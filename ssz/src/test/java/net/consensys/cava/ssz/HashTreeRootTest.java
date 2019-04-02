@@ -10,14 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.ssz;
+package org.apache.tuweni.ssz;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.bytes.Bytes32;
-import net.consensys.cava.crypto.Hash;
-import net.consensys.cava.junit.BouncyCastleExtension;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
+import org.apache.tuweni.crypto.Hash;
+import org.apache.tuweni.junit.BouncyCastleExtension;
 
 import org.bouncycastle.util.Arrays;
 import org.junit.jupiter.api.Test;

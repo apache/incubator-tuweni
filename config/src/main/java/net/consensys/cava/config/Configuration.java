@@ -10,12 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.config;
+package org.apache.tuweni.config;
 
 import static java.util.Objects.requireNonNull;
-import static net.consensys.cava.toml.Toml.canonicalDottedKey;
+import static org.apache.tuweni.toml.Toml.canonicalDottedKey;
 
-import net.consensys.cava.toml.Toml;
+import org.apache.tuweni.toml.Toml;
 
 import java.io.IOException;
 import java.io.InputStream;

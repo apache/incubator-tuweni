@@ -10,22 +10,22 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.eth.repository
+package org.apache.tuweni.eth.repository
 
-import net.consensys.cava.bytes.Bytes
-import net.consensys.cava.bytes.Bytes32
-import net.consensys.cava.eth.Address
-import net.consensys.cava.eth.BlockHeader
-import net.consensys.cava.eth.Hash
-import net.consensys.cava.eth.Log
-import net.consensys.cava.eth.LogsBloomFilter
-import net.consensys.cava.eth.TransactionReceipt
-import net.consensys.cava.junit.BouncyCastleExtension
-import net.consensys.cava.junit.LuceneIndex
-import net.consensys.cava.junit.LuceneIndexWriter
-import net.consensys.cava.junit.LuceneIndexWriterExtension
-import net.consensys.cava.units.bigints.UInt256
-import net.consensys.cava.units.ethereum.Gas
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.eth.Address
+import org.apache.tuweni.eth.BlockHeader
+import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.Log
+import org.apache.tuweni.eth.LogsBloomFilter
+import org.apache.tuweni.eth.TransactionReceipt
+import org.apache.tuweni.junit.BouncyCastleExtension
+import org.apache.tuweni.junit.LuceneIndex
+import org.apache.tuweni.junit.LuceneIndexWriter
+import org.apache.tuweni.junit.LuceneIndexWriterExtension
+import org.apache.tuweni.units.bigints.UInt256
+import org.apache.tuweni.units.ethereum.Gas
 import org.apache.lucene.index.DirectoryReader
 import org.apache.lucene.index.IndexWriter
 import org.apache.lucene.index.Term

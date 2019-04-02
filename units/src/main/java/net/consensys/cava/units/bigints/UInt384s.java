@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.units.bigints;
+package org.apache.tuweni.units.bigints;
 
 /** Static utility methods on UInt384 values. */
 public final class UInt384s {

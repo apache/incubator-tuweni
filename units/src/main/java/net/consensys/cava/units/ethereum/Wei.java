@@ -10,12 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.units.ethereum;
+package org.apache.tuweni.units.ethereum;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import net.consensys.cava.units.bigints.BaseUInt256Value;
-import net.consensys.cava.units.bigints.UInt256;
+import org.apache.tuweni.units.bigints.BaseUInt256Value;
+import org.apache.tuweni.units.bigints.UInt256;
 
 import java.math.BigInteger;
 

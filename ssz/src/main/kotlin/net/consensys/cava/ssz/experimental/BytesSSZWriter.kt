@@ -10,15 +10,15 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.ssz.experimental
+package org.apache.tuweni.ssz.experimental
 
-import net.consensys.cava.bytes.Bytes
-import net.consensys.cava.units.bigints.UInt256
-import net.consensys.cava.units.bigints.UInt384
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.units.bigints.UInt256
+import org.apache.tuweni.units.bigints.UInt384
 import java.math.BigInteger
 
 @ExperimentalUnsignedTypes
-internal class BytesSSZWriter(private val delegate: net.consensys.cava.ssz.SSZWriter) : SSZWriter {
+internal class BytesSSZWriter(private val delegate: org.apache.tuweni.ssz.SSZWriter) : SSZWriter {
   override fun writeSSZ(value: Bytes) =
     delegate.writeSSZ(value)
 

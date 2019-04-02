@@ -10,13 +10,13 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.les
+package org.apache.tuweni.les
 
-import net.consensys.cava.bytes.Bytes32
-import net.consensys.cava.eth.BlockBody
-import net.consensys.cava.eth.BlockHeader
-import net.consensys.cava.eth.Hash
-import net.consensys.cava.eth.TransactionReceipt
+import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.eth.BlockBody
+import org.apache.tuweni.eth.BlockHeader
+import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.TransactionReceipt
 
 /**
  * Calls to LES functions from the point of view of the consumer of the subprotocol.

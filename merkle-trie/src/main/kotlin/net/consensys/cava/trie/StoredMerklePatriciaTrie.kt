@@ -10,12 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.trie
+package org.apache.tuweni.trie
 
-import net.consensys.cava.bytes.Bytes
-import net.consensys.cava.bytes.Bytes32
-import net.consensys.cava.trie.CompactEncoding.bytesToPath
-import net.consensys.cava.trie.MerkleTrie.Companion.EMPTY_TRIE_ROOT_HASH
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.trie.CompactEncoding.bytesToPath
+import org.apache.tuweni.trie.MerkleTrie.Companion.EMPTY_TRIE_ROOT_HASH
 import java.util.function.Function
 
 /**

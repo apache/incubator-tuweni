@@ -21,13 +21,13 @@ You can import all modules using the cava jar.
 With Maven:
 ```xml
 <dependency>
-  <groupId>net.consensys.cava</groupId>
+  <groupId>org.apache.tuweni</groupId>
   <artifactId>cava</artifactId>
   <version>0.6.0</version>
 </dependency>
 ```
 
-With Gradle: `compile 'net.consensys.cava:cava:0.6.0'`
+With Gradle: `compile 'org.apache.tuweni:cava:0.6.0'`
 
 [PACKAGES.md](PACKAGES.md) contains the list of modules and instructions to import them separately.
 

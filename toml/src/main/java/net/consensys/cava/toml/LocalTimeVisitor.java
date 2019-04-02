@@ -10,13 +10,13 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.toml;
+package org.apache.tuweni.toml;
 
-import net.consensys.cava.toml.internal.TomlParser.HourContext;
-import net.consensys.cava.toml.internal.TomlParser.MinuteContext;
-import net.consensys.cava.toml.internal.TomlParser.SecondContext;
-import net.consensys.cava.toml.internal.TomlParser.SecondFractionContext;
-import net.consensys.cava.toml.internal.TomlParserBaseVisitor;
+import org.apache.tuweni.toml.internal.TomlParser.HourContext;
+import org.apache.tuweni.toml.internal.TomlParser.MinuteContext;
+import org.apache.tuweni.toml.internal.TomlParser.SecondContext;
+import org.apache.tuweni.toml.internal.TomlParser.SecondFractionContext;
+import org.apache.tuweni.toml.internal.TomlParserBaseVisitor;
 
 import java.time.LocalTime;
 

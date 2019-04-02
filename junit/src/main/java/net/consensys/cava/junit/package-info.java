@@ -3,6 +3,6 @@
  *
  * <p>
  * These classes are included in the standard Cava distribution, or separately when using the gradle dependency
- * 'net.consensys.cava:cava-junit' (cava-junit.jar).
+ * 'org.apache.tuweni:cava-junit' (cava-junit.jar).
  */
-package net.consensys.cava.junit;
+package org.apache.tuweni.junit;

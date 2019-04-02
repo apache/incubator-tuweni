@@ -10,20 +10,20 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.ssz.experimental
+package org.apache.tuweni.ssz.experimental
 
-import net.consensys.cava.bytes.Bytes
-import net.consensys.cava.ssz.EndOfSSZException
-import net.consensys.cava.ssz.InvalidSSZTypeException
-import net.consensys.cava.units.bigints.UInt256
-import net.consensys.cava.units.bigints.UInt384
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.ssz.EndOfSSZException
+import org.apache.tuweni.ssz.InvalidSSZTypeException
+import org.apache.tuweni.units.bigints.UInt256
+import org.apache.tuweni.units.bigints.UInt384
 import java.math.BigInteger
 import java.nio.charset.StandardCharsets.UTF_8
 
 /**
  * A reader for consuming values from an SSZ encoded source.
  */
-// Does not extend net.consensys.cava.ssz.SSZReader (unlike SSZWriter) as the return types vary for the UInt methods.
+// Does not extend org.apache.tuweni.ssz.SSZReader (unlike SSZWriter) as the return types vary for the UInt methods.
 @ExperimentalUnsignedTypes
 interface SSZReader {
 

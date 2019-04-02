@@ -3,7 +3,7 @@ parser grammar TomlParser;
 options { tokenVocab=TomlLexer; }
 
 @header {
-package net.consensys.cava.toml.internal;
+package org.apache.tuweni.toml.internal;
 }
 
 // Document parser

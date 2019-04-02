@@ -10,17 +10,17 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.scuttlebutt.handshake.vertx;
+package org.apache.tuweni.scuttlebutt.handshake.vertx;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.bytes.Bytes32;
-import net.consensys.cava.concurrent.AsyncCompletion;
-import net.consensys.cava.concurrent.CompletableAsyncCompletion;
-import net.consensys.cava.crypto.sodium.Signature;
-import net.consensys.cava.scuttlebutt.handshake.HandshakeException;
-import net.consensys.cava.scuttlebutt.handshake.SecureScuttlebuttHandshakeServer;
-import net.consensys.cava.scuttlebutt.handshake.SecureScuttlebuttStreamServer;
-import net.consensys.cava.scuttlebutt.handshake.StreamException;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
+import org.apache.tuweni.concurrent.AsyncCompletion;
+import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
+import org.apache.tuweni.crypto.sodium.Signature;
+import org.apache.tuweni.scuttlebutt.handshake.HandshakeException;
+import org.apache.tuweni.scuttlebutt.handshake.SecureScuttlebuttHandshakeServer;
+import org.apache.tuweni.scuttlebutt.handshake.SecureScuttlebuttStreamServer;
+import org.apache.tuweni.scuttlebutt.handshake.StreamException;
 
 import java.net.InetSocketAddress;
 

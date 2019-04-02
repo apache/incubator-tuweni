@@ -5,7 +5,7 @@ channels { COMMENTS, WHITESPACE }
 tokens { TripleQuotationMark, TripleApostrophe, StringChar, Comma }
 
 @header {
-package net.consensys.cava.toml.internal;
+package org.apache.tuweni.toml.internal;
 }
 
 @members {

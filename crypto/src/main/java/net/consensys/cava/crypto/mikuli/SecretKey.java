@@ -10,11 +10,11 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.crypto.mikuli;
+package org.apache.tuweni.crypto.mikuli;
 
 import static org.apache.milagro.amcl.BLS381.BIG.MODBYTES;
 
-import net.consensys.cava.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes;
 
 import java.util.Objects;
 

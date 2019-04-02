@@ -10,18 +10,18 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.scuttlebutt.handshake;
+package org.apache.tuweni.scuttlebutt.handshake;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.bytes.Bytes32;
-import net.consensys.cava.crypto.sodium.Allocated;
-import net.consensys.cava.crypto.sodium.Box;
-import net.consensys.cava.crypto.sodium.Concatenate;
-import net.consensys.cava.crypto.sodium.DiffieHelman;
-import net.consensys.cava.crypto.sodium.HMACSHA512256;
-import net.consensys.cava.crypto.sodium.SHA256Hash;
-import net.consensys.cava.crypto.sodium.SecretBox;
-import net.consensys.cava.crypto.sodium.Signature;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
+import org.apache.tuweni.crypto.sodium.Allocated;
+import org.apache.tuweni.crypto.sodium.Box;
+import org.apache.tuweni.crypto.sodium.Concatenate;
+import org.apache.tuweni.crypto.sodium.DiffieHelman;
+import org.apache.tuweni.crypto.sodium.HMACSHA512256;
+import org.apache.tuweni.crypto.sodium.SHA256Hash;
+import org.apache.tuweni.crypto.sodium.SecretBox;
+import org.apache.tuweni.crypto.sodium.Signature;
 
 /**
  * Class responsible for performing a Secure Scuttlebutt handshake with a remote peer, as defined in the

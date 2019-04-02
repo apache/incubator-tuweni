@@ -3,9 +3,9 @@
  *
  * <p>
  * These classes are included in the standard Cava distribution, or separately when using the gradle dependency
- * 'net.consensys.cava:cava-crypto' (cava-crypto.jar).
+ * 'org.apache.tuweni:cava-crypto' (cava-crypto.jar).
  */
 @ParametersAreNonnullByDefault
-package net.consensys.cava.crypto.mikuli;
+package org.apache.tuweni.crypto.mikuli;
 
 import javax.annotation.ParametersAreNonnullByDefault;

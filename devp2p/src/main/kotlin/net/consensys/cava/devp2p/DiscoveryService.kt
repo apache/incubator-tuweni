@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.devp2p
+package org.apache.tuweni.devp2p
 
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
@@ -36,18 +36,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.yield
-import net.consensys.cava.bytes.Bytes32
-import net.consensys.cava.concurrent.AsyncCompletion
-import net.consensys.cava.concurrent.AsyncResult
-import net.consensys.cava.concurrent.coroutines.CoroutineLatch
-import net.consensys.cava.concurrent.coroutines.asyncCompletion
-import net.consensys.cava.concurrent.coroutines.asyncResult
-import net.consensys.cava.crypto.SECP256K1
-import net.consensys.cava.kademlia.orderedInsert
-import net.consensys.cava.kademlia.xorDistCmp
-import net.consensys.cava.net.coroutines.CommonCoroutineGroup
-import net.consensys.cava.net.coroutines.CoroutineChannelGroup
-import net.consensys.cava.net.coroutines.CoroutineDatagramChannel
+import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.concurrent.AsyncCompletion
+import org.apache.tuweni.concurrent.AsyncResult
+import org.apache.tuweni.concurrent.coroutines.CoroutineLatch
+import org.apache.tuweni.concurrent.coroutines.asyncCompletion
+import org.apache.tuweni.concurrent.coroutines.asyncResult
+import org.apache.tuweni.crypto.SECP256K1
+import org.apache.tuweni.kademlia.orderedInsert
+import org.apache.tuweni.kademlia.xorDistCmp
+import org.apache.tuweni.net.coroutines.CommonCoroutineGroup
+import org.apache.tuweni.net.coroutines.CoroutineChannelGroup
+import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import org.logl.LogMessage.patternFormat
 import org.logl.LoggerProvider
 import java.io.IOException

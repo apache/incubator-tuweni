@@ -10,14 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.rlp;
+package org.apache.tuweni.rlp;
 
 import static java.util.Objects.requireNonNull;
-import static net.consensys.cava.rlp.RLP.encodeByteArray;
-import static net.consensys.cava.rlp.RLP.encodeLength;
-import static net.consensys.cava.rlp.RLP.encodeNumber;
+import static org.apache.tuweni.rlp.RLP.encodeByteArray;
+import static org.apache.tuweni.rlp.RLP.encodeLength;
+import static org.apache.tuweni.rlp.RLP.encodeNumber;
 
-import net.consensys.cava.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;

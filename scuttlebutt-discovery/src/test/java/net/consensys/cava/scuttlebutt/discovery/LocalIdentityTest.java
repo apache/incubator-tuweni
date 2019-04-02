@@ -10,15 +10,15 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.scuttlebutt.discovery;
+package org.apache.tuweni.scuttlebutt.discovery;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import net.consensys.cava.crypto.sodium.Sodium;
-import net.consensys.cava.scuttlebutt.Identity;
+import org.apache.tuweni.crypto.sodium.Sodium;
+import org.apache.tuweni.scuttlebutt.Identity;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

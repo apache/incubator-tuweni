@@ -10,10 +10,10 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.junit;
+package org.apache.tuweni.junit;
 
 import static java.nio.file.Files.createTempDirectory;
-import static net.consensys.cava.io.file.Files.deleteRecursively;
+import static org.apache.tuweni.io.file.Files.deleteRecursively;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

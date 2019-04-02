@@ -10,16 +10,16 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.config;
+package org.apache.tuweni.config;
 
-import static net.consensys.cava.toml.Toml.joinKeyPath;
-import static net.consensys.cava.toml.Toml.parseDottedKey;
+import static org.apache.tuweni.toml.Toml.joinKeyPath;
+import static org.apache.tuweni.toml.Toml.parseDottedKey;
 
-import net.consensys.cava.toml.TomlArray;
-import net.consensys.cava.toml.TomlInvalidTypeException;
-import net.consensys.cava.toml.TomlParseResult;
-import net.consensys.cava.toml.TomlPosition;
-import net.consensys.cava.toml.TomlTable;
+import org.apache.tuweni.toml.TomlArray;
+import org.apache.tuweni.toml.TomlInvalidTypeException;
+import org.apache.tuweni.toml.TomlParseResult;
+import org.apache.tuweni.toml.TomlPosition;
+import org.apache.tuweni.toml.TomlTable;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -30,19 +30,19 @@ It can also be included independently, using the cava-toml jar, which is publish
 With Maven:
 ```
 <dependency>
-  <groupId>net.consensys.cava</groupId>
+  <groupId>org.apache.tuweni</groupId>
   <artifactId>cava-toml</artifactId>
   <version>0.6.0</version>
 </dependency>
 ```
 
-With Gradle: `compile 'net.consensys.cava:cava-toml:0.6.0'`
+With Gradle: `compile 'org.apache.tuweni:cava-toml:0.6.0'`
 
 ## Links
 
 - [GitHub project](https://github.com/consensys/cava)
 - [Online Java documentation](https://consensys.github.io/cava/docs/java/latest/net/consensys/cava/toml/package-summary.html)
-- [Online Kotlin documentation](https://consensys.github.io/cava/docs/kotlin/latest/cava/net.consensys.cava.toml/index.html)
+- [Online Kotlin documentation](https://consensys.github.io/cava/docs/kotlin/latest/cava/org.apache.tuweni.toml/index.html)
 - [Issue tracker: Report a defect or feature request](https://github.com/google/cava/issues/new)
 - [StackOverflow: Ask "how-to" and "why-didn't-it-work" questions](https://stackoverflow.com/questions/ask?tags=cava+toml+java)
 - [cava-discuss: For open-ended questions and discussion](http://groups.google.com/group/cava-discuss)

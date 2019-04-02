@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.concurrent.coroutines
+package org.apache.tuweni.concurrent.coroutines
 
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CompletableDeferred
@@ -24,8 +24,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.newCoroutineContext
 import kotlinx.coroutines.suspendCancellableCoroutine
-import net.consensys.cava.concurrent.AsyncCompletion
-import net.consensys.cava.concurrent.CompletableAsyncCompletion
+import org.apache.tuweni.concurrent.AsyncCompletion
+import org.apache.tuweni.concurrent.CompletableAsyncCompletion
 import java.util.concurrent.CancellationException
 import java.util.concurrent.CompletionException
 import java.util.function.Consumer

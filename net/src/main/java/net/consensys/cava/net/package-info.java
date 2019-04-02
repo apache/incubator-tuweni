@@ -3,6 +3,6 @@
  *
  * <p>
  * These classes are included in the standard Cava distribution, or separately when using the gradle dependency
- * 'net.consensys.cava:cava-net' (cava-net.jar).
+ * 'org.apache.tuweni:cava-net' (cava-net.jar).
  */
-package net.consensys.cava.net;
+package org.apache.tuweni.net;

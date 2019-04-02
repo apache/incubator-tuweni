@@ -97,7 +97,7 @@ subprojects {
       removeUnusedImports()
       licenseHeaderFile rootProject.file('gradle/spotless.license.java')
       eclipse().configFile(rootProject.file('gradle/eclipse-java-consensys-style.xml'))
-      importOrder 'net.consensys', 'java', ''
+      importOrder 'org.apache', 'java', ''
       endWithNewline()
     }
     kotlin {
@@ -298,7 +298,7 @@ allprojects {
             artifact sourcesJar { classifier 'sources' }
           }
           artifact dokkaJar { classifier 'javadoc' }
-          groupId 'net.consensys.cava'
+          groupId 'org.apache.tuweni'
           artifactId project.jar.baseName
           version project.version
 
@@ -340,7 +340,7 @@ allprojects {
             def addDependencyNode = { dep, optional ->
               def dependencyNode = dependenciesNode.appendNode('dependency')
               if (dep instanceof ProjectDependency) {
-                dependencyNode.appendNode('groupId', 'net.consensys.cava')
+                dependencyNode.appendNode('groupId', 'org.apache.tuweni')
                 dependencyNode.appendNode('artifactId', rootProject.name + '-' + dep.name)
                 dependencyNode.appendNode('version', dep.version)
               } else {

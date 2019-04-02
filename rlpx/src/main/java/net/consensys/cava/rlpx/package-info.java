@@ -3,10 +3,10 @@
  *
  * <p>
  * These classes are included in the standard Cava distribution, or separately when using the gradle dependency
- * 'net.consensys.cava:cava-rlpx' (cava-rlpx.jar).
+ * 'org.apache.tuweni:cava-rlpx' (cava-rlpx.jar).
  */
 @ParametersAreNonnullByDefault
 
-package net.consensys.cava.rlpx;
+package org.apache.tuweni.rlpx;
 
 import javax.annotation.ParametersAreNonnullByDefault;

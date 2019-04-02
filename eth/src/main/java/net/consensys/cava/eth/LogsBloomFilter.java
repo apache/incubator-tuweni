@@ -10,15 +10,15 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.eth;
+package org.apache.tuweni.eth;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static net.consensys.cava.crypto.Hash.keccak256;
+import static org.apache.tuweni.crypto.Hash.keccak256;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.bytes.Bytes32;
-import net.consensys.cava.bytes.MutableBytes;
-import net.consensys.cava.rlp.RLPReader;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
+import org.apache.tuweni.bytes.MutableBytes;
+import org.apache.tuweni.rlp.RLPReader;
 
 import java.util.Collection;
 

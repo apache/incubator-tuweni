@@ -10,16 +10,16 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.io.file;
+package org.apache.tuweni.io.file;
 
-import static net.consensys.cava.io.file.Files.copyResource;
-import static net.consensys.cava.io.file.Files.deleteRecursively;
+import static org.apache.tuweni.io.file.Files.copyResource;
+import static org.apache.tuweni.io.file.Files.deleteRecursively;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import net.consensys.cava.junit.TempDirectory;
-import net.consensys.cava.junit.TempDirectoryExtension;
+import org.apache.tuweni.junit.TempDirectory;
+import org.apache.tuweni.junit.TempDirectoryExtension;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

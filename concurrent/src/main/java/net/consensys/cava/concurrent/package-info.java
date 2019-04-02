@@ -3,9 +3,9 @@
  *
  * <p>
  * These classes are included in the standard Cava distribution, or separately when using the gradle dependency
- * 'net.consensys.cava:cava-concurrent' (cava-concurrent.jar).
+ * 'org.apache.tuweni:cava-concurrent' (cava-concurrent.jar).
  */
 @ParametersAreNonnullByDefault
-package net.consensys.cava.concurrent;
+package org.apache.tuweni.concurrent;
 
 import javax.annotation.ParametersAreNonnullByDefault;

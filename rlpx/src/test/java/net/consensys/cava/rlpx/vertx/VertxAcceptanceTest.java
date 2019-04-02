@@ -10,26 +10,26 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.rlpx.vertx;
+package org.apache.tuweni.rlpx.vertx;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.bytes.Bytes32;
-import net.consensys.cava.concurrent.AsyncCompletion;
-import net.consensys.cava.concurrent.CompletableAsyncCompletion;
-import net.consensys.cava.crypto.SECP256K1;
-import net.consensys.cava.junit.BouncyCastleExtension;
-import net.consensys.cava.junit.VertxExtension;
-import net.consensys.cava.junit.VertxInstance;
-import net.consensys.cava.rlpx.MemoryWireConnectionsRepository;
-import net.consensys.cava.rlpx.RLPxService;
-import net.consensys.cava.rlpx.wire.DefaultWireConnection;
-import net.consensys.cava.rlpx.wire.SubProtocol;
-import net.consensys.cava.rlpx.wire.SubProtocolHandler;
-import net.consensys.cava.rlpx.wire.SubProtocolIdentifier;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
+import org.apache.tuweni.concurrent.AsyncCompletion;
+import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
+import org.apache.tuweni.crypto.SECP256K1;
+import org.apache.tuweni.junit.BouncyCastleExtension;
+import org.apache.tuweni.junit.VertxExtension;
+import org.apache.tuweni.junit.VertxInstance;
+import org.apache.tuweni.rlpx.MemoryWireConnectionsRepository;
+import org.apache.tuweni.rlpx.RLPxService;
+import org.apache.tuweni.rlpx.wire.DefaultWireConnection;
+import org.apache.tuweni.rlpx.wire.SubProtocol;
+import org.apache.tuweni.rlpx.wire.SubProtocolHandler;
+import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
 
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;

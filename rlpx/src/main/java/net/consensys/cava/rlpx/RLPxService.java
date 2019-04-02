@@ -10,13 +10,13 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.rlpx;
+package org.apache.tuweni.rlpx;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.concurrent.AsyncCompletion;
-import net.consensys.cava.crypto.SECP256K1;
-import net.consensys.cava.rlpx.wire.DisconnectReason;
-import net.consensys.cava.rlpx.wire.SubProtocolIdentifier;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.concurrent.AsyncCompletion;
+import org.apache.tuweni.crypto.SECP256K1;
+import org.apache.tuweni.rlpx.wire.DisconnectReason;
+import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
 
 import java.net.InetSocketAddress;
 

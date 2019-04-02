@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.concurrent;
+package org.apache.tuweni.concurrent;
 
 /**
  * An {@link AsyncCompletion} that can later be completed successfully or with a provided exception.

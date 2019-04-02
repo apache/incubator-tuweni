@@ -10,9 +10,9 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.io;
+package org.apache.tuweni.io;
 
-import static net.consensys.cava.io.Streams.enumerationStream;
+import static org.apache.tuweni.io.Streams.enumerationStream;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

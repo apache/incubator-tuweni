@@ -10,19 +10,19 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.trie
+package org.apache.tuweni.trie
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import net.consensys.cava.bytes.Bytes
-import net.consensys.cava.bytes.Bytes32
-import net.consensys.cava.concurrent.AsyncCompletion
-import net.consensys.cava.concurrent.AsyncResult
-import net.consensys.cava.concurrent.coroutines.asyncCompletion
-import net.consensys.cava.concurrent.coroutines.asyncResult
-import net.consensys.cava.crypto.Hash
-import net.consensys.cava.rlp.RLP
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.concurrent.AsyncCompletion
+import org.apache.tuweni.concurrent.AsyncResult
+import org.apache.tuweni.concurrent.coroutines.asyncCompletion
+import org.apache.tuweni.concurrent.coroutines.asyncResult
+import org.apache.tuweni.crypto.Hash
+import org.apache.tuweni.rlp.RLP
 
 // Workaround for a javadoc generation issue - extracting these method bodies out of the default method and into
 // private funcs appears to resolve it. It would be good to remove this workaround one day.

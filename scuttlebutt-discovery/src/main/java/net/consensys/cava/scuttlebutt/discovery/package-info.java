@@ -6,9 +6,9 @@
  *
  * <p>
  * These classes are included in the standard Cava distribution, or separately when using the gradle dependency
- * 'net.consensys.cava:cava-scuttlebutt-discovery' (cava-scuttlebutt-discovery.jar).
+ * 'org.apache.tuweni:cava-scuttlebutt-discovery' (cava-scuttlebutt-discovery.jar).
  */
 @ParametersAreNonnullByDefault
-package net.consensys.cava.scuttlebutt.discovery;
+package org.apache.tuweni.scuttlebutt.discovery;
 
 import javax.annotation.ParametersAreNonnullByDefault;

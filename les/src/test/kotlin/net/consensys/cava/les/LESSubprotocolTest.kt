@@ -10,16 +10,16 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.les
+package org.apache.tuweni.les
 
-import net.consensys.cava.eth.repository.BlockchainIndex
-import net.consensys.cava.eth.repository.BlockchainRepository
-import net.consensys.cava.junit.LuceneIndexWriter
-import net.consensys.cava.junit.LuceneIndexWriterExtension
-import net.consensys.cava.junit.TempDirectoryExtension
-import net.consensys.cava.kv.MapKeyValueStore
-import net.consensys.cava.rlpx.wire.SubProtocolIdentifier
-import net.consensys.cava.units.bigints.UInt256
+import org.apache.tuweni.eth.repository.BlockchainIndex
+import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.junit.LuceneIndexWriter
+import org.apache.tuweni.junit.LuceneIndexWriterExtension
+import org.apache.tuweni.junit.TempDirectoryExtension
+import org.apache.tuweni.kv.MapKeyValueStore
+import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
+import org.apache.tuweni.units.bigints.UInt256
 import org.apache.lucene.index.IndexWriter
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

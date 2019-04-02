@@ -10,26 +10,26 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.rlpx.vertx;
+package org.apache.tuweni.rlpx.vertx;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.bytes.Bytes32;
-import net.consensys.cava.concurrent.AsyncCompletion;
-import net.consensys.cava.concurrent.CompletableAsyncCompletion;
-import net.consensys.cava.crypto.SECP256K1.KeyPair;
-import net.consensys.cava.crypto.SECP256K1.PublicKey;
-import net.consensys.cava.rlpx.HandshakeMessage;
-import net.consensys.cava.rlpx.MemoryWireConnectionsRepository;
-import net.consensys.cava.rlpx.RLPxConnection;
-import net.consensys.cava.rlpx.RLPxConnectionFactory;
-import net.consensys.cava.rlpx.RLPxService;
-import net.consensys.cava.rlpx.WireConnectionRepository;
-import net.consensys.cava.rlpx.wire.DefaultWireConnection;
-import net.consensys.cava.rlpx.wire.DisconnectReason;
-import net.consensys.cava.rlpx.wire.SubProtocol;
-import net.consensys.cava.rlpx.wire.SubProtocolHandler;
-import net.consensys.cava.rlpx.wire.SubProtocolIdentifier;
-import net.consensys.cava.rlpx.wire.WireConnection;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
+import org.apache.tuweni.concurrent.AsyncCompletion;
+import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
+import org.apache.tuweni.crypto.SECP256K1.KeyPair;
+import org.apache.tuweni.crypto.SECP256K1.PublicKey;
+import org.apache.tuweni.rlpx.HandshakeMessage;
+import org.apache.tuweni.rlpx.MemoryWireConnectionsRepository;
+import org.apache.tuweni.rlpx.RLPxConnection;
+import org.apache.tuweni.rlpx.RLPxConnectionFactory;
+import org.apache.tuweni.rlpx.RLPxService;
+import org.apache.tuweni.rlpx.WireConnectionRepository;
+import org.apache.tuweni.rlpx.wire.DefaultWireConnection;
+import org.apache.tuweni.rlpx.wire.DisconnectReason;
+import org.apache.tuweni.rlpx.wire.SubProtocol;
+import org.apache.tuweni.rlpx.wire.SubProtocolHandler;
+import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
+import org.apache.tuweni.rlpx.wire.WireConnection;
 
 import java.net.InetSocketAddress;
 import java.util.LinkedHashMap;

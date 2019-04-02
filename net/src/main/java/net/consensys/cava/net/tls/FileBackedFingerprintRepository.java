@@ -10,13 +10,13 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.net.tls;
+package org.apache.tuweni.net.tls;
 
 import static java.nio.file.Files.createDirectories;
-import static net.consensys.cava.io.file.Files.atomicReplace;
-import static net.consensys.cava.io.file.Files.createFileIfMissing;
+import static org.apache.tuweni.io.file.Files.atomicReplace;
+import static org.apache.tuweni.io.file.Files.createFileIfMissing;
 
-import net.consensys.cava.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes;
 
 import java.io.IOException;
 import java.nio.file.Files;

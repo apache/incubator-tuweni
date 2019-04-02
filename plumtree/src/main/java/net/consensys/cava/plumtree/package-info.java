@@ -3,9 +3,9 @@
  *
  * <p>
  * These classes are included in the standard Cava distribution, or separately when using the gradle dependency
- * 'net.consensys.cava:cava-plumtree' (cava-plumtree.jar).
+ * 'org.apache.tuweni:cava-plumtree' (cava-plumtree.jar).
  */
 @ParametersAreNonnullByDefault
-package net.consensys.cava.plumtree;
+package org.apache.tuweni.plumtree;
 
 import javax.annotation.ParametersAreNonnullByDefault;

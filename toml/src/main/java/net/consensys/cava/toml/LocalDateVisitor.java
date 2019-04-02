@@ -10,12 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.toml;
+package org.apache.tuweni.toml;
 
-import net.consensys.cava.toml.internal.TomlParser.DayContext;
-import net.consensys.cava.toml.internal.TomlParser.MonthContext;
-import net.consensys.cava.toml.internal.TomlParser.YearContext;
-import net.consensys.cava.toml.internal.TomlParserBaseVisitor;
+import org.apache.tuweni.toml.internal.TomlParser.DayContext;
+import org.apache.tuweni.toml.internal.TomlParser.MonthContext;
+import org.apache.tuweni.toml.internal.TomlParser.YearContext;
+import org.apache.tuweni.toml.internal.TomlParserBaseVisitor;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;

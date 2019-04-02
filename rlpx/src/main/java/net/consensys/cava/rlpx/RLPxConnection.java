@@ -10,14 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.rlpx;
+package org.apache.tuweni.rlpx;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.bytes.Bytes32;
-import net.consensys.cava.bytes.MutableBytes;
-import net.consensys.cava.crypto.SECP256K1;
-import net.consensys.cava.rlp.RLP;
-import net.consensys.cava.rlpx.wire.HelloMessage;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
+import org.apache.tuweni.bytes.MutableBytes;
+import org.apache.tuweni.crypto.SECP256K1;
+import org.apache.tuweni.rlp.RLP;
+import org.apache.tuweni.rlpx.wire.HelloMessage;
 
 import java.io.IOException;
 import java.util.Arrays;

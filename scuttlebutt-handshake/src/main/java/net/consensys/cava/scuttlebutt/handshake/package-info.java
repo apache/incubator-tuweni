@@ -6,9 +6,9 @@
  *
  * <p>
  * These classes are included in the standard Cava distribution, or separately when using the gradle dependency
- * 'net.consensys.cava:cava-scuttlebutt-handshake' (cava-scuttlebutt-handshake.jar).
+ * 'org.apache.tuweni:cava-scuttlebutt-handshake' (cava-scuttlebutt-handshake.jar).
  */
 @ParametersAreNonnullByDefault
-package net.consensys.cava.scuttlebutt.handshake;
+package org.apache.tuweni.scuttlebutt.handshake;
 
 import javax.annotation.ParametersAreNonnullByDefault;

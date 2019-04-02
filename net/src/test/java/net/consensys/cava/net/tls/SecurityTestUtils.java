@@ -10,9 +10,9 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.net.tls;
+package org.apache.tuweni.net.tls;
 
-import static net.consensys.cava.net.tls.TLS.readPemFile;
+import static org.apache.tuweni.net.tls.TLS.readPemFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

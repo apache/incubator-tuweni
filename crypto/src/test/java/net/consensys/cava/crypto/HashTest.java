@@ -10,13 +10,13 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.crypto;
+package org.apache.tuweni.crypto;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.*;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.junit.BouncyCastleExtension;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.junit.BouncyCastleExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

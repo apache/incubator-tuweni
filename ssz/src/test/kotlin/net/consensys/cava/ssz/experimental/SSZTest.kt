@@ -10,9 +10,9 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.ssz.experimental
+package org.apache.tuweni.ssz.experimental
 
-import net.consensys.cava.bytes.Bytes.fromHexString
+import org.apache.tuweni.bytes.Bytes.fromHexString
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

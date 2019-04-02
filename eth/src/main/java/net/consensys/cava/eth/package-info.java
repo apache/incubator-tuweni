@@ -3,9 +3,9 @@
  *
  * <p>
  * These classes are included in the standard Cava distribution, or separately when using the gradle dependency
- * 'net.consensys.cava:cava-eth' (cava-eth.jar).
+ * 'org.apache.tuweni:cava-eth' (cava-eth.jar).
  */
 @ParametersAreNonnullByDefault
-package net.consensys.cava.eth;
+package org.apache.tuweni.eth;
 
 import javax.annotation.ParametersAreNonnullByDefault;

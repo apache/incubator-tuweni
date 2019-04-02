@@ -10,10 +10,10 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.toml;
+package org.apache.tuweni.toml;
 
 import static java.util.Objects.requireNonNull;
-import static net.consensys.cava.toml.TomlType.typeFor;
+import static org.apache.tuweni.toml.TomlType.typeFor;
 
 import java.io.IOException;
 import java.util.Collections;

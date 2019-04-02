@@ -10,11 +10,11 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.toml;
+package org.apache.tuweni.toml;
 
-import net.consensys.cava.toml.internal.TomlParser.ArrayValueContext;
-import net.consensys.cava.toml.internal.TomlParser.ValContext;
-import net.consensys.cava.toml.internal.TomlParserBaseVisitor;
+import org.apache.tuweni.toml.internal.TomlParser.ArrayValueContext;
+import org.apache.tuweni.toml.internal.TomlParser.ValContext;
+import org.apache.tuweni.toml.internal.TomlParserBaseVisitor;
 
 final class ArrayVisitor extends TomlParserBaseVisitor<MutableTomlArray> {
 

@@ -10,10 +10,10 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.config;
+package org.apache.tuweni.config;
 
-import static net.consensys.cava.config.ConfigurationErrors.noErrors;
-import static net.consensys.cava.config.ConfigurationErrors.singleError;
+import static org.apache.tuweni.config.ConfigurationErrors.noErrors;
+import static org.apache.tuweni.config.ConfigurationErrors.singleError;
 
 import java.net.MalformedURLException;
 import java.net.URL;

@@ -10,20 +10,20 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.scuttlebutt.handshake.vertx;
+package org.apache.tuweni.scuttlebutt.handshake.vertx;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.bytes.Bytes32;
-import net.consensys.cava.crypto.sodium.Signature;
-import net.consensys.cava.junit.VertxExtension;
-import net.consensys.cava.junit.VertxInstance;
-import net.consensys.cava.scuttlebutt.rpc.RPCCodec;
-import net.consensys.cava.scuttlebutt.rpc.RPCFlag;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
+import org.apache.tuweni.crypto.sodium.Signature;
+import org.apache.tuweni.junit.VertxExtension;
+import org.apache.tuweni.junit.VertxInstance;
+import org.apache.tuweni.scuttlebutt.rpc.RPCCodec;
+import org.apache.tuweni.scuttlebutt.rpc.RPCFlag;
 
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;

@@ -10,9 +10,9 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.les
+package org.apache.tuweni.les
 
-import net.consensys.cava.eth.Hash
+import org.apache.tuweni.eth.Hash
 import java.util.concurrent.ConcurrentHashMap
 
 internal class LESPeerState {

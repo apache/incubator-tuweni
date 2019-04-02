@@ -10,17 +10,17 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.net.tls;
+package org.apache.tuweni.net.tls;
 
-import static net.consensys.cava.net.tls.SecurityTestUtils.DUMMY_FINGERPRINT;
-import static net.consensys.cava.net.tls.SecurityTestUtils.startServer;
-import static net.consensys.cava.net.tls.TLS.certificateHexFingerprint;
+import static org.apache.tuweni.net.tls.SecurityTestUtils.DUMMY_FINGERPRINT;
+import static org.apache.tuweni.net.tls.SecurityTestUtils.startServer;
+import static org.apache.tuweni.net.tls.TLS.certificateHexFingerprint;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import net.consensys.cava.junit.TempDirectory;
-import net.consensys.cava.junit.TempDirectoryExtension;
-import net.consensys.cava.junit.VertxExtension;
-import net.consensys.cava.junit.VertxInstance;
+import org.apache.tuweni.junit.TempDirectory;
+import org.apache.tuweni.junit.TempDirectoryExtension;
+import org.apache.tuweni.junit.VertxExtension;
+import org.apache.tuweni.junit.VertxInstance;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

@@ -3,9 +3,9 @@
  *
  * <p>
  * These classes are included in the standard Cava distribution, or separately when using the gradle dependency
- * 'net.consensys.cava:cava-bytes' (cava-bytes.jar).
+ * 'org.apache.tuweni:cava-bytes' (cava-bytes.jar).
  */
 @ParametersAreNonnullByDefault
-package net.consensys.cava.bytes;
+package org.apache.tuweni.bytes;
 
 import javax.annotation.ParametersAreNonnullByDefault;

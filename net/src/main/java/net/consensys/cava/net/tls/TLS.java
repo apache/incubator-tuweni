@@ -10,13 +10,13 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.net.tls;
+package org.apache.tuweni.net.tls;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.createDirectories;
-import static net.consensys.cava.crypto.Hash.sha2_256;
+import static org.apache.tuweni.crypto.Hash.sha2_256;
 
-import net.consensys.cava.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

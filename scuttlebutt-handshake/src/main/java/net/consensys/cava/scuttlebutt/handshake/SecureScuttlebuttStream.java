@@ -10,12 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.scuttlebutt.handshake;
+package org.apache.tuweni.scuttlebutt.handshake;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.bytes.MutableBytes;
-import net.consensys.cava.crypto.sodium.SHA256Hash;
-import net.consensys.cava.crypto.sodium.SecretBox;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.MutableBytes;
+import org.apache.tuweni.crypto.sodium.SHA256Hash;
+import org.apache.tuweni.crypto.sodium.SecretBox;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -10,15 +10,15 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.ssz;
+package org.apache.tuweni.ssz;
 
-import static net.consensys.cava.bytes.Bytes.fromHexString;
+import static org.apache.tuweni.bytes.Bytes.fromHexString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.bytes.Bytes48;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes48;
 
 import java.math.BigInteger;
 import java.util.Arrays;

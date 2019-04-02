@@ -10,12 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.units.bigints;
+package org.apache.tuweni.units.bigints;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.bytes.MutableBytes;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.MutableBytes;
 
 import java.math.BigInteger;
 

@@ -10,11 +10,11 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.scuttlebutt.discovery;
+package org.apache.tuweni.scuttlebutt.discovery;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.crypto.sodium.Signature;
-import net.consensys.cava.scuttlebutt.Identity;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.crypto.sodium.Signature;
+import org.apache.tuweni.scuttlebutt.Identity;
 
 import java.net.InetSocketAddress;
 import java.util.Objects;

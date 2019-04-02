@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.kv
+package org.apache.tuweni.kv
 
 import io.lettuce.core.RedisClient
 import io.lettuce.core.RedisURI
@@ -18,7 +18,7 @@ import io.lettuce.core.api.StatefulRedisConnection
 import io.lettuce.core.api.async.RedisAsyncCommands
 import io.lettuce.core.codec.RedisCodec
 import kotlinx.coroutines.future.await
-import net.consensys.cava.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes
 import java.net.InetAddress
 import java.util.concurrent.CompletionStage
 

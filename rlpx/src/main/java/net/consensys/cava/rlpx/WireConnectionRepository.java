@@ -10,9 +10,9 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.rlpx;
+package org.apache.tuweni.rlpx;
 
-import net.consensys.cava.rlpx.wire.WireConnection;
+import org.apache.tuweni.rlpx.wire.WireConnection;
 
 /**
  * A repository managing wire connections.
@@ -29,7 +29,7 @@ public interface WireConnectionRepository {
 
   /**
    * Gets a wire connection by its identifier, as provided by
-   * <code>net.consensys.cava.rlpx.wire.DefaultWireConnection#id</code>
+   * <code>org.apache.tuweni.rlpx.wire.DefaultWireConnection#id</code>
    * 
    * @param id the identifier of the wire connection
    * @return the wire connection associated with the identifier, or <code>null</code> if no such wire connection exists.

@@ -10,17 +10,17 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.eth;
+package org.apache.tuweni.eth;
 
-import static net.consensys.cava.crypto.Hash.keccak256;
+import static org.apache.tuweni.crypto.Hash.keccak256;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.crypto.SECP256K1;
-import net.consensys.cava.junit.BouncyCastleExtension;
-import net.consensys.cava.units.bigints.UInt256;
-import net.consensys.cava.units.ethereum.Gas;
-import net.consensys.cava.units.ethereum.Wei;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.crypto.SECP256K1;
+import org.apache.tuweni.junit.BouncyCastleExtension;
+import org.apache.tuweni.units.bigints.UInt256;
+import org.apache.tuweni.units.ethereum.Gas;
+import org.apache.tuweni.units.ethereum.Wei;
 
 import java.math.BigInteger;
 

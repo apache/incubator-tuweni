@@ -10,15 +10,15 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.les
+package org.apache.tuweni.les
 
 import kotlinx.coroutines.Dispatchers
-import net.consensys.cava.eth.repository.BlockchainRepository
-import net.consensys.cava.rlpx.RLPxService
-import net.consensys.cava.rlpx.wire.SubProtocol
-import net.consensys.cava.rlpx.wire.SubProtocolHandler
-import net.consensys.cava.rlpx.wire.SubProtocolIdentifier
-import net.consensys.cava.units.bigints.UInt256
+import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.rlpx.RLPxService
+import org.apache.tuweni.rlpx.wire.SubProtocol
+import org.apache.tuweni.rlpx.wire.SubProtocolHandler
+import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
+import org.apache.tuweni.units.bigints.UInt256
 
 /**
  * The LES subprotocol entry point class, to be used in conjunction with RLPxService
@@ -27,7 +27,7 @@ import net.consensys.cava.units.bigints.UInt256
  * This subprotocol is implemented after the specification presented on the *
  * [Ethereum wiki.](https://github.com/ethereum/wiki/wiki/Light-client-protocol)
  *
- * @see net.consensys.cava.rlpx.RLPxService
+ * @see org.apache.tuweni.rlpx.RLPxService
  */
 class LESSubprotocol
 /**

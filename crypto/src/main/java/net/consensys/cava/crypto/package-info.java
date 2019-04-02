@@ -3,6 +3,6 @@
  *
  * <p>
  * These classes are included in the standard Cava distribution, or separately when using the gradle dependency
- * 'net.consensys.cava:cava-crypto' (cava-crypto.jar).
+ * 'org.apache.tuweni:cava-crypto' (cava-crypto.jar).
  */
-package net.consensys.cava.crypto;
+package org.apache.tuweni.crypto;

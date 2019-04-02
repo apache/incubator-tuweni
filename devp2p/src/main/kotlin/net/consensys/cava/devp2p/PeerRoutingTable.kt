@@ -10,13 +10,13 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.devp2p
+package org.apache.tuweni.devp2p
 
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
-import net.consensys.cava.crypto.Hash.keccak256
-import net.consensys.cava.crypto.SECP256K1
-import net.consensys.cava.kademlia.KademliaRoutingTable
+import org.apache.tuweni.crypto.Hash.keccak256
+import org.apache.tuweni.crypto.SECP256K1
+import org.apache.tuweni.kademlia.KademliaRoutingTable
 
 /**
  * A routing table for ÐΞVp2p peers.

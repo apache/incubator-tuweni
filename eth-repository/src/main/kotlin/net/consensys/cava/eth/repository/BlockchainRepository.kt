@@ -10,16 +10,16 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.eth.repository
+package org.apache.tuweni.eth.repository
 
-import net.consensys.cava.bytes.Bytes
-import net.consensys.cava.bytes.Bytes32
-import net.consensys.cava.eth.Block
-import net.consensys.cava.eth.BlockBody
-import net.consensys.cava.eth.BlockHeader
-import net.consensys.cava.eth.Hash
-import net.consensys.cava.eth.TransactionReceipt
-import net.consensys.cava.kv.KeyValueStore
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.eth.Block
+import org.apache.tuweni.eth.BlockBody
+import org.apache.tuweni.eth.BlockHeader
+import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.TransactionReceipt
+import org.apache.tuweni.kv.KeyValueStore
 
 /**
  * Repository housing blockchain information.

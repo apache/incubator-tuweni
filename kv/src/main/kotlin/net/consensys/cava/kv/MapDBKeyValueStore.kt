@@ -10,12 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.kv
+package org.apache.tuweni.kv
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.consensys.cava.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes
 import org.mapdb.DB
 import org.mapdb.DBMaker
 import org.mapdb.DataInput2

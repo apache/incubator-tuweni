@@ -10,27 +10,27 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.eth.repository
+package org.apache.tuweni.eth.repository
 
-import net.consensys.cava.bytes.Bytes
-import net.consensys.cava.bytes.Bytes32
-import net.consensys.cava.eth.Address
-import net.consensys.cava.eth.BlockHeader
-import net.consensys.cava.eth.Hash
-import net.consensys.cava.eth.TransactionReceipt
-import net.consensys.cava.eth.repository.BlockHeaderFields.COINBASE
-import net.consensys.cava.eth.repository.BlockHeaderFields.DIFFICULTY
-import net.consensys.cava.eth.repository.BlockHeaderFields.EXTRA_DATA
-import net.consensys.cava.eth.repository.BlockHeaderFields.GAS_LIMIT
-import net.consensys.cava.eth.repository.BlockHeaderFields.GAS_USED
-import net.consensys.cava.eth.repository.BlockHeaderFields.NUMBER
-import net.consensys.cava.eth.repository.BlockHeaderFields.OMMERS_HASH
-import net.consensys.cava.eth.repository.BlockHeaderFields.PARENT_HASH
-import net.consensys.cava.eth.repository.BlockHeaderFields.STATE_ROOT
-import net.consensys.cava.eth.repository.BlockHeaderFields.TIMESTAMP
-import net.consensys.cava.eth.repository.BlockHeaderFields.TOTAL_DIFFICULTY
-import net.consensys.cava.units.bigints.UInt256
-import net.consensys.cava.units.ethereum.Gas
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.eth.Address
+import org.apache.tuweni.eth.BlockHeader
+import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.TransactionReceipt
+import org.apache.tuweni.eth.repository.BlockHeaderFields.COINBASE
+import org.apache.tuweni.eth.repository.BlockHeaderFields.DIFFICULTY
+import org.apache.tuweni.eth.repository.BlockHeaderFields.EXTRA_DATA
+import org.apache.tuweni.eth.repository.BlockHeaderFields.GAS_LIMIT
+import org.apache.tuweni.eth.repository.BlockHeaderFields.GAS_USED
+import org.apache.tuweni.eth.repository.BlockHeaderFields.NUMBER
+import org.apache.tuweni.eth.repository.BlockHeaderFields.OMMERS_HASH
+import org.apache.tuweni.eth.repository.BlockHeaderFields.PARENT_HASH
+import org.apache.tuweni.eth.repository.BlockHeaderFields.STATE_ROOT
+import org.apache.tuweni.eth.repository.BlockHeaderFields.TIMESTAMP
+import org.apache.tuweni.eth.repository.BlockHeaderFields.TOTAL_DIFFICULTY
+import org.apache.tuweni.units.bigints.UInt256
+import org.apache.tuweni.units.ethereum.Gas
 import org.apache.lucene.document.Document
 import org.apache.lucene.document.Field
 import org.apache.lucene.document.NumericDocValuesField

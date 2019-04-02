@@ -3,6 +3,6 @@
  *
  * <p>
  * These classes are included in the standard Cava distribution, or separately when using the gradle dependency
- * 'net.consensys.cava:cava-units' (cava-units.jar).
+ * 'org.apache.tuweni:cava-units' (cava-units.jar).
  */
-package net.consensys.cava.units;
+package org.apache.tuweni.units;

@@ -10,15 +10,15 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.kv
+package org.apache.tuweni.kv
 
 import com.google.common.io.MoreFiles
 import com.google.common.io.RecursiveDeleteOption
 import com.winterbe.expekt.should
 import kotlinx.coroutines.runBlocking
-import net.consensys.cava.bytes.Bytes
-import net.consensys.cava.kv.Vars.foo
-import net.consensys.cava.kv.Vars.foobar
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.kv.Vars.foo
+import org.apache.tuweni.kv.Vars.foobar
 import org.infinispan.Cache
 import org.infinispan.configuration.cache.ConfigurationBuilder
 import org.infinispan.manager.DefaultCacheManager

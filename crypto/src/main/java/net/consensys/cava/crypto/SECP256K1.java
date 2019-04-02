@@ -10,20 +10,20 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.crypto;
+package org.apache.tuweni.crypto;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.nio.file.StandardOpenOption.READ;
-import static net.consensys.cava.crypto.Hash.keccak256;
-import static net.consensys.cava.crypto.SECP256K1.Parameters.CURVE;
-import static net.consensys.cava.io.file.Files.atomicReplace;
+import static org.apache.tuweni.crypto.Hash.keccak256;
+import static org.apache.tuweni.crypto.SECP256K1.Parameters.CURVE;
+import static org.apache.tuweni.io.file.Files.atomicReplace;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.bytes.Bytes32;
-import net.consensys.cava.bytes.MutableBytes;
-import net.consensys.cava.units.bigints.UInt256;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
+import org.apache.tuweni.bytes.MutableBytes;
+import org.apache.tuweni.units.bigints.UInt256;
 
 import java.io.IOException;
 import java.math.BigInteger;

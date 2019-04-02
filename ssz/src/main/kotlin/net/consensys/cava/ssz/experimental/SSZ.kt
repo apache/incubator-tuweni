@@ -10,11 +10,11 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.ssz.experimental
+package org.apache.tuweni.ssz.experimental
 
-import net.consensys.cava.bytes.Bytes
-import net.consensys.cava.ssz.EndOfSSZException
-import net.consensys.cava.ssz.InvalidSSZTypeException
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.ssz.EndOfSSZException
+import org.apache.tuweni.ssz.InvalidSSZTypeException
 import java.nio.BufferOverflowException
 import java.nio.ByteBuffer
 import java.nio.ReadOnlyBufferException
@@ -33,7 +33,7 @@ object SSZ {
    * @param fn A consumer that will be provided with a {@link SSZWriter} that can consume values.
    * @return The SSZ encoding in a {@link Bytes} value.
    */
-  fun encode(fn: (SSZWriter) -> Unit): Bytes = net.consensys.cava.ssz.SSZ.encode { w -> fn(BytesSSZWriter(w)) }
+  fun encode(fn: (SSZWriter) -> Unit): Bytes = org.apache.tuweni.ssz.SSZ.encode { w -> fn(BytesSSZWriter(w)) }
 
   /**
    * Encode values to a {@link ByteBuffer}.
@@ -46,7 +46,7 @@ object SSZ {
    * @throws ReadOnlyBufferException If the provided buffer is read-only.
    */
   fun <T : ByteBuffer> encodeTo(buffer: T, fn: (SSZWriter) -> Unit): T =
-    net.consensys.cava.ssz.SSZ.encodeTo(buffer) { w -> fn(BytesSSZWriter(w)) }
+    org.apache.tuweni.ssz.SSZ.encodeTo(buffer) { w -> fn(BytesSSZWriter(w)) }
 
   /**
    * Encode an unsigned integer to a {@link Bytes} value.
@@ -57,7 +57,7 @@ object SSZ {
    * @throws IllegalArgumentException If the value is too large for the specified {@code bitLength}.
    */
   fun encodeUInt(value: UInt, bitLength: Int): Bytes =
-    net.consensys.cava.ssz.SSZ.encodeULong(value.toLong(), bitLength)
+    org.apache.tuweni.ssz.SSZ.encodeULong(value.toLong(), bitLength)
 
   /**
    * Encode an unsigned long integer to a {@link Bytes} value.
@@ -68,7 +68,7 @@ object SSZ {
    * @throws IllegalArgumentException If the value is too large for the specified {@code bitLength}.
    */
   fun encodeULong(value: ULong, bitLength: Int): Bytes =
-    net.consensys.cava.ssz.SSZ.encodeULong(value.toLong(), bitLength)
+    org.apache.tuweni.ssz.SSZ.encodeULong(value.toLong(), bitLength)
 
   /**
    * Encode an 8-bit unsigned integer to a {@link Bytes} value.
@@ -117,7 +117,7 @@ object SSZ {
    * @return The result from the reading function.
    */
   fun <T> decode(source: Bytes, fn: (SSZReader) -> T): T =
-    net.consensys.cava.ssz.SSZ.decode(source) { r -> fn(BytesSSZReader(r)) }
+    org.apache.tuweni.ssz.SSZ.decode(source) { r -> fn(BytesSSZReader(r)) }
 
   /**
    * Read a SSZ encoded unsigned integer from a {@link Bytes} value.
@@ -130,7 +130,7 @@ object SSZ {
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
   fun decodeUInt(source: Bytes, bitLength: Int): UInt =
-    net.consensys.cava.ssz.SSZ.decodeUInt(source, bitLength).toUInt()
+    org.apache.tuweni.ssz.SSZ.decodeUInt(source, bitLength).toUInt()
 
   /**
    * Read a SSZ encoded unsigned long integer from a {@link Bytes} value.
@@ -143,7 +143,7 @@ object SSZ {
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
   fun decodeULong(source: Bytes, bitLength: Int): ULong =
-    net.consensys.cava.ssz.SSZ.decodeULong(source, bitLength).toULong()
+    org.apache.tuweni.ssz.SSZ.decodeULong(source, bitLength).toULong()
 
   /**
    * Read an 8-bit unsigned integer from the SSZ source.

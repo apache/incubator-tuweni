@@ -10,15 +10,15 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.net.tls;
+package org.apache.tuweni.net.tls;
 
-import static net.consensys.cava.net.tls.TLS.readPemFile;
+import static org.apache.tuweni.net.tls.TLS.readPemFile;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import net.consensys.cava.junit.BouncyCastleExtension;
-import net.consensys.cava.junit.TempDirectory;
-import net.consensys.cava.junit.TempDirectoryExtension;
+import org.apache.tuweni.junit.BouncyCastleExtension;
+import org.apache.tuweni.junit.TempDirectory;
+import org.apache.tuweni.junit.TempDirectoryExtension;
 
 import java.io.ByteArrayInputStream;
 import java.nio.file.Files;

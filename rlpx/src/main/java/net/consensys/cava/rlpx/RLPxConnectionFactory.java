@@ -10,19 +10,19 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.rlpx;
+package org.apache.tuweni.rlpx;
 
-import static net.consensys.cava.bytes.Bytes.concatenate;
-import static net.consensys.cava.crypto.Hash.keccak256;
-import static net.consensys.cava.crypto.SECP256K1.Parameters.CURVE;
-import static net.consensys.cava.crypto.SECP256K1.calculateKeyAgreement;
+import static org.apache.tuweni.bytes.Bytes.concatenate;
+import static org.apache.tuweni.crypto.Hash.keccak256;
+import static org.apache.tuweni.crypto.SECP256K1.Parameters.CURVE;
+import static org.apache.tuweni.crypto.SECP256K1.calculateKeyAgreement;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.bytes.Bytes32;
-import net.consensys.cava.concurrent.AsyncResult;
-import net.consensys.cava.crypto.SECP256K1.KeyPair;
-import net.consensys.cava.crypto.SECP256K1.PublicKey;
-import net.consensys.cava.crypto.SECP256K1.SecretKey;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
+import org.apache.tuweni.concurrent.AsyncResult;
+import org.apache.tuweni.crypto.SECP256K1.KeyPair;
+import org.apache.tuweni.crypto.SECP256K1.PublicKey;
+import org.apache.tuweni.crypto.SECP256K1.SecretKey;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;

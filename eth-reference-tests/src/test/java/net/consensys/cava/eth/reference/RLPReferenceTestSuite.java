@@ -10,17 +10,17 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.eth.reference;
+package org.apache.tuweni.eth.reference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.io.Resources;
-import net.consensys.cava.rlp.RLP;
-import net.consensys.cava.rlp.RLPException;
-import net.consensys.cava.rlp.RLPReader;
-import net.consensys.cava.rlp.RLPWriter;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.io.Resources;
+import org.apache.tuweni.rlp.RLP;
+import org.apache.tuweni.rlp.RLPException;
+import org.apache.tuweni.rlp.RLPReader;
+import org.apache.tuweni.rlp.RLPWriter;
 
 import java.io.IOException;
 import java.io.InputStream;

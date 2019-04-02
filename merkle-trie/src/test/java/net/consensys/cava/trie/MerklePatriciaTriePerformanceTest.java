@@ -10,14 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.trie;
+package org.apache.tuweni.trie;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.bytes.Bytes32;
-import net.consensys.cava.concurrent.AsyncCompletion;
-import net.consensys.cava.concurrent.AsyncResult;
-import net.consensys.cava.concurrent.CompletableAsyncCompletion;
-import net.consensys.cava.junit.BouncyCastleExtension;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
+import org.apache.tuweni.concurrent.AsyncCompletion;
+import org.apache.tuweni.concurrent.AsyncResult;
+import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
+import org.apache.tuweni.junit.BouncyCastleExtension;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;

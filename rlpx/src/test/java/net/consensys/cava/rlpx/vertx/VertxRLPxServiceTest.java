@@ -10,19 +10,19 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.rlpx.vertx;
+package org.apache.tuweni.rlpx.vertx;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import net.consensys.cava.concurrent.AsyncCompletion;
-import net.consensys.cava.crypto.SECP256K1;
-import net.consensys.cava.junit.BouncyCastleExtension;
-import net.consensys.cava.junit.VertxExtension;
-import net.consensys.cava.junit.VertxInstance;
-import net.consensys.cava.rlpx.MemoryWireConnectionsRepository;
+import org.apache.tuweni.concurrent.AsyncCompletion;
+import org.apache.tuweni.crypto.SECP256K1;
+import org.apache.tuweni.junit.BouncyCastleExtension;
+import org.apache.tuweni.junit.VertxExtension;
+import org.apache.tuweni.junit.VertxInstance;
+import org.apache.tuweni.rlpx.MemoryWireConnectionsRepository;
 
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;

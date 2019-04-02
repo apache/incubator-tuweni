@@ -10,10 +10,10 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.rlpx.wire;
+package org.apache.tuweni.rlpx.wire;
 
 
-import net.consensys.cava.rlpx.RLPxService;
+import org.apache.tuweni.rlpx.RLPxService;
 
 /**
  * Defines a subprotocol to be used for wire connections

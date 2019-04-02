@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.devp2p
+package org.apache.tuweni.devp2p
 
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.reflect.KProperty
