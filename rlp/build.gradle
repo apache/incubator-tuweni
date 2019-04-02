@@ -1,0 +1,12 @@
+description = 'Recursive Length Prefix (RLP) encoding and decoding.'
+
+dependencies {
+  compile project(':bytes')
+  compileOnly project(':units')
+
+  testCompile project(':units')
+  testCompile 'org.junit.jupiter:junit-jupiter-api'
+  testCompile 'org.junit.jupiter:junit-jupiter-params'
+
+  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+}

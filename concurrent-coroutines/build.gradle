@@ -1,0 +1,11 @@
+description = 'Kotlin coroutine extensions for cava concurrency primitives.'
+
+dependencies {
+  compile project(':concurrent')
+  compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+
+  testCompile 'org.junit.jupiter:junit-jupiter-api'
+  testCompile 'org.junit.jupiter:junit-jupiter-params'
+
+  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+}

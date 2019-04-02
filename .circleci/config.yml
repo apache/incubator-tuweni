@@ -1,0 +1,144 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:11-jdk-sid
+
+    working_directory: ~/repo
+
+    environment:
+      TERM: dumb
+      JAVA_TOOL_OPTIONS: -Xmx768m
+      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2
+      GRADLE_MAX_TEST_FORKS: 2
+
+    steps:
+      - checkout
+      - run:
+          name: Check submodule status
+          command: git submodule status | tee ~/submodule-status
+
+      - restore_cache:
+          name: Restoring cached submodules
+          keys:
+          - v1-submodules-{{ checksum "~/submodule-status" }}
+
+      - run:
+          name: Update submodules
+          command: git submodule update --init --recursive
+
+      - run:
+          name: Install Sodium Library
+          command: |
+            sudo sh -c "echo 'deb http://deb.debian.org/debian unstable main contrib non-free' > /etc/apt/sources.list"
+            sudo apt-get update
+            sudo apt-get install -y libsodium23
+
+      - restore_cache:
+          name: Restoring cached gradle dependencies
+          keys:
+          - v1-gradle-dir-{{ checksum "build.gradle" }}
+          - v1-gradle-dir-
+
+      - run:
+          name: Downloading dependencies
+          command: ./gradlew allDependencies checkLicenses
+
+      - run:
+          name: Compiling
+          command: ./gradlew spotlessCheck assemble
+
+      - run:
+          name: Collecting artifacts
+          command: |
+            mkdir -p ~/jars
+            find . -type f -regex ".*/build/libs/.*jar" -exec cp {} ~/jars/ \;
+          when: always
+
+      - store_artifacts:
+          name: Uploading artifacts
+          path: ~/jars
+          destination: jars
+          when: always
+
+      - run:
+          name: Running tests
+          command: ./gradlew --stacktrace test
+
+      - run:
+          name: Collecting test results
+          command: |
+            ./gradlew jacocoTestReport
+            mkdir -p ~/test-results/
+            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/test-results/ \;
+          when: always
+
+      - store_test_results:
+          name: Uploading test results
+          path: ~/test-results
+          destination: tests
+          when: always
+
+      - run:
+          name: Collecting reports
+          command: |
+            mkdir -p ~/reports/license
+            (cd ./build/reports/license && tar c .) | (cd ~/reports/license && tar x)
+            find . -type d -regex ".*/build/reports/tests/test" | while read dir; do
+                  module=`echo $dir | sed -e 's/build\/reports\/tests\/test//'`
+                  mkdir -p ~/reports/test/"$module"
+                  (cd "$dir" && tar c .) | (cd ~/reports/test/"$module" && tar x)
+              done
+              find . -type d -regex ".*/build/reports/jacoco/test/html" | while read dir; do
+                  module=`echo $dir | sed -e 's/build\/reports\/jacoco\/test\/html//'`
+                  mkdir -p ~/reports/jacoco/"$module"
+                  (cd "$dir" && tar c .) | (cd ~/reports/jacoco/"$module" && tar x)
+              done
+          when: always
+
+      - store_artifacts:
+          name: Uploading reports
+          path: ~/reports
+          destination: reports
+
+      - run:
+          name: Building JavaDoc
+          command: ./gradlew :javadoc
+
+      - store_artifacts:
+          name: Uploading JavaDoc
+          path: build/docs/javadoc
+          destination: javadoc
+
+      - run:
+          name: Building Dokka docs
+          command: ./gradlew :dokka
+
+      - store_artifacts:
+          name: Uploading Dokka docs
+          path: build/docs/dokka
+          destination: dokka
+
+      - deploy:
+          name: Deploying snapshot to Bintray (release branches only)
+          command: |
+            if [ -z "${CIRCLE_PULL_REQUEST}" ] && echo "${CIRCLE_BRANCH}" | grep -q -E '^master$|^[0-9]+\.[0-9]+$'; then
+              echo "Start deployment"
+              BINTRAY_DEPLOY=true ./gradlew deploy
+            else
+              echo "Start dry run deployment"
+              ./gradlew deploy
+            fi
+
+      - save_cache:
+          name: Caching gradle dependencies
+          paths:
+          - .gradle
+          - ~/.gradle
+          key: v1-gradle-dir-{{ checksum "build.gradle" }}-{{ .Branch }}-{{ .BuildNum }}
+
+      - save_cache:
+          name: Caching submodules
+          paths:
+            - .git/modules
+          key: v1-submodules-{{ checksum "~/submodule-status" }}

@@ -1,0 +1,21 @@
+dependencies {
+  compile project(':crypto')
+  compile project(':bytes')
+  compile project(':concurrent')
+  compile project(':rlp')
+  compile 'com.google.guava:guava'
+  compile 'org.logl:logl-api'
+
+  compileOnly 'io.vertx:vertx-core'
+  compile 'org.xerial.snappy:snappy-java'
+  compile 'org.bouncycastle:bcprov-jdk15on'
+
+  testCompile project(':junit')
+  testCompile 'io.vertx:vertx-core'
+  testCompile 'org.bouncycastle:bcprov-jdk15on'
+  testCompile 'org.junit.jupiter:junit-jupiter-api'
+  testCompile 'org.junit.jupiter:junit-jupiter-params'
+  testCompile 'org.logl:logl-logl'
+
+  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+}

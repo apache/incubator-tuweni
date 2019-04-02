@@ -1,0 +1,29 @@
+description = 'A parser for Tom\'s Obvious, Minimal Language (TOML).'
+
+apply plugin: 'antlr'
+
+generateGrammarSource {
+  outputDirectory file("${project.buildDir}/generated-src/antlr/main/net/consensys/cava/toml/internal")
+  arguments << "-visitor" << "-long-messages"
+  arguments << "-Xexact-output-dir"
+}
+
+javadoc { exclude '**/internal/**' }
+
+configurations {
+  compile {
+    extendsFrom = extendsFrom.findAll { it != configurations.antlr }
+  }
+}
+
+dependencies {
+  antlr 'org.antlr:antlr4'
+
+  compile 'org.antlr:antlr4-runtime'
+  compile 'com.google.code.findbugs:jsr305'
+
+  testCompile 'org.junit.jupiter:junit-jupiter-api'
+  testCompile 'org.junit.jupiter:junit-jupiter-params'
+
+  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+}

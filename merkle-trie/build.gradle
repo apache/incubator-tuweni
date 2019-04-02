@@ -1,0 +1,17 @@
+description = 'Patricia Merkle Trie implementations.'
+
+dependencies {
+  compile project(':bytes')
+  compile project(':concurrent-coroutines')
+  compile project(':crypto')
+  compile project(':rlp')
+  compile 'com.google.guava:guava'
+  compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+
+  testCompile project(':junit')
+  testCompile 'org.bouncycastle:bcprov-jdk15on'
+  testCompile 'org.junit.jupiter:junit-jupiter-api'
+  testCompile 'org.junit.jupiter:junit-jupiter-params'
+
+  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+}

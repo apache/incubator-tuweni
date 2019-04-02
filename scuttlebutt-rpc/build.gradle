@@ -1,0 +1,23 @@
+description = 'Scuttlebutt Handshake library'
+
+dependencies {
+  compile project(':bytes')
+  compile project(':concurrent')
+  compile project(':crypto')
+  compile project(':scuttlebutt')
+
+  compile 'com.fasterxml.jackson.core:jackson-databind'
+
+  testCompile project(':junit')
+  testCompile project(':scuttlebutt-handshake')
+
+  testCompile 'org.bouncycastle:bcprov-jdk15on'
+  testCompile 'org.junit.jupiter:junit-jupiter-api'
+  testCompile 'org.junit.jupiter:junit-jupiter-params'
+  testCompile 'io.vertx:vertx-core'
+
+  testCompile 'org.logl:logl-logl'
+  testCompile 'org.logl:logl-vertx'
+
+  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+}
