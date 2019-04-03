@@ -480,7 +480,7 @@ class TomlTest {
 
   @Test
   void testTomlV0_4_0Example() throws Exception {
-    InputStream is = this.getClass().getResourceAsStream("/net/consensys/cava/toml/example-v0.4.0.toml");
+    InputStream is = this.getClass().getResourceAsStream("/org/apache/tuweni/toml/example-v0.4.0.toml");
     assertNotNull(is);
     TomlParseResult result = Toml.parse(is, TomlVersion.V0_4_0);
     assertFalse(result.hasErrors(), () -> joinErrors(result));
@@ -496,7 +496,7 @@ class TomlTest {
 
   @Test
   void testHardExample() throws Exception {
-    InputStream is = this.getClass().getResourceAsStream("/net/consensys/cava/toml/hard_example.toml");
+    InputStream is = this.getClass().getResourceAsStream("/org/apache/tuweni/toml/hard_example.toml");
     assertNotNull(is);
     TomlParseResult result = Toml.parse(is, TomlVersion.V0_4_0);
     assertFalse(result.hasErrors(), () -> joinErrors(result));
@@ -508,7 +508,7 @@ class TomlTest {
 
   @Test
   void testHardExampleUnicode() throws Exception {
-    InputStream is = this.getClass().getResourceAsStream("/net/consensys/cava/toml/hard_example_unicode.toml");
+    InputStream is = this.getClass().getResourceAsStream("/org/apache/tuweni/toml/hard_example_unicode.toml");
     assertNotNull(is);
     TomlParseResult result = Toml.parse(is, TomlVersion.V0_4_0);
     assertFalse(result.hasErrors(), () -> joinErrors(result));
@@ -520,7 +520,7 @@ class TomlTest {
 
   @Test
   void testSpecExample() throws Exception {
-    InputStream is = this.getClass().getResourceAsStream("/net/consensys/cava/toml/toml-v0.5.0-spec-example.toml");
+    InputStream is = this.getClass().getResourceAsStream("/org/apache/tuweni/toml/toml-v0.5.0-spec-example.toml");
     assertNotNull(is);
     TomlParseResult result = Toml.parse(is, TomlVersion.V0_4_0);
     assertFalse(result.hasErrors(), () -> joinErrors(result));
