@@ -36,6 +36,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -69,12 +70,15 @@ class BlockRLPTestSuite {
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }
-    });
+    }).filter(Objects::nonNull);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   private static Stream<Arguments> readTestCase(InputStream is) throws IOException {
     Map<String, Map> test = mapper.readerFor(Map.class).readValue(is);
+    if (test.isEmpty()) {
+      return null;
+    }
     String name = test.keySet().iterator().next();
     Map testData = test.get(name);
     List<Map> blocks = (List<Map>) testData.get("blocks");

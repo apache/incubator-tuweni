@@ -43,7 +43,7 @@ class ResourcesTest {
     List<URL> all = Resources.find("org/apache/tuweni/io/file/resourceresolver/**").collect(Collectors.toList());
     assertEquals(12, all.size(), () -> describeExpectation(12, all));
 
-    List<URL> txtFiles = Resources.find("net/**/test*.txt").collect(Collectors.toList());
+    List<URL> txtFiles = Resources.find("org/**/test*.txt").collect(Collectors.toList());
     assertEquals(6, txtFiles.size(), () -> describeExpectation(6, txtFiles));
 
     List<URL> txtFilesFromRoot = Resources.find("/**/test?.txt").collect(Collectors.toList());
