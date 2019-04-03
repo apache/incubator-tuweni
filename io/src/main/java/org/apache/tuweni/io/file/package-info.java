@@ -2,8 +2,8 @@
  * Classes and utilities for handling file IO.
  *
  * <p>
- * These classes are included in the standard Cava distribution, or separately when using the gradle dependency
- * 'org.apache.tuweni:cava-io' (cava-io.jar).
+ * These classes are included in the standard Tuweni distribution, or separately when using the gradle dependency
+ * 'org.apache.tuweni:tuweni-io' (tuweni-io.jar).
  */
 @ParametersAreNonnullByDefault
 package org.apache.tuweni.io.file;

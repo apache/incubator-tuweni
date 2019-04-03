@@ -73,9 +73,9 @@ class RedisKeyValueStore(uri: String) : KeyValueStore {
     fun open(port: Int, address: InetAddress) = RedisKeyValueStore(port, address)
 
     /**
-     * A [RedisCodec] for working with cava Bytes classes.
+     * A [RedisCodec] for working with Bytes classes.
      *
-     * @return A [RedisCodec] for working with cava Bytes classes.
+     * @return A [RedisCodec] for working with Bytes classes.
      */
     @JvmStatic
     fun codec(): RedisCodec<Bytes, Bytes> = RedisBytesCodec()

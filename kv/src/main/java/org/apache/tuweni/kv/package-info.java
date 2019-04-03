@@ -2,8 +2,8 @@
  * Classes and utilities for working with key/value stores.
  *
  * <p>
- * These classes are included in the complete Cava distribution, or separately when using the gradle dependency
- * `org.apache.tuweni:cava-kv` (`cava-kv.jar`).
+ * These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency
+ * `org.apache.tuweni:tuweni-kv` (`tuweni-kv.jar`).
  */
 @ParametersAreNonnullByDefault
 package org.apache.tuweni.kv;

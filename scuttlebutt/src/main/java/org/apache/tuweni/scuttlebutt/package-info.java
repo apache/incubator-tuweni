@@ -5,8 +5,8 @@
  * <a href="https://ssbc.github.io/scuttlebutt-protocol-guide/">the Scuttlebutt protocol guide</a>.
  *
  * <p>
- * These classes are included in the standard Cava distribution, or separately when using the gradle dependency
- * 'org.apache.tuweni:cava-scuttlebutt' (cava-scuttlebutt.jar).
+ * These classes are included in the standard Tuweni distribution, or separately when using the gradle dependency
+ * 'org.apache.tuweni:tuweni-scuttlebutt' (tuweni-scuttlebutt.jar).
  */
 @ParametersAreNonnullByDefault
 package org.apache.tuweni.scuttlebutt;

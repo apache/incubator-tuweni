@@ -1,18 +1,18 @@
-# Module cava
+# Module tuweni
 
-In the spirit of [Google Guava](https://github.com/google/guava/), Cava is a set of libraries and other tools to aid development of blockchain and other decentralized software in Java and other JVM languages.
+In the spirit of [Google Guava](https://github.com/google/guava/), Tuweni is a set of libraries and other tools to aid development of blockchain and other decentralized software in Java and other JVM languages.
 
 # Package org.apache.tuweni.bytes
 
 Classes and utilities for working with byte arrays.
 
-These classes are included in the complete Cava distribution, or separately when using the gradle dependency `org.apache.tuweni:cava-bytes` (`cava-bytes.jar`).
+These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-bytes` (`tuweni-bytes.jar`).
 
 # Package org.apache.tuweni.concurrent
 
 Classes and utilities for working with concurrency.
 
-These classes are included in the complete Cava distribution, or separately when using the gradle dependency `org.apache.tuweni:cava-concurrent` (`cava-concurrent.jar`).
+These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-concurrent` (`tuweni-concurrent.jar`).
 
 # Package org.apache.tuweni.concurrent.coroutines
 
@@ -22,13 +22,13 @@ Extensions for mapping [AsyncResult][org.apache.tuweni.concurrent.AsyncResult] a
 
 A general-purpose library for managing configuration data.
 
-These classes are included in the complete Cava distribution, or separately when using the gradle dependency `org.apache.tuweni:cava-config` (`cava-config.jar`).
+These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-config` (`tuweni-config.jar`).
 
 # Package org.apache.tuweni.crypto
 
 Classes and utilities for working with cryptography.
 
-These classes are included in the complete Cava distribution, or separately when using the gradle dependency `org.apache.tuweni:cava-crypto` (`cava-crypto.jar`).
+These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-crypto` (`tuweni-crypto.jar`).
 
 # Package org.apache.tuweni.crypto.sodium
 
@@ -36,25 +36,25 @@ Classes and utilities for working with the sodium native library.
 
 Classes and utilities in this package provide an interface to the native Sodium crypto library (https://www.libsodium.org/), which must be installed on the same system as the JVM. It will be searched for in common library locations, or its it can be loaded explicitly using [org.apache.tuweni.crypto.sodium.Sodium.loadLibrary].
 
-Classes in this package depend upon the JNR-FFI library, which is not automatically included when using the complete Cava distribution. See https://github.com/jnr/jnr-ffi. JNR-FFI can be included using the gradle dependency `com.github.jnr:jnr-ffi`.
+Classes in this package depend upon the JNR-FFI library, which is not automatically included when using the complete Tuweni distribution. See https://github.com/jnr/jnr-ffi. JNR-FFI can be included using the gradle dependency `com.github.jnr:jnr-ffi`.
 
 # Package org.apache.tuweni.devp2p
 
 Kotlin coroutine based implementation of the Ethereum ÐΞVp2p protocol.
 
-These classes are included in the complete Cava distribution, or separately when using the gradle dependency `org.apache.tuweni:cava-devp2p` (`cava-devp2p.jar`).
+These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-devp2p` (`tuweni-devp2p.jar`).
 
 # Package org.apache.tuweni.eth
 
 Classes and utilities for working in the Ethereum domain.
 
-These classes are included in the complete Cava distribution, or separately when using the gradle dependency `org.apache.tuweni:cava-eth` (`cava-eth.jar`).
+These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-eth` (`tuweni-eth.jar`).
 
 # Package org.apache.tuweni.io
 
 Classes and utilities for handling file and network IO.
 
-These classes are included in the complete Cava distribution, or separately when using the gradle dependency `org.apache.tuweni:cava-io` (`cava-io.jar`).
+These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-io` (`tuweni-io.jar`).
 
 # Package org.apache.tuweni.io.file
 
@@ -64,31 +64,31 @@ General utilities for working with files and the filesystem.
 
 Utilities for better junit testing.
 
-These classes are included in the complete Cava distribution, or separately when using the gradle dependency `org.apache.tuweni:cava-junit` (`cava-junit.jar`).
+These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-junit` (`tuweni-junit.jar`).
 
 # Package org.apache.tuweni.kademlia
 
 An implementation of the kademlia distributed hash (routing) table.
 
-These classes are included in the complete Cava distribution, or separately when using the gradle dependency `org.apache.tuweni:cava-kademlia` (`cava-kademlia.jar`).
+These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-kademlia` (`tuweni-kademlia.jar`).
 
 # Package org.apache.tuweni.kv
 
 Classes and utilities for working with key/value stores.
 
-These classes are included in the complete Cava distribution, or separately when using the gradle dependency `org.apache.tuweni:cava-kv` (`cava-kv.jar`).
+These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-kv` (`tuweni-kv.jar`).
 
 # Package org.apache.tuweni.net
 
 Classes and utilities for working with networking.
 
-These classes are included in the complete Cava distribution, or separately when using the gradle dependency `org.apache.tuweni:cava-net` (`cava-net.jar`).
+These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-net` (`tuweni-net.jar`).
 
 # Package org.apache.tuweni.net.coroutines
 
 Classes and utilities for coroutine based networking.
 
-These classes are included in the complete Cava distribution, or separately when using the gradle dependency `org.apache.tuweni:cava-net-coroutines` (`cava-net-coroutines.jar`).
+These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-net-coroutines` (`tuweni-net-coroutines.jar`).
 
 # Package org.apache.tuweni.net.tls
 
@@ -100,7 +100,7 @@ Recursive Length Prefix (RLP) encoding and decoding.
 
 An implementation of the Ethereum Recursive Length Prefix (RLP) algorithm, as described at https://github.com/ethereum/wiki/wiki/RLP.
 
-These classes are included in the complete Cava distribution, or separately when using the gradle dependency `org.apache.tuweni:cava-rlp` (`cava-rlp.jar`).
+These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-rlp` (`tuweni-rlp.jar`).
 
 # Package org.apache.tuweni.toml
 
@@ -108,7 +108,7 @@ A parser for Tom's Obvious, Minimal Language (TOML).
 
 A parser and semantic checker for Tom's Obvious, Minimal Language (TOML), as described at https://github.com/toml-lang/toml/.
 
-These classes are included in the complete Cava distribution, or separately when using the gradle dependency `org.apache.tuweni:cava-toml` (cava-toml.jar).
+These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-toml` (tuweni-toml.jar).
 
 # Package org.apache.tuweni.trie
 
@@ -116,7 +116,7 @@ Merkle Trie implementations.
 
 Implementations of the Ethereum Patricia Trie, as described at https://github.com/ethereum/wiki/wiki/Patricia-Tree.
 
-These classes are included in the complete Cava distribution, or separately when using the gradle dependency `org.apache.tuweni:cava-merkle-trie` (`cava-merkle-trie.jar`).
+These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-merkle-trie` (`tuweni-merkle-trie.jar`).
 
 # Package org.apache.tuweni.trie
 
@@ -126,7 +126,7 @@ Merkle Trie implementations using Kotlin coroutines.
 
 Classes and utilities for working with 256 bit integers and Ethereum units.
 
-These classes are included in the complete Cava distribution, or separately when using the gradle dependency `org.apache.tuweni:cava-units` (`cava-units.jar`).
+These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-units` (`tuweni-units.jar`).
 
 # Package org.apache.tuweni.units.bigints
 
