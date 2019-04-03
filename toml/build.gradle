@@ -3,7 +3,7 @@ description = 'A parser for Tom\'s Obvious, Minimal Language (TOML).'
 apply plugin: 'antlr'
 
 generateGrammarSource {
-  outputDirectory file("${project.buildDir}/generated-src/antlr/main/net/consensys/cava/toml/internal")
+  outputDirectory file("${project.buildDir}/generated-src/antlr/main/org/apache/tuweni/toml/internal")
   arguments << "-visitor" << "-long-messages"
   arguments << "-Xexact-output-dir"
 }
