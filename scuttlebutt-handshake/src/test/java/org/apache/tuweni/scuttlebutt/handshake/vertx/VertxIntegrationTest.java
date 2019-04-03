@@ -16,10 +16,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.crypto.sodium.Signature;
+import org.apache.tuweni.crypto.sodium.Sodium;
 import org.apache.tuweni.junit.VertxExtension;
 import org.apache.tuweni.junit.VertxInstance;
 import org.apache.tuweni.scuttlebutt.rpc.RPCCodec;
@@ -33,6 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import io.vertx.core.Vertx;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.logl.Level;
@@ -40,8 +43,14 @@ import org.logl.LoggerProvider;
 import org.logl.logl.SimpleLogger;
 import org.logl.vertx.LoglLogDelegateFactory;
 
+
 @ExtendWith(VertxExtension.class)
 class VertxIntegrationTest {
+
+  @BeforeAll
+  static void checkAvailable() {
+    assumeTrue(Sodium.isAvailable(), "Sodium native library is not available");
+  }
 
   private static class MyClientHandler implements ClientHandler {
 
