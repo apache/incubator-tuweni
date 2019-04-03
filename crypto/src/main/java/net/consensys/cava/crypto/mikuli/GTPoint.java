@@ -1,8 +1,8 @@
 /*
- * Copyright 2019 ConsenSys AG.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
+ * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
+ * to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -12,9 +12,9 @@
  */
 package org.apache.tuweni.crypto.mikuli;
 
-import java.util.Objects;
-
 import org.apache.milagro.amcl.BLS381.FP12;
+
+import java.util.Objects;
 
 /**
  * GT is the object that holds the result of the pairing operation. Points in GT are elements of Fq12.
