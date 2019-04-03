@@ -40,7 +40,7 @@ class ResourcesTest {
   @Test
   @SuppressWarnings("MustBeClosedChecker")
   void shouldIterateResourcesOnFileSystemAndInJars() throws Exception {
-    List<URL> all = Resources.find("net/consensys/cava/io/file/resourceresolver/**").collect(Collectors.toList());
+    List<URL> all = Resources.find("org/apache/tuweni/io/file/resourceresolver/**").collect(Collectors.toList());
     assertEquals(12, all.size(), () -> describeExpectation(12, all));
 
     List<URL> txtFiles = Resources.find("net/**/test*.txt").collect(Collectors.toList());

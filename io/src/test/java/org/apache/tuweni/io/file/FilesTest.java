@@ -56,7 +56,7 @@ class FilesTest {
 
   @Test
   void canCopyResources(@TempDirectory Path tempDir) throws Exception {
-    Path file = copyResource("net/consensys/cava/io/file/test.txt", tempDir.resolve("test.txt"));
+    Path file = copyResource("org/apache/tuweni/io/file/test.txt", tempDir.resolve("test.txt"));
     assertTrue(Files.exists(file));
     assertEquals(81, Files.size(file));
   }
