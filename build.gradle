@@ -133,7 +133,7 @@ subprojects {
 task deploy() {}
 
 configurations.archives.artifacts.removeAll { PublishArtifact publishArtifact ->
-  (publishArtifact.type == 'jar' && publishArtifact.name == 'cava')}
+  (publishArtifact.type == 'jar' && publishArtifact.name == 'tuweni')}
 
 
 //////
@@ -228,7 +228,7 @@ allprojects {
     def relativePath = rootDir.toPath().relativize(projectDir.toPath()).toString()
     linkMapping {
       dir = projectDir.toString()
-      url = "https://github.com/consensys/cava/blob/master/$relativePath"
+      url = "https://github.com/apache/incubator-tuweni/blob/master/$relativePath"
       suffix = "#L"
     }
   }
@@ -305,7 +305,7 @@ allprojects {
           pom {
             name = project.jar.baseName
             afterEvaluate { description = project.description }
-            url = 'https://github.com/ConsenSys/cava'
+            url = 'https://github.com/apache/incubator-tuweni'
             licenses {
               license {
                 name = "The Apache License, Version 2.0"
@@ -313,22 +313,22 @@ allprojects {
               }
             }
             scm {
-              connection = 'scm:https://github.com/ConsenSys/cava.git'
-              developerConnection = 'scm:git@github.com:ConsenSys/cava.git'
-              url = 'https://github.com/ConsenSys/cava'
+              connection = 'scm:https://github.com/apache/incubator-tuweni.git'
+              developerConnection = 'scm:git@github.com:apache/incubator-tuweni.git'
+              url = 'https://github.com/apache/incubator-tuweni'
             }
             developers {
               developer {
                 name = 'Chris Leishman'
                 email = 'chris@leishman.org'
-                organization = 'ConsenSys'
-                organizationUrl = 'https://www.consensys.net'
+                organization = 'Apache'
+                organizationUrl = 'https://tuweni.apache.org'
               }
               developer {
                 name = 'Antoine Toulme'
                 email = 'antoine@lunar-ocean.com'
-                organization = 'ConsenSys'
-                organizationUrl = 'https://www.consensys.net'
+                organization = 'Apache'
+                organizationUrl = 'https://tuweni.apache.org'
               }
             }
           }
@@ -440,12 +440,12 @@ allprojects {
       publish = true
       pkg {
         repo = 'consensys'
-        name = 'cava'
+        name = 'tuweni'
         userOrg = 'consensys'
         licenses = ['Apache-2.0']
         version {
           name = project.version
-          desc = 'Cava distribution'
+          desc = 'Tuweni distribution'
           released = new Date()
           vcsTag = project.version
         }
@@ -504,7 +504,7 @@ dokka {
   })
   linkMapping {
     dir = rootDir.toString()
-    url = "https://github.com/consensys/cava/blob/master"
+    url = "https://github.com/apache/incubator-tuweni/blob/master"
     suffix = "#L"
   }
 
