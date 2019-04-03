@@ -15,15 +15,18 @@ package org.apache.tuweni.plumtree;
 import org.apache.tuweni.bytes.Bytes;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 /**
  * Local state to our peer, representing the make-up of the tree of peers.
@@ -32,8 +35,19 @@ public final class State {
 
   private final PeerRepository peerRepository;
   private final MessageHashing messageHashingFunction;
-  private final Map<Bytes, MessageHandler> messageHandlers = new ConcurrentHashMap<>();
+  private final int maxMessagesHandlers = 1000000;
+  private final Map<Bytes, MessageHandler> messageHandlers =
+      Collections.synchronizedMap(new LinkedHashMap<Bytes, MessageHandler>() {
+
+        @Override
+        protected boolean removeEldestEntry(final Map.Entry<Bytes, MessageHandler> eldest) {
+          return super.size() > maxMessagesHandlers;
+        }
+      });
+
   private final MessageSender messageSender;
+  private final Consumer<Bytes> messageListener;
+  private final MessageValidator messageValidator;
   private final Queue<Runnable> lazyQueue = new ConcurrentLinkedQueue<>();
   private final Timer timer = new Timer("plumtree", true);
   private final long delay;
@@ -41,6 +55,7 @@ public final class State {
   final class MessageHandler {
 
     private final Bytes hash;
+
     private final AtomicBoolean receivedFullMessage = new AtomicBoolean(false);
     private final AtomicBoolean requestingGraftMessage = new AtomicBoolean(false);
     private List<TimerTask> tasks = new ArrayList<>();
@@ -50,26 +65,38 @@ public final class State {
       this.hash = hash;
     }
 
-    void fullMessageReceived(Peer sender, Bytes message) {
+    /**
+     * Acts on receiving the full message
+     * 
+     * @param sender the sender - may be null if we are submitting this message to the network
+     * @param message the payload to send to the network
+     */
+    void fullMessageReceived(@Nullable Peer sender, Bytes message) {
       if (receivedFullMessage.compareAndSet(false, true)) {
         for (TimerTask task : tasks) {
           task.cancel();
         }
-        for (Peer peer : peerRepository.eagerPushPeers()) {
-          if (!sender.equals(peer)) {
-            messageSender.sendMessage(MessageSender.Verb.GOSSIP, peer, message);
+
+        if (sender == null || messageValidator.validate(message, sender)) {
+          for (Peer peer : peerRepository.eagerPushPeers()) {
+            if (sender == null || !sender.equals(peer)) {
+              messageSender.sendMessage(MessageSender.Verb.GOSSIP, peer, message);
+            }
           }
+          lazyQueue.addAll(
+              peerRepository
+                  .lazyPushPeers()
+                  .stream()
+                  .filter(p -> !lazyPeers.contains(p))
+                  .map(peer -> (Runnable) (() -> messageSender.sendMessage(MessageSender.Verb.IHAVE, peer, hash)))
+                  .collect(Collectors.toList()));
+          messageListener.accept(message);
         }
-        lazyQueue.addAll(
-            peerRepository
-                .lazyPushPeers()
-                .stream()
-                .filter(p -> !lazyPeers.contains(p))
-                .map(peer -> (Runnable) (() -> messageSender.sendMessage(MessageSender.Verb.IHAVE, peer, hash)))
-                .collect(Collectors.toList()));
       } else {
-        messageSender.sendMessage(MessageSender.Verb.PRUNE, sender, null);
-        peerRepository.moveToLazy(sender);
+        if (sender != null) {
+          messageSender.sendMessage(MessageSender.Verb.PRUNE, sender, null);
+          peerRepository.moveToLazy(sender);
+        }
       }
     }
 
@@ -99,19 +126,49 @@ public final class State {
     }
   }
 
-  public State(PeerRepository peerRepository, MessageHashing messageHashingFunction, MessageSender messageSender) {
-    this(peerRepository, messageHashingFunction, messageSender, 5000, 5000);
-  }
-
+  /**
+   * Constructor using default time constants.
+   * 
+   * @param peerRepository the peer repository to use to store and access peer information.
+   * @param messageHashingFunction the function to use to hash messages into hashes to compare them.
+   * @param messageSender a function abstracting sending messages to other peers.
+   * @param messageListener a function consuming messages when they are gossiped.
+   * @param messageValidator a function validating messages before they are gossiped to other peers.
+   */
   public State(
       PeerRepository peerRepository,
       MessageHashing messageHashingFunction,
       MessageSender messageSender,
+      Consumer<Bytes> messageListener,
+      MessageValidator messageValidator) {
+    this(peerRepository, messageHashingFunction, messageSender, messageListener, messageValidator, 5000, 5000);
+  }
+
+  /**
+   * Constructor using default time constants.
+   * 
+   * @param peerRepository the peer repository to use to store and access peer information.
+   * @param messageHashingFunction the function to use to hash messages into hashes to compare them.
+   * @param messageSender a function abstracting sending messages to other peers.
+   * @param messageListener a function consuming messages when they are gossiped.
+   * @param messageValidator a function validating messages before they are gossiped to other peers.
+   * @param graftDelay delay in milliseconds to apply before this peer grafts an other peer when it finds that peer has
+   *        data it misses.
+   * @param lazyQueueInterval the interval in milliseconds between sending messages to lazy peers.
+   */
+  public State(
+      PeerRepository peerRepository,
+      MessageHashing messageHashingFunction,
+      MessageSender messageSender,
+      Consumer<Bytes> messageListener,
+      MessageValidator messageValidator,
       long graftDelay,
       long lazyQueueInterval) {
     this.peerRepository = peerRepository;
     this.messageHashingFunction = messageHashingFunction;
     this.messageSender = messageSender;
+    this.messageListener = messageListener;
+    this.messageValidator = messageValidator;
     this.delay = graftDelay;
     timer.schedule(new TimerTask() {
       @Override
@@ -132,7 +189,7 @@ public final class State {
 
   /**
    * Removes a peer from the collection of peers we are connected to.
-   * 
+   *
    * @param peer the peer to remove
    */
   public void removePeer(Peer peer) {
@@ -141,31 +198,31 @@ public final class State {
   }
 
   /**
-   * Records a message was received in full from a peer
+   * Records a message was received in full from a peer.
    *
    * @param peer the peer that sent the message
    * @param message the hash of the message
    */
-  public void receiveFullMessage(Peer peer, Bytes message) {
+  public void receiveGossipMessage(Peer peer, Bytes message) {
     peerRepository.considerNewPeer(peer);
     MessageHandler handler = messageHandlers.computeIfAbsent(messageHashingFunction.hash(message), MessageHandler::new);
     handler.fullMessageReceived(peer, message);
   }
 
   /**
-   * Records a message was partially received from a peer
+   * Records a message was partially received from a peer.
    *
    * @param peer the peer that sent the message
    * @param messageHash the hash of the message
    */
-  public void receiveHeaderMessage(Peer peer, Bytes messageHash) {
+  public void receiveIHaveMessage(Peer peer, Bytes messageHash) {
     MessageHandler handler = messageHandlers.computeIfAbsent(messageHash, MessageHandler::new);
     handler.partialMessageReceived(peer);
   }
 
   /**
    * Requests a peer be pruned away from the eager peers into the lazy peers
-   * 
+   *
    * @param peer the peer to move to lazy peers
    */
   public void receivePruneMessage(Peer peer) {
@@ -174,13 +231,23 @@ public final class State {
 
   /**
    * Requests a peer be grafted to the eager peers list
-   * 
+   *
    * @param peer the peer to add to the eager peers
    * @param messageHash the hash of the message that triggers this grafting
    */
   public void receiveGraftMessage(Peer peer, Bytes messageHash) {
     peerRepository.moveToEager(peer);
     messageSender.sendMessage(MessageSender.Verb.GOSSIP, peer, messageHash);
+  }
+
+  /**
+   * Sends a gossip message to all peers, according to their status.
+   * 
+   * @param message the message to propagate
+   */
+  public void sendGossipMessage(Bytes message) {
+    MessageHandler handler = messageHandlers.computeIfAbsent(messageHashingFunction.hash(message), MessageHandler::new);
+    handler.fullMessageReceived(null, message);
   }
 
   void processQueue() {

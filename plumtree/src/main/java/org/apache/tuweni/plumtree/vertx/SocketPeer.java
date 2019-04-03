@@ -10,7 +10,29 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.tuweni.plumtree;
+package org.apache.tuweni.plumtree.vertx;
 
-public interface StateActor {
+import org.apache.tuweni.plumtree.Peer;
+
+import io.vertx.core.net.NetSocket;
+
+/**
+ * Vert.x gossip peer associated with a socket
+ */
+final class SocketPeer implements Peer {
+
+  private final NetSocket socket;
+
+  SocketPeer(NetSocket socket) {
+    this.socket = socket;
+  }
+
+  NetSocket socket() {
+    return socket;
+  }
+
+  @Override
+  public String toString() {
+    return socket.localAddress().toString();
+  }
 }

@@ -21,11 +21,17 @@ import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.crypto.Hash;
 import org.apache.tuweni.junit.BouncyCastleExtension;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(BouncyCastleExtension.class)
 class StateTest {
+
+  private static class PeerImpl implements Peer {
+
+  }
 
   private static class MockMessageSender implements MessageSender {
 
@@ -42,10 +48,12 @@ class StateTest {
     }
   }
 
+  private static final AtomicReference<Bytes> messageRef = new AtomicReference<>();
+
   @Test
   void testInitialState() {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
-    State state = new State(repo, Hash::keccak256, new MockMessageSender());
+    State state = new State(repo, Hash::keccak256, new MockMessageSender(), messageRef::set, (message, peer) -> true);
     assertTrue(repo.peers().isEmpty());
     assertTrue(repo.lazyPushPeers().isEmpty());
     assertTrue(repo.eagerPushPeers().isEmpty());
@@ -54,10 +62,10 @@ class StateTest {
   @Test
   void firstRoundWithThreePeers() {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
-    State state = new State(repo, Hash::keccak256, new MockMessageSender());
-    state.addPeer(new Peer());
-    state.addPeer(new Peer());
-    state.addPeer(new Peer());
+    State state = new State(repo, Hash::keccak256, new MockMessageSender(), messageRef::set, (message, peer) -> true);
+    state.addPeer(new PeerImpl());
+    state.addPeer(new PeerImpl());
+    state.addPeer(new PeerImpl());
     assertTrue(repo.lazyPushPeers().isEmpty());
     assertEquals(3, repo.eagerPushPeers().size());
   }
@@ -65,8 +73,8 @@ class StateTest {
   @Test
   void removePeer() {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
-    State state = new State(repo, Hash::keccak256, new MockMessageSender());
-    Peer peer = new Peer();
+    State state = new State(repo, Hash::keccak256, new MockMessageSender(), messageRef::set, (message, peer) -> true);
+    Peer peer = new PeerImpl();
     state.addPeer(peer);
     state.removePeer(peer);
     assertTrue(repo.peers().isEmpty());
@@ -77,8 +85,8 @@ class StateTest {
   @Test
   void prunePeer() {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
-    State state = new State(repo, Hash::keccak256, new MockMessageSender());
-    Peer peer = new Peer();
+    State state = new State(repo, Hash::keccak256, new MockMessageSender(), messageRef::set, (message, peer) -> true);
+    Peer peer = new PeerImpl();
     state.addPeer(peer);
     state.receivePruneMessage(peer);
     assertEquals(0, repo.eagerPushPeers().size());
@@ -88,8 +96,8 @@ class StateTest {
   @Test
   void graftPeer() {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
-    State state = new State(repo, Hash::keccak256, new MockMessageSender());
-    Peer peer = new Peer();
+    State state = new State(repo, Hash::keccak256, new MockMessageSender(), messageRef::set, (message, peer) -> true);
+    Peer peer = new PeerImpl();
     state.addPeer(peer);
     state.receivePruneMessage(peer);
     assertEquals(0, repo.eagerPushPeers().size());
@@ -103,13 +111,13 @@ class StateTest {
   void receiveFullMessageFromEagerPeer() {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
     MockMessageSender messageSender = new MockMessageSender();
-    State state = new State(repo, Hash::keccak256, messageSender);
-    Peer peer = new Peer();
+    State state = new State(repo, Hash::keccak256, messageSender, messageRef::set, (message, peer) -> true);
+    Peer peer = new PeerImpl();
     state.addPeer(peer);
-    Peer otherPeer = new Peer();
+    Peer otherPeer = new PeerImpl();
     state.addPeer(otherPeer);
     Bytes32 msg = Bytes32.random();
-    state.receiveFullMessage(peer, msg);
+    state.receiveGossipMessage(peer, msg);
     assertEquals(msg, messageSender.payload);
     assertEquals(otherPeer, messageSender.peer);
   }
@@ -118,16 +126,16 @@ class StateTest {
   void receiveFullMessageFromEagerPeerWithALazyPeer() {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
     MockMessageSender messageSender = new MockMessageSender();
-    State state = new State(repo, Hash::keccak256, messageSender);
-    Peer peer = new Peer();
+    State state = new State(repo, Hash::keccak256, messageSender, messageRef::set, (message, peer) -> true);
+    Peer peer = new PeerImpl();
     state.addPeer(peer);
-    Peer otherPeer = new Peer();
+    Peer otherPeer = new PeerImpl();
     state.addPeer(otherPeer);
     Bytes32 msg = Bytes32.random();
-    Peer lazyPeer = new Peer();
+    Peer lazyPeer = new PeerImpl();
     state.addPeer(lazyPeer);
     repo.moveToLazy(lazyPeer);
-    state.receiveFullMessage(peer, msg);
+    state.receiveGossipMessage(peer, msg);
     assertEquals(msg, messageSender.payload);
     assertEquals(otherPeer, messageSender.peer);
     state.processQueue();
@@ -140,15 +148,15 @@ class StateTest {
   void receiveFullMessageFromEagerPeerThenPartialMessageFromLazyPeer() {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
     MockMessageSender messageSender = new MockMessageSender();
-    State state = new State(repo, Hash::keccak256, messageSender);
-    Peer peer = new Peer();
+    State state = new State(repo, Hash::keccak256, messageSender, messageRef::set, (message, peer) -> true);
+    Peer peer = new PeerImpl();
     state.addPeer(peer);
-    Peer lazyPeer = new Peer();
+    Peer lazyPeer = new PeerImpl();
     state.addPeer(lazyPeer);
     repo.moveToLazy(lazyPeer);
     Bytes message = Bytes32.random();
-    state.receiveFullMessage(peer, message);
-    state.receiveHeaderMessage(lazyPeer, message);
+    state.receiveGossipMessage(peer, message);
+    state.receiveIHaveMessage(lazyPeer, message);
     assertNull(messageSender.payload);
     assertNull(messageSender.peer);
   }
@@ -157,14 +165,14 @@ class StateTest {
   void receivePartialMessageFromLazyPeerAndNoFullMessage() throws Exception {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
     MockMessageSender messageSender = new MockMessageSender();
-    State state = new State(repo, Hash::keccak256, messageSender, 100, 4000);
-    Peer peer = new Peer();
+    State state = new State(repo, Hash::keccak256, messageSender, messageRef::set, (message, peer) -> true, 100, 4000);
+    Peer peer = new PeerImpl();
     state.addPeer(peer);
-    Peer lazyPeer = new Peer();
+    Peer lazyPeer = new PeerImpl();
     state.addPeer(lazyPeer);
     repo.moveToLazy(lazyPeer);
     Bytes message = Bytes32.random();
-    state.receiveHeaderMessage(lazyPeer, message);
+    state.receiveIHaveMessage(lazyPeer, message);
     Thread.sleep(200);
     assertEquals(message, messageSender.payload);
     assertEquals(lazyPeer, messageSender.peer);
@@ -175,16 +183,16 @@ class StateTest {
   void receivePartialMessageFromLazyPeerAndThenFullMessage() throws Exception {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
     MockMessageSender messageSender = new MockMessageSender();
-    State state = new State(repo, Hash::keccak256, messageSender, 500, 4000);
-    Peer peer = new Peer();
+    State state = new State(repo, Hash::keccak256, messageSender, messageRef::set, (message, peer) -> true, 500, 4000);
+    Peer peer = new PeerImpl();
     state.addPeer(peer);
-    Peer lazyPeer = new Peer();
+    Peer lazyPeer = new PeerImpl();
     state.addPeer(lazyPeer);
     repo.moveToLazy(lazyPeer);
     Bytes message = Bytes32.random();
-    state.receiveHeaderMessage(lazyPeer, Hash.keccak256(message));
+    state.receiveIHaveMessage(lazyPeer, Hash.keccak256(message));
     Thread.sleep(100);
-    state.receiveFullMessage(peer, message);
+    state.receiveGossipMessage(peer, message);
     Thread.sleep(500);
     assertNull(messageSender.verb);
     assertNull(messageSender.payload);
@@ -195,10 +203,10 @@ class StateTest {
   void receiveFullMessageFromUnknownPeer() {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
     MockMessageSender messageSender = new MockMessageSender();
-    State state = new State(repo, Hash::keccak256, messageSender);
-    Peer peer = new Peer();
+    State state = new State(repo, Hash::keccak256, messageSender, messageRef::set, (message, peer) -> true);
+    Peer peer = new PeerImpl();
     Bytes message = Bytes32.random();
-    state.receiveFullMessage(peer, message);
+    state.receiveGossipMessage(peer, message);
     assertEquals(1, repo.eagerPushPeers().size());
     assertEquals(0, repo.lazyPushPeers().size());
     assertEquals(peer, repo.eagerPushPeers().iterator().next());
@@ -208,12 +216,12 @@ class StateTest {
   void prunePeerWhenReceivingTwiceTheSameFullMessage() {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
     MockMessageSender messageSender = new MockMessageSender();
-    State state = new State(repo, Hash::keccak256, messageSender);
-    Peer peer = new Peer();
-    Peer secondPeer = new Peer();
+    State state = new State(repo, Hash::keccak256, messageSender, messageRef::set, (message, peer) -> true);
+    Peer peer = new PeerImpl();
+    Peer secondPeer = new PeerImpl();
     Bytes message = Bytes32.random();
-    state.receiveFullMessage(peer, message);
-    state.receiveFullMessage(secondPeer, message);
+    state.receiveGossipMessage(peer, message);
+    state.receiveGossipMessage(secondPeer, message);
     assertEquals(1, repo.eagerPushPeers().size());
     assertEquals(1, repo.lazyPushPeers().size());
     assertNull(messageSender.payload);

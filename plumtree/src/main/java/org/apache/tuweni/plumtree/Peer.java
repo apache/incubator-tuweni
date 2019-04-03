@@ -12,5 +12,8 @@
  */
 package org.apache.tuweni.plumtree;
 
-public class Peer {
+/**
+ * A peer part of the gossip system.
+ */
+public interface Peer {
 }
