@@ -37,12 +37,14 @@ class StateTest {
 
     Verb verb;
     Peer peer;
+    Bytes hash;
     Bytes payload;
 
     @Override
-    public void sendMessage(Verb verb, Peer peer, Bytes payload) {
+    public void sendMessage(Verb verb, Peer peer, Bytes hash, Bytes payload) {
       this.verb = verb;
       this.peer = peer;
+      this.hash = hash;
       this.payload = payload;
 
     }
@@ -139,7 +141,7 @@ class StateTest {
     assertEquals(msg, messageSender.payload);
     assertEquals(otherPeer, messageSender.peer);
     state.processQueue();
-    assertEquals(Hash.keccak256(msg), messageSender.payload);
+    assertEquals(Hash.keccak256(msg), messageSender.hash);
     assertEquals(lazyPeer, messageSender.peer);
     assertEquals(MessageSender.Verb.IHAVE, messageSender.verb);
   }
@@ -174,7 +176,7 @@ class StateTest {
     Bytes message = Bytes32.random();
     state.receiveIHaveMessage(lazyPeer, message);
     Thread.sleep(200);
-    assertEquals(message, messageSender.payload);
+    assertEquals(message, messageSender.hash);
     assertEquals(lazyPeer, messageSender.peer);
     assertEquals(MessageSender.Verb.GRAFT, messageSender.verb);
   }

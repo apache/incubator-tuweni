@@ -33,7 +33,8 @@ public interface MessageSender {
    * 
    * @param verb the type of message
    * @param peer the target of the message
+   * @param hash the hash of the message
    * @param payload the bytes to send
    */
-  void sendMessage(Verb verb, Peer peer, @Nullable Bytes payload);
+  void sendMessage(Verb verb, Peer peer, Bytes hash, @Nullable Bytes payload);
 }

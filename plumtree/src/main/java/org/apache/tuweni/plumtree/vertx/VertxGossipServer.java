@@ -47,6 +47,7 @@ public final class VertxGossipServer {
   private static final class Message {
 
     public MessageSender.Verb verb;
+    public String hash;
     public String payload;
   }
   private final class SocketHandler {
@@ -135,9 +136,10 @@ public final class VertxGossipServer {
         if (res.failed()) {
           completion.completeExceptionally(res.cause());
         } else {
-          state = new State(peerRepository, messageHashing, (verb, peer, payload) -> {
+          state = new State(peerRepository, messageHashing, (verb, peer, hash, payload) -> {
             Message message = new Message();
             message.verb = verb;
+            message.hash = hash.toHexString();
             message.payload = payload == null ? null : payload.toHexString();
             try {
               ((SocketPeer) peer).socket().write(Buffer.buffer(mapper.writeValueAsBytes(message)));

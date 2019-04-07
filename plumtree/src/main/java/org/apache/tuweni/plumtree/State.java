@@ -80,7 +80,7 @@ public final class State {
         if (sender == null || messageValidator.validate(message, sender)) {
           for (Peer peer : peerRepository.eagerPushPeers()) {
             if (sender == null || !sender.equals(peer)) {
-              messageSender.sendMessage(MessageSender.Verb.GOSSIP, peer, message);
+              messageSender.sendMessage(MessageSender.Verb.GOSSIP, peer, hash, message);
             }
           }
           lazyQueue.addAll(
@@ -88,13 +88,13 @@ public final class State {
                   .lazyPushPeers()
                   .stream()
                   .filter(p -> !lazyPeers.contains(p))
-                  .map(peer -> (Runnable) (() -> messageSender.sendMessage(MessageSender.Verb.IHAVE, peer, hash)))
+                  .map(peer -> (Runnable) (() -> messageSender.sendMessage(MessageSender.Verb.IHAVE, peer, hash, null)))
                   .collect(Collectors.toList()));
           messageListener.accept(message);
         }
       } else {
         if (sender != null) {
-          messageSender.sendMessage(MessageSender.Verb.PRUNE, sender, null);
+          messageSender.sendMessage(MessageSender.Verb.PRUNE, sender, hash, null);
           peerRepository.moveToLazy(sender);
         }
       }
@@ -108,7 +108,7 @@ public final class State {
           if (newPeerIndex == lazyPeers.size()) {
             newPeerIndex = 0;
           }
-          messageSender.sendMessage(MessageSender.Verb.GRAFT, lazyPeers.get(index), hash);
+          messageSender.sendMessage(MessageSender.Verb.GRAFT, lazyPeers.get(index), hash, null);
           scheduleGraftMessage(newPeerIndex++);
         }
       };
@@ -237,7 +237,7 @@ public final class State {
    */
   public void receiveGraftMessage(Peer peer, Bytes messageHash) {
     peerRepository.moveToEager(peer);
-    messageSender.sendMessage(MessageSender.Verb.GOSSIP, peer, messageHash);
+    messageSender.sendMessage(MessageSender.Verb.GOSSIP, peer, messageHash, null);
   }
 
   /**
