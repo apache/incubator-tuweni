@@ -244,10 +244,13 @@ public final class State {
    * Sends a gossip message to all peers, according to their status.
    * 
    * @param message the message to propagate
+   * @return The associated hash of the message
    */
-  public void sendGossipMessage(Bytes message) {
-    MessageHandler handler = messageHandlers.computeIfAbsent(messageHashingFunction.hash(message), MessageHandler::new);
+  public Bytes sendGossipMessage(Bytes message) {
+    Bytes messageHash = messageHashingFunction.hash(message);
+    MessageHandler handler = messageHandlers.computeIfAbsent(messageHash, MessageHandler::new);
     handler.fullMessageReceived(null, message);
+    return messageHash;
   }
 
   void processQueue() {
