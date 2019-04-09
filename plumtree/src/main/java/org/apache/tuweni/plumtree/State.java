@@ -90,7 +90,9 @@ public final class State {
                   .filter(p -> !lazyPeers.contains(p))
                   .map(peer -> (Runnable) (() -> messageSender.sendMessage(MessageSender.Verb.IHAVE, peer, hash, null)))
                   .collect(Collectors.toList()));
-          messageListener.accept(message);
+          if (sender != null) {
+            messageListener.accept(message);
+          }
         }
       } else {
         if (sender != null) {

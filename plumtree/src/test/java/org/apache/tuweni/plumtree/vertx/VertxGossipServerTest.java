@@ -13,6 +13,7 @@
 package org.apache.tuweni.plumtree.vertx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -106,6 +107,7 @@ class VertxGossipServerTest {
     Thread.sleep(1000);
     assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.get());
     assertEquals(Bytes.fromHexString("deadbeef"), messageReceived3.get());
+    assertNull(messageReceived1.get());
 
     server1.stop().join();
     server2.stop().join();
