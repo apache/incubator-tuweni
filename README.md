@@ -1,6 +1,6 @@
 # Tuweni: Apache Core Libraries for Java (& Kotlin)
 
-[![Build Status](https://circleci.com/gh/ConsenSys/cava.svg?style=shield&circle-token=440c81af8cae3c059b516a8e375471258d7e0229)](https://circleci.com/gh/ConsenSys/cava)
+[![Build Status](https://builds.apache.org/job/Apache%20Tuweni/job/CI/badge/icon)](https://builds.apache.org/job/Apache%20Tuweni/job/CI/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/ConsenSys/cava/blob/master/LICENSE)
 [![Download](https://api.bintray.com/packages/consensys/consensys/cava/images/download.svg?version=0.6.0) ](https://bintray.com/consensys/consensys/cava/0.6.0)
 
