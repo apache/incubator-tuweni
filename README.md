@@ -1,4 +1,4 @@
-# Tuweni: ConsenSys Core Libraries for Java (& Kotlin)
+# Tuweni: Apache Core Libraries for Java (& Kotlin)
 
 [![Build Status](https://circleci.com/gh/ConsenSys/cava.svg?style=shield&circle-token=440c81af8cae3c059b516a8e375471258d7e0229)](https://circleci.com/gh/ConsenSys/cava)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/ConsenSys/cava/blob/master/LICENSE)
