@@ -2,19 +2,18 @@ import java.util.regex.Pattern
 import net.ltgt.gradle.errorprone.CheckSeverity
 
 buildscript {
-  repositories {
-    maven { url 'https://consensys.bintray.com/consensys/' }
-    jcenter()
+  repositories { jcenter() // jcenter
   }
 }
+
 plugins {
   id 'com.diffplug.gradle.spotless' version '3.16.0'
   id 'net.ltgt.errorprone' version '0.6'
   id 'io.spring.dependency-management' version '1.0.6.RELEASE'
   id 'com.github.hierynomus.license' version '0.15.0'
-  id 'com.jfrog.bintray' version '1.8.3'
   id 'org.jetbrains.kotlin.jvm' version '1.3.20'
   id 'org.jetbrains.dokka' version '0.9.17'
+  id 'maven-publish'
 }
 
 description = 'A set of libraries and other tools to aid development of blockchain and other decentralized software in Java and other JVM languages'
@@ -41,12 +40,7 @@ static String buildTag() {
   if (System.getenv('BUILD_RELEASE') == 'true') {
     return ''
   }
-  if (System.getenv('CIRCLECI')) {
-    def buildNumber = System.getenv('CIRCLE_SHA1').take(4).toUpperCase() +
-      String.format('%02X', System.getenv('CIRCLE_BUILD_NUM').toInteger() % 256, 16)
-    return '-' + buildNumber + '-snapshot'
-  }
-  return '-dev'
+  return '-SNAPSHOT'
 }
 
 
@@ -128,15 +122,6 @@ subprojects {
 
 
 //////
-// Top-level target for deploy (bintrayUpload depends on it)
-
-task deploy() {}
-
-configurations.archives.artifacts.removeAll { PublishArtifact publishArtifact ->
-  (publishArtifact.type == 'jar' && publishArtifact.name == 'tuweni')}
-
-
-//////
 // Project defaults
 
 allprojects {
@@ -145,7 +130,6 @@ allprojects {
   apply plugin: 'io.spring.dependency-management'
   apply plugin: 'jacoco'
   apply plugin: 'net.ltgt.errorprone'
-  apply plugin: 'com.jfrog.bintray'
   apply plugin: 'maven-publish'
   apply plugin: 'org.jetbrains.dokka'
   apply plugin: 'signing'
@@ -273,6 +257,10 @@ allprojects {
       attributes('Implementation-Title': baseName,
       'Implementation-Version': project.version)
     }
+    from(project.projectDir) {
+      include 'LICENSE'
+      into 'META-INF'
+    }
   }
 
   if (project.name != 'eth-reference-tests') {
@@ -291,6 +279,17 @@ allprojects {
     }
 
     publishing {
+      repositories {
+        maven {
+          credentials {
+            username System.getenv('NEXUS_USER')
+            password System.getenv('NEXUS_PASSWORD')
+          }
+          def releasesRepoUrl = "https://repository.apache.org/service/local/staging/deploy/maven2"
+          def snapshotsRepoUrl = "https://repository.apache.org/content/repositories/snapshots"
+          url = buildVersion.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+      }
       publications {
         MavenDeployment(MavenPublication) { publication ->
           if (project != rootProject) {
@@ -319,22 +318,24 @@ allprojects {
             }
             developers {
               developer {
-                name = 'Chris Leishman'
-                email = 'chris@leishman.org'
-                organization = 'Apache'
-                organizationUrl = 'https://tuweni.apache.org'
-              }
-              developer {
                 name = 'Antoine Toulme'
                 email = 'antoine@lunar-ocean.com'
                 organization = 'Apache'
                 organizationUrl = 'https://tuweni.apache.org'
               }
             }
+            issueManagement {
+              system = "jira"
+              url = "https://issues.apache.org/jira/projects/TUWENI"
+            }
           }
+
           pom.withXml {
             // use inline versions rather than pom dependency management
             asNode().remove(asNode().dependencyManagement[0])
+            if (asNode().dependencies[0]) {
+              asNode().remove(asNode().dependencies[0])
+            }
 
             def dependenciesNode = asNode().appendNode('dependencies')
             def addDependencyNode = { dep, optional ->
@@ -416,42 +417,6 @@ allprojects {
       }
       tasks.publishMavenDeploymentPublicationToMavenLocal { dependsOn project.tasks.signArchives }
     }
-
-    def artifactIdMatcher = Pattern.compile("(.*)-\\d.*")
-    bintray {
-      user = System.getenv('BINTRAY_USER')
-      key = System.getenv('BINTRAY_KEY')
-      publications = ['MavenDeployment']
-      filesSpec {
-        project.extensions.getByType(PublishingExtension).publications.all { publication ->
-          publication.getArtifacts().all {
-            def ascFile = new File(it.file.getParentFile(), it.file.getName() + '.asc')
-            if (ascFile.exists()) {
-              def matcher = artifactIdMatcher.matcher(it.file.getName())
-              matcher.find()
-              def artifactId = matcher.group(1)
-              from ascFile.getAbsolutePath()
-              into publication.groupId.replaceAll('\\.', '/') + '/' + artifactId + '/' + publication.version + '/'
-            }
-          }
-        }
-      }
-      dryRun = !(System.getenv('BINTRAY_DEPLOY') == 'true')
-      publish = true
-      pkg {
-        repo = 'consensys'
-        name = 'tuweni'
-        userOrg = 'consensys'
-        licenses = ['Apache-2.0']
-        version {
-          name = project.version
-          desc = 'Tuweni distribution'
-          released = new Date()
-          vcsTag = project.version
-        }
-      }
-    }
-    deploy.dependsOn bintrayUpload
   }
 }
 
