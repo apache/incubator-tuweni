@@ -267,9 +267,9 @@ allprojects {
 
     artifacts {
       if (project != rootProject) {
-        archives jar
         archives sourcesJar
       }
+      archives jar
       archives dokkaJar
     }
 
@@ -466,7 +466,13 @@ dependencies {
   }
 }
 
-jar { enabled = false }
+jar {
+  subprojects.each { subproject ->
+    if (subproject.name != 'eth-reference-tests') {
+      from subproject.configurations.archives.collect { it.path.endsWith('.jar') }.files.collect { zipTree(it) }
+    }
+  }
+}
 
 javadoc {
   subprojects.each {
