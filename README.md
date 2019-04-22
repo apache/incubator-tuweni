@@ -1,10 +1,10 @@
 # Tuweni: Apache Core Libraries for Java (& Kotlin)
 
 [![Build Status](https://builds.apache.org/job/Apache%20Tuweni/job/CI/badge/icon)](https://builds.apache.org/job/Apache%20Tuweni/job/CI/)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/ConsenSys/cava/blob/master/LICENSE)
-[![Download](https://api.bintray.com/packages/consensys/consensys/cava/images/download.svg?version=0.6.0) ](https://bintray.com/consensys/consensys/cava/0.6.0)
-
-In the spirit of [Google Guava](https://github.com/google/guava/), Tuweni is a set of libraries and other tools to aid development of blockchain and other decentralized software in Java and other JVM languages.
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/incubator-tuweni/blob/master/LICENSE)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.apache.tuweni/tuweni/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/org.apache.tuweni/tuweni)
+[![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/repository.apache.org/org.apache.tuweni/tuweni.svg)](https://repository.apache.org/content/repositories/snapshots/org/apache/tuweni/tuweni/)
+Tuweni is a set of libraries and other tools to aid development of blockchain and other decentralized software in Java and other JVM languages.
 
 It includes a low-level bytes library, serialization and deserialization codecs (e.g. [RLP](https://github.com/ethereum/wiki/wiki/RLP)), various cryptography functions and primatives, and lots of other helpful utilities.
 
@@ -12,9 +12,7 @@ Tuweni is developed for JDK 1.8 or higher, and depends on various other FOSS lib
 
 ## Getting tuweni
 
-> Note that these libraries are experimental and are subject to change.
-
-The libraries are published to [ConsenSys bintray repository](https://consensys.bintray.com/consensys/), synced to JCenter and Maven Central.
+The libraries are published to the [Apache Nexus Repository](https://repository.apache.org/), synced to JCenter and Maven Central.
 
 You can import all modules using the tuweni jar.
 
@@ -23,13 +21,48 @@ With Maven:
 <dependency>
   <groupId>org.apache.tuweni</groupId>
   <artifactId>tuweni</artifactId>
-  <version>0.6.0</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 
-With Gradle: `compile 'org.apache.tuweni:tuweni:0.6.0'`
+With Gradle: `compile 'org.apache.tuweni:tuweni:1.0.0'`
 
 [PACKAGES.md](PACKAGES.md) contains the list of modules and instructions to import them separately.
+
+### Getting snapshots
+
+We publish a new snapshot on every change of the master branch.
+
+Snapshots are stored under the [Apache snapshots repository](https://repository.apache.org/content/repositories/snapshots).
+
+With Maven, add this repository with:
+```xml
+ <repositories>
+    <repository>
+      <id>apache.snapshots</id>
+      <name>Apache Snapshot Repository</name>
+      <url>https://repository.apache.org/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository>
+  </repositories>
+```
+
+```xml
+<dependency>
+  <groupId>org.apache.tuweni</groupId>
+  <artifactId>tuweni</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+</dependency>
+```
+
+With gradle:
+```groovy
+maven { url "https://repository.apache.org/snapshots"}
+```
+
+`compile 'org.apache.tuweni:tuweni:1.0.0-SNAPSHOT'`
 
 ## Build Instructions
 
@@ -43,11 +76,20 @@ cd incubator-tuweni
 
 After a successful build, libraries will be available in `build/libs`.
 
-## Links
+## Contributing
 
-- [GitHub project](https://github.com/apache/incubator-tuweni)
-- [Online Kotlin documentation](https://consensys.github.io/cava/docs/kotlin/0.6.0/cava)
-- [Online Java documentation](https://consensys.github.io/cava/docs/java/0.6.0)
+Your contributions are very welcome! Here are a few links to help you:
+
 - [Issue tracker: Report a defect or feature request](https://github.com/apache/incubator-tuweni/issues/new)
-- [StackOverflow: Ask "how-to" and "why-didn't-it-work" questions](https://stackoverflow.com/questions/ask?tags=cava+java)
-- [cava-discuss: For open-ended questions and discussion](http://groups.google.com/group/cava-discuss)
+- [StackOverflow: Ask "how-to" and "why-didn't-it-work" questions](https://stackoverflow.com/questions/ask?tags=tuweni)
+
+## Mailing lists
+
+- [users@tuweni.incubator.apache.org](users@tuweni.incubator.apache.org) is for usage questions, help, and announcements. [subscribe](users-subscribe@tuweni.incubator.apache.org?subject=send%20this%20email%20to%20subscribe), [unsubscribe](dev-unsubscribe@tuweni.incubator.apache.org?subject=send%20this%20email%20to%20unsubscribe), [archives](https://www.mail-archive.com/users@tuweni.incubator.apache.org/)
+- [dev@tuweni.incubator.apache.org](dev@tuweni.incubator.apache.org) is for people who want to contribute code to Tuweni. [subscribe](dev-subscribe@tuweni.incubator.apache.org?subject=send%20this%20email%20to%20subscribe), [unsubscribe](dev-unsubscribe@tuweni.incubator.apache.org?subject=send%20this%20email%20to%20unsubscribe), [archives](https://www.mail-archive.com/dev@tuweni.incubator.apache.org/)
+- [commits@tuweni.incubator.apache.org](commits@tuweni.incubator.apache.org) is for commit messages and patches to Tuweni. [subscribe](commits-subscribe@tuweni.incubator.apache.org?subject=send%20this%20email%20to%20subscribe), [unsubscribe](commits-unsubscribe@tuweni.incubator.apache.org?subject=send%20this%20email%20to%20unsubscribe), [archives](https://www.mail-archive.com/commits@tuweni.incubator.apache.org/)
+
+## More information
+
+- [Official website](https://tuweni.apache.org)
+- [GitHub project](https://github.com/apache/incubator-tuweni)
