@@ -287,17 +287,25 @@ allprojects {
           url = isRelease ? snapshotsRepoUrl : releasesRepoUrl
 
           def settingsXml = new File(System.getProperty('user.home'), '.m2/settings.xml')
+
+          def credentialsFound = false;
           if (settingsXml.exists()) {
+            project.logger.info('Using .m2/settings.xml')
             def serverId = (project.properties['distMgmtServerId'] ?: isRelease
               ? 'apache.releases.https' : 'apache.snapshots.https')
             def m2SettingCreds = new XmlSlurper().parse(settingsXml).servers.server.find { server -> serverId.equals(server.id.text()) }
             if (m2SettingCreds) {
+              project.logger.info('Found matching credentials from .m2/settings.xml')
               credentials {
                 username m2SettingCreds.username.text()
                 password m2SettingCreds.password.text()
               }
+              credentialsFound = true
             }
-          } else {
+          }
+
+          if (!credentialsFound) {
+            project.logger.info('Reading credentials from environment')
             credentials {
               username System.getenv('NEXUS_USER')
               password System.getenv('NEXUS_PASSWORD')
