@@ -290,7 +290,7 @@ allprojects {
 
           def credentialsFound = false;
           if (settingsXml.exists()) {
-            project.logger.info('Using .m2/settings.xml')
+            project.logger.info('Reading .m2/settings.xml')
             def serverId = (project.properties['distMgmtServerId'] ?: isRelease
               ? 'apache.releases.https' : 'apache.snapshots.https')
             def m2SettingCreds = new XmlSlurper().parse(settingsXml).servers.server.find { server -> serverId.equals(server.id.text()) }
@@ -306,9 +306,12 @@ allprojects {
 
           if (!credentialsFound) {
             project.logger.info('Reading credentials from environment')
-            credentials {
-              username System.getenv('NEXUS_USER')
-              password System.getenv('NEXUS_PASSWORD')
+            credentialsFound = System.getenv('NEXUS_USER') != null
+            if (credentialsFound) {
+              credentials {
+                username asfNexusUsername ?: System.getenv('NEXUS_USER')
+                password asfNexusPassword ?: System.getenv('NEXUS_PASSWORD')
+              }
             }
           }
         }
