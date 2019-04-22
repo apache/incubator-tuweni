@@ -281,13 +281,28 @@ allprojects {
     publishing {
       repositories {
         maven {
-          credentials {
-            username System.getenv('NEXUS_USER')
-            password System.getenv('NEXUS_PASSWORD')
-          }
+          def isRelease = buildVersion.endsWith('SNAPSHOT')
           def releasesRepoUrl = "https://repository.apache.org/service/local/staging/deploy/maven2"
           def snapshotsRepoUrl = "https://repository.apache.org/content/repositories/snapshots"
-          url = buildVersion.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+          url = isRelease ? snapshotsRepoUrl : releasesRepoUrl
+
+          def settingsXml = new File(System.getProperty('user.home'), '.m2/settings.xml')
+          if (settingsXml.exists()) {
+            def serverId = (project.properties['distMgmtServerId'] ?: isRelease
+              ? 'apache.releases.https' : 'apache.snapshots.https')
+            def m2SettingCreds = new XmlSlurper().parse(settingsXml).servers.server.find { server -> serverId.equals(server.id.text()) }
+            if (m2SettingCreds) {
+              credentials {
+                username m2SettingCreds.username.text()
+                password m2SettingCreds.password.text()
+              }
+            }
+          } else {
+            credentials {
+              username System.getenv('NEXUS_USER')
+              password System.getenv('NEXUS_PASSWORD')
+            }
+          }
         }
       }
       publications {
