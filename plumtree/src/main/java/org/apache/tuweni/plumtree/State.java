@@ -71,7 +71,7 @@ public final class State {
      * @param sender the sender - may be null if we are submitting this message to the network
      * @param message the payload to send to the network
      */
-    void fullMessageReceived(@Nullable Peer sender, Bytes message) {
+    void fullMessageReceived(@Nullable Peer sender, MessageSender.Type type, Bytes message) {
       if (receivedFullMessage.compareAndSet(false, true)) {
         for (TimerTask task : tasks) {
           task.cancel();
@@ -80,7 +80,7 @@ public final class State {
         if (sender == null || messageValidator.validate(message, sender)) {
           for (Peer peer : peerRepository.eagerPushPeers()) {
             if (sender == null || !sender.equals(peer)) {
-              messageSender.sendMessage(MessageSender.Verb.GOSSIP, peer, hash, message);
+              messageSender.sendMessage(MessageSender.Verb.GOSSIP, type, peer, hash, message);
             }
           }
           lazyQueue.addAll(
@@ -88,7 +88,9 @@ public final class State {
                   .lazyPushPeers()
                   .stream()
                   .filter(p -> !lazyPeers.contains(p))
-                  .map(peer -> (Runnable) (() -> messageSender.sendMessage(MessageSender.Verb.IHAVE, peer, hash, null)))
+                  .map(
+                      peer -> (Runnable) (() -> messageSender
+                          .sendMessage(MessageSender.Verb.IHAVE, MessageSender.Type.NADA, peer, hash, null)))
                   .collect(Collectors.toList()));
           if (sender != null) {
             messageListener.accept(message);
@@ -96,7 +98,7 @@ public final class State {
         }
       } else {
         if (sender != null) {
-          messageSender.sendMessage(MessageSender.Verb.PRUNE, sender, hash, null);
+          messageSender.sendMessage(MessageSender.Verb.PRUNE, MessageSender.Type.NADA, sender, hash, null);
           peerRepository.moveToLazy(sender);
         }
       }
@@ -110,7 +112,8 @@ public final class State {
           if (newPeerIndex == lazyPeers.size()) {
             newPeerIndex = 0;
           }
-          messageSender.sendMessage(MessageSender.Verb.GRAFT, lazyPeers.get(index), hash, null);
+          messageSender
+              .sendMessage(MessageSender.Verb.GRAFT, MessageSender.Type.NADA, lazyPeers.get(index), hash, null);
           scheduleGraftMessage(newPeerIndex++);
         }
       };
@@ -203,12 +206,13 @@ public final class State {
    * Records a message was received in full from a peer.
    *
    * @param peer the peer that sent the message
+   * @param type message type of the message
    * @param message the hash of the message
    */
-  public void receiveGossipMessage(Peer peer, Bytes message) {
+  public void receiveGossipMessage(Peer peer, MessageSender.Type type, Bytes message) {
     peerRepository.considerNewPeer(peer);
     MessageHandler handler = messageHandlers.computeIfAbsent(messageHashingFunction.hash(message), MessageHandler::new);
-    handler.fullMessageReceived(peer, message);
+    handler.fullMessageReceived(peer, type, message);
   }
 
   /**
@@ -239,19 +243,20 @@ public final class State {
    */
   public void receiveGraftMessage(Peer peer, Bytes messageHash) {
     peerRepository.moveToEager(peer);
-    messageSender.sendMessage(MessageSender.Verb.GOSSIP, peer, messageHash, null);
+    messageSender.sendMessage(MessageSender.Verb.GOSSIP, MessageSender.Type.NADA, peer, messageHash, null);
   }
 
   /**
    * Sends a gossip message to all peers, according to their status.
    * 
    * @param message the message to propagate
+   * @param type message type of the message
    * @return The associated hash of the message
    */
-  public Bytes sendGossipMessage(Bytes message) {
+  public Bytes sendGossipMessage(MessageSender.Type type, Bytes message) {
     Bytes messageHash = messageHashingFunction.hash(message);
     MessageHandler handler = messageHandlers.computeIfAbsent(messageHash, MessageHandler::new);
-    handler.fullMessageReceived(null, message);
+    handler.fullMessageReceived(null, type, message);
     return messageHash;
   }
 

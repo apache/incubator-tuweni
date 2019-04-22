@@ -20,6 +20,7 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.junit.VertxExtension;
 import org.apache.tuweni.junit.VertxInstance;
 import org.apache.tuweni.plumtree.EphemeralPeerRepository;
+import org.apache.tuweni.plumtree.MessageSender;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -57,7 +58,7 @@ class VertxGossipServerTest {
     server2.start().join();
 
     server1.connectTo("127.0.0.1", 10001).join();
-    server1.gossip(Bytes.fromHexString("deadbeef"));
+    server1.gossip(MessageSender.Type.BLOCK, Bytes.fromHexString("deadbeef"));
     Thread.sleep(1000);
     assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.get());
 
@@ -103,7 +104,7 @@ class VertxGossipServerTest {
 
     server1.connectTo("127.0.0.1", 10001).join();
     server3.connectTo("127.0.0.1", 10001).join();
-    server1.gossip(Bytes.fromHexString("deadbeef"));
+    server1.gossip(MessageSender.Type.BLOCK, Bytes.fromHexString("deadbeef"));
     Thread.sleep(1000);
     assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.get());
     assertEquals(Bytes.fromHexString("deadbeef"), messageReceived3.get());
@@ -153,7 +154,7 @@ class VertxGossipServerTest {
     server1.connectTo("127.0.0.1", 10001).join();
     server2.connectTo("127.0.0.1", 10002).join();
     server1.connectTo("127.0.0.1", 10002).join();
-    server1.gossip(Bytes.fromHexString("deadbeef"));
+    server1.gossip(MessageSender.Type.BLOCK, Bytes.fromHexString("deadbeef"));
     Thread.sleep(1000);
     assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.get());
     Thread.sleep(1000);

@@ -36,13 +36,15 @@ class StateTest {
   private static class MockMessageSender implements MessageSender {
 
     Verb verb;
+    Type type;
     Peer peer;
     Bytes hash;
     Bytes payload;
 
     @Override
-    public void sendMessage(Verb verb, Peer peer, Bytes hash, Bytes payload) {
+    public void sendMessage(Verb verb, Type type, Peer peer, Bytes hash, Bytes payload) {
       this.verb = verb;
+      this.type = type;
       this.peer = peer;
       this.hash = hash;
       this.payload = payload;
@@ -70,6 +72,25 @@ class StateTest {
     state.addPeer(new PeerImpl());
     assertTrue(repo.lazyPushPeers().isEmpty());
     assertEquals(3, repo.eagerPushPeers().size());
+  }
+
+  @Test
+  void firstRoundWithTwoPeers() {
+    EphemeralPeerRepository repo = new EphemeralPeerRepository();
+    State state = new State(repo, Hash::keccak256, new MockMessageSender(), messageRef::set, (message, peer) -> true);
+    state.addPeer(new PeerImpl());
+    state.addPeer(new PeerImpl());
+    assertTrue(repo.lazyPushPeers().isEmpty());
+    assertEquals(2, repo.eagerPushPeers().size());
+  }
+
+  @Test
+  void firstRoundWithOnePeer() {
+    EphemeralPeerRepository repo = new EphemeralPeerRepository();
+    State state = new State(repo, Hash::keccak256, new MockMessageSender(), messageRef::set, (message, peer) -> true);
+    state.addPeer(new PeerImpl());
+    assertTrue(repo.lazyPushPeers().isEmpty());
+    assertEquals(1, repo.eagerPushPeers().size());
   }
 
   @Test
@@ -119,7 +140,7 @@ class StateTest {
     Peer otherPeer = new PeerImpl();
     state.addPeer(otherPeer);
     Bytes32 msg = Bytes32.random();
-    state.receiveGossipMessage(peer, msg);
+    state.receiveGossipMessage(peer, MessageSender.Type.BLOCK, msg);
     assertEquals(msg, messageSender.payload);
     assertEquals(otherPeer, messageSender.peer);
   }
@@ -137,7 +158,7 @@ class StateTest {
     Peer lazyPeer = new PeerImpl();
     state.addPeer(lazyPeer);
     repo.moveToLazy(lazyPeer);
-    state.receiveGossipMessage(peer, msg);
+    state.receiveGossipMessage(peer, MessageSender.Type.BLOCK, msg);
     assertEquals(msg, messageSender.payload);
     assertEquals(otherPeer, messageSender.peer);
     state.processQueue();
@@ -157,7 +178,7 @@ class StateTest {
     state.addPeer(lazyPeer);
     repo.moveToLazy(lazyPeer);
     Bytes message = Bytes32.random();
-    state.receiveGossipMessage(peer, message);
+    state.receiveGossipMessage(peer, MessageSender.Type.BLOCK, message);
     state.receiveIHaveMessage(lazyPeer, message);
     assertNull(messageSender.payload);
     assertNull(messageSender.peer);
@@ -194,7 +215,7 @@ class StateTest {
     Bytes message = Bytes32.random();
     state.receiveIHaveMessage(lazyPeer, Hash.keccak256(message));
     Thread.sleep(100);
-    state.receiveGossipMessage(peer, message);
+    state.receiveGossipMessage(peer, MessageSender.Type.BLOCK, message);
     Thread.sleep(500);
     assertNull(messageSender.verb);
     assertNull(messageSender.payload);
@@ -208,7 +229,7 @@ class StateTest {
     State state = new State(repo, Hash::keccak256, messageSender, messageRef::set, (message, peer) -> true);
     Peer peer = new PeerImpl();
     Bytes message = Bytes32.random();
-    state.receiveGossipMessage(peer, message);
+    state.receiveGossipMessage(peer, MessageSender.Type.BLOCK, message);
     assertEquals(1, repo.eagerPushPeers().size());
     assertEquals(0, repo.lazyPushPeers().size());
     assertEquals(peer, repo.eagerPushPeers().iterator().next());
@@ -222,8 +243,8 @@ class StateTest {
     Peer peer = new PeerImpl();
     Peer secondPeer = new PeerImpl();
     Bytes message = Bytes32.random();
-    state.receiveGossipMessage(peer, message);
-    state.receiveGossipMessage(secondPeer, message);
+    state.receiveGossipMessage(peer, MessageSender.Type.BLOCK, message);
+    state.receiveGossipMessage(secondPeer, MessageSender.Type.BLOCK, message);
     assertEquals(1, repo.eagerPushPeers().size());
     assertEquals(1, repo.lazyPushPeers().size());
     assertNull(messageSender.payload);

@@ -47,6 +47,7 @@ public final class VertxGossipServer {
   private static final class Message {
 
     public MessageSender.Verb verb;
+    public MessageSender.Type type;
     public String hash;
     public String payload;
   }
@@ -77,7 +78,7 @@ public final class VertxGossipServer {
           state.receiveIHaveMessage(peer, Bytes.fromHexString(message.payload));
           break;
         case GOSSIP:
-          state.receiveGossipMessage(peer, Bytes.fromHexString(message.payload));
+          state.receiveGossipMessage(peer, message.type, Bytes.fromHexString(message.payload));
           break;
         case GRAFT:
           state.receiveGraftMessage(peer, Bytes.fromHexString(message.payload));
@@ -136,9 +137,10 @@ public final class VertxGossipServer {
         if (res.failed()) {
           completion.completeExceptionally(res.cause());
         } else {
-          state = new State(peerRepository, messageHashing, (verb, peer, hash, payload) -> {
+          state = new State(peerRepository, messageHashing, (verb, type, peer, hash, payload) -> {
             Message message = new Message();
             message.verb = verb;
+            message.type = type;
             message.hash = hash.toHexString();
             message.payload = payload == null ? null : payload.toHexString();
             try {
@@ -201,10 +203,10 @@ public final class VertxGossipServer {
    *
    * @param message the payload to propagate
    */
-  public void gossip(Bytes message) {
+  public void gossip(MessageSender.Type type, Bytes message) {
     if (!started.get()) {
       throw new IllegalStateException("Server has not started");
     }
-    state.sendGossipMessage(message);
+    state.sendGossipMessage(type, message);
   }
 }
