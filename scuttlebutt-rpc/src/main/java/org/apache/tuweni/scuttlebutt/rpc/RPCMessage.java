@@ -19,13 +19,12 @@ import org.apache.tuweni.bytes.Bytes;
 import java.io.IOException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Optional;
 
 /**
  * Decoded RPC message, making elements of the message available directly.
  */
 public final class RPCMessage {
-
-  private static final ObjectMapper mapper = new ObjectMapper();
 
   private final byte rpcFlags;
   private final boolean stream;
@@ -82,6 +81,40 @@ public final class RPCMessage {
   }
 
   /**
+   *
+   * @return true if this is a last message in a stream, and it is not an error
+   */
+  public boolean isSuccessfulLastMessage() {
+    return lastMessageOrError() && asString().equals("true");
+  }
+
+  /**
+   *
+   * @return true if this is an error message response
+   */
+  public boolean isErrorMessage() {
+    return lastMessageOrError && !isSuccessfulLastMessage();
+  }
+
+  /**
+   * @param objectMapper the object mapper to deserialize with
+   * @return the RPC error response body, if this is an error response - nothing otherwise
+   */
+  public Optional<RPCErrorBody> getErrorBody(ObjectMapper objectMapper) {
+
+    if (!isErrorMessage()) {
+      // If the body of the response is 'true' or the error flag isn't set, it's a successful end condition
+      return Optional.absent();
+    } else {
+      try {
+        return Optional.of(asJSON(objectMapper, RPCErrorBody.class));
+      } catch (IOException e) {
+        return Optional.absent();
+      }
+    }
+  }
+
+  /**
    * Provides the type of the body of the message: a binary message, a UTF-8 string or a JSON message.
    * 
    * @return the type of the body: a binary message, a UTF-8 string or a JSON message
@@ -128,13 +161,14 @@ public final class RPCMessage {
 
   /**
    * Provides the body of the message, marshalled as a JSON object.
-   * 
+   *
+   * @param objectMapper the object mapper to deserialize with
    * @param clazz the JSON object class
    * @param <T> the matching JSON object class
    * @return a new instance of the JSON object class
    * @throws IOException if an error occurs during marshalling
    */
-  public <T> T asJSON(Class<T> clazz) throws IOException {
-    return mapper.readerFor(clazz).readValue(body().toArrayUnsafe());
+  public <T> T asJSON(ObjectMapper objectMapper, Class<T> clazz) throws IOException {
+    return objectMapper.readerFor(clazz).readValue(body().toArrayUnsafe());
   }
 }

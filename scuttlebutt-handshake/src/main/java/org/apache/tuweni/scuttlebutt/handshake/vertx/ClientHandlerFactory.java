@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 /**
  * Factory creating stream handlers, managing client-side connections.
  */
-public interface ClientHandlerFactory {
+public interface ClientHandlerFactory<T extends ClientHandler> {
 
   /**
    * Creates a new handler associated with a valid streaming connection.
@@ -27,5 +27,5 @@ public interface ClientHandlerFactory {
    * @param sender the function to send bytes to the server
    * @param terminationFunction a function to terminate the stream properly
    */
-  ClientHandler createHandler(Consumer<Bytes> sender, Runnable terminationFunction);
+  T createHandler(Consumer<Bytes> sender, Runnable terminationFunction);
 }

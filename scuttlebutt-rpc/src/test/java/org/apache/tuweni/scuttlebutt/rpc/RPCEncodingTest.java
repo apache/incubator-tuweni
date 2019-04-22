@@ -21,6 +21,7 @@ import org.apache.tuweni.bytes.Bytes;
 
 import java.nio.charset.StandardCharsets;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 class RPCEncodingTest {
@@ -44,7 +45,7 @@ class RPCEncodingTest {
         RPCFlag.Stream.STREAM);
     RPCMessage decoded = new RPCMessage(message);
     assertTrue(decoded.stream());
-    assertEquals("some JSON string", decoded.asJSON(String.class));
+    assertEquals("some JSON string", decoded.asJSON(new ObjectMapper(), String.class));
     assertEquals(RPCFlag.BodyType.JSON, decoded.bodyType());
     assertEquals(RPCCodec.counter.get() - 1, decoded.requestNumber());
   }

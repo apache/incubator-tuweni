@@ -188,4 +188,5 @@ class PatchworkIntegrationTest {
 
     secureScuttlebuttVertxClient.stop().join();
   }
+
 }

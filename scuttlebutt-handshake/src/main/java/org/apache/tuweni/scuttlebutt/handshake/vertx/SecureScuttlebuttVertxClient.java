@@ -39,16 +39,16 @@ import org.logl.LoggerProvider;
  */
 public final class SecureScuttlebuttVertxClient {
 
-  private class NetSocketClientHandler {
+  private class NetSocketClientHandler<T extends ClientHandler> {
 
     private final Logger logger;
     private final NetSocket socket;
     private final SecureScuttlebuttHandshakeClient handshakeClient;
-    private final ClientHandlerFactory handlerFactory;
-    private final CompletableAsyncResult<ClientHandler> completionHandle;
+    private final ClientHandlerFactory<T> handlerFactory;
+    private final CompletableAsyncResult<T> completionHandle;
     private int handshakeCounter;
     private SecureScuttlebuttStreamClient client;
-    private ClientHandler handler;
+    private T handler;
 
     private Bytes messageBuffer = Bytes.EMPTY;
 
@@ -56,8 +56,8 @@ public final class SecureScuttlebuttVertxClient {
         Logger logger,
         NetSocket socket,
         Signature.PublicKey remotePublicKey,
-        ClientHandlerFactory handlerFactory,
-        CompletableAsyncResult<ClientHandler> completionHandle) {
+        ClientHandlerFactory<T> handlerFactory,
+        CompletableAsyncResult<T> completionHandle) {
       this.logger = logger;
       this.socket = socket;
       this.handshakeClient = SecureScuttlebuttHandshakeClient.create(keyPair, networkIdentifier, remotePublicKey);
@@ -182,19 +182,19 @@ public final class SecureScuttlebuttVertxClient {
    * @param handlerFactory the factory of handlers for connections
    * @return a handle to a new stream handler with the remote host
    */
-  public AsyncResult<ClientHandler> connectTo(
+  public <T extends ClientHandler> AsyncResult<T> connectTo(
       int port,
       String host,
       Signature.PublicKey remotePublicKey,
-      ClientHandlerFactory handlerFactory) {
+      ClientHandlerFactory<T> handlerFactory) {
     client = vertx.createNetClient(new NetClientOptions().setTcpKeepAlive(true));
-    CompletableAsyncResult<ClientHandler> completion = AsyncResult.incomplete();
+    CompletableAsyncResult<T> completion = AsyncResult.incomplete();
     client.connect(port, host, res -> {
       if (res.failed()) {
         completion.completeExceptionally(res.cause());
       } else {
         NetSocket socket = res.result();
-        new NetSocketClientHandler(
+        new NetSocketClientHandler<T>(
             loggerProvider.getLogger(host + ":" + port),
             socket,
             remotePublicKey,

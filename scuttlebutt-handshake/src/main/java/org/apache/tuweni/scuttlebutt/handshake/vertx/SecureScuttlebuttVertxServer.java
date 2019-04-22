@@ -113,8 +113,8 @@ public final class SecureScuttlebuttVertxServer {
           }
         }
       } catch (HandshakeException | StreamException e) {
-        e.printStackTrace();
         netSocket.close();
+        throw e;
       }
     }
   }

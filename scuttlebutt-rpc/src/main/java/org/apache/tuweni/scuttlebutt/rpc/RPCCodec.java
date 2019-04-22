@@ -18,6 +18,9 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Encoder responsible for encoding requests.
  * <p>
@@ -26,6 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class RPCCodec {
 
   static final AtomicInteger counter = new AtomicInteger(1);
+
+  private static ObjectMapper mapper = new ObjectMapper();
 
   private static int nextRequestNumber() {
     int requestNumber = counter.getAndIncrement();
@@ -82,6 +87,19 @@ public final class RPCCodec {
   }
 
   /**
+   * Encode a message as an RPC request.
+   *
+   * @param body the body to encode as an RPC request
+   * @param requestNumber the request number
+   * @param flags the flags of the RPC request (already encoded.)
+   * @return the message encoded as an RPC request
+   */
+  public static Bytes encodeRequest(Bytes body, int requestNumber, byte flags) {
+    return Bytes
+        .concatenate(Bytes.of(flags), Bytes.ofUnsignedInt(body.size()), Bytes.ofUnsignedInt(requestNumber), body);
+  }
+
+  /**
    * Encode a message as a response to a RPC request.
    * 
    * @param body the body to encode as the body of the response
@@ -114,6 +132,18 @@ public final class RPCCodec {
       flagByte = flag.apply(flagByte);
     }
     return encodeResponse(body, requestNumber, flagByte);
+  }
+
+  /**
+   * Encodes a message with the body and headers set in the appropriate way to end a stream.
+   *
+   * @return the response encoded as an RPC request
+   * @throws JsonProcessingException
+   */
+  public static Bytes encodeStreamEndRequest(int requestNumber) throws JsonProcessingException {
+    Boolean bool = Boolean.TRUE;
+    byte[] bytes = mapper.writeValueAsBytes(bool);
+    return encodeRequest(Bytes.wrap(bytes), requestNumber, RPCFlag.EndOrError.END);
   }
 
   /**
