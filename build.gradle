@@ -306,10 +306,10 @@ allprojects {
 
           if (!credentialsFound) {
             project.logger.info('Reading credentials from environment')
-            project.logger.info('Username ' + project.findProperty('asfNexusUsername') ?: System.getenv('NEXUS_USER'))
+            project.logger.info('Username ' + asfNexusUsername)
             credentials {
-              username project.findProperty('asfNexusUsername') ?: System.getenv('NEXUS_USER')
-              password project.findProperty('asfNexusPassword') ?: System.getenv('NEXUS_PASSWORD')
+              username asfNexusUsername
+              password asfNexusPassword
             }
           }
         }
