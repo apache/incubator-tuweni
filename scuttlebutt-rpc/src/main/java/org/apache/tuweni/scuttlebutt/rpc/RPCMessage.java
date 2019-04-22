@@ -15,11 +15,12 @@ package org.apache.tuweni.scuttlebutt.rpc;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.scuttlebutt.rpc.mux.exceptions.RPCRequestFailedException;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
 
 /**
  * Decoded RPC message, making elements of the message available directly.
@@ -104,13 +105,37 @@ public final class RPCMessage {
 
     if (!isErrorMessage()) {
       // If the body of the response is 'true' or the error flag isn't set, it's a successful end condition
-      return Optional.absent();
+      return Optional.empty();
     } else {
       try {
         return Optional.of(asJSON(objectMapper, RPCErrorBody.class));
       } catch (IOException e) {
-        return Optional.absent();
+        return Optional.empty();
       }
+    }
+  }
+
+  /**
+   *
+   * @param objectMapper the objectmatter to deserialize the error with.
+   *
+   * @return an exception if this represents an error RPC response, otherwise nothing
+   */
+  public Optional<RPCRequestFailedException> getException(ObjectMapper objectMapper) {
+    if (isErrorMessage()) {
+      Optional<RPCRequestFailedException> exception =
+          getErrorBody(objectMapper).map(errorBody -> new RPCRequestFailedException(errorBody.getMessage()));
+
+      if (!exception.isPresent()) {
+        // If we failed to deserialize into the RPCErrorBody type there may be a bug in the server implementation
+        // which prevented it returning the correct type, so we just print whatever it returned
+        return Optional.of(new RPCRequestFailedException(this.asString()));
+      } else {
+        return exception;
+      }
+
+    } else {
+      return Optional.empty();
     }
   }
 

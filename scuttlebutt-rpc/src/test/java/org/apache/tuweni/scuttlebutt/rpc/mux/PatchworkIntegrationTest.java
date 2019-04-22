@@ -1,8 +1,8 @@
 /*
- * Copyright 2019 ConsenSys AG.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
+ * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
+ * to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.scuttlebutt.rpc.mux;
+package org.apache.tuweni.scuttlebutt.rpc.mux;
 
 /*
  * Copyright 2019 ConsenSys AG.
@@ -26,22 +26,20 @@ package net.consensys.cava.scuttlebutt.rpc.mux;
  */
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.bytes.Bytes32;
-import net.consensys.cava.concurrent.AsyncResult;
-import net.consensys.cava.concurrent.CompletableAsyncResult;
-import net.consensys.cava.crypto.sodium.Signature;
-import net.consensys.cava.io.Base64;
-import net.consensys.cava.junit.VertxExtension;
-import net.consensys.cava.junit.VertxInstance;
-import net.consensys.cava.scuttlebutt.handshake.vertx.SecureScuttlebuttVertxClient;
-import net.consensys.cava.scuttlebutt.rpc.RPCAsyncRequest;
-import net.consensys.cava.scuttlebutt.rpc.RPCFunction;
-import net.consensys.cava.scuttlebutt.rpc.RPCMessage;
-import net.consensys.cava.scuttlebutt.rpc.RPCStreamRequest;
-import net.consensys.cava.scuttlebutt.rpc.mux.exceptions.ConnectionClosedException;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
+import org.apache.tuweni.concurrent.AsyncResult;
+import org.apache.tuweni.concurrent.CompletableAsyncResult;
+import org.apache.tuweni.crypto.sodium.Signature;
+import org.apache.tuweni.io.Base64;
+import org.apache.tuweni.junit.VertxExtension;
+import org.apache.tuweni.junit.VertxInstance;
+import org.apache.tuweni.scuttlebutt.handshake.vertx.SecureScuttlebuttVertxClient;
+import org.apache.tuweni.scuttlebutt.rpc.RPCAsyncRequest;
+import org.apache.tuweni.scuttlebutt.rpc.RPCFunction;
+import org.apache.tuweni.scuttlebutt.rpc.RPCResponse;
+import org.apache.tuweni.scuttlebutt.rpc.RPCStreamRequest;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -78,27 +76,21 @@ public class PatchworkIntegrationTest {
 
     RPCHandler rpcHandler = makeRPCHandler(vertx);
 
-    List<AsyncResult<RPCMessage>> results = new ArrayList<>();
+    List<AsyncResult<RPCResponse>> results = new ArrayList<>();
 
     for (int i = 0; i < 10; i++) {
       RPCFunction function = new RPCFunction("whoami");
       RPCAsyncRequest asyncRequest = new RPCAsyncRequest(function, new ArrayList<>());
 
-      AsyncResult<RPCMessage> res = rpcHandler.makeAsyncRequest(asyncRequest);
+      AsyncResult<RPCResponse> res = rpcHandler.makeAsyncRequest(asyncRequest);
 
       results.add(res);
     }
 
-    AsyncResult<List<RPCMessage>> allResults = AsyncResult.combine(results);
-    List<RPCMessage> rpcMessages = allResults.get();
+    AsyncResult<List<RPCResponse>> allResults = AsyncResult.combine(results);
+    List<RPCResponse> rpcMessages = allResults.get();
 
     assertEquals(10, rpcMessages.size());
-
-    rpcMessages.forEach(msg -> {
-      assertFalse(msg.lastMessageOrError());
-
-    });
-
   }
 
 
@@ -158,7 +150,7 @@ public class PatchworkIntegrationTest {
     RPCHandler rpcHandler = makeRPCHandler(vertx);
 
 
-    List<AsyncResult<RPCMessage>> results = new ArrayList<>();
+    List<AsyncResult<RPCResponse>> results = new ArrayList<>();
 
     for (int i = 0; i < 20; i++) {
       // Note: in a real use case, this would more likely be a Java class with these fields
@@ -168,13 +160,13 @@ public class PatchworkIntegrationTest {
 
       RPCAsyncRequest asyncRequest = new RPCAsyncRequest(new RPCFunction("publish"), Arrays.asList(params));
 
-      AsyncResult<RPCMessage> rpcMessageAsyncResult = rpcHandler.makeAsyncRequest(asyncRequest);
+      AsyncResult<RPCResponse> rpcMessageAsyncResult = rpcHandler.makeAsyncRequest(asyncRequest);
 
       results.add(rpcMessageAsyncResult);
 
     }
 
-    List<RPCMessage> rpcMessages = AsyncResult.combine(results).get();
+    List<RPCResponse> rpcMessages = AsyncResult.combine(results).get();
 
     rpcMessages.forEach(msg -> System.out.println(msg.asString()));
   }
@@ -196,7 +188,7 @@ public class PatchworkIntegrationTest {
     AsyncResult<RPCHandler> onConnect =
         secureScuttlebuttVertxClient.connectTo(port, host, keyPair.publicKey(), (sender, terminationFn) -> {
 
-          return new RPCHandler(sender, terminationFn, new ObjectMapper(), loggerProvider);
+          return new RPCHandler(vertx, sender, terminationFn, new ObjectMapper(), loggerProvider);
         });
 
     return onConnect.get();
@@ -219,26 +211,23 @@ public class PatchworkIntegrationTest {
 
     RPCStreamRequest streamRequest = new RPCStreamRequest(new RPCFunction("createUserStream"), Arrays.asList(params));
 
-    try {
-      handler.openStream(streamRequest, (closeStream) -> new ScuttlebuttStreamHandler() {
-        @Override
-        public void onMessage(RPCMessage message) {
-          System.out.print(message.asString());
-        }
+    handler.openStream(streamRequest, (closeStream) -> new ScuttlebuttStreamHandler() {
+      @Override
+      public void onMessage(RPCResponse message) {
+        System.out.print(message.asString());
+      }
 
-        @Override
-        public void onStreamEnd() {
-          streamEnded.complete(null);
-        }
+      @Override
+      public void onStreamEnd() {
+        streamEnded.complete(null);
+      }
 
-        @Override
-        public void onStreamError(Exception ex) {
+      @Override
+      public void onStreamError(Exception ex) {
 
-        }
-      });
-    } catch (ConnectionClosedException e) {
-      throw e;
-    }
+        streamEnded.completeExceptionally(ex);
+      }
+    });
 
     // Wait until the stream is complete
     streamEnded.get();

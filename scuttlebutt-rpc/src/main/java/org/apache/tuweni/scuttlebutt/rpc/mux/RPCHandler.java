@@ -1,8 +1,8 @@
 /*
- * Copyright 2019 ConsenSys AG.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
+ * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
+ * to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -10,41 +10,36 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package net.consensys.cava.scuttlebutt.rpc.mux;
+package org.apache.tuweni.scuttlebutt.rpc.mux;
 
-import net.consensys.cava.bytes.Bytes;
-import net.consensys.cava.concurrent.AsyncResult;
-import net.consensys.cava.concurrent.CompletableAsyncResult;
-import net.consensys.cava.scuttlebutt.handshake.vertx.ClientHandler;
-import net.consensys.cava.scuttlebutt.rpc.RPCAsyncRequest;
-import net.consensys.cava.scuttlebutt.rpc.RPCCodec;
-import net.consensys.cava.scuttlebutt.rpc.RPCErrorBody;
-import net.consensys.cava.scuttlebutt.rpc.RPCFlag;
-import net.consensys.cava.scuttlebutt.rpc.RPCMessage;
-import net.consensys.cava.scuttlebutt.rpc.RPCStreamRequest;
-import net.consensys.cava.scuttlebutt.rpc.mux.exceptions.ConnectionClosedException;
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.concurrent.AsyncResult;
+import org.apache.tuweni.concurrent.CompletableAsyncResult;
+import org.apache.tuweni.scuttlebutt.handshake.vertx.ClientHandler;
+import org.apache.tuweni.scuttlebutt.rpc.RPCAsyncRequest;
+import org.apache.tuweni.scuttlebutt.rpc.RPCCodec;
+import org.apache.tuweni.scuttlebutt.rpc.RPCFlag;
+import org.apache.tuweni.scuttlebutt.rpc.RPCMessage;
+import org.apache.tuweni.scuttlebutt.rpc.RPCResponse;
+import org.apache.tuweni.scuttlebutt.rpc.RPCStreamRequest;
+import org.apache.tuweni.scuttlebutt.rpc.mux.exceptions.ConnectionClosedException;
+import org.apache.tuweni.scuttlebutt.rpc.mux.exceptions.RPCRequestFailedException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import org.logl.Logger;
 import org.logl.LoggerProvider;
 
 /**
- * Handles RPC requests and responses from an active connection to a scuttlebutt node
- *
- * Note: the public methods on this class are synchronized so that a request is rejected if the connection has been
- * closed before it begins and any 'in flight' requests are ended exceptionally with a 'connection closed' error without
- * new incoming requests being added to the maps by threads.
- *
- * In the future,we could perhaps be carefully more fine grained about the locking if we require a high degree of
- * concurrency.
- *
+ * Handles RPC requests and responses from an active connection to a scuttlebutt node.
  */
 public class RPCHandler implements Multiplexer, ClientHandler {
 
@@ -53,7 +48,13 @@ public class RPCHandler implements Multiplexer, ClientHandler {
   private final Runnable connectionCloser;
   private final ObjectMapper objectMapper;
 
-  private Map<Integer, CompletableAsyncResult<RPCMessage>> awaitingAsyncResponse = new HashMap<>();
+  /**
+   * We run each each update on the vertx event loop to update the request state synchronously, and to handle the
+   * underlying connection closing by failing the in progress requests and not accepting future requests
+   */
+  private final Vertx vertx;
+
+  private Map<Integer, CompletableAsyncResult<RPCResponse>> awaitingAsyncResponse = new HashMap<>();
   private Map<Integer, ScuttlebuttStreamHandler> streams = new HashMap<>();
 
   private boolean closed;
@@ -61,16 +62,19 @@ public class RPCHandler implements Multiplexer, ClientHandler {
   /**
    * Makes RPC requests over a connection
    *
+   * @param vertx The vertx instance to queue requests with
    * @param messageSender sends the request to the node
    * @param terminationFn closes the connection
    * @param objectMapper the objectMapper to serialize and deserialize message request and response bodies
    * @param logger
    */
   public RPCHandler(
+      Vertx vertx,
       Consumer<Bytes> messageSender,
       Runnable terminationFn,
       ObjectMapper objectMapper,
       LoggerProvider logger) {
+    this.vertx = vertx;
     this.messageSender = messageSender;
     this.connectionCloser = terminationFn;
     this.closed = false;
@@ -80,86 +84,116 @@ public class RPCHandler implements Multiplexer, ClientHandler {
   }
 
   @Override
-  public synchronized AsyncResult<RPCMessage> makeAsyncRequest(RPCAsyncRequest request) {
+  public AsyncResult<RPCResponse> makeAsyncRequest(RPCAsyncRequest request) throws JsonProcessingException {
 
-    CompletableAsyncResult<RPCMessage> result = AsyncResult.incomplete();
+    Bytes bodyBytes = request.toEncodedRpcMessage(objectMapper);
 
-    if (closed) {
-      result.completeExceptionally(new ConnectionClosedException());
-    }
+    CompletableAsyncResult<RPCResponse> result = AsyncResult.incomplete();
 
-    try {
-      RPCMessage message = new RPCMessage(request.toEncodedRpcMessage(objectMapper));
-      int requestNumber = message.requestNumber();
-      awaitingAsyncResponse.put(requestNumber, result);
-      Bytes bytes = RPCCodec.encodeRequest(message.body(), requestNumber, request.getRPCFlags());
-      messageSender.accept(bytes);
+    Handler<Void> synchronizedAddRequest = (event) -> {
+      if (closed) {
+        result.completeExceptionally(new ConnectionClosedException());
+      } else {
+        RPCMessage message = new RPCMessage(bodyBytes);
+        int requestNumber = message.requestNumber();
 
-    } catch (JsonProcessingException e) {
-      result.completeExceptionally(e);
-    }
+        awaitingAsyncResponse.put(requestNumber, result);
+        Bytes bytes = RPCCodec.encodeRequest(message.body(), requestNumber, request.getRPCFlags());
+        sendBytes(bytes);
+      }
+    };
 
+    vertx.runOnContext(synchronizedAddRequest);
     return result;
   }
 
   @Override
-  public synchronized void openStream(
-      RPCStreamRequest request,
-      Function<Runnable, ScuttlebuttStreamHandler> responseSink) throws JsonProcessingException,
-      ConnectionClosedException {
+  public void openStream(RPCStreamRequest request, Function<Runnable, ScuttlebuttStreamHandler> responseSink)
+      throws JsonProcessingException {
 
-    if (closed) {
-      throw new ConnectionClosedException();
-    }
+    Bytes bodyBytes = request.toEncodedRpcMessage(objectMapper);
 
-    try {
+    Handler<Void> synchronizedRequest = (event) -> {
+
       RPCFlag[] rpcFlags = request.getRPCFlags();
-      RPCMessage message = new RPCMessage(request.toEncodedRpcMessage(objectMapper));
+      RPCMessage message = new RPCMessage(bodyBytes);
       int requestNumber = message.requestNumber();
 
-      Bytes bytes = RPCCodec.encodeRequest(message.body(), requestNumber, rpcFlags);
-      messageSender.accept(bytes);
+      Bytes requestBytes = RPCCodec.encodeRequest(message.body(), requestNumber, rpcFlags);
 
-      Runnable closeStreamHandler = new Runnable() {
-        @Override
-        public void run() {
+      Runnable closeStreamHandler = () -> {
 
-          try {
-            Bytes bytes = RPCCodec.encodeStreamEndRequest(requestNumber);
-            messageSender.accept(bytes);
-          } catch (JsonProcessingException e) {
-            logger.warn("Unexpectedly could not encode stream end message to JSON.");
-          }
-
+        try {
+          Bytes streamEnd = RPCCodec.encodeStreamEndRequest(requestNumber);
+          sendBytes(streamEnd);
+        } catch (JsonProcessingException e) {
+          logger.warn("Unexpectedly could not encode stream end message to JSON.");
         }
+
       };
 
       ScuttlebuttStreamHandler scuttlebuttStreamHandler = responseSink.apply(closeStreamHandler);
 
-      streams.put(requestNumber, scuttlebuttStreamHandler);
-    } catch (JsonProcessingException ex) {
-      throw ex;
-    }
+      if (closed) {
+        scuttlebuttStreamHandler.onStreamError(new ConnectionClosedException());
+      } else {
+        streams.put(requestNumber, scuttlebuttStreamHandler);
+        sendBytes(requestBytes);
+      }
+
+
+    };
+
+    vertx.runOnContext(synchronizedRequest);
   }
 
   @Override
-  public synchronized void close() {
-    connectionCloser.run();
+  public void close() {
+    vertx.runOnContext((event) -> {
+      connectionCloser.run();
+    });
   }
 
   @Override
-  public synchronized void receivedMessage(Bytes message) {
+  public void receivedMessage(Bytes message) {
 
-    RPCMessage rpcMessage = new RPCMessage(message);
+    Handler<Void> synchronizedHandleMessage = (event) -> {
+      RPCMessage rpcMessage = new RPCMessage(message);
 
-    // A negative request number indicates that this is a response, rather than a request that this node
-    // should service
-    if (rpcMessage.requestNumber() < 0) {
-      handleResponse(rpcMessage);
-    } else {
-      handleRequest(rpcMessage);
-    }
+      // A negative request number indicates that this is a response, rather than a request that this node
+      // should service
+      if (rpcMessage.requestNumber() < 0) {
+        handleResponse(rpcMessage);
+      } else {
+        handleRequest(rpcMessage);
+      }
+    };
 
+    vertx.runOnContext(synchronizedHandleMessage);
+  }
+
+  @Override
+  public void streamClosed() {
+
+    Handler<Void> synchronizedCloseStream = (event) -> {
+      closed = true;
+
+      streams.forEach((key, streamHandler) -> {
+        streamHandler.onStreamError(new ConnectionClosedException());
+      });
+
+      streams.clear();
+
+      awaitingAsyncResponse.forEach((key, value) -> {
+        if (!value.isDone()) {
+          value.completeExceptionally(new ConnectionClosedException());
+        }
+      });
+
+      awaitingAsyncResponse.clear();
+    };
+
+    vertx.runOnContext(synchronizedCloseStream);
   }
 
   private void handleRequest(RPCMessage rpcMessage) {
@@ -179,6 +213,8 @@ public class RPCHandler implements Multiplexer, ClientHandler {
 
     boolean isStream = RPCFlag.Stream.STREAM.isApplied(rpcFlags);
 
+    Optional<RPCRequestFailedException> exception = response.getException(objectMapper);
+
     if (isStream) {
       ScuttlebuttStreamHandler scuttlebuttStreamHandler = streams.get(requestNumber);
 
@@ -187,20 +223,11 @@ public class RPCHandler implements Multiplexer, ClientHandler {
         if (response.isSuccessfulLastMessage()) {
           streams.remove(requestNumber);
           scuttlebuttStreamHandler.onStreamEnd();
-        } else if (response.isErrorMessage()) {
-
-          Optional<RPCErrorBody> errorBody = response.getErrorBody(objectMapper);
-
-          if (errorBody.isPresent()) {
-            scuttlebuttStreamHandler.onStreamError(new Exception(errorBody.get().getMessage()));
-          } else {
-            // This shouldn't happen, but for safety we fall back to just writing the whole body in the exception message
-            // if we fail to marshall it for whatever reason
-            scuttlebuttStreamHandler.onStreamError(new Exception(response.asString()));
-          }
-
+        } else if (exception.isPresent()) {
+          scuttlebuttStreamHandler.onStreamError(exception.get());
         } else {
-          scuttlebuttStreamHandler.onMessage(response);
+          RPCResponse successfulResponse = new RPCResponse(response.body(), response.bodyType());
+          scuttlebuttStreamHandler.onMessage(successfulResponse);
         }
       } else {
         logger.warn(
@@ -212,11 +239,18 @@ public class RPCHandler implements Multiplexer, ClientHandler {
 
     } else {
 
-      CompletableAsyncResult<RPCMessage> rpcMessageFuture = awaitingAsyncResponse.get(requestNumber);
+      CompletableAsyncResult<RPCResponse> rpcMessageFuture = awaitingAsyncResponse.remove(requestNumber);
 
       if (rpcMessageFuture != null) {
-        rpcMessageFuture.complete(response);
-        awaitingAsyncResponse.remove(requestNumber);
+
+        if (exception.isPresent()) {
+          rpcMessageFuture.completeExceptionally(exception.get());
+        } else {
+          RPCResponse successfulResponse = new RPCResponse(response.body(), response.bodyType());
+
+          rpcMessageFuture.complete(successfulResponse);
+        }
+
       } else {
         logger.warn(
             "Couldn't find async handler for RPC response with request number "
@@ -228,23 +262,8 @@ public class RPCHandler implements Multiplexer, ClientHandler {
 
   }
 
-  @Override
-  public void streamClosed() {
-    this.closed = true;
-
-    streams.forEach((key, streamHandler) -> {
-      streamHandler.onStreamError(new ConnectionClosedException());
-    });
-
-    streams.clear();
-
-    awaitingAsyncResponse.forEach((key, value) -> {
-      if (!value.isDone()) {
-        value.completeExceptionally(new ConnectionClosedException());
-      }
-
-    });
-
-
+  private void sendBytes(Bytes bytes) {
+    messageSender.accept(bytes);
   }
+
 }

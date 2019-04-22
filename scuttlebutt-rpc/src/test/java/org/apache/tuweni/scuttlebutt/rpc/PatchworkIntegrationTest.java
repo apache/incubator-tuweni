@@ -16,13 +16,11 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.crypto.sodium.Signature;
-import org.apache.tuweni.crypto.sodium.Sodium;
 import org.apache.tuweni.io.Base64;
 import org.apache.tuweni.junit.VertxExtension;
 import org.apache.tuweni.junit.VertxInstance;
@@ -43,7 +41,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import io.vertx.core.Vertx;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,11 +56,6 @@ import org.logl.vertx.LoglLogDelegateFactory;
  */
 @ExtendWith(VertxExtension.class)
 class PatchworkIntegrationTest {
-
-  @BeforeAll
-  static void checkAvailable() {
-    assumeTrue(Sodium.isAvailable(), "Sodium native library is not available");
-  }
 
   public static class MyClientHandler implements ClientHandler {
 

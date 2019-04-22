@@ -1,9 +1,10 @@
-description = 'Scuttlebutt Handshake library'
+description = 'Scuttlebutt RPC library'
 
 dependencies {
   compile project(':bytes')
   compile project(':concurrent')
   compile project(':crypto')
+  compileOnly 'io.vertx:vertx-core'
   compile project(':scuttlebutt')
   compile project(':scuttlebutt-handshake')
   compile 'org.logl:logl-api'
