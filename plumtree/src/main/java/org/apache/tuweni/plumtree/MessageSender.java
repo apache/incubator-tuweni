@@ -22,7 +22,7 @@ import javax.annotation.Nullable;
 public interface MessageSender {
 
   /**
-   * Types of message supported by the dialect
+   * Types of verbs supported by the dialect
    */
   enum Verb {
     IHAVE, GRAFT, PRUNE, GOSSIP
@@ -32,9 +32,11 @@ public interface MessageSender {
    * Sends bytes to a peer.
    * 
    * @param verb the type of message
+   * @param attributes the attributes of message
    * @param peer the target of the message
    * @param hash the hash of the message
    * @param payload the bytes to send
    */
-  void sendMessage(Verb verb, Peer peer, Bytes hash, @Nullable Bytes payload);
+  void sendMessage(Verb verb, String attributes, Peer peer, Bytes hash, @Nullable Bytes payload);
+
 }
