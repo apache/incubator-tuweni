@@ -200,6 +200,7 @@ public final class VertxGossipServer {
 
   /**
    * Gossip a message to all known peers.
+   * 
    * @param attributes the payload to propagate
    * @param message the payload to propagate
    */
