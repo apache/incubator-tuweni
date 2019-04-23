@@ -65,6 +65,7 @@ public final class SecureScuttlebuttHandshakeClient {
   /**
    * Create a new handshake client to connect to the server specified in the invite
    *
+   * @param networkIdentifier the networkIdentifier
    * @param invite the invite
    * @return a new Secure Scuttlebutt handshake client
    */

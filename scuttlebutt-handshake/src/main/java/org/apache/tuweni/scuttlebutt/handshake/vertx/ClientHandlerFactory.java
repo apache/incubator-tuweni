@@ -26,6 +26,7 @@ public interface ClientHandlerFactory<T extends ClientHandler> {
    *
    * @param sender the function to send bytes to the server
    * @param terminationFunction a function to terminate the stream properly
+   * @return the created ClientHandler
    */
   T createHandler(Consumer<Bytes> sender, Runnable terminationFunction);
 }

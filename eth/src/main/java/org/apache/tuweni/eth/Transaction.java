@@ -205,6 +205,7 @@ public final class Transaction {
    * @param to The target contract address, if any.
    * @param value The amount of Eth to transfer.
    * @param payload The transaction payload.
+   * @param chainId The chain id.
    * @param signature The transaction signature.
    */
   public Transaction(
