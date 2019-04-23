@@ -158,6 +158,7 @@ public final class SecureScuttlebuttVertxClient {
   /**
    * Default constructor.
    *
+   * @param loggerProvider the LoggerProvider
    * @param vertx the Vert.x instance
    * @param keyPair the identity of the server according to the Secure Scuttlebutt protocol
    * @param networkIdentifier the network identifier of the server according to the Secure Scuttlebutt protocol
