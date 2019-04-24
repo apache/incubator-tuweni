@@ -3,46 +3,44 @@ description = 'Tuweni distribution.'
 apply plugin: 'distribution'
 
 distributions {
-    main {
-        baseName = 'tuweni'
-        contents {
-            into('') {
-                from ".."
-                include 'README.md'
-                include 'DISCLAIMER'
-                include 'LICENSE'
-                include 'NOTICE'
-            }
-            def docs = []
-            def libs = []
-            def sources = []
-            rootProject.subprojects.each { s ->
-                if (s.name != 'eth-reference-tests') {
-                    docs << s.dokkaJar.outputs
-                    libs << s.jar.outputs
-                    sources << s.sourcesJar.outputs
-                }
-            }
-            into('lib') {
-                from rootProject.jar
-                from libs
-            }
-            into('sources') {
-                from rootProject.sourcesJar
-                from sources
-            }
-            into('docs') {
-                from rootProject.dokkaJar
-                from docs
-            }
-            into('site') {
-                from rootProject.dokka.outputDirectory
-                from rootProject.javadoc.outputDirectory
-            }
+  main {
+    baseName = 'tuweni'
+    contents {
+      into('') {
+        from ".."
+        include 'README.md'
+        include 'DISCLAIMER'
+        include 'LICENSE'
+        include 'NOTICE'
+      }
+      def docs = []
+      def libs = []
+      def sources = []
+      rootProject.subprojects.each { s ->
+        if (s.name != 'eth-reference-tests') {
+          docs << s.dokkaJar.outputs
+          libs << s.jar.outputs
+          sources << s.sourcesJar.outputs
         }
+      }
+      into('lib') {
+        from rootProject.jar
+        from libs
+      }
+      into('sources') {
+        from rootProject.sourcesJar
+        from sources
+      }
+      into('docs') {
+        from rootProject.dokkaJar
+        from docs
+      }
+      into('site') {
+        from rootProject.dokka.outputDirectory
+        from rootProject.javadoc.outputDirectory
+      }
     }
+  }
 }
 
-distTar{
-    compression = Compression.GZIP
-}
+distTar{ compression = Compression.GZIP }
