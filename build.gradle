@@ -121,7 +121,6 @@ subprojects {
   task allDependencies(type: DependencyReportTask) {}
 }
 
-
 //////
 // Project defaults
 
@@ -263,24 +262,6 @@ allprojects {
       include 'LICENSE'
       include 'NOTICE'
       into 'META-INF'
-    }
-  }
-
-  distZip {
-    into(project.name) {
-      from '.'
-      include 'DISCLAIMER'
-      include 'LICENSE'
-      include 'NOTICE'
-    }
-  }
-
-  distTar {
-    into(project.name) {
-      from '.'
-      include 'DISCLAIMER'
-      include 'LICENSE'
-      include 'NOTICE'
     }
   }
 
