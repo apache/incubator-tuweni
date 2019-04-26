@@ -38,10 +38,20 @@ TODO : point to commit example
 
 ### Build the artifacts
 
+Set up the version strategy:
+```
+export BUILD_RELEASE=true
+```
+
+Build the artifacts
+```
+./gradlew assemble
+```
+
+Sign and publish
 ```
 export ENABLE_SIGNING=true
-export BUILD_RELEASE=true
-./gradlew clean publish
+./gradlew publish
 ```
 
 This checks the code, the licenses, runs all the tests and creates all the artifacts (binaries, sources, javadoc).
@@ -68,15 +78,16 @@ TODO
 Copy the distribution artifacts to it - make sure to change the name to ${RELEASE VERSION}-incubating:
 
 ```
-cp build/distributions/tuweni-${RELEASE VERSION}.zip _staged/tuweni-${RELEASE VERSION}-incubating.zip
-```
-
-Copy the site to it:
-```
-TODO
+cp dist/build/distributions/tuweni-${RELEASE VERSION}.zip _staged/tuweni-${RELEASE VERSION}-incubating.zip
+cp dist/build/distributions/tuweni-${RELEASE VERSION}.tgz _staged/tuweni-${RELEASE VERSION}-incubating.tgz
 ```
 
 Commit the changes
+```
+cd _staged
+svn add tuweni-*
+svn ci -m "Add Apache Tuweni ${RELEASE VERSION} release candidate"
+```
 
 ### Tag the git repository
 

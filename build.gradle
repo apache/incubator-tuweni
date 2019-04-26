@@ -14,7 +14,6 @@ plugins {
   id 'org.jetbrains.kotlin.jvm' version '1.3.20'
   id 'org.jetbrains.dokka' version '0.9.17'
   id 'maven-publish'
-  id 'distribution'
 }
 
 description = 'A set of libraries and other tools to aid development of blockchain and other decentralized software in Java and other JVM languages'
@@ -265,7 +264,7 @@ allprojects {
     }
   }
 
-  if (project.name != 'eth-reference-tests') {
+  if (project.name != 'eth-reference-tests' && project.name != 'dist') {
 
     artifacts {
       if (project != rootProject) {
