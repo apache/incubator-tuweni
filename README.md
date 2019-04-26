@@ -53,7 +53,7 @@ With Maven, add this repository with:
 <dependency>
   <groupId>org.apache.tuweni</groupId>
   <artifactId>tuweni</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -62,7 +62,7 @@ With gradle:
 maven { url "https://repository.apache.org/snapshots"}
 ```
 
-`compile 'org.apache.tuweni:tuweni:1.0.0-SNAPSHOT'`
+`compile 'org.apache.tuweni:tuweni:1.1.0-SNAPSHOT'`
 
 ## Build Instructions
 
