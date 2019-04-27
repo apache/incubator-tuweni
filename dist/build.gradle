@@ -4,6 +4,14 @@ apply plugin: 'distribution'
 
 jar { enabled = false }
 
+if (System.getenv('ENABLE_SIGNING') == 'true') {
+  signing {
+    useGpgCmd()
+    sign distZip
+    sign distTar
+  }
+}
+
 distributions {
   main {
     baseName = 'tuweni'
@@ -19,22 +27,28 @@ distributions {
       def libs = []
       def sources = []
       rootProject.subprojects.each { s ->
-        if (s.name != 'eth-reference-tests') {
-          docs << s.dokkaJar.outputs
+        if (s.name != 'eth-reference-tests' && s.name != 'dist') {
+          libs << s.signArchives.signatureFiles[0]
+          sources << s.signArchives.signatureFiles[1]
+          docs << s.signArchives.signatureFiles[2]
           libs << s.jar.outputs
           sources << s.sourcesJar.outputs
+          docs << s.dokkaJar.outputs
         }
       }
       into('lib') {
         from rootProject.jar
+        from rootProject.signArchives.signatureFiles[0]
         from libs
       }
       into('sources') {
         from rootProject.sourcesJar
+        from rootProject.signArchives.signatureFiles[1]
         from sources
       }
       into('docs') {
         from rootProject.dokkaJar
+        from rootProject.signArchives.signatureFiles[2]
         from docs
       }
       into('site') {
@@ -45,4 +59,14 @@ distributions {
   }
 }
 
+import org.gradle.crypto.checksum.Checksum
+
 distTar{ compression = Compression.GZIP }
+
+task createChecksums(type: Checksum, dependsOn: ['distZip', 'distTar']) {
+  files = distZip.outputs.files + distTar.outputs.files
+  outputDir = new File(project.buildDir, "distributions")
+  algorithm = Checksum.Algorithm.SHA512
+}
+
+build.dependsOn('createChecksums')
