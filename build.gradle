@@ -257,7 +257,7 @@ allprojects {
       attributes('Implementation-Title': baseName,
       'Implementation-Version': project.version)
     }
-    from(project.projectDir) {
+    from(rootProject.projectDir) {
       include 'DISCLAIMER'
       include 'LICENSE'
       include 'NOTICE'
