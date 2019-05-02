@@ -14,7 +14,7 @@ if (System.getenv('ENABLE_SIGNING') == 'true') {
 
 distributions {
   main {
-    baseName = 'tuweni'
+    baseName = 'tuweni-bin'
     contents {
       into('') {
         from ".."
@@ -41,11 +41,6 @@ distributions {
         from rootProject.signArchives.signatureFiles[0]
         from libs
       }
-      into('sources') {
-        from rootProject.sourcesJar
-        from rootProject.signArchives.signatureFiles[1]
-        from sources
-      }
       into('docs') {
         from rootProject.dokkaJar
         from rootProject.signArchives.signatureFiles[2]
@@ -57,14 +52,33 @@ distributions {
       }
     }
   }
+  sources {
+    baseName = 'tuweni-src'
+    contents {
+      from rootProject.projectDir
+      include 'LICENCE', '*.md', 'NOTICE', '*.gradle', 'DISCLAIMER', 'gradle/**', 'gradlew', 'gradle.properties'
+      rootProject.subprojects.each {
+        include it.projectDir.name + '/src/**'
+        include it.projectDir.name + '/build.gradle'
+      }
+    }
+  }
 }
 
 import org.gradle.crypto.checksum.Checksum
 
 distTar{ compression = Compression.GZIP }
 
-task createChecksums(type: Checksum, dependsOn: ['distZip', 'distTar']) {
-  files = distZip.outputs.files + distTar.outputs.files
+
+sourcesDistTar{ compression = Compression.GZIP }
+
+task createChecksums(type: Checksum, dependsOn: [
+  'distZip',
+  'distTar',
+  'sourcesDistZip',
+  'sourcesDistTar'
+]) {
+  files = distZip.outputs.files + distTar.outputs.files + sourcesDistZip.outputs.files + sourcesDistTar.outputs.files
   outputDir = new File(project.buildDir, "distributions")
   algorithm = Checksum.Algorithm.SHA512
 }
