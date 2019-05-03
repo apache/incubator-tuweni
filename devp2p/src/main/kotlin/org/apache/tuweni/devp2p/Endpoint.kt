@@ -53,8 +53,8 @@ data class Endpoint(
    * @param tcpPort the TCP port for the endpoint or `null` if no TCP port is known
    * @throws IllegalArgumentException if the address isn't an IP address, or either port is out of range
    */
-  constructor(address: String, udpPort: Int = DEFAULT_PORT, tcpPort: Int? = null)
-    : this(parseInetAddress(address), udpPort, tcpPort)
+  constructor(address: String, udpPort: Int = DEFAULT_PORT, tcpPort: Int? = null) :
+    this(parseInetAddress(address), udpPort, tcpPort)
 
   /**
    * Create a new endpoint.

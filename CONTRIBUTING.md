@@ -1,6 +1,6 @@
-# Contributing to Cava
+# Contributing to Apache Tuweni
 
-Welcome to the Cava repository! This document describes the procedure and guidelines for contributing to the Cava project. The subsequent sections encapsulate the criteria used to evaluate additions to, and modifications of, the existing codebase.
+Welcome to the  Apache Tuweni repository! This document describes the procedure and guidelines for contributing to the Apache Tuweni project. The subsequent sections encapsulate the criteria used to evaluate additions to, and modifications of, the existing codebase.
 
 ## Contributor Workflow
 
@@ -26,7 +26,7 @@ commits are squashed together.
 
 #### Stylistic
 
-The fundamental resource Cava contributors should familiarize themselves with is Oracle's [Code Conventions for the Java TM Programming Language](http://www.oracle.com/technetwork/java/codeconvtoc-136057.html), to establish a general programme on Java coding. Furthermore, all pull-requests should be formatted according to the (slightly modified) [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html), as it will be checked by our continuous integration architecture, and code that does not comply stylistically will fail to build.
+The fundamental resource Apache Tuweni contributors should familiarize themselves with is Oracle's [Code Conventions for the Java TM Programming Language](http://www.oracle.com/technetwork/java/codeconvtoc-136057.html), to establish a general programme on Java coding. Furthermore, all pull-requests should be formatted according to the (slightly modified) [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html), as it will be checked by our continuous integration architecture, and code that does not comply stylistically will fail to build.
 
 #### Architectural Best Practices
 
@@ -59,3 +59,16 @@ The code is free from glaring typos (*e.g. misspelled comments*), thinkos, or fo
 #### Appropriately Commented
 
 Ambiguous or unclear code segments are commented. The comments are written in complete sentences.
+
+# License
+
+Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
+file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
+to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
