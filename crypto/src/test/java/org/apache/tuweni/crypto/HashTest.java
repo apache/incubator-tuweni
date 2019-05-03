@@ -117,11 +117,4 @@ class HashTest {
     byte[] resultCow2 = Hash.sha3_512("cow".getBytes(UTF_8));
     assertArrayEquals(Bytes.fromHexString(cowSha3).toArray(), resultCow2);
   }
-
-  @Test
-  void test() {
-    Bytes bytes = Hash.keccak256(Bytes.wrap("Osaka, Japan".getBytes(UTF_8)));
-    System.out.println(bytes.toHexString());
-    assertEquals("0x2c064d25432e60a5300ea5db05d43a56a52f0622e79d63ca89fe61b7d1de446f", bytes.toHexString());
-  }
 }
