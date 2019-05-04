@@ -24,7 +24,9 @@ import org.apache.tuweni.plumtree.State;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -64,28 +66,30 @@ public final class VertxGossipServer {
 
     void handle(Buffer data) {
       buffer = Bytes.concatenate(buffer, Bytes.wrapBuffer(data));
-      Message message;
-      try {
-        JsonParser parser = mapper.getFactory().createParser(buffer.toArrayUnsafe());
-        message = parser.readValueAs(Message.class);
-        buffer = buffer.slice((int) parser.getCurrentLocation().getByteOffset());
-      } catch (IOException e) {
-        return;
-      }
+      while (!buffer.isEmpty()) {
+        Message message;
+        try {
+          JsonParser parser = mapper.getFactory().createParser(buffer.toArrayUnsafe());
+          message = parser.readValueAs(Message.class);
+          buffer = buffer.slice((int) parser.getCurrentLocation().getByteOffset());
+        } catch (IOException e) {
+          return;
+        }
 
-      switch (message.verb) {
-        case IHAVE:
-          state.receiveIHaveMessage(peer, Bytes.fromHexString(message.payload));
-          break;
-        case GOSSIP:
-          state.receiveGossipMessage(peer, message.attributes, Bytes.fromHexString(message.payload));
-          break;
-        case GRAFT:
-          state.receiveGraftMessage(peer, Bytes.fromHexString(message.payload));
-          break;
-        case PRUNE:
-          state.receivePruneMessage(peer);
-          break;
+        switch (message.verb) {
+          case IHAVE:
+            state.receiveIHaveMessage(peer, Bytes.fromHexString(message.payload));
+            break;
+          case GOSSIP:
+            state.receiveGossipMessage(peer, message.attributes, Bytes.fromHexString(message.payload));
+            break;
+          case GRAFT:
+            state.receiveGraftMessage(peer, Bytes.fromHexString(message.payload));
+            break;
+          case PRUNE:
+            state.receivePruneMessage(peer);
+            break;
+        }
       }
     }
 
@@ -113,14 +117,14 @@ public final class VertxGossipServer {
       MessageHashing messageHashing,
       PeerRepository peerRepository,
       Consumer<Bytes> payloadListener,
-      MessageValidator payloadValidator) {
+      @Nullable MessageValidator payloadValidator) {
     this.vertx = vertx;
     this.networkInterface = networkInterface;
     this.port = port;
     this.messageHashing = messageHashing;
     this.peerRepository = peerRepository;
     this.payloadListener = payloadListener;
-    this.payloadValidator = payloadValidator;
+    this.payloadValidator = payloadValidator == null ? (bytes, peer) -> true : payloadValidator;
   }
 
   public AsyncCompletion start() {
@@ -184,16 +188,21 @@ public final class VertxGossipServer {
       throw new IllegalStateException("Server has not started");
     }
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-    client.connect(port, host, res -> {
-      if (res.failed()) {
-        completion.completeExceptionally(res.cause());
-      } else {
-        completion.complete();
-        Peer peer = new SocketPeer(res.result());
-        SocketHandler handler = new SocketHandler(peer);
-        res.result().handler(handler::handle).closeHandler(handler::close);
-      }
-    });
+    AtomicInteger counter = new AtomicInteger(0);
+    while (!completion.isDone()) {
+      client.connect(port, host, res -> {
+        if (res.failed()) {
+          if (counter.incrementAndGet() > 5) {
+            completion.completeExceptionally(res.cause());
+          }
+        } else {
+          completion.complete();
+          Peer peer = new SocketPeer(res.result());
+          SocketHandler handler = new SocketHandler(peer);
+          res.result().handler(handler::handle).closeHandler(handler::close);
+        }
+      });
+    }
 
     return completion;
   }

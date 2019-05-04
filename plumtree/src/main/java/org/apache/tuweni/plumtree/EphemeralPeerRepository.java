@@ -14,15 +14,14 @@ package org.apache.tuweni.plumtree;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EphemeralPeerRepository implements PeerRepository {
 
-  private final Set<Peer> eagerPushPeers = Collections.synchronizedSet(new HashSet<>());
-  private final Set<Peer> lazyPushPeers = Collections.synchronizedSet(new HashSet<>());
+  private final Set<Peer> eagerPushPeers = ConcurrentHashMap.newKeySet();
+  private final Set<Peer> lazyPushPeers = ConcurrentHashMap.newKeySet();
 
   @Override
   public void addEager(Peer peer) {
