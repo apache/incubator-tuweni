@@ -106,7 +106,7 @@ class VertxGossipServerTest {
     server3.connectTo("127.0.0.1", 10001).join();
     String attributes = "{\"message_type\": \"BLOCK\"}";
     server1.gossip(attributes, Bytes.fromHexString("deadbeef"));
-    Thread.sleep(1000);
+    Thread.sleep(2000);
     assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.get());
     assertEquals(Bytes.fromHexString("deadbeef"), messageReceived3.get());
     assertNull(messageReceived1.get());
@@ -161,7 +161,7 @@ class VertxGossipServerTest {
     assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.get());
     Thread.sleep(1000);
 
-    assertTrue(peerRepository1.lazyPushPeers().size() == 1 || peerRepository3.lazyPushPeers().size() == 1);
+    assertTrue(peerRepository1.lazyPushPeers().size() > 1 || peerRepository3.lazyPushPeers().size() > 1);
 
     server1.stop().join();
     server2.stop().join();

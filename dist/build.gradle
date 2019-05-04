@@ -75,22 +75,40 @@ distributions {
       }
     }
   }
+  gossip {
+    contents {
+      into('bin') {
+        from { project(':gossip').startScripts.outputs.files }
+        fileMode = 0755
+      }
+      into('lib') {
+        def libs = []
+        libs << project(':gossip').configurations.runtime
+        from libs
+        from project(':gossip').jar
+      }
+    }
+  }
 }
 
 import org.gradle.crypto.checksum.Checksum
 
 distTar{ compression = Compression.GZIP }
 
-
 sourcesDistTar{ compression = Compression.GZIP }
+
+gossipDistTar{ compression = Compression.GZIP }
 
 task createChecksums(type: Checksum, dependsOn: [
   'distZip',
   'distTar',
   'sourcesDistZip',
-  'sourcesDistTar'
+  'sourcesDistTar',
+  'gossipDistZip',
+  'gossipDistTar'
 ]) {
-  files = distZip.outputs.files + distTar.outputs.files + sourcesDistZip.outputs.files + sourcesDistTar.outputs.files
+  files = distZip.outputs.files + distTar.outputs.files + sourcesDistZip.outputs.files + sourcesDistTar.outputs.files \
+      + gossipDistZip.outputs.files + gossipDistTar.outputs.files
   outputDir = new File(project.buildDir, "distributions")
   algorithm = Checksum.Algorithm.SHA512
 }
