@@ -21,7 +21,6 @@ import org.apache.tuweni.junit.BouncyCastleExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.nio.charset.StandardCharsets;
 
 @ExtendWith(BouncyCastleExtension.class)
 class HashTest {
