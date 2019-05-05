@@ -91,6 +91,7 @@ class PasswordHashTest {
 
   @Test
   void checkHashAndVerify() {
+    assumeTrue(Sodium.supportsVersion(Sodium.VERSION_10_0_14), "Requires sodium native library >= 10.0.14");
     String password = "A very insecure password";
 
     String hash = PasswordHash.hashInteractive(password);
