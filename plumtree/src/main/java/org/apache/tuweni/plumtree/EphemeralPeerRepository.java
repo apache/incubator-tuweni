@@ -18,7 +18,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class EphemeralPeerRepository implements PeerRepository {
+/**
+ * In-memory peer repository.
+ */
+public final class EphemeralPeerRepository implements PeerRepository {
 
   private final Set<Peer> eagerPushPeers = ConcurrentHashMap.newKeySet();
   private final Set<Peer> lazyPushPeers = ConcurrentHashMap.newKeySet();

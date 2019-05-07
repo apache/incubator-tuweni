@@ -48,7 +48,7 @@ public final class State {
   private final MessageSender messageSender;
   private final Consumer<Bytes> messageListener;
   private final MessageValidator messageValidator;
-  private final Queue<Runnable> lazyQueue = new ConcurrentLinkedQueue<>();
+  final Queue<Runnable> lazyQueue = new ConcurrentLinkedQueue<>();
   private final Timer timer = new Timer("plumtree", true);
   private final long delay;
 
@@ -260,9 +260,12 @@ public final class State {
   }
 
   void processQueue() {
+    List<Runnable> executed = new ArrayList<>();
     for (Runnable r : lazyQueue) {
       r.run();
+      executed.add(r);
     }
+    lazyQueue.removeAll(executed);
   }
 
   /**

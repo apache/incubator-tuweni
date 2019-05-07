@@ -48,7 +48,6 @@ class StateTest {
       this.peer = peer;
       this.hash = hash;
       this.payload = payload;
-
     }
   }
 
@@ -167,6 +166,7 @@ class StateTest {
     assertEquals(Hash.keccak256(msg), messageSender.hash);
     assertEquals(lazyPeer, messageSender.peer);
     assertEquals(MessageSender.Verb.IHAVE, messageSender.verb);
+    assertTrue(state.lazyQueue.isEmpty());
   }
 
   @Test
