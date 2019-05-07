@@ -19,35 +19,29 @@ import org.apache.tuweni.bytes.Bytes;
 
 import org.junit.jupiter.api.Test;
 
-class Base64Test {
+class Base32Test {
 
   @Test
   void shouldEncodeByteArray() {
-    String s = Base64.encodeBytes(new byte[] {1, 2, 3, 4, 5, 6, 7, 8});
-    assertEquals("AQIDBAUGBwg=", s);
+    String s = Base32.encodeBytes(new byte[] {1, 2, 3, 4, 5, 6, 7, 8});
+    assertEquals("AEBAGBAFAYDQQ===", s);
   }
 
   @Test
   void shouldEncodeBytesValue() {
-    String s = Base64.encode(Bytes.of(1, 2, 3, 4, 5, 6, 7, 8));
-    assertEquals("AQIDBAUGBwg=", s);
+    String s = Base32.encode(Bytes.of(1, 2, 3, 4, 5, 6, 7, 8));
+    assertEquals("AEBAGBAFAYDQQ===", s);
   }
 
   @Test
   void shouldDecodeToByteArray() {
-    byte[] bytes = Base64.decodeBytes("AQIDBAUGBwg=");
+    byte[] bytes = Base32.decodeBytes("AEBAGBAFAYDQQ===");
     assertArrayEquals(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}, bytes);
   }
 
   @Test
   void shouldDecodeToBytesValue() {
-    Bytes bytes = Base64.decode("AQIDBAUGBwg=");
+    Bytes bytes = Base32.decode("AEBAGBAFAYDQQ===");
     assertEquals(Bytes.of(1, 2, 3, 4, 5, 6, 7, 8), bytes);
-  }
-
-  @Test
-  void shouldEncodeValueWithSlashes() {
-    String value = Base64.encode(Bytes.fromHexString("deadbeefffffff"));
-    assertEquals("3q2+7////w==", value);
   }
 }
