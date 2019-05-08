@@ -18,14 +18,6 @@ apply plugin: 'distribution'
 
 jar { enabled = false }
 
-if (System.getenv('ENABLE_SIGNING') == 'true') {
-  signing {
-    useGpgCmd()
-    sign distZip
-    sign distTar
-  }
-}
-
 distributions {
   main {
     baseName = 'tuweni-bin'
@@ -80,6 +72,13 @@ distributions {
   gossip {
     baseName = 'tuweni-gossip'
     contents {
+      into('') {
+        from ".."
+        include 'README.md'
+        include 'DISCLAIMER'
+        include 'LICENSE'
+        include 'NOTICE'
+      }
       into('bin') {
         from { project(':gossip').startScripts.outputs.files }
         fileMode = 0755
@@ -101,6 +100,18 @@ distTar{ compression = Compression.GZIP }
 sourcesDistTar{ compression = Compression.GZIP }
 
 gossipDistTar{ compression = Compression.GZIP }
+
+if (System.getenv('ENABLE_SIGNING') == 'true') {
+  signing {
+    useGpgCmd()
+    sign distZip
+    sign distTar
+    sign sourcesDistZip
+    sign sourcesDistTar
+    sign gossipDistZip
+    sign gossipDistTar
+  }
+}
 
 task createChecksums(type: Checksum, dependsOn: [
   'distZip',
