@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
  * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
  * to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
@@ -10,35 +10,28 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-rootProject.name='tuweni'
-include 'bytes'
-include 'concurrent'
-include 'concurrent-coroutines'
-include 'config'
-include 'crypto'
-include 'devp2p'
-include 'dist'
-include 'dns-discovery'
-include 'eth'
-include 'eth-reference-tests'
-include 'eth-repository'
-include 'gossip'
-include 'io'
-include 'junit'
-include 'kademlia'
-include 'kv'
-include 'les'
-include 'merkle-trie'
-include 'net'
-include 'net-coroutines'
-include 'plumtree'
-include 'progpow'
-include 'rlp'
-include 'rlpx'
-include 'scuttlebutt'
-include 'scuttlebutt-discovery'
-include 'scuttlebutt-handshake'
-include 'scuttlebutt-rpc'
-include 'ssz'
-include 'toml'
-include 'units'
+description = 'Node discovery via DNS'
+
+dependencies {
+  compile project(':bytes')
+  compile project(':concurrent')
+  compile project(':concurrent-coroutines')
+  compile project(':crypto')
+  compile project(':devp2p')
+  compile project(':kv')
+  compile project(':merkle-trie')
+  compile project(':rlp')
+  compile 'dnsjava:dnsjava'
+  compile 'io.vertx:vertx-core'
+  compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+  compile 'org.logl:logl-api'
+
+  compileOnly 'org.bouncycastle:bcprov-jdk15on'
+
+  testCompile project(':junit')
+  testCompile 'org.bouncycastle:bcprov-jdk15on'
+  testCompile 'org.junit.jupiter:junit-jupiter-api'
+  testCompile 'org.junit.jupiter:junit-jupiter-params'
+
+  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+}
