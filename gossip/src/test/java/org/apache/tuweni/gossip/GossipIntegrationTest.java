@@ -22,6 +22,7 @@ import org.apache.tuweni.junit.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -103,13 +104,15 @@ class GossipIntegrationTest {
       }).end(Buffer.buffer(Bytes32.rightPad(Bytes.ofUnsignedInt(i)).toHexString().getBytes(StandardCharsets.UTF_8)));
     }
 
-    List<String> receiver1 = null;
+    List<String> receiver1 = Collections.emptyList();
 
     int counter = 0;
     do {
       Thread.sleep(1000);
       counter++;
-      receiver1 = Files.readAllLines(tempDir.resolve("log2.log"));
+      if (Files.exists(tempDir.resolve("log2.log"))) {
+        receiver1 = Files.readAllLines(tempDir.resolve("log2.log"));
+      }
     } while (receiver1.size() < 20 && counter < 20);
 
     client.close();
