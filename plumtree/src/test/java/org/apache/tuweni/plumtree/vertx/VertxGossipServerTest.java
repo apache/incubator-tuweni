@@ -59,7 +59,7 @@ class VertxGossipServerTest {
     server1.connectTo("127.0.0.1", 10001).join();
     String attributes = "{\"message_type\": \"BLOCK\"}";
     server1.gossip(attributes, Bytes.fromHexString("deadbeef"));
-    for (int i = 0 ; i < 10 ; i++) {
+    for (int i = 0; i < 10; i++) {
       Thread.sleep(500);
       if (Bytes.fromHexString("deadbeef").equals(messageReceived2.get())) {
         break;
@@ -111,10 +111,10 @@ class VertxGossipServerTest {
     server3.connectTo("127.0.0.1", 10001).join();
     String attributes = "{\"message_type\": \"BLOCK\"}";
     server1.gossip(attributes, Bytes.fromHexString("deadbeef"));
-    for (int i = 0 ; i < 10 ; i++) {
+    for (int i = 0; i < 10; i++) {
       Thread.sleep(500);
       if (Bytes.fromHexString("deadbeef").equals(messageReceived2.get())
-              && Bytes.fromHexString("deadbeef").equals(messageReceived3.get())) {
+          && Bytes.fromHexString("deadbeef").equals(messageReceived3.get())) {
         break;
       }
     }
