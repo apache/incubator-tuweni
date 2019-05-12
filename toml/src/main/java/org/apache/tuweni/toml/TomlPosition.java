@@ -17,7 +17,10 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A position in an input document.
+ *
+ * @deprecated Replaced by {@code org.tomlj.TomlPosition} (https://tomlj.org)
  */
+@Deprecated
 public final class TomlPosition {
   private final int line;
   private final int column;
@@ -28,7 +31,9 @@ public final class TomlPosition {
    * @param line The line.
    * @param column The column.
    * @return A position.
+   * @deprecated Replaced by {@code org.tomlj.TomlPosition.positionAt} (https://tomlj.org)
    */
+  @Deprecated
   public static TomlPosition positionAt(int line, int column) {
     if (line < 1) {
       throw new IllegalArgumentException("line must be >= 1");

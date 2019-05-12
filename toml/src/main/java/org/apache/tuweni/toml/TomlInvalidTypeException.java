@@ -14,7 +14,10 @@ package org.apache.tuweni.toml;
 
 /**
  * An exception thrown when an invalid type is encountered.
+ *
+ * @deprecated Replaced by {@code org.tomlj.TomlInvalidTypeException} (https://tomlj.org)
  */
+@Deprecated
 public class TomlInvalidTypeException extends RuntimeException {
 
   TomlInvalidTypeException(String message) {
