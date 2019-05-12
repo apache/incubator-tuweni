@@ -13,9 +13,7 @@
 package org.apache.tuweni.config;
 
 import static java.util.Objects.requireNonNull;
-import static org.apache.tuweni.toml.Toml.canonicalDottedKey;
-
-import org.apache.tuweni.toml.Toml;
+import static org.tomlj.Toml.canonicalDottedKey;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
+
+import org.tomlj.Toml;
 
 /**
  * Represents collection of configuration properties, optionally validated against a schema.

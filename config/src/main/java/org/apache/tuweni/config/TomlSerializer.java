@@ -14,8 +14,6 @@ package org.apache.tuweni.config;
 
 import static org.apache.tuweni.config.Configuration.canonicalKey;
 
-import org.apache.tuweni.toml.Toml;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
@@ -28,6 +26,7 @@ import java.util.stream.Collectors;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import org.tomlj.Toml;
 
 final class TomlSerializer {
 

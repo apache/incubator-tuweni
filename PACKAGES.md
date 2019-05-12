@@ -102,14 +102,6 @@ An implementation of the Ethereum Recursive Length Prefix (RLP) algorithm, as de
 
 These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-rlp` (`tuweni-rlp.jar`).
 
-# Package org.apache.tuweni.toml
-
-A parser for Tom's Obvious, Minimal Language (TOML).
-
-A parser and semantic checker for Tom's Obvious, Minimal Language (TOML), as described at https://github.com/toml-lang/toml/.
-
-These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-toml` (tuweni-toml.jar).
-
 # Package org.apache.tuweni.trie
 
 Merkle Trie implementations.

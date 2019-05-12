@@ -12,14 +12,8 @@
  */
 package org.apache.tuweni.config;
 
-import static org.apache.tuweni.toml.Toml.joinKeyPath;
-import static org.apache.tuweni.toml.Toml.parseDottedKey;
-
-import org.apache.tuweni.toml.TomlArray;
-import org.apache.tuweni.toml.TomlInvalidTypeException;
-import org.apache.tuweni.toml.TomlParseResult;
-import org.apache.tuweni.toml.TomlPosition;
-import org.apache.tuweni.toml.TomlTable;
+import static org.tomlj.Toml.joinKeyPath;
+import static org.tomlj.Toml.parseDottedKey;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,6 +27,12 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.annotation.Nullable;
+
+import org.tomlj.TomlArray;
+import org.tomlj.TomlInvalidTypeException;
+import org.tomlj.TomlParseResult;
+import org.tomlj.TomlPosition;
+import org.tomlj.TomlTable;
 
 final class TomlBackedConfiguration implements Configuration {
 
