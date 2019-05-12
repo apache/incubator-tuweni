@@ -16,7 +16,10 @@ import java.util.List;
 
 /**
  * The result from parsing a TOML document.
+ *
+ * @deprecated Replaced by {@code org.tomlj.TomlParseResult} (https://tomlj.org)
  */
+@Deprecated
 public interface TomlParseResult extends TomlTable {
 
   /**

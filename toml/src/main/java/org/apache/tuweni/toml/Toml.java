@@ -28,7 +28,10 @@ import org.antlr.v4.runtime.CharStreams;
 
 /**
  * Methods for parsing data stored in Tom's Obvious, Minimal Language (TOML).
+ *
+ * @deprecated Replaced by {@code org.tomlj.Toml} (https://tomlj.org)
  */
+@Deprecated
 public final class Toml {
   private static final Pattern simpleKeyPattern = Pattern.compile("^[A-Za-z0-9_-]+$");
 
@@ -39,7 +42,9 @@ public final class Toml {
    *
    * @param input The input to parse.
    * @return The parse result.
+   * @deprecated Replaced by {@code org.tomlj.Toml.parse} (https://tomlj.org)
    */
+  @Deprecated
   public static TomlParseResult parse(String input) {
     return parse(input, TomlVersion.LATEST);
   }
@@ -50,7 +55,9 @@ public final class Toml {
    * @param input The input to parse.
    * @param version The version level to parse at.
    * @return The parse result.
+   * @deprecated Replaced by {@code org.tomlj.Toml.parse} (https://tomlj.org)
    */
+  @Deprecated
   public static TomlParseResult parse(String input, TomlVersion version) {
     CharStream stream = CharStreams.fromString(input);
     return Parser.parse(stream, version.canonical);
@@ -62,7 +69,9 @@ public final class Toml {
    * @param file The input file to parse.
    * @return The parse result.
    * @throws IOException If an IO error occurs.
+   * @deprecated Replaced by {@code org.tomlj.Toml.parse} (https://tomlj.org)
    */
+  @Deprecated
   public static TomlParseResult parse(Path file) throws IOException {
     return parse(file, TomlVersion.LATEST);
   }
@@ -74,7 +83,9 @@ public final class Toml {
    * @param version The version level to parse at.
    * @return The parse result.
    * @throws IOException If an IO error occurs.
+   * @deprecated Replaced by {@code org.tomlj.Toml.parse} (https://tomlj.org)
    */
+  @Deprecated
   public static TomlParseResult parse(Path file, TomlVersion version) throws IOException {
     CharStream stream = CharStreams.fromPath(file);
     return Parser.parse(stream, version.canonical);
@@ -86,7 +97,9 @@ public final class Toml {
    * @param is The input stream to read the TOML document from.
    * @return The parse result.
    * @throws IOException If an IO error occurs.
+   * @deprecated Replaced by {@code org.tomlj.Toml.parse} (https://tomlj.org)
    */
+  @Deprecated
   public static TomlParseResult parse(InputStream is) throws IOException {
     return parse(is, TomlVersion.LATEST);
   }
@@ -98,7 +111,9 @@ public final class Toml {
    * @param version The version level to parse at.
    * @return The parse result.
    * @throws IOException If an IO error occurs.
+   * @deprecated Replaced by {@code org.tomlj.Toml.parse} (https://tomlj.org)
    */
+  @Deprecated
   public static TomlParseResult parse(InputStream is, TomlVersion version) throws IOException {
     CharStream stream = CharStreams.fromStream(is);
     return Parser.parse(stream, version.canonical);
@@ -110,7 +125,9 @@ public final class Toml {
    * @param reader The reader to obtain the TOML document from.
    * @return The parse result.
    * @throws IOException If an IO error occurs.
+   * @deprecated Replaced by {@code org.tomlj.Toml.parse} (https://tomlj.org)
    */
+  @Deprecated
   public static TomlParseResult parse(Reader reader) throws IOException {
     return parse(reader, TomlVersion.LATEST);
   }
@@ -122,7 +139,9 @@ public final class Toml {
    * @param version The version level to parse at.
    * @return The parse result.
    * @throws IOException If an IO error occurs.
+   * @deprecated Replaced by {@code org.tomlj.Toml.parse} (https://tomlj.org)
    */
+  @Deprecated
   public static TomlParseResult parse(Reader reader, TomlVersion version) throws IOException {
     CharStream stream = CharStreams.fromReader(reader);
     return Parser.parse(stream, version.canonical);
@@ -134,7 +153,9 @@ public final class Toml {
    * @param channel The channel to read the TOML document from.
    * @return The parse result.
    * @throws IOException If an IO error occurs.
+   * @deprecated Replaced by {@code org.tomlj.Toml.parse} (https://tomlj.org)
    */
+  @Deprecated
   public static TomlParseResult parse(ReadableByteChannel channel) throws IOException {
     return parse(channel, TomlVersion.LATEST);
   }
@@ -146,7 +167,9 @@ public final class Toml {
    * @param version The version level to parse at.
    * @return The parse result.
    * @throws IOException If an IO error occurs.
+   * @deprecated Replaced by {@code org.tomlj.Toml.parse} (https://tomlj.org)
    */
+  @Deprecated
   public static TomlParseResult parse(ReadableByteChannel channel, TomlVersion version) throws IOException {
     CharStream stream = CharStreams.fromChannel(channel);
     return Parser.parse(stream, version.canonical);
@@ -158,7 +181,9 @@ public final class Toml {
    * @param dottedKey A dotted key (e.g. {@code server.address.port}).
    * @return A list of individual keys in the path.
    * @throws IllegalArgumentException If the dotted key cannot be parsed.
+   * @deprecated Replaced by {@code org.tomlj.Toml.parseDottedKey} (https://tomlj.org)
    */
+  @Deprecated
   public static List<String> parseDottedKey(String dottedKey) {
     requireNonNull(dottedKey);
     return Parser.parseDottedKey(dottedKey);
@@ -169,7 +194,9 @@ public final class Toml {
    *
    * @param path The list of keys that form the path.
    * @return The path string.
+   * @deprecated Replaced by {@code org.tomlj.Toml.joinKeyPath} (https://tomlj.org)
    */
+  @Deprecated
   public static String joinKeyPath(List<String> path) {
     requireNonNull(path);
 
@@ -190,7 +217,9 @@ public final class Toml {
    * @param dottedKey A dotted key (e.g. {@code server.address.port}).
    * @return The canonical form of the dotted key.
    * @throws IllegalArgumentException If the dotted key cannot be parsed.
+   * @deprecated Replaced by {@code org.tomlj.Toml.canonicalDottedKey} (https://tomlj.org)
    */
+  @Deprecated
   public static String canonicalDottedKey(String dottedKey) {
     return joinKeyPath(parseDottedKey(dottedKey));
   }
@@ -200,7 +229,9 @@ public final class Toml {
    *
    * @param text The text string to escape.
    * @return A {@link StringBuilder} holding the results of escaping the text.
+   * @deprecated Replaced by {@code org.tomlj.Toml.tomlEscape} (https://tomlj.org)
    */
+  @Deprecated
   public static StringBuilder tomlEscape(String text) {
     final StringBuilder out = new StringBuilder();
     for (int i = 0; i < text.length(); i++) {

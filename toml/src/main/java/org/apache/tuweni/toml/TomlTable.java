@@ -35,7 +35,10 @@ import javax.annotation.Nullable;
 
 /**
  * An interface for accessing data stored in Tom's Obvious, Minimal Language (TOML).
+ *
+ * @deprecated Replaced by {@code org.tomlj.TomlTable} (https://tomlj.org)
  */
+@Deprecated
 public interface TomlTable {
 
   /**

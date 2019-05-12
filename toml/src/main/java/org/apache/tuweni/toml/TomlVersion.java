@@ -16,7 +16,10 @@ import javax.annotation.Nullable;
 
 /**
  * Supported TOML specification versions.
+ *
+ * @deprecated Replaced by {@code org.tomlj.TomlVersion} (https://tomlj.org)
  */
+@Deprecated
 public enum TomlVersion {
   /**
    * The 0.4.0 version of TOML.

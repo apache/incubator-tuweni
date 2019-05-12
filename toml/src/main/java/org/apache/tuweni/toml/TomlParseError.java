@@ -14,7 +14,10 @@ package org.apache.tuweni.toml;
 
 /**
  * An error that occurred while parsing.
+ *
+ * @deprecated Replaced by {@code org.tomlj.TomlParseError} (https://tomlj.org)
  */
+@Deprecated
 public final class TomlParseError extends RuntimeException {
 
   private final TomlPosition position;

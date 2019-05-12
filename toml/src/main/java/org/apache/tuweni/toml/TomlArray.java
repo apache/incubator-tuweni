@@ -24,7 +24,10 @@ import java.util.List;
 
 /**
  * An array of TOML values.
+ *
+ * @deprecated Replaced by {@code org.tomlj.TomlArray} (https://tomlj.org)
  */
+@Deprecated
 public interface TomlArray {
 
   /**
