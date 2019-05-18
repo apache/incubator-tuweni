@@ -41,7 +41,13 @@ class ResourcesTest {
   @SuppressWarnings("MustBeClosedChecker")
   void shouldIterateResourcesOnFileSystemAndInJars() throws Exception {
     List<URL> all = Resources.find("org/apache/tuweni/io/file/resourceresolver/**").collect(Collectors.toList());
-    assertEquals(12, all.size(), () -> describeExpectation(12, all));
+    String version = System.getProperty("java.version");
+    // Java 8 captures the root entry of the folder in the jar.
+    if (version.startsWith("1.")) {
+      assertEquals(13, all.size(), () -> describeExpectation(13, all));
+    } else {
+      assertEquals(12, all.size(), () -> describeExpectation(12, all));
+    }
 
     List<URL> txtFiles = Resources.find("org/**/test*.txt").collect(Collectors.toList());
     assertEquals(6, txtFiles.size(), () -> describeExpectation(6, txtFiles));
