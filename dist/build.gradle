@@ -61,8 +61,16 @@ distributions {
   sources {
     baseName = 'tuweni-src'
     contents {
-      from rootProject.projectDir
-      include 'LICENCE', '*.md', 'NOTICE', '*.gradle', 'DISCLAIMER', 'gradle/**', 'gradlew', 'gradle.properties'
+      into('') {
+        from ".."
+        include '*.md'
+        include 'NOTICE'
+        include '*.gradle'
+        include 'gradle/**'
+        include 'gradlew'
+        include 'gradle.properties'
+        include 'LICENSE'
+      }
       rootProject.subprojects.each {
         include it.projectDir.name + '/src/**'
         include it.projectDir.name + '/build.gradle'
