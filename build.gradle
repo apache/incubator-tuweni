@@ -102,13 +102,13 @@ subprojects {
         exclude '**/generated-src/**/*.*'
       }
       removeUnusedImports()
-      licenseHeaderFile rootProject.file('gradle/spotless.license.java')
+      licenseHeaderFile rootProject.file('gradle/spotless.license.txt')
       eclipse().configFile(rootProject.file('gradle/eclipse-java-consensys-style.xml'))
       importOrder 'org.apache', 'java', ''
       endWithNewline()
     }
     kotlin {
-      licenseHeaderFile rootProject.file('gradle/spotless.license.java')
+      licenseHeaderFile rootProject.file('gradle/spotless.license.txt')
       ktlint().userData(['indent_size': '2', 'continuation_indent_size' : '2', 'max_line_length': '120'])
       endWithNewline()
     }
