@@ -29,6 +29,7 @@ distributions {
         include 'LICENSE'
         include 'NOTICE'
       }
+      into('licenses') { from '../build/reports/license' }
       def docs = []
       def libs = []
       def sources = []
@@ -61,11 +62,17 @@ distributions {
   sources {
     baseName = 'tuweni-src'
     contents {
+      into('licenses') {
+        from '../build/reports/license'
+        include '*'
+      }
       into('') {
         from ".."
         include '*.md'
         include 'NOTICE'
-        include '*.gradle'
+        include 'build.gradle'
+        include 'dependency-versions.gradle'
+        include 'settings.gradle'
         include 'gradle/**'
         include 'gradlew'
         include 'gradle.properties'
@@ -87,6 +94,7 @@ distributions {
         include 'LICENSE'
         include 'NOTICE'
       }
+      into('licenses') { from '../build/reports/license' }
       into('bin') {
         from { project(':gossip').startScripts.outputs.files }
         fileMode = 0755
