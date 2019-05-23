@@ -187,24 +187,30 @@ public final class VertxGossipServer {
     if (!started.get()) {
       throw new IllegalStateException("Server has not started");
     }
+
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
     AtomicInteger counter = new AtomicInteger(0);
-    while (!completion.isDone()) {
-      client.connect(port, host, res -> {
-        if (res.failed()) {
-          if (counter.incrementAndGet() > 5) {
-            completion.completeExceptionally(res.cause());
-          }
-        } else {
-          completion.complete();
-          Peer peer = new SocketPeer(res.result());
-          SocketHandler handler = new SocketHandler(peer);
-          res.result().handler(handler::handle).closeHandler(handler::close);
-        }
-      });
-    }
+
+    roundConnect(host, port, counter, completion);
 
     return completion;
+  }
+
+  private void roundConnect(String host, int port, AtomicInteger counter, CompletableAsyncCompletion completion) {
+    client.connect(port, host, res -> {
+      if (res.failed()) {
+        if (counter.incrementAndGet() > 5) {
+          completion.completeExceptionally(res.cause());
+        } else {
+          roundConnect(host, port, counter, completion);
+        }
+      } else {
+        Peer peer = new SocketPeer(res.result());
+        SocketHandler handler = new SocketHandler(peer);
+        res.result().handler(handler::handle).closeHandler(handler::close);
+        completion.complete();
+      }
+    });
   }
 
   /**
