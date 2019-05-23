@@ -131,8 +131,6 @@ final class SecureScuttlebuttStream implements SecureScuttlebuttStreamClient, Se
       destroyIfNonNull(headerNonce);
       destroyIfNonNull(bodyNonce);
     }
-
-
   }
 
   private Bytes encrypt(Bytes message, SecretBox.Key clientToServerKey, MutableBytes clientToServerNonce) {
@@ -173,8 +171,4 @@ final class SecureScuttlebuttStream implements SecureScuttlebuttStreamClient, Se
       nonce.destroy();
     }
   }
-
-
-
-
 }
