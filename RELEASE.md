@@ -45,7 +45,17 @@ export BUILD_RELEASE=true
 
 Build the artifacts
 ```
-./gradlew assemble
+./gradlew build
+```
+
+Check the sha512 signatures match
+```
+shasum -a 512 dist/build/distributions/tuweni-bin-${RELEASE VERSION}.tgz
+shasum -a 512 dist/build/distributions/tuweni-bin-${RELEASE VERSION}.zip
+shasum -a 512 dist/build/distributions/tuweni-src-${RELEASE VERSION}.tgz
+shasum -a 512 dist/build/distributions/tuweni-src-${RELEASE VERSION}.zip
+shasum -a 512 dist/build/distributions/tuweni-gossip-${RELEASE VERSION}.tgz
+shasum -a 512 dist/build/distributions/tuweni-gossip-${RELEASE VERSION}.zip
 ```
 
 Sign and publish
