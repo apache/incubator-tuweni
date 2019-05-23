@@ -311,12 +311,6 @@ allprojects {
     }
 
     publishing {
-      repositories {
-        maven {
-
-          //def url = "https://api.bintray.com/maven/openlawteam/maven/incubator-tuweni"
-        }
-      }
       publications {
         MavenDeployment(MavenPublication) { publication ->
           if (project != rootProject) {
