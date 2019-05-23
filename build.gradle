@@ -293,37 +293,8 @@ allprojects {
     publishing {
       repositories {
         maven {
-          def isRelease = buildVersion.endsWith('SNAPSHOT')
-          def releasesRepoUrl = "https://repository.apache.org/service/local/staging/deploy/maven2"
-          def snapshotsRepoUrl = "https://repository.apache.org/content/repositories/snapshots"
-          url = isRelease ? snapshotsRepoUrl : releasesRepoUrl
-
-          def settingsXml = new File(System.getProperty('user.home'), '.m2/settings.xml')
-
-          def credentialsFound = false;
-          if (settingsXml.exists()) {
-            project.logger.info('Reading .m2/settings.xml')
-            def serverId = (project.properties['distMgmtServerId'] ?: isRelease
-              ? 'apache.releases.https' : 'apache.snapshots.https')
-            def m2SettingCreds = new XmlSlurper().parse(settingsXml).servers.server.find { server -> serverId.equals(server.id.text()) }
-            if (m2SettingCreds) {
-              project.logger.info('Found matching credentials from .m2/settings.xml')
-              credentials {
-                username m2SettingCreds.username.text()
-                password m2SettingCreds.password.text()
-              }
-              credentialsFound = true
-            }
-          }
-
-          if (!credentialsFound) {
-            project.logger.info('Reading credentials from environment')
-            project.logger.info('Username ' + asfNexusUsername)
-            credentials {
-              username asfNexusUsername
-              password asfNexusPassword
-            }
-          }
+         
+          //def url = "https://api.bintray.com/maven/openlawteam/maven/incubator-tuweni"
         }
       }
       publications {
@@ -333,14 +304,14 @@ allprojects {
             artifact sourcesJar { classifier 'sources' }
           }
           artifact dokkaJar { classifier 'javadoc' }
-          groupId 'org.apache.tuweni'
+          groupId 'org.openlaw'
           artifactId project.jar.baseName
           version project.version
 
           pom {
             name = project.jar.baseName
             afterEvaluate { description = project.description }
-            url = 'https://github.com/apache/incubator-tuweni'
+            url = 'https://github.com/openlawteam/incubator-tuweni'
             licenses {
               license {
                 name = "The Apache License, Version 2.0"
@@ -348,26 +319,23 @@ allprojects {
               }
             }
             scm {
-              connection = 'scm:https://github.com/apache/incubator-tuweni.git'
-              developerConnection = 'scm:git@github.com:apache/incubator-tuweni.git'
-              url = 'https://github.com/apache/incubator-tuweni'
+              connection = 'scm:https://github.com/openlawteam/incubator-tuweni.git'
+              developerConnection = 'scm:git@github.com:openlawteam/incubator-tuweni.git'
+              url = 'https://github.com/openlawteam/incubator-tuweni'
             }
             developers {
               developer {
-                name = 'Antoine Toulme'
-                email = 'antoine@lunar-ocean.com'
-                organization = 'Apache'
-                organizationUrl = 'https://tuweni.apache.org'
+                name = 'David Roon'
+                email = 'david@roon.me'
+                organization = 'OpenLaw'
+                organizationUrl = 'https://openlaw.io'
               }
               developer {
-                name = 'Jonny Rhea'
-                organization = 'Apache'
-                organizationUrl = 'https://tuweni.apache.org'
+                name = 'Jacqueline Outka'
+                email = 'jacqueline@outka.xyz'
+                organization = 'OpenLaw'
+                organizationUrl = 'https://openlaw.io'
               }
-            }
-            issueManagement {
-              system = "jira"
-              url = "https://issues.apache.org/jira/projects/TUWENI"
             }
           }
 
@@ -382,7 +350,7 @@ allprojects {
             def addDependencyNode = { dep, optional ->
               def dependencyNode = dependenciesNode.appendNode('dependency')
               if (dep instanceof ProjectDependency) {
-                dependencyNode.appendNode('groupId', 'org.apache.tuweni')
+                dependencyNode.appendNode('groupId', 'org.openlaw')
                 dependencyNode.appendNode('artifactId', rootProject.name + '-' + dep.name)
                 dependencyNode.appendNode('version', dep.version)
               } else {
@@ -516,7 +484,7 @@ dokka {
   })
   linkMapping {
     dir = rootDir.toString()
-    url = "https://github.com/apache/incubator-tuweni/blob/master"
+    url = "https://github.com/openlawteam/incubator-tuweni/blob/master"
     suffix = "#L"
   }
 
