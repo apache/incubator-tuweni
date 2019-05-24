@@ -193,7 +193,7 @@ public final class SecretBox {
   /**
    * A SecretBox nonce.
    */
-  public static final class Nonce {
+  public static final class Nonce implements Destroyable {
     final Allocated value;
 
     private Nonce(Pointer ptr, int length) {
@@ -258,6 +258,11 @@ public final class SecretBox {
         Sodium.sodium_free(ptr);
         throw e;
       }
+    }
+
+    @Override
+    public void destroy() {
+      this.value.destroy();
     }
 
     /**
