@@ -93,6 +93,7 @@ subprojects {
   // Source formatting
 
   apply plugin: 'com.diffplug.gradle.spotless'
+  apply plugin: 'com.jfrog.bintray'
   spotless {
     java {
       target project.fileTree(project.projectDir) {
@@ -143,6 +144,7 @@ allprojects {
   apply plugin: 'maven-publish'
   apply plugin: 'org.jetbrains.dokka'
   apply plugin: 'signing'
+  apply plugin: 'com.jfrog.bintray'
   apply from: "${rootDir}/dependency-versions.gradle"
   apply from: "${rootDir}/gradle/check-licenses.gradle"
 
