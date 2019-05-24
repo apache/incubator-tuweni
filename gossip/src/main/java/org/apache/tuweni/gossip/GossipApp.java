@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.security.Security;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.concurrent.CompletionException;
@@ -39,6 +40,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerRequest;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import picocli.CommandLine;
 
 /**
@@ -48,6 +50,7 @@ import picocli.CommandLine;
 public final class GossipApp {
 
   public static void main(String[] args) {
+    Security.addProvider(new BouncyCastleProvider());
     GossipCommandLineOptions opts = CommandLine.populateCommand(new GossipCommandLineOptions(), args);
     try {
       opts.validate();
@@ -61,9 +64,11 @@ public final class GossipApp {
       System.exit(0);
     }
     GossipApp gossipApp = new GossipApp(Vertx.vertx(), opts, System.err, System.out, () -> System.exit(1));
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> gossipApp.stop()));
+    Runtime.getRuntime().addShutdownHook(new Thread(gossipApp::stop));
     gossipApp.start();
   }
+
+
 
   private final GossipCommandLineOptions opts;
   private final Runnable terminateFunction;
@@ -79,6 +84,7 @@ public final class GossipApp {
       PrintStream outStream,
       Runnable terminateFunction) {
     EphemeralPeerRepository repository = new EphemeralPeerRepository();
+    outStream.println("Setting up server on " + opts.networkInterface() + ":" + opts.listenPort());
     server = new VertxGossipServer(
         vertx,
         opts.networkInterface(),
@@ -95,6 +101,7 @@ public final class GossipApp {
   }
 
   void start() {
+    outStream.println("Starting gossip");
     AsyncCompletion completion = server.start();
     try {
       completion.join();
@@ -102,6 +109,7 @@ public final class GossipApp {
       errStream.println("Server could not start: " + e.getMessage());
       terminateFunction.run();
     }
+    outStream.println("TCP server started");
 
     CompletableAsyncCompletion rpcCompletion = AsyncCompletion.incomplete();
     rpcServer.requestHandler(this::handleRPCRequest).listen(opts.rpcPort(), opts.networkInterface(), res -> {
@@ -117,6 +125,7 @@ public final class GossipApp {
       errStream.println("RPC server could not start: " + e.getMessage());
       terminateFunction.run();
     }
+    outStream.println("RPC server started");
 
     try {
       AsyncCompletion
@@ -125,6 +134,7 @@ public final class GossipApp {
     } catch (TimeoutException | InterruptedException e) {
       errStream.println("Server could not connect to other peers: " + e.getMessage());
     }
+    outStream.println("Gossip started");
   }
 
   private void handleRPCRequest(HttpServerRequest httpServerRequest) {
@@ -143,6 +153,7 @@ public final class GossipApp {
   }
 
   void stop() {
+    outStream.println("Stopping gossip");
     try {
       server.stop().join();
     } catch (InterruptedException e) {
@@ -161,6 +172,7 @@ public final class GossipApp {
     try {
       rpcCompletion.join();
     } catch (CompletionException | InterruptedException e) {
+      outStream.println("Stopped gossip");
       errStream.println("RPC server could not stop: " + e.getMessage());
       terminateFunction.run();
     }
@@ -184,6 +196,7 @@ public final class GossipApp {
   }
 
   public void publish(Bytes message) {
+    outStream.println("Message to publish " + message.toHexString());
     server.gossip("", message);
   }
 }

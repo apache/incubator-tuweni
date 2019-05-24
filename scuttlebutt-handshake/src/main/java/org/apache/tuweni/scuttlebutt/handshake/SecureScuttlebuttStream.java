@@ -103,26 +103,34 @@ final class SecureScuttlebuttStream implements SecureScuttlebuttStreamClient, Se
     if (message.size() < 34) {
       return null;
     }
-    MutableBytes snapshotNonce = nonce.mutableCopy();
-    SecretBox.Nonce headerNonce = SecretBox.Nonce.fromBytes(snapshotNonce);
-    SecretBox.Nonce bodyNonce = SecretBox.Nonce.fromBytes(snapshotNonce.increment());
-    Bytes decryptedHeader = SecretBox.decrypt(message.slice(0, 34), key, headerNonce);
 
-    if (decryptedHeader == null) {
-      throw new StreamException("Failed to decrypt message header");
-    }
+    SecretBox.Nonce headerNonce = null;
+    SecretBox.Nonce bodyNonce = null;
+    try {
+      MutableBytes snapshotNonce = nonce.mutableCopy();
+      headerNonce = SecretBox.Nonce.fromBytes(snapshotNonce);
+      bodyNonce = SecretBox.Nonce.fromBytes(snapshotNonce.increment());
+      Bytes decryptedHeader = SecretBox.decrypt(message.slice(0, 34), key, headerNonce);
 
-    int bodySize = ((decryptedHeader.get(0) & 0xFF) << 8) + (decryptedHeader.get(1) & 0xFF);
-    if (message.size() < bodySize + 34) {
-      return null;
+      if (decryptedHeader == null) {
+        throw new StreamException("Failed to decrypt message header");
+      }
+
+      int bodySize = ((decryptedHeader.get(0) & 0xFF) << 8) + (decryptedHeader.get(1) & 0xFF);
+      if (message.size() < bodySize + 34) {
+        return null;
+      }
+      Bytes body = message.slice(34, bodySize);
+      Bytes decryptedBody = SecretBox.decrypt(Bytes.concatenate(decryptedHeader.slice(2), body), key, bodyNonce);
+      if (decryptedBody == null) {
+        throw new StreamException("Failed to decrypt message");
+      }
+      nonce.increment().increment();
+      return decryptedBody;
+    } finally {
+      destroyIfNonNull(headerNonce);
+      destroyIfNonNull(bodyNonce);
     }
-    Bytes body = message.slice(34, bodySize);
-    Bytes decryptedBody = SecretBox.decrypt(Bytes.concatenate(decryptedHeader.slice(2), body), key, bodyNonce);
-    if (decryptedBody == null) {
-      throw new StreamException("Failed to decrypt message");
-    }
-    nonce.increment().increment();
-    return decryptedBody;
   }
 
   private Bytes encrypt(Bytes message, SecretBox.Key clientToServerKey, MutableBytes clientToServerNonce) {
@@ -139,14 +147,28 @@ final class SecureScuttlebuttStream implements SecureScuttlebuttStreamClient, Se
   }
 
   private Bytes encryptMessage(Bytes message, SecretBox.Key key, MutableBytes nonce) {
-    SecretBox.Nonce headerNonce = SecretBox.Nonce.fromBytes(nonce);
-    SecretBox.Nonce bodyNonce = SecretBox.Nonce.fromBytes(nonce.increment());
-    nonce.increment();
-    Bytes encryptedBody = SecretBox.encrypt(message, key, bodyNonce);
-    int bodySize = encryptedBody.size() - 16;
-    Bytes encodedBodySize = Bytes.ofUnsignedInt(bodySize).slice(2);
-    Bytes header = SecretBox.encrypt(Bytes.concatenate(encodedBodySize, encryptedBody.slice(0, 16)), key, headerNonce);
+    SecretBox.Nonce headerNonce = null;
+    SecretBox.Nonce bodyNonce = null;
+    try {
+      headerNonce = SecretBox.Nonce.fromBytes(nonce);
+      bodyNonce = SecretBox.Nonce.fromBytes(nonce.increment());
+      nonce.increment();
+      Bytes encryptedBody = SecretBox.encrypt(message, key, bodyNonce);
+      int bodySize = encryptedBody.size() - 16;
+      Bytes encodedBodySize = Bytes.ofUnsignedInt(bodySize).slice(2);
+      Bytes header = SecretBox.encrypt(Bytes.concatenate(encodedBodySize, encryptedBody.slice(0, 16)), key, headerNonce);
 
-    return Bytes.concatenate(header, encryptedBody.slice(16));
+      return Bytes.concatenate(header, encryptedBody.slice(16));
+    } finally {
+      destroyIfNonNull(headerNonce);
+      destroyIfNonNull(bodyNonce);
+    }
+
+  }
+
+  private void destroyIfNonNull(SecretBox.Nonce nonce) {
+    if (nonce != null) {
+      nonce.destroy();
+    }
   }
 }

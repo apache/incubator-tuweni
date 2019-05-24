@@ -166,13 +166,14 @@ class VertxGossipServerTest {
     server1.connectTo("127.0.0.1", 10001).join();
     server2.connectTo("127.0.0.1", 10002).join();
     server1.connectTo("127.0.0.1", 10002).join();
+    assertEquals(2, peerRepository1.eagerPushPeers().size());
     String attributes = "{\"message_type\": \"BLOCK\"}";
     server1.gossip(attributes, Bytes.fromHexString("deadbeef"));
     Thread.sleep(1000);
     assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.get());
     Thread.sleep(1000);
 
-    assertTrue(peerRepository1.lazyPushPeers().size() > 1 || peerRepository3.lazyPushPeers().size() > 1);
+    assertTrue(peerRepository1.lazyPushPeers().size() > 0 || peerRepository3.lazyPushPeers().size() > 0);
 
     server1.stop().join();
     server2.stop().join();
