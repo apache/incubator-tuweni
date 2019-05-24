@@ -294,10 +294,10 @@ allprojects {
     bintray {
       user = System.getenv('BINTRAY_USER')
       key = System.getenv('BINTRAY_PASS')
+      publications = ['MavenDeployment'] 
       pkg {
-        repo = 'openlawteam'
+        repo = 'forks'
         name = 'incubator-tuweni'
-        userOrg = 'openlawos'
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/openlawteam/incubator-tuweni.git'
         version {
