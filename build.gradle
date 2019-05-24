@@ -51,10 +51,7 @@ def versionNumber = '0.8.0'
 def buildVersion = versionNumber + buildTag()
 
 static String buildTag() {
-  if (System.getenv('BUILD_RELEASE') == 'true') {
     return ''
-  }
-  return '-SNAPSHOT'
 }
 
 
@@ -294,17 +291,17 @@ allprojects {
     bintray {
       user = System.getenv('BINTRAY_USER')
       key = System.getenv('BINTRAY_PASS')
-      publications = ['MavenDeployment'] 
+      publications = ['MavenDeployment']
       pkg {
         repo = 'forks'
         name = 'incubator-tuweni'
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/openlawteam/incubator-tuweni.git'
         version {
-          name = '1.0.0'
-          desc = 'OpenLaw version of Tuweni 1.0.0'
+          name = '0.8.0'
+          desc = 'OpenLaw version of Tuweni 0.8.0'
           released  = new Date()
-          vcsTag = '1.0.0'
+          vcsTag = '0.8.0'
           attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
         }
       }
