@@ -22,11 +22,11 @@ With Maven:
 <dependency>
   <groupId>org.apache.tuweni</groupId>
   <artifactId>tuweni</artifactId>
-  <version>1.0.0</version>
+  <version>0.7.0</version>
 </dependency>
 ```
 
-With Gradle: `compile 'org.apache.tuweni:tuweni:1.0.0'`
+With Gradle: `compile 'org.apache.tuweni:tuweni:0.7.0'`
 
 [PACKAGES.md](PACKAGES.md) contains the list of modules and instructions to import them separately.
 
@@ -54,7 +54,7 @@ With Maven, add this repository with:
 <dependency>
   <groupId>org.apache.tuweni</groupId>
   <artifactId>tuweni</artifactId>
-  <version>1.1.0-SNAPSHOT</version>
+  <version>0.8.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -63,7 +63,7 @@ With gradle:
 maven { url "https://repository.apache.org/snapshots"}
 ```
 
-`compile 'org.apache.tuweni:tuweni:1.1.0-SNAPSHOT'`
+`compile 'org.apache.tuweni:tuweni:0.8.0-SNAPSHOT'`
 
 ## Build Instructions
 
@@ -81,14 +81,14 @@ After a successful build, libraries will be available in `build/libs`.
 
 Your contributions are very welcome! Here are a few links to help you:
 
-- [Issue tracker: Report a defect or feature request](https://github.com/apache/incubator-tuweni/issues/new)
+- [Issue tracker: Report a defect or feature request](https://issues.apache.org/jira/projects/TUWENI/issues)
 - [StackOverflow: Ask "how-to" and "why-didn't-it-work" questions](https://stackoverflow.com/questions/ask?tags=tuweni)
 
 ## Mailing lists
 
-- [users@tuweni.incubator.apache.org](users@tuweni.incubator.apache.org) is for usage questions, help, and announcements. [subscribe](users-subscribe@tuweni.incubator.apache.org?subject=send%20this%20email%20to%20subscribe), [unsubscribe](dev-unsubscribe@tuweni.incubator.apache.org?subject=send%20this%20email%20to%20unsubscribe), [archives](https://www.mail-archive.com/users@tuweni.incubator.apache.org/)
-- [dev@tuweni.incubator.apache.org](dev@tuweni.incubator.apache.org) is for people who want to contribute code to Tuweni. [subscribe](dev-subscribe@tuweni.incubator.apache.org?subject=send%20this%20email%20to%20subscribe), [unsubscribe](dev-unsubscribe@tuweni.incubator.apache.org?subject=send%20this%20email%20to%20unsubscribe), [archives](https://www.mail-archive.com/dev@tuweni.incubator.apache.org/)
-- [commits@tuweni.incubator.apache.org](commits@tuweni.incubator.apache.org) is for commit messages and patches to Tuweni. [subscribe](commits-subscribe@tuweni.incubator.apache.org?subject=send%20this%20email%20to%20subscribe), [unsubscribe](commits-unsubscribe@tuweni.incubator.apache.org?subject=send%20this%20email%20to%20unsubscribe), [archives](https://www.mail-archive.com/commits@tuweni.incubator.apache.org/)
+- [users@tuweni.incubator.apache.org](users@tuweni.apache.org) is for usage questions, help, and announcements. [subscribe](users-subscribe@tuweni.apache.org?subject=send%20this%20email%20to%20subscribe), [unsubscribe](dev-unsubscribe@tuweni.apache.org?subject=send%20this%20email%20to%20unsubscribe), [archives](https://www.mail-archive.com/users@tuweni.apache.org/)
+- [dev@tuweni.incubator.apache.org](dev@tuweni.apache.org) is for people who want to contribute code to Tuweni. [subscribe](dev-subscribe@tuweni.apache.org?subject=send%20this%20email%20to%20subscribe), [unsubscribe](dev-unsubscribe@tuweni.apache.org?subject=send%20this%20email%20to%20unsubscribe), [archives](https://www.mail-archive.com/dev@tuweni.apache.org/)
+- [commits@tuweni.incubator.apache.org](commits@tuweni.apache.org) is for commit messages and patches to Tuweni. [subscribe](commits-subscribe@tuweni.apache.org?subject=send%20this%20email%20to%20subscribe), [unsubscribe](commits-unsubscribe@tuweni.apache.org?subject=send%20this%20email%20to%20unsubscribe), [archives](https://www.mail-archive.com/commits@tuweni.apache.org/)
 
 ## More information
 
