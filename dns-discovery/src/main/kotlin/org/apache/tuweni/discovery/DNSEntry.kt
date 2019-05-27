@@ -48,7 +48,7 @@ internal interface DNSEntry {
       } else if (attrs.containsKey("enrtree-link")) {
         return ENRTreeLink(attrs)
       } else {
-        throw InvalidEntryException("$serialized should contain enrtree, enrtree-root or enrtree-link")
+        throw InvalidEntryException("$serialized should contain enrtree, enr, enrtree-root or enrtree-link")
       }
     }
   }
@@ -82,24 +82,36 @@ class ENRTreeRoot(attrs: Map<String, String>) : DNSEntry {
     sig = SECP256K1.Signature.fromBytes(Base64URLSafe.decode(attrs["sig"]!!))
     hash = Base32.decode(attrs["hash"]!!)
   }
+
+  override fun toString(): String {
+    val encodedHash = Base32.encode(hash)
+    return "enrtree-root=$version hash=${encodedHash.subSequence(0, encodedHash.indexOf("="))} seq=$seq sig=${Base64URLSafe.encode(sig.bytes())}"
+  }
 }
 
 class ENRTree(attrs: Map<String, String>) : DNSEntry {
 
+  val entries: List<String>
   init {
-    if (attrs["enrtree"] == null) {
-      throw InvalidEntryException("Missing attributes on enrtree entry")
-    }
+    val attr = attrs["enrtree"] ?: throw InvalidEntryException("Missing attributes on enrtree entry")
+    entries = attr.split(",")
+  }
+
+  override fun toString(): String {
+    return "enrtree=${entries.joinToString(",")}"
   }
 }
+
 class ENRTreeLink(attrs: Map<String, String>) : DNSEntry {
 
   val domainName: String
   init {
-    if (attrs["enrtree-link"] == null) {
-      throw InvalidEntryException("Missing attributes on enrtree-link entry")
-    }
-    domainName = attrs["enrtree-link"]!!
+    val attr = attrs["enrtree-link"] ?: throw InvalidEntryException("Missing attributes on enrtree-link entry")
+    domainName = attr
+  }
+
+  override fun toString(): String {
+    return "enrtree-link=$domainName"
   }
 }
 
