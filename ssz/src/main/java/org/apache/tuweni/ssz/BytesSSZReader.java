@@ -1,8 +1,8 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
- * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
- * to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
- * License. You may obtain a copy of the License at
+ * Copyright 2018 ConsenSys AG.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -54,6 +54,12 @@ final class BytesSSZReader implements SSZReader {
       throw new InvalidSSZTypeException("SSZ encoded data has insufficient bytes for decoded byte array length");
     }
     return consumeBytes(size);
+  }
+
+  @Override
+  public Bytes readFixedBytes(int byteLength, int limit) {
+    ensureBytes(byteLength, () -> "SSZ encoded data is not a fixed-length byte array");
+    return consumeBytes(byteLength);
   }
 
   @Override
@@ -127,6 +133,22 @@ final class BytesSSZReader implements SSZReader {
   @Override
   public List<Bytes> readBytesList(int limit) {
     return readList(remaining -> readByteArray(limit), Bytes::wrap);
+  }
+
+  @Override
+  public List<Bytes> readBytesList(long listSize, int limit) {
+    return readList(listSize, remaining -> readByteArray(limit), Bytes::wrap);
+  }
+
+  @Override
+  public List<Bytes> readFixedBytesList(long listSize, int byteLength, int limit) {
+    checkArgument(listSize <= Integer.MAX_VALUE, "Cannot read bytes list: expected length is too large");
+    return readFixedList(listSize, remaining -> readFixedByteArray(byteLength, limit), Bytes::wrap);
+  }
+
+  @Override
+  public List<Bytes> readFixedBytesList(int byteLength, int limit) {
+    return readFixedList(remaining -> readFixedByteArray(byteLength, limit), Bytes::wrap);
   }
 
   @Override
@@ -216,6 +238,69 @@ final class BytesSSZReader implements SSZReader {
         elements.add(converter.apply(bytes));
         listSize -= bytes.length;
         listSize -= 4;
+        if (listSize < 0) {
+          throw new InvalidSSZTypeException("SSZ encoded list length does not align with lengths of its elements");
+        }
+      }
+    } catch (Exception e) {
+      this.index = originalIndex;
+      throw e;
+    }
+    return elements;
+  }
+
+  private <T> List<T> readList(long listSize, LongFunction<byte[]> bytesSupplier, Function<byte[], T> converter) {
+    int originalIndex = this.index;
+    List<T> elements;
+    try {
+      elements = new ArrayList<>();
+      while (listSize > 0) {
+        byte[] bytes = bytesSupplier.apply(listSize);
+        elements.add(converter.apply(bytes));
+        listSize -= bytes.length;
+        listSize -= 4;
+        if (listSize < 0) {
+          throw new InvalidSSZTypeException("SSZ encoded list length does not align with lengths of its elements");
+        }
+      }
+    } catch (Exception e) {
+      this.index = originalIndex;
+      throw e;
+    }
+    return elements;
+  }
+
+  private <T> List<T> readFixedList(LongFunction<byte[]> bytesSupplier, Function<byte[], T> converter) {
+    int originalIndex = this.index;
+    List<T> elements;
+    try {
+      // use a long to simulate reading unsigned
+      long listSize = consumeBytes(4).toLong(LITTLE_ENDIAN);
+      elements = new ArrayList<>();
+      while (listSize > 0) {
+        byte[] bytes = bytesSupplier.apply(listSize);
+        elements.add(converter.apply(bytes));
+        listSize -= bytes.length;
+        if (listSize < 0) {
+          throw new InvalidSSZTypeException("SSZ encoded list length does not align with lengths of its elements");
+        }
+      }
+    } catch (Exception e) {
+      this.index = originalIndex;
+      throw e;
+    }
+    return elements;
+  }
+
+  private <T> List<T> readFixedList(long listSize, LongFunction<byte[]> bytesSupplier, Function<byte[], T> converter) {
+    int originalIndex = this.index;
+    List<T> elements;
+    try {
+      elements = new ArrayList<>();
+      while (listSize > 0) {
+        byte[] bytes = bytesSupplier.apply(listSize);
+        elements.add(converter.apply(bytes));
+        listSize -= bytes.length;
         if (listSize < 0) {
           throw new InvalidSSZTypeException("SSZ encoded list length does not align with lengths of its elements");
         }

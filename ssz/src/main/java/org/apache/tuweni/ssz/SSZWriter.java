@@ -1,8 +1,8 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
- * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
- * to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
- * License. You may obtain a copy of the License at
+ * Copyright 2018 ConsenSys AG.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -62,6 +62,17 @@ public interface SSZWriter {
    */
   default void writeBytes(byte[] value) {
     SSZ.encodeByteArrayTo(value, this::writeSSZ);
+  }
+
+  /**
+   * Encode a known fixed-length {@link Bytes} value to SSZ without the length mixin.
+   *
+   * @param byteLength the number of byts to write
+   * @param value the byte array to encode
+   * @throws IllegalArgumentException if the byteLength is not the same size as value.
+   */
+  default void writeFixedBytes(int byteLength, Bytes value) {
+    SSZ.encodeFixedBytesTo(byteLength, value, this::writeSSZ);
   }
 
   /**
@@ -283,6 +294,38 @@ public interface SSZWriter {
    */
   default void writeBytesList(List<? extends Bytes> elements) {
     SSZ.encodeBytesListTo(elements, this::writeSSZ);
+  }
+
+  /**
+   * Write a known-size fixed-length list of bytes. The list itself WILL NOT have a length mixin, but the elements WILL.
+   *
+   * @param listSize the number of elements in the list
+   * @param elements the bytes to write as a list
+   */
+  default void writeBytesList(long listSize, List<? extends Bytes> elements) {
+    SSZ.encodeBytesListTo(listSize, elements, this::writeSSZ);
+  }
+
+  /**
+   * Write a list of known-size homogenous bytes. The list itself WILL have a length mixin, but the elements WILL NOT.
+   *
+   * @param byteLength the number of bytes in each element
+   * @param elements the known-size bytes to write as a list
+   */
+  default void writeFixedBytesList(int byteLength, List<? extends Bytes> elements) {
+    SSZ.encodeFixedBytesListTo(byteLength, elements, this::writeSSZ);
+  }
+
+  /**
+   * Write a known-size fixed-length list of known-size homogenous bytes. Neither the list nor the elements in the list
+   * will have a length mixin.
+   *
+   * @param listSize the number of elements in the list
+   * @param byteLength the number of bytes in each element
+   * @param elements the bytes to write as a list
+   */
+  default void writeFixedBytesList(long listSize, int byteLength, List<? extends Bytes> elements) {
+    SSZ.encodeFixedBytesListTo(listSize, byteLength, elements, this::writeSSZ);
   }
 
   /**

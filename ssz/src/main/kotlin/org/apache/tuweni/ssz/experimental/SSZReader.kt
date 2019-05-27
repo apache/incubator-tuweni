@@ -10,36 +10,22 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.tuweni.ssz;
+package org.apache.tuweni.ssz.experimental
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.units.bigints.UInt256;
-import org.apache.tuweni.units.bigints.UInt384;
-
-import java.math.BigInteger;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.ssz.EndOfSSZException
+import org.apache.tuweni.ssz.InvalidSSZTypeException
+import org.apache.tuweni.units.bigints.UInt256
+import org.apache.tuweni.units.bigints.UInt384
+import java.math.BigInteger
+import java.nio.charset.StandardCharsets.UTF_8
 
 /**
  * A reader for consuming values from an SSZ encoded source.
  */
-public interface SSZReader {
-
-  /**
-   * Read bytes from the SSZ source.
-   *
-   * Note: prefer to use {@link #readBytes(int)} instead, especially when reading untrusted data.
-   *
-   * @return The bytes for the next value.
-   * @throws InvalidSSZTypeException If the next SSZ value is not a byte array, or is too large (greater than 2^32
-   *         bytes).
-   * @throws EndOfSSZException If there are no more SSZ values to read.
-   */
-  default Bytes readBytes() {
-    return readBytes(Integer.MAX_VALUE);
-  }
+// Does not extend org.apache.tuweni.ssz.SSZReader (unlike SSZWriter) as the return types vary for the UInt methods.
+@ExperimentalUnsignedTypes
+interface SSZReader {
 
   /**
    * Read bytes from the SSZ source.
@@ -49,47 +35,7 @@ public interface SSZReader {
    * @throws InvalidSSZTypeException If the next SSZ value is not a byte array, or would exceed the limit.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  Bytes readBytes(int limit);
-
-  /**
-   * Read a known size fixed-length bytes value from the SSZ source.
-   *
-   * Note: prefer to use {@link #readFixedBytes(int, int)} instead, especially when reading untrusted data.
-   *
-   * @param byteLength The number of fixed-length Bytes (no length mixin) to read.
-   * @return The bytes for the next value.
-   * @throws InvalidSSZTypeException If the next SSZ value is not a byte array, or is too large (greater than 2^32
-   *         bytes).
-   * @throws EndOfSSZException If there are no more SSZ values to read.
-   */
-  default Bytes readFixedBytes(int byteLength) {
-    return readFixedBytes(byteLength, Integer.MAX_VALUE);
-  }
-
-  /**
-   * Read a known size fixed-length bytes value from the SSZ source.
-   *
-   * @param byteLength The number of fixed-length Bytes (no length mixin) to read.
-   * @param limit The maximum number of bytes to read.
-   * @return The bytes for the next value.
-   * @throws InvalidSSZTypeException If the next SSZ value is not a byte array, or would exceed the limit.
-   * @throws EndOfSSZException If there are no more SSZ values to read.
-   */
-  Bytes readFixedBytes(int byteLength, int limit);
-
-  /**
-   * Read a byte array from the SSZ source.
-   *
-   * Note: prefer to use {@link #readByteArray(int)} instead, especially when reading untrusted data.
-   *
-   * @return The byte array for the next value.
-   * @throws InvalidSSZTypeException If the next SSZ value is not a byte array, or is too large (greater than 2^32
-   *         bytes).
-   * @throws EndOfSSZException If there are no more SSZ values to read.
-   */
-  default byte[] readByteArray() {
-    return readByteArray(Integer.MAX_VALUE);
-  }
+  fun readBytes(limit: Int): Bytes
 
   /**
    * Read a byte array from the SSZ source.
@@ -99,36 +45,7 @@ public interface SSZReader {
    * @throws InvalidSSZTypeException If the next SSZ value is not a byte array, or would exceed the limit.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default byte[] readByteArray(int limit) {
-    return readBytes(limit).toArrayUnsafe();
-  }
-
-  /**
-   * Read an array of fixed-length homogenous Bytes from the SSZ source.
-   *
-   * @param byteLength The number of fixed-length Bytes per array element.
-   * @param limit The maximum number of bytes to read.
-   * @return The byte array for the next value.
-   * @throws InvalidSSZTypeException If the next SSZ value is not a byte array, or would exceed the limit.
-   * @throws EndOfSSZException If there are no more SSZ values to read.
-   */
-  default byte[] readFixedByteArray(int byteLength, int limit) {
-    return readFixedBytes(byteLength, limit).toArrayUnsafe();
-  }
-
-  /**
-   * Read a string value from the SSZ source.
-   *
-   * Note: prefer to use {@link #readString(int)} instead, especially when reading untrusted data.
-   *
-   * @return A string.
-   * @throws InvalidSSZTypeException If the next SSZ value is not a byte array, or is too large (greater than 2^32
-   *         bytes).
-   * @throws EndOfSSZException If there are no more SSZ values to read.
-   */
-  default String readString() {
-    return new String(readByteArray(), UTF_8);
-  }
+  fun readByteArray(limit: Int = Integer.MAX_VALUE): ByteArray = readBytes(limit).toArrayUnsafe()
 
   /**
    * Read a string value from the SSZ source.
@@ -138,9 +55,7 @@ public interface SSZReader {
    * @throws InvalidSSZTypeException If the next SSZ value is not a byte array, or would exceed the limit.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default String readString(int limit) {
-    return new String(readByteArray(limit), UTF_8);
-  }
+  fun readString(limit: Int): String = String(readByteArray(limit), UTF_8)
 
   /**
    * Read a two's-compliment int value from the SSZ source.
@@ -148,10 +63,10 @@ public interface SSZReader {
    * @param bitLength The bit length of the integer to read (a multiple of 8).
    * @return An int.
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for the desired bit length, or the decoded
-   *         value was too large to fit into an int.
+   * value was too large to fit into an int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  int readInt(int bitLength);
+  fun readInt(bitLength: Int): Int
 
   /**
    * Read a two's-compliment long value from the SSZ source.
@@ -159,10 +74,10 @@ public interface SSZReader {
    * @param bitLength The bit length of the integer to read (a multiple of 8).
    * @return A long.
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for the desired bit length, or the decoded
-   *         value was too large to fit into a long.
+   * value was too large to fit into a long.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  long readLong(int bitLength);
+  fun readLong(bitLength: Int): Long
 
   /**
    * Read a big integer value from the SSZ source.
@@ -172,7 +87,7 @@ public interface SSZReader {
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for the desired bit length.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  BigInteger readBigInteger(int bitLength);
+  fun readBigInteger(bitLength: Int): BigInteger
 
   /**
    * Read an 8-bit two's-compliment integer from the SSZ source.
@@ -181,9 +96,7 @@ public interface SSZReader {
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for an 8-bit int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default int readInt8() {
-    return readInt(8);
-  }
+  fun readInt8(): Int = readInt(8)
 
   /**
    * Read a 16-bit two's-compliment integer from the SSZ source.
@@ -192,9 +105,7 @@ public interface SSZReader {
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for a 16-bit int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default int readInt16() {
-    return readInt(16);
-  }
+  fun readInt16(): Int = readInt(16)
 
   /**
    * Read a 32-bit two's-compliment integer from the SSZ source.
@@ -203,9 +114,7 @@ public interface SSZReader {
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for a 32-bit int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default int readInt32() {
-    return readInt(32);
-  }
+  fun readInt32(): Int = readInt(32)
 
   /**
    * Read a 64-bit two's-compliment integer from the SSZ source.
@@ -214,9 +123,7 @@ public interface SSZReader {
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for a 64-bit int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default long readInt64() {
-    return readLong(64);
-  }
+  fun readInt64(): Long = readLong(64)
 
   /**
    * Read an unsigned int value from the SSZ source.
@@ -224,13 +131,10 @@ public interface SSZReader {
    * @param bitLength The bit length of the integer to read (a multiple of 8).
    * @return An unsigned int.
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for the desired bit length, or the decoded
-   *         value was too large to fit into an int.
+   * value was too large to fit into an int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default int readUInt(int bitLength) {
-    // encoding is the same for unsigned
-    return readInt(bitLength);
-  }
+  fun readUInt(bitLength: Int): UInt = readInt(bitLength).toUInt()
 
   /**
    * Read an unsigned long value from the SSZ source.
@@ -238,13 +142,10 @@ public interface SSZReader {
    * @param bitLength The bit length of the integer to read (a multiple of 8).
    * @return An unsigned long.
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for the desired bit length, or the decoded
-   *         value was too large to fit into a long.
+   * value was too large to fit into a long.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default long readULong(int bitLength) {
-    // encoding is the same for unsigned
-    return readLong(bitLength);
-  }
+  fun readULong(bitLength: Int): ULong = readLong(bitLength).toULong()
 
   /**
    * Read an unsigned big integer value from the SSZ source.
@@ -254,7 +155,7 @@ public interface SSZReader {
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for the desired bit length.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  BigInteger readUnsignedBigInteger(int bitLength);
+  fun readUnsignedBigInteger(bitLength: Int): BigInteger
 
   /**
    * Read an 8-bit unsigned integer from the SSZ source.
@@ -263,9 +164,7 @@ public interface SSZReader {
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for an 8-bit int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default int readUInt8() {
-    return readUInt(8);
-  }
+  fun readUInt8(): UInt = readUInt(8)
 
   /**
    * Read a 16-bit unsigned integer from the SSZ source.
@@ -274,9 +173,7 @@ public interface SSZReader {
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for a 16-bit int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default int readUInt16() {
-    return readUInt(16);
-  }
+  fun readUInt16(): UInt = readUInt(16)
 
   /**
    * Read a 32-bit unsigned integer from the SSZ source.
@@ -285,9 +182,7 @@ public interface SSZReader {
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for a 32-bit int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default long readUInt32() {
-    return readULong(32);
-  }
+  fun readUInt32(): ULong = readULong(32)
 
   /**
    * Read a 64-bit unsigned integer from the SSZ source.
@@ -296,27 +191,25 @@ public interface SSZReader {
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for a 64-bit int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default long readUInt64() {
-    return readULong(64);
-  }
+  fun readUInt64(): ULong = readULong(64)
 
   /**
-   * Read a {@link UInt256} from the SSZ source.
+   * Read a [UInt256] from the SSZ source.
    *
-   * @return A {@link UInt256}.
+   * @return A [UInt256].
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for a 256-bit int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  UInt256 readUInt256();
+  fun readUInt256(): UInt256
 
   /**
-   * Read a {@link UInt384} from the SSZ source.
+   * Read a [UInt384] from the SSZ source.
    *
-   * @return A {@link UInt384}.
+   * @return A [UInt384].
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for a 384-bit int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  UInt384 readUInt384();
+  fun readUInt384(): UInt384
 
   /**
    * Read a boolean from the SSZ source.
@@ -325,15 +218,10 @@ public interface SSZReader {
    * @throws InvalidSSZTypeException If the decoded value is not a boolean.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default boolean readBoolean() {
-    int value = readInt(8);
-    if (value == 0) {
-      return false;
-    } else if (value == 1) {
-      return true;
-    } else {
-      throw new InvalidSSZTypeException("decoded value is not a boolean");
-    }
+  fun readBoolean(): Boolean = when (readInt(8)) {
+    0 -> false
+    1 -> true
+    else -> throw InvalidSSZTypeException("decoded value is not a boolean")
   }
 
   /**
@@ -343,7 +231,7 @@ public interface SSZReader {
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for a 20-byte address.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  Bytes readAddress();
+  fun readAddress(): Bytes
 
   /**
    * Read a hash from the SSZ source.
@@ -353,134 +241,42 @@ public interface SSZReader {
    * @throws InvalidSSZTypeException If there are insufficient encoded bytes for a 32-byte hash.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  Bytes readHash(int hashLength);
+  fun readHash(hashLength: Int): Bytes
 
   /**
-   * Read a list of {@link Bytes} from the SSZ source.
+   * Read a list of [Bytes] from the SSZ source.
    *
-   * Note: prefer to use {@link #readBytesList(int)} instead, especially when reading untrusted data.
+   * Note: prefer to use [.readBytesList] instead, especially when reading untrusted data.
    *
-   * @return A list of {@link Bytes}.
+   * @return A list of [Bytes].
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, any value in the list is not a byte array, or
-   *         any byte array is too large (greater than 2^32 bytes).
+   * any byte array is too large (greater than 2^32 bytes).
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default List<Bytes> readBytesList() {
-    return readBytesList(Integer.MAX_VALUE);
-  }
+  fun readBytesList(): List<Bytes> = readBytesList(Integer.MAX_VALUE)
 
   /**
-   * Read a known-size fixed-length list of {@link Bytes} from the SSZ source. The list WILL NOT have a length mixin,
-   * where as the elements WILL.
-   *
-   * Note: prefer to use {@link #readBytesList(long, int)} instead, especially when reading untrusted data.
-   *
-   * @param listSize The size of the fixed-length list being read.
-   * @return A list of {@link Bytes}.
-   * @throws InvalidSSZTypeException If the next SSZ value is not a list, any value in the list is not a byte array, or
-   *         any byte array is too large (greater than 2^32 bytes).
-   * @throws EndOfSSZException If there are no more SSZ values to read.
-   */
-  default List<Bytes> readBytesList(long listSize) {
-    return readBytesList(listSize, Integer.MAX_VALUE);
-  }
-
-  /**
-   * Read a known-size fixed length list of known-size fixed length {@link Bytes} from the SSZ source. No length mixin
-   * is expected in either the list or the list elements.
-   *
-   * @param listSize The size of the fixed-length list being read.
-   * @param byteLength The number of fixed-length Bytes per homogenous List element.
-   * @param limit The maximum number of bytes to read for each list element.
-   * @return A list of {@link Bytes}.
-   * @throws InvalidSSZTypeException If the next SSZ value is not a list, any value in the list is not a byte array, or
-   *         the size of any byte array would exceed the limit.
-   * @throws EndOfSSZException If there are no more SSZ values to read.
-   */
-  List<Bytes> readFixedBytesList(long listSize, int byteLength, int limit);
-
-  /**
-   * Read a known-size fixed length list of known-size fixed length {@link Bytes} from the SSZ source. No length mixin
-   * is expected in either the list or the list elements.
-   *
-   * Note: prefer to use {@link #readFixedBytesList(long, int, int)} instead, especially when reading untrusted data.
-   *
-   * @param listSize The size of the fixed-length list being read.
-   * @param byteLength The number of fixed-length Bytes per homogenous List element.
-   * @return A list of {@link Bytes}.
-   * @throws InvalidSSZTypeException If the next SSZ value is not a list, any value in the list is not a byte array, or
-   *         any byte array is too large (greater than 2^32 bytes).
-   * @throws EndOfSSZException If there are no more SSZ values to read.
-   */
-  default List<Bytes> readFixedBytesList(long listSize, int byteLength) {
-    return readFixedBytesList(listSize, byteLength, Integer.MAX_VALUE);
-  }
-
-  /**
-   * Read a list of known-size fixed length {@link Bytes} from the SSZ source. A length mixin IS expected for the list,
-   * but IS NOT expected for the list elements.
-   *
-   * @param byteLength The number of fixed-length Bytes per homogenous List element.
-   * @param limit The maximum number of bytes to read for each list element.
-   * @return A list of {@link Bytes}.
-   * @throws InvalidSSZTypeException If the next SSZ value is not a list, any value in the list is not a byte array, or
-   *         the size of any byte array would exceed the limit.
-   * @throws EndOfSSZException If there are no more SSZ values to read.
-   */
-  List<Bytes> readFixedBytesList(int byteLength, int limit);
-
-  /**
-   * Read a list of known-size fixed length {@link Bytes} from the SSZ source. A length mixin IS expected for the list,
-   * but IS NOT expected for the list elements.
-   *
-   * Note: prefer to use {@link #readFixedBytesList(int, int)} instead, especially when reading untrusted data.
-   *
-   * @param byteLength The number of fixed-length Bytes per homogenous List element.
-   * @return A list of {@link Bytes}.
-   * @throws InvalidSSZTypeException If the next SSZ value is not a list, any value in the list is not a byte array, or
-   *         any byte array is too large (greater than 2^32 bytes).
-   * @throws EndOfSSZException If there are no more SSZ values to read.
-   */
-  default List<Bytes> readFixedBytesList(int byteLength) {
-    return readFixedBytesList(byteLength, Integer.MAX_VALUE);
-  }
-
-  /**
-   * Read a list of {@link Bytes} from the SSZ source.
+   * Read a list of [Bytes] from the SSZ source.
    *
    * @param limit The maximum number of bytes to read for each list element.
-   * @return A list of {@link Bytes}.
+   * @return A list of [Bytes].
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, any value in the list is not a byte array, or
-   *         the size of any byte array would exceed the limit.
+   * the size of any byte array would exceed the limit.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  List<Bytes> readBytesList(int limit);
-
-  /**
-   * Read a known-size fixed-length list of {@link Bytes} from the SSZ source.
-   *
-   * @param listSize The size of the fixed-length list being read.
-   * @param limit The maximum number of bytes to read for each list element.
-   * @return A list of {@link Bytes}.
-   * @throws InvalidSSZTypeException If the next SSZ value is not a list, any value in the list is not a byte array, or
-   *         the size of any byte array would exceed the limit.
-   * @throws EndOfSSZException If there are no more SSZ values to read.
-   */
-  List<Bytes> readBytesList(long listSize, int limit);
+  fun readBytesList(limit: Int): List<Bytes>
 
   /**
    * Read a list of byte arrays from the SSZ source.
    *
-   * Note: prefer to use {@link #readByteArrayList(int)} instead, especially when reading untrusted data.
+   * Note: prefer to use [.readByteArrayList] instead, especially when reading untrusted data.
    *
    * @return A list of byte arrays.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, any value in the list is not a byte array, or
-   *         any byte array is too large (greater than 2^32 bytes).
+   * any byte array is too large (greater than 2^32 bytes).
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default List<byte[]> readByteArrayList() {
-    return readByteArrayList(Integer.MAX_VALUE);
-  }
+  fun readByteArrayList(): List<ByteArray> = readByteArrayList(Integer.MAX_VALUE)
 
   /**
    * Read a list of byte arrays from the SSZ source.
@@ -488,26 +284,22 @@ public interface SSZReader {
    * @param limit The maximum number of bytes to read for each list element.
    * @return A list of byte arrays.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, any value in the list is not a byte array, or
-   *         the size of any byte array would exceed the limit.
+   * the size of any byte array would exceed the limit.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default List<byte[]> readByteArrayList(int limit) {
-    return readBytesList(limit).stream().map(Bytes::toArrayUnsafe).collect(Collectors.toList());
-  }
+  fun readByteArrayList(limit: Int): List<ByteArray>
 
   /**
    * Read a list of strings from the SSZ source.
    *
-   * Note: prefer to use {@link #readStringList(int)} instead, especially when reading untrusted data.
+   * Note: prefer to use [.readStringList] instead, especially when reading untrusted data.
    *
    * @return A list of strings.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, any value in the list is not a string, or any
-   *         string is too large (greater than 2^32 bytes).
+   * string is too large (greater than 2^32 bytes).
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default List<String> readStringList() {
-    return readStringList(Integer.MAX_VALUE);
-  }
+  fun readStringList(): List<String> = readStringList(Integer.MAX_VALUE)
 
   /**
    * Read a list of strings from the SSZ source.
@@ -515,10 +307,10 @@ public interface SSZReader {
    * @param limit The maximum number of bytes to read for each list element.
    * @return A list of strings.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, any value in the list is not a string, or the
-   *         size of any string would exceed the limit.
+   * size of any string would exceed the limit.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  List<String> readStringList(int limit);
+  fun readStringList(limit: Int): List<String>
 
   /**
    * Read a list of two's-compliment int values from the SSZ source.
@@ -526,10 +318,10 @@ public interface SSZReader {
    * @param bitLength The bit length of the integers to read (a multiple of 8).
    * @return A list of ints.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int.
+   * desired bit length or any value in the list, or any decoded value was too large to fit into an int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  List<Integer> readIntList(int bitLength);
+  fun readIntList(bitLength: Int): List<Int>
 
   /**
    * Read a list of two's-compliment long int values from the SSZ source.
@@ -537,10 +329,10 @@ public interface SSZReader {
    * @param bitLength The bit length of the integers to read (a multiple of 8).
    * @return A list of longs.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into a long.
+   * desired bit length or any value in the list, or any decoded value was too large to fit into a long.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  List<Long> readLongIntList(int bitLength);
+  fun readLongIntList(bitLength: Int): List<Long>
 
   /**
    * Read a list of two's-compliment big integer values from the SSZ source.
@@ -548,58 +340,50 @@ public interface SSZReader {
    * @param bitLength The bit length of the integers to read (a multiple of 8).
    * @return A list of big integers.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, or there are insufficient encoded bytes for
-   *         the desired bit length or any value in the list.
+   * the desired bit length or any value in the list.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  List<BigInteger> readBigIntegerList(int bitLength);
+  fun readBigIntegerList(bitLength: Int): List<BigInteger>
 
   /**
    * Read a list of 8-bit two's-compliment int values from the SSZ source.
    *
    * @return A list of ints.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int.
+   * desired bit length or any value in the list, or any decoded value was too large to fit into an int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default List<Integer> readInt8List() {
-    return readIntList(8);
-  }
+  fun readInt8List(): List<Int> = readIntList(8)
 
   /**
    * Read a list of 16-bit two's-compliment int values from the SSZ source.
    *
    * @return A list of ints.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int.
+   * desired bit length or any value in the list, or any decoded value was too large to fit into an int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default List<Integer> readInt16List() {
-    return readIntList(16);
-  }
+  fun readInt16List(): List<Int> = readIntList(16)
 
   /**
    * Read a list of 32-bit two's-compliment int values from the SSZ source.
    *
    * @return A list of ints.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int.
+   * desired bit length or any value in the list, or any decoded value was too large to fit into an int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default List<Integer> readInt32List() {
-    return readIntList(32);
-  }
+  fun readInt32List(): List<Int> = readIntList(32)
 
   /**
    * Read a list of 64-bit two's-compliment int values from the SSZ source.
    *
    * @return A list of ints.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int.
+   * desired bit length or any value in the list, or any decoded value was too large to fit into an int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default List<Long> readInt64List() {
-    return readLongIntList(64);
-  }
+  fun readInt64List(): List<Long> = readLongIntList(64)
 
   /**
    * Read a list of unsigned int values from the SSZ source.
@@ -607,12 +391,12 @@ public interface SSZReader {
    * @param bitLength The bit length of the integers to read (a multiple of 8).
    * @return A list of ints.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int.
+   * desired bit length or any value in the list, or any decoded value was too large to fit into an int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default List<Integer> readUIntList(int bitLength) {
+  fun readUIntList(bitLength: Int): List<UInt> {
     // encoding is the same for unsigned
-    return readIntList(bitLength);
+    return readIntList(bitLength).map { i -> i.toUInt() }
   }
 
   /**
@@ -621,12 +405,12 @@ public interface SSZReader {
    * @param bitLength The bit length of the integers to read (a multiple of 8).
    * @return A list of longs.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into a long.
+   * desired bit length or any value in the list, or any decoded value was too large to fit into a long.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default List<Long> readULongIntList(int bitLength) {
+  fun readULongIntList(bitLength: Int): List<ULong> {
     // encoding is the same for unsigned
-    return readLongIntList(bitLength);
+    return readLongIntList(bitLength).map { i -> i.toULong() }
   }
 
   /**
@@ -635,88 +419,80 @@ public interface SSZReader {
    * @param bitLength The bit length of the integers to read (a multiple of 8).
    * @return A list of big integers.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, or there are insufficient encoded bytes for
-   *         the desired bit length or any value in the list.
+   * the desired bit length or any value in the list.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  List<BigInteger> readUnsignedBigIntegerList(int bitLength);
+  fun readUnsignedBigIntegerList(bitLength: Int): List<BigInteger>
 
   /**
    * Read a list of 8-bit unsigned int values from the SSZ source.
    *
    * @return A list of ints.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int.
+   * desired bit length or any value in the list, or any decoded value was too large to fit into an int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default List<Integer> readUInt8List() {
-    return readUIntList(8);
-  }
+  fun readUInt8List(): List<UInt> = readUIntList(8)
 
   /**
    * Read a list of 16-bit unsigned int values from the SSZ source.
    *
    * @return A list of ints.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int.
+   * desired bit length or any value in the list, or any decoded value was too large to fit into an int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default List<Integer> readUInt16List() {
-    return readUIntList(16);
-  }
+  fun readUInt16List(): List<UInt> = readUIntList(16)
 
   /**
    * Read a list of 32-bit unsigned int values from the SSZ source.
    *
    * @return A list of ints.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int.
+   * desired bit length or any value in the list, or any decoded value was too large to fit into an int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default List<Long> readUInt32List() {
-    return readULongIntList(32);
-  }
+  fun readUInt32List(): List<ULong> = readULongIntList(32)
 
   /**
    * Read a list of 64-bit unsigned int values from the SSZ source.
    *
    * @return A list of ints.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int.
+   * desired bit length or any value in the list, or any decoded value was too large to fit into an int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default List<Long> readUInt64List() {
-    return readULongIntList(64);
-  }
+  fun readUInt64List(): List<ULong> = readULongIntList(64)
 
   /**
    * Read a list of 256-bit unsigned int values from the SSZ source.
    *
-   * @return A list of {@link UInt256}.
+   * @return A list of [UInt256].
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int.
+   * desired bit length or any value in the list, or any decoded value was too large to fit into an int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  List<UInt256> readUInt256List();
+  fun readUInt256List(): List<UInt256>
 
   /**
    * Read a list of 384-bit unsigned int values from the SSZ source.
    *
-   * @return A list of {@link UInt384}.
+   * @return A list of [UInt256].
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int.
+   * desired bit length or any value in the list, or any decoded value was too large to fit into an int.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  List<UInt384> readUInt384List();
+  fun readUInt384List(): List<UInt384>
 
   /**
    * Read a list of 20-byte addresses from the SSZ source.
    *
    * @return A list of 20-byte addresses.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for any
-   *         address in the list.
+   * address in the list.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  List<Bytes> readAddressList();
+  fun readAddressList(): List<Bytes>
 
   /**
    * Read a list of hashes from the SSZ source.
@@ -724,25 +500,25 @@ public interface SSZReader {
    * @param hashLength The length of the hash (in bytes).
    * @return A list of 32-byte hashes.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for any
-   *         hash in the list.
+   * hash in the list.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  List<Bytes> readHashList(int hashLength);
+  fun readHashList(hashLength: Int): List<Bytes>
 
   /**
    * Read a list of booleans from the SSZ source.
    *
    * @return A list of booleans.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for all
-   *         the booleans in the list.
+   * the booleans in the list.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  List<Boolean> readBooleanList();
+  fun readBooleanList(): List<Boolean>
 
   /**
    * Check if all values have been read.
    *
-   * @return {@code true} if all values have been read.
+   * @return `true` if all values have been read.
    */
-  boolean isComplete();
+  val isComplete: Boolean
 }
