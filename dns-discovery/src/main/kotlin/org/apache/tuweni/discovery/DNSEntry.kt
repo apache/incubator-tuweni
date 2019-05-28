@@ -85,7 +85,8 @@ class ENRTreeRoot(attrs: Map<String, String>) : DNSEntry {
 
   override fun toString(): String {
     val encodedHash = Base32.encode(hash)
-    return "enrtree-root=$version hash=${encodedHash.subSequence(0, encodedHash.indexOf("="))} seq=$seq sig=${Base64URLSafe.encode(sig.bytes())}"
+    return "enrtree-root=$version hash=${encodedHash.subSequence(0, encodedHash.indexOf("="))} " +
+      "seq=$seq sig=${Base64URLSafe.encode(sig.bytes())}"
   }
 }
 

@@ -100,12 +100,14 @@ class DNSEntryTest {
       "JGUFMSAGI7KZYB3P7IZW4S5Y3A")
     val enr = entry as ENRTree
     val entries = enr.entries
-    assertEquals(listOf("F4YWVKW4N6B2DDZWFS4XCUQBHY","JTNOVTCP6XZUMXDRANXA6SWXTM","JGUFMSAGI7KZYB3P7IZW4S5Y3A"), entries)
+    assertEquals(listOf("F4YWVKW4N6B2DDZWFS4XCUQBHY", "JTNOVTCP6XZUMXDRANXA6SWXTM", "JGUFMSAGI7KZYB3P7IZW4S5Y3A"),
+      entries)
   }
 
   @Test
   fun testRootToString() {
-    val root = ENRTreeRoot(mapOf(Pair("enrtree-root", "v1"), Pair("hash", "TO4Q75OQ2N7DX4EOOR7X66A6OM"), Pair("seq", "3"),
+    val root = ENRTreeRoot(mapOf(Pair("enrtree-root", "v1"), Pair("hash", "TO4Q75OQ2N7DX4EOOR7X66A6OM"),
+      Pair("seq", "3"),
       Pair("sig", "N-YY6UB9xD0hFx1Gmnt7v0RfSxch5tKyry2SRDoLx7B4GfPXagwLxQqyf7gAMvApFn_ORwZQekMWa_pXrcGCtwE=")))
     assertEquals("enrtree-root=v1 hash=TO4Q75OQ2N7DX4EOOR7X66A6OM seq=3 sig=N-YY6UB9xD0hFx1Gmnt7v0RfSxch5tKyry" +
       "2SRDoLx7B4GfPXagwLxQqyf7gAMvApFn_ORwZQekMWa_pXrcGCtwE=", root.toString())
