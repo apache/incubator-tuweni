@@ -132,10 +132,10 @@ class EphemeralPeerRepository : PeerRepository {
     override val nodeId: SECP256K1.PublicKey,
     knownEndpoint: Endpoint? = null
   ) : Peer {
-
     @Volatile
     override var endpoint: Endpoint? = knownEndpoint
 
+    override var enr: EthereumNodeRecord? = null
     @Synchronized
     override fun getEndpoint(ifVerifiedOnOrAfter: Long): Endpoint? {
       if ((lastVerified ?: 0) >= ifVerifiedOnOrAfter) {
@@ -189,6 +189,14 @@ class EphemeralPeerRepository : PeerRepository {
       }
       if ((lastSeen ?: 0) < time) {
         lastSeen = time
+      }
+    }
+
+    @Synchronized
+    override fun updateENR(record: EthereumNodeRecord, time: Long) {
+      if (enr == null || enr!!.seq < record.seq) {
+        enr = record
+        updateEndpoint(Endpoint(record.ip(), record.udp(), record.tcp()), time)
       }
     }
   }
