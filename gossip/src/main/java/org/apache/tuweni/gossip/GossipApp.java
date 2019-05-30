@@ -101,7 +101,7 @@ public final class GossipApp {
         repository,
         bytes -> readMessage(opts.messageLog(), errStream, bytes),
         null,
-        new CountingPeerPruningFunction(10),
+        new CountingPeerPruningFunction(10000000),
         100,
         100);
     this.opts = opts;
@@ -212,19 +212,21 @@ public final class GossipApp {
   }
 
   private void readMessage(String messageLog, PrintStream err, Bytes bytes) {
-    ObjectMapper mapper = new ObjectMapper();
-    ObjectNode node = mapper.createObjectNode();
-    node.put("timestamp", Instant.now().toString());
-    node.put("value", new String(bytes.toArrayUnsafe(), StandardCharsets.UTF_8));
-    try {
-      Path path = Paths.get(messageLog);
-      Files.write(
-          path,
-          Collections.singletonList(mapper.writeValueAsString(node)),
-          StandardCharsets.UTF_8,
-          Files.exists(path) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);
-    } catch (IOException e) {
-      err.println(e.getMessage());
+    synchronized (this) {
+      ObjectMapper mapper = new ObjectMapper();
+      ObjectNode node = mapper.createObjectNode();
+      node.put("timestamp", Instant.now().toString());
+      node.put("value", new String(bytes.toArrayUnsafe(), StandardCharsets.UTF_8));
+      try {
+        Path path = Paths.get(messageLog);
+        Files.write(
+            path,
+            Collections.singletonList(mapper.writeValueAsString(node)),
+            StandardCharsets.UTF_8,
+            Files.exists(path) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);
+      } catch (IOException e) {
+        err.println(e.getMessage());
+      }
     }
   }
 
