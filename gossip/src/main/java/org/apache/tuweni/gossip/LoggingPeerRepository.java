@@ -10,21 +10,27 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.tuweni.plumtree;
+package org.apache.tuweni.gossip;
 
+import org.apache.tuweni.plumtree.Peer;
+import org.apache.tuweni.plumtree.PeerRepository;
+
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * In-memory peer repository.
- */
-public final class EphemeralPeerRepository implements PeerRepository {
+final class LoggingPeerRepository implements PeerRepository {
 
   private final Set<Peer> eagerPushPeers = ConcurrentHashMap.newKeySet();
   private final Set<Peer> lazyPushPeers = ConcurrentHashMap.newKeySet();
+  private final PrintStream logger;
+
+  public LoggingPeerRepository(PrintStream logger) {
+    this.logger = logger;
+  }
 
   @Override
   public void addEager(Peer peer) {
@@ -50,12 +56,14 @@ public final class EphemeralPeerRepository implements PeerRepository {
 
   @Override
   public void removePeer(Peer peer) {
+    logger.println("Removing peer " + peer);
     lazyPushPeers.remove(peer);
     eagerPushPeers.remove(peer);
   }
 
   @Override
   public boolean moveToLazy(Peer peer) {
+    logger.println("Move peer to lazy " + peer);
     eagerPushPeers.remove(peer);
     lazyPushPeers.add(peer);
     return true;
@@ -63,6 +71,7 @@ public final class EphemeralPeerRepository implements PeerRepository {
 
   @Override
   public void moveToEager(Peer peer) {
+    logger.println("Move peer to eager " + peer);
     lazyPushPeers.remove(peer);
     eagerPushPeers.add(peer);
   }
@@ -70,8 +79,11 @@ public final class EphemeralPeerRepository implements PeerRepository {
   @Override
   public void considerNewPeer(Peer peer) {
     if (!lazyPushPeers.contains(peer)) {
-      eagerPushPeers.add(peer);
+      if (eagerPushPeers.add(peer)) {
+        logger.println("Added new peer " + peer);
+      }
     }
 
   }
+
 }

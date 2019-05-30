@@ -43,7 +43,10 @@ class VertxGossipServerTest {
         bytes -> bytes,
         new EphemeralPeerRepository(),
         messageReceived1::set,
-        (message, peer) -> true);
+        (message, peer) -> true,
+        null,
+        200,
+        200);
     VertxGossipServer server2 = new VertxGossipServer(
         vertx,
         "127.0.0.1",
@@ -51,7 +54,10 @@ class VertxGossipServerTest {
         bytes -> bytes,
         new EphemeralPeerRepository(),
         messageReceived2::set,
-        (message, peer) -> true);
+        (message, peer) -> true,
+        null,
+        200,
+        200);
 
     server1.start().join();
     server2.start().join();
@@ -85,7 +91,10 @@ class VertxGossipServerTest {
         bytes -> bytes,
         new EphemeralPeerRepository(),
         messageReceived1::set,
-        (message, peer) -> true);
+        (message, peer) -> true,
+        null,
+        200,
+        200);
     VertxGossipServer server2 = new VertxGossipServer(
         vertx,
         "127.0.0.1",
@@ -93,7 +102,10 @@ class VertxGossipServerTest {
         bytes -> bytes,
         new EphemeralPeerRepository(),
         messageReceived2::set,
-        (message, peer) -> true);
+        (message, peer) -> true,
+        null,
+        200,
+        200);
     VertxGossipServer server3 = new VertxGossipServer(
         vertx,
         "127.0.0.1",
@@ -101,7 +113,10 @@ class VertxGossipServerTest {
         bytes -> bytes,
         new EphemeralPeerRepository(),
         messageReceived3::set,
-        (message, peer) -> true);
+        (message, peer) -> true,
+        null,
+        200,
+        200);
 
     server1.start().join();
     server2.start().join();
@@ -141,7 +156,10 @@ class VertxGossipServerTest {
         bytes -> bytes,
         peerRepository1,
         messageReceived1::set,
-        (message, peer) -> true);
+        (message, peer) -> true,
+        null,
+        200,
+        200);
     VertxGossipServer server2 = new VertxGossipServer(
         vertx,
         "127.0.0.1",
@@ -149,7 +167,10 @@ class VertxGossipServerTest {
         bytes -> bytes,
         new EphemeralPeerRepository(),
         messageReceived2::set,
-        (message, peer) -> true);
+        (message, peer) -> true,
+        null,
+        200,
+        200);
     VertxGossipServer server3 = new VertxGossipServer(
         vertx,
         "127.0.0.1",
@@ -157,7 +178,10 @@ class VertxGossipServerTest {
         bytes -> bytes,
         peerRepository3,
         messageReceived2::set,
-        (message, peer) -> true);
+        (message, peer) -> true,
+        null,
+        200,
+        200);
 
     server1.start().join();
     server2.start().join();

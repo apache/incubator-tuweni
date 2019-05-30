@@ -17,7 +17,6 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.concurrent.AsyncCompletion;
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
 import org.apache.tuweni.crypto.Hash;
-import org.apache.tuweni.plumtree.EphemeralPeerRepository;
 import org.apache.tuweni.plumtree.vertx.VertxGossipServer;
 
 import java.io.IOException;
@@ -31,6 +30,9 @@ import java.security.Security;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -68,8 +70,14 @@ public final class GossipApp {
     gossipApp.start();
   }
 
-
-
+  private final ExecutorService senderThreadPool = Executors.newSingleThreadExecutor(new ThreadFactory() {
+    @Override
+    public Thread newThread(Runnable r) {
+      Thread t = new Thread(r, "sender");
+      t.setDaemon(false);
+      return t;
+    }
+  });
   private final GossipCommandLineOptions opts;
   private final Runnable terminateFunction;
   private final PrintStream errStream;
@@ -83,7 +91,7 @@ public final class GossipApp {
       PrintStream errStream,
       PrintStream outStream,
       Runnable terminateFunction) {
-    EphemeralPeerRepository repository = new EphemeralPeerRepository();
+    LoggingPeerRepository repository = new LoggingPeerRepository(outStream);
     outStream.println("Setting up server on " + opts.networkInterface() + ":" + opts.listenPort());
     server = new VertxGossipServer(
         vertx,
@@ -92,7 +100,10 @@ public final class GossipApp {
         Hash::keccak256,
         repository,
         bytes -> readMessage(opts.messageLog(), errStream, bytes),
-        null);
+        null,
+        new CountingPeerPruningFunction(10),
+        100,
+        100);
     this.opts = opts;
     this.errStream = errStream;
     this.outStream = outStream;
@@ -135,13 +146,33 @@ public final class GossipApp {
       errStream.println("Server could not connect to other peers: " + e.getMessage());
     }
     outStream.println("Gossip started");
+
+    if (opts.sending()) {
+      outStream.println("Start sending messages");
+      senderThreadPool.submit(() -> {
+        for (int i = 0; i < opts.numberOfMessages(); i++) {
+          if (Thread.currentThread().isInterrupted()) {
+            return;
+          }
+          Bytes payload = Bytes.random(opts.payloadSize());
+          publish(payload);
+          try {
+            Thread.sleep(opts.sendInterval());
+          } catch (InterruptedException e) {
+            return;
+          }
+        }
+      });
+    }
   }
 
   private void handleRPCRequest(HttpServerRequest httpServerRequest) {
     if (HttpMethod.POST.equals(httpServerRequest.method())) {
       if ("/publish".equals(httpServerRequest.path())) {
         httpServerRequest.bodyHandler(body -> {
-          publish(Bytes.wrapBuffer(body));
+          Bytes message = Bytes.wrapBuffer(body);
+          outStream.println("Message to publish " + message.toHexString());
+          publish(message);
           httpServerRequest.response().setStatusCode(200).end();
         });
       } else {
@@ -153,6 +184,8 @@ public final class GossipApp {
   }
 
   void stop() {
+    outStream.println("Stopping sending");
+    senderThreadPool.shutdown();
     outStream.println("Stopping gossip");
     try {
       server.stop().join();
@@ -196,7 +229,6 @@ public final class GossipApp {
   }
 
   public void publish(Bytes message) {
-    outStream.println("Message to publish " + message.toHexString());
     server.gossip("", message);
   }
 }
