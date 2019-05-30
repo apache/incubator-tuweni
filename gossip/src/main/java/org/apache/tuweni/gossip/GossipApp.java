@@ -101,7 +101,7 @@ public final class GossipApp {
         repository,
         bytes -> readMessage(opts.messageLog(), errStream, bytes),
         null,
-        new CountingPeerPruningFunction(10000000),
+        new CountingPeerPruningFunction(10),
         100,
         100);
     this.opts = opts;
