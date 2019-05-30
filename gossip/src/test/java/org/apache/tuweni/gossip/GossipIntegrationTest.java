@@ -14,6 +14,7 @@ package org.apache.tuweni.gossip;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
@@ -162,9 +163,7 @@ class GossipIntegrationTest {
       receiver2Expected.remove(value);
     }
 
-    receiver2 = Files.readAllLines(tempDir.resolve("log3.log"));
-    assertEquals(20, receiver2.size());
-    receiver1 = Files.readAllLines(tempDir.resolve("log2.log"));
-    assertEquals(20, receiver1.size());
+    assertTrue(receiver1Expected.isEmpty());
+    assertTrue(receiver2Expected.isEmpty());
   }
 }
