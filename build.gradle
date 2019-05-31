@@ -10,6 +10,10 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.regex.Pattern
 import net.ltgt.gradle.errorprone.CheckSeverity
 
@@ -27,10 +31,10 @@ plugins {
   id 'org.jetbrains.kotlin.jvm' version '1.3.20'
   id 'org.jetbrains.dokka' version '0.9.17'
   id 'maven-publish'
+  id 'com.jfrog.bintray' version '1.8.3'
 }
 
 description = 'A set of libraries and other tools to aid development of blockchain and other decentralized software in Java and other JVM languages'
-
 
 //////
 // Sanity checks
@@ -52,6 +56,9 @@ def buildVersion = versionNumber + buildTag()
 static String buildTag() {
   if (System.getenv('BUILD_RELEASE') == 'true') {
     return ''
+  }
+  if (System.getenv('BUILD_TIMESTAMP') != null) {
+    return DateTimeFormatter.ofPattern("-yyyyMMddHHmmss").withLocale(Locale.US).withZone( ZoneId.systemDefault() ).format(Instant.now())
   }
   return '-SNAPSHOT'
 }
@@ -141,6 +148,7 @@ allprojects {
   apply plugin: 'kotlin'
   apply plugin: 'io.spring.dependency-management'
   apply plugin: 'jacoco'
+  apply plugin: 'com.jfrog.bintray'
   apply plugin: 'net.ltgt.errorprone'
   apply plugin: 'maven-publish'
   apply plugin: 'org.jetbrains.dokka'
@@ -457,6 +465,19 @@ allprojects {
         destination = file("$buildDir/generated-pom.xml")
       }
       tasks.publishMavenDeploymentPublicationToMavenLocal { dependsOn project.tasks.signArchives }
+    }
+
+    bintray {
+      publications = ['MavenDeployment']
+      user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : 'invalid'
+      key = project.hasProperty('bintrayKey') ? project.property('bintrayKey') : 'invalid'
+      pkg {
+        repo = project.hasProperty('bintrayRepo') ? project.property('bintrayRepo') : 'invalid'
+        name = project.hasProperty('bintrayName') ? project.property('bintrayName') : 'invalid'
+        userOrg = project.hasProperty('bintrayOrg') ? project.property('bintrayOrg') : 'invalid'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/apache/incubator-tuweni.git'
+      }
     }
   }
 }
