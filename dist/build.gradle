@@ -69,6 +69,8 @@ distributions {
       into('') {
         from ".."
         include '*.md'
+        include 'DISCLAIMER'
+        include 'LICENSE'
         include 'NOTICE'
         include 'build.gradle'
         include 'dependency-versions.gradle'
@@ -76,7 +78,6 @@ distributions {
         include 'gradle/**'
         include 'gradlew'
         include 'gradle.properties'
-        include 'LICENSE'
       }
       rootProject.subprojects.each {
         include it.projectDir.name + '/src/**'
