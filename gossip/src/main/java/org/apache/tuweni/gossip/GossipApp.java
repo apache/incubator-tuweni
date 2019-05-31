@@ -84,6 +84,7 @@ public final class GossipApp {
   private final PrintStream outStream;
   private final VertxGossipServer server;
   private final HttpServer rpcServer;
+  private final ExecutorService fileWriter = Executors.newSingleThreadExecutor();
 
   GossipApp(
       Vertx vertx,
@@ -209,14 +210,16 @@ public final class GossipApp {
       errStream.println("RPC server could not stop: " + e.getMessage());
       terminateFunction.run();
     }
+
+    fileWriter.shutdown();
   }
 
   private void readMessage(String messageLog, PrintStream err, Bytes bytes) {
-    synchronized (this) {
+    fileWriter.submit(() -> {
       ObjectMapper mapper = new ObjectMapper();
       ObjectNode node = mapper.createObjectNode();
       node.put("timestamp", Instant.now().toString());
-      node.put("value", new String(bytes.toArrayUnsafe(), StandardCharsets.UTF_8));
+      node.put("value", bytes.toHexString());
       try {
         Path path = Paths.get(messageLog);
         Files.write(
@@ -227,7 +230,7 @@ public final class GossipApp {
       } catch (IOException e) {
         err.println(e.getMessage());
       }
-    }
+    });
   }
 
   public void publish(Bytes message) {

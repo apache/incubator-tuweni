@@ -19,7 +19,6 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.junit.*;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -114,15 +113,15 @@ class GossipIntegrationTest {
     List<String> sent = new ArrayList<>();
 
     for (int i = 0; i < 20; i++) {
-      String message = Bytes32.rightPad(Bytes.ofUnsignedInt(i)).toHexString();
-      sent.add(message);
+      Bytes message = Bytes32.rightPad(Bytes.ofUnsignedInt(i));
+      sent.add(message.toHexString());
 
       Thread.sleep(100);
       client.request(HttpMethod.POST, 10000, "127.0.0.1", "/publish").exceptionHandler(thr -> {
         throw new RuntimeException(thr);
       }).handler(resp -> {
 
-      }).end(Buffer.buffer(message.getBytes(StandardCharsets.UTF_8)));
+      }).end(Buffer.buffer(message.toArrayUnsafe()));
     }
 
     List<String> receiver1 = Collections.emptyList();
@@ -162,7 +161,7 @@ class GossipIntegrationTest {
       receiver2Expected.remove(value);
     }
 
-    assertTrue(receiver1Expected.isEmpty());
-    assertTrue(receiver2Expected.isEmpty());
+    assertTrue(receiver1Expected.isEmpty(), "Elements left:" + receiver1Expected);
+    assertTrue(receiver2Expected.isEmpty(), "Elements left:" + receiver2Expected);
   }
 }
