@@ -157,7 +157,7 @@ public final class VertxGossipServer {
           completion.completeExceptionally(res.cause());
         } else {
           state = new State(peerRepository, messageHashing, (verb, attributes, peer, hash, payload) -> {
-            vertx.runOnContext(handler -> {
+            vertx.executeBlocking(future -> {
               Message message = new Message();
               message.verb = verb;
               message.attributes = attributes;
@@ -165,9 +165,12 @@ public final class VertxGossipServer {
               message.payload = payload == null ? null : payload.toHexString();
               try {
                 ((SocketPeer) peer).socket().write(Buffer.buffer(mapper.writeValueAsBytes(message)));
+                future.complete();
               } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                future.fail(e);
               }
+
+            }, done -> {
             });
           }, payloadListener, payloadValidator, peerPruningFunction, graftDelay, lazyQueueInterval);
 
