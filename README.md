@@ -5,75 +5,35 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.apache.tuweni/tuweni/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/org.apache.tuweni/tuweni)
 [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/repository.apache.org/org.apache.tuweni/tuweni.svg)](https://repository.apache.org/content/repositories/snapshots/org/apache/tuweni/tuweni/)
 
+See our [web site](https://tuweni.apache.org) for details on the project.
+
 Tuweni is a set of libraries and other tools to aid development of blockchain and other decentralized software in Java and other JVM languages.
 
 It includes a low-level bytes library, serialization and deserialization codecs (e.g. [RLP](https://github.com/ethereum/wiki/wiki/RLP)), various cryptography functions and primatives, and lots of other helpful utilities.
 
-Tuweni is developed for JDK 1.8 or higher, and depends on various other FOSS libraries, including Guava.
-
-## Getting tuweni
-
-The libraries are published to the [Apache Nexus Repository](https://repository.apache.org/), synced to JCenter and Maven Central.
-
-You can import all modules using the tuweni jar.
-
-With Maven:
-```xml
-<dependency>
-  <groupId>org.apache.tuweni</groupId>
-  <artifactId>tuweni</artifactId>
-  <version>0.7.0</version>
-</dependency>
-```
-
-With Gradle: `compile 'org.apache.tuweni:tuweni:0.7.0'`
-
-[PACKAGES.md](PACKAGES.md) contains the list of modules and instructions to import them separately.
-
-### Getting snapshots
-
-We publish a new snapshot on every change of the master branch.
-
-Snapshots are stored under the [Apache snapshots repository](https://repository.apache.org/content/repositories/snapshots).
-
-With Maven, add this repository with:
-```xml
- <repositories>
-    <repository>
-      <id>apache.snapshots</id>
-      <name>Apache Snapshot Repository</name>
-      <url>https://repository.apache.org/snapshots</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
-```
-
-```xml
-<dependency>
-  <groupId>org.apache.tuweni</groupId>
-  <artifactId>tuweni</artifactId>
-  <version>0.8.0-SNAPSHOT</version>
-</dependency>
-```
-
-With gradle:
-```groovy
-maven { url "https://repository.apache.org/snapshots"}
-```
-
-`compile 'org.apache.tuweni:tuweni:0.8.0-SNAPSHOT'`
+Tuweni is developed for JDK 1.8 or higher.
 
 ## Build Instructions
 
-To build, clone this repo and run with `./gradlew` like so:
+You need to have [Gradle](https://www.gradle.org/installation) and [Java](https://www.oracle.com/technetwork/java/javase/downloads/index.html) installed.
 
-```sh
-git clone --recursive https://github.com/apache/incubator-tuweni
-cd incubator-tuweni
-./gradlew
-```
+Tuweni requires Gradle 5.0 or higher.
+
+Java 8 should be used for building in order to support both Java 8 and Java 11 at runtime.
+
+## Clone along with submodules ##
+    git clone https://github.com/apache/incubator-tuweni.git tuweni
+    cd tuweni
+    git submodule update --init --recursive
+
+### First bootstrap and download the wrapper ###
+    gradle setup
+    
+This downloads gradle and installs helper scripts for the project under `./gradlew` and `./gradlew.bat`.
+
+### Build the project ###
+    ./gradlew build
+
 
 After a successful build, libraries will be available in `build/libs`.
 

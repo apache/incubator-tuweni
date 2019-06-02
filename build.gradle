@@ -83,6 +83,7 @@ gradle.startParameter.taskNames.each {
 }
 gradle.startParameter.taskNames = expandedTaskList.flatten()
 
+apply from: file('wrapper.gradle')
 
 //////
 // Gradle script formatting
