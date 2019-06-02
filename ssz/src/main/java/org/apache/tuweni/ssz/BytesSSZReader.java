@@ -257,8 +257,10 @@ final class BytesSSZReader implements SSZReader {
       while (listSize > 0) {
         byte[] bytes = bytesSupplier.apply(listSize);
         elements.add(converter.apply(bytes));
-        listSize -= bytes.length;
-        listSize -= 4;
+        // When lists have lengths passed in, the listSize argument is the number of
+        // elements in the list, instead of the number of bytes in the list, so
+        // we only subtract one each time an element is processed in this case.
+        listSize -= 1;
         if (listSize < 0) {
           throw new InvalidSSZTypeException("SSZ encoded list length does not align with lengths of its elements");
         }
@@ -300,7 +302,10 @@ final class BytesSSZReader implements SSZReader {
       while (listSize > 0) {
         byte[] bytes = bytesSupplier.apply(listSize);
         elements.add(converter.apply(bytes));
-        listSize -= bytes.length;
+        // When lists have lengths passed in, the listSize argument is the number of
+        // elements in the list, instead of the number of bytes in the list, so
+        // we only subtract one each time an element is processed in this case.
+        listSize -= 1;
         if (listSize < 0) {
           throw new InvalidSSZTypeException("SSZ encoded list length does not align with lengths of its elements");
         }
