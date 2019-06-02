@@ -72,12 +72,12 @@ This also publishes the artifacts to repository.apache.org in a staging reposito
 
 If necessary create the folder:
 ```
-svn mkdir -m "Add new Tuweni folder for release ${RELEASE VERSION}" https://dist.apache.org/repos/dist/dev/tuweni/${RELEASE VERSION}
+svn mkdir -m "Add new Tuweni folder for release ${RELEASE VERSION}" https://dist.apache.org/repos/dist/dev/incubator/tuweni/${RELEASE VERSION}
 ```
 
 Check out the folder locally:
 ```
-svn checkout https://dist.apache.org/repos/dist/dev/tuweni/${RELEASE VERSION} _staged
+svn checkout https://dist.apache.org/repos/dist/dev/incubator/tuweni/${RELEASE VERSION} _staged
 ```
 
 Delete contents of the folder if necessary.
@@ -103,7 +103,7 @@ svn ci -m "Add Apache Tuweni ${RELEASE VERSION} release candidate"
 
 ```
 git tag -m "Release ${RELEASE VERSION}" v${RELEASE VERSION}
-git push origin 1.0 --tags
+git push origin ${RELEASE BRANCH} --tags
 ```
 
 ### Open a thread for a vote
@@ -113,12 +113,15 @@ Send an email to dev@tuweni.apache.org with the following:
 Subject:[VOTE] Tuweni ${RELEASE VERSION} release
 ```
 We're voting on the source distributions available here:
-https://dist.apache.org/repos/dist/dev/tuweni/${RELEASE VERSION}/dist/
+https://dist.apache.org/repos/dist/dev/incubator/tuweni/${RELEASE VERSION}/dist/
 Specifically:
-https://dist.apache.org/repos/dist/dev/tuweni/${RELEASE VERSION}/dist/tuweni-${RELEASE VERSION}.tgz
-https://dist.apache.org/repos/dist/dev/tuweni/${RELEASE VERSION}/dist/tuweni-${RELEASE VERSION}.zip
+https://dist.apache.org/repos/dist/dev/incubator/tuweni/${RELEASE VERSION}/dist/tuweni-${RELEASE VERSION}.tgz
+https://dist.apache.org/repos/dist/dev/incubator/tuweni/${RELEASE VERSION}/dist/tuweni-${RELEASE VERSION}.zip
+The release tag is present here:
+https://github.com/apache/incubator-tuweni/releases/tag/v${RELEASE VERSION}
+
 The documentation generated for this release is available here:
-https://dist.apache.org/repos/dist/dev/tuweni/${RELEASE VERSION}/site/
+https://dist.apache.org/repos/dist/dev/incubator/tuweni/${RELEASE VERSION}/site/
 The following changes were made since ${PREVIOUS VERSION}:
 
 ${fill in changes}
