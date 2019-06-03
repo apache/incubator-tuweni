@@ -22,9 +22,7 @@ buildscript {
   repositories { jcenter() // jcenter
   }
 
-  dependencies {
-    classpath "org.ajoberstar.grgit:grgit-core:3.1.1"
-  }
+  dependencies { classpath "org.ajoberstar.grgit:grgit-core:3.1.1" }
 }
 
 plugins {
@@ -102,27 +100,27 @@ if (file('.git').exists()) {
     excludes = new ArrayList<String>(repo.clean(ignore: false, directories: true, dryRun: true))
     // And some of the files that we have checked in should also be excluded from this check
     excludes.addAll([
-            '.*\\.asc',
-            '\\w+/out/.*',
-            'eth-reference-tests/**',
-            'build',
-            '.circleci/*',
-            '.editorconfig',
-            '.idea/**',
-            'gradlew.bat',
-            'gradlew',
-            'io/src/test/resources/org/apache/tuweni/io/file/**',
-            'toml/src/test/resources/**',
-            '.gitattributes',
-            'test1.txt',
-            'test2.txt',
-            'test3.yaml',
-            '.*\\.kotlin_module',
-            'example-v0.4.0.toml',
-            'hard_example.toml',
-            'toml-v0.5.0-spec-example.toml',
-            'test.txt',
-            'resourceresolver-test.jar'
+      '.*\\.asc',
+      '\\w+/out/.*',
+      'eth-reference-tests/**',
+      'build',
+      '.circleci/*',
+      '.editorconfig',
+      '.idea/**',
+      'gradlew.bat',
+      'gradlew',
+      'io/src/test/resources/org/apache/tuweni/io/file/**',
+      'toml/src/test/resources/**',
+      '.gitattributes',
+      'test1.txt',
+      'test2.txt',
+      'test3.yaml',
+      '.*\\.kotlin_module',
+      'example-v0.4.0.toml',
+      'hard_example.toml',
+      'toml-v0.5.0-spec-example.toml',
+      'test.txt',
+      'resourceresolver-test.jar'
     ])
   }
 }
