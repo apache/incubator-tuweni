@@ -10,6 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+import org.ajoberstar.grgit.Grgit
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -19,6 +20,10 @@ import net.ltgt.gradle.errorprone.CheckSeverity
 
 buildscript {
   repositories { jcenter() // jcenter
+  }
+
+  dependencies {
+    classpath "org.ajoberstar.grgit:grgit-core:3.1.1"
   }
 }
 
@@ -83,7 +88,44 @@ gradle.startParameter.taskNames.each {
 }
 gradle.startParameter.taskNames = expandedTaskList.flatten()
 
-apply from: file('wrapper.gradle')
+apply from: "${rootDir}/wrapper.gradle"
+
+//////
+// RAT checks
+
+if (file('.git').exists()) {
+  apply from: "${rootDir}/gradle/rat.gradle"
+  rat {
+    // Exclude everything under the directory that git should be ignoring via .gitignore or that isn't checked in. These
+    // restrict us only to files that are checked in or are staged.
+    def repo = Grgit.open(currentDir: project.getRootDir())
+    excludes = new ArrayList<String>(repo.clean(ignore: false, directories: true, dryRun: true))
+    // And some of the files that we have checked in should also be excluded from this check
+    excludes.addAll([
+            '.*\\.asc',
+            '\\w+/out/.*',
+            'eth-reference-tests/**',
+            'build',
+            '.circleci/*',
+            '.editorconfig',
+            '.idea/**',
+            'gradlew.bat',
+            'gradlew',
+            'io/src/test/resources/org/apache/tuweni/io/file/**',
+            'toml/src/test/resources/**',
+            '.gitattributes',
+            'test1.txt',
+            'test2.txt',
+            'test3.yaml',
+            '.*\\.kotlin_module',
+            'example-v0.4.0.toml',
+            'hard_example.toml',
+            'toml-v0.5.0-spec-example.toml',
+            'test.txt',
+            'resourceresolver-test.jar'
+    ])
+  }
+}
 
 //////
 // Gradle script formatting
