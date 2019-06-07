@@ -57,7 +57,7 @@ class HobbitsTransportTest {
     val server = HobbitsTransport(vertx)
     server.start()
     val exception: IllegalStateException = assertThrows {
-      server.createHTTPEndpoint()
+      server.createHTTPEndpoint(handler = {})
     }
     assertEquals("Server already started", exception.message)
   }

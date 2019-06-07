@@ -85,9 +85,19 @@ class Message(
 
   /**
    * Writes a message into bytes.
+   * @return the bytes of the message
    */
   fun toBytes(): Bytes {
     val requestLine = "$protocol $version $command ${headers.size()} ${body.size()}\n"
     return Bytes.concatenate(Bytes.wrap(requestLine.toByteArray()), headers, body)
+  }
+
+  /**
+   * Provides the size of the message
+   * @return the size of the message
+   */
+  fun size(): Int {
+    return protocol.length + 5 + version.length + command.length + headers.size().toString().length +
+      body.size().toString().length + headers.size() + body.size()
   }
 }
