@@ -22,6 +22,7 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.junit.VertxInstance
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.concurrent.atomic.AtomicReference
@@ -36,6 +37,29 @@ class TCPPersistentTest {
     val client2 = HobbitsTransport(vertx)
     runBlocking {
       client1.createTCPEndpoint("foo", port = 10000, handler = ref::set)
+      client1.start()
+      client2.start()
+      client2.sendMessage(
+        Message(command = "WHO", body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
+        Transport.TCP,
+        "0.0.0.0",
+        10000
+      )
+    }
+    Thread.sleep(200)
+    assertEquals(Bytes.fromHexString("deadbeef"), ref.get().body)
+    client1.stop()
+    client2.stop()
+  }
+
+  @Disabled
+  @Test
+  fun testTwoTCPConnectionsWithTLS(@VertxInstance vertx: Vertx) {
+    val ref = AtomicReference<Message>()
+    val client1 = HobbitsTransport(vertx)
+    val client2 = HobbitsTransport(vertx)
+    runBlocking {
+      client1.createTCPEndpoint("foo", port = 10000, handler = ref::set, tls = true)
       client1.start()
       client2.start()
       client2.sendMessage(

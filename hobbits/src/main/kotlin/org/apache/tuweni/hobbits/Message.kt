@@ -100,4 +100,9 @@ class Message(
     return protocol.length + 5 + version.length + command.length + headers.size().toString().length +
       body.size().toString().length + headers.size() + body.size()
   }
+
+  override fun toString(): String {
+    val requestLine = "$protocol $version $command ${headers.size()} ${body.size()}\n"
+    return requestLine + headers.toHexString() + "\n" + body.toHexString()
+  }
 }

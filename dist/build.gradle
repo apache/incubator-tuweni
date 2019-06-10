@@ -97,6 +97,22 @@ distributions {
       }
     }
   }
+  relayer {
+    baseName = 'tuweni-relayer'
+    contents {
+      mandatoryFiles(it)
+      into('bin') {
+        from { project(':hobbits-relayer').startScripts.outputs.files }
+        fileMode = 0755
+      }
+      into('lib') {
+        def libs = []
+        libs << project(':hobbits-relayer').configurations.runtime
+        from libs
+        from project(':hobbits-relayer').jar
+      }
+    }
+  }
 }
 
 import org.gradle.crypto.checksum.Checksum
@@ -107,6 +123,8 @@ sourcesDistTar{ compression = Compression.GZIP }
 
 gossipDistTar{ compression = Compression.GZIP }
 
+relayerDistTar{ compression = Compression.GZIP }
+
 if (System.getenv('ENABLE_SIGNING') == 'true') {
   signing {
     useGpgCmd()
@@ -116,6 +134,8 @@ if (System.getenv('ENABLE_SIGNING') == 'true') {
     sign sourcesDistTar
     sign gossipDistZip
     sign gossipDistTar
+    sign relayerDistZip
+    sign relayerDistTar
   }
 }
 
@@ -125,10 +145,12 @@ task createChecksums(type: Checksum, dependsOn: [
   'sourcesDistZip',
   'sourcesDistTar',
   'gossipDistZip',
-  'gossipDistTar'
+  'gossipDistTar',
+  'relayerDistZip',
+  'relayerDistTar'
 ]) {
   files = distZip.outputs.files + distTar.outputs.files + sourcesDistZip.outputs.files + sourcesDistTar.outputs.files \
-      + gossipDistZip.outputs.files + gossipDistTar.outputs.files
+      + gossipDistZip.outputs.files + gossipDistTar.outputs.files + relayerDistZip.outputs.files + relayerDistTar.outputs.files
   outputDir = new File(project.buildDir, "distributions")
   algorithm = Checksum.Algorithm.SHA512
 }
@@ -137,9 +159,16 @@ build.dependsOn('createChecksums')
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 
-task buildImage(type: DockerBuildImage) {
+task buildGossipImage(type: DockerBuildImage) {
   dependsOn gossipDistTar
   inputDir = projectDir
   dockerFile = file("docker/gossip.Dockerfile")
   tag = "apache-tuweni/gossip:$project.version"
+}
+
+task buildRelayerImage(type: DockerBuildImage) {
+  dependsOn relayerDistTar
+  inputDir = projectDir
+  dockerFile = file("docker/relayer.Dockerfile")
+  tag = "apache-tuweni/relayer:$project.version"
 }
