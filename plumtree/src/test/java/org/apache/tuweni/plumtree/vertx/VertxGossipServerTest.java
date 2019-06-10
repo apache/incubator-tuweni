@@ -20,8 +20,7 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.junit.VertxExtension;
 import org.apache.tuweni.junit.VertxInstance;
 import org.apache.tuweni.plumtree.EphemeralPeerRepository;
-
-import java.util.concurrent.atomic.AtomicReference;
+import org.apache.tuweni.plumtree.MessageListener;
 
 import io.vertx.core.Vertx;
 import org.junit.jupiter.api.Test;
@@ -30,11 +29,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(VertxExtension.class)
 class VertxGossipServerTest {
 
+  private static class MessageListenerImpl implements MessageListener {
+
+    public Bytes message;
+
+    @Override
+    public void listen(Bytes messageBody, String attributes) {
+      message = messageBody;
+    }
+  }
+
   @Test
   void gossipDeadBeefToOtherNode(@VertxInstance Vertx vertx) throws Exception {
 
-    AtomicReference<Bytes> messageReceived1 = new AtomicReference<>();
-    AtomicReference<Bytes> messageReceived2 = new AtomicReference<>();
+    MessageListenerImpl messageReceived1 = new MessageListenerImpl();
+    MessageListenerImpl messageReceived2 = new MessageListenerImpl();
 
     VertxGossipServer server1 = new VertxGossipServer(
         vertx,
@@ -42,7 +51,7 @@ class VertxGossipServerTest {
         10000,
         bytes -> bytes,
         new EphemeralPeerRepository(),
-        messageReceived1::set,
+        messageReceived1,
         (message, peer) -> true,
         null,
         200,
@@ -53,7 +62,7 @@ class VertxGossipServerTest {
         10001,
         bytes -> bytes,
         new EphemeralPeerRepository(),
-        messageReceived2::set,
+        messageReceived2,
         (message, peer) -> true,
         null,
         200,
@@ -67,11 +76,11 @@ class VertxGossipServerTest {
     server1.gossip(attributes, Bytes.fromHexString("deadbeef"));
     for (int i = 0; i < 10; i++) {
       Thread.sleep(500);
-      if (Bytes.fromHexString("deadbeef").equals(messageReceived2.get())) {
+      if (Bytes.fromHexString("deadbeef").equals(messageReceived2.message)) {
         break;
       }
     }
-    assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.get());
+    assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);
 
     server1.stop().join();
     server2.stop().join();
@@ -80,9 +89,9 @@ class VertxGossipServerTest {
   @Test
   void gossipDeadBeefToTwoOtherNodes(@VertxInstance Vertx vertx) throws Exception {
 
-    AtomicReference<Bytes> messageReceived1 = new AtomicReference<>();
-    AtomicReference<Bytes> messageReceived2 = new AtomicReference<>();
-    AtomicReference<Bytes> messageReceived3 = new AtomicReference<>();
+    MessageListenerImpl messageReceived1 = new MessageListenerImpl();
+    MessageListenerImpl messageReceived2 = new MessageListenerImpl();
+    MessageListenerImpl messageReceived3 = new MessageListenerImpl();
 
     VertxGossipServer server1 = new VertxGossipServer(
         vertx,
@@ -90,7 +99,7 @@ class VertxGossipServerTest {
         10000,
         bytes -> bytes,
         new EphemeralPeerRepository(),
-        messageReceived1::set,
+        messageReceived1,
         (message, peer) -> true,
         null,
         200,
@@ -101,7 +110,7 @@ class VertxGossipServerTest {
         10001,
         bytes -> bytes,
         new EphemeralPeerRepository(),
-        messageReceived2::set,
+        messageReceived2,
         (message, peer) -> true,
         null,
         200,
@@ -112,7 +121,7 @@ class VertxGossipServerTest {
         10002,
         bytes -> bytes,
         new EphemeralPeerRepository(),
-        messageReceived3::set,
+        messageReceived3,
         (message, peer) -> true,
         null,
         200,
@@ -128,23 +137,24 @@ class VertxGossipServerTest {
     server1.gossip(attributes, Bytes.fromHexString("deadbeef"));
     for (int i = 0; i < 10; i++) {
       Thread.sleep(500);
-      if (Bytes.fromHexString("deadbeef").equals(messageReceived2.get())
-          && Bytes.fromHexString("deadbeef").equals(messageReceived3.get())) {
+      if (Bytes.fromHexString("deadbeef").equals(messageReceived2.message)
+          && Bytes.fromHexString("deadbeef").equals(messageReceived3.message)) {
         break;
       }
     }
-    assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.get());
-    assertEquals(Bytes.fromHexString("deadbeef"), messageReceived3.get());
-    assertNull(messageReceived1.get());
+    assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);
+    assertEquals(Bytes.fromHexString("deadbeef"), messageReceived3.message);
+    assertNull(messageReceived1.message);
 
     server1.stop().join();
     server2.stop().join();
+    server3.stop().join();
   }
 
   @Test
   void gossipCollision(@VertxInstance Vertx vertx) throws Exception {
-    AtomicReference<Bytes> messageReceived1 = new AtomicReference<>();
-    AtomicReference<Bytes> messageReceived2 = new AtomicReference<>();
+    MessageListenerImpl messageReceived1 = new MessageListenerImpl();
+    MessageListenerImpl messageReceived2 = new MessageListenerImpl();
 
     EphemeralPeerRepository peerRepository1 = new EphemeralPeerRepository();
     EphemeralPeerRepository peerRepository3 = new EphemeralPeerRepository();
@@ -155,7 +165,7 @@ class VertxGossipServerTest {
         10000,
         bytes -> bytes,
         peerRepository1,
-        messageReceived1::set,
+        messageReceived1,
         (message, peer) -> true,
         null,
         200,
@@ -166,7 +176,7 @@ class VertxGossipServerTest {
         10001,
         bytes -> bytes,
         new EphemeralPeerRepository(),
-        messageReceived2::set,
+        messageReceived2,
         (message, peer) -> true,
         null,
         200,
@@ -177,7 +187,7 @@ class VertxGossipServerTest {
         10002,
         bytes -> bytes,
         peerRepository3,
-        messageReceived2::set,
+        messageReceived2,
         (message, peer) -> true,
         null,
         200,
@@ -194,7 +204,7 @@ class VertxGossipServerTest {
     String attributes = "{\"message_type\": \"BLOCK\"}";
     server1.gossip(attributes, Bytes.fromHexString("deadbeef"));
     Thread.sleep(1000);
-    assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.get());
+    assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);
     Thread.sleep(1000);
 
     assertTrue(peerRepository1.lazyPushPeers().size() > 0 || peerRepository3.lazyPushPeers().size() > 0);

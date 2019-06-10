@@ -16,6 +16,7 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.concurrent.AsyncCompletion;
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
 import org.apache.tuweni.plumtree.MessageHashing;
+import org.apache.tuweni.plumtree.MessageListener;
 import org.apache.tuweni.plumtree.MessageSender;
 import org.apache.tuweni.plumtree.MessageValidator;
 import org.apache.tuweni.plumtree.Peer;
@@ -26,7 +27,6 @@ import org.apache.tuweni.plumtree.State;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -108,7 +108,7 @@ public final class VertxGossipServer {
   private final int lazyQueueInterval;
   private final MessageHashing messageHashing;
   private final String networkInterface;
-  private final Consumer<Bytes> payloadListener;
+  private final MessageListener payloadListener;
   private final MessageValidator payloadValidator;
   private final PeerPruning peerPruningFunction;
   private final PeerRepository peerRepository;
@@ -124,7 +124,7 @@ public final class VertxGossipServer {
       int port,
       MessageHashing messageHashing,
       PeerRepository peerRepository,
-      Consumer<Bytes> payloadListener,
+      MessageListener payloadListener,
       @Nullable MessageValidator payloadValidator,
       @Nullable PeerPruning peerPruningFunction,
       int graftDelay,

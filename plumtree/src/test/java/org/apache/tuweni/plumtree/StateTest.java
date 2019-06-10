@@ -21,8 +21,6 @@ import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.crypto.Hash;
 import org.apache.tuweni.junit.BouncyCastleExtension;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -51,7 +49,15 @@ class StateTest {
     }
   }
 
-  private static final AtomicReference<Bytes> messageRef = new AtomicReference<>();
+  private static final MessageListener messageListener = new MessageListener() {
+
+    public Bytes message;
+
+    @Override
+    public void listen(Bytes messageBody, String attributes) {
+      message = messageBody;
+    }
+  };
 
   @Test
   void testInitialState() {
@@ -60,7 +66,7 @@ class StateTest {
         repo,
         Hash::keccak256,
         new MockMessageSender(),
-        messageRef::set,
+        messageListener,
         (message, peer) -> true,
         (peer) -> true);
     assertTrue(repo.peers().isEmpty());
@@ -75,7 +81,7 @@ class StateTest {
         repo,
         Hash::keccak256,
         new MockMessageSender(),
-        messageRef::set,
+        messageListener,
         (message, peer) -> true,
         (peer) -> true);
     state.addPeer(new PeerImpl());
@@ -92,7 +98,7 @@ class StateTest {
         repo,
         Hash::keccak256,
         new MockMessageSender(),
-        messageRef::set,
+        messageListener,
         (message, peer) -> true,
         (peer) -> true);
     state.addPeer(new PeerImpl());
@@ -108,7 +114,7 @@ class StateTest {
         repo,
         Hash::keccak256,
         new MockMessageSender(),
-        messageRef::set,
+        messageListener,
         (message, peer) -> true,
         (peer) -> true);
     state.addPeer(new PeerImpl());
@@ -123,7 +129,7 @@ class StateTest {
         repo,
         Hash::keccak256,
         new MockMessageSender(),
-        messageRef::set,
+        messageListener,
         (message, peer) -> true,
         (peer) -> true);
     Peer peer = new PeerImpl();
@@ -141,7 +147,7 @@ class StateTest {
         repo,
         Hash::keccak256,
         new MockMessageSender(),
-        messageRef::set,
+        messageListener,
         (message, peer) -> true,
         (peer) -> true);
     Peer peer = new PeerImpl();
@@ -158,7 +164,7 @@ class StateTest {
         repo,
         Hash::keccak256,
         new MockMessageSender(),
-        messageRef::set,
+        messageListener,
         (message, peer) -> true,
         (peer) -> true);
     Peer peer = new PeerImpl();
@@ -176,7 +182,7 @@ class StateTest {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
     MockMessageSender messageSender = new MockMessageSender();
     State state =
-        new State(repo, Hash::keccak256, messageSender, messageRef::set, (message, peer) -> true, (peer) -> true);
+        new State(repo, Hash::keccak256, messageSender, messageListener, (message, peer) -> true, (peer) -> true);
     Peer peer = new PeerImpl();
     state.addPeer(peer);
     Peer otherPeer = new PeerImpl();
@@ -193,7 +199,7 @@ class StateTest {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
     MockMessageSender messageSender = new MockMessageSender();
     State state =
-        new State(repo, Hash::keccak256, messageSender, messageRef::set, (message, peer) -> true, (peer) -> true);
+        new State(repo, Hash::keccak256, messageSender, messageListener, (message, peer) -> true, (peer) -> true);
     Peer peer = new PeerImpl();
     state.addPeer(peer);
     Peer otherPeer = new PeerImpl();
@@ -218,7 +224,7 @@ class StateTest {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
     MockMessageSender messageSender = new MockMessageSender();
     State state =
-        new State(repo, Hash::keccak256, messageSender, messageRef::set, (message, peer) -> true, (peer) -> true);
+        new State(repo, Hash::keccak256, messageSender, messageListener, (message, peer) -> true, (peer) -> true);
     Peer peer = new PeerImpl();
     state.addPeer(peer);
     Peer lazyPeer = new PeerImpl();
@@ -240,7 +246,7 @@ class StateTest {
         repo,
         Hash::keccak256,
         messageSender,
-        messageRef::set,
+        messageListener,
         (message, peer) -> true,
         (peer) -> true,
         100,
@@ -266,7 +272,7 @@ class StateTest {
         repo,
         Hash::keccak256,
         messageSender,
-        messageRef::set,
+        messageListener,
         (message, peer) -> true,
         (peer) -> true,
         500,
@@ -292,7 +298,7 @@ class StateTest {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
     MockMessageSender messageSender = new MockMessageSender();
     State state =
-        new State(repo, Hash::keccak256, messageSender, messageRef::set, (message, peer) -> true, (peer) -> true);
+        new State(repo, Hash::keccak256, messageSender, messageListener, (message, peer) -> true, (peer) -> true);
     Peer peer = new PeerImpl();
     Bytes message = Bytes32.random();
     String attributes = "{\"message_type\": \"BLOCK\"}";
@@ -307,7 +313,7 @@ class StateTest {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
     MockMessageSender messageSender = new MockMessageSender();
     State state =
-        new State(repo, Hash::keccak256, messageSender, messageRef::set, (message, peer) -> true, (peer) -> true);
+        new State(repo, Hash::keccak256, messageSender, messageListener, (message, peer) -> true, (peer) -> true);
     Peer peer = new PeerImpl();
     Peer secondPeer = new PeerImpl();
     Bytes message = Bytes32.random();

@@ -24,7 +24,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
@@ -46,7 +45,7 @@ public final class State {
       });
 
   private final MessageSender messageSender;
-  private final Consumer<Bytes> messageListener;
+  private final MessageListener messageListener;
   private final MessageValidator messageValidator;
   private final PeerPruning peerPruningFunction;
   final Queue<Runnable> lazyQueue = new ConcurrentLinkedQueue<>();
@@ -94,7 +93,7 @@ public final class State {
                           .sendMessage(MessageSender.Verb.IHAVE, null, peer, hash, null)))
                   .collect(Collectors.toList()));
           if (sender != null) {
-            messageListener.accept(message);
+            messageListener.listen(message, attributes);
           }
         }
       } else {
@@ -146,7 +145,7 @@ public final class State {
       PeerRepository peerRepository,
       MessageHashing messageHashingFunction,
       MessageSender messageSender,
-      Consumer<Bytes> messageListener,
+      MessageListener messageListener,
       MessageValidator messageValidator,
       PeerPruning peerPruningFunction) {
     this(
@@ -177,7 +176,7 @@ public final class State {
       PeerRepository peerRepository,
       MessageHashing messageHashingFunction,
       MessageSender messageSender,
-      Consumer<Bytes> messageListener,
+      MessageListener messageListener,
       MessageValidator messageValidator,
       PeerPruning peerPruningFunction,
       long graftDelay,
