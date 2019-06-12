@@ -23,8 +23,17 @@ import kotlinx.coroutines.async
 import java.net.URI
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * Relays messages between two endpoints, with an interceptor reading passed messages.
+ *
+ * @param vertx a Vert.x instance
+ * @param bind the endpoint to bind to
+ * @param to the endpoint to send to
+ * @param interceptor the interceptor function consuming messages being relayed
+ * @param coroutineContext the coroutine context of the relayer
+ */
 class Relayer(
-  private val vertx: Vertx,
+  vertx: Vertx,
   bind: String,
   to: String,
   interceptor: (Message) -> Unit,
@@ -71,10 +80,16 @@ class Relayer(
     }
   }
 
+  /**
+   * Starts the relayer.
+   */
   suspend fun start() {
     transport.start()
   }
 
+  /**
+   * Stops the relayer.
+   */
   fun stop() {
     transport.stop()
   }

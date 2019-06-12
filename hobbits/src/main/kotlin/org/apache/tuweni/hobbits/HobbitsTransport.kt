@@ -239,6 +239,9 @@ class HobbitsTransport(
     }
   }
 
+  /**
+   * Starts the hobbits transport.
+   */
   suspend fun start() {
     if (started.compareAndSet(false, true)) {
       httpClient = vertx.createHttpClient()
@@ -344,6 +347,9 @@ class HobbitsTransport(
     }
   }
 
+  /**
+   * Stops the hobbits transport.
+   */
   fun stop() {
     if (started.compareAndSet(true, false)) {
       httpClient!!.close()
@@ -382,6 +388,9 @@ internal data class Endpoint(
   val handler: (Message) -> Unit
 )
 
+/**
+ * Transport types supported.
+ */
 enum class Transport() {
   HTTP,
   TCP,
