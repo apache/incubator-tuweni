@@ -27,7 +27,7 @@ apply plugin: RatPlugin
 
 class RatTask extends DefaultTask {
   @Input
-  List<String> excludes
+  Closure<List<String>> excludes
 
   def reportDir = project.file('build/rat')
   def stylesheet = project.file('gradle/resources/rat-output-to-html.xsl').getAbsolutePath()
@@ -35,6 +35,7 @@ class RatTask extends DefaultTask {
   def htmlReport = new File(reportDir, 'rat-report.html')
 
   def generateXmlReport(File reportDir) {
+    def excludeList = excludes()
     def antBuilder = services.get(IsolatedAntBuilder)
     def ratClasspath = project.configurations.rat
     def projectPath = project.getRootDir().getAbsolutePath()
@@ -43,7 +44,7 @@ class RatTask extends DefaultTask {
       ant.report(format: 'xml', reportFile: xmlReport) {
         fileset(dir: projectPath) {
           patternset {
-            excludes.each { exclude(name: it) }
+            excludeList.each { exclude(name: it) }
           }
         }
       }
