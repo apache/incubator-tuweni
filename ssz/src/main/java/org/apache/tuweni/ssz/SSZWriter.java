@@ -297,13 +297,12 @@ public interface SSZWriter {
   }
 
   /**
-   * Write a known-size fixed-length list of bytes. The list itself WILL NOT have a length mixin, but the elements WILL.
+   * Write a vector of bytes.
    *
-   * @param listSize the number of elements in the list
    * @param elements the bytes to write as a list
    */
-  default void writeBytesList(long listSize, List<? extends Bytes> elements) {
-    SSZ.encodeBytesListTo(listSize, elements, this::writeSSZ);
+  default void writeVector(List<? extends Bytes> elements) {
+    SSZ.encodeBytesVectorTo(elements, this::writeSSZ);
   }
 
   /**
@@ -320,12 +319,10 @@ public interface SSZWriter {
    * Write a known-size fixed-length list of known-size homogenous bytes. Neither the list nor the elements in the list
    * will have a length mixin.
    *
-   * @param listSize the number of elements in the list
-   * @param byteLength the number of bytes in each element
    * @param elements the bytes to write as a list
    */
-  default void writeFixedBytesList(long listSize, int byteLength, List<? extends Bytes> elements) {
-    SSZ.encodeFixedBytesListTo(listSize, byteLength, elements, this::writeSSZ);
+  default void writeFixedBytesVector(List<? extends Bytes> elements) {
+    SSZ.encodeBytesVectorTo(elements, this::writeSSZ);
   }
 
   /**

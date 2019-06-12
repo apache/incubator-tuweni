@@ -373,7 +373,7 @@ public interface SSZReader {
    * Read a known-size fixed-length list of {@link Bytes} from the SSZ source. The list WILL NOT have a length mixin,
    * where as the elements WILL.
    *
-   * Note: prefer to use {@link #readBytesList(long, int)} instead, especially when reading untrusted data.
+   * Note: prefer to use {@link #readVector(long, int)} instead, especially when reading untrusted data.
    *
    * @param listSize The size of the fixed-length list being read.
    * @return A list of {@link Bytes}.
@@ -381,13 +381,12 @@ public interface SSZReader {
    *         any byte array is too large (greater than 2^32 bytes).
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default List<Bytes> readBytesList(long listSize) {
-    return readBytesList(listSize, Integer.MAX_VALUE);
+  default List<Bytes> readVector(long listSize) {
+    return readVector(listSize, Integer.MAX_VALUE);
   }
 
   /**
-   * Read a known-size fixed length list of known-size fixed length {@link Bytes} from the SSZ source. No length mixin
-   * is expected in either the list or the list elements.
+   * Read a known-size fixed length list of known-size fixed length {@link Bytes} from the SSZ source.
    *
    * @param listSize The size of the fixed-length list being read.
    * @param byteLength The number of fixed-length Bytes per homogenous List element.
@@ -397,13 +396,12 @@ public interface SSZReader {
    *         the size of any byte array would exceed the limit.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  List<Bytes> readFixedBytesList(long listSize, int byteLength, int limit);
+  List<Bytes> readFixedBytesVector(int listSize, int byteLength, int limit);
 
   /**
-   * Read a known-size fixed length list of known-size fixed length {@link Bytes} from the SSZ source. No length mixin
-   * is expected in either the list or the list elements.
+   * Read a known-size fixed length list of known-size fixed length {@link Bytes} from the SSZ source.
    *
-   * Note: prefer to use {@link #readFixedBytesList(long, int, int)} instead, especially when reading untrusted data.
+   * Note: prefer to use {@link #readFixedBytesVector(int, int, int)} instead, especially when reading untrusted data.
    *
    * @param listSize The size of the fixed-length list being read.
    * @param byteLength The number of fixed-length Bytes per homogenous List element.
@@ -412,8 +410,8 @@ public interface SSZReader {
    *         any byte array is too large (greater than 2^32 bytes).
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  default List<Bytes> readFixedBytesList(long listSize, int byteLength) {
-    return readFixedBytesList(listSize, byteLength, Integer.MAX_VALUE);
+  default List<Bytes> readFixedBytesVector(int listSize, int byteLength) {
+    return readFixedBytesVector(listSize, byteLength, Integer.MAX_VALUE);
   }
 
   /**
@@ -430,8 +428,7 @@ public interface SSZReader {
   List<Bytes> readFixedBytesList(int byteLength, int limit);
 
   /**
-   * Read a list of known-size fixed length {@link Bytes} from the SSZ source. A length mixin IS expected for the list,
-   * but IS NOT expected for the list elements.
+   * Read a variable-length list of known-size fixed length {@link Bytes} from the SSZ source.
    *
    * Note: prefer to use {@link #readFixedBytesList(int, int)} instead, especially when reading untrusted data.
    *
@@ -466,7 +463,7 @@ public interface SSZReader {
    *         the size of any byte array would exceed the limit.
    * @throws EndOfSSZException If there are no more SSZ values to read.
    */
-  List<Bytes> readBytesList(long listSize, int limit);
+  List<Bytes> readVector(long listSize, int limit);
 
   /**
    * Read a list of byte arrays from the SSZ source.
@@ -722,7 +719,7 @@ public interface SSZReader {
    * Read a list of hashes from the SSZ source.
    *
    * @param hashLength The length of the hash (in bytes).
-   * @return A list of 32-byte hashes.
+   * @return A list of hashes.
    * @throws InvalidSSZTypeException If the next SSZ value is not a list, there are insufficient encoded bytes for any
    *         hash in the list.
    * @throws EndOfSSZException If there are no more SSZ values to read.

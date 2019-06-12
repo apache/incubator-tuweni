@@ -547,13 +547,9 @@ public final class SSZ {
     }
   }
 
-  static void encodeBytesListTo(long listSize, List<? extends Bytes> elements, Consumer<Bytes> appender) {
-    checkArgument(listSize > 0, "Cannot serialize list: list size must be positive");
-    if (listSize > Integer.MAX_VALUE) {
-      throw new IllegalArgumentException("Cannot serialize list: overall length is too large");
-    }
+  static void encodeBytesVectorTo(List<? extends Bytes> elements, Consumer<Bytes> appender) {
     for (Bytes bytes : elements) {
-      encodeBytesTo(bytes, appender);
+      appender.accept(bytes);
     }
   }
 
@@ -1241,7 +1237,7 @@ public final class SSZ {
   private static byte[] listLengthPrefix(long nElements, int elementBytes) {
     long listSize;
     try {
-      listSize = Math.multiplyExact(nElements, elementBytes);
+      listSize = Math.multiplyExact(nElements, (long) elementBytes);
     } catch (ArithmeticException e) {
       listSize = Long.MAX_VALUE;
     }
