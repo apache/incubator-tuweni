@@ -39,7 +39,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Hobbits is a peer-to-peer transport stack specified at https://www.github.com/deltap2p/hobbits.
  *
- * This class works as a transport mech anism that can leverage a variety of network transport
+ * This class works as a transport mechanism that can leverage a variety of network transport
  * mechanisms, such as TCP, HTTP, UDP and Web sockets.
  *
  * It can be used to contact other Hobbits endpoints, or to expose endpoints to the network.
