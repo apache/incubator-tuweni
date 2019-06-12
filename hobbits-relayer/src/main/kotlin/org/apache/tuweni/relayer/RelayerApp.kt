@@ -23,24 +23,35 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider
 import picocli.CommandLine
 import java.security.Security
 
-internal class RelayerAppCommandlineArguments() {
-  @CommandLine.Option(names = ["-b", "--bind"], description = ["Endpoint to bind to"]) var bind: String = ""
-  @CommandLine.Option(names = ["-t", "--to"], description = ["Endpoint to relay to"]) var to: String = ""
-}
-
 /**
- * Runs a relayer between two hobbits endpoints.
+ * Relayer application, allowing to set a relay between two hobbits endpoints.
+ *
+ * The relayer runs as a Java application using the main method defined herein.
  */
-fun main(args: Array<String>) {
-  Security.addProvider(BouncyCastleProvider())
-  val opts = CommandLine.populateCommand<RelayerAppCommandlineArguments>(RelayerAppCommandlineArguments(), *args)
-  val vertx = Vertx.vertx()
-  val relayer = Relayer(vertx, opts.bind, opts.to, {
-    System.out.println(it)
-  })
-  Runtime.getRuntime().addShutdownHook(Thread { relayer.stop()
-    vertx.close() })
-  runBlocking {
-    relayer.start()
+class RelayerApp {
+  companion object {
+    /**
+     * Runs a relayer between two hobbits endpoints.
+     */
+    @JvmStatic
+    fun main(args: Array<String>) {
+      Security.addProvider(BouncyCastleProvider())
+      val opts = CommandLine.populateCommand<RelayerAppCommandlineArguments>(RelayerAppCommandlineArguments(), *args)
+      if (opts.help) {
+        CommandLine(opts).usage(System.out)
+        System.exit(0)
+      }
+      val vertx = Vertx.vertx()
+      val relayer = Relayer(vertx, opts.bind, opts.to, {
+        System.out.println(it)
+      })
+      Runtime.getRuntime().addShutdownHook(Thread { relayer.stop()
+        vertx.close() })
+      runBlocking {
+        relayer.start()
+      }
+    }
   }
 }
+
+
