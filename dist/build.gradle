@@ -21,7 +21,6 @@ jar { enabled = false }
 static def mandatoryFiles(CopySpec spec) {
   spec.into('') {
     from ".."
-    include 'README.md'
     include 'DISCLAIMER'
     include 'LICENSE'
     include 'NOTICE'
@@ -34,6 +33,10 @@ distributions {
     baseName = 'tuweni-bin'
     contents {
       mandatoryFiles(it)
+      into('') {
+        from ".."
+        include 'README.md'
+      }
       def docs = []
       def libs = []
       def sources = []
@@ -69,6 +72,7 @@ distributions {
       mandatoryFiles(it)
       into('') {
         from ".."
+        include 'README.md'
         include '*.md'
         include '*.gradle'
         include 'dependency-versions.gradle'
@@ -85,6 +89,10 @@ distributions {
     baseName = 'tuweni-gossip'
     contents {
       mandatoryFiles(it)
+      into('') {
+        from ".."
+        include 'gossip/README.md'
+      }
       into('bin') {
         from { project(':gossip').startScripts.outputs.files }
         fileMode = 0755
@@ -101,6 +109,10 @@ distributions {
     baseName = 'tuweni-relayer'
     contents {
       mandatoryFiles(it)
+      into('') {
+        from ".."
+        include 'hobbits-relayer/README.md'
+      }
       into('bin') {
         from { project(':hobbits-relayer').startScripts.outputs.files }
         fileMode = 0755

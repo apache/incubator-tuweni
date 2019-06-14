@@ -44,9 +44,13 @@ import kotlin.coroutines.CoroutineContext
  *
  * It can be used to contact other Hobbits endpoints, or to expose endpoints to the network.
  *
+ * @param vertx Vert.x instance
+ * @param incompleteMessageHandler a handler to manage incomplete or invalid messages
+ * @param coroutineContext the co-routine context for the transport
  */
 class HobbitsTransport(
   private val vertx: Vertx,
+  private val incompleteMessageHandler: (Bytes) -> Unit = {},
   override val coroutineContext: CoroutineContext = Dispatchers.Default
 ) : CoroutineScope {
 
@@ -256,7 +260,15 @@ class HobbitsTransport(
 
         httpServer.requestHandler {
           if (endpoint.requestURI == null || it.path().startsWith(endpoint.requestURI)) {
-            it.bodyHandler { endpoint.handler(Message.readMessage(Bytes.wrapBuffer(it))!!) }
+            it.bodyHandler {
+              val bytes = Bytes.wrapBuffer(it)
+              val message = Message.readMessage(bytes)
+              if (message == null) {
+                incompleteMessageHandler(bytes)
+              } else {
+                endpoint.handler(message)
+              }
+            }
             it.response().statusCode = 200
             it.response().end()
           } else {
@@ -277,9 +289,10 @@ class HobbitsTransport(
         val tcpServer = vertx.createNetServer()
         tcpServers[id] = tcpServer
         tcpServer.connectHandler { connectHandler -> connectHandler.handler { buffer ->
-          val message = Message.readMessage(Bytes.wrapBuffer(buffer))
+          val bytes = Bytes.wrapBuffer(buffer)
+          val message = Message.readMessage(bytes)
           if (message == null) {
-            TODO("Buffer not implemented yet")
+            incompleteMessageHandler(bytes)
           } else {
             endpoint.handler(message)
           }
@@ -300,9 +313,10 @@ class HobbitsTransport(
         udpServers[id] = udpServer
 
         udpServer.handler { packet ->
-          val message = Message.readMessage(Bytes.wrapBuffer(packet.data()))
+          val bytes = Bytes.wrapBuffer(packet.data())
+          val message = Message.readMessage(bytes)
           if (message == null) {
-            TODO("Buffer not implemented yet")
+            incompleteMessageHandler(bytes)
           } else {
             endpoint.handler(message)
           }
@@ -326,7 +340,13 @@ class HobbitsTransport(
 
             it.binaryMessageHandler { buffer ->
               try {
-                endpoint.handler(Message.readMessage(Bytes.wrapBuffer(buffer))!!)
+                val bytes = Bytes.wrapBuffer(buffer)
+                val message = Message.readMessage(bytes)
+                if (message == null) {
+                  incompleteMessageHandler(bytes)
+                } else {
+                  endpoint.handler(message)
+                }
               } finally {
                 it.end()
               }

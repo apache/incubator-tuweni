@@ -40,7 +40,7 @@ class Relayer(
   override val coroutineContext: CoroutineContext = Dispatchers.Default
 ) : CoroutineScope {
 
-  private val transport = HobbitsTransport(vertx, coroutineContext)
+  private val transport = HobbitsTransport(vertx, { println("Invalid message: $it") }, coroutineContext)
   init {
     val toURI = URI.create(to)
     val uri = URI.create(bind)
