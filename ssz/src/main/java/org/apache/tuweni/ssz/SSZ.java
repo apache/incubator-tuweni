@@ -547,8 +547,15 @@ public final class SSZ {
     }
   }
 
+  static void encodeFixedBytesVectorTo(List<? extends Bytes> elements, Consumer<Bytes> appender) {
+    for (Bytes bytes : elements) {
+      appender.accept(bytes);
+    }
+  }
+
   static void encodeBytesVectorTo(List<? extends Bytes> elements, Consumer<Bytes> appender) {
     for (Bytes bytes : elements) {
+      appender.accept(encodeLong(bytes.size(), 32));
       appender.accept(bytes);
     }
   }

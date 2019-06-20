@@ -322,7 +322,7 @@ public interface SSZWriter {
    * @param elements the bytes to write as a list
    */
   default void writeFixedBytesVector(List<? extends Bytes> elements) {
-    SSZ.encodeBytesVectorTo(elements, this::writeSSZ);
+    SSZ.encodeFixedBytesVectorTo(elements, this::writeSSZ);
   }
 
   /**
