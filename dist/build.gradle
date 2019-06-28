@@ -72,7 +72,8 @@ distributions {
         include '*.md'
         include '*.gradle'
         include 'dependency-versions.gradle'
-        include 'gradle/**'
+        include 'gradle/resources/*'
+        include 'gradle/*'
         include 'gradle.properties'
       }
       rootProject.subprojects.each {
