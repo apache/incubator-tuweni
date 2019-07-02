@@ -154,8 +154,7 @@ public final class SSZ {
     appender.accept(value);
   }
 
-  static void encodeFixedBytesTo(int byteLength, Bytes value, Consumer<Bytes> appender) {
-    checkArgument(byteLength == value.size(), "byteLength must be the same size as the value being encoded");
+  static void encodeFixedBytesTo(Bytes value, Consumer<Bytes> appender) {
     appender.accept(value);
   }
 
@@ -547,18 +546,24 @@ public final class SSZ {
     }
   }
 
-  static void encodeBytesVectorTo(List<? extends Bytes> elements, Consumer<Bytes> appender) {
+  static void encodeFixedBytesVectorTo(List<? extends Bytes> elements, Consumer<Bytes> appender) {
     for (Bytes bytes : elements) {
       appender.accept(bytes);
     }
   }
 
-  static void encodeFixedBytesListTo(int byteLength, List<? extends Bytes> elements, Consumer<Bytes> appender) {
+  static void encodeBytesVectorTo(List<? extends Bytes> elements, Consumer<Bytes> appender) {
+    for (Bytes bytes : elements) {
+      appender.accept(encodeLong(bytes.size(), 32));
+      appender.accept(bytes);
+    }
+  }
+
+  static void encodeFixedBytesListTo(List<? extends Bytes> elements, Consumer<Bytes> appender) {
     // pre-calculate the list size - relies on knowing how encodeBytesTo does its serialization, but is worth it
     // to avoid having to pre-serialize all the elements
     long listSize = 0;
     for (Bytes bytes : elements) {
-      listSize += 4;
       listSize += bytes.size();
       if (listSize > Integer.MAX_VALUE) {
         throw new IllegalArgumentException("Cannot serialize list: overall length is too large");
@@ -566,21 +571,7 @@ public final class SSZ {
     }
     appender.accept(encodeUInt32(listSize));
     for (Bytes bytes : elements) {
-      encodeFixedBytesTo(byteLength, bytes, appender);
-    }
-  }
-
-  static void encodeFixedBytesListTo(
-      long listSize,
-      int byteLength,
-      List<? extends Bytes> elements,
-      Consumer<Bytes> appender) {
-    checkArgument(listSize > 0, "Cannot serialize list: list size must be positive");
-    if (listSize > Integer.MAX_VALUE) {
-      throw new IllegalArgumentException("Cannot serialize list: overall length is too large");
-    }
-    for (Bytes bytes : elements) {
-      encodeFixedBytesTo(byteLength, bytes, appender);
+      encodeFixedBytesTo(bytes, appender);
     }
   }
 

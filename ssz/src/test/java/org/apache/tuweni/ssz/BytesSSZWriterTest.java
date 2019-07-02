@@ -24,6 +24,7 @@ import org.apache.tuweni.units.bigints.UInt256;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
 
 import com.google.common.base.Charsets;
 import org.junit.jupiter.api.Test;
@@ -419,6 +420,84 @@ class BytesSSZWriterTest {
   @Test
   void shouldWriteUtilListsOfBooleans() {
     assertEquals(fromHexString("0400000000010100"), SSZ.encodeBooleanList(Arrays.asList(false, true, true, false)));
+  }
+
+  @Test
+  void shouldWriteVectorOfHomogeneousBytes() {
+    // Per the pre-SOS SSZ spec, neither the vector nor the bytes should have a mixin.
+    List<Bytes32> elements = Arrays.asList(
+        Bytes32.fromHexString("0x01"),
+        Bytes32.fromHexString("0x02"),
+        Bytes32.fromHexString("0x03"),
+        Bytes32.fromHexString("0x04"),
+        Bytes32.fromHexString("0x05"));
+    assertEquals(
+        fromHexString(
+            "0x0000000000000000000000000000000000000000000000000000000000000001"
+                + "0000000000000000000000000000000000000000000000000000000000000002"
+                + "0000000000000000000000000000000000000000000000000000000000000003"
+                + "0000000000000000000000000000000000000000000000000000000000000004"
+                + "0000000000000000000000000000000000000000000000000000000000000005"),
+        SSZ.encode(writer -> writer.writeFixedBytesVector(elements)));
+  }
+
+  @Test
+  void shouldWriteVectorOfNonHomogeneousBytes() {
+    // Per the pre-SOS SSZ spec, the vector itself should not have a mixin, but the individual bytes elements should.
+    List<Bytes32> elements = Arrays.asList(
+        Bytes32.fromHexString("0x01"),
+        Bytes32.fromHexString("0x02"),
+        Bytes32.fromHexString("0x03"),
+        Bytes32.fromHexString("0x04"),
+        Bytes32.fromHexString("0x05"));
+    assertEquals(
+        fromHexString(
+            "0x200000000000000000000000000000000000000000000000000000000000000000000001"
+                + "200000000000000000000000000000000000000000000000000000000000000000000002"
+                + "200000000000000000000000000000000000000000000000000000000000000000000003"
+                + "200000000000000000000000000000000000000000000000000000000000000000000004"
+                + "200000000000000000000000000000000000000000000000000000000000000000000005"),
+        SSZ.encode(writer -> writer.writeVector(elements)));
+  }
+
+  @Test
+  void shouldWriteListOfHomogeneousBytes() {
+    // Per the pre-SOS SSZ spec, the list iself should have a mixin, but the bytes elements should not.
+    List<Bytes32> elements = Arrays.asList(
+        Bytes32.fromHexString("0x01"),
+        Bytes32.fromHexString("0x02"),
+        Bytes32.fromHexString("0x03"),
+        Bytes32.fromHexString("0x04"),
+        Bytes32.fromHexString("0x05"));
+    assertEquals(
+        fromHexString(
+            "0xA0000000"
+                + "0000000000000000000000000000000000000000000000000000000000000001"
+                + "0000000000000000000000000000000000000000000000000000000000000002"
+                + "0000000000000000000000000000000000000000000000000000000000000003"
+                + "0000000000000000000000000000000000000000000000000000000000000004"
+                + "0000000000000000000000000000000000000000000000000000000000000005"),
+        SSZ.encode(writer -> writer.writeFixedBytesList(elements)));
+  }
+
+  @Test
+  void shouldWriteListOfNonHomogeneousBytes() {
+    // Per the pre-SOS SSZ spec, both the vector itself and the individual bytes elements should have a length mixin.
+    List<Bytes32> elements = Arrays.asList(
+        Bytes32.fromHexString("0x01"),
+        Bytes32.fromHexString("0x02"),
+        Bytes32.fromHexString("0x03"),
+        Bytes32.fromHexString("0x04"),
+        Bytes32.fromHexString("0x05"));
+    assertEquals(
+        fromHexString(
+            "0xB4000000"
+                + "200000000000000000000000000000000000000000000000000000000000000000000001"
+                + "200000000000000000000000000000000000000000000000000000000000000000000002"
+                + "200000000000000000000000000000000000000000000000000000000000000000000003"
+                + "200000000000000000000000000000000000000000000000000000000000000000000004"
+                + "200000000000000000000000000000000000000000000000000000000000000000000005"),
+        SSZ.encode(writer -> writer.writeBytesList(elements)));
   }
 
   @Test
