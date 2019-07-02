@@ -71,8 +71,8 @@ public interface SSZWriter {
    * @param value the byte array to encode
    * @throws IllegalArgumentException if the byteLength is not the same size as value.
    */
-  default void writeFixedBytes(int byteLength, Bytes value) {
-    SSZ.encodeFixedBytesTo(byteLength, value, this::writeSSZ);
+  default void writeFixedBytes(Bytes value) {
+    SSZ.encodeFixedBytesTo(value, this::writeSSZ);
   }
 
   /**
@@ -311,8 +311,8 @@ public interface SSZWriter {
    * @param byteLength the number of bytes in each element
    * @param elements the known-size bytes to write as a list
    */
-  default void writeFixedBytesList(int byteLength, List<? extends Bytes> elements) {
-    SSZ.encodeFixedBytesListTo(byteLength, elements, this::writeSSZ);
+  default void writeFixedBytesList(List<? extends Bytes> elements) {
+    SSZ.encodeFixedBytesListTo(elements, this::writeSSZ);
   }
 
   /**
