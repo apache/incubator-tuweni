@@ -50,7 +50,12 @@ hellohello
 ## Docker:
 ```
 docker build -t hobbits-relayer -f Dockerfile ..
-docker run --rm -it -p 1000:1000 -p 18000:18000 hobbits-relayer -b tcp://localhost:10000 -t tcp://localhost:18000
+docker run --name hobbits-relayer -d -p 10000:10000 -p 18000:18000 hobbits-relayer -b tcp://localhost:10000 -t tcp://localhost:18000
+cat message | netcat localhost 10000
+docker exec -it hobbits-relayer netcat -l -p 18000
+
+# cleanup
+docker rm -f hobbits-relayer
 ```
 
 ## More information
