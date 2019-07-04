@@ -1,5 +1,7 @@
 FROM gradle:jdk11
 
+RUN apt-get update && apt-get install -y netcat
+
 COPY . /usr/local/src/
 
 WORKDIR /usr/local/src

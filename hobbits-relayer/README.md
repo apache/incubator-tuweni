@@ -2,7 +2,7 @@
 
 This application relays two hobbits endpoints.
 
-Usage:
+## Usage:
 ```bash
 $> bin/hobbits-relayer --help
 Usage: <main class> [-h] [-b=<bind>] [-t=<to>]
@@ -45,6 +45,12 @@ The listener will show the message, received:
 $> netcat -l -p 18000
 EWP 0.2 RPC 5 5
 hellohello
+```
+
+## Docker:
+```
+docker build -t hobbits-relayer -f Dockerfile ..
+docker run --rm -it -p 1000:1000 -p 18000:18000 hobbits-relayer -b tcp://localhost:10000 -t tcp://localhost:18000
 ```
 
 ## More information
