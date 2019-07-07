@@ -27,7 +27,7 @@ $> bin/hobbits-relayer -b tcp://localhost:10000 -t tcp://localhost:18000
 
 Send a message:
 ```bash
-$> cat message 
+$> cat message
 EWP 0.2 RPC 5 5
 hellohello
 $> cat message | netcat localhost 10000
@@ -50,14 +50,35 @@ hellohello
 ## Docker:
 ```
 docker build -t hobbits-relayer -f Dockerfile ..
-docker run --name hobbits-relayer -d -p 10000:10000 hobbits-relayer -b tcp://localhost:10000 -t tcp://localhost:18000
-docker exec -it hobbits-relayer bash -c 'echo foo| netcat -v localhost 10000'
+docker network create hobbits
 
-docker logs hobbits-relayer
-# should see invalid message
+# start the relay endpoint
+docker run -d \
+  --hostname hobbits-endpoint \
+  --network hobbits \
+  --name hobbits-endpoint \
+  --entrypoint netcat \
+  hobbits-relayer -l -p 18000
+
+# start the relayer
+docker run -d \
+  --network hobbits \
+  --name hobbits-relayer \
+  -p 10000:10000 \
+  hobbits-relayer -b tcp://0.0.0.0:10000 -t tcp://hobbits-endpoint:18000
+
+# send message to relayer
+cat sample-message | netcat -c localhost 10000
+
+# view received message
+docker logs hobbits-endpoint
+# EWP 0.2 RPC 5 5
+# hellohello
 
 # cleanup
 docker rm -f hobbits-relayer
+docker rm hobbits-endpoint
+docker network rm hobbits
 ```
 
 ## More information
