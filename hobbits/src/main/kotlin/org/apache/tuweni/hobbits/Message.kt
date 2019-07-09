@@ -55,7 +55,7 @@ class Message(
       val headersLength = message.getInt(PREAMBLE.size + 4 + 1)
       val bodyLength = message.getInt(PREAMBLE.size + 4 + 1 + 4)
 
-      if (message.size() < PREAMBLE.size + java.lang.Integer.BYTES * 3 + 1 + headersLength + bodyLength) {
+      if (message.size() < MESSAGE_HEADER_LENGTH + headersLength + bodyLength) {
         return null
       }
 
@@ -71,7 +71,7 @@ class Message(
    * @return the bytes of the message
    */
   fun toBytes(): Bytes {
-    val buffer = ByteBuffer.allocate(PREAMBLE.size + java.lang.Integer.BYTES * 3 + 1)
+    val buffer = ByteBuffer.allocate(MESSAGE_HEADER_LENGTH)
     buffer.put(PREAMBLE)
     buffer.putInt(version)
     buffer.put(protocol.code)
@@ -86,7 +86,7 @@ class Message(
    * @return the size of the message
    */
   fun size(): Int {
-    return PREAMBLE.size + java.lang.Integer.BYTES * 3 + 1 + headers.size() + body.size()
+    return MESSAGE_HEADER_LENGTH + headers.size() + body.size()
   }
 
   override fun toString(): String {
