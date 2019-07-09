@@ -16,18 +16,20 @@
  */
 package org.apache.tuweni.hobbits
 
-import com.google.common.base.Splitter
 import org.apache.tuweni.bytes.Bytes
-import java.nio.charset.StandardCharsets
+import java.lang.IllegalArgumentException
+import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets.UTF_8
 
+val PREAMBLE = "EWP".toByteArray(UTF_8)
+val MESSAGE_HEADER_LENGTH = PREAMBLE.size + java.lang.Integer.BYTES * 3 + 1
 /**
  * Hobbits message.
  *
  */
 class Message(
-  val protocol: String = "EWP",
-  val version: String = "0.2",
-  val command: String,
+  val version: Int = 3,
+  val protocol: Protocol,
   val headers: Bytes,
   val body: Bytes
 ) {
@@ -38,48 +40,29 @@ class Message(
      * Reads a message from a byte buffer.
      * @param message the message bytes
      * @return the message interpreted by the codec, or null if the message is too short.
+     * @throws IllegalArgumentException if the message doesn't start with the correct preamble.
      */
     @JvmStatic
     fun readMessage(message: Bytes): Message? {
-      var requestLineBytes: Bytes? = null
-      for (i in 0 until message.size()) {
-        if (message.get(i) == '\n'.toByte()) {
-          requestLineBytes = message.slice(0, i)
-          break
-        }
-      }
-      if (requestLineBytes == null) {
+      if (message.size() < MESSAGE_HEADER_LENGTH) {
         return null
       }
-      val requestLine = String(requestLineBytes.toArrayUnsafe(), StandardCharsets.UTF_8)
-      val segments = Splitter.on(" ").split(requestLine).iterator()
+      if (message.slice(0, PREAMBLE.size) != Bytes.wrap(PREAMBLE)) {
+        throw IllegalArgumentException("Message doesn't start with correct preamble")
+      }
+      val version = message.getInt(PREAMBLE.size)
+      val protocol = Protocol.fromByte(message.get(PREAMBLE.size + 4))
+      val headersLength = message.getInt(PREAMBLE.size + 4 + 1)
+      val bodyLength = message.getInt(PREAMBLE.size + 4 + 1 + 4)
 
-      val protocol = segments.next()
-      if (!segments.hasNext()) {
-        return null
-      }
-      val version = segments.next()
-      if (!segments.hasNext()) {
-        return null
-      }
-      val command = segments.next()
-      if (!segments.hasNext()) {
-        return null
-      }
-      val headersLength = segments.next().toInt()
-      if (!segments.hasNext()) {
-        return null
-      }
-      val bodyLength = segments.next().toInt()
-
-      if (message.size() < requestLineBytes.size() + 1 + headersLength + bodyLength) {
+      if (message.size() < PREAMBLE.size + java.lang.Integer.BYTES * 3 + 1 + headersLength + bodyLength) {
         return null
       }
 
-      val headers = message.slice(requestLineBytes.size() + 1, headersLength)
-      val body = message.slice(requestLineBytes.size() + headersLength + 1, bodyLength)
+      val headers = message.slice(MESSAGE_HEADER_LENGTH, headersLength)
+      val body = message.slice(MESSAGE_HEADER_LENGTH + headersLength, bodyLength)
 
-      return Message(protocol, version, command, headers, body)
+      return Message(version, protocol, headers, body)
     }
   }
 
@@ -88,8 +71,14 @@ class Message(
    * @return the bytes of the message
    */
   fun toBytes(): Bytes {
-    val requestLine = "$protocol $version $command ${headers.size()} ${body.size()}\n"
-    return Bytes.concatenate(Bytes.wrap(requestLine.toByteArray()), headers, body)
+    val buffer = ByteBuffer.allocate(PREAMBLE.size + java.lang.Integer.BYTES * 3 + 1)
+    buffer.put(PREAMBLE)
+    buffer.putInt(version)
+    buffer.put(protocol.code)
+    buffer.putInt(headers.size())
+    buffer.putInt(body.size())
+
+    return Bytes.concatenate(Bytes.wrap(buffer.array()), headers, body)
   }
 
   /**
@@ -97,12 +86,26 @@ class Message(
    * @return the size of the message
    */
   fun size(): Int {
-    return protocol.length + 5 + version.length + command.length + headers.size().toString().length +
-      body.size().toString().length + headers.size() + body.size()
+    return PREAMBLE.size + java.lang.Integer.BYTES * 3 + 1 + headers.size() + body.size()
   }
 
   override fun toString(): String {
-    val requestLine = "$protocol $version $command ${headers.size()} ${body.size()}\n"
+    val requestLine = "EWP $version $protocol ${headers.size()} ${body.size()}\n"
     return requestLine + headers.toHexString() + "\n" + body.toHexString()
+  }
+}
+
+enum class Protocol(val code: Byte) {
+  GOSSIP(1), PING(2), RPC(0);
+
+  companion object {
+    fun fromByte(b: Byte): Protocol {
+      return when (b) {
+        RPC.code -> RPC
+        GOSSIP.code -> GOSSIP
+        PING.code -> PING
+        else -> throw IllegalArgumentException("Unsupported protocol code $b")
+      }
+    }
   }
 }

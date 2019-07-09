@@ -40,7 +40,7 @@ class TCPPersistentTest {
       client1.start()
       client2.start()
       client2.sendMessage(
-        Message(command = "WHO", body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
+        Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
         "0.0.0.0",
         10000
@@ -59,14 +59,14 @@ class TCPPersistentTest {
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
     runBlocking {
-      client1.createTCPEndpoint("foo", port = 10000, handler = ref::set, tls = true)
+      client1.createTCPEndpoint("foo", port = 11000, handler = ref::set, tls = true)
       client1.start()
       client2.start()
       client2.sendMessage(
-        Message(command = "WHO", body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
+        Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
         "0.0.0.0",
-        10000
+        11000
       )
     }
     Thread.sleep(200)
@@ -82,21 +82,21 @@ class TCPPersistentTest {
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
     runBlocking {
-      client1.createTCPEndpoint("foo", port = 10000, handler = ref::set)
-      client1.createTCPEndpoint("bar", port = 10001, handler = ref2::set)
+      client1.createTCPEndpoint("foo", port = 12000, handler = ref::set)
+      client1.createTCPEndpoint("bar", port = 12001, handler = ref2::set)
       client1.start()
       client2.start()
       client2.sendMessage(
-        Message(command = "WHO", body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
+        Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
         "0.0.0.0",
-        10000
+        12000
       )
       client2.sendMessage(
-        Message(command = "WHO", body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
+        Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
         "0.0.0.0",
-        10001
+        12001
       )
     }
     Thread.sleep(200)
@@ -116,11 +116,11 @@ class HTTPTest {
     val client2 = HobbitsTransport(vertx)
 
     runBlocking {
-      client1.createHTTPEndpoint("foo", port = 10000, handler = ref::set)
+      client1.createHTTPEndpoint("foo", port = 13000, handler = ref::set)
       client1.start()
       client2.start()
-      client2.sendMessage(Message(command = "WHO", body = Bytes.fromHexString("deadbeef"),
-        headers = Bytes.random(16)), Transport.HTTP, "0.0.0.0", 10000)
+      client2.sendMessage(Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"),
+        headers = Bytes.random(16)), Transport.HTTP, "0.0.0.0", 13000)
     }
     Thread.sleep(200)
     assertEquals(Bytes.fromHexString("deadbeef"), ref.get().body)
@@ -135,21 +135,21 @@ class HTTPTest {
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
     runBlocking {
-      client1.createHTTPEndpoint("foo", port = 10000, handler = ref::set)
-      client1.createHTTPEndpoint("bar", port = 10001, handler = ref2::set)
+      client1.createHTTPEndpoint("foo", port = 14000, handler = ref::set)
+      client1.createHTTPEndpoint("bar", port = 14001, handler = ref2::set)
       client1.start()
       client2.start()
       client2.sendMessage(
-        Message(command = "WHO", body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
+        Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.HTTP,
         "0.0.0.0",
-        10000
+        14000
       )
       client2.sendMessage(
-        Message(command = "WHO", body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
+        Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.HTTP,
         "0.0.0.0",
-        10001
+        14001
       )
     }
     Thread.sleep(200)
@@ -169,11 +169,11 @@ class UDPTest {
     val client2 = HobbitsTransport(vertx)
 
     runBlocking {
-      client1.createUDPEndpoint("foo", port = 10000, handler = ref::set)
+      client1.createUDPEndpoint("foo", port = 15000, handler = ref::set)
       client1.start()
       client2.start()
-      client2.sendMessage(Message(command = "WHO", body = Bytes.fromHexString("deadbeef"),
-        headers = Bytes.random(16)), Transport.UDP, "0.0.0.0", 10000)
+      client2.sendMessage(Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"),
+        headers = Bytes.random(16)), Transport.UDP, "0.0.0.0", 15000)
     }
     Thread.sleep(200)
     assertEquals(Bytes.fromHexString("deadbeef"), ref.get().body)
@@ -188,21 +188,21 @@ class UDPTest {
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
     runBlocking {
-      client1.createUDPEndpoint("foo", port = 10000, handler = ref::set)
-      client1.createUDPEndpoint("bar", port = 10001, handler = ref2::set)
+      client1.createUDPEndpoint("foo", port = 16000, handler = ref::set)
+      client1.createUDPEndpoint("bar", port = 16001, handler = ref2::set)
       client1.start()
       client2.start()
       client2.sendMessage(
-        Message(command = "WHO", body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
+        Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.UDP,
         "0.0.0.0",
-        10000
+        16000
       )
       client2.sendMessage(
-        Message(command = "WHO", body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
+        Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.UDP,
         "0.0.0.0",
-        10001
+        16001
       )
     }
     Thread.sleep(200)
@@ -223,11 +223,11 @@ class WebSocketTest {
     val client2 = HobbitsTransport(vertx)
 
     runBlocking {
-      client1.createWSEndpoint("foo", port = 10000, handler = ref::set)
+      client1.createWSEndpoint("foo", port = 17000, handler = ref::set)
       client1.start()
       client2.start()
-      client2.sendMessage(Message(command = "WHO", body = Bytes.fromHexString("deadbeef"),
-        headers = Bytes.random(16)), Transport.WS, "0.0.0.0", 10000)
+      client2.sendMessage(Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"),
+        headers = Bytes.random(16)), Transport.WS, "0.0.0.0", 17000)
     }
     Thread.sleep(200)
     assertEquals(Bytes.fromHexString("deadbeef"), ref.get().body)
@@ -244,21 +244,21 @@ class WebSocketTest {
     runBlocking {
       client1.exceptionHandler { it.printStackTrace() }
       client2.exceptionHandler { it.printStackTrace() }
-      client1.createWSEndpoint("foo", port = 11000, handler = ref::set)
-      client1.createWSEndpoint("bar", port = 11001, handler = ref2::set)
+      client1.createWSEndpoint("foo", port = 18000, handler = ref::set)
+      client1.createWSEndpoint("bar", port = 18001, handler = ref2::set)
       client1.start()
       client2.start()
       client2.sendMessage(
-        Message(command = "WHO", body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
+        Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.WS,
         "0.0.0.0",
-        11000
+        18000
       )
       client2.sendMessage(
-        Message(command = "WHO", body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
+        Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.WS,
         "0.0.0.0",
-        11001
+        18001
       )
     }
     Thread.sleep(200)

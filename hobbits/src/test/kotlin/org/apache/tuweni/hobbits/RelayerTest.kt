@@ -41,7 +41,7 @@ class RelayerTest {
       client2.start()
       relayer.start()
       client2.sendMessage(
-        Message(command = "WHO", body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
+        Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
         "localhost",
         22000
@@ -66,7 +66,7 @@ class RelayerTest {
       client2.start()
       relayer.start()
       client2.sendMessage(
-        Message(command = "WHO", body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
+        Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.HTTP,
         "localhost",
         13000
@@ -91,7 +91,7 @@ class RelayerTest {
       client2.start()
       relayer.start()
       client2.sendMessage(
-        Message(command = "WHO", body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
+        Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.UDP,
         "localhost",
         12000
@@ -116,7 +116,7 @@ class RelayerTest {
       client2.start()
       relayer.start()
       client2.sendMessage(
-        Message(command = "WHO", body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
+        Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.WS,
         "localhost",
         32000

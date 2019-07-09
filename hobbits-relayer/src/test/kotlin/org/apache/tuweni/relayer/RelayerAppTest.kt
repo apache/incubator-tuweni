@@ -21,6 +21,7 @@ import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.hobbits.HobbitsTransport
 import org.apache.tuweni.hobbits.Message
+import org.apache.tuweni.hobbits.Protocol
 import org.apache.tuweni.hobbits.Transport
 import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.junit.VertxInstance
@@ -37,16 +38,16 @@ class RelayerAppTest {
     val ref = AtomicReference<Message>()
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
-    RelayerApp.main(arrayOf("-b", "tcp://localhost:12000", "-t", "tcp://0.0.0.0:10000"))
+    RelayerApp.main(arrayOf("-b", "tcp://localhost:21000", "-t", "tcp://0.0.0.0:22000"))
     runBlocking {
-      client1.createTCPEndpoint("foo", port = 10000, handler = ref::set)
+      client1.createTCPEndpoint("foo", port = 22000, handler = ref::set)
       client1.start()
       client2.start()
       client2.sendMessage(
-        Message(command = "WHO", body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
+        Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
         "localhost",
-        12000
+        21000
       )
     }
     Thread.sleep(1000)

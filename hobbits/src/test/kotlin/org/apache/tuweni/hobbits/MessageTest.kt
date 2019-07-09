@@ -24,14 +24,13 @@ class MessageTest {
 
   @Test
   fun parseMessageRoundtrip() {
-    val msg = Message(command = "RPC", headers = Bytes.fromHexString("deadbeef"),
-      body = Bytes.fromHexString("deadbeef"))
+    val msg = Message(protocol = Protocol.PING, headers = Bytes.fromHexString("deadbeef01"),
+      body = Bytes.fromHexString("deadbeef02"))
     val serialized = msg.toBytes()
     val read = Message.readMessage(serialized)!!
-    assertEquals("EWP", read.protocol)
-    assertEquals("0.2", read.version)
-    assertEquals("RPC", read.command)
-    assertEquals(Bytes.fromHexString("deadbeef"), read.headers)
-    assertEquals(Bytes.fromHexString("deadbeef"), read.body)
+    assertEquals(3, read.version)
+    assertEquals(Protocol.PING, read.protocol)
+    assertEquals(Bytes.fromHexString("deadbeef01"), read.headers)
+    assertEquals(Bytes.fromHexString("deadbeef02"), read.body)
   }
 }
