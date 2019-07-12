@@ -122,14 +122,7 @@ public class RPCHandler implements Multiplexer, ClientHandler {
       Bytes requestBytes = RPCCodec.encodeRequest(message.body(), requestNumber, rpcFlags);
 
       Runnable closeStreamHandler = () -> {
-
-        try {
-          Bytes streamEnd = RPCCodec.encodeStreamEndRequest(requestNumber);
-          sendBytes(streamEnd);
-        } catch (JsonProcessingException e) {
-          logger.warn("Unexpectedly could not encode stream end message to JSON.");
-        }
-
+        endStream(requestNumber);
       };
 
       ScuttlebuttStreamHandler scuttlebuttStreamHandler = responseSink.apply(closeStreamHandler);
@@ -222,6 +215,7 @@ public class RPCHandler implements Multiplexer, ClientHandler {
 
         if (response.isSuccessfulLastMessage()) {
           streams.remove(requestNumber);
+          endStream(requestNumber);
           scuttlebuttStreamHandler.onStreamEnd();
         } else if (exception.isPresent()) {
           scuttlebuttStreamHandler.onStreamError(exception.get());
@@ -264,6 +258,15 @@ public class RPCHandler implements Multiplexer, ClientHandler {
 
   private void sendBytes(Bytes bytes) {
     messageSender.accept(bytes);
+  }
+
+  private void endStream(int requestNumber) {
+    try {
+      Bytes streamEnd = RPCCodec.encodeStreamEndRequest(requestNumber);
+      sendBytes(streamEnd);
+    } catch (JsonProcessingException e) {
+      logger.warn("Unexpectedly could not encode stream end message to JSON.");
+    }
   }
 
 }
