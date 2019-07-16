@@ -130,7 +130,7 @@ if (file('.git').exists()) {
 spotless {
   groovyGradle {
     target '**/*.gradle'
-    greclipse().configFile(rootProject.file('gradle/greclipse-gradle-consensys-style.properties'))
+    greclipse().configFile(rootProject.file('gradle/greclipse-gradle-tuweni-style.properties'))
     endWithNewline()
   }
 }
@@ -150,7 +150,7 @@ subprojects {
       }
       removeUnusedImports()
       licenseHeaderFile rootProject.file('gradle/spotless.license.txt')
-      eclipse().configFile(rootProject.file('gradle/eclipse-java-consensys-style.xml'))
+      eclipse().configFile(rootProject.file('gradle/eclipse-java-tuweni-style.xml'))
       importOrder 'org.apache', 'java', ''
       endWithNewline()
     }
