@@ -12,6 +12,18 @@
  */
 package org.apache.tuweni.scuttlebutt.rpc.mux;
 
+/*
+ * Copyright 2019 ConsenSys AG.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -145,6 +157,38 @@ public class PatchworkIntegrationTest {
       HashMap<String, String> params = new HashMap<>();
       params.put("type", "post");
       params.put("text", "test test " + i);
+
+      RPCAsyncRequest asyncRequest = new RPCAsyncRequest(new RPCFunction("publish"), Arrays.asList(params));
+
+      AsyncResult<RPCResponse> rpcMessageAsyncResult = rpcHandler.makeAsyncRequest(asyncRequest);
+
+      results.add(rpcMessageAsyncResult);
+
+    }
+
+    List<RPCResponse> rpcMessages = AsyncResult.combine(results).get();
+
+    rpcMessages.forEach(msg -> System.out.println(msg.asString()));
+  }
+
+  @Test
+  @Disabled
+  /**
+   * We expect this to complete the AsyncResult with an exception.
+   */
+  public void postMessageThatIsTooLong(@VertxInstance Vertx vertx) throws Exception {
+
+    RPCHandler rpcHandler = makeRPCHandler(vertx);
+
+    List<AsyncResult<RPCResponse>> results = new ArrayList<>();
+
+    String longString = new String(new char[40000]).replace("\0", "a");
+
+    for (int i = 0; i < 20; i++) {
+      // Note: in a real use case, this would more likely be a Java class with these fields
+      HashMap<String, String> params = new HashMap<>();
+      params.put("type", "post");
+      params.put("text", longString);
 
       RPCAsyncRequest asyncRequest = new RPCAsyncRequest(new RPCFunction("publish"), Arrays.asList(params));
 
