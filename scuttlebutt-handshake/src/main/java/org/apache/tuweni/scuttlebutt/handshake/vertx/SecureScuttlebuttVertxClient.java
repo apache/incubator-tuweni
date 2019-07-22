@@ -68,6 +68,7 @@ public final class SecureScuttlebuttVertxClient {
           handler.streamClosed();
         }
       });
+
       socket.exceptionHandler(e -> logger.error(e.getMessage(), e));
       socket.handler(this::handle);
       socket.write(Buffer.buffer(handshakeClient.createHello().toArrayUnsafe()));
