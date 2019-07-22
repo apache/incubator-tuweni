@@ -171,6 +171,38 @@ public class PatchworkIntegrationTest {
     rpcMessages.forEach(msg -> System.out.println(msg.asString()));
   }
 
+  @Test
+  @Disabled
+  /**
+   * We expect this to complete the AsyncResult with an exception.
+   */
+  public void postMessageThatIsTooLong(@VertxInstance Vertx vertx) throws Exception {
+
+    RPCHandler rpcHandler = makeRPCHandler(vertx);
+
+    List<AsyncResult<RPCResponse>> results = new ArrayList<>();
+
+    String longString = new String(new char[40000]).replace("\0", "a");
+
+    for (int i = 0; i < 20; i++) {
+      // Note: in a real use case, this would more likely be a Java class with these fields
+      HashMap<String, String> params = new HashMap<>();
+      params.put("type", "post");
+      params.put("text", longString);
+
+      RPCAsyncRequest asyncRequest = new RPCAsyncRequest(new RPCFunction("publish"), Arrays.asList(params));
+
+      AsyncResult<RPCResponse> rpcMessageAsyncResult = rpcHandler.makeAsyncRequest(asyncRequest);
+
+      results.add(rpcMessageAsyncResult);
+
+    }
+
+    List<RPCResponse> rpcMessages = AsyncResult.combine(results).get();
+
+    rpcMessages.forEach(msg -> System.out.println(msg.asString()));
+  }
+
   private RPCHandler makeRPCHandler(Vertx vertx) throws Exception {
     Signature.KeyPair keyPair = getLocalKeys();
     String networkKeyBase64 = "1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s=";
