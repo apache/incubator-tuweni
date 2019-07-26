@@ -14,15 +14,31 @@ package org.apache.tuweni.io;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.apache.tuweni.junit.TempDirectory;
+import org.apache.tuweni.junit.TempDirectoryExtension;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.URI;
 import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(TempDirectoryExtension.class)
 class ResourcesTest {
 
   @Test
@@ -37,31 +53,63 @@ class ResourcesTest {
     assertEquals(Arrays.asList("", "**/*.bar"), Arrays.asList(Resources.globRoot("**/*.bar")));
   }
 
-  @Test
-  @SuppressWarnings("MustBeClosedChecker")
-  void shouldIterateResourcesOnFileSystemAndInJars() throws Exception {
-    List<URL> all = Resources.find("org/apache/tuweni/io/file/resourceresolver/**").collect(Collectors.toList());
-    String version = System.getProperty("java.version");
-    // Java 8 captures the root entry of the folder in the jar.
-    if (version.startsWith("1.")) {
-      assertEquals(13, all.size(), () -> describeExpectation(13, all));
-    } else {
-      assertEquals(12, all.size(), () -> describeExpectation(12, all));
+  private void copy(Path source, Path dest) {
+    try {
+      if (!dest.toString().equals("")) {
+        Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);
+      }
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
     }
+  }
 
-    List<URL> txtFiles = Resources.find("org/**/test*.txt").collect(Collectors.toList());
-    assertEquals(6, txtFiles.size(), () -> describeExpectation(6, txtFiles));
+  @Test
+  @SuppressWarnings({"MustBeClosedChecker", "StreamResourceLeak"})
+  void shouldIterateResourcesOnFileSystemAndInJars(@TempDirectory Path folder) throws Exception {
+    Files.createDirectories(folder.resolve("org/apache/tuweni/io/file/resourceresolver"));
+    Files.createDirectory(folder.resolve("org/apache/tuweni/io/file/resourceresolver/subdir"));
+    Files.createFile(folder.resolve("org/apache/tuweni/io/file/resourceresolver/test.txt"));
+    Files.createFile(folder.resolve("org/apache/tuweni/io/file/resourceresolver/test1.txt"));
+    Files.createFile(folder.resolve("org/apache/tuweni/io/file/resourceresolver/test2.txt"));
+    Files.createFile(folder.resolve("org/apache/tuweni/io/file/resourceresolver/subdir/test3.yaml"));
 
-    List<URL> txtFilesFromRoot = Resources.find("/**/test?.txt").collect(Collectors.toList());
+    Files.createDirectory(folder.resolve("org/apache/tuweni/io/file/resourceresolver/anotherdir"));
+    Files.createFile(folder.resolve("org/apache/tuweni/io/file/resourceresolver/anotherdir/test6.yaml"));
+    Files.createFile(folder.resolve("org/apache/tuweni/io/file/resourceresolver/anotherdir/test5.txt"));
+
+    URI jarFile = URI.create("jar:" + folder.resolve("resourceresolvertest.jar").toUri());
+
+    try (FileSystem zipfs = FileSystems.newFileSystem(jarFile, Collections.singletonMap("create", "true"));) {
+      Files.walk(folder).forEach(source -> copy(source, zipfs.getPath(folder.relativize(source).toString())));
+    }
+    Files
+        .walk(folder.resolve("org/apache/tuweni/io/file/resourceresolver/anotherdir"))
+        .sorted(Comparator.reverseOrder())
+        .map(Path::toFile)
+        .forEach(File::delete);
+
+    URLClassLoader classLoader = new URLClassLoader(
+        new URL[] {
+            new URL("file:" + folder.toString() + "/"),
+            new URL("file:" + folder.resolve("resourceresolvertest.jar").toString())});
+    List<URL> all =
+        Resources.find(classLoader, "/org/apache/tuweni/io/file/resourceresolver/**").collect(Collectors.toList());
+
+    assertEquals(14, all.size(), () -> describeExpectation(14, all));
+
+    List<URL> txtFiles = Resources.find(classLoader, "org/**/test*.txt").collect(Collectors.toList());
+    assertEquals(7, txtFiles.size(), () -> describeExpectation(7, txtFiles));
+
+    List<URL> txtFilesFromRoot = Resources.find(classLoader, "/**/test?.txt").collect(Collectors.toList());
     assertEquals(5, txtFilesFromRoot.size(), () -> describeExpectation(5, txtFilesFromRoot));
 
-    List<URL> txtFilesFromRoot2 = Resources.find("//**/test*.txt").collect(Collectors.toList());
-    assertEquals(6, txtFilesFromRoot2.size(), () -> describeExpectation(6, txtFilesFromRoot2));
+    List<URL> txtFilesFromRoot2 = Resources.find(classLoader, "//**/test*.txt").collect(Collectors.toList());
+    assertEquals(7, txtFilesFromRoot2.size(), () -> describeExpectation(7, txtFilesFromRoot2));
 
-    List<URL> txtFilesFromRoot3 = Resources.find("///**/test*.txt").collect(Collectors.toList());
-    assertEquals(6, txtFilesFromRoot3.size(), () -> describeExpectation(6, txtFilesFromRoot3));
+    List<URL> txtFilesFromRoot3 = Resources.find(classLoader, "///**/test*.txt").collect(Collectors.toList());
+    assertEquals(7, txtFilesFromRoot3.size(), () -> describeExpectation(7, txtFilesFromRoot3));
 
-    List<URL> txtFilesInDir = Resources.find("**/anotherdir/*.txt").collect(Collectors.toList());
+    List<URL> txtFilesInDir = Resources.find(classLoader, "**/anotherdir/*.txt").collect(Collectors.toList());
     assertEquals(1, txtFilesInDir.size(), () -> describeExpectation(1, txtFilesInDir));
   }
 

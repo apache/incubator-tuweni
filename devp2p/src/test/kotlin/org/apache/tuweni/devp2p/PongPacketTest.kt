@@ -22,6 +22,7 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.nio.ByteBuffer
@@ -35,7 +36,7 @@ internal class PongPacketTest {
     val to = Endpoint("10.0.0.54", 6543, 6543)
     val pingHash = Bytes32.random()
     val now = System.currentTimeMillis()
-    val pong = PongPacket.create(keyPair, now, to, pingHash)
+    val pong = PongPacket.create(keyPair, now, to, pingHash, null)
 
     val buffer = ByteBuffer.allocate(Packet.MAX_SIZE)
     pong.encodeTo(buffer)
@@ -52,6 +53,31 @@ internal class PongPacketTest {
     assertEquals(((now + PACKET_EXPIRATION_PERIOD_MS + 999) / 1000) * 1000, pongPacket.expiration)
   }
 
+  @Test
+  fun shouldEncodeThenDecodePacketWithSeq() {
+    val keyPair = SECP256K1.KeyPair.random()
+    val to = Endpoint("10.0.0.54", 6543, 6543)
+    val pingHash = Bytes32.random()
+    val now = System.currentTimeMillis()
+    val pong = PongPacket.create(keyPair, now, to, pingHash, 32)
+
+    val buffer = ByteBuffer.allocate(Packet.MAX_SIZE)
+    pong.encodeTo(buffer)
+    buffer.flip()
+
+    val datagram = Bytes.wrapByteBuffer(buffer)
+    val packet = Packet.decodeFrom(datagram)
+    assertTrue(packet is PongPacket)
+
+    val pongPacket = packet as PongPacket
+    assertEquals(keyPair.publicKey(), pongPacket.nodeId)
+    assertEquals(Endpoint("10.0.0.54", 6543, 6543), pongPacket.to)
+    assertEquals(pingHash, pongPacket.pingHash)
+    assertEquals(((now + PACKET_EXPIRATION_PERIOD_MS + 999) / 1000) * 1000, pongPacket.expiration)
+    assertEquals(32L, pongPacket.enrSeq)
+  }
+
+  @Disabled("EIP-868 supercedes EIP-8 behavior")
   @Test
   fun decodeReferencePacket1() {
     // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-8.md

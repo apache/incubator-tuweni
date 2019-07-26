@@ -26,20 +26,31 @@ class GossipCommandLineOptionsTest {
 
   @Test
   void testInvalidPort() {
-    GossipCommandLineOptions opts = new GossipCommandLineOptions(new String[0], -4, "0.0.0.0", null, 3, null);
+    GossipCommandLineOptions opts =
+        new GossipCommandLineOptions(new String[0], -4, "0.0.0.0", null, 3, 0, 0, false, 50, null);
     assertThrows(IllegalArgumentException.class, opts::validate);
   }
 
   @Test
   void testInvalidPeer() {
-    GossipCommandLineOptions opts =
-        new GossipCommandLineOptions(new String[] {"tcp://400.300.200.100:9000"}, 10, "0.0.0.0", null, 3, null);
+    GossipCommandLineOptions opts = new GossipCommandLineOptions(
+        new String[] {"tcp://400.300.200.100:9000"},
+        10,
+        "0.0.0.0",
+        null,
+        3,
+        0,
+        0,
+        false,
+        50,
+        null);
     assertThrows(IllegalArgumentException.class, opts::validate);
   }
 
   @Test
   void testInvalidNetworkInterface() {
-    GossipCommandLineOptions opts = new GossipCommandLineOptions(new String[] {}, 10, "400.300.200.100", null, 3, null);
+    GossipCommandLineOptions opts =
+        new GossipCommandLineOptions(new String[] {}, 10, "400.300.200.100", null, 3, 0, 0, false, 50, null);
     assertThrows(IllegalArgumentException.class, opts::validate);
   }
 
@@ -52,7 +63,7 @@ class GossipCommandLineOptionsTest {
             + "networkInterface=\"127.0.0.1\"\n"
             + "messageLog=\"D:/Temp\"",
         GossipCommandLineOptions.createConfigFileSchema());
-    GossipCommandLineOptions opts = new GossipCommandLineOptions(null, null, null, null, 3000, config);
+    GossipCommandLineOptions opts = new GossipCommandLineOptions(null, null, null, null, 3000, 0, 0, false, 50, config);
     opts.validate();
     assertEquals(1080, opts.listenPort());
     assertEquals(1, opts.peers().size());
@@ -70,7 +81,18 @@ class GossipCommandLineOptionsTest {
             + "networkInterface=\"127.0.0.1\"\n"
             + "messageLog=\"D:/Temp\"",
         GossipCommandLineOptions.createConfigFileSchema());
-    GossipCommandLineOptions opts = new GossipCommandLineOptions(null, null, null, null, 3000, config);
+    GossipCommandLineOptions opts = new GossipCommandLineOptions(
+        null,
+        null,
+        null,
+        null,
+        3000,
+        0,
+        0,
+
+        false,
+        50,
+        config);
     assertThrows(IllegalArgumentException.class, opts::validate);
   }
 
@@ -82,8 +104,17 @@ class GossipCommandLineOptionsTest {
             + "listenPort=1080\n"
             + "networkInterface=\"127.0.0.1\"\n"
             + "messageLog=\"D:/Temp\"");
-    GossipCommandLineOptions opts =
-        new GossipCommandLineOptions(new String[] {"tcp://192.168.0.1:3000"}, 400, "0.0.0.0", "C:/Temp", 3000, config);
+    GossipCommandLineOptions opts = new GossipCommandLineOptions(
+        new String[] {"tcp://192.168.0.1:3000"},
+        400,
+        "0.0.0.0",
+        "C:/Temp",
+        3000,
+        0,
+        0,
+        false,
+        50,
+        config);
     assertEquals(400, opts.listenPort());
     assertEquals(1, opts.peers().size());
     assertEquals(URI.create("tcp://192.168.0.1:3000"), opts.peers().get(0));

@@ -178,7 +178,8 @@ final class SecureScuttlebuttStream implements SecureScuttlebuttStreamClient, Se
       Bytes encryptedBody = SecretBox.encrypt(message, key, bodyNonce);
       int bodySize = encryptedBody.size() - 16;
       Bytes encodedBodySize = Bytes.ofUnsignedInt(bodySize).slice(2);
-      Bytes header = SecretBox.encrypt(Bytes.concatenate(encodedBodySize, encryptedBody.slice(0, 16)), key, headerNonce);
+      Bytes header =
+          SecretBox.encrypt(Bytes.concatenate(encodedBodySize, encryptedBody.slice(0, 16)), key, headerNonce);
 
       return Bytes.concatenate(header, encryptedBody.slice(16));
     } finally {

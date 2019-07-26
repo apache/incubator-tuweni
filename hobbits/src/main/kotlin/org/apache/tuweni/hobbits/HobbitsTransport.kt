@@ -26,6 +26,7 @@ import io.vertx.core.net.NetClient
 import io.vertx.core.net.NetServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.coroutines.await
 import java.lang.IllegalArgumentException
@@ -39,13 +40,17 @@ import kotlin.coroutines.CoroutineContext
  * Hobbits is a peer-to-peer transport stack specified at https://www.github.com/deltap2p/hobbits.
  *
  * This class works as a transport mechanism that can leverage a variety of network transport
- * mechanisms, such as TCP, HTTP, UDP and Web sockets.
+ * protocols, such as TCP, HTTP, UDP and Web sockets.
  *
  * It can be used to contact other Hobbits endpoints, or to expose endpoints to the network.
  *
+ * @param vertx Vert.x instance
+ * @param incompleteMessageHandler a handler to manage incomplete or invalid messages
+ * @param coroutineContext the co-routine context for the transport
  */
 class HobbitsTransport(
   private val vertx: Vertx,
+  private val incompleteMessageHandler: (Bytes) -> Unit = {},
   override val coroutineContext: CoroutineContext = Dispatchers.Default
 ) : CoroutineScope {
 
@@ -56,27 +61,42 @@ class HobbitsTransport(
   private val udpEndpoints = mutableMapOf<String, Endpoint>()
   private val wsEndpoints = mutableMapOf<String, Endpoint>()
 
+  private var exceptionHandler: ((Throwable) -> Unit)? = { }
+
   private var httpClient: HttpClient? = null
   private var tcpClient: NetClient? = null
   private var udpClient: DatagramSocket? = null
 
-  private var httpServer: HttpServer? = null
-  private var tcpServer: NetServer? = null
+  private val httpServers = mutableMapOf<String, HttpServer>()
+  private val tcpServers = mutableMapOf<String, NetServer>()
+  private val udpServers = mutableMapOf<String, DatagramSocket>()
+  private val wsServers = mutableMapOf<String, HttpServer>()
+
+  /**
+   * Sets an exception handler that will be called whenever an exception occurs during transport.
+   */
+  fun exceptionHandler(handler: (Throwable) -> Unit) {
+    exceptionHandler = handler
+  }
 
   /**
    * Creates a new endpoint over http.
    * @param networkInterface the network interface to bind the endpoint to
    * @param port the port to serve traffic from
+   * @param requestURI the request URI path to match
    * @param tls whether the endpoint should be secured using TLS
+   * @param handler function called when a message is received
    */
   fun createHTTPEndpoint(
     id: String = "default",
     networkInterface: String = "0.0.0.0",
     port: Int = 9337,
-    tls: Boolean = false
+    requestURI: String? = null,
+    tls: Boolean = false,
+    handler: (Message) -> Unit
   ) {
     checkNotStarted()
-    httpEndpoints[id] = Endpoint(networkInterface, port, tls)
+    httpEndpoints[id] = Endpoint(networkInterface, port, requestURI, tls, handler)
   }
 
   /**
@@ -84,15 +104,17 @@ class HobbitsTransport(
    * @param networkInterface the network interface to bind the endpoint to
    * @param port the port to serve traffic from
    * @param tls whether the endpoint should be secured using TLS
+   * @param handler function called when a message is received
    */
   fun createTCPEndpoint(
     id: String = "default",
     networkInterface: String = "0.0.0.0",
     port: Int = 9237,
-    tls: Boolean = false
+    tls: Boolean = false,
+    handler: (Message) -> Unit
   ) {
     checkNotStarted()
-    tcpEndpoints[id] = Endpoint(networkInterface, port, tls)
+    tcpEndpoints[id] = Endpoint(networkInterface, port, null, tls, handler)
   }
 
   /**
@@ -100,43 +122,54 @@ class HobbitsTransport(
    * @param networkInterface the network interface to bind the endpoint to
    * @param port the port to serve traffic from
    * @param tls whether the endpoint should be secured using TLS
+   * @param handler function called when a message is received
    */
-  fun createUDPEndpoint(id: String = "default", networkInterface: String = "0.0.0.0", port: Int = 9137) {
+  fun createUDPEndpoint(
+    id: String = "default",
+    networkInterface: String = "0.0.0.0",
+    port: Int = 9137,
+    handler: (Message) -> Unit
+  ) {
     checkNotStarted()
-    udpEndpoints[id] = Endpoint(networkInterface, port, false)
+    udpEndpoints[id] = Endpoint(networkInterface, port, null, false, handler)
   }
 
   /**
    * Creates a new endpoint over websocket connections.
    * @param networkInterface the network interface to bind the endpoint to
    * @param port the port to serve traffic from
+   * @param requestURI the request URI path to match
    * @param tls whether the endpoint should be secured using TLS
+   * @param handler function called when a message is received
    */
   fun createWSEndpoint(
     id: String = "default",
     networkInterface: String = "0.0.0.0",
     port: Int = 9037,
-    tls: Boolean = false
+    requestURI: String? = null,
+    tls: Boolean = false,
+    handler: (Message) -> Unit
   ) {
     checkNotStarted()
-    wsEndpoints[id] = Endpoint(networkInterface, port, tls)
+    wsEndpoints[id] = Endpoint(networkInterface, port, requestURI, tls, handler)
   }
 
   /**
    * Sends a message using the transport specified.
    *
    */
-  suspend fun sendMessage(message: Message, transport: Transport, host: String, port: Int) {
+  suspend fun sendMessage(message: Message, transport: Transport, host: String, port: Int, requestURI: String = "") {
     checkStarted()
     val completion = AsyncCompletion.incomplete()
     when (transport) {
       Transport.HTTP -> {
         @Suppress("DEPRECATION")
-        val req = httpClient!!.request(HttpMethod.POST, port, host, "/").handler {
+        val req = httpClient!!.request(HttpMethod.POST, port, host, requestURI)
+          .exceptionHandler(exceptionHandler).handler {
           if (it.statusCode() == 200) {
             completion.complete()
           } else {
-            completion.completeExceptionally(RuntimeException())
+            completion.completeExceptionally(RuntimeException("${it.statusCode()}"))
           }
         }
         req.end(Buffer.buffer(message.toBytes().toArrayUnsafe()))
@@ -146,16 +179,29 @@ class HobbitsTransport(
           if (res.failed()) {
             completion.completeExceptionally(res.cause())
           } else {
-            res.result().end(Buffer.buffer(message.toBytes().toArrayUnsafe()))
+            res.result().exceptionHandler(exceptionHandler).end(Buffer.buffer(message.toBytes().toArrayUnsafe()))
             completion.complete()
           }
         }
       }
       Transport.UDP -> {
-        TODO()
+        udpClient!!.send(Buffer.buffer(message.toBytes().toArrayUnsafe()), port, host) { handler ->
+          if (handler.failed()) {
+                completion.completeExceptionally(handler.cause())
+          } else {
+                completion.complete()
+            }
+        }
       }
       Transport.WS -> {
-        TODO()
+        httpClient!!.websocket(port, host, requestURI, { handler ->
+          handler.exceptionHandler(exceptionHandler)
+            .writeBinaryMessage(Buffer.buffer(message.toBytes().toArrayUnsafe())).end()
+          completion.complete()
+        },
+        { exception ->
+          completion.completeExceptionally(exception)
+        })
       }
     }
     completion.await()
@@ -197,19 +243,39 @@ class HobbitsTransport(
     }
   }
 
+  /**
+   * Starts the hobbits transport.
+   */
   suspend fun start() {
     if (started.compareAndSet(false, true)) {
       httpClient = vertx.createHttpClient()
       tcpClient = vertx.createNetClient()
-      udpClient = vertx.createDatagramSocket()
-
-      httpServer = vertx.createHttpServer()
-      tcpServer = vertx.createNetServer()
+      udpClient = vertx.createDatagramSocket().exceptionHandler(exceptionHandler)
 
       val completions = mutableListOf<AsyncCompletion>()
-      for (endpoint in httpEndpoints.values) {
+      for ((id, endpoint) in httpEndpoints) {
         val completion = AsyncCompletion.incomplete()
-        httpServer!!.listen(endpoint.port, endpoint.networkInterface) {
+        val httpServer = vertx.createHttpServer()
+        httpServers[id] = httpServer
+
+        httpServer.requestHandler {
+          if (endpoint.requestURI == null || it.path().startsWith(endpoint.requestURI)) {
+            it.bodyHandler {
+              val bytes = Bytes.wrapBuffer(it)
+              val message = Message.readMessage(bytes)
+              if (message == null) {
+                incompleteMessageHandler(bytes)
+              } else {
+                endpoint.handler(message)
+              }
+            }
+            it.response().statusCode = 200
+            it.response().end()
+          } else {
+            it.response().statusCode = 404
+            it.response().end()
+          }
+        }.listen(endpoint.port, endpoint.networkInterface) {
           if (it.failed()) {
             completion.completeExceptionally(it.cause())
           } else {
@@ -218,9 +284,77 @@ class HobbitsTransport(
         }
         completions.add(completion)
       }
-      for (endpoint in tcpEndpoints.values) {
+      for ((id, endpoint) in tcpEndpoints) {
         val completion = AsyncCompletion.incomplete()
-        tcpServer!!.listen(endpoint.port, endpoint.networkInterface) {
+        val tcpServer = vertx.createNetServer()
+        tcpServers[id] = tcpServer
+        tcpServer.connectHandler { connectHandler -> connectHandler.handler { buffer ->
+          val bytes = Bytes.wrapBuffer(buffer)
+          val message = Message.readMessage(bytes)
+          if (message == null) {
+            incompleteMessageHandler(bytes)
+          } else {
+            endpoint.handler(message)
+          }
+        }
+        }.listen(endpoint.port, endpoint.networkInterface) {
+          if (it.failed()) {
+            completion.completeExceptionally(it.cause())
+          } else {
+            completion.complete()
+          }
+        }
+        completions.add(completion)
+      }
+      for ((id, endpoint) in udpEndpoints) {
+        val completion = AsyncCompletion.incomplete()
+
+        val udpServer = vertx.createDatagramSocket()
+        udpServers[id] = udpServer
+
+        udpServer.handler { packet ->
+          val bytes = Bytes.wrapBuffer(packet.data())
+          val message = Message.readMessage(bytes)
+          if (message == null) {
+            incompleteMessageHandler(bytes)
+          } else {
+            endpoint.handler(message)
+          }
+        }.listen(endpoint.port, endpoint.networkInterface) {
+          if (it.failed()) {
+            completion.completeExceptionally(it.cause())
+          } else {
+            completion.complete()
+          }
+        }
+        completions.add(completion)
+      }
+      for ((id, endpoint) in wsEndpoints) {
+        val completion = AsyncCompletion.incomplete()
+        val httpServer = vertx.createHttpServer()
+        wsServers[id] = httpServer
+
+        httpServer.websocketHandler {
+          if (endpoint.requestURI == null || it.path().startsWith(endpoint.requestURI)) {
+            it.accept()
+
+            it.binaryMessageHandler { buffer ->
+              try {
+                val bytes = Bytes.wrapBuffer(buffer)
+                val message = Message.readMessage(bytes)
+                if (message == null) {
+                  incompleteMessageHandler(bytes)
+                } else {
+                  endpoint.handler(message)
+                }
+              } finally {
+                it.end()
+              }
+            }
+          } else {
+            it.reject()
+          }
+        }.listen(endpoint.port, endpoint.networkInterface) {
           if (it.failed()) {
             completion.completeExceptionally(it.cause())
           } else {
@@ -233,11 +367,23 @@ class HobbitsTransport(
     }
   }
 
+  /**
+   * Stops the hobbits transport.
+   */
   fun stop() {
     if (started.compareAndSet(true, false)) {
       httpClient!!.close()
       tcpClient!!.close()
       udpClient!!.close()
+      for (server in httpServers.values) {
+        server.close()
+      }
+      for (server in tcpServers.values) {
+        server.close()
+      }
+      for (server in udpServers.values) {
+        server.close()
+      }
     }
   }
 
@@ -254,8 +400,17 @@ class HobbitsTransport(
   }
 }
 
-internal data class Endpoint(val networkInterface: String, val port: Int, val tls: Boolean)
+internal data class Endpoint(
+  val networkInterface: String,
+  val port: Int,
+  val requestURI: String?,
+  val tls: Boolean,
+  val handler: (Message) -> Unit
+)
 
+/**
+ * Transport types supported.
+ */
 enum class Transport() {
   HTTP,
   TCP,

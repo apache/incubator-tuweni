@@ -12,16 +12,16 @@
  */
 package org.apache.tuweni.gossip;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.junit.*;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -29,6 +29,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -48,6 +50,10 @@ class GossipIntegrationTest {
         "127.0.0.1",
         tempDir.resolve("log1.log").toString(),
         10000,
+        0,
+        0,
+        false,
+        50,
         null);
     GossipCommandLineOptions opts2 = new GossipCommandLineOptions(
         new String[] {"tcp://127.0.0.1:9000", "tcp://127.0.0.1:9002"},
@@ -55,6 +61,10 @@ class GossipIntegrationTest {
         "127.0.0.1",
         tempDir.resolve("log2.log").toString(),
         10001,
+        0,
+        0,
+        false,
+        50,
         null);
     GossipCommandLineOptions opts3 = new GossipCommandLineOptions(
         new String[] {"tcp://127.0.0.1:9000", "tcp://127.0.0.1:9001"},
@@ -62,6 +72,10 @@ class GossipIntegrationTest {
         "127.0.0.1",
         tempDir.resolve("log3.log").toString(),
         10002,
+        0,
+        0,
+        false,
+        50,
         null);
     AtomicBoolean terminationRan = new AtomicBoolean(false);
 
@@ -96,37 +110,58 @@ class GossipIntegrationTest {
 
     HttpClient client = vertx.createHttpClient();
 
+    List<String> sent = new ArrayList<>();
+
     for (int i = 0; i < 20; i++) {
+      Bytes message = Bytes32.rightPad(Bytes.ofUnsignedInt(i));
+      sent.add(message.toHexString());
+
+      Thread.sleep(100);
       client.request(HttpMethod.POST, 10000, "127.0.0.1", "/publish").exceptionHandler(thr -> {
         throw new RuntimeException(thr);
       }).handler(resp -> {
 
-      }).end(Buffer.buffer(Bytes32.rightPad(Bytes.ofUnsignedInt(i)).toHexString().getBytes(StandardCharsets.UTF_8)));
+      }).end(Buffer.buffer(message.toArrayUnsafe()));
     }
 
     List<String> receiver1 = Collections.emptyList();
-
+    List<String> receiver2 = Collections.emptyList();
     int counter = 0;
     do {
-      Thread.sleep(1000);
+      Thread.sleep(100);
       counter++;
       if (Files.exists(tempDir.resolve("log2.log"))) {
         receiver1 = Files.readAllLines(tempDir.resolve("log2.log"));
       }
-    } while (receiver1.size() < 20 && counter < 20);
+      if (Files.exists(tempDir.resolve("log3.log"))) {
+        receiver2 = Files.readAllLines(tempDir.resolve("log3.log"));
+      }
+    } while ((receiver1.size() < 20 || receiver2.size() < 20) && counter < 100);
 
     client.close();
 
     service.submit(app1::stop);
     service.submit(app2::stop);
     service.submit(app3::stop);
-
-
-    assertEquals(20, receiver1.size());
-    List<String> receiver2 = Files.readAllLines(tempDir.resolve("log3.log"));
-    assertEquals(20, receiver2.size());
-
     service.shutdown();
 
+    List<String> receiver1Expected = new ArrayList<>(sent);
+    Pattern pattern = Pattern.compile("value\":\"(.*)\"}$");
+    for (String received : receiver1) {
+      Matcher match = pattern.matcher(received);
+      match.find();
+      String value = match.group(1);
+      receiver1Expected.remove(value);
+    }
+    List<String> receiver2Expected = new ArrayList<>(sent);
+    for (String received : receiver2) {
+      Matcher match = pattern.matcher(received);
+      match.find();
+      String value = match.group(1);
+      receiver2Expected.remove(value);
+    }
+
+    assertTrue(receiver1Expected.isEmpty(), "Elements left:" + receiver1Expected);
+    assertTrue(receiver2Expected.isEmpty(), "Elements left:" + receiver2Expected);
   }
 }

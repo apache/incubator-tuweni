@@ -24,7 +24,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
@@ -46,8 +45,9 @@ public final class State {
       });
 
   private final MessageSender messageSender;
-  private final Consumer<Bytes> messageListener;
+  private final MessageListener messageListener;
   private final MessageValidator messageValidator;
+  private final PeerPruning peerPruningFunction;
   final Queue<Runnable> lazyQueue = new ConcurrentLinkedQueue<>();
   private final Timer timer = new Timer("plumtree", true);
   private final long delay;
@@ -66,7 +66,7 @@ public final class State {
     }
 
     /**
-     * Acts on receiving the full message
+     * Acts on receiving the full message.
      * 
      * @param sender the sender - may be null if we are submitting this message to the network
      * @param message the payload to send to the network
@@ -93,13 +93,14 @@ public final class State {
                           .sendMessage(MessageSender.Verb.IHAVE, null, peer, hash, null)))
                   .collect(Collectors.toList()));
           if (sender != null) {
-            messageListener.accept(message);
+            messageListener.listen(message, attributes);
           }
         }
       } else {
         if (sender != null) {
-          messageSender.sendMessage(MessageSender.Verb.PRUNE, null, sender, hash, null);
-          peerRepository.moveToLazy(sender);
+          if (peerPruningFunction.prunePeer(sender)) {
+            messageSender.sendMessage(MessageSender.Verb.PRUNE, null, sender, hash, null);
+          }
         }
       }
     }
@@ -138,24 +139,35 @@ public final class State {
    * @param messageSender a function abstracting sending messages to other peers.
    * @param messageListener a function consuming messages when they are gossiped.
    * @param messageValidator a function validating messages before they are gossiped to other peers.
+   * @param peerPruningFunction a function deciding whether to prune peers.
    */
   public State(
       PeerRepository peerRepository,
       MessageHashing messageHashingFunction,
       MessageSender messageSender,
-      Consumer<Bytes> messageListener,
-      MessageValidator messageValidator) {
-    this(peerRepository, messageHashingFunction, messageSender, messageListener, messageValidator, 5000, 5000);
+      MessageListener messageListener,
+      MessageValidator messageValidator,
+      PeerPruning peerPruningFunction) {
+    this(
+        peerRepository,
+        messageHashingFunction,
+        messageSender,
+        messageListener,
+        messageValidator,
+        peerPruningFunction,
+        5000,
+        5000);
   }
 
   /**
-   * Constructor using default time constants.
+   * Default constructor.
    * 
    * @param peerRepository the peer repository to use to store and access peer information.
    * @param messageHashingFunction the function to use to hash messages into hashes to compare them.
    * @param messageSender a function abstracting sending messages to other peers.
    * @param messageListener a function consuming messages when they are gossiped.
    * @param messageValidator a function validating messages before they are gossiped to other peers.
+   * @param peerPruningFunction a function deciding whether to prune peers.
    * @param graftDelay delay in milliseconds to apply before this peer grafts an other peer when it finds that peer has
    *        data it misses.
    * @param lazyQueueInterval the interval in milliseconds between sending messages to lazy peers.
@@ -164,8 +176,9 @@ public final class State {
       PeerRepository peerRepository,
       MessageHashing messageHashingFunction,
       MessageSender messageSender,
-      Consumer<Bytes> messageListener,
+      MessageListener messageListener,
       MessageValidator messageValidator,
+      PeerPruning peerPruningFunction,
       long graftDelay,
       long lazyQueueInterval) {
     this.peerRepository = peerRepository;
@@ -173,6 +186,7 @@ public final class State {
     this.messageSender = messageSender;
     this.messageListener = messageListener;
     this.messageValidator = messageValidator;
+    this.peerPruningFunction = peerPruningFunction;
     this.delay = graftDelay;
     timer.schedule(new TimerTask() {
       @Override
@@ -208,9 +222,13 @@ public final class State {
    * @param attributes of the message
    * @param message the hash of the message
    */
-  public void receiveGossipMessage(Peer peer, String attributes, Bytes message) {
+  public void receiveGossipMessage(Peer peer, String attributes, Bytes message, Bytes messageHash) {
+    Bytes checkHash = messageHashingFunction.hash(message);
+    if (!checkHash.equals(messageHash)) {
+      return;
+    }
     peerRepository.considerNewPeer(peer);
-    MessageHandler handler = messageHandlers.computeIfAbsent(messageHashingFunction.hash(message), MessageHandler::new);
+    MessageHandler handler = messageHandlers.computeIfAbsent(messageHash, MessageHandler::new);
     handler.fullMessageReceived(peer, attributes, message);
   }
 
@@ -226,7 +244,7 @@ public final class State {
   }
 
   /**
-   * Requests a peer be pruned away from the eager peers into the lazy peers
+   * Requests a peer be pruned away from the eager peers into the lazy peers.
    *
    * @param peer the peer to move to lazy peers
    */
@@ -235,7 +253,7 @@ public final class State {
   }
 
   /**
-   * Requests a peer be grafted to the eager peers list
+   * Requests a peer be grafted to the eager peers list.
    *
    * @param peer the peer to add to the eager peers
    * @param messageHash the hash of the message that triggers this grafting

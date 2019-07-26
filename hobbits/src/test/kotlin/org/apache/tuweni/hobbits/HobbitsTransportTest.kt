@@ -45,7 +45,7 @@ class HobbitsTransportTest {
     val server = HobbitsTransport(vertx)
     val exception: IllegalStateException = assertThrows {
       runBlocking {
-        server.sendMessage(Message(command = "RCP", headers = Bytes.EMPTY, body = Bytes.EMPTY),
+        server.sendMessage(Message(protocol = Protocol.RPC, headers = Bytes.EMPTY, body = Bytes.EMPTY),
           Transport.TCP, "localhost", 9000)
       }
     }
@@ -57,7 +57,7 @@ class HobbitsTransportTest {
     val server = HobbitsTransport(vertx)
     server.start()
     val exception: IllegalStateException = assertThrows {
-      server.createHTTPEndpoint()
+      server.createHTTPEndpoint(handler = {})
     }
     assertEquals("Server already started", exception.message)
   }
@@ -73,7 +73,7 @@ class HobbitsTransportTest {
     }.listen(10000, "localhost")
     val server = HobbitsTransport(vertx)
     server.start()
-    val msg = Message(command = "RCP", headers = Bytes.EMPTY, body = Bytes.EMPTY)
+    val msg = Message(protocol = Protocol.RPC, headers = Bytes.EMPTY, body = Bytes.EMPTY)
     server.sendMessage(msg, Transport.TCP, "localhost", 10000)
     val result = completion.await()
     assertEquals(msg.toBytes(), result)

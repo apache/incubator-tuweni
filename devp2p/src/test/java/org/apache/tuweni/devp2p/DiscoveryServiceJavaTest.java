@@ -12,6 +12,7 @@
  */
 package org.apache.tuweni.devp2p;
 
+import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -56,6 +57,8 @@ class DiscoveryServiceJavaTest {
         SECP256K1.KeyPair.random(),
         0,
         "localhost",
+        1,
+        emptyMap(),
         Collections.singletonList(URI.create("enode://" + peerKeyPair.publicKey().toHexString() + "@127.0.0.1:10000")),
         repository);
     AsyncResult<Peer> result = repository.getAsync(peerKeyPair.publicKey());

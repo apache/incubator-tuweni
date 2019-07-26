@@ -41,6 +41,14 @@ final class GossipCommandLineOptions {
         .addString("networkInterface", "0.0.0.0", "Network interface to bind to", null)
         .addListOfString("peers", Collections.emptyList(), "Static peers list", null)
         .addString("messagelog", "messages.log", "Log file where messages are stored", null)
+        .addBoolean("sending", false, "Whether this peer sends random messages to all other peers (load testing)", null)
+        .addInteger(
+            "sendInterval",
+            1000,
+            "Interval to wait in between sending messages in milliseconds (load testing)",
+            null)
+        .addInteger("numberOfMessages", 100, "Number of messages to publish to other peers (load testing)", null)
+        .addInteger("payloadSize", 200, "Size of the random payload to send to other peers (load testing)", null)
         .toSchema();
   }
 
@@ -62,6 +70,21 @@ final class GossipCommandLineOptions {
   @CommandLine.Option(names = {"-m", "--messageLog"} , description = "Log file where messages are stored")
   private String messageLog;
 
+  @CommandLine.Option(names = {"--sendInterval"} ,
+      description = "Interval to wait in between sending messages in milliseconds (load testing)")
+  private Integer sendInterval;
+
+  @CommandLine.Option(names = {"--payloadSize"} ,
+      description = "Size of the random payload to send to other peers (load testing)")
+  private Integer payloadSize;
+
+  @CommandLine.Option(names = {"--numberOfMessages"} , description = "Number of messages to publish (load testing)")
+  private Integer numberOfMessages;
+
+  @CommandLine.Option(names = {"--sending"} ,
+      description = "Whether this peer sends random messages to all other peers (load testing)")
+  private Boolean sending;
+
   @CommandLine.Option(names = {"-h", "--help"} , description = "Prints usage prompt")
   private boolean help;
 
@@ -70,12 +93,19 @@ final class GossipCommandLineOptions {
 
   GossipCommandLineOptions() {}
 
+  /**
+   * Constructor used for testing.
+   */
   GossipCommandLineOptions(
       String[] peers,
       Integer port,
       String networkInterface,
       String messageLog,
       Integer rpcPort,
+      Integer payloadSize,
+      Integer sendInterval,
+      Boolean sending,
+      Integer numberOfMessages,
       Configuration config) {
     this.peers = peers;
     this.port = port;
@@ -83,6 +113,10 @@ final class GossipCommandLineOptions {
     this.messageLog = messageLog;
     this.rpcPort = rpcPort;
     this.config = config;
+    this.payloadSize = payloadSize;
+    this.sendInterval = sendInterval;
+    this.numberOfMessages = numberOfMessages;
+    this.sending = sending;
   }
 
   private Configuration config() {
@@ -101,25 +135,25 @@ final class GossipCommandLineOptions {
       peerAddresses = new ArrayList<>();
       if (peers != null) {
         for (String peer : peers) {
-          URI peerURI = URI.create(peer);
-          if (peerURI.getHost() == null) {
-            throw new IllegalArgumentException("Invalid peer URI " + peerURI);
-          }
-          peerAddresses.add(peerURI);
+          readPeerInfo(peer);
         }
       } else {
         if (config() != null) {
           for (String peer : config().getListOfString("peers")) {
-            URI peerURI = URI.create(peer);
-            if (peerURI.getHost() == null) {
-              throw new IllegalArgumentException("Invalid peer URI " + peerURI);
-            }
-            peerAddresses.add(peerURI);
+            readPeerInfo(peer);
           }
         }
       }
     }
     return peerAddresses;
+  }
+
+  private void readPeerInfo(String peer) {
+    URI peerURI = URI.create(peer);
+    if (peerURI.getHost() == null) {
+      throw new IllegalArgumentException("Invalid peer URI " + peerURI);
+    }
+    peerAddresses.add(peerURI);
   }
 
   void validate() {
@@ -185,6 +219,46 @@ final class GossipCommandLineOptions {
       return config.getString("messageLog");
     }
     return "messages.log";
+  }
+
+  boolean sending() {
+    if (sending != null) {
+      return sending;
+    }
+    if (config != null) {
+      return config.getBoolean("sending");
+    }
+    return false;
+  }
+
+  Integer payloadSize() {
+    if (payloadSize != null) {
+      return payloadSize;
+    }
+    if (config != null) {
+      return config.getInteger("payloadSize");
+    }
+    return 200;
+  }
+
+  Integer sendInterval() {
+    if (sendInterval != null) {
+      return sendInterval;
+    }
+    if (config != null) {
+      return config.getInteger("sendInterval");
+    }
+    return 1000;
+  }
+
+  Integer numberOfMessages() {
+    if (numberOfMessages != null) {
+      return numberOfMessages;
+    }
+    if (config != null) {
+      return config.getInteger("numberOfMessages");
+    }
+    return 100;
   }
 
   boolean help() {

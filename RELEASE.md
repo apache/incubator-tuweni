@@ -56,6 +56,8 @@ shasum -a 512 dist/build/distributions/tuweni-src-${RELEASE VERSION}.tgz
 shasum -a 512 dist/build/distributions/tuweni-src-${RELEASE VERSION}.zip
 shasum -a 512 dist/build/distributions/tuweni-gossip-${RELEASE VERSION}.tgz
 shasum -a 512 dist/build/distributions/tuweni-gossip-${RELEASE VERSION}.zip
+shasum -a 512 dist/build/distributions/tuweni-relayer-${RELEASE VERSION}.tgz
+shasum -a 512 dist/build/distributions/tuweni-relayer-${RELEASE VERSION}.zip
 ```
 
 Sign and publish
@@ -70,19 +72,19 @@ This also publishes the artifacts to repository.apache.org in a staging reposito
 
 ### Push the distribution to dist.apache.org staging area
 
-If necessary create the folder:
+Delete the folder if necessary:
 ```
-svn mkdir -m "Add new Tuweni folder for release ${RELEASE VERSION}" https://dist.apache.org/repos/dist/dev/tuweni/${RELEASE VERSION}
+svn delete https://dist.apache.org/repos/dist/dev/incubator/tuweni/${RELEASE VERSION} -m "Deleting release candidate ${RELEASE_VERSION}"
+```
+
+Create the folder:
+```
+svn mkdir -m "Add new Tuweni folder for release ${RELEASE VERSION}" https://dist.apache.org/repos/dist/dev/incubator/tuweni/${RELEASE VERSION}
 ```
 
 Check out the folder locally:
 ```
-svn checkout https://dist.apache.org/repos/dist/dev/tuweni/${RELEASE VERSION} _staged
-```
-
-Delete contents of the folder if necessary.
-```
-TODO
+svn checkout https://dist.apache.org/repos/dist/dev/incubator/tuweni/${RELEASE VERSION} _staged
 ```
 
 Copy the distribution artifacts to it - make sure to change the name to ${RELEASE VERSION}-incubating:
@@ -92,7 +94,7 @@ cp dist/build/distributions/tuweni-${RELEASE VERSION}.zip _staged/tuweni-${RELEA
 cp dist/build/distributions/tuweni-${RELEASE VERSION}.tgz _staged/tuweni-${RELEASE VERSION}-incubating.tgz
 ```
 
-Commit the changes
+Commit the changes:
 ```
 cd _staged
 svn add tuweni-*
@@ -103,22 +105,22 @@ svn ci -m "Add Apache Tuweni ${RELEASE VERSION} release candidate"
 
 ```
 git tag -m "Release ${RELEASE VERSION}" v${RELEASE VERSION}
-git push origin 1.0 --tags
+git push origin ${RELEASE BRANCH} --tags
 ```
 
 ### Open a thread for a vote
 
 Send an email to dev@tuweni.apache.org with the following:
 
-Subject:[VOTE] Tuweni ${RELEASE VERSION} release
+Subject:[VOTE] Apache Tuweni ${RELEASE VERSION} release
 ```
 We're voting on the source distributions available here:
-https://dist.apache.org/repos/dist/dev/tuweni/${RELEASE VERSION}/dist/
-Specifically:
-https://dist.apache.org/repos/dist/dev/tuweni/${RELEASE VERSION}/dist/tuweni-${RELEASE VERSION}.tgz
-https://dist.apache.org/repos/dist/dev/tuweni/${RELEASE VERSION}/dist/tuweni-${RELEASE VERSION}.zip
-The documentation generated for this release is available here:
-https://dist.apache.org/repos/dist/dev/tuweni/${RELEASE VERSION}/site/
+https://dist.apache.org/repos/dist/dev/incubator/tuweni/${RELEASE VERSION}/
+The release tag is present here:
+https://github.com/apache/incubator-tuweni/releases/tag/v${RELEASE VERSION}
+
+Please review and vote as appropriate.
+
 The following changes were made since ${PREVIOUS VERSION}:
 
 ${fill in changes}
@@ -131,9 +133,27 @@ The vote should be opened for at least 72 hours, longer if there is a week-end.
 
 After the time of the vote has elapsed, close the vote thread with a recap showing the votes.
 
+## Incubator general list
+
+The next step is to email the general incubator list. If 3 IPMC votes were collected in the first vote, this is a notification.
+If less than 3 votes were collected, this email is a new vote asking for more IPMC +1s.
+
+## Close the vote
+
+If a vote was called on the IPMC list, close it in the same fashion with a recap.
+
 ### Push the release to the dist final location
 
-TODO
+Move the files from `https://dist.apache.org/repos/dist/dev/incubator/tuweni/${RELEASE VERSION}/` to 
+`https://dist.apache.org/repos/dist/release/incubator/tuweni/${RELEASE VERSION}/`:
+```bash
+svn move -m "Move Apache Tuweni ${RELEASE VERSION} to releases" https://dist.apache.org/repos/dist/dev/incubator/tuweni/${RELEASE VERSION} https://dist.apache.org/repos/dist/release/incubator/tuweni/${RELEASE VERSION}
+```
+
+Update the website:
+
+Test the downloads page (wait 24h for mirrors to update):
+
 
 ### Move the artifacts to maven central
 
@@ -156,14 +176,6 @@ To learn more about Tuweni and get started:
 http://tuweni.apache.org/
 Thanks!
 The Apache Tuweni Team
-```
-
-### Cherry-pick the commit changing versions back to master
-
-See $commitId above.
-
-```
-git cherry-pick ${commitId}
 ```
 
 ### Clean up jira

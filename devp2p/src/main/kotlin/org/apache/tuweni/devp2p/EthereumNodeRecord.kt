@@ -157,6 +157,18 @@ class EthereumNodeRecord(val signature: Bytes, val seq: Long, val data: Map<Stri
     val ecPoint = SECP256K1.Parameters.CURVE.getCurve().decodePoint(keyBytes.toArrayUnsafe())
     return SECP256K1.PublicKey.fromBytes(Bytes.wrap(ecPoint.getEncoded(false)).slice(1))
   }
+
+  fun ip(): InetAddress {
+    return InetAddress.getByAddress(data["ip"]!!.toArrayUnsafe())
+  }
+
+  fun tcp(): Int {
+    return data["tcp"]!!.toInt()
+  }
+
+  fun udp(): Int {
+    return data["udp"]!!.toInt()
+  }
 }
 
 internal class InvalidNodeRecordException(message: String?) : RuntimeException(message)

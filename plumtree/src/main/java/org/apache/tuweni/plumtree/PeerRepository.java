@@ -54,8 +54,9 @@ public interface PeerRepository {
    * Moves a peer to the list of lazy peers
    * 
    * @param peer the peer to move
+   * @return true if the move was effective
    */
-  void moveToLazy(Peer peer);
+  boolean moveToLazy(Peer peer);
 
   /**
    * Moves a peer to the list of eager peers.

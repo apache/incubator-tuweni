@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.yield
+import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.AsyncResult
@@ -61,6 +62,7 @@ import java.net.SocketAddress
 import java.net.URI
 import java.nio.ByteBuffer
 import java.nio.channels.ClosedChannelException
+import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
@@ -69,7 +71,9 @@ import kotlin.coroutines.CoroutineContext
 internal const val PACKET_EXPIRATION_PERIOD_MS: Long = (20 * 1000) // 20 seconds
 internal const val PACKET_EXPIRATION_CHECK_GRACE_MS: Long = (5 * 1000) // 5 seconds
 internal const val PEER_VERIFICATION_TIMEOUT_MS: Long = (22 * 1000) // 22 seconds (packet expiration + a little)
+internal const val ENR_REQUEST_TIMEOUT_MS: Long = (22 * 1000) // 22 seconds (packet expiration + a little)
 internal const val PEER_VERIFICATION_RETRY_DELAY_MS: Long = (5 * 60 * 1000) // 5 minutes
+internal const val ENR_REQUEST_RETRY_DELAY_MS: Long = (5 * 60 * 1000) // 5 minutes
 internal const val BOOTSTRAP_PEER_VERIFICATION_TIMEOUT_MS: Long = (2 * 60 * 1000) // 2 minutes
 internal const val REFRESH_INTERVAL_MS: Long = (60 * 1000) // 1 minute
 internal const val PING_RETRIES: Int = 20
@@ -84,7 +88,9 @@ internal const val LOOKUP_RESPONSE_TIMEOUT_MS: Long = 500 // 500 milliseconds
 /**
  * An Ethereum ÐΞVp2p discovery service.
  *
- * @author Chris Leishman - https://cleishm.github.io/
+ * This service supports devp2p discovery v4, alongside support for EIP-868.
+ * http://eips.ethereum.org/EIPS/eip-868
+ *
  */
 interface DiscoveryService {
 
@@ -99,6 +105,8 @@ interface DiscoveryService {
      * @param port the port to listen on (defaults to `0`, which will cause a random free port to be chosen)
      * @param host the host name or IP address of the interface to bind to (defaults to `null`, which will cause the
      *         service to listen on all interfaces
+     * @param seq the sequence number of the Ethereum Node Record
+     * @param enrData the additional key/value pair entries to broadcast as an Ethereum Node Record (ENR).
      * @param bootstrapURIs the URIs for bootstrap nodes
      * @param peerRepository a [PeerRepository] for obtaining [Peer] instances
      * @param advertiseAddress the IP address to advertise to peers, or `null` if the address of the first bound
@@ -117,6 +125,8 @@ interface DiscoveryService {
       keyPair: SECP256K1.KeyPair,
       port: Int = 0,
       host: String? = null,
+      seq: Long = Instant.now().toEpochMilli(),
+      enrData: Map<String, Bytes> = emptyMap(),
       bootstrapURIs: List<URI> = emptyList(),
       peerRepository: PeerRepository = EphemeralPeerRepository(),
       advertiseAddress: InetAddress? = null,
@@ -133,6 +143,8 @@ interface DiscoveryService {
       return open(
         keyPair,
         bindAddress,
+        seq,
+        enrData,
         bootstrapURIs,
         peerRepository,
         advertiseAddress,
@@ -152,6 +164,8 @@ interface DiscoveryService {
      *
      * @param keyPair the local node's keypair
      * @param bindAddress the address to listen on
+     * @param seq the sequence number of the Ethereum Node Record
+     * @param enrData the additional key/value pair entries to broadcast as an Ethereum Node Record (ENR).
      * @param bootstrapURIs the URIs for bootstrap nodes
      * @param peerRepository a [PeerRepository] for obtaining [Peer] instances
      * @param advertiseAddress the IP address to advertise for incoming packets
@@ -168,6 +182,8 @@ interface DiscoveryService {
     fun open(
       keyPair: SECP256K1.KeyPair,
       bindAddress: InetSocketAddress,
+      seq: Long = Instant.now().toEpochMilli(),
+      enrData: Map<String, Bytes> = emptyMap(),
       bootstrapURIs: List<URI> = emptyList(),
       peerRepository: PeerRepository = EphemeralPeerRepository(),
       advertiseAddress: InetAddress? = null,
@@ -181,8 +197,8 @@ interface DiscoveryService {
       timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER
     ): DiscoveryService {
       return CoroutineDiscoveryService(
-        keyPair, bindAddress, bootstrapURIs, advertiseAddress, advertiseUdpPort, advertiseTcpPort, peerRepository,
-        routingTable, packetFilter, loggerProvider, channelGroup, bufferAllocator, timeSupplier
+        keyPair, seq, enrData, bindAddress, bootstrapURIs, advertiseAddress, advertiseUdpPort, advertiseTcpPort,
+        peerRepository, routingTable, packetFilter, loggerProvider, channelGroup, bufferAllocator, timeSupplier
       )
     }
   }
@@ -259,10 +275,13 @@ interface DiscoveryService {
   val unvalidatedPeerPackets: Long
   val unexpectedPongs: Long
   val unexpectedNeighbors: Long
+  val unexpectedENRResponses: Long
 }
 
 internal class CoroutineDiscoveryService(
   private val keyPair: SECP256K1.KeyPair,
+  private val seq: Long = Instant.now().toEpochMilli(),
+  private val enrData: Map<String, Bytes>,
   bindAddress: InetSocketAddress,
   bootstrapURIs: List<URI> = emptyList(),
   advertiseAddress: InetAddress? = null,
@@ -280,8 +299,8 @@ internal class CoroutineDiscoveryService(
 
   private val logger = loggerProvider.getLogger(DiscoveryService::class.java)
   private val serviceDescriptor = "ÐΞVp2p discovery " + System.identityHashCode(this)
-
   private val selfEndpoint: Endpoint
+  private val enr: Bytes
 
   private val job = Job()
   // override the default exception handler, which dumps to stderr
@@ -306,7 +325,10 @@ internal class CoroutineDiscoveryService(
 
   private val verifyingEndpoints: Cache<InetSocketAddress, EndpointVerification> =
     CacheBuilder.newBuilder().expireAfterAccess(PEER_VERIFICATION_RETRY_DELAY_MS, TimeUnit.MILLISECONDS).build()
+  private val requestingENRs: Cache<InetSocketAddress, ENRRequest> =
+    CacheBuilder.newBuilder().expireAfterAccess(ENR_REQUEST_RETRY_DELAY_MS, TimeUnit.MILLISECONDS).build()
   private val awaitingPongs = ConcurrentHashMap<Bytes32, EndpointVerification>()
+  private val awaitingENRs = ConcurrentHashMap<Bytes32, ENRRequest>()
   private val findNodeStates: Cache<SECP256K1.PublicKey, FindNodeState> =
     CacheBuilder.newBuilder().expireAfterAccess(FIND_NODES_CACHE_EXPIRY, TimeUnit.MILLISECONDS)
       .removalListener<SECP256K1.PublicKey, FindNodeState> { it.value.close() }
@@ -318,6 +340,7 @@ internal class CoroutineDiscoveryService(
   override var filteredPackets: Long by AtomicLong(0)
   override var unvalidatedPeerPackets: Long by AtomicLong(0)
   override var unexpectedPongs: Long by AtomicLong(0)
+  override var unexpectedENRResponses: Long by AtomicLong(0)
   override var unexpectedNeighbors: Long by AtomicLong(0)
 
   init {
@@ -328,6 +351,9 @@ internal class CoroutineDiscoveryService(
       advertiseUdpPort ?: channel.localPort,
       advertiseTcpPort
     )
+
+    enr = EthereumNodeRecord.toRLP(keyPair, seq, enrData, selfEndpoint.address, selfEndpoint.tcpPort,
+      selfEndpoint.udpPort)
 
     val bootstrapping = bootstrapURIs.map { uri ->
       activityLatch.countUp()
@@ -535,6 +561,8 @@ internal class CoroutineDiscoveryService(
       is PongPacket -> handlePong(packet, address, arrivalTime)
       is FindNodePacket -> handleFindNode(packet, address, arrivalTime)
       is NeighborsPacket -> handleNeighbors(packet, address)
+      is ENRRequestPacket -> handleENRRequest(packet, address, arrivalTime)
+      is ENRResponsePacket -> handleENRResponse(packet, address, arrivalTime)
     }.let {} // guarantees "when" matching is exhaustive
   }
 
@@ -553,7 +581,7 @@ internal class CoroutineDiscoveryService(
       )
     }
 
-    val pong = PongPacket.create(keyPair, timeSupplier(), currentEndpoint, packet.hash)
+    val pong = PongPacket.create(keyPair, timeSupplier(), currentEndpoint, packet.hash, seq)
     sendPacket(from, pong)
     // https://github.com/ethereum/devp2p/blob/master/discv4.md#ping-packet-0x01 also suggests sending a ping
     // packet if the peer is unknown, however sending two packets in response to a single incoming would allow a
@@ -594,6 +622,13 @@ internal class CoroutineDiscoveryService(
     }
 
     pending.complete(VerificationResult(peer, endpoint))
+
+    if (packet.enrSeq != null) {
+      if (peer.enr == null || peer.enr!!.seq < packet.enrSeq) {
+        val now = timeSupplier()
+        withTimeoutOrNull(ENR_REQUEST_TIMEOUT_MS) { enrRequest(endpoint, peer).verify(now) }
+      }
+    }
   }
 
   private suspend fun handleFindNode(packet: FindNodePacket, from: InetSocketAddress, arrivalTime: Long) {
@@ -642,6 +677,47 @@ internal class CoroutineDiscoveryService(
     }
   }
 
+  private suspend fun handleENRRequest(packet: ENRRequestPacket, from: InetSocketAddress, arrivalTime: Long) {
+    val peer = peerRepository.get(packet.nodeId)
+    val (_, endpoint) = ensurePeerIsValid(peer, from, arrivalTime) ?: run {
+      logger.debug("{}: received enrRequest from {} which cannot be validated", serviceDescriptor, from)
+      ++unvalidatedPeerPackets
+      return
+    }
+
+    logger.debug("{}: received enrRequest from {}", serviceDescriptor, from)
+
+    val address = endpoint.udpSocketAddress
+    sendPacket(address, ENRResponsePacket.create(keyPair, timeSupplier(), packet.hash, enr))
+  }
+
+  private suspend fun handleENRResponse(packet: ENRResponsePacket, from: InetSocketAddress, arrivalTime: Long) {
+    val pending = awaitingENRs.remove(packet.requestHash) ?: run {
+      logger.debug("{}: received unexpected or late enr response from {}", serviceDescriptor, from)
+      ++unexpectedENRResponses
+      return
+    }
+    packet.requestHash
+    val sender = pending.peer
+    // COMPATIBILITY: If the node-id's don't match, the pong should probably be rejected. However, if a different
+    // peer is listening at the same address, it will respond to the ping with its node-id. Instead of rejecting,
+    // accept the pong and update the new peer record with the proven endpoint, preferring to keep its current
+    // tcpPort and otherwise keeping the tcpPort of the original peer.
+    val peer = if (sender.nodeId == packet.nodeId) sender else peerRepository.get(packet.nodeId)
+
+    val enr = EthereumNodeRecord.fromRLP(packet.enr)
+    try {
+      enr.validate()
+    } catch (e: InvalidNodeRecordException) {
+      logger.debug("Invalid ENR", e)
+      return
+    }
+
+    peer.updateENR(enr, arrivalTime)
+
+    pending.complete(ENRResult(peer, enr))
+  }
+
   private fun addToRoutingTable(peer: Peer) {
     routingTable.add(peer)?.let { contested ->
       launch {
@@ -673,7 +749,7 @@ internal class CoroutineDiscoveryService(
   private fun endpointVerification(endpoint: Endpoint, peer: Peer) =
     verifyingEndpoints.get(endpoint.udpSocketAddress) { EndpointVerification(endpoint, peer) }
 
-  // a representation of the state and current action for verifying and endpoint,
+  // a representation of the state and current action for verifying an endpoint,
   // to avoid concurrent attempts to verify the same endpoint
   private inner class EndpointVerification(val endpoint: Endpoint, val peer: Peer) {
     private val deferred = CompletableDeferred<VerificationResult?>()
@@ -718,7 +794,7 @@ internal class CoroutineDiscoveryService(
     }
 
     private suspend fun sendPing(now: Long = timeSupplier()) {
-      val pingPacket = PingPacket.create(keyPair, now, selfEndpoint, endpoint)
+      val pingPacket = PingPacket.create(keyPair, now, selfEndpoint, endpoint, seq)
 
       // create local references to be captured in the closure, rather than the whole packet instance
       val hash = pingPacket.hash
@@ -751,6 +827,61 @@ internal class CoroutineDiscoveryService(
      * This will typically be the same as peer.endpoint, but may not be due to concurrent updates.
      */
     val endpoint: Endpoint
+  )
+
+  private fun enrRequest(endpoint: Endpoint, peer: Peer) =
+    requestingENRs.get(endpoint.udpSocketAddress) { ENRRequest(endpoint, peer) }
+
+  // a representation of the state and current action for querying an ENR from a peer,
+  // to avoid concurrent attempts to request the same information.
+  private inner class ENRRequest(val endpoint: Endpoint, val peer: Peer) {
+    private val deferred = CompletableDeferred<ENRResult?>()
+    @Volatile
+    private var active: Job? = null
+    private var nextENRRequest: Long = 0
+    private var retryDelay: Long = 0
+
+    suspend fun verify(now: Long = timeSupplier()): ENRResult? {
+      if (!deferred.isCompleted) {
+        // if not already actively requesting and enough time has passed since the last request, send a single request
+        synchronized(this) {
+          if (active?.isCompleted != false && now >= nextENRRequest) {
+            nextENRRequest = now + RESEND_DELAY_MS
+            launch { sendENRRequest(now) }
+          }
+        }
+      }
+      return deferred.await()
+    }
+
+    private suspend fun sendENRRequest(now: Long = timeSupplier()) {
+      val enrRequestPacket = ENRRequestPacket.create(keyPair, now)
+
+      // create local references to be captured in the closure, rather than the whole packet instance
+      val hash = enrRequestPacket.hash
+      val timeout = enrRequestPacket.expiration - now
+
+      // very unlikely that there is another ping packet created with the same hash yet a different ENRRequest
+      // instance, but if there is then the first will be waiting on a deferred that never completes and will
+      // eventually time out
+      if (awaitingENRs.put(hash, this) != this) {
+        launch {
+          delay(timeout)
+          awaitingENRs.remove(hash)
+        }
+        sendPacket(endpoint.udpSocketAddress, enrRequestPacket)
+      }
+    }
+
+    fun complete(result: ENRResult?): Boolean {
+      active?.cancel()
+      return deferred.complete(result)
+    }
+  }
+
+  private data class ENRResult(
+    val peer: Peer,
+    val enr: EthereumNodeRecord
   )
 
   @UseExperimental(ObsoleteCoroutinesApi::class)
