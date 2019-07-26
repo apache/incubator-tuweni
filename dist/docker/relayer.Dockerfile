@@ -25,4 +25,3 @@ RUN cd /usr \
   && mv tuweni-relayer-* relayer
 
 ENTRYPOINT ["/usr/relayer/bin/relayer"]
-

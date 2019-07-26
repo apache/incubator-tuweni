@@ -188,7 +188,7 @@ allprojects {
   apply plugin: 'io.spring.dependency-management'
   apply plugin: 'jacoco'
   apply plugin: 'com.jfrog.bintray'
-  apply plugin: 'net.ltgt.errorprone'
+  // apply plugin: 'net.ltgt.errorprone'
   apply plugin: 'maven-publish'
   apply plugin: 'org.jetbrains.dokka'
   apply plugin: 'signing'
@@ -210,10 +210,10 @@ allprojects {
   jacoco { toolVersion = '0.8.2' }
 
   dependencies {
-    errorprone 'com.google.errorprone:error_prone_core'
-    if (JavaVersion.current().isJava8()) {
-      errorproneJavac("com.google.errorprone:javac")
-    }
+  //  errorprone 'com.google.errorprone:error_prone_core'
+  //  if (JavaVersion.current().isJava8()) {
+  //    errorproneJavac("com.google.errorprone:javac")
+  //  }
   }
 
   tasks.withType(JavaCompile) {
@@ -234,12 +234,12 @@ allprojects {
       '-Werror'
     ]
 
-    options.errorprone {
-      excludedPaths '.*/generated-src/.*'
-      check('FutureReturnValueIgnored', CheckSeverity.OFF)
-      check('UnnecessaryParentheses', CheckSeverity.OFF)
-      disableWarningsInGeneratedCode = true
-    }
+  //  options.errorprone {
+  //    excludedPaths '.*/generated-src/.*'
+  //    check('FutureReturnValueIgnored', CheckSeverity.OFF)
+  //    check('UnnecessaryParentheses', CheckSeverity.OFF)
+  //    disableWarningsInGeneratedCode = true
+  //  }
   }
 
   tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
