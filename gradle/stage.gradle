@@ -1,0 +1,241 @@
+import org.gradle.api.internal.project.IsolatedAntBuilder
+
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+apply plugin: StagePlugin
+
+class VerifyStageTask extends DefaultTask {
+
+  @TaskAction
+  def run() {
+    // check if credentials are set
+    if (project.findProperty("asfNexusUsername") == null) {
+      throw new GradleException("Missing nexus username")
+    }
+    if (project.findProperty("asfNexusPassword") == null) {
+      throw new GradleException("Missing nexus password")
+    }
+    if (project.findProperty('signing.keyId') == null) {
+      throw new GradleException("Missing GPG key ID")
+    }
+    if (project.findProperty('signing.gnupg.keyName') == null) {
+      throw new GradleException("Missing GPG key name")
+    }
+    // make sure we are building a release
+    if (System.getenv('BUILD_RELEASE') != 'true') {
+      throw new GradleException("BUILD_RELEASE is not set to true. Run export BUILD_RELEASE=true")
+    }
+    // make sure signing is enabled
+    if (System.getenv("ENABLE_SIGNING") != 'true') {
+      throw new GradleException("ENABLE_SIGNING is not set to true. Run export ENABLE_SIGNING=true")
+    }
+
+    // make sure there are no local changes.
+    def status = new ByteArrayOutputStream()
+    project.exec {
+      commandLine 'git', 'status', '-s'
+      standardOutput = status
+    }
+    if (status.size() != 0) {
+      throw new GradleException("Local changes detected")
+    }
+
+    // check the version matches the branch.
+    def branchOutput = new ByteArrayOutputStream()
+    project.exec {
+      commandLine 'git', 'rev-parse', '--abbrev-ref', 'HEAD'
+      standardOutput = branchOutput
+    }
+    def branch = branchOutput.toString().trim()
+    if (!project.version.startsWith(branch)) {
+      throw new GradleException("$project.version does not start with $branch")
+    }
+  }
+}
+
+class StageBuildTask extends DefaultTask {
+
+  @TaskAction
+  def run() {
+    // run the build, publishing the artifacts to Nexus as staging
+    project.exec { commandLine "./gradlew", "clean", "build" }
+    project.exec { commandLine "./gradlew", "publish" }
+  }
+}
+
+class SubversionStageTask extends DefaultTask {
+  @TaskAction
+  def run() {
+    if (!file("_staged/$project.version-incubating"))
+      // create _staged folder
+      project.exec { commandLine "mkdir", "-p", "_staged" }
+
+    // create the folder in SVN where we will stage the binaries
+    project.exec {
+      commandLine "svn", "mkdir", "-m", "Add new Apache Tuweni folder for release $project.version", "https://dist.apache.org/repos/dist/dev/incubator/tuweni/$project.version-incubating"
+    }
+
+    // check out the SVN repository where we will store the binaries
+    project.exec {
+      commandLine "svn", "checkout", "https://dist.apache.org/repos/dist/dev/incubator/tuweni/$project.version-incubating", "_staged/$project.version-incubating"
+    }
+  }
+}
+
+class CopyStagedTask extends DefaultTask {
+
+  @TaskAction
+  def copy() {
+    // copy distributions over to the folder
+    project.exec {
+      commandLine "bash", "-c", "cp dist/build/distributions/tuweni-* _staged/$project.version-incubating/"
+    }
+
+    // add incubating to the version.
+    def fileNames = []
+    def fileOutput = new ByteArrayOutputStream()
+    project.exec {
+      commandLine "ls", "_staged/$project.version-incubating/"
+      standardOutput fileOutput
+    }
+    fileOutput.toString().split("\n").each {
+      fileNames.add([
+        it,
+        it.replace(project.version, "$project.version-incubating")
+      ])
+    }
+
+    fileNames.each {
+      def src = it[0]
+      def target = it[1]
+      project.exec {
+        workingDir "_staged/$project.version-incubating/"
+        commandLine "mv", src, target
+      }
+    }
+
+    // now commit the staged files
+    project.exec {
+      workingDir "_staged/$project.version-incubating/"
+      commandLine 'bash', '-c', 'svn add tuweni-*'
+    }
+    project.exec {
+      workingDir "_staged/$project.version-incubating/"
+      commandLine 'svn', 'ci', '-m', "Add Apache Tuweni $project.version release candidate"
+    }
+  }
+}
+
+class GitStageTask extends DefaultTask {
+  @TaskAction
+  def run() {
+    def branchOutput = new ByteArrayOutputStream()
+    project.exec {
+      commandLine 'git', 'rev-parse', '--abbrev-ref', 'HEAD'
+      standardOutput = branchOutput
+    }
+    def branch = branchOutput.toString().trim()
+    // tag the repo
+    project.exec {
+      commandLine 'git', 'tag', '-m', "Release $project.version-incubating", "v$project.version-incubating"
+    }
+    project.exec {
+      commandLine 'git', 'push', 'origin', branch, '--tags'
+    }
+  }
+}
+
+class EmailPromptTask extends DefaultTask {
+  @TaskAction
+  def run() {
+    println("""
+To: dev@tuweni.apache.org
+Subject:[VOTE] Tuweni $project.version-incubating release
+We're voting on the source distributions available here:
+https://dist.apache.org/repos/dist/dev/incubator/tuweni/$project.version-incubating/
+The release tag is present here:
+https://github.com/apache/incubator-tuweni/releases/tag/v$project.version-incubating
+
+This release includes the following changes:
+
+// TODO fill changes
+""")
+  }
+}
+
+class StageTask extends DefaultTask {
+
+  @TaskAction
+  def stage() {
+    new VerifyStageTask().run()
+    new StageBuildTask().run()
+    new SubversionStageTask().run()
+    new CopyStagedTask().run()
+    new GitStageTask().run()
+    new EmailPromptTask().run()
+  }
+}
+
+class StagePlugin implements Plugin<Project> {
+  void apply(Project project) {
+    configureDependencies(project)
+    project.plugins.apply(JavaPlugin)
+
+    Task stageTask = project.task("stage",
+    type: StageTask,
+    group: 'Build',
+    description: 'Stages Apache Tuweni.')
+
+    Task verifyStage = project.task("stageVerify",
+    type: VerifyStageTask,
+    group: "Build",
+    description: 'Verifies Apache Tuweni can be staged.')
+
+    Task buildStage = project.task("stageBuild",
+    type: StageBuildTask,
+    group: "Build",
+    description: 'Builds Apache Tuweni to be staged.')
+
+    Task subversionStage = project.task("stageSVN",
+    type: SubversionStageTask,
+    group: "Build",
+    description: 'Creates staging folder on SVN and checks it out')
+
+    Task copyStage = project.task("stageCopy",
+    type: CopyStagedTask,
+    group: 'Build',
+    description: 'Copy over distributions to staged area and push them to SVN')
+
+    Task gitStageTask = project.task("stageGitTag",
+    type: GitStageTask,
+    group: 'Build',
+    description: 'Tag in git the current stage')
+
+    Task emailPrompt = project.task("stageEmail",
+    type: EmailPromptTask,
+    group: 'Build',
+    description: 'Email example to console showing what to send')
+
+  }
+
+  void configureDependencies(final Project project) {
+    project.repositories { mavenCentral() }
+  }
+}

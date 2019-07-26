@@ -10,12 +10,19 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+import org.ajoberstar.grgit.Grgit
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.regex.Pattern
 import net.ltgt.gradle.errorprone.CheckSeverity
 
 buildscript {
   repositories { jcenter() // jcenter
   }
+
+  dependencies { classpath "org.ajoberstar.grgit:grgit-core:3.1.1" }
 }
 
 plugins {
@@ -32,7 +39,6 @@ plugins {
 
 description = 'A set of libraries and other tools to aid development of blockchain and other decentralized software in Java and other JVM languages'
 
-
 //////
 // Sanity checks
 
@@ -47,11 +53,18 @@ if (!file("${rootDir}/eth-reference-tests/src/test/resources/eth2.0-tests/README
 //////
 // Version numbering
 
-def versionNumber = '0.8.0'
+def versionNumber = '0.9.0'
 def buildVersion = versionNumber + buildTag()
 
 static String buildTag() {
     return ''
+
+  }
+  if (System.getenv('BUILD_TIMESTAMP') != null) {
+    return DateTimeFormatter.ofPattern("-yyyyMMddHHmmss").withLocale(Locale.US).withZone( ZoneId.systemDefault() ).format(Instant.now())
+  }
+  return '-SNAPSHOT'
+
 }
 
 
@@ -74,6 +87,43 @@ gradle.startParameter.taskNames.each {
 }
 gradle.startParameter.taskNames = expandedTaskList.flatten()
 
+apply from: "${rootDir}/wrapper.gradle"
+
+apply from: "${rootDir}/gradle/stage.gradle"
+
+//////
+// RAT checks
+
+if (file('.git').exists()) {
+  apply from: "${rootDir}/gradle/rat.gradle"
+  rat {
+    // Exclude everything under the directory that git should be ignoring via .gitignore or that isn't checked in. These
+    // restrict us only to files that are checked in or are staged.
+    def repo = Grgit.open(currentDir: project.getRootDir())
+    excludes = {
+      def list = new ArrayList<String>(repo.clean(ignore: false, directories: true, dryRun: true))
+      // And some of the files that we have checked in should also be excluded from this check
+      list.addAll([
+        '.*\\.asc',
+        '\\w+/out/.*',
+        'eth-reference-tests/**',
+        'build',
+        '.*/build/**',
+        '.editorconfig',
+        '.idea/**',
+        'gradlew.bat',
+        'gradlew',
+        'toml/src/test/resources/**',
+        '.gitattributes',
+        '.*\\.kotlin_module',
+        'example-v0.4.0.toml',
+        'hard_example.toml',
+        'toml-v0.5.0-spec-example.toml',
+      ])
+      return list
+    }
+  }
+}
 
 //////
 // Gradle script formatting
@@ -140,6 +190,7 @@ allprojects {
   apply plugin: 'kotlin'
   apply plugin: 'io.spring.dependency-management'
   apply plugin: 'jacoco'
+  apply plugin: 'com.jfrog.bintray'
   apply plugin: 'net.ltgt.errorprone'
   apply plugin: 'maven-publish'
   apply plugin: 'org.jetbrains.dokka'
@@ -349,6 +400,12 @@ allprojects {
                 organization = 'OpenLaw'
                 organizationUrl = 'https://openlaw.io'
               }
+              developer {
+                name = 'Steven J Schroeder'
+                email = 'sjs@apache.org'
+                organization = 'Apache'
+                organizationUrl = 'https://tuweni.apache.org'
+              }
             }
           }
 
@@ -438,6 +495,19 @@ allprojects {
         destination = file("$buildDir/generated-pom.xml")
       }
       tasks.publishMavenDeploymentPublicationToMavenLocal { dependsOn project.tasks.signArchives }
+    }
+
+    bintray {
+      publications = ['MavenDeployment']
+      user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : 'invalid'
+      key = project.hasProperty('bintrayKey') ? project.property('bintrayKey') : 'invalid'
+      pkg {
+        repo = project.hasProperty('bintrayRepo') ? project.property('bintrayRepo') : 'invalid'
+        name = project.hasProperty('bintrayName') ? project.property('bintrayName') : 'invalid'
+        userOrg = project.hasProperty('bintrayOrg') ? project.property('bintrayOrg') : 'invalid'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/apache/incubator-tuweni.git'
+      }
     }
   }
 }

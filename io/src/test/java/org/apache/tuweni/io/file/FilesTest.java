@@ -21,6 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.apache.tuweni.junit.TempDirectory;
 import org.apache.tuweni.junit.TempDirectoryExtension;
 
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -56,8 +59,12 @@ class FilesTest {
 
   @Test
   void canCopyResources(@TempDirectory Path tempDir) throws Exception {
-    Path file = copyResource("org/apache/tuweni/io/file/test.txt", tempDir.resolve("test.txt"));
+    Files.createDirectories(tempDir.resolve("org/something"));
+    Files.write(tempDir.resolve("org/something/test.txt"), "foo".getBytes(StandardCharsets.UTF_8));
+    URLClassLoader classLoader = new URLClassLoader(new URL[] {new URL("file:" + tempDir.toString() + "/")});
+
+    Path file = copyResource(classLoader, "org/something/test.txt", tempDir.resolve("test.txt"));
     assertTrue(Files.exists(file));
-    assertEquals(81, Files.size(file));
+    assertEquals(3, Files.size(file));
   }
 }

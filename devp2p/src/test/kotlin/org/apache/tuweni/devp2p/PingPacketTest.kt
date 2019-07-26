@@ -21,6 +21,7 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.nio.ByteBuffer
@@ -34,7 +35,7 @@ internal class PingPacketTest {
     val from = Endpoint("10.0.0.54", 6543, 6543)
     val to = Endpoint("192.168.34.65", 9832, 1453)
     val now = System.currentTimeMillis()
-    val ping = PingPacket.create(keyPair, now, from, to)
+    val ping = PingPacket.create(keyPair, now, from, to, null)
 
     val buffer = ByteBuffer.allocate(Packet.MAX_SIZE)
     ping.encodeTo(buffer)
@@ -52,12 +53,36 @@ internal class PingPacketTest {
   }
 
   @Test
+  fun shouldEncodeThenDecodePacketWithEnrSeq() {
+    val keyPair = SECP256K1.KeyPair.random()
+    val from = Endpoint("10.0.0.54", 6543, 6543)
+    val to = Endpoint("192.168.34.65", 9832, 1453)
+    val now = System.currentTimeMillis()
+    val ping = PingPacket.create(keyPair, now, from, to, 64)
+
+    val buffer = ByteBuffer.allocate(Packet.MAX_SIZE)
+    ping.encodeTo(buffer)
+    buffer.flip()
+
+    val datagram = Bytes.wrapByteBuffer(buffer)
+    val packet = Packet.decodeFrom(datagram)
+    assertTrue(packet is PingPacket)
+
+    val pingPacket = packet as PingPacket
+    assertEquals(keyPair.publicKey(), pingPacket.nodeId)
+    assertEquals(Endpoint("10.0.0.54", 6543, 6543), pingPacket.from)
+    assertEquals(Endpoint("192.168.34.65", 9832, 1453), pingPacket.to)
+    assertEquals(((now + PACKET_EXPIRATION_PERIOD_MS + 999) / 1000) * 1000, pingPacket.expiration)
+    assertEquals(64L, pingPacket.enrSeq)
+  }
+
+  @Test
   fun shouldDecodePingPacketWithMissingEndpoint() {
     val keyPair = SECP256K1.KeyPair.random()
     val from = Endpoint("10.0.0.54", 6543, 6543)
     val to = Endpoint("192.168.34.65", 9832, 1453)
     val now = System.currentTimeMillis()
-    val ping = PingPacket.create(keyPair, now, from, to)
+    val ping = PingPacket.create(keyPair, now, from, to, null)
 
     val buffer = ByteBuffer.allocate(1024)
     ping.encodeTo(buffer)
@@ -87,6 +112,7 @@ internal class PingPacketTest {
     assertTrue(packet is PingPacket)
   }
 
+  @Disabled("EIP-868 supercedes EIP-8 behavior")
   @Test
   fun decodeReferencePacket2() {
     // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-8.md

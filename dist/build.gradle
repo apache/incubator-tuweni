@@ -18,18 +18,25 @@ apply plugin: 'distribution'
 
 jar { enabled = false }
 
+static def mandatoryFiles(CopySpec spec) {
+  spec.into('') {
+    from ".."
+    include 'DISCLAIMER'
+    include 'LICENSE'
+    include 'NOTICE'
+  }
+  spec.into('licenses') { from '../build/reports/license' }
+}
+
 distributions {
   main {
     baseName = 'tuweni-bin'
     contents {
+      mandatoryFiles(it)
       into('') {
         from ".."
         include 'README.md'
-        include 'DISCLAIMER'
-        include 'LICENSE'
-        include 'NOTICE'
       }
-      into('licenses') { from '../build/reports/license' }
       def docs = []
       def libs = []
       def sources = []
@@ -62,21 +69,16 @@ distributions {
   sources {
     baseName = 'tuweni-src'
     contents {
-      into('licenses') {
-        from '../build/reports/license'
-        include '*'
-      }
+      mandatoryFiles(it)
       into('') {
         from ".."
+        include 'README.md'
         include '*.md'
-        include 'NOTICE'
-        include 'build.gradle'
+        include '*.gradle'
         include 'dependency-versions.gradle'
-        include 'settings.gradle'
-        include 'gradle/**'
-        include 'gradlew'
+        include 'gradle/resources/*'
+        include 'gradle/*'
         include 'gradle.properties'
-        include 'LICENSE'
       }
       rootProject.subprojects.each {
         include it.projectDir.name + '/src/**'
@@ -87,14 +89,11 @@ distributions {
   gossip {
     baseName = 'tuweni-gossip'
     contents {
+      mandatoryFiles(it)
       into('') {
         from ".."
-        include 'README.md'
-        include 'DISCLAIMER'
-        include 'LICENSE'
-        include 'NOTICE'
+        include 'gossip/README.md'
       }
-      into('licenses') { from '../build/reports/license' }
       into('bin') {
         from { project(':gossip').startScripts.outputs.files }
         fileMode = 0755
@@ -104,6 +103,26 @@ distributions {
         libs << project(':gossip').configurations.runtime
         from libs
         from project(':gossip').jar
+      }
+    }
+  }
+  relayer {
+    baseName = 'tuweni-relayer'
+    contents {
+      mandatoryFiles(it)
+      into('') {
+        from ".."
+        include 'hobbits-relayer/README.md'
+      }
+      into('bin') {
+        from { project(':hobbits-relayer').startScripts.outputs.files }
+        fileMode = 0755
+      }
+      into('lib') {
+        def libs = []
+        libs << project(':hobbits-relayer').configurations.runtime
+        from libs
+        from project(':hobbits-relayer').jar
       }
     }
   }
@@ -117,6 +136,8 @@ sourcesDistTar{ compression = Compression.GZIP }
 
 gossipDistTar{ compression = Compression.GZIP }
 
+relayerDistTar{ compression = Compression.GZIP }
+
 if (System.getenv('ENABLE_SIGNING') == 'true') {
   signing {
     useGpgCmd()
@@ -126,6 +147,8 @@ if (System.getenv('ENABLE_SIGNING') == 'true') {
     sign sourcesDistTar
     sign gossipDistZip
     sign gossipDistTar
+    sign relayerDistZip
+    sign relayerDistTar
   }
 }
 
@@ -135,10 +158,12 @@ task createChecksums(type: Checksum, dependsOn: [
   'sourcesDistZip',
   'sourcesDistTar',
   'gossipDistZip',
-  'gossipDistTar'
+  'gossipDistTar',
+  'relayerDistZip',
+  'relayerDistTar'
 ]) {
   files = distZip.outputs.files + distTar.outputs.files + sourcesDistZip.outputs.files + sourcesDistTar.outputs.files \
-      + gossipDistZip.outputs.files + gossipDistTar.outputs.files
+      + gossipDistZip.outputs.files + gossipDistTar.outputs.files + relayerDistZip.outputs.files + relayerDistTar.outputs.files
   outputDir = new File(project.buildDir, "distributions")
   algorithm = Checksum.Algorithm.SHA512
 }
@@ -147,9 +172,16 @@ build.dependsOn('createChecksums')
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 
-task buildImage(type: DockerBuildImage) {
+task buildGossipImage(type: DockerBuildImage) {
   dependsOn gossipDistTar
   inputDir = projectDir
   dockerFile = file("docker/gossip.Dockerfile")
   tag = "apache-tuweni/gossip:$project.version"
+}
+
+task buildRelayerImage(type: DockerBuildImage) {
+  dependsOn relayerDistTar
+  inputDir = projectDir
+  dockerFile = file("docker/relayer.Dockerfile")
+  tag = "apache-tuweni/relayer:$project.version"
 }

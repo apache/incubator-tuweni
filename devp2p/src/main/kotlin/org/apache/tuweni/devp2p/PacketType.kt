@@ -55,6 +55,22 @@ internal enum class PacketType(
       publicKey: SECP256K1.PublicKey,
       signature: SECP256K1.Signature
     ) = NeighborsPacket.decode(payload, hash, publicKey, signature)
+  },
+  ENRREQUEST(0x05) {
+    override fun decode(
+      payload: Bytes,
+      hash: Bytes32,
+      publicKey: SECP256K1.PublicKey,
+      signature: SECP256K1.Signature
+    ) = ENRRequestPacket.decode(payload, hash, publicKey, signature)
+  },
+  ENRRESPONSE(0x06) {
+    override fun decode(
+      payload: Bytes,
+      hash: Bytes32,
+      publicKey: SECP256K1.PublicKey,
+      signature: SECP256K1.Signature
+    ) = ENRResponsePacket.decode(payload, hash, publicKey, signature)
   };
 
   companion object {

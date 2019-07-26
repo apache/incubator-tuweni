@@ -80,7 +80,7 @@ internal class DiscoveryServiceTest {
     val clientKeyPair = SECP256K1.KeyPair.random()
     val client = CoroutineDatagramChannel.open()
     val clientEndpoint = Endpoint("192.168.1.1", 5678, 7654)
-    val ping = PingPacket.create(clientKeyPair, System.currentTimeMillis(), clientEndpoint, Endpoint(address))
+    val ping = PingPacket.create(clientKeyPair, System.currentTimeMillis(), clientEndpoint, Endpoint(address), null)
     client.send(ping, address)
 
     val pong = client.receivePacket() as PongPacket
@@ -119,7 +119,7 @@ internal class DiscoveryServiceTest {
     assertEquals(discoveryService.localPort, ping.from.udpPort)
     assertNull(ping.from.tcpPort)
 
-    val pong = PongPacket.create(bootstrapKeyPair, System.currentTimeMillis(), ping.from, ping.hash)
+    val pong = PongPacket.create(bootstrapKeyPair, System.currentTimeMillis(), ping.from, ping.hash, null)
     bootstrapClient.send(pong, address)
 
     val findNodes = bootstrapClient.receivePacket() as FindNodePacket
@@ -161,7 +161,7 @@ internal class DiscoveryServiceTest {
     assertEquals(discoveryService.localPort, ping.from.udpPort)
     assertNull(ping.from.tcpPort)
 
-    val pong = PongPacket.create(SECP256K1.KeyPair.random(), System.currentTimeMillis(), ping.from, ping.hash)
+    val pong = PongPacket.create(SECP256K1.KeyPair.random(), System.currentTimeMillis(), ping.from, ping.hash, null)
     bootstrapClient.send(pong, address)
 
     delay(1000)
@@ -247,7 +247,7 @@ internal class DiscoveryServiceTest {
     delay(500)
     assertNull(client.tryReceive(ByteBuffer.allocate(2048)))
 
-    val pong = PongPacket.create(clientKeyPair, System.currentTimeMillis(), ping.from, ping.hash)
+    val pong = PongPacket.create(clientKeyPair, System.currentTimeMillis(), ping.from, ping.hash, null)
     client.send(pong, address)
 
     val neighbors = client.receivePacket() as NeighborsPacket

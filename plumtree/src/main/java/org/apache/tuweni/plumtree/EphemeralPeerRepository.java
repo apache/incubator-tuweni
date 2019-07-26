@@ -55,9 +55,10 @@ public final class EphemeralPeerRepository implements PeerRepository {
   }
 
   @Override
-  public void moveToLazy(Peer peer) {
+  public boolean moveToLazy(Peer peer) {
     eagerPushPeers.remove(peer);
     lazyPushPeers.add(peer);
+    return true;
   }
 
   @Override

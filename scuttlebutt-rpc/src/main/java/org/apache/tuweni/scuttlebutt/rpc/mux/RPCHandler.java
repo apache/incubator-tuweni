@@ -99,6 +99,7 @@ public class RPCHandler implements Multiplexer, ClientHandler {
 
         awaitingAsyncResponse.put(requestNumber, result);
         Bytes bytes = RPCCodec.encodeRequest(message.body(), requestNumber, request.getRPCFlags());
+        logOutgoingRequest(message);
         sendBytes(bytes);
       }
     };
@@ -123,12 +124,14 @@ public class RPCHandler implements Multiplexer, ClientHandler {
 
       Runnable closeStreamHandler = () -> {
 
-        try {
-          Bytes streamEnd = RPCCodec.encodeStreamEndRequest(requestNumber);
-          sendBytes(streamEnd);
-        } catch (JsonProcessingException e) {
-          logger.warn("Unexpectedly could not encode stream end message to JSON.");
-        }
+        // Run on vertx context because this callback may be called from a different
+        // thread by the caller
+        vertx.runOnContext(new Handler<Void>() {
+          @Override
+          public void handle(Void event) {
+            endStream(requestNumber);
+          }
+        });
 
       };
 
@@ -138,6 +141,7 @@ public class RPCHandler implements Multiplexer, ClientHandler {
         scuttlebuttStreamHandler.onStreamError(new ConnectionClosedException());
       } else {
         streams.put(requestNumber, scuttlebuttStreamHandler);
+        logOutgoingRequest(message);
         sendBytes(requestBytes);
       }
 
@@ -145,6 +149,15 @@ public class RPCHandler implements Multiplexer, ClientHandler {
     };
 
     vertx.runOnContext(synchronizedRequest);
+  }
+
+  private void logOutgoingRequest(RPCMessage rpcMessage) {
+    if (logger.isDebugEnabled()) {
+      String requestString = new String(rpcMessage.asString());
+      String logMessage = String.format("[%d] Outgoing request: %s", rpcMessage.requestNumber(), requestString);
+      logger.debug(logMessage);
+    }
+
   }
 
   @Override
@@ -199,14 +212,14 @@ public class RPCHandler implements Multiplexer, ClientHandler {
   private void handleRequest(RPCMessage rpcMessage) {
     // Not yet implemented
     logger.warn("Received incoming request, but we do not yet handle any requests: " + rpcMessage.asString());
-
   }
 
   private void handleResponse(RPCMessage response) {
     int requestNumber = response.requestNumber() * -1;
 
     if (logger.isDebugEnabled()) {
-      logger.debug("Incoming response: " + response.asString());
+      String logMessage = String.format("[%d] incoming response: %s", requestNumber, response.asString());
+      logger.debug(logMessage);
     }
 
     byte rpcFlags = response.rpcFlags();
@@ -221,8 +234,8 @@ public class RPCHandler implements Multiplexer, ClientHandler {
       if (scuttlebuttStreamHandler != null) {
 
         if (response.isSuccessfulLastMessage()) {
-          streams.remove(requestNumber);
-          scuttlebuttStreamHandler.onStreamEnd();
+          // Confirm our end of the stream close and inform the consumer of the stream that it is closed
+          endStream(requestNumber);
         } else if (exception.isPresent()) {
           scuttlebuttStreamHandler.onStreamError(exception.get());
         } else {
@@ -264,6 +277,37 @@ public class RPCHandler implements Multiplexer, ClientHandler {
 
   private void sendBytes(Bytes bytes) {
     messageSender.accept(bytes);
+  }
+
+  /**
+   * Sends an stream close message over the RPC channel to for the given request number if we have not already closed
+   * our end of the stream.
+   *
+   * Removes the stream handler from the state, so any newly incoming messages until the other side of the stream has
+   * closed its end will be ignored.
+   *
+   * @param requestNumber the request number of the stream to send a close message over RPC for
+   */
+  private void endStream(int requestNumber) {
+    try {
+      ScuttlebuttStreamHandler streamHandler = streams.remove(requestNumber);
+
+      // Only send the message if the stream hasn't already been closed at our end
+      if (streamHandler != null) {
+        Bytes streamEnd = RPCCodec.encodeStreamEndRequest(requestNumber);
+
+        streamHandler.onStreamEnd();
+        if (logger.isDebugEnabled()) {
+          String logMessage = String.format("[%d] Sending close stream message.", requestNumber);
+          logger.debug(logMessage);
+        }
+
+        sendBytes(streamEnd);
+      }
+
+    } catch (JsonProcessingException e) {
+      logger.warn("Unexpectedly could not encode stream end message to JSON.");
+    }
   }
 
 }

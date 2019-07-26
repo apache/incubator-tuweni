@@ -114,19 +114,20 @@ internal class PingPacket private constructor(
   hash: Bytes32,
   val from: Endpoint,
   val to: Endpoint,
-  expiration: Long
+  expiration: Long,
+  val enrSeq: Long?
 ) : Packet(nodeId, signature, hash, expiration) {
 
   companion object {
     private const val VERSION = 4
 
-    fun create(keyPair: SECP256K1.KeyPair, now: Long, from: Endpoint, to: Endpoint): PingPacket {
+    fun create(keyPair: SECP256K1.KeyPair, now: Long, from: Endpoint, to: Endpoint, seq: Long?): PingPacket {
       val expiration = expirationFor(now)
       val sigHash = createSignature(
         PacketType.PING,
         keyPair
       ) { writer ->
-        encodeTo(writer, from, to, expiration)
+        encodeTo(writer, from, to, expiration, seq)
       }
       return PingPacket(
         keyPair.publicKey(),
@@ -134,7 +135,8 @@ internal class PingPacket private constructor(
         sigHash.hash,
         from,
         to,
-        expiration
+        expiration,
+        seq
       )
     }
 
@@ -150,27 +152,36 @@ internal class PingPacket private constructor(
           val from = reader.readList { r -> Endpoint.readFrom(r) }
           val to = reader.readList { r -> Endpoint.readFrom(r) }
           val expiration = reader.readLong() // seconds
+          val seq: Long?
+          if (!reader.isComplete) {
+            seq = reader.readLong()
+          } else {
+            seq = null
+          }
 
           if (version < VERSION) {
             throw DecodingException("Unexpected version $VERSION in ping")
           }
-          PingPacket(publicKey, signature, hash, from, to, secToMsec(expiration))
+          PingPacket(publicKey, signature, hash, from, to, secToMsec(expiration), seq)
         }
       } catch (e: RLPException) {
         throw DecodingException("Invalid ping packet", e)
       }
     }
 
-    private fun encodeTo(writer: RLPWriter, from: Endpoint, to: Endpoint, expiration: Long) {
+    private fun encodeTo(writer: RLPWriter, from: Endpoint, to: Endpoint, expiration: Long, seq: Long?) {
       writer.writeInt(VERSION)
       writer.writeList { w -> from.writeTo(w) }
       writer.writeList { w -> to.writeTo(w) }
       writer.writeLong(msecToSec(expiration)) // write in seconds
+      seq?.let {
+        writer.writeLong(it)
+      }
     }
   }
 
   override fun encodeTo(dst: ByteBuffer) = encodeTo(dst, PacketType.PING) { writer ->
-    encodeTo(writer, from, to, expiration)
+    encodeTo(writer, from, to, expiration, enrSeq)
   }
 }
 
@@ -180,17 +191,18 @@ internal class PongPacket private constructor(
   hash: Bytes32,
   val to: Endpoint,
   val pingHash: Bytes32,
-  expiration: Long
+  expiration: Long,
+  val enrSeq: Long?
 ) : Packet(nodeId, signature, hash, expiration) {
 
   companion object {
-    fun create(keyPair: SECP256K1.KeyPair, now: Long, to: Endpoint, pingHash: Bytes32): PongPacket {
+    fun create(keyPair: SECP256K1.KeyPair, now: Long, to: Endpoint, pingHash: Bytes32, enrSeq: Long?): PongPacket {
       val expiration = expirationFor(now)
       val sigHash = createSignature(
         PacketType.PONG,
         keyPair
       ) { writer ->
-        encodeTo(writer, to, pingHash, expiration)
+        encodeTo(writer, to, pingHash, expiration, enrSeq)
       }
       return PongPacket(
         keyPair.publicKey(),
@@ -198,7 +210,8 @@ internal class PongPacket private constructor(
         sigHash.hash,
         to,
         pingHash,
-        expiration
+        expiration,
+        enrSeq
       )
     }
 
@@ -213,22 +226,29 @@ internal class PongPacket private constructor(
           val to = reader.readList { r -> Endpoint.readFrom(r) }
           val pingHash = Bytes32.wrap(reader.readValue())
           val expiration = reader.readLong() // seconds
-          PongPacket(publicKey, signature, hash, to, pingHash, secToMsec(expiration))
+          val seq: Long?
+          if (!reader.isComplete) {
+            seq = reader.readLong()
+          } else {
+            seq = null
+          }
+          PongPacket(publicKey, signature, hash, to, pingHash, secToMsec(expiration), seq)
         }
       } catch (e: RLPException) {
         throw DecodingException("Invalid pong packet", e)
       }
     }
 
-    private fun encodeTo(writer: RLPWriter, to: Endpoint, pingHash: Bytes32, expiration: Long) {
+    private fun encodeTo(writer: RLPWriter, to: Endpoint, pingHash: Bytes32, expiration: Long, enrSeq: Long?) {
       writer.writeList { w -> to.writeTo(w) }
       writer.writeValue(pingHash)
       writer.writeLong(msecToSec(expiration))
+      enrSeq?.let { writer.writeLong(it) }
     }
   }
 
   override fun encodeTo(dst: ByteBuffer) = encodeTo(dst, PacketType.PONG) { writer ->
-    encodeTo(writer, to, pingHash, expiration)
+    encodeTo(writer, to, pingHash, expiration, enrSeq)
   }
 }
 
@@ -364,5 +384,115 @@ internal class NeighborsPacket private constructor(
 
   override fun encodeTo(dst: ByteBuffer) = encodeTo(dst, PacketType.NEIGHBORS) { writer ->
     encodeTo(writer, nodes, expiration)
+  }
+}
+
+internal class ENRRequestPacket private constructor(
+  nodeId: SECP256K1.PublicKey,
+  signature: SECP256K1.Signature,
+  hash: Bytes32,
+  expiration: Long
+) : Packet(nodeId, signature, hash, expiration) {
+
+  companion object {
+    fun decode(
+      payload: Bytes,
+      hash: Bytes32,
+      publicKey: SECP256K1.PublicKey,
+      signature: SECP256K1.Signature
+    ): ENRRequestPacket {
+      try {
+        return RLP.decodeList(payload) { reader ->
+          val expiration = reader.readLong()
+          ENRRequestPacket(publicKey, signature, hash, secToMsec(expiration))
+        }
+      } catch (e: RLPException) {
+        throw DecodingException("Invalid enr request packet", e)
+      }
+    }
+
+    private fun encodeTo(writer: RLPWriter, expiration: Long) {
+      writer.writeLong(msecToSec(expiration))
+    }
+
+    fun create(keyPair: SECP256K1.KeyPair, now: Long): Packet {
+      val expiration = expirationFor(now)
+      val sigHash = createSignature(
+        PacketType.ENRRESPONSE,
+        keyPair
+      ) { writer ->
+        ENRRequestPacket.encodeTo(writer, expiration)
+      }
+      return ENRRequestPacket(
+        keyPair.publicKey(),
+        sigHash.signature,
+        sigHash.hash,
+        expiration
+      )
+    }
+  }
+
+  override fun encodeTo(dst: ByteBuffer) = encodeTo(dst, PacketType.ENRREQUEST) { writer ->
+    ENRRequestPacket.encodeTo(writer, expiration)
+  }
+}
+
+internal class ENRResponsePacket private constructor(
+  nodeId: SECP256K1.PublicKey,
+  signature: SECP256K1.Signature,
+  hash: Bytes32,
+  expiration: Long,
+  val requestHash: Bytes,
+  val enr: Bytes
+) : Packet(nodeId, signature, hash, expiration) {
+
+  companion object {
+
+    fun create(keyPair: SECP256K1.KeyPair, now: Long, requestHash: Bytes, enr: Bytes): ENRResponsePacket {
+      val expiration = expirationFor(now)
+      val sigHash = createSignature(
+        PacketType.ENRRESPONSE,
+        keyPair
+      ) { writer ->
+        encodeTo(writer, requestHash, enr, expiration)
+      }
+      return ENRResponsePacket(
+        keyPair.publicKey(),
+        sigHash.signature,
+        sigHash.hash,
+        expiration,
+        requestHash,
+        enr
+      )
+    }
+
+    fun decode(
+      payload: Bytes,
+      hash: Bytes32,
+      publicKey: SECP256K1.PublicKey,
+      signature: SECP256K1.Signature
+    ): ENRResponsePacket {
+      try {
+        return RLP.decodeList(payload) { reader ->
+          //request-hash, ENR
+          val requestHash = reader.readValue()
+          val enr = reader.readValue()
+          val expiration = reader.readLong()
+          ENRResponsePacket(publicKey, signature, hash, secToMsec(expiration), requestHash, enr)
+        }
+      } catch (e: RLPException) {
+        throw DecodingException("Invalid enr response packet", e)
+      }
+    }
+
+    private fun encodeTo(writer: RLPWriter, requestHash: Bytes, enr: Bytes, expiration: Long) {
+      writer.writeValue(requestHash)
+      writer.writeValue(enr)
+      writer.writeLong(msecToSec(expiration))
+    }
+  }
+
+  override fun encodeTo(dst: ByteBuffer) = encodeTo(dst, PacketType.ENRRESPONSE) { writer ->
+    ENRResponsePacket.encodeTo(writer, requestHash, enr, expiration)
   }
 }

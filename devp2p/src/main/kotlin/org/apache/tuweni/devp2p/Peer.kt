@@ -34,6 +34,11 @@ interface Peer {
   val endpoint: Endpoint?
 
   /**
+   * The Ethereum Node Record associated with the peer, if known.
+   */
+  val enr: EthereumNodeRecord?
+
+  /**
    * The last time the current endpoint of this peer was verified, in milliseconds since the epoch.
    *
    * Endpoint is verified by a ping/pong cycle: https://github.com/ethereum/devp2p/blob/master/discv4.md#endpoint-proof
@@ -89,4 +94,14 @@ interface Peer {
    * @throws IllegalStateException if there is no endpoint for this peer
    */
   fun seenAt(time: Long)
+
+  /**
+   * Update the peer's ENR.
+   *
+   * Will only update if the [seq] is larger than the one associated with the peer.
+   *
+   * @param record the ENR record associated with the peer
+   * @param time the time this endpoint information was determined, in milliseconds since the epoch
+   */
+  fun updateENR(record: EthereumNodeRecord, time: Long)
 }

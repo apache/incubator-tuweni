@@ -16,16 +16,17 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.concurrent.AsyncCompletion;
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
 import org.apache.tuweni.plumtree.MessageHashing;
+import org.apache.tuweni.plumtree.MessageListener;
 import org.apache.tuweni.plumtree.MessageSender;
 import org.apache.tuweni.plumtree.MessageValidator;
 import org.apache.tuweni.plumtree.Peer;
+import org.apache.tuweni.plumtree.PeerPruning;
 import org.apache.tuweni.plumtree.PeerRepository;
 import org.apache.tuweni.plumtree.State;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -78,10 +79,14 @@ public final class VertxGossipServer {
 
         switch (message.verb) {
           case IHAVE:
-            state.receiveIHaveMessage(peer, Bytes.fromHexString(message.payload));
+            state.receiveIHaveMessage(peer, Bytes.fromHexString(message.hash));
             break;
           case GOSSIP:
-            state.receiveGossipMessage(peer, message.attributes, Bytes.fromHexString(message.payload));
+            state.receiveGossipMessage(
+                peer,
+                message.attributes,
+                Bytes.fromHexString(message.payload),
+                Bytes.fromHexString(message.hash));
             break;
           case GRAFT:
             state.receiveGraftMessage(peer, Bytes.fromHexString(message.payload));
@@ -98,17 +103,20 @@ public final class VertxGossipServer {
     }
   }
 
-  private final AtomicBoolean started = new AtomicBoolean(false);
-  private final Vertx vertx;
-  private final int port;
+  private NetClient client;
+  private final int graftDelay;
+  private final int lazyQueueInterval;
   private final MessageHashing messageHashing;
   private final String networkInterface;
-  private final PeerRepository peerRepository;
-  private final Consumer<Bytes> payloadListener;
+  private final MessageListener payloadListener;
   private final MessageValidator payloadValidator;
-  private State state;
+  private final PeerPruning peerPruningFunction;
+  private final PeerRepository peerRepository;
+  private final int port;
   private NetServer server;
-  private NetClient client;
+  private final AtomicBoolean started = new AtomicBoolean(false);
+  private State state;
+  private final Vertx vertx;
 
   public VertxGossipServer(
       Vertx vertx,
@@ -116,8 +124,11 @@ public final class VertxGossipServer {
       int port,
       MessageHashing messageHashing,
       PeerRepository peerRepository,
-      Consumer<Bytes> payloadListener,
-      @Nullable MessageValidator payloadValidator) {
+      MessageListener payloadListener,
+      @Nullable MessageValidator payloadValidator,
+      @Nullable PeerPruning peerPruningFunction,
+      int graftDelay,
+      int lazyQueueInterval) {
     this.vertx = vertx;
     this.networkInterface = networkInterface;
     this.port = port;
@@ -125,6 +136,9 @@ public final class VertxGossipServer {
     this.peerRepository = peerRepository;
     this.payloadListener = payloadListener;
     this.payloadValidator = payloadValidator == null ? (bytes, peer) -> true : payloadValidator;
+    this.peerPruningFunction = peerPruningFunction == null ? (peer) -> true : peerPruningFunction;
+    this.graftDelay = graftDelay;
+    this.lazyQueueInterval = lazyQueueInterval;
   }
 
   public AsyncCompletion start() {
@@ -135,24 +149,30 @@ public final class VertxGossipServer {
       server.connectHandler(socket -> {
         Peer peer = new SocketPeer(socket);
         SocketHandler handler = new SocketHandler(peer);
-        socket.handler(handler::handle).closeHandler(handler::close);
+        socket.handler(handler::handle).closeHandler(handler::close).exceptionHandler(Throwable::printStackTrace);
       });
+      server.exceptionHandler(Throwable::printStackTrace);
       server.listen(port, networkInterface, res -> {
         if (res.failed()) {
           completion.completeExceptionally(res.cause());
         } else {
           state = new State(peerRepository, messageHashing, (verb, attributes, peer, hash, payload) -> {
-            Message message = new Message();
-            message.verb = verb;
-            message.attributes = attributes;
-            message.hash = hash.toHexString();
-            message.payload = payload == null ? null : payload.toHexString();
-            try {
-              ((SocketPeer) peer).socket().write(Buffer.buffer(mapper.writeValueAsBytes(message)));
-            } catch (JsonProcessingException e) {
-              throw new RuntimeException(e);
-            }
-          }, payloadListener, payloadValidator);
+            vertx.executeBlocking(future -> {
+              Message message = new Message();
+              message.verb = verb;
+              message.attributes = attributes;
+              message.hash = hash.toHexString();
+              message.payload = payload == null ? null : payload.toHexString();
+              try {
+                ((SocketPeer) peer).socket().write(Buffer.buffer(mapper.writeValueAsBytes(message)));
+                future.complete();
+              } catch (JsonProcessingException e) {
+                future.fail(e);
+              }
+
+            }, done -> {
+            });
+          }, payloadListener, payloadValidator, peerPruningFunction, graftDelay, lazyQueueInterval);
 
           completion.complete();
         }

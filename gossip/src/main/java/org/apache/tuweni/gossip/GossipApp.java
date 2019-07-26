@@ -17,7 +17,6 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.concurrent.AsyncCompletion;
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
 import org.apache.tuweni.crypto.Hash;
-import org.apache.tuweni.plumtree.EphemeralPeerRepository;
 import org.apache.tuweni.plumtree.vertx.VertxGossipServer;
 
 import java.io.IOException;
@@ -31,6 +30,9 @@ import java.security.Security;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -68,14 +70,21 @@ public final class GossipApp {
     gossipApp.start();
   }
 
-
-
+  private final ExecutorService senderThreadPool = Executors.newSingleThreadExecutor(new ThreadFactory() {
+    @Override
+    public Thread newThread(Runnable r) {
+      Thread t = new Thread(r, "sender");
+      t.setDaemon(false);
+      return t;
+    }
+  });
   private final GossipCommandLineOptions opts;
   private final Runnable terminateFunction;
   private final PrintStream errStream;
   private final PrintStream outStream;
   private final VertxGossipServer server;
   private final HttpServer rpcServer;
+  private final ExecutorService fileWriter = Executors.newSingleThreadExecutor();
 
   GossipApp(
       Vertx vertx,
@@ -83,7 +92,7 @@ public final class GossipApp {
       PrintStream errStream,
       PrintStream outStream,
       Runnable terminateFunction) {
-    EphemeralPeerRepository repository = new EphemeralPeerRepository();
+    LoggingPeerRepository repository = new LoggingPeerRepository(outStream);
     outStream.println("Setting up server on " + opts.networkInterface() + ":" + opts.listenPort());
     server = new VertxGossipServer(
         vertx,
@@ -91,8 +100,11 @@ public final class GossipApp {
         opts.listenPort(),
         Hash::keccak256,
         repository,
-        bytes -> readMessage(opts.messageLog(), errStream, bytes),
-        null);
+        (bytes, attr) -> readMessage(opts.messageLog(), errStream, bytes),
+        null,
+        new CountingPeerPruningFunction(10),
+        100,
+        100);
     this.opts = opts;
     this.errStream = errStream;
     this.outStream = outStream;
@@ -135,13 +147,33 @@ public final class GossipApp {
       errStream.println("Server could not connect to other peers: " + e.getMessage());
     }
     outStream.println("Gossip started");
+
+    if (opts.sending()) {
+      outStream.println("Start sending messages");
+      senderThreadPool.submit(() -> {
+        for (int i = 0; i < opts.numberOfMessages(); i++) {
+          if (Thread.currentThread().isInterrupted()) {
+            return;
+          }
+          Bytes payload = Bytes.random(opts.payloadSize());
+          publish(payload);
+          try {
+            Thread.sleep(opts.sendInterval());
+          } catch (InterruptedException e) {
+            return;
+          }
+        }
+      });
+    }
   }
 
   private void handleRPCRequest(HttpServerRequest httpServerRequest) {
     if (HttpMethod.POST.equals(httpServerRequest.method())) {
       if ("/publish".equals(httpServerRequest.path())) {
         httpServerRequest.bodyHandler(body -> {
-          publish(Bytes.wrapBuffer(body));
+          Bytes message = Bytes.wrapBuffer(body);
+          outStream.println("Message to publish " + message.toHexString());
+          publish(message);
           httpServerRequest.response().setStatusCode(200).end();
         });
       } else {
@@ -153,6 +185,8 @@ public final class GossipApp {
   }
 
   void stop() {
+    outStream.println("Stopping sending");
+    senderThreadPool.shutdown();
     outStream.println("Stopping gossip");
     try {
       server.stop().join();
@@ -176,27 +210,30 @@ public final class GossipApp {
       errStream.println("RPC server could not stop: " + e.getMessage());
       terminateFunction.run();
     }
+
+    fileWriter.shutdown();
   }
 
   private void readMessage(String messageLog, PrintStream err, Bytes bytes) {
-    ObjectMapper mapper = new ObjectMapper();
-    ObjectNode node = mapper.createObjectNode();
-    node.put("timestamp", Instant.now().toString());
-    node.put("value", new String(bytes.toArrayUnsafe(), StandardCharsets.UTF_8));
-    try {
-      Path path = Paths.get(messageLog);
-      Files.write(
-          path,
-          Collections.singletonList(mapper.writeValueAsString(node)),
-          StandardCharsets.UTF_8,
-          Files.exists(path) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);
-    } catch (IOException e) {
-      err.println(e.getMessage());
-    }
+    fileWriter.submit(() -> {
+      ObjectMapper mapper = new ObjectMapper();
+      ObjectNode node = mapper.createObjectNode();
+      node.put("timestamp", Instant.now().toString());
+      node.put("value", bytes.toHexString());
+      try {
+        Path path = Paths.get(messageLog);
+        Files.write(
+            path,
+            Collections.singletonList(mapper.writeValueAsString(node)),
+            StandardCharsets.UTF_8,
+            Files.exists(path) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);
+      } catch (IOException e) {
+        err.println(e.getMessage());
+      }
+    });
   }
 
   public void publish(Bytes message) {
-    outStream.println("Message to publish " + message.toHexString());
     server.gossip("", message);
   }
 }

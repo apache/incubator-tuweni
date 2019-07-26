@@ -94,11 +94,26 @@ public final class Files {
    * @throws IOException If an I/O error occurs.
    */
   public static Path copyResource(String resourceName, Path destination, OpenOption... options) throws IOException {
+    return copyResource(Files.class.getClassLoader(), resourceName, destination, options);
+  }
+
+  /**
+   * Copies the content of a resource to a file.
+   *
+   * @param classloader The class loader of the resource.
+   * @param resourceName The resource name.
+   * @param destination The destination file.
+   * @param options Options specifying how the destination file should be opened.
+   * @return The destination file.
+   * @throws IOException If an I/O error occurs.
+   */
+  public static Path copyResource(ClassLoader classloader, String resourceName, Path destination, OpenOption... options)
+      throws IOException {
     requireNonNull(resourceName);
     requireNonNull(destination);
 
     try (OutputStream out = java.nio.file.Files.newOutputStream(destination, options)) {
-      copyResource(resourceName, out);
+      copyResource(classloader, resourceName, out);
     }
     return destination;
   }
@@ -112,7 +127,23 @@ public final class Files {
    * @throws IOException If an I/O error occurs.
    */
   public static long copyResource(String resourceName, OutputStream out) throws IOException {
-    try (InputStream in = Files.class.getClassLoader().getResourceAsStream(resourceName)) {
+    return copyResource(Files.class.getClassLoader(), resourceName, out);
+  }
+
+  /**
+   * Copies the content of a resource to an output stream.
+   *
+   * @param classloader The class loader.
+   * @param resourceName The resource name.
+   * @param out The output stream.
+   * @return The total bytes written.
+   * @throws IOException If an I/O error occurs.
+   */
+  public static long copyResource(ClassLoader classloader, String resourceName, OutputStream out) throws IOException {
+    try (InputStream in = classloader.getResourceAsStream(resourceName)) {
+      if (in == null) {
+        throw new IllegalArgumentException(resourceName + " could not be accessed");
+      }
       long total = 0L;
       byte[] buf = new byte[4096];
       int n;
