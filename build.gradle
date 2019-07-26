@@ -26,6 +26,7 @@ buildscript {
 }
 
 plugins {
+
   id 'com.diffplug.gradle.spotless' version '3.16.0'
   id 'net.ltgt.errorprone' version '0.6'
   id 'io.spring.dependency-management' version '1.0.6.RELEASE'
@@ -58,15 +59,11 @@ def buildVersion = versionNumber + buildTag()
 
 static String buildTag() {
     return ''
-
-  }
   if (System.getenv('BUILD_TIMESTAMP') != null) {
     return DateTimeFormatter.ofPattern("-yyyyMMddHHmmss").withLocale(Locale.US).withZone( ZoneId.systemDefault() ).format(Instant.now())
   }
   return '-SNAPSHOT'
-
 }
-
 
 //////
 // Default tasks and build aliases
