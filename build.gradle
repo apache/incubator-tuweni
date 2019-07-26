@@ -497,18 +497,6 @@ allprojects {
       tasks.publishMavenDeploymentPublicationToMavenLocal { dependsOn project.tasks.signArchives }
     }
 
-    bintray {
-      publications = ['MavenDeployment']
-      user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : 'invalid'
-      key = project.hasProperty('bintrayKey') ? project.property('bintrayKey') : 'invalid'
-      pkg {
-        repo = project.hasProperty('bintrayRepo') ? project.property('bintrayRepo') : 'invalid'
-        name = project.hasProperty('bintrayName') ? project.property('bintrayName') : 'invalid'
-        userOrg = project.hasProperty('bintrayOrg') ? project.property('bintrayOrg') : 'invalid'
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/apache/incubator-tuweni.git'
-      }
-    }
   }
 }
 
