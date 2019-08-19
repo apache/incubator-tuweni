@@ -415,7 +415,7 @@ public final class Transaction {
     return SECP256K1.sign(signatureData(nonce, gasPrice, gasLimit, to, value, payload, chainId), keyPair);
   }
 
-  private static Bytes signatureData(
+  public static Bytes signatureData(
       UInt256 nonce,
       Wei gasPrice,
       Gas gasLimit,
