@@ -41,10 +41,6 @@ description = 'A set of libraries and other tools to aid development of blockcha
 
 //////
 // Sanity checks
-
-if (!file("${rootDir}/eth-reference-tests/src/test/resources/tests/README.md").exists()) {
-  throw new GradleException("eth-reference-tests/src/test/resources/tests/README.md missing: please clone submodules (git submodule update --init --recursive)")
-}
 if (!file("${rootDir}/eth-reference-tests/src/test/resources/eth2.0-tests/README.md").exists()) {
   throw new GradleException("eth-reference-tests/src/test/resources/eth2.0-tests/README.md missing: please clone submodules (git submodule update --init --recursive)")
 }
