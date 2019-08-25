@@ -26,6 +26,9 @@ import java.util.stream.Stream;
 /**
  * Ethereum ProgPoW mining algorithm, based on revision 0.9.2.
  *
+ * This implements the ProgPoW algorithm (https://github.com/ifdefelse/ProgPOW). This algorithm is licensed under CC0
+ * 1.0 Universal (CC0 1.0) Public Domain Dedication (https://creativecommons.org/publicdomain/zero/1.0/)
+ *
  * @implSpec https://github.com/ifdefelse/ProgPOW
  */
 public final class ProgPoW {
