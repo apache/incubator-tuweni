@@ -212,6 +212,11 @@ allprojects {
     }
   }
 
+  tasks.withType(AbstractArchiveTask) {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+  }
+
   tasks.withType(JavaCompile) {
     // Until https://github.com/gradle/gradle/issues/2510 is resolved and
     // something like a `releaseCompability` property is added, we have to add
