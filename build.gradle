@@ -143,6 +143,7 @@ subprojects {
       target project.fileTree(project.projectDir) {
         include '**/*.java'
         exclude '**/generated-src/**/*.*'
+        exclude '**/SECP256K1.java'
       }
       removeUnusedImports()
       licenseHeaderFile rootProject.file('gradle/spotless.license.txt')
