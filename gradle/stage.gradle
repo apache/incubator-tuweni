@@ -184,12 +184,7 @@ class StageTask extends DefaultTask {
 
   @TaskAction
   def stage() {
-    new VerifyStageTask().run()
-    new StageBuildTask().run()
-    new SubversionStageTask().run()
-    new CopyStagedTask().run()
-    new GitStageTask().run()
-    new EmailPromptTask().run()
+    project.exec { commandLine "./gradlew", "stageVerify", "stageBuild", "stageSVN", "stageCopy", "stageGitTag", "stageEmail" }
   }
 }
 
