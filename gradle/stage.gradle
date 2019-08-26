@@ -83,7 +83,7 @@ class StageBuildTask extends DefaultTask {
 class SubversionStageTask extends DefaultTask {
   @TaskAction
   def run() {
-    if (!file("_staged/$project.version-incubating"))
+    if (!new File("_staged/$project.version-incubating").exists())
       // create _staged folder
       project.exec { commandLine "mkdir", "-p", "_staged" }
 
