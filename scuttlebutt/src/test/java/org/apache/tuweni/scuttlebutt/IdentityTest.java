@@ -164,4 +164,6 @@ class IdentityTest {
     assertThrows(UnsupportedOperationException.class, () -> Identity.random().secp256k1PublicKey());
     assertThrows(UnsupportedOperationException.class, () -> Identity.randomSECP256K1().ed25519PublicKey());
   }
+
+
 }

@@ -1,0 +1,17 @@
+description = "Higher level scuttlebutt library functions"
+
+dependencies {
+  compile project(":scuttlebutt-rpc")
+  compile project(":scuttlebutt-handshake")
+  compileOnly 'io.vertx:vertx-core'
+  compile 'io.vertx:vertx-core'
+
+  compile 'org.logl:logl-api'
+  compile 'org.logl:logl-logl'
+  compile 'org.logl:logl-vertx'
+
+  testCompile project(':junit')
+  testCompile 'org.junit.jupiter:junit-jupiter-api'
+  testCompile 'org.junit.jupiter:junit-jupiter-params'
+  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+}

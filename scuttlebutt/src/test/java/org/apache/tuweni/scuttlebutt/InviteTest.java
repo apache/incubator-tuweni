@@ -14,6 +14,7 @@ package org.apache.tuweni.scuttlebutt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import org.apache.tuweni.crypto.sodium.Signature;
@@ -33,22 +34,69 @@ class InviteTest {
   void invalidPort() {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new Invite("localhost", -1, Identity.random(), Signature.KeyPair.random().secretKey()));
+        () -> new Invite("localhost", -1, Identity.random(), Signature.Seed.random()));
   }
 
   @Test
   void testToString() {
     Identity identity = Identity.random();
-    Signature.SecretKey secretKey = Signature.KeyPair.random().secretKey();
+    Signature.Seed seed = Signature.Seed.random();
 
-    Invite invite = new Invite("localhost", 8008, identity, secretKey);
+    Invite invite = new Invite("localhost", 8008, identity, seed);
     assertEquals(
         "localhost:8008:"
+            + "@"
             + identity.publicKeyAsBase64String()
             + "."
             + identity.curveName()
             + "~"
-            + secretKey.bytes().toBase64String(),
+            + seed.bytes().toBase64String(),
         invite.toString());
   }
+
+  @Test
+  void testParseFromCanonicalValid() {
+    String testInvite =
+        "fake.address.com:8009:@MS/HpeAess0EGruiZjfnc+x+FkPq7qoMqSD4SdvTCtM=.ed25519~IJubWEcZM6usWncF/Lu26CyI3ZiovcHjh9+kBI1hiKI=";
+
+    try {
+      Invite invite = Invite.fromCanonicalForm(testInvite);
+
+      assertEquals(invite.host(), "fake.address.com");
+      assertEquals(invite.port(), 8009);
+      assertEquals(invite.identity().publicKeyAsBase64String(), "MS/HpeAess0EGruiZjfnc+x+FkPq7qoMqSD4SdvTCtM=");
+      assertEquals(invite.seedKey().bytes().toBase64String(), "IJubWEcZM6usWncF/Lu26CyI3ZiovcHjh9+kBI1hiKI=");
+
+      assertEquals(invite.toCanonicalForm(), testInvite);
+    } catch (MalformedInviteCodeException malformedInviteCodeException) {
+      fail("Exception while parsing into canonical form: " + malformedInviteCodeException.getMessage());
+    }
+  }
+
+  @Test
+  void testParseFromCanonicalMissingHost() {
+    String testInvite =
+        ":@MS/HpeAess0EGruiZjfnc+x+FkPq7qoMqSD4SdvTCtM=.ed25519~IJubWEcZM6usWncF/Lu26CyI3ZiovcHjh9+kBI1hiKI=";
+
+    try {
+      Invite.fromCanonicalForm(testInvite);
+      fail("Exception expected when host missing from invite code.");
+    } catch (MalformedInviteCodeException malformedInviteCodeException) {
+
+    }
+  }
+
+  @Test
+  void testParseFromCanonicalMissingSeed() {
+    String testInvite = "fake.address.com:8009:@MS/HpeAess0EGruiZjfnc+x+FkPq7qoMqSD4SdvTCtM=.ed25519";
+
+    try {
+      Invite.fromCanonicalForm(testInvite);
+      fail("Exception expected when seed missing from invite code.");
+    } catch (MalformedInviteCodeException malformedInviteCodeException) {
+
+    }
+
+  }
+
 }
