@@ -146,7 +146,7 @@ class SecureScuttlebuttHandshakeClientTest {
         IllegalArgumentException.class,
         () -> SecureScuttlebuttHandshakeClient.fromInvite(
             Bytes32.random(),
-            new Invite("localhost", 30303, Identity.randomSECP256K1(), Signature.KeyPair.random().secretKey())));
+            new Invite("localhost", 30303, Identity.randomSECP256K1(), Signature.Seed.random())));
   }
 
 }

@@ -143,7 +143,12 @@ public final class RPCCodec {
   public static Bytes encodeStreamEndRequest(int requestNumber) throws JsonProcessingException {
     Boolean bool = Boolean.TRUE;
     byte[] bytes = mapper.writeValueAsBytes(bool);
-    return encodeRequest(Bytes.wrap(bytes), requestNumber, RPCFlag.EndOrError.END, RPCFlag.BodyType.JSON, RPCFlag.Stream.STREAM);
+    return encodeRequest(
+        Bytes.wrap(bytes),
+        requestNumber,
+        RPCFlag.EndOrError.END,
+        RPCFlag.BodyType.JSON,
+        RPCFlag.Stream.STREAM);
   }
 
   /**

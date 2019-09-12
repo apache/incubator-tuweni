@@ -12,6 +12,7 @@
  */
 package org.apache.tuweni.scuttlebutt;
 
+import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.crypto.sodium.Signature;
 
 /**
@@ -24,7 +25,7 @@ public final class Invite {
   private final String host;
   private final int port;
   private final Identity identity;
-  private final Signature.SecretKey secretKey;
+  private final Signature.Seed seedKey;
 
   /**
    * Default constructor
@@ -32,16 +33,16 @@ public final class Invite {
    * @param host the host to connect to
    * @param port the port of the host to connect to
    * @param identity the public key of the host to connect to
-   * @param secretKey an Ed25519 secret key used to identify the invite
+   * @param seedKey an Ed25519 secret key used to identify the invite
    */
-  public Invite(String host, int port, Identity identity, Signature.SecretKey secretKey) {
+  public Invite(String host, int port, Identity identity, Signature.Seed seedKey) {
     if (port <= 0 || port > 65535) {
       throw new IllegalArgumentException("Invalid port");
     }
     this.host = host;
     this.port = port;
     this.identity = identity;
-    this.secretKey = secretKey;
+    this.seedKey = seedKey;
   }
 
   /**
@@ -73,8 +74,8 @@ public final class Invite {
    *
    * @return the secret key
    */
-  public Signature.SecretKey secretKey() {
-    return secretKey;
+  public Signature.Seed seedKey() {
+    return seedKey;
   }
 
   /**
@@ -87,12 +88,69 @@ public final class Invite {
         + ":"
         + port
         + ":"
+        + "@"
         + identity.publicKeyAsBase64String()
         + "."
         + identity.curveName()
         + "~"
-        + secretKey.bytes().toBase64String();
+        + seedKey.bytes().toBase64String();
 
+  }
+
+  public static Invite fromCanonicalForm(String inviteCode) throws MalformedInviteCodeException {
+    String exceptionMessage = "Invite code should be of format host:port:publicKey.curveName~secretKey";
+
+    String[] parts = inviteCode.split(":");
+
+    if (parts.length != 3) {
+      throw new MalformedInviteCodeException(exceptionMessage);
+    }
+
+    String host = parts[0];
+    String portString = parts[1];
+    int port = toPort(portString);
+
+    String[] keyAndSecret = parts[2].split("~");
+
+    if (keyAndSecret.length != 2) {
+      throw new MalformedInviteCodeException(exceptionMessage);
+    }
+
+    String fullKey = keyAndSecret[0];
+    String[] splitKey = fullKey.split("\\.");
+
+    if (splitKey.length != 2) {
+      throw new MalformedInviteCodeException(exceptionMessage);
+    }
+    String keyPart = splitKey[0];
+
+    String secretKeyPart = keyAndSecret[1];
+
+    Signature.Seed secretKey = toSecretKey(secretKeyPart);
+    Ed25519PublicKeyIdentity identity = toPublicKey(keyPart);
+
+    return new Invite(host, port, identity, secretKey);
+  }
+
+  private static Signature.Seed toSecretKey(String secretKeyPart) {
+    Bytes secret = Bytes.fromBase64String(secretKeyPart);
+    return Signature.Seed.fromBytes(secret);
+  }
+
+  private static Ed25519PublicKeyIdentity toPublicKey(String keyPart) {
+    // Remove the @ from the front of the key
+    String keyPartSuffix = keyPart.substring(1);
+    Bytes publicKeyBytes = Bytes.fromBase64String(keyPartSuffix);
+    Signature.PublicKey publicKey = Signature.PublicKey.fromBytes(publicKeyBytes);
+    return new Ed25519PublicKeyIdentity(publicKey);
+  }
+
+  private static int toPort(String portString) throws MalformedInviteCodeException {
+    try {
+      return Integer.parseInt(portString);
+    } catch (NumberFormatException ex) {
+      throw new MalformedInviteCodeException("Expected a string for the port. Value parsed: " + portString);
+    }
   }
 
   @Override

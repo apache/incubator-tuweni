@@ -14,6 +14,7 @@ package org.apache.tuweni.scuttlebutt.rpc.mux;
 
 import org.apache.tuweni.scuttlebutt.rpc.RPCResponse;
 
+
 /**
  * Handles incoming items from a result stream
  */

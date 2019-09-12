@@ -18,9 +18,7 @@ import org.apache.tuweni.crypto.sodium.SHA256Hash;
 import org.apache.tuweni.crypto.sodium.SecretBox;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 final class SecureScuttlebuttStream implements SecureScuttlebuttStreamClient, SecureScuttlebuttStreamServer {
 
@@ -138,37 +136,17 @@ final class SecureScuttlebuttStream implements SecureScuttlebuttStreamClient, Se
   private Bytes encrypt(Bytes message, SecretBox.Key clientToServerKey, MutableBytes clientToServerNonce) {
     int messages = (int) Math.ceil((double) message.size() / 4096d);
     Bytes[] encryptedMessages = new Bytes[messages];
-
-    ArrayList<Bytes> bytes = breakIntoParts(message);
-
-    List<Bytes> segments = bytes
-            .stream().
-                    map(slice -> encryptMessage(slice, clientToServerKey, clientToServerNonce))
-            .collect(Collectors.toList());
-
-    return Bytes.concatenate(segments.toArray(new Bytes[]{}));
-  }
-
-  private ArrayList<Bytes> breakIntoParts(Bytes message) {
-
-    byte[] original = message.toArray();
-
-    int chunk = 4096;
-
-    ArrayList<Bytes> result = new ArrayList<>();
-    for(int i=0; i< original.length; i+=chunk){
-      byte[] bytes = Arrays.copyOfRange(original, i, Math.min(original.length, i + chunk));
-
-      Bytes wrap = Bytes.wrap(bytes);
-      result.add(wrap);
+    for (int i = 0; i < messages; i++) {
+      Bytes encryptedMessage = encryptMessage(
+          message.slice(i * 4096, Math.min((i + 1) * 4096, message.size() - i * 4096)),
+          clientToServerKey,
+          clientToServerNonce);
+      encryptedMessages[i] = encryptedMessage;
     }
-
-    return result;
+    return Bytes.concatenate(encryptedMessages);
   }
-
 
   private Bytes encryptMessage(Bytes message, SecretBox.Key key, MutableBytes nonce) {
-
     SecretBox.Nonce headerNonce = null;
     SecretBox.Nonce bodyNonce = null;
     try {
