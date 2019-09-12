@@ -10,33 +10,29 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.tuweni.scuttlebutt.rpc.mux;
+package org.apache.tuweni.scuttlebutt.lib;
 
-import org.apache.tuweni.scuttlebutt.rpc.RPCResponse;
+import org.apache.tuweni.scuttlebutt.lib.model.ScuttlebuttMessageContent;
 
 
-/**
- * Handles incoming items from a result stream
- */
-public interface ScuttlebuttStreamHandler {
+public class TestScuttlebuttSerializationModel implements ScuttlebuttMessageContent {
 
-  /**
-   * Handles a new message from the result stream.
-   *
-   * @param message
-   */
-  void onMessage(RPCResponse message);
+  private String value;
+  private String type = "serialization-test";;
 
-  /**
-   * Invoked when the stream has been closed.
-   */
-  void onStreamEnd();
+  public TestScuttlebuttSerializationModel() {}
 
-  /**
-   * Invoked when there is an error in the stream.
-   *
-   * @param ex the underlying error
-   */
-  void onStreamError(Exception ex);
+  public TestScuttlebuttSerializationModel(String value) {
+    this.value = value;
+  }
+
+  @Override
+  public String getType() {
+    return type;
+  }
+
+  public String getValue() {
+    return value;
+  }
 
 }

@@ -74,7 +74,7 @@ public final class SecureScuttlebuttHandshakeClient {
       throw new IllegalArgumentException("Only ed25519 keys are supported");
     }
     return new SecureScuttlebuttHandshakeClient(
-        Signature.KeyPair.forSecretKey(invite.secretKey()),
+        Signature.KeyPair.forSecretKey(Signature.SecretKey.fromSeed(invite.seedKey())),
         networkIdentifier,
         invite.identity().ed25519PublicKey());
   }

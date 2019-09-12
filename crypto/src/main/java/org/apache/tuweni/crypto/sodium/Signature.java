@@ -208,6 +208,10 @@ public final class Signature {
       return Sodium.dup(bytes, SecretKey::new);
     }
 
+    public static SecretKey fromSeed(Seed seed) {
+      return Sodium.dup(seed.bytes().toArray(), SecretKey::new);
+    }
+
     /**
      * Obtain the length of the key in bytes (32).
      *
