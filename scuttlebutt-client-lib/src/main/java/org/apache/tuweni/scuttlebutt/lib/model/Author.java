@@ -10,33 +10,19 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.tuweni.scuttlebutt.rpc.mux;
-
-import org.apache.tuweni.scuttlebutt.rpc.RPCResponse;
-
+package org.apache.tuweni.scuttlebutt.lib.model;
 
 /**
- * Handles incoming items from a result stream
+ * A post author
  */
-public interface ScuttlebuttStreamHandler {
+public class Author {
+
+  private final String id;
 
   /**
-   * Handles a new message from the result stream.
-   *
-   * @param message
+   * @param id the string representation of the ID for the post author
    */
-  void onMessage(RPCResponse message);
-
-  /**
-   * Invoked when the stream has been closed.
-   */
-  void onStreamEnd();
-
-  /**
-   * Invoked when there is an error in the stream.
-   *
-   * @param ex the underlying error
-   */
-  void onStreamError(Exception ex);
-
+  public Author(String id) {
+    this.id = id;
+  }
 }

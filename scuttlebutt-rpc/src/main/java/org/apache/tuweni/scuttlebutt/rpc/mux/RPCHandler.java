@@ -280,11 +280,11 @@ public class RPCHandler implements Multiplexer, ClientHandler {
   }
 
   /**
-   * Sends an stream close message over the RPC channel to for the given request number
-   * if we have not already closed our end of the stream.
+   * Sends an stream close message over the RPC channel to for the given request number if we have not already closed
+   * our end of the stream.
    *
-   * Removes the stream handler from the state, so any newly incoming messages until
-   * the other side of the stream has closed its end will be ignored.
+   * Removes the stream handler from the state, so any newly incoming messages until the other side of the stream has
+   * closed its end will be ignored.
    *
    * @param requestNumber the request number of the stream to send a close message over RPC for
    */

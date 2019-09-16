@@ -10,33 +10,18 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.tuweni.scuttlebutt.rpc.mux;
-
-import org.apache.tuweni.scuttlebutt.rpc.RPCResponse;
-
+package org.apache.tuweni.scuttlebutt.lib.model;
 
 /**
- * Handles incoming items from a result stream
+ * Classes that are to be posted to the scuttlebutt feed should implement this interface
  */
-public interface ScuttlebuttStreamHandler {
+public interface ScuttlebuttMessageContent {
 
   /**
-   * Handles a new message from the result stream.
+   * To be serializable to scuttlebutt, its message content must have a 'type' field.
    *
-   * @param message
+   * @return the type of the message
    */
-  void onMessage(RPCResponse message);
-
-  /**
-   * Invoked when the stream has been closed.
-   */
-  void onStreamEnd();
-
-  /**
-   * Invoked when there is an error in the stream.
-   *
-   * @param ex the underlying error
-   */
-  void onStreamError(Exception ex);
+  String getType();
 
 }

@@ -137,16 +137,14 @@ final class SecureScuttlebuttStream implements SecureScuttlebuttStreamClient, Se
 
   private Bytes encrypt(Bytes message, SecretBox.Key clientToServerKey, MutableBytes clientToServerNonce) {
     int messages = (int) Math.ceil((double) message.size() / 4096d);
-    Bytes[] encryptedMessages = new Bytes[messages];
 
     ArrayList<Bytes> bytes = breakIntoParts(message);
 
-    List<Bytes> segments = bytes
-            .stream().
-                    map(slice -> encryptMessage(slice, clientToServerKey, clientToServerNonce))
-            .collect(Collectors.toList());
+    List<Bytes> segments =
+        bytes.stream().map(slice -> encryptMessage(slice, clientToServerKey, clientToServerNonce)).collect(
+            Collectors.toList());
 
-    return Bytes.concatenate(segments.toArray(new Bytes[]{}));
+    return Bytes.concatenate(segments.toArray(new Bytes[] {}));
   }
 
   private ArrayList<Bytes> breakIntoParts(Bytes message) {
@@ -156,7 +154,7 @@ final class SecureScuttlebuttStream implements SecureScuttlebuttStreamClient, Se
     int chunk = 4096;
 
     ArrayList<Bytes> result = new ArrayList<>();
-    for(int i=0; i< original.length; i+=chunk){
+    for (int i = 0; i < original.length; i += chunk) {
       byte[] bytes = Arrays.copyOfRange(original, i, Math.min(original.length, i + chunk));
 
       Bytes wrap = Bytes.wrap(bytes);
