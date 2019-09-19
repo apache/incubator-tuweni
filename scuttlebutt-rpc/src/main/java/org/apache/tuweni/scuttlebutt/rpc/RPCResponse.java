@@ -19,6 +19,7 @@ import org.apache.tuweni.scuttlebutt.rpc.RPCFlag.BodyType;
 
 import java.io.IOException;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -76,5 +77,10 @@ public class RPCResponse {
   public <T> T asJSON(ObjectMapper objectMapper, Class<T> clazz) throws IOException {
     return objectMapper.readerFor(clazz).readValue(body().toArrayUnsafe());
   }
+
+  public <T> T asJSON(ObjectMapper objectMapper, TypeReference<T> typeReference) throws IOException {
+    return objectMapper.readerFor(typeReference).readValue(body().toArrayUnsafe());
+  }
+
 
 }

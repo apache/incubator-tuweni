@@ -12,25 +12,33 @@
  */
 package org.apache.tuweni.scuttlebutt.lib.model;
 
+/**
+ * Represents a user profile.
+ */
+public class Profile {
 
-public interface StreamHandler<T> {
+  private String key;
+  private String displayName;
+
+  public Profile() {
+
+  }
 
   /**
-   * Handles a new item from the result stream.
    *
-   * @param item
+   * @param key the public key of the user
+   * @param displayName the display name of the user
    */
-  void onMessage(T item);
+  public Profile(String key, String displayName) {
+    this.key = key;
+    this.displayName = displayName;
+  }
 
-  /**
-   * Invoked when the stream has been closed.
-   */
-  void onStreamEnd();
+  public String getKey() {
+    return key;
+  }
 
-  /**
-   * Invoked when there is an error in the stream.
-   *
-   * @param ex the underlying error
-   */
-  void onStreamError(Exception ex);
+  public String getDisplayName() {
+    return displayName;
+  }
 }

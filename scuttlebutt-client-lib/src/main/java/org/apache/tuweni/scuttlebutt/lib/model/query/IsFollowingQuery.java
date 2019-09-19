@@ -10,27 +10,31 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.tuweni.scuttlebutt.lib.model;
+package org.apache.tuweni.scuttlebutt.lib.model.query;
 
+public class IsFollowingQuery {
 
-public interface StreamHandler<T> {
+  private String source;
+  private String dest;
+
+  public IsFollowingQuery() {}
 
   /**
-   * Handles a new item from the result stream.
+   * A query body to check whether the 'source' is following the 'destination' user.
    *
-   * @param item
+   * @param source the source to check
+   * @param dest the target node
    */
-  void onMessage(T item);
+  public IsFollowingQuery(String source, String dest) {
+    this.source = source;
+    this.dest = dest;
+  }
 
-  /**
-   * Invoked when the stream has been closed.
-   */
-  void onStreamEnd();
+  public String getSource() {
+    return source;
+  }
 
-  /**
-   * Invoked when there is an error in the stream.
-   *
-   * @param ex the underlying error
-   */
-  void onStreamError(Exception ex);
+  public String getDest() {
+    return dest;
+  }
 }

@@ -26,7 +26,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ScuttlebuttClient {
 
   private final Multiplexer multiplexer;
-  private final ObjectMapper mapper;
+
+  private final FeedService feedService;
 
   /**
    *
@@ -35,7 +36,7 @@ public class ScuttlebuttClient {
    */
   protected ScuttlebuttClient(Multiplexer multiplexer, ObjectMapper mapper) {
     this.multiplexer = multiplexer;
-    this.mapper = mapper;
+    this.feedService = new FeedService(multiplexer, mapper);
   }
 
   /**
@@ -53,8 +54,18 @@ public class ScuttlebuttClient {
    * @return
    */
   public FeedService getFeedService() {
-    return new FeedService(multiplexer, mapper);
+    return feedService;
   }
+
+  /**
+   * A service for operations concerning social connections and updating the instance's profile
+   *
+   * @return
+   */
+  public SocialService getSocialService() {
+    return new SocialService(multiplexer, feedService);
+  }
+
 
   /**
    * A service for making lower level requests that are not supported by higher level services.

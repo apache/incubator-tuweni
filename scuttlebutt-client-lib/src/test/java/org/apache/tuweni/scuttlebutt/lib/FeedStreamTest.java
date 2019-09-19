@@ -66,7 +66,7 @@ public class FeedStreamTest {
 
     CompletableAsyncResult<Optional<FeedMessage>> lastMessage = AsyncResult.incomplete();
 
-    feedService.createFeedStream(new StreamHandler<FeedMessage>() {
+    feedService.createFeedStream((closer) -> new StreamHandler<FeedMessage>() {
 
       Optional<FeedMessage> currentMessage = Optional.empty();
 

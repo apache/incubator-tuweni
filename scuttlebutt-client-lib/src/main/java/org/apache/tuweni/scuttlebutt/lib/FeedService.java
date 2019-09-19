@@ -27,6 +27,7 @@ import org.apache.tuweni.scuttlebutt.rpc.mux.exceptions.ConnectionClosedExceptio
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -83,18 +84,23 @@ public final class FeedService {
   /**
    * Streams every message in the instance's database.
    *
-   * @param handler the handler for processing the streamed messages
+   * @param streamHandler a function that can be used to construct the handler for processing the streamed messages,
+   *        using a runnable which can be ran to close the stream early.
    * @throws JsonProcessingException if the request to open the stream could not be made due to a JSON marshalling
    *         error.
    *
    * @throws ConnectionClosedException if the stream could not be started because the connection is no longer open.
    */
-  public void createFeedStream(StreamHandler<FeedMessage> handler) throws JsonProcessingException,
+  public void createFeedStream(Function<Runnable, StreamHandler<FeedMessage>> streamHandler)
+      throws JsonProcessingException,
       ConnectionClosedException {
 
     RPCStreamRequest streamRequest = new RPCStreamRequest(new RPCFunction("createFeedStream"), Arrays.asList());
 
     multiplexer.openStream(streamRequest, (closer) -> new ScuttlebuttStreamHandler() {
+
+      StreamHandler<FeedMessage> handler = streamHandler.apply(closer);
+
       @Override
       public void onMessage(RPCResponse message) {
         try {

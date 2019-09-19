@@ -12,25 +12,37 @@
  */
 package org.apache.tuweni.scuttlebutt.lib.model;
 
+/**
+ * A message that when persisted to the feed updates the name of the given user
+ */
+public class UpdateNameMessage implements ScuttlebuttMessageContent {
 
-public interface StreamHandler<T> {
+  private String about;
+  public String type = "about";
+  public String name = "name";
+
+  public UpdateNameMessage() {}
 
   /**
-   * Handles a new item from the result stream.
    *
-   * @param item
+   * @param name the new name for the user
+   * @param about the public key that the new name should be applied to
    */
-  void onMessage(T item);
+  public UpdateNameMessage(String name, String about) {
+    this.name = name;
+    this.about = about;
+  }
 
-  /**
-   * Invoked when the stream has been closed.
-   */
-  void onStreamEnd();
+  public String getAbout() {
+    return about;
+  }
 
-  /**
-   * Invoked when there is an error in the stream.
-   *
-   * @param ex the underlying error
-   */
-  void onStreamError(Exception ex);
+  public String getName() {
+    return name;
+  }
+
+  @Override
+  public String getType() {
+    return type;
+  }
 }

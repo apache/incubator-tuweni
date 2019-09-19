@@ -10,27 +10,31 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.tuweni.scuttlebutt.lib.model;
+package org.apache.tuweni.scuttlebutt.lib.model.query;
 
+import java.util.List;
 
-public interface StreamHandler<T> {
+public class AboutQuery {
 
-  /**
-   * Handles a new item from the result stream.
-   *
-   * @param item
-   */
-  void onMessage(T item);
+  private List<String> keys;
+  private String dest;
 
-  /**
-   * Invoked when the stream has been closed.
-   */
-  void onStreamEnd();
+  public AboutQuery() {}
 
   /**
-   * Invoked when there is an error in the stream.
-   *
-   * @param ex the underlying error
+   * @param dest the object that the 'about' type message refers to (e.g. user profile / message ID.)
+   * @param keys The keys for the 'about' type messages that we're querying
    */
-  void onStreamError(Exception ex);
+  public AboutQuery(String dest, List<String> keys) {
+    this.keys = keys;
+    this.dest = dest;
+  }
+
+  public List<String> getKeys() {
+    return keys;
+  }
+
+  public String getDest() {
+    return dest;
+  }
 }
