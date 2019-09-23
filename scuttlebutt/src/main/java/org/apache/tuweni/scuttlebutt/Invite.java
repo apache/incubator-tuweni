@@ -12,11 +12,12 @@
  */
 package org.apache.tuweni.scuttlebutt;
 
-import com.google.common.base.Splitter;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.crypto.sodium.Signature;
 
 import java.util.List;
+
+import com.google.common.base.Splitter;
 
 /**
  * An invite code as defined by the Secure Scuttlebutt protocol guide.
