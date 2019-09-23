@@ -24,7 +24,8 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 
 public class FeedMessageDeserializer extends JsonDeserializer<FeedMessage> {
   @Override
-  public FeedMessage deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+  public FeedMessage deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,
+      JsonProcessingException {
 
     JsonNode node = jp.getCodec().readTree(jp);
 
