@@ -10,27 +10,25 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.tuweni.scuttlebutt.lib.model;
+package org.apache.tuweni.scuttlebutt.lib.model.query;
 
+public class WhoAmIResponse {
 
-public interface StreamHandler<T> {
+  private String id;
+
+  public WhoAmIResponse() {
+
+  }
 
   /**
-   * Handles a new item from the result stream.
    *
-   * @param item
+   * @param id the ID of the current user in response to a 'whoami' query
    */
-  void onMessage(T item);
+  public WhoAmIResponse(String id) {
+    this.id = id;
+  }
 
-  /**
-   * Invoked when the stream has been closed.
-   */
-  void onStreamEnd();
-
-  /**
-   * Invoked when there is an error in the stream.
-   *
-   * @param ex the underlying error
-   */
-  void onStreamError(Exception ex);
+  public String getId() {
+    return id;
+  }
 }

@@ -10,27 +10,26 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.tuweni.scuttlebutt.lib.model;
+package org.apache.tuweni.scuttlebutt.lib.model.query;
 
+/**
+ * A response to querying for the profile details of a user.
+ */
+public class AboutQueryResponse {
 
-public interface StreamHandler<T> {
+  private String name;
+
+  public AboutQueryResponse() {}
 
   /**
-   * Handles a new item from the result stream.
    *
-   * @param item
+   * @param name the display name of the user
    */
-  void onMessage(T item);
+  public AboutQueryResponse(String name) {
+    this.name = name;
+  }
 
-  /**
-   * Invoked when the stream has been closed.
-   */
-  void onStreamEnd();
-
-  /**
-   * Invoked when there is an error in the stream.
-   *
-   * @param ex the underlying error
-   */
-  void onStreamError(Exception ex);
+  public String getName() {
+    return name;
+  }
 }

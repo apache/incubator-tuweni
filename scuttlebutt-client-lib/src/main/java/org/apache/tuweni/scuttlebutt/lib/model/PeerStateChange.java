@@ -12,25 +12,40 @@
  */
 package org.apache.tuweni.scuttlebutt.lib.model;
 
+public class PeerStateChange {
 
-public interface StreamHandler<T> {
+  private Peer peer;
+  private String type;
+
+  /*
+    * Empty constructor for serialization
+   */
+  public PeerStateChange() {}
 
   /**
-   * Handles a new item from the result stream.
+   * A change in peer state.
    *
-   * @param item
+   * @param type the state change since the previous state
+   * @param peer the new peer details
    */
-  void onMessage(T item);
+  public PeerStateChange(String type, Peer peer) {
+    this.type = type;
+    this.peer = peer;
+  }
 
-  /**
-   * Invoked when the stream has been closed.
-   */
-  void onStreamEnd();
+  public Peer getPeer() {
+    return peer;
+  }
 
-  /**
-   * Invoked when there is an error in the stream.
-   *
-   * @param ex the underlying error
-   */
-  void onStreamError(Exception ex);
+  public void setPeer(Peer peer) {
+    this.peer = peer;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
 }

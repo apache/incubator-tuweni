@@ -12,25 +12,46 @@
  */
 package org.apache.tuweni.scuttlebutt.lib.model;
 
+public class Peer {
 
-public interface StreamHandler<T> {
+  private String state;
+  private String address;
+  private int port;
+  private String key;
+
+  public Peer() {}
 
   /**
-   * Handles a new item from the result stream.
    *
-   * @param item
+   * @param address the address of the peer used to connect to it
+   * @param port the port of the peer
+   * @param key the public key of the peer
+   * @param state the connection state of the peer
    */
-  void onMessage(T item);
+  public Peer(String address, int port, String key, String state) {
+    this.address = address;
+    this.port = port;
+    this.key = key;
+    this.state = state;
+  }
 
-  /**
-   * Invoked when the stream has been closed.
-   */
-  void onStreamEnd();
+  public String getAddress() {
+    return address;
+  }
 
-  /**
-   * Invoked when there is an error in the stream.
-   *
-   * @param ex the underlying error
-   */
-  void onStreamError(Exception ex);
+  public int getPort() {
+    return port;
+  }
+
+  public String getKey() {
+    return key;
+  }
+
+  public String getState() {
+    if (state == null) {
+      return "unknown";
+    } else {
+      return state;
+    }
+  }
 }
