@@ -108,6 +108,12 @@ git tag -m "Release ${RELEASE VERSION}" v${RELEASE VERSION}
 git push origin ${RELEASE BRANCH} --tags
 ```
 
+### Close the staged repository for the release
+
+Go to repository.apache.org and find the open repository that was created during the upload.
+
+Click "Close" in the workflow buttons at the top.
+
 ### Open a thread for a vote
 
 Send an email to dev@tuweni.apache.org with the following:
@@ -152,30 +158,73 @@ svn move -m "Move Apache Tuweni ${RELEASE VERSION} to releases" https://dist.apa
 
 Update the website:
 
+Go to the repository here and perform this change:
+
+https://github.com/apache/incubator-tuweni-website/commit/77066736df2997991e3a1954f41ced1c7a52999d
+
 Test the downloads page (wait 24h for mirrors to update):
 
 
-### Move the artifacts to maven central
+### Release the artifacts to maven central
 
-TODO
+Go to repository.apache.org to the closed repository you closed during the RC process.
+
+Click on it and press the release workflow button at the top.
 
 ### Publish the site
 
-TODO
+Go to builds.apache.org, and run this build:
+
+https://builds.apache.org/job/Apache%20Tuweni/job/website/
+
+It takes an hour for the changes to be pushed out.
+
+### Make release notes
+
+Go to github.com, click tags and find your release.
+
+Edit the tag and add release notes.
 
 ### Send an [ANNOUNCE] email
 
+The email goes to dev@tuweni.apache.org, general@incubator.apache.org, and announce@apache.org.
+This email must be sent from an @apache.org email.
+
 ```
-Subject: [ANNOUNCE] Apache Tuweni ${RELEASE VERSION} released
+Subject: [ANNOUNCE] Apache Tuweni (incubating) ${RELEASE VERSION} released
 
-${TUWENI DESCRIPTION}
+The Apache Tuweni team is proud to announce the release of Apache Tuweni
+(incubating) ${RELEASE VERSION}.
 
-New in this release:
-${list of changes}
+Apache Tuweni is a set of libraries and other tools to aid development of
+blockchain and other decentralized software in Java and other JVM 
+languages. It includes a low-level bytes library, serialization and 
+deserialization codecs (e.g. RLP), various cryptography functions 
+and primatives, and lots of other helpful utilities. Tuweni is 
+developed for JDK 1.8 or higher, and depends on various other FOSS libraries.
+
+Source and binary distributions can be downloaded from:
+https://tuweni.apache.org/download
+
+Release notes are at:
+https://github.com/apache/incubator-tuweni/releases/tag/v${RELEASE VERSION}
+
+A big thank you to all the contributors in this milestone release!
+
 To learn more about Tuweni and get started:
 http://tuweni.apache.org/
 Thanks!
 The Apache Tuweni Team
+
+----
+Disclaimer: Apache Tuweni is an effort undergoing incubation at The Apache
+Software Foundation (ASF), sponsored by the Apache Incubator. Incubation is
+required of all newly accepted projects until a further review indicates
+that the infrastructure, communications, and decision making process have
+stabilized in a manner consistent with other successful ASF projects. While
+incubation status is not necessarily a reflection of the completeness or
+stability of the code, it does indicate that the project has yet to be
+fully endorsed by the ASF.
 ```
 
 ### Clean up jira
