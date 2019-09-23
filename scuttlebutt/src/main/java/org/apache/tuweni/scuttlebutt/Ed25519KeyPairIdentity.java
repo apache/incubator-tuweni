@@ -26,7 +26,7 @@ final class Ed25519KeyPairIdentity implements Identity {
 
   private final Signature.KeyPair keyPair;
 
-  Ed25519KeyPairIdentity(Signature.KeyPair keyPair) {
+  public Ed25519KeyPairIdentity(Signature.KeyPair keyPair) {
     this.keyPair = keyPair;
   }
 
