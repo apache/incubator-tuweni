@@ -101,6 +101,14 @@ public final class Invite {
 
   }
 
+  /**
+   * Takes an invite string in its canonical form and parses it into an Invite object, throwing an error if it is not of
+   * the expected format.
+   * 
+   * @param inviteCode the invite code in its canonical form
+   * @return the invite code
+   * @throws MalformedInviteCodeException
+   */
   public static Invite fromCanonicalForm(String inviteCode) throws MalformedInviteCodeException {
     String exceptionMessage = "Invite code should be of format host:port:publicKey.curveName~secretKey";
 
