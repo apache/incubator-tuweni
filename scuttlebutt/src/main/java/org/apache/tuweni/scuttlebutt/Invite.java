@@ -15,6 +15,10 @@ package org.apache.tuweni.scuttlebutt;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.crypto.sodium.Signature;
 
+import java.util.List;
+
+import com.google.common.base.Splitter;
+
 /**
  * An invite code as defined by the Secure Scuttlebutt protocol guide.
  * <p>
@@ -97,34 +101,42 @@ public final class Invite {
 
   }
 
+  /**
+   * Takes an invite string in its canonical form and parses it into an Invite object, throwing an error if it is not of
+   * the expected format.
+   * 
+   * @param inviteCode the invite code in its canonical form
+   * @return the invite code
+   * @throws MalformedInviteCodeException
+   */
   public static Invite fromCanonicalForm(String inviteCode) throws MalformedInviteCodeException {
     String exceptionMessage = "Invite code should be of format host:port:publicKey.curveName~secretKey";
 
-    String[] parts = inviteCode.split(":");
+    List<String> parts = Splitter.on(':').splitToList(inviteCode);
 
-    if (parts.length != 3) {
+    if (parts.size() != 3) {
       throw new MalformedInviteCodeException(exceptionMessage);
     }
 
-    String host = parts[0];
-    String portString = parts[1];
+    String host = parts.get(0);
+    String portString = parts.get(1);
     int port = toPort(portString);
 
-    String[] keyAndSecret = parts[2].split("~");
+    List<String> keyAndSecret = Splitter.on('~').splitToList(parts.get(2));
 
-    if (keyAndSecret.length != 2) {
+    if (keyAndSecret.size() != 2) {
       throw new MalformedInviteCodeException(exceptionMessage);
     }
 
-    String fullKey = keyAndSecret[0];
-    String[] splitKey = fullKey.split("\\.");
+    String fullKey = keyAndSecret.get(0);
+    List<String> splitKey = Splitter.on('.').splitToList(fullKey);
 
-    if (splitKey.length != 2) {
+    if (splitKey.size() != 2) {
       throw new MalformedInviteCodeException(exceptionMessage);
     }
-    String keyPart = splitKey[0];
+    String keyPart = splitKey.get(0);
 
-    String secretKeyPart = keyAndSecret[1];
+    String secretKeyPart = keyAndSecret.get(1);
 
     Signature.Seed secretKey = toSecretKey(secretKeyPart);
     Ed25519PublicKeyIdentity identity = toPublicKey(keyPart);
