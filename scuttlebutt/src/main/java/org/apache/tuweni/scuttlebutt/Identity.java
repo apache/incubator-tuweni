@@ -105,9 +105,9 @@ public interface Identity {
   }
 
   /**
-   * Creates a new SECP256K1 identity backed by this secret key.
+   * Creates a new SECP256K1 identity backed by this public key.
    *
-   * @param publicKey the secret key of the identity
+   * @param publicKey the public key of the identity
    * @return a new Scuttlebutt identity
    */
   static Identity fromPublicKey(SECP256K1.PublicKey publicKey) {
@@ -115,9 +115,9 @@ public interface Identity {
   }
 
   /**
-   * Creates a new Ed25519 identity backed by this secret key.
+   * Creates a new Ed25519 identity backed by this public key.
    *
-   * @param publicKey the secret key of the identity
+   * @param publicKey the public key of the identity
    * @return a new Scuttlebutt identity
    */
   static Identity fromPublicKey(Signature.PublicKey publicKey) {
