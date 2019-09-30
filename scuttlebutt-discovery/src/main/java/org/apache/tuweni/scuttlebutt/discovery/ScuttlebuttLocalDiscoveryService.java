@@ -75,7 +75,7 @@ public class ScuttlebuttLocalDiscoveryService {
   }
 
 
-  ScuttlebuttLocalDiscoveryService(
+  public ScuttlebuttLocalDiscoveryService(
       Vertx vertx,
       Logger logger,
       int listenPort,
