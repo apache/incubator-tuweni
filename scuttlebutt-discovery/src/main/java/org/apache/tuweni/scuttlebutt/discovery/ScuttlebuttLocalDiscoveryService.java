@@ -75,6 +75,16 @@ public class ScuttlebuttLocalDiscoveryService {
   }
 
 
+  /**
+   * Constructor with option to not validate that multicastAddress is in fact a multicast address.
+   *
+   * @param vertx Vert.x instance used to create the UDP socket
+   * @param logger the logger used to log events and errors
+   * @param listenPort the port to bind the UDP socket to
+   * @param listenNetworkInterface the network interface to bind the UDP socket to
+   * @param multicastAddress the address to broadcast multicast packets to
+   * @param validateMulticast check whether or not multicastAddress is actually a multicast address
+   */
   public ScuttlebuttLocalDiscoveryService(
       Vertx vertx,
       Logger logger,
