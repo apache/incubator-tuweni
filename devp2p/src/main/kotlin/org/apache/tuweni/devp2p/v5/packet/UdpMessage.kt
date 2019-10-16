@@ -7,12 +7,16 @@ import java.nio.ByteBuffer
 
 abstract class UdpMessage(
   val src: Bytes,
-  val dest: Bytes
+  val dest: Bytes,
+  val auth: Bytes? = null,
+  val encryptionKey: Bytes? = null
 ) {
 
-  protected val VERSION: Int = 5
+  abstract fun encode(encryptionKey: Bytes = Bytes.EMPTY, encryptionNonce: Bytes = Bytes.EMPTY): ByteBuffer
 
-  abstract fun encode(): ByteBuffer
+  open fun getMessageType(): Int {
+    throw UnsupportedOperationException("Message don't identified with type")
+  }
 
   companion object {
 

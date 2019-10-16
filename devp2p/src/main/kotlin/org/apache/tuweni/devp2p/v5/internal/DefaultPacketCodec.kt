@@ -14,10 +14,6 @@ class DefaultPacketCodec(
   val nodeId: Bytes
 ): PacketCodec {
 
-  override fun encode(message: UdpMessage): ByteBuffer {
-    return message.encode()
-  }
-
   override fun decode(buffer: ByteBuffer): UdpMessage {
     val bytes = Bytes.wrapByteBuffer(buffer)
     val tag = bytes.slice(0, UdpMessage.TAG_LENGTH)

@@ -4,31 +4,50 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
-import org.apache.tuweni.devp2p.v5.MessageHandler
 import org.apache.tuweni.devp2p.v5.UdpConnector
 import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
 import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
+import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.rlp.RLP
 import org.bouncycastle.crypto.digests.SHA256Digest
 import org.bouncycastle.crypto.generators.HKDFBytesGenerator
 import org.bouncycastle.crypto.params.HKDFParameters
-import java.net.InetSocketAddress
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.net.InetAddress
+import java.nio.ByteBuffer
 
-class WhoAreYouMessageHandler(
-  private val nodeId: Bytes
-): MessageHandler<WhoAreYouMessage> {
+@ExtendWith(BouncyCastleExtension::class)
+class WhoAreYouMessageHandlerTest {
 
-  override fun handle(message: WhoAreYouMessage, address: InetSocketAddress, connector: UdpConnector) {
+  @Test
+  fun tryHandshake() {
+    val aNodeKeyPair = SECP256K1.KeyPair.random()
+    val aEnr = EthereumNodeRecord.toRLP(aNodeKeyPair, ip = InetAddress.getLocalHost())
+    val aNodeId = Hash.sha2_256(aEnr)
+
+    val bNodeKeyPair = SECP256K1.KeyPair.random()
+    val bEnr = EthereumNodeRecord.toRLP(bNodeKeyPair, ip = InetAddress.getLocalHost())
+    val bNodeId = Hash.sha2_256(bEnr)
+
+    val message = WhoAreYouMessage(aNodeId, bNodeId)
+
+    initHandshake(message, aEnr, bEnr, aNodeKeyPair)
+  }
+
+  fun initHandshake(message: WhoAreYouMessage, aEnr: Bytes, bEnr: Bytes, keyPair: SECP256K1.KeyPair): ByteBuffer {
     // Generate ephemeral key pair
     val ephemeralKeyPair = SECP256K1.KeyPair.random()
     val ephemeralKey = ephemeralKeyPair.secretKey()
 
     // Retrieve enr
-    val destRlp = connector.getPendingNodeIdByAddress(address)
+    val destRlp = aEnr
     val enr = EthereumNodeRecord.fromRLP(destRlp)
     val destNodeId = Hash.sha2_256(destRlp)
+
+    val nodeId = Hash.sha2_256(bEnr)
 
     // Perform agreement
     val secret = SECP256K1.calculateKeyAgreement(ephemeralKey, enr.publicKey())
@@ -41,11 +60,11 @@ class WhoAreYouMessageHandler(
     derive(hkdf)
     val authRespKey = derive(hkdf)
 
-    val signature = sign(connector.getNodeKeyPair(), message)
+    val signature = sign(keyPair, message)
 
     val authHeader = generateAuthHeader(signature, message, authRespKey, ephemeralKeyPair.publicKey())
     val findNodeMessage = FindNodeMessage(nodeId, destNodeId, authHeader)
-    connector.send(address, findNodeMessage)
+    return findNodeMessage.encode(Bytes.wrap(authRespKey), message.authTag)
   }
 
   private fun derive(hkdf: HKDFBytesGenerator): ByteArray {

@@ -5,8 +5,6 @@ import java.nio.ByteBuffer
 
 interface PacketCodec {
 
-  fun encode(message: UdpMessage): ByteBuffer
-
   fun decode(buffer: ByteBuffer): UdpMessage
 
 }

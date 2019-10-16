@@ -13,8 +13,8 @@ class WhoAreYouMessage(
   val idNonce: Bytes = idNonce()
 ): UdpMessage(src, dest) {
 
-  override fun encode(): ByteBuffer {
-    val magic = magic(src)
+  override fun encode(encryptionKey: Bytes, encryptionNonce: Bytes): ByteBuffer {
+    val magic = magic(dest)
     val rlpBody = RLP.encodeList { w ->
       w.writeByteArray(authTag.toArray())
       w.writeByteArray(idNonce.toArray())

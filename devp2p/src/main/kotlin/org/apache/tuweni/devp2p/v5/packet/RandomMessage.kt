@@ -12,7 +12,7 @@ class RandomMessage(
   val authTag: Bytes = authTag()
 ): UdpMessage(src, dest) {
 
-  override fun encode(): ByteBuffer {
+  override fun encode(encryptionKey: Bytes, encryptionNonce: Bytes): ByteBuffer {
     val authTagBytes = RLP.encodeByteArray(authTag.toArray())
 
     val tag = tag(src, dest)

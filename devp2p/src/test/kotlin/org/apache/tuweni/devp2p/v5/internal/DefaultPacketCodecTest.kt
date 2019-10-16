@@ -11,20 +11,6 @@ class DefaultPacketCodecTest {
   private val nodeId: Bytes = Bytes.fromHexString("0x98EB6D611291FA21F6169BFF382B9369C33D997FE4DC93410987E27796360640")
   private val codec: PacketCodec = DefaultPacketCodec(nodeId)
 
-  @Test
-  fun encodeTransformsMessageIntoValidByteBuffer() {
-    val srcId = Bytes.fromHexString("0xA5CFE10E0EFC543CBE023560B2900E2243D798FAFD0EA46267DDD20D283CE13C")
-    val authTag = UdpMessage.authTag()
-    val message = RandomMessage(nodeId, srcId, authTag)
-
-    val result = Bytes.wrapByteBuffer(codec.encode(message)).slice(UdpMessage.TAG_LENGTH)
-
-    val decodedResult = RandomMessage.create(result, srcId, nodeId)
-
-    assert(decodedResult.src == srcId)
-    assert(decodedResult.dest == nodeId)
-    assert(decodedResult.authTag == authTag)
-  }
 
   @Test
   fun decodeTransformsMessageIntoValidMessage() {

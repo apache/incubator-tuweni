@@ -24,7 +24,7 @@ class DefaultNodeDiscoveryService(
   private val enrSeq: Long = Instant.now().toEpochMilli(),
   private val selfENR: Bytes = EthereumNodeRecord.toRLP(keyPair, enrSeq, emptyMap(), bindAddress.address, null, bindAddress.port),
   private val nodeId: Bytes = Hash.sha2_256(selfENR),
-  private val connector: UdpConnector = DefaultUdpConnector(nodeId, bindAddress),
+  private val connector: UdpConnector = DefaultUdpConnector(nodeId, bindAddress, keyPair),
   override val coroutineContext: CoroutineContext = Dispatchers.Default
 ) : NodeDiscoveryService, CoroutineScope {
 
@@ -47,7 +47,7 @@ class DefaultNodeDiscoveryService(
       val randomMessage = RandomMessage(nodeId, destNodeId)
       val address = InetSocketAddress(enr.ip(), enr.udp())
 
-      connector.addPendingNodeId(address, destNodeId)
+      connector.addPendingNodeId(address, rlpENR)
       connector.send(address, randomMessage)
     }
   }

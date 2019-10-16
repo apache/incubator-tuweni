@@ -2,6 +2,7 @@ package org.apache.tuweni.devp2p.v5.internal
 
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.v5.UdpConnector
 import org.apache.tuweni.devp2p.v5.packet.RandomMessage
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
@@ -21,12 +22,13 @@ class DefaultUpdConnectorTest {
   private val srcId: Bytes = Bytes.fromHexString("0xA5CFE10E0EFC543CBE023560B2900E2243D798FAFD0EA46267DDD20D283CE13C")
   private val authTag: Bytes = UdpMessage.authTag()
   private val message: RandomMessage = RandomMessage(nodeId, srcId, authTag)
+  private val keyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
 
-  private var connector: UdpConnector = DefaultUdpConnector(nodeId, address)
+  private var connector: UdpConnector = DefaultUdpConnector(nodeId, address, keyPair)
 
   @BeforeEach
   fun setUp() {
-    connector = DefaultUdpConnector(nodeId, address)
+    connector = DefaultUdpConnector(nodeId, address, keyPair)
   }
 
   @AfterEach

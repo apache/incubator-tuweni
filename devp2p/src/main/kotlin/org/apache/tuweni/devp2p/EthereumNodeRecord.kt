@@ -55,6 +55,7 @@ class EthereumNodeRecord(val signature: Bytes, val seq: Long, val data: Map<Stri
         while (!it.isComplete) {
           val key = it.readString()
           val value = it.readValue()
+          println("$key === $value")
           data[key] = value
         }
 
@@ -85,10 +86,10 @@ class EthereumNodeRecord(val signature: Bytes, val seq: Long, val data: Map<Stri
       }
       udp?.let {
         mutableData["udp"] = Bytes.ofUnsignedShort(it)
-        writer.writeString("udp")
       }
       mutableData.keys.sorted().forEach { key ->
           mutableData[key]?.let { value ->
+            println("$key -> $value")
             writer.writeString(key)
             writer.writeValue(value)
           }

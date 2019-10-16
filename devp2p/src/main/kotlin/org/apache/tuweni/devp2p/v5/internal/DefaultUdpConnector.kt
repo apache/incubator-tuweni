@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.v5.MessageHandler
 import org.apache.tuweni.devp2p.v5.PacketCodec
 import org.apache.tuweni.devp2p.v5.UdpConnector
@@ -21,6 +22,7 @@ import kotlin.coroutines.CoroutineContext
 class DefaultUdpConnector(
   private val nodeId: Bytes,
   private val bindAddress: InetSocketAddress,
+  private val keyPair: SECP256K1.KeyPair,
   private val receiveChannel: CoroutineDatagramChannel = CoroutineDatagramChannel.open(),
   private val sendChannel: CoroutineDatagramChannel = CoroutineDatagramChannel.open(),
   private val packetCodec: PacketCodec = DefaultPacketCodec(nodeId),
@@ -28,7 +30,7 @@ class DefaultUdpConnector(
 ): UdpConnector, CoroutineScope {
 
   private val randomMessageHandler: MessageHandler<RandomMessage> = RandomMessageHandler()
-  private val whoAreYouMessageHandler: MessageHandler<WhoAreYouMessage> = WhoAreYouMessageHandler()
+  private val whoAreYouMessageHandler: MessageHandler<WhoAreYouMessage> = WhoAreYouMessageHandler(nodeId)
 
   private val authenticatingPeers: MutableMap<InetSocketAddress, Bytes> = mutableMapOf()
 
@@ -49,9 +51,9 @@ class DefaultUdpConnector(
     return receiveJob
   }
 
-  override fun send(address: InetSocketAddress, message: UdpMessage) {
+  override fun send(address: InetSocketAddress, message: UdpMessage, encryptionKey: Bytes, encryptionNonce: Bytes) {
     launch {
-      val buffer = packetCodec.encode(message)
+      val buffer = message.encode(encryptionKey, encryptionNonce)
       sendChannel.send(buffer, address)
     }
   }
@@ -69,6 +71,8 @@ class DefaultUdpConnector(
   override fun addPendingNodeId(address: InetSocketAddress, nodeId: Bytes) {
     authenticatingPeers[address] = nodeId
   }
+
+  override fun getNodeKeyPair(): SECP256K1.KeyPair = keyPair
 
   override fun getPendingNodeIdByAddress(address: InetSocketAddress): Bytes = authenticatingPeers[address]
     ?: throw IllegalArgumentException("Authenticated peer not found with address ${address.hostName}:${address.port}")

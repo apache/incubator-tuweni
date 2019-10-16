@@ -8,6 +8,7 @@ import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.packet.RandomMessage
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
+import org.apache.tuweni.io.Base64URLSafe
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import org.junit.jupiter.api.Test
@@ -70,6 +71,49 @@ class DefaultNodeDiscoveryServiceTest {
       discoveryService.terminate()
     }
 
+  }
+
+  @Test
+  fun whoAreYouTest() {
+    val senderAddress = InetSocketAddress(InetAddress.getLocalHost(), 9091)
+    val senderKey = SECP256K1.KeyPair.random()
+    val senderEnrSeq = Instant.now().toEpochMilli()
+    val senderEnr = EthereumNodeRecord.toRLP(
+      senderKey,
+      senderEnrSeq,
+      emptyMap(),
+      senderAddress.address,
+      udp = senderAddress.port
+    )
+    val senderNodeId = Hash.sha2_256(senderEnr)
+
+    val receiverAddress = InetSocketAddress(InetAddress.getLocalHost(), 9090)
+    val receiverKey = SECP256K1.KeyPair.random()
+    val receiverEnrSeq = Instant.now().toEpochMilli()
+    val receiverEnr = EthereumNodeRecord.toRLP(
+      receiverKey,
+      receiverEnrSeq,
+      emptyMap(),
+      receiverAddress.address,
+      udp = receiverAddress.port
+    )
+    val receiverNodeId = Hash.sha2_256(receiverEnr)
+
+    val channel = CoroutineDatagramChannel.open()
+    channel.bind(senderAddress)
+
+    val bootList = listOf("enr:${Base64URLSafe.encode(senderEnr)}")
+    val discoveryService = DefaultNodeDiscoveryService(receiverKey, 9090, enrSeq = receiverEnrSeq, selfENR = receiverEnr, bootstrapENRList = bootList)
+    discoveryService.start()
+
+    runBlocking {
+      val buffer = ByteBuffer.allocate(1280)
+      channel.receive(buffer)
+      val message = WhoAreYouMessage(senderNodeId, receiverNodeId, UdpMessage.authTag())
+      channel.send(message.encode(), receiverAddress)
+      buffer.clear()
+      channel.receive(buffer)
+    }
   }
 
 }
