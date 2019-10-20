@@ -14,29 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.packet
+package org.apache.tuweni.devp2p.v5.misc
 
 import org.apache.tuweni.bytes.Bytes
-import org.junit.jupiter.api.Test
 
-class WhoAreYouMessageTest {
-
-  @Test
-  fun encodeCreatesValidBytesSequence() {
-    val expectedEncodingResult =
-      "0xEF8C05D038D54B1ACB9A2A83C480A0C3B548CA063DA57BC9DE93340360AF32815FC8D0B2F053B3CB7918ABBB291A5180"
-
-    val authTag = Bytes.fromHexString("0x05D038D54B1ACB9A2A83C480")
-    val nonce = Bytes.fromHexString("0xC3B548CA063DA57BC9DE93340360AF32815FC8D0B2F053B3CB7918ABBB291A51")
-    val message = WhoAreYouMessage(authTag, nonce)
-
-    val encodingResult = message.encode()
-    assert(encodingResult.toHexString() == expectedEncodingResult)
-
-    val decodingResult = WhoAreYouMessage.create(encodingResult)
-
-    assert(decodingResult.authTag == authTag)
-    assert(decodingResult.idNonce == nonce)
-    assert(decodingResult.enrSeq == 0L)
-  }
-}
+class HandshakeInitParameters(
+  val idNonce: Bytes,
+  val authTag: Bytes,
+  val destEnr: Bytes
+)

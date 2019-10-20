@@ -19,24 +19,28 @@ package org.apache.tuweni.devp2p.v5.packet
 import org.apache.tuweni.bytes.Bytes
 import org.junit.jupiter.api.Test
 
-class WhoAreYouMessageTest {
+class FindNodeMessageTest {
 
   @Test
   fun encodeCreatesValidBytesSequence() {
-    val expectedEncodingResult =
-      "0xEF8C05D038D54B1ACB9A2A83C480A0C3B548CA063DA57BC9DE93340360AF32815FC8D0B2F053B3CB7918ABBB291A5180"
+    val expectedEncodingResult = "0xCA88C6E32C5E89CAA75480"
 
-    val authTag = Bytes.fromHexString("0x05D038D54B1ACB9A2A83C480")
-    val nonce = Bytes.fromHexString("0xC3B548CA063DA57BC9DE93340360AF32815FC8D0B2F053B3CB7918ABBB291A51")
-    val message = WhoAreYouMessage(authTag, nonce)
+    val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
+    val message = FindNodeMessage(requestId)
 
     val encodingResult = message.encode()
     assert(encodingResult.toHexString() == expectedEncodingResult)
 
-    val decodingResult = WhoAreYouMessage.create(encodingResult)
+    val decodingResult = FindNodeMessage.create(encodingResult)
 
-    assert(decodingResult.authTag == authTag)
-    assert(decodingResult.idNonce == nonce)
-    assert(decodingResult.enrSeq == 0L)
+    assert(decodingResult.requestId == requestId)
+    assert(decodingResult.distance == 0L)
+  }
+
+  @Test
+  fun getMessageTypeHasValidIndex() {
+    val message = FindNodeMessage()
+
+    assert(3 == message.getMessageType().toInt())
   }
 }

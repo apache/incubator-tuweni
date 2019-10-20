@@ -1,31 +1,48 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
 import org.apache.tuweni.rlp.RLP
-import java.nio.ByteBuffer
 
 class FindNodeMessage(
-  src: Bytes,
-  dest: Bytes,
-  auth: Bytes,
-  val requestId: Bytes = Bytes.random(8),
+  val requestId: Bytes = UdpMessage.requestId(),
   val distance: Long = 0
-): UdpMessage(src, dest, auth) {
+) : UdpMessage() {
 
-  override fun encode(encryptionKey: Bytes, encryptionNonce: Bytes): ByteBuffer {
-    val tag = tag(src, dest)
-    val encoded = RLP.encodeList { writer ->
-      writer.writeValue(tag(src, dest))
-      writer.writeValue(auth!!)
-      val payload = Bytes.wrap(Bytes.ofUnsignedShort(getMessageType()), requestId, Bytes.ofUnsignedLong(distance))
-      val encryptionMeta = if (RLP.isList(auth)) Bytes.wrap(tag, auth) else tag
-      val encrypted = AES128GCM.encrypt(encryptionKey, encryptionNonce, payload, encryptionMeta)
-      writer.writeValue(encrypted)
+  private val encodedMessageType: Bytes = Bytes.fromHexString("0x03")
+
+  override fun encode(): Bytes {
+    return RLP.encodeList { writer ->
+      writer.writeValue(requestId)
+      writer.writeLong(distance)
     }
-    return ByteBuffer.wrap(encoded.toArray())
   }
 
-  override fun getMessageType(): Int = 3
+  override fun getMessageType(): Bytes = encodedMessageType
 
+  companion object {
+
+    fun create(content: Bytes): FindNodeMessage {
+      return RLP.decodeList(content) { reader ->
+        val requestId = reader.readValue()
+        val distance = reader.readLong()
+        return@decodeList FindNodeMessage(requestId, distance)
+      }
+    }
+  }
 }

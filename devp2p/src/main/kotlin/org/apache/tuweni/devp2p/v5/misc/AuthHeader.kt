@@ -14,29 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.packet
+package org.apache.tuweni.devp2p.v5.misc
 
 import org.apache.tuweni.bytes.Bytes
-import org.junit.jupiter.api.Test
+import org.apache.tuweni.rlp.RLP
 
-class WhoAreYouMessageTest {
+class AuthHeader(
+  val authTag: Bytes,
+  val idNonce: Bytes,
+  val ephemeralPublicKey: Bytes,
+  val authResponse: Bytes,
+  val authScheme: String = AUTH_SCHEME
+) {
 
-  @Test
-  fun encodeCreatesValidBytesSequence() {
-    val expectedEncodingResult =
-      "0xEF8C05D038D54B1ACB9A2A83C480A0C3B548CA063DA57BC9DE93340360AF32815FC8D0B2F053B3CB7918ABBB291A5180"
+  fun asRlp(): Bytes {
+    return RLP.encodeList { writer ->
+      writer.writeValue(authTag)
+      writer.writeValue(idNonce)
+      writer.writeValue(AUTH_SCHEME_BYTES)
+      writer.writeValue(ephemeralPublicKey)
+      writer.writeValue(authResponse)
+    }
+  }
 
-    val authTag = Bytes.fromHexString("0x05D038D54B1ACB9A2A83C480")
-    val nonce = Bytes.fromHexString("0xC3B548CA063DA57BC9DE93340360AF32815FC8D0B2F053B3CB7918ABBB291A51")
-    val message = WhoAreYouMessage(authTag, nonce)
+  companion object {
+    private const val AUTH_SCHEME: String = "gcm"
 
-    val encodingResult = message.encode()
-    assert(encodingResult.toHexString() == expectedEncodingResult)
-
-    val decodingResult = WhoAreYouMessage.create(encodingResult)
-
-    assert(decodingResult.authTag == authTag)
-    assert(decodingResult.idNonce == nonce)
-    assert(decodingResult.enrSeq == 0L)
+    private val AUTH_SCHEME_BYTES: Bytes = Bytes.wrap(AUTH_SCHEME.toByteArray())
   }
 }

@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
@@ -6,19 +22,18 @@ import org.junit.jupiter.api.Test
 class RandomMessageTest {
 
   @Test
-  fun encodeAndDecodeCorrectlyTransformsData() {
-    val srcId = Bytes.fromHexString("0x98EB6D611291FA21F6169BFF382B9369C33D997FE4DC93410987E27796360640")
-    val destId = Bytes.fromHexString("0xA5CFE10E0EFC543CBE023560B2900E2243D798FAFD0EA46267DDD20D283CE13C")
-    val authTag = UdpMessage.authTag()
+  fun encodeCreatesValidBytesSequence() {
+    val expectedEncodingResult =
+      "0xB53CCF732982B8E950836D1E02898C8B38CFDBFDF86BC65C8826506B454E14618EA73612A0F5582C130FF666"
 
-    val message = RandomMessage(srcId, destId, authTag)
+    val data = Bytes.fromHexString(expectedEncodingResult)
+    val message = RandomMessage(data)
 
-    val encodedResult = message.encode()
+    val encodingResult = message.encode()
+    assert(encodingResult.toHexString() == expectedEncodingResult)
 
-    val content = Bytes.wrapByteBuffer(encodedResult).slice(UdpMessage.TAG_LENGTH)
-    val decodedMessage = RandomMessage.create(content, srcId, destId)
+    val decodingResult = RandomMessage.create(encodingResult)
 
-    assert(decodedMessage.authTag == authTag)
+    assert(decodingResult.data == data)
   }
-
 }

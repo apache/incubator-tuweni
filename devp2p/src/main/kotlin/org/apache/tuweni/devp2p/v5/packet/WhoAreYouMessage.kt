@@ -1,36 +1,46 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.crypto.SECP256K1
-import org.apache.tuweni.devp2p.v5.MessageDecoder
 import org.apache.tuweni.rlp.RLP
-import java.nio.ByteBuffer
 
 class WhoAreYouMessage(
-  src: Bytes,
-  dest: Bytes,
   val authTag: Bytes = authTag(),
-  val idNonce: Bytes = idNonce()
-): UdpMessage(src, dest) {
+  val idNonce: Bytes = idNonce(),
+  val enrSeq: Long = 0
+) : UdpMessage() {
 
-  override fun encode(encryptionKey: Bytes, encryptionNonce: Bytes): ByteBuffer {
-    val magic = magic(dest)
-    val rlpBody = RLP.encodeList { w ->
-      w.writeByteArray(authTag.toArray())
-      w.writeByteArray(idNonce.toArray())
+  override fun encode(): Bytes {
+    return RLP.encodeList { w ->
+      w.writeValue(authTag)
+      w.writeValue(idNonce)
+      w.writeLong(enrSeq)
     }
-    val messageBytes = Bytes.wrap(magic, rlpBody) // TODO: ENR seq number
-    return ByteBuffer.wrap(messageBytes.toArray())
   }
 
-  companion object: MessageDecoder<WhoAreYouMessage> {
-    override fun create(content: Bytes, src: Bytes, nodeId: Bytes): WhoAreYouMessage {
+  companion object {
+    fun create(content: Bytes): WhoAreYouMessage {
       return RLP.decodeList(content) { r ->
-        val authTag = Bytes.wrap(r.readByteArray())
-        val idNonce = Bytes.wrap(r.readByteArray())
-        return@decodeList WhoAreYouMessage(src, nodeId, authTag, idNonce)
+        val authTag = r.readValue()
+        val idNonce = r.readValue()
+        val enrSeq = r.readLong()
+        return@decodeList WhoAreYouMessage(authTag, idNonce, enrSeq)
       }
     }
   }
-
 }
