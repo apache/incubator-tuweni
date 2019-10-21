@@ -17,6 +17,7 @@
 package org.apache.tuweni.devp2p.v5.internal
 
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.v5.AuthenticationProvider
 import org.apache.tuweni.devp2p.v5.PacketCodec
@@ -33,9 +34,9 @@ import org.apache.tuweni.rlp.RLPReader
 import kotlin.IllegalArgumentException
 
 class DefaultPacketCodec(
-  private val nodeId: Bytes,
   private val keyPair: SECP256K1.KeyPair,
   private val enr: Bytes,
+  private val nodeId: Bytes = Hash.sha2_256(enr),
   private val authenticationProvider: AuthenticationProvider = DefaultAuthenticationProvider(keyPair, enr)
 ) : PacketCodec {
 

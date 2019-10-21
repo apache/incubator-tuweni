@@ -91,5 +91,4 @@ class DefaultAuthenticationProviderTest {
 
     assert(result != null)
   }
-
 }

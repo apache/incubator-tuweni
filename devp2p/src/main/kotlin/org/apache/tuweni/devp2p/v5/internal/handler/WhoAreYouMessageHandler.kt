@@ -17,6 +17,7 @@
 package org.apache.tuweni.devp2p.v5.internal.handler
 
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.devp2p.v5.MessageHandler
 import org.apache.tuweni.devp2p.v5.UdpConnector
 import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
@@ -37,8 +38,9 @@ class WhoAreYouMessageHandler(
     // Retrieve enr
     val destRlp = connector.getPendingNodeIdByAddress(address)
     val handshakeParams = HandshakeInitParameters(message.idNonce, message.authTag, destRlp)
+    val destNodeId = Hash.sha2_256(destRlp)
 
     val findNodeMessage = FindNodeMessage()
-    connector.send(address, findNodeMessage, srcNodeId, handshakeParams)
+    connector.send(address, findNodeMessage, destNodeId, handshakeParams)
   }
 }

@@ -42,7 +42,7 @@ class DefaultPacketCodecTest {
   private val nodeId: Bytes = Hash.sha2_256(enr)
   private val authenticationProvider: AuthenticationProvider = DefaultAuthenticationProvider(keyPair, enr)
 
-  private val codec: PacketCodec = DefaultPacketCodec(nodeId, keyPair, enr, authenticationProvider)
+  private val codec: PacketCodec = DefaultPacketCodec(keyPair, enr, nodeId, authenticationProvider)
 
   private val destNodeId: Bytes = Bytes.random(32)
 
@@ -144,5 +144,4 @@ class DefaultPacketCodecTest {
     assert(result!!.requestId == message.requestId)
     assert(result.distance == message.distance)
   }
-
 }

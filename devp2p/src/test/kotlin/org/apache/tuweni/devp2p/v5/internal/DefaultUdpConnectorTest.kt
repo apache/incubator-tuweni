@@ -44,11 +44,11 @@ class DefaultUdpConnectorTest {
   private val data: Bytes = UdpMessage.randomData()
   private val message: RandomMessage = RandomMessage(data)
 
-  private var connector: UdpConnector = DefaultUdpConnector(nodeId, address, keyPair, selfEnr)
+  private var connector: UdpConnector = DefaultUdpConnector(address, keyPair, selfEnr, nodeId)
 
   @BeforeEach
   fun setUp() {
-    connector = DefaultUdpConnector(nodeId, address, keyPair, selfEnr)
+    connector = DefaultUdpConnector(address, keyPair, selfEnr, nodeId)
   }
 
   @AfterEach

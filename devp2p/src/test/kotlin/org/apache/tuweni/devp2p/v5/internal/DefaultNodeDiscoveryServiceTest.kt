@@ -18,7 +18,6 @@ package org.apache.tuweni.devp2p.v5.internal
 
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.NodeDiscoveryService
@@ -56,11 +55,10 @@ class DefaultNodeDiscoveryServiceTest {
     null,
     bindAddress.port
   )
-  private val nodeId: Bytes = Hash.sha2_256(selfENR)
-  private val connector: UdpConnector = DefaultUdpConnector(nodeId, bindAddress, keyPair, selfENR)
+  private val connector: UdpConnector = DefaultUdpConnector(bindAddress, keyPair, selfENR)
 
   private val nodeDiscoveryService: NodeDiscoveryService =
-    DefaultNodeDiscoveryService(keyPair, localPort, bindAddress, bootstrapENRList, enrSeq, selfENR, nodeId, connector)
+    DefaultNodeDiscoveryService(keyPair, localPort, bindAddress, bootstrapENRList, enrSeq, selfENR, connector)
 
   @Test
   fun startInitializesConnectorAndBootstraps() {
@@ -96,5 +94,4 @@ class DefaultNodeDiscoveryServiceTest {
 
     assert(!connector.available())
   }
-
 }
