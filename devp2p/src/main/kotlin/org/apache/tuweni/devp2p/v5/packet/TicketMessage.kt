@@ -19,28 +19,31 @@ package org.apache.tuweni.devp2p.v5.packet
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.rlp.RLP
 
-class FindNodeMessage(
+class TicketMessage(
   val requestId: Bytes = UdpMessage.requestId(),
-  val distance: Long = 0
+  val ticket: Bytes,
+  val waitTime: Long
 ) : UdpMessage() {
 
-  private val encodedMessageType: Bytes = Bytes.fromHexString("0x03")
+  private val encodedMessageType: Bytes = Bytes.fromHexString("0x06")
+
+  override fun getMessageType(): Bytes = encodedMessageType
 
   override fun encode(): Bytes {
     return RLP.encodeList { writer ->
       writer.writeValue(requestId)
-      writer.writeLong(distance)
+      writer.writeValue(ticket)
+      writer.writeLong(waitTime)
     }
   }
 
-  override fun getMessageType(): Bytes = encodedMessageType
-
   companion object {
-    fun create(content: Bytes): FindNodeMessage {
+    fun create(content: Bytes): TicketMessage {
       return RLP.decodeList(content) { reader ->
         val requestId = reader.readValue()
-        val distance = reader.readLong()
-        return@decodeList FindNodeMessage(requestId, distance)
+        val ticket = reader.readValue()
+        val waitTime = reader.readLong()
+        return@decodeList TicketMessage(requestId, ticket, waitTime)
       }
     }
   }

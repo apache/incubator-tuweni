@@ -97,5 +97,6 @@ class DefaultUdpConnectorTest {
 
       assert(message.data == data)
     }
+    socketChannel.close()
   }
 }

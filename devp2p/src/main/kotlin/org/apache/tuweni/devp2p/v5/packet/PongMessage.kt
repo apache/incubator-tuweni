@@ -18,29 +18,38 @@ package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.rlp.RLP
+import java.net.InetAddress
 
-class FindNodeMessage(
+class PongMessage(
   val requestId: Bytes = UdpMessage.requestId(),
-  val distance: Long = 0
+  val enrSeq: Long = 0,
+  val recipientIp: InetAddress,
+  val recipientPort: Int
 ) : UdpMessage() {
 
-  private val encodedMessageType: Bytes = Bytes.fromHexString("0x03")
+  private val encodedMessageType: Bytes = Bytes.fromHexString("0x02")
+
+  override fun getMessageType(): Bytes = encodedMessageType
 
   override fun encode(): Bytes {
     return RLP.encodeList { writer ->
       writer.writeValue(requestId)
-      writer.writeLong(distance)
+      writer.writeLong(enrSeq)
+
+      val bytesIp = Bytes.wrap(recipientIp.address)
+      writer.writeValue(bytesIp)
+      writer.writeInt(recipientPort)
     }
   }
 
-  override fun getMessageType(): Bytes = encodedMessageType
-
   companion object {
-    fun create(content: Bytes): FindNodeMessage {
+    fun create(content: Bytes): PongMessage {
       return RLP.decodeList(content) { reader ->
         val requestId = reader.readValue()
-        val distance = reader.readLong()
-        return@decodeList FindNodeMessage(requestId, distance)
+        val enrSeq = reader.readLong()
+        val address = InetAddress.getByAddress(reader.readValue().toArray())
+        val recipientPort = reader.readInt()
+        return@decodeList PongMessage(requestId, enrSeq, address, recipientPort)
       }
     }
   }

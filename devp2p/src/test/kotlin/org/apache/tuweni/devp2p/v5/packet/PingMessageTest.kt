@@ -17,31 +17,27 @@
 package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.rlp.RLP
+import org.junit.jupiter.api.Test
 
-class FindNodeMessage(
-  val requestId: Bytes = UdpMessage.requestId(),
-  val distance: Long = 0
-) : UdpMessage() {
+class PingMessageTest {
 
-  private val encodedMessageType: Bytes = Bytes.fromHexString("0x03")
+  @Test
+  fun encodeCreatesValidBytesSequence() {
+    val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
+    val message = PingMessage(requestId)
 
-  override fun encode(): Bytes {
-    return RLP.encodeList { writer ->
-      writer.writeValue(requestId)
-      writer.writeLong(distance)
-    }
+    val encodingResult = message.encode()
+
+    val decodingResult = PingMessage.create(encodingResult)
+
+    assert(decodingResult.requestId == requestId)
+    assert(decodingResult.enrSeq == message.enrSeq)
   }
 
-  override fun getMessageType(): Bytes = encodedMessageType
+  @Test
+  fun getMessageTypeHasValidIndex() {
+    val message = PingMessage()
 
-  companion object {
-    fun create(content: Bytes): FindNodeMessage {
-      return RLP.decodeList(content) { reader ->
-        val requestId = reader.readValue()
-        val distance = reader.readLong()
-        return@decodeList FindNodeMessage(requestId, distance)
-      }
-    }
+    assert(1 == message.getMessageType().toInt())
   }
 }
