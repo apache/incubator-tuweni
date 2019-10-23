@@ -31,6 +31,7 @@ object AES128GCM {
   private const val CIPHER_NAME: String = "AES/GCM/NoPadding"
   private const val KEY_SIZE: Int = 128
 
+
   /**
    * AES128GCM encryption function
    *
@@ -40,32 +41,20 @@ object AES128GCM {
    * @param data encryption metadata
    */
   fun encrypt(key: Bytes, nonce: Bytes, message: Bytes, data: Bytes): Bytes {
-    val result = encrypt(key.toArray(), nonce.toArray(), message.toArray(), data.toArray())
-    return Bytes.wrap(result)
-  }
-
-  /**
-   * AES128GCM encryption function
-   *
-   * @param key 16-byte encryption key
-   * @param nonce initialization vector
-   * @param message content for encryption
-   * @param data encryption metadata
-   */
-  fun encrypt(key: ByteArray, nonce: ByteArray, message: ByteArray, data: ByteArray): ByteArray {
-    val keySpec = SecretKeySpec(key, ALGO_NAME)
+    val nonceBytes = nonce.toArray()
+    val keySpec = SecretKeySpec(key.toArray(), ALGO_NAME)
     val cipher = Cipher.getInstance(CIPHER_NAME)
-    val parameterSpec = GCMParameterSpec(KEY_SIZE, nonce)
+    val parameterSpec = GCMParameterSpec(KEY_SIZE, nonceBytes)
 
     cipher.init(Cipher.ENCRYPT_MODE, keySpec, parameterSpec)
 
-    cipher.updateAAD(data)
+    cipher.updateAAD(data.toArray())
 
-    val encryptedText = Bytes.wrap(cipher.doFinal(message))
+    val encryptedText = Bytes.wrap(cipher.doFinal(message.toArray()))
 
-    val wrappedNonce = Bytes.wrap(nonce)
-    val nonceSize = Bytes.ofUnsignedInt(nonce.size.toLong())
-    return Bytes.wrap(nonceSize, wrappedNonce, encryptedText).toArray()
+    val wrappedNonce = Bytes.wrap(nonceBytes)
+    val nonceSize = Bytes.ofUnsignedInt(nonceBytes.size.toLong())
+    return Bytes.wrap(nonceSize, wrappedNonce, encryptedText)
   }
 
   /**
@@ -76,33 +65,21 @@ object AES128GCM {
    * @param data encryption metadata
    */
   fun decrypt(encryptedContent: Bytes, key: Bytes, data: Bytes): Bytes {
-    val result = decrypt(encryptedContent.toArray(), key.toArray(), data.toArray())
-    return Bytes.wrap(result)
-  }
-
-  /**
-   * AES128GCM decryption function
-   *
-   * @param encryptedContent content for decryption
-   * @param key 16-byte encryption key
-   * @param data encryption metadata
-   */
-  fun decrypt(encryptedContent: ByteArray, key: ByteArray, data: ByteArray): ByteArray {
-    val buffer = ByteBuffer.wrap(encryptedContent)
+    val buffer = ByteBuffer.wrap(encryptedContent.toArray())
     val nonceLength = buffer.int
     val nonce = ByteArray(nonceLength)
     buffer.get(nonce)
     val encryptedText = ByteArray(buffer.remaining())
     buffer.get(encryptedText)
 
-    val keySpec = SecretKeySpec(key, ALGO_NAME)
+    val keySpec = SecretKeySpec(key.toArray(), ALGO_NAME)
 
     val parameterSpec = GCMParameterSpec(KEY_SIZE, nonce)
     val cipher = Cipher.getInstance(CIPHER_NAME)
     cipher.init(Cipher.DECRYPT_MODE, keySpec, parameterSpec)
 
-    cipher.updateAAD(data)
+    cipher.updateAAD(data.toArray())
 
-    return cipher.doFinal(encryptedText)
+    return Bytes.wrap(cipher.doFinal(encryptedText))
   }
 }
