@@ -61,11 +61,11 @@ object AES128GCM {
 
     cipher.updateAAD(data)
 
-    val encriptedText = Bytes.wrap(cipher.doFinal(message))
+    val encryptedText = Bytes.wrap(cipher.doFinal(message))
 
     val wrappedNonce = Bytes.wrap(nonce)
     val nonceSize = Bytes.ofUnsignedInt(nonce.size.toLong())
-    return Bytes.wrap(nonceSize, wrappedNonce, encriptedText).toArray()
+    return Bytes.wrap(nonceSize, wrappedNonce, encryptedText).toArray()
   }
 
   /**
@@ -92,8 +92,8 @@ object AES128GCM {
     val nonceLength = buffer.int
     val nonce = ByteArray(nonceLength)
     buffer.get(nonce)
-    val encriptedText = ByteArray(buffer.remaining())
-    buffer.get(encriptedText)
+    val encryptedText = ByteArray(buffer.remaining())
+    buffer.get(encryptedText)
 
     val keySpec = SecretKeySpec(key, ALGO_NAME)
 
@@ -103,6 +103,6 @@ object AES128GCM {
 
     cipher.updateAAD(data)
 
-    return cipher.doFinal(encriptedText)
+    return cipher.doFinal(encryptedText)
   }
 }

@@ -16,6 +16,21 @@
  */
 package org.apache.tuweni.devp2p.v5
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.crypto.SECP256K1
+import org.apache.tuweni.devp2p.EthereumNodeRecord
+import org.apache.tuweni.devp2p.v5.internal.DefaultUdpConnector
+import org.apache.tuweni.devp2p.v5.packet.RandomMessage
+import org.apache.tuweni.io.Base64URLSafe
+import java.net.InetSocketAddress
+import java.time.Instant
+import kotlin.coroutines.CoroutineContext
+
 /**
  * Service executes network discovery, according to discv5 specification
  * (https://github.com/ethereum/devp2p/blob/master/discv5/discv5.md)
@@ -31,4 +46,54 @@ interface NodeDiscoveryService {
    * Executes service shut down
    */
   fun terminate(await: Boolean = false)
+
+}
+
+internal class DefaultNodeDiscoveryService(
+  private val keyPair: SECP256K1.KeyPair,
+  private val localPort: Int,
+  private val bindAddress: InetSocketAddress = InetSocketAddress(localPort),
+  private val bootstrapENRList: List<String> = emptyList(),
+  private val enrSeq: Long = Instant.now().toEpochMilli(),
+  private val selfENR: Bytes = EthereumNodeRecord.toRLP(
+    keyPair,
+    enrSeq,
+    emptyMap(),
+    bindAddress.address,
+    null,
+    bindAddress.port
+  ),
+  private val connector: UdpConnector = DefaultUdpConnector(bindAddress, keyPair, selfENR),
+  override val coroutineContext: CoroutineContext = Dispatchers.Default
+) : NodeDiscoveryService, CoroutineScope {
+
+  override fun start() {
+    connector.start()
+    launch { bootstrap() }
+  }
+
+  override fun terminate(await: Boolean) {
+    runBlocking {
+      val job = async { connector.terminate() }
+      if (await) {
+        job.await()
+      }
+    }
+  }
+
+  private fun bootstrap() {
+    bootstrapENRList.forEach {
+      if (it.startsWith("enr:")) {
+        val encodedEnr = it.substringAfter("enr:")
+        val rlpENR = Base64URLSafe.decode(encodedEnr)
+        val enr = EthereumNodeRecord.fromRLP(rlpENR)
+
+        val randomMessage = RandomMessage()
+        val address = InetSocketAddress(enr.ip(), enr.udp())
+
+        connector.addPendingNodeId(address, rlpENR)
+        connector.send(address, randomMessage, rlpENR)
+      }
+    }
+  }
 }

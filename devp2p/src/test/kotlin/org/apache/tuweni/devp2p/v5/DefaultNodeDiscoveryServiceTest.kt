@@ -14,14 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.internal
+package org.apache.tuweni.devp2p.v5
 
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
-import org.apache.tuweni.devp2p.v5.NodeDiscoveryService
-import org.apache.tuweni.devp2p.v5.UdpConnector
+import org.apache.tuweni.devp2p.v5.internal.DefaultUdpConnector
 import org.apache.tuweni.devp2p.v5.packet.RandomMessage
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.io.Base64URLSafe
@@ -41,7 +40,6 @@ class DefaultNodeDiscoveryServiceTest {
   private val recipientEnr: Bytes =
     EthereumNodeRecord.toRLP(recipientKeyPair, ip = InetAddress.getLocalHost(), udp = 9091)
   private val encodedEnr: String = "enr:${Base64URLSafe.encode(recipientEnr)}"
-
   private val keyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
   private val localPort: Int = 9090
   private val bindAddress: InetSocketAddress = InetSocketAddress(localPort)
@@ -55,10 +53,19 @@ class DefaultNodeDiscoveryServiceTest {
     null,
     bindAddress.port
   )
-  private val connector: UdpConnector = DefaultUdpConnector(bindAddress, keyPair, selfENR)
+  private val connector: UdpConnector =
+    DefaultUdpConnector(bindAddress, keyPair, selfENR)
 
   private val nodeDiscoveryService: NodeDiscoveryService =
-    DefaultNodeDiscoveryService(keyPair, localPort, bindAddress, bootstrapENRList, enrSeq, selfENR, connector)
+    DefaultNodeDiscoveryService(
+      keyPair,
+      localPort,
+      bindAddress,
+      bootstrapENRList,
+      enrSeq,
+      selfENR,
+      connector
+    )
 
   @Test
   fun startInitializesConnectorAndBootstraps() {
