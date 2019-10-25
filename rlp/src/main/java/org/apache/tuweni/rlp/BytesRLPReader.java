@@ -196,6 +196,11 @@ final class BytesRLPReader implements RLPReader {
     return (content.size() - index) == 0;
   }
 
+  @Override
+  public int position() {
+    return index;
+  }
+
   private Bytes readList(boolean lenient) {
     int remaining = content.size() - index;
     if (remaining == 0) {

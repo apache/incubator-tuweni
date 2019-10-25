@@ -399,4 +399,11 @@ public interface RLPReader {
    * @return {@code true} if all values have been read.
    */
   boolean isComplete();
+
+  /**
+   * Returns reader's index
+   *
+   * @return current reader position
+   */
+  int position();
 }
