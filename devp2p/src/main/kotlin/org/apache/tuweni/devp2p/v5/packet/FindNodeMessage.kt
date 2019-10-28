@@ -21,7 +21,7 @@ import org.apache.tuweni.rlp.RLP
 
 class FindNodeMessage(
   val requestId: Bytes = UdpMessage.requestId(),
-  val distance: Long = 0
+  val distance: Int = 0
 ) : UdpMessage() {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x03")
@@ -29,7 +29,7 @@ class FindNodeMessage(
   override fun encode(): Bytes {
     return RLP.encodeList { writer ->
       writer.writeValue(requestId)
-      writer.writeLong(distance)
+      writer.writeInt(distance)
     }
   }
 
@@ -39,7 +39,7 @@ class FindNodeMessage(
     fun create(content: Bytes): FindNodeMessage {
       return RLP.decodeList(content) { reader ->
         val requestId = reader.readValue()
-        val distance = reader.readLong()
+        val distance = reader.readInt()
         return@decodeList FindNodeMessage(requestId, distance)
       }
     }

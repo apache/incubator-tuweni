@@ -21,6 +21,7 @@ import com.google.common.cache.CacheBuilder
 import org.apache.tuweni.crypto.Hash.keccak256
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.kademlia.KademliaRoutingTable
+import org.apache.tuweni.kademlia.xorDist
 
 /**
  * A routing table for ÐΞVp2p peers.

@@ -26,6 +26,9 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.v5.MessageHandler
 import org.apache.tuweni.devp2p.v5.PacketCodec
 import org.apache.tuweni.devp2p.v5.UdpConnector
+import org.apache.tuweni.devp2p.v5.dht.RoutingTable
+import org.apache.tuweni.devp2p.v5.internal.handler.FindNodeMessageHandler
+import org.apache.tuweni.devp2p.v5.internal.handler.NodesMessageHandler
 import org.apache.tuweni.devp2p.v5.internal.handler.RandomMessageHandler
 import org.apache.tuweni.devp2p.v5.internal.handler.WhoAreYouMessageHandler
 import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
@@ -33,6 +36,7 @@ import org.apache.tuweni.devp2p.v5.packet.RandomMessage
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
+import org.apache.tuweni.devp2p.v5.packet.NodesMessage
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
@@ -54,8 +58,12 @@ class DefaultUdpConnector(
 
   private val randomMessageHandler: MessageHandler<RandomMessage> = RandomMessageHandler()
   private val whoAreYouMessageHandler: MessageHandler<WhoAreYouMessage> = WhoAreYouMessageHandler(nodeId)
+  private val findNodeMessageHandler: MessageHandler<FindNodeMessage> = FindNodeMessageHandler()
+  private val nodesMessageHandler: MessageHandler<NodesMessage> = NodesMessageHandler()
 
   private val authenticatingPeers: MutableMap<InetSocketAddress, Bytes> = mutableMapOf()
+
+  private val nodesTable: RoutingTable = RoutingTable(selfEnr)
 
   private lateinit var receiveJob: Job
 
@@ -114,6 +122,8 @@ class DefaultUdpConnector(
     return result
   }
 
+  override fun getNodesTable(): RoutingTable = nodesTable
+
   private fun processDatagram(datagram: ByteBuffer, address: InetSocketAddress) {
     val messageBytes = Bytes.wrapByteBuffer(datagram)
     val decodeResult = packetCodec.decode(messageBytes)
@@ -121,7 +131,8 @@ class DefaultUdpConnector(
     when (message) {
       is RandomMessage -> randomMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
       is WhoAreYouMessage -> whoAreYouMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
-      is FindNodeMessage -> { } //TODO: response with NODES message
+      is FindNodeMessage -> findNodeMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
+      is NodesMessage -> nodesMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
       else -> throw IllegalArgumentException("Unexpected message has been received - ${message::class.java.simpleName}")
     }
   }

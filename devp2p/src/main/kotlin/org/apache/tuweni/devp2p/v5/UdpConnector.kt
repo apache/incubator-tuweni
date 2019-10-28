@@ -18,6 +18,7 @@ package org.apache.tuweni.devp2p.v5
 
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.SECP256K1
+import org.apache.tuweni.devp2p.v5.dht.RoutingTable
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
 import java.net.InetSocketAddress
@@ -97,4 +98,6 @@ interface UdpConnector {
    * @return node's ENR
    */
   fun getEnr(): Bytes
+
+  fun getNodesTable(): RoutingTable
 }

@@ -94,7 +94,8 @@ class KademliaRoutingTable<T>(
   private val selfId: ByteArray,
   k: Int,
   maxReplacements: Int = k,
-  private val nodeId: (T) -> ByteArray
+  private val nodeId: (T) -> ByteArray,
+  private val distanceToSelf: (T) -> Int = { nodeId(it) xorDist selfId }
 ) : Set<T> {
 
   companion object {
@@ -108,8 +109,13 @@ class KademliaRoutingTable<T>(
      * @return A new routing table
      */
     @JvmStatic
-    fun <T> create(selfId: ByteArray, k: Int, nodeId: Function<T, ByteArray>): KademliaRoutingTable<T> =
-      KademliaRoutingTable(selfId, k, nodeId = nodeId::apply)
+    fun <T> create(
+      selfId: ByteArray,
+      k: Int,
+      nodeId: Function<T, ByteArray>,
+      distanceToSelf: Function<T, Int>
+    ): KademliaRoutingTable<T> =
+      KademliaRoutingTable(selfId, k, nodeId = nodeId::apply, distanceToSelf = distanceToSelf::apply)
 
     /**
      * Create a new routing table.
@@ -126,8 +132,9 @@ class KademliaRoutingTable<T>(
       selfId: ByteArray,
       k: Int,
       maxReplacements: Int,
-      nodeId: Function<T, ByteArray>
-    ): KademliaRoutingTable<T> = KademliaRoutingTable(selfId, k, maxReplacements, nodeId::apply)
+      nodeId: Function<T, ByteArray>,
+      distanceToSelf: Function<T, Int>
+    ): KademliaRoutingTable<T> = KademliaRoutingTable(selfId, k, maxReplacements, nodeId::apply, distanceToSelf::apply)
   }
 
   init {
@@ -209,6 +216,10 @@ class KademliaRoutingTable<T>(
     buckets.forEach { bucket -> bucket.clear() }
   }
 
+  fun peersOfDistance(value: Int): List<T> {
+    return buckets[value].toList()
+  }
+
   private fun idForNode(node: T): ByteArray {
     val id = nodeId(node)
     require(id.size == selfId.size) { "id obtained for node is not the correct length" }
@@ -218,7 +229,7 @@ class KademliaRoutingTable<T>(
 
   private fun bucketFor(node: T) = buckets[logDistToSelf(node)]
 
-  private fun logDistToSelf(node: T): Int = distanceCache.get(node) { idForNode(node) xorDist selfId }
+  private fun logDistToSelf(node: T): Int = distanceCache.get(node) { distanceToSelf.invoke(node) }
 
   private class Bucket<E> private constructor(
     // ordered with most recent first
