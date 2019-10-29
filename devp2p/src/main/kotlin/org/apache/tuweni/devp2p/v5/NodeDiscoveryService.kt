@@ -46,7 +46,6 @@ interface NodeDiscoveryService {
    * Executes service shut down
    */
   fun terminate(await: Boolean = false)
-
 }
 
 internal class DefaultNodeDiscoveryService(

@@ -31,7 +31,6 @@ object AES128GCM {
   private const val CIPHER_NAME: String = "AES/GCM/NoPadding"
   private const val KEY_SIZE: Int = 128
 
-
   /**
    * AES128GCM encryption function
    *

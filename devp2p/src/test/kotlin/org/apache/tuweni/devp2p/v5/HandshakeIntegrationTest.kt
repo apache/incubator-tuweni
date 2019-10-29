@@ -88,7 +88,7 @@ class HandshakeIntegrationTest {
 
       val message = decodingResult.message as FindNodeMessage
 
-      assert(message.distance == 0L)
+      assert(message.distance == 0)
       assert(message.requestId.size() == UdpMessage.REQUEST_ID_LENGTH)
     }
   }
