@@ -17,32 +17,21 @@
 package org.apache.tuweni.devp2p.v5.internal.handler
 
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.MessageHandler
 import org.apache.tuweni.devp2p.v5.UdpConnector
 import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
-import org.apache.tuweni.devp2p.v5.packet.NodesMessage
+import org.apache.tuweni.devp2p.v5.packet.PongMessage
 import java.net.InetSocketAddress
 
-class FindNodeMessageHandler : MessageHandler<FindNodeMessage> {
+class PongMessageHandler : MessageHandler<PongMessage> {
 
-  override fun handle(message: FindNodeMessage, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector) {
-    if (0 == message.distance) {
-      val response = NodesMessage(message.requestId, 1, listOf(connector.getEnrBytes()))
-      connector.send(address, response, srcNodeId)
-      return
+  override fun handle(message: PongMessage, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector) {
+    val enrBytes = connector.getAwaitingPongRecord(srcNodeId) ?: return
+    val enr = EthereumNodeRecord.fromRLP(enrBytes)
+    if (enr.seq != message.enrSeq) {
+      val request = FindNodeMessage(message.requestId)
+      connector.send(address, request, srcNodeId)
     }
-
-    val nodes = connector.getNodesTable().nodesOfDistance(message.distance)
-
-    var caret = 0
-    while (caret < nodes.size) {
-      val response = NodesMessage(message.requestId, nodes.size, nodes.subList(caret, caret + MAX_NODES_IN_RESPONSE))
-      connector.send(address, response, srcNodeId)
-      caret += MAX_NODES_IN_RESPONSE
-    }
-  }
-
-  companion object {
-      private const val MAX_NODES_IN_RESPONSE: Int = 16
   }
 }

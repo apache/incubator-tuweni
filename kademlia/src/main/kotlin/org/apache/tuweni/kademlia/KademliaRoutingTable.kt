@@ -220,6 +220,10 @@ class KademliaRoutingTable<T>(
     return buckets[value].toList()
   }
 
+  fun getRandom(): T {
+    return buckets.random().random()
+  }
+
   private fun idForNode(node: T): ByteArray {
     val id = nodeId(node)
     require(id.size == selfId.size) { "id obtained for node is not the correct length" }

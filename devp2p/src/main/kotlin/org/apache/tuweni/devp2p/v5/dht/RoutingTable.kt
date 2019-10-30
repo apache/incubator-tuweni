@@ -39,6 +39,10 @@ class RoutingTable(
 
   fun evict(enr: Bytes): Boolean = table.evict(enr)
 
+  fun random(): Bytes = table.getRandom()
+
+  fun isEmpty(): Boolean = table.isEmpty()
+
   fun nodesOfDistance(distance: Int): List<Bytes> = table.peersOfDistance(distance)
 
   private fun key(enr: Bytes): ByteArray = Hash.sha2_256(enr).toArray()
