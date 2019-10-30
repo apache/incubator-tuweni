@@ -24,20 +24,20 @@ class RegConfirmationMessageTest {
   @Test
   fun encodeCreatesValidBytesSequence() {
     val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
-    val message = RegConfirmationMessage(requestId, false)
+    val message = RegConfirmationMessage(requestId, Bytes.random(32))
 
     val encodingResult = message.encode()
 
     val decodingResult = RegConfirmationMessage.create(encodingResult)
 
     assert(decodingResult.requestId == requestId)
-    assert(decodingResult.registered == message.registered)
+    assert(decodingResult.topic == message.topic)
   }
 
   @Test
   fun getMessageTypeHasValidIndex() {
-    val message = RegConfirmationMessage()
+    val message = RegConfirmationMessage(topic = Bytes.random(32))
 
-    assert(8 == message.getMessageType().toInt())
+    assert(7 == message.getMessageType().toInt())
   }
 }

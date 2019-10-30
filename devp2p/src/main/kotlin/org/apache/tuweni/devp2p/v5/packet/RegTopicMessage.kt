@@ -25,7 +25,7 @@ class RegTopicMessage(
   val nodeRecord: Bytes
 ) : UdpMessage() {
 
-  private val encodedMessageType: Bytes = Bytes.fromHexString("0x07")
+  private val encodedMessageType: Bytes = Bytes.fromHexString("0x05")
 
   override fun getMessageType(): Bytes = encodedMessageType
 

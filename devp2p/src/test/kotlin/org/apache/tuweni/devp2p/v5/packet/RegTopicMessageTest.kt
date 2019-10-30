@@ -39,6 +39,6 @@ class RegTopicMessageTest {
   fun getMessageTypeHasValidIndex() {
     val message = RegTopicMessage(ticket = Bytes.random(32), nodeRecord = Bytes.random(32))
 
-    assert(7 == message.getMessageType().toInt())
+    assert(5 == message.getMessageType().toInt())
   }
 }

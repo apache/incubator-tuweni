@@ -38,6 +38,6 @@ class TopicQueryMessageTest {
   fun getMessageTypeHasValidIndex() {
     val message = TopicQueryMessage(topic = Bytes.random(32))
 
-    assert(9 == message.getMessageType().toInt())
+    assert(8 == message.getMessageType().toInt())
   }
 }
