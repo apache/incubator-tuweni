@@ -221,8 +221,10 @@ class KademliaRoutingTable<T>(
   }
 
   fun getRandom(): T {
-    return buckets.random().random()
+    return buckets.filter { !it.isEmpty() }.random().random()
   }
+
+  fun logDistToSelf(node: T): Int = distanceCache.get(node) { distanceToSelf.invoke(node) }
 
   private fun idForNode(node: T): ByteArray {
     val id = nodeId(node)
@@ -232,8 +234,6 @@ class KademliaRoutingTable<T>(
   }
 
   private fun bucketFor(node: T) = buckets[logDistToSelf(node)]
-
-  private fun logDistToSelf(node: T): Int = distanceCache.get(node) { distanceToSelf.invoke(node) }
 
   private class Bucket<E> private constructor(
     // ordered with most recent first

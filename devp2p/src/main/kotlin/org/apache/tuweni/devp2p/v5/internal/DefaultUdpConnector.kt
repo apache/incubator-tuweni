@@ -59,7 +59,10 @@ class DefaultUdpConnector(
   private val nodeId: Bytes = Hash.sha2_256(selfEnr),
   private val receiveChannel: CoroutineDatagramChannel = CoroutineDatagramChannel.open(),
   private val sendChannel: CoroutineDatagramChannel = CoroutineDatagramChannel.open(),
-  private val packetCodec: PacketCodec = DefaultPacketCodec(keyPair, selfEnr),
+  private val nodesTable: RoutingTable = RoutingTable(selfEnr),
+  private val packetCodec: PacketCodec = DefaultPacketCodec(keyPair, nodesTable),
+  private val authenticatingPeers: MutableMap<InetSocketAddress, Bytes> = mutableMapOf(),
+  private val selfNodeRecord: EthereumNodeRecord = EthereumNodeRecord.fromRLP(selfEnr),
   override val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : UdpConnector, CoroutineScope {
 
@@ -71,12 +74,6 @@ class DefaultUdpConnector(
   private val nodesMessageHandler: MessageHandler<NodesMessage> = NodesMessageHandler()
   private val pingMessageHandler: MessageHandler<PingMessage> = PingMessageHandler()
   private val pongMessageHandler: MessageHandler<PongMessage> = PongMessageHandler()
-
-  private val authenticatingPeers: MutableMap<InetSocketAddress, Bytes> = mutableMapOf()
-
-  private val nodesTable: RoutingTable = RoutingTable(selfEnr)
-
-  private val selfNodeRecord: EthereumNodeRecord = EthereumNodeRecord.fromRLP(selfEnr)
 
   private val pings: Cache<String, Bytes> = CacheBuilder.newBuilder()
     .expireAfterWrite(Duration.ofMillis(PING_TIMEOUT))
@@ -120,9 +117,11 @@ class DefaultUdpConnector(
   }
 
   override fun terminate() {
-    receiveJob.cancel()
     receiveChannel.close()
     sendChannel.close()
+
+    receiveJob.cancel()
+    refreshJob.cancel()
   }
 
   override fun available(): Boolean = receiveChannel.isOpen
@@ -188,6 +187,6 @@ class DefaultUdpConnector(
 
   companion object {
     private const val REFRESH_RATE: Long = 1000
-    private const val PING_TIMEOUT: Long = 1000
+    private const val PING_TIMEOUT: Long = 20000
   }
 }

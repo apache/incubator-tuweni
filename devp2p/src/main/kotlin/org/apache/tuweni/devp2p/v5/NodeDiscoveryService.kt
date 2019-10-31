@@ -90,6 +90,7 @@ internal class DefaultNodeDiscoveryService(
         val randomMessage = RandomMessage()
         val address = InetSocketAddress(enr.ip(), enr.udp())
 
+        connector.getNodesTable().add(rlpENR)
         connector.addPendingNodeId(address, rlpENR)
         connector.send(address, randomMessage, rlpENR)
       }

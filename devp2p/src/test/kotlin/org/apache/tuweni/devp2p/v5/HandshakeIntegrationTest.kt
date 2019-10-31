@@ -21,6 +21,7 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
+import org.apache.tuweni.devp2p.v5.dht.RoutingTable
 import org.apache.tuweni.devp2p.v5.internal.DefaultAuthenticationProvider
 import org.apache.tuweni.devp2p.v5.internal.DefaultPacketCodec
 import org.apache.tuweni.devp2p.v5.internal.DefaultUdpConnector
@@ -49,8 +50,9 @@ class HandshakeIntegrationTest {
 
   private val clientKeyPair = SECP256K1.KeyPair.random()
   private val clientEnr = EthereumNodeRecord.toRLP(clientKeyPair, ip = InetAddress.getLocalHost(), udp = CLIENT_PORT)
-  private val authProvider = DefaultAuthenticationProvider(clientKeyPair, clientEnr)
-  private val clientCodec = DefaultPacketCodec(clientKeyPair, clientEnr, authenticationProvider = authProvider)
+  private val routingTable = RoutingTable(clientEnr)
+  private val authProvider = DefaultAuthenticationProvider(clientKeyPair, routingTable)
+  private val clientCodec = DefaultPacketCodec(clientKeyPair, routingTable, authenticationProvider = authProvider)
   private val socket = CoroutineDatagramChannel.open()
 
   private val clientNodeId: Bytes = Hash.sha2_256(clientEnr)

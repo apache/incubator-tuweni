@@ -22,20 +22,21 @@ import org.apache.tuweni.kademlia.KademliaRoutingTable
 import org.apache.tuweni.kademlia.xorDist
 
 class RoutingTable(
-  selfEnr: Bytes
+  private val selfEnr: Bytes
 ) {
 
   private val selfNodeId = key(selfEnr)
   private val nodeIdCalculation: (Bytes) -> ByteArray = { enr -> key(enr) }
+
   private val table = KademliaRoutingTable(
     selfId = selfNodeId,
     k = BUCKET_SIZE,
     nodeId = nodeIdCalculation,
     distanceToSelf = { key(it) xorDist selfNodeId })
 
-  fun add(enr: Bytes): Bytes? = table.add(enr)
+  fun getSelfEnr(): Bytes = selfEnr
 
-  fun nearest(nodeId: Bytes, limit: Int): List<Bytes> = table.nearest(nodeId.toArray(), limit)
+  fun add(enr: Bytes): Bytes? = table.add(enr)
 
   fun evict(enr: Bytes): Boolean = table.evict(enr)
 
@@ -44,6 +45,8 @@ class RoutingTable(
   fun isEmpty(): Boolean = table.isEmpty()
 
   fun nodesOfDistance(distance: Int): List<Bytes> = table.peersOfDistance(distance)
+
+  fun clear() = table.clear()
 
   private fun key(enr: Bytes): ByteArray = Hash.sha2_256(enr).toArray()
 
