@@ -14,31 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.packet
+package org.apache.tuweni.devp2p.v5.topic
 
 import org.apache.tuweni.bytes.Bytes
-import org.junit.jupiter.api.Test
+import org.apache.tuweni.concurrent.ExpiringMap
 
-class RegTopicMessageTest {
+class TicketHolder {
 
-  @Test
-  fun encodeCreatesValidBytesSequence() {
-    val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
-    val message = RegTopicMessage(requestId, Bytes.random(32), Bytes.random(32), Bytes.random(16))
+  private val ticketKeys: ExpiringMap<Bytes, Bytes> = ExpiringMap() // requestId to signing key
+  private val selfTickets: MutableMap<Bytes, Bytes> = hashMapOf() // requestId to ticket
 
-    val encodingResult = message.encode()
 
-    val decodingResult = RegTopicMessage.create(encodingResult)
-
-    assert(decodingResult.requestId == requestId)
-    assert(decodingResult.ticket == message.ticket)
-    assert(decodingResult.nodeRecord == message.nodeRecord)
+  fun putKey(requestId: Bytes, key: Bytes, expiry: Long) {
+    ticketKeys.put(requestId, key, expiry)
   }
 
-  @Test
-  fun getMessageTypeHasValidIndex() {
-    val message = RegTopicMessage(ticket = Bytes.random(32), nodeRecord = Bytes.random(32), topic = Bytes.random(16))
+  fun getKey(requestId: Bytes): Bytes? = ticketKeys[requestId]
 
-    assert(5 == message.getMessageType().toInt())
+  fun removeKey(requestId: Bytes): Bytes? = ticketKeys.remove(requestId)
+
+
+  fun putSelfTicket(requestId: Bytes, ticket: Bytes) {
+    selfTickets[requestId] = ticket
   }
+
+  fun getSelfTicket(requestId: Bytes): Bytes? = selfTickets[requestId]
+
+  fun removeSelfTicket(requestId: Bytes): Bytes? = selfTickets.remove(requestId)
+
 }

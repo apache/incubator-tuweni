@@ -22,6 +22,8 @@ import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.dht.RoutingTable
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
+import org.apache.tuweni.devp2p.v5.topic.TicketHolder
+import org.apache.tuweni.devp2p.v5.topic.TopicTable
 import java.net.InetSocketAddress
 
 /**
@@ -108,6 +110,20 @@ interface UdpConnector {
   fun getEnr(): EthereumNodeRecord
 
   fun getNodesTable(): RoutingTable
+
+  /**
+   * Provides node's topic table
+   *
+   * @return node's topic table
+   */
+  fun getTopicTable(): TopicTable
+
+  /**
+   * Provides node's ticket holder
+   *
+   * @return node's ticket holder
+   */
+  fun getTicketHolder(): TicketHolder
 
   fun getAwaitingPongRecord(nodeId: Bytes): Bytes?
 }

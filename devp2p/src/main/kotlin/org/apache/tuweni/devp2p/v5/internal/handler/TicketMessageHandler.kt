@@ -14,31 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.packet
+package org.apache.tuweni.devp2p.v5.internal.handler
 
 import org.apache.tuweni.bytes.Bytes
-import org.junit.jupiter.api.Test
+import org.apache.tuweni.devp2p.v5.MessageHandler
+import org.apache.tuweni.devp2p.v5.UdpConnector
+import org.apache.tuweni.devp2p.v5.packet.TicketMessage
+import java.net.InetSocketAddress
 
-class RegTopicMessageTest {
+class TicketMessageHandler : MessageHandler<TicketMessage> {
 
-  @Test
-  fun encodeCreatesValidBytesSequence() {
-    val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
-    val message = RegTopicMessage(requestId, Bytes.random(32), Bytes.random(32), Bytes.random(16))
-
-    val encodingResult = message.encode()
-
-    val decodingResult = RegTopicMessage.create(encodingResult)
-
-    assert(decodingResult.requestId == requestId)
-    assert(decodingResult.ticket == message.ticket)
-    assert(decodingResult.nodeRecord == message.nodeRecord)
-  }
-
-  @Test
-  fun getMessageTypeHasValidIndex() {
-    val message = RegTopicMessage(ticket = Bytes.random(32), nodeRecord = Bytes.random(32), topic = Bytes.random(16))
-
-    assert(5 == message.getMessageType().toInt())
+  override fun handle(message: TicketMessage, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector) {
+    val ticketHolder = connector.getTicketHolder()
+    ticketHolder.putSelfTicket(message.requestId, message.ticket)
+    // todo ticket wait time
   }
 }
