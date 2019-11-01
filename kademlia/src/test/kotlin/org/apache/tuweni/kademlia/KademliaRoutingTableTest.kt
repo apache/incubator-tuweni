@@ -47,14 +47,14 @@ internal class KademliaRoutingTableTest {
 
   @Test
   fun shouldBeEmptyOnConstruction() {
-    val table = KademliaRoutingTable<Node>(shortId, 16) { n -> n.nodeId }
+    val table = KademliaRoutingTable<Node>(shortId, 16, nodeId = { n -> n.nodeId })
     assertTrue(table.isEmpty())
     assertEquals(0, table.size)
   }
 
   @Test
   fun shouldAddToEmptyTable() {
-    val table = KademliaRoutingTable<Node>(shortId, 16) { n -> n.nodeId }
+    val table = KademliaRoutingTable<Node>(shortId, 16, nodeId = { n -> n.nodeId })
     val node = Node(0x01)
     assertNull(table.add(node))
     assertTrue(table.contains(node))
@@ -63,7 +63,7 @@ internal class KademliaRoutingTableTest {
 
   @Test
   fun shouldProposeEvictionIfBucketIsFull() {
-    val table = KademliaRoutingTable<Node>(shortId, 2) { n -> n.nodeId }
+    val table = KademliaRoutingTable<Node>(shortId, 2, nodeId = { n -> n.nodeId })
     val node1 = Node(0x04)
     assertNull(table.add(node1))
     val node2 = Node(0x05)
@@ -82,7 +82,7 @@ internal class KademliaRoutingTableTest {
 
   @Test
   fun shouldReplaceEvictedNode() {
-    val table = KademliaRoutingTable<Node>(shortId, 2) { n -> n.nodeId }
+    val table = KademliaRoutingTable<Node>(shortId, 2, nodeId = { n -> n.nodeId })
     val node1 = Node(0x04)
     val node2 = Node(0x05)
     table.add(node1)
@@ -100,7 +100,7 @@ internal class KademliaRoutingTableTest {
 
   @Test
   fun shouldReturnNearestOrderedNodesUpToLimit() {
-    val table = KademliaRoutingTable<Node>(shortId, 16) { n -> n.nodeId }
+    val table = KademliaRoutingTable<Node>(shortId, 16, nodeId = { n -> n.nodeId })
     table.add(Node(0x05))
     table.add(Node(0x04))
     val node3 = Node(0x03)
@@ -119,7 +119,7 @@ internal class KademliaRoutingTableTest {
 
   @Test
   fun shouldReturnAllNodesWhenTableIsSmallerThanLimit() {
-    val table = KademliaRoutingTable<Node>(shortId, 16) { n -> n.nodeId }
+    val table = KademliaRoutingTable<Node>(shortId, 16, nodeId = { n -> n.nodeId })
     table.add(Node(0x05))
     table.add(Node(0x04))
     table.add(Node(0x03))
@@ -134,7 +134,7 @@ internal class KademliaRoutingTableTest {
 
   @Test
   fun shouldClearAllNodes() {
-    val table = KademliaRoutingTable<Node>(shortId, 16) { n -> n.nodeId }
+    val table = KademliaRoutingTable<Node>(shortId, 16, nodeId = { n -> n.nodeId })
     table.add(Node(0x05))
     table.add(Node(0x04))
     table.add(Node(0x03))

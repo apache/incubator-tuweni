@@ -24,6 +24,7 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.ENR_REQUEST_RETRY_DELAY_MS
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.AuthenticationProvider
+import org.apache.tuweni.devp2p.v5.dht.RoutingTable
 import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
 import org.apache.tuweni.devp2p.v5.encrypt.SessionKeyGenerator
 import org.apache.tuweni.devp2p.v5.misc.AuthHeader
@@ -34,14 +35,14 @@ import java.util.concurrent.TimeUnit
 
 class DefaultAuthenticationProvider(
   private val keyPair: SECP256K1.KeyPair,
-  private val enr: Bytes
+  private val routingTable: RoutingTable
 ) : AuthenticationProvider {
 
   private val sessionKeys: Cache<String, SessionKey> = CacheBuilder
     .newBuilder()
     .expireAfterWrite(ENR_REQUEST_RETRY_DELAY_MS, TimeUnit.MILLISECONDS)
     .build()
-  private val nodeId: Bytes = Hash.sha2_256(enr)
+  private val nodeId: Bytes = Hash.sha2_256(routingTable.getSelfEnr())
 
   override fun authenticate(handshakeParams: HandshakeInitParameters): AuthHeader {
     // Generate ephemeral key pair
@@ -61,7 +62,13 @@ class DefaultAuthenticationProvider(
 
     val signature = sign(keyPair, handshakeParams)
 
-    return generateAuthHeader(enr, signature, handshakeParams, sessionKey.authRespKey, ephemeralKeyPair.publicKey())
+    return generateAuthHeader(
+      routingTable.getSelfEnr(),
+      signature,
+      handshakeParams,
+      sessionKey.authRespKey,
+      ephemeralKeyPair.publicKey()
+    )
   }
 
   override fun findSessionKey(nodeId: String): SessionKey? {
@@ -90,6 +97,7 @@ class DefaultAuthenticationProvider(
         throw IllegalArgumentException("Signature is not verified")
       }
       setSessionKey(senderNodeId.toHexString(), sessionKey)
+      routingTable.add(enrRLP)
     }
   }
 

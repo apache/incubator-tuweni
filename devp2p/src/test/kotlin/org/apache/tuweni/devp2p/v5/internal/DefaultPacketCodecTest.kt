@@ -22,6 +22,7 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.AuthenticationProvider
 import org.apache.tuweni.devp2p.v5.PacketCodec
+import org.apache.tuweni.devp2p.v5.dht.RoutingTable
 import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
 import org.apache.tuweni.devp2p.v5.misc.SessionKey
 import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
@@ -40,9 +41,10 @@ class DefaultPacketCodecTest {
   private val keyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
   private val enr: Bytes = EthereumNodeRecord.toRLP(keyPair, ip = InetAddress.getLocalHost())
   private val nodeId: Bytes = Hash.sha2_256(enr)
-  private val authenticationProvider: AuthenticationProvider = DefaultAuthenticationProvider(keyPair, enr)
+  private val routingTable: RoutingTable = RoutingTable(enr)
+  private val authenticationProvider: AuthenticationProvider = DefaultAuthenticationProvider(keyPair, routingTable)
 
-  private val codec: PacketCodec = DefaultPacketCodec(keyPair, enr, nodeId, authenticationProvider)
+  private val codec: PacketCodec = DefaultPacketCodec(keyPair, routingTable, nodeId, authenticationProvider)
 
   private val destNodeId: Bytes = Bytes.random(32)
 

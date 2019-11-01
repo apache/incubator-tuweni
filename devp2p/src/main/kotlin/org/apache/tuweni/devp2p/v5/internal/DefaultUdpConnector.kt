@@ -16,19 +16,25 @@
  */
 package org.apache.tuweni.devp2p.v5.internal
 
+import com.google.common.cache.Cache
+import com.google.common.cache.CacheBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
+import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.MessageHandler
 import org.apache.tuweni.devp2p.v5.PacketCodec
 import org.apache.tuweni.devp2p.v5.UdpConnector
 import org.apache.tuweni.devp2p.v5.dht.RoutingTable
 import org.apache.tuweni.devp2p.v5.internal.handler.FindNodeMessageHandler
 import org.apache.tuweni.devp2p.v5.internal.handler.NodesMessageHandler
+import org.apache.tuweni.devp2p.v5.internal.handler.PingMessageHandler
+import org.apache.tuweni.devp2p.v5.internal.handler.PongMessageHandler
 import org.apache.tuweni.devp2p.v5.internal.handler.RandomMessageHandler
 import org.apache.tuweni.devp2p.v5.internal.handler.WhoAreYouMessageHandler
 import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
@@ -37,9 +43,12 @@ import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
 import org.apache.tuweni.devp2p.v5.packet.NodesMessage
+import org.apache.tuweni.devp2p.v5.packet.PingMessage
+import org.apache.tuweni.devp2p.v5.packet.PongMessage
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
+import java.time.Duration
 import java.util.logging.Logger
 import kotlin.coroutines.CoroutineContext
 
@@ -50,7 +59,10 @@ class DefaultUdpConnector(
   private val nodeId: Bytes = Hash.sha2_256(selfEnr),
   private val receiveChannel: CoroutineDatagramChannel = CoroutineDatagramChannel.open(),
   private val sendChannel: CoroutineDatagramChannel = CoroutineDatagramChannel.open(),
-  private val packetCodec: PacketCodec = DefaultPacketCodec(keyPair, selfEnr),
+  private val nodesTable: RoutingTable = RoutingTable(selfEnr),
+  private val packetCodec: PacketCodec = DefaultPacketCodec(keyPair, nodesTable),
+  private val authenticatingPeers: MutableMap<InetSocketAddress, Bytes> = mutableMapOf(),
+  private val selfNodeRecord: EthereumNodeRecord = EthereumNodeRecord.fromRLP(selfEnr),
   override val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : UdpConnector, CoroutineScope {
 
@@ -60,11 +72,16 @@ class DefaultUdpConnector(
   private val whoAreYouMessageHandler: MessageHandler<WhoAreYouMessage> = WhoAreYouMessageHandler(nodeId)
   private val findNodeMessageHandler: MessageHandler<FindNodeMessage> = FindNodeMessageHandler()
   private val nodesMessageHandler: MessageHandler<NodesMessage> = NodesMessageHandler()
+  private val pingMessageHandler: MessageHandler<PingMessage> = PingMessageHandler()
+  private val pongMessageHandler: MessageHandler<PongMessage> = PongMessageHandler()
 
-  private val authenticatingPeers: MutableMap<InetSocketAddress, Bytes> = mutableMapOf()
+  private val pings: Cache<String, Bytes> = CacheBuilder.newBuilder()
+    .expireAfterWrite(Duration.ofMillis(PING_TIMEOUT))
+    .removalListener<String, Bytes> {
+      getNodesTable().evict(it.value)
+    }.build()
 
-  private val nodesTable: RoutingTable = RoutingTable(selfEnr)
-
+  private lateinit var refreshJob: Job
   private lateinit var receiveJob: Job
 
   override fun start() {
@@ -83,6 +100,8 @@ class DefaultUdpConnector(
         }
       }
     }
+
+    refreshJob = refreshNodesTable()
   }
 
   override fun send(
@@ -98,16 +117,20 @@ class DefaultUdpConnector(
   }
 
   override fun terminate() {
-    receiveJob.cancel()
     receiveChannel.close()
     sendChannel.close()
+
+    receiveJob.cancel()
+    refreshJob.cancel()
   }
 
   override fun available(): Boolean = receiveChannel.isOpen
 
   override fun started(): Boolean = ::receiveJob.isInitialized && available()
 
-  override fun getEnr(): Bytes = selfEnr
+  override fun getEnrBytes(): Bytes = selfEnr
+
+  override fun getEnr(): EthereumNodeRecord = selfNodeRecord
 
   override fun addPendingNodeId(address: InetSocketAddress, nodeId: Bytes) {
     authenticatingPeers[address] = nodeId
@@ -124,6 +147,13 @@ class DefaultUdpConnector(
 
   override fun getNodesTable(): RoutingTable = nodesTable
 
+  override fun getAwaitingPongRecord(nodeId: Bytes): Bytes? {
+    val nodeIdHex = nodeId.toHexString()
+    val result = pings.getIfPresent(nodeIdHex)
+    pings.invalidate(nodeIdHex)
+    return result
+  }
+
   private fun processDatagram(datagram: ByteBuffer, address: InetSocketAddress) {
     val messageBytes = Bytes.wrapByteBuffer(datagram)
     val decodeResult = packetCodec.decode(messageBytes)
@@ -133,7 +163,30 @@ class DefaultUdpConnector(
       is WhoAreYouMessage -> whoAreYouMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
       is FindNodeMessage -> findNodeMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
       is NodesMessage -> nodesMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
+      is PingMessage -> pingMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
+      is PongMessage -> pongMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
       else -> throw IllegalArgumentException("Unexpected message has been received - ${message::class.java.simpleName}")
     }
+  }
+
+  private fun refreshNodesTable(): Job = launch {
+    while (true) {
+      if (!getNodesTable().isEmpty()) {
+        val enrBytes = getNodesTable().random()
+        val nodeId = Hash.sha2_256(enrBytes)
+        val enr = EthereumNodeRecord.fromRLP(enrBytes)
+        val address = InetSocketAddress(enr.ip(), enr.udp())
+        val message = PingMessage(enrSeq = enr.seq)
+
+        send(address, message, nodeId)
+        pings.put(nodeId.toHexString(), enrBytes)
+      }
+      delay(REFRESH_RATE)
+    }
+  }
+
+  companion object {
+    private const val REFRESH_RATE: Long = 1000
+    private const val PING_TIMEOUT: Long = 20000
   }
 }
