@@ -19,9 +19,10 @@ package org.apache.tuweni.devp2p.v5
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
-import org.apache.tuweni.devp2p.v5.dht.RoutingTable
+import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
+import org.apache.tuweni.devp2p.v5.misc.TrackingMessage
 import java.net.InetSocketAddress
 
 /**
@@ -107,9 +108,15 @@ interface UdpConnector {
    */
   fun getEnr(): EthereumNodeRecord
 
+  fun attachObserver(observer: MessageObserver)
+
+  fun detachObserver(observer: MessageObserver)
+
   fun getNodesTable(): RoutingTable
 
   fun getAwaitingPongRecord(nodeId: Bytes): Bytes?
 
-  fun findPendingMessage(nodeId: Bytes): UdpMessage?
+  fun getPendingMessage(authTag: Bytes): TrackingMessage
+
+  fun getNodeRecords(): ENRStorage
 }

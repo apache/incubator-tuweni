@@ -64,7 +64,7 @@ class DefaultNodeDiscoveryServiceTest {
       bootstrapENRList,
       enrSeq,
       selfENR,
-      connector
+      connector = connector
     )
 
   @Test
@@ -81,7 +81,7 @@ class DefaultNodeDiscoveryServiceTest {
       val receivedBytes = Bytes.wrapByteBuffer(buffer)
       val content = receivedBytes.slice(45)
 
-      val message = RandomMessage.create(content)
+      val message = RandomMessage.create(UdpMessage.authTag(), content)
       assert(message.data.size() == UdpMessage.RANDOM_DATA_LENGTH)
     }
 

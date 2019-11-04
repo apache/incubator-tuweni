@@ -37,18 +37,17 @@ import java.nio.ByteBuffer
 class DefaultUdpConnectorTest {
 
   private val keyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
-  private val nodeId: Bytes = Bytes.fromHexString("0x98EB6D611291FA21F6169BFF382B9369C33D997FE4DC93410987E27796360640")
   private val address: InetSocketAddress = InetSocketAddress(9090)
   private val selfEnr: Bytes = EthereumNodeRecord.toRLP(keyPair, ip = address.address)
 
   private val data: Bytes = UdpMessage.randomData()
-  private val message: RandomMessage = RandomMessage(data)
+  private val message: RandomMessage = RandomMessage(UdpMessage.authTag(), data)
 
-  private var connector: UdpConnector = DefaultUdpConnector(address, keyPair, selfEnr, nodeId)
+  private var connector: UdpConnector = DefaultUdpConnector(address, keyPair, selfEnr)
 
   @BeforeEach
   fun setUp() {
-    connector = DefaultUdpConnector(address, keyPair, selfEnr, nodeId)
+    connector = DefaultUdpConnector(address, keyPair, selfEnr)
   }
 
   @AfterEach
@@ -93,7 +92,7 @@ class DefaultUdpConnectorTest {
       buffer.flip()
 
       val messageContent = Bytes.wrapByteBuffer(buffer).slice(45)
-      val message = RandomMessage.create(messageContent)
+      val message = RandomMessage.create(UdpMessage.authTag(), messageContent)
 
       assert(message.data == data)
     }

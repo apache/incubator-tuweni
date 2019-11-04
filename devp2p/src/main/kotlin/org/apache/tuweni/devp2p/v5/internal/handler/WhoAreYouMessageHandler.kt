@@ -17,17 +17,16 @@
 package org.apache.tuweni.devp2p.v5.internal.handler
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.devp2p.v5.MessageHandler
 import org.apache.tuweni.devp2p.v5.UdpConnector
 import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
 import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
+import org.apache.tuweni.devp2p.v5.packet.RandomMessage
+import java.lang.IllegalArgumentException
 import java.net.InetSocketAddress
 
-class WhoAreYouMessageHandler(
-  private val nodeId: Bytes
-) : MessageHandler<WhoAreYouMessage> {
+class WhoAreYouMessageHandler : MessageHandler<WhoAreYouMessage> {
 
   override fun handle(
     message: WhoAreYouMessage,
@@ -36,11 +35,12 @@ class WhoAreYouMessageHandler(
     connector: UdpConnector
   ) {
     // Retrieve enr
-    val destRlp = connector.findPendingNodeId(address)
-    val handshakeParams = HandshakeInitParameters(message.idNonce, message.authTag, destRlp)
-    val destNodeId = Hash.sha2_256(destRlp)
+    val trackingMessage = connector.getPendingMessage(message.authTag)
+    val rlpEnr = connector.getNodeRecords().find(trackingMessage.nodeId)
+      ?: throw IllegalArgumentException("Unable to find node enr by id ${trackingMessage.nodeId}")
+    val handshakeParams = HandshakeInitParameters(message.idNonce, message.authTag, rlpEnr)
 
-    val response = connector.findPendingMessage(srcNodeId) ?: FindNodeMessage()
-    connector.send(address, response, destNodeId, handshakeParams)
+    val response = if (trackingMessage.message is RandomMessage) FindNodeMessage() else trackingMessage.message
+    connector.send(address, response, trackingMessage.nodeId, handshakeParams)
   }
 }
