@@ -20,13 +20,19 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.devp2p.v5.MessageHandler
 import org.apache.tuweni.devp2p.v5.UdpConnector
 import org.apache.tuweni.devp2p.v5.packet.TicketMessage
+import org.apache.tuweni.devp2p.v5.topic.Ticket
 import java.net.InetSocketAddress
 
 class TicketMessageHandler : MessageHandler<TicketMessage> {
 
   override fun handle(message: TicketMessage, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector) {
     val ticketHolder = connector.getTicketHolder()
-    ticketHolder.putSelfTicket(message.requestId, message.ticket)
-    // todo ticket wait time
+    ticketHolder.putTicket(message.requestId, message.ticket)
+
+    if (message.waitTime != 0L) {
+      val key = connector.getSessionInitiatorKey(srcNodeId)
+      val ticket = Ticket.decrypt(message.ticket, key)
+      connector.getTopicRegistrar().delayRegTopic(message.requestId, ticket.topic, message.waitTime)
+    }
   }
 }

@@ -21,7 +21,7 @@ import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
 import org.apache.tuweni.rlp.RLP
 import java.net.InetAddress
 
-class Ticket(
+data class Ticket(
   val topic: Bytes,
   val srcNodeId: Bytes,
   val srcIp: InetAddress,
@@ -46,9 +46,15 @@ class Ticket(
     return AES128GCM.encrypt(key, Bytes.wrap(ByteArray(ZERO_NONCE_SIZE)), ticketBytes, Bytes.EMPTY)
   }
 
-  fun validate(srcNodeId: Bytes, srcIp: InetAddress, now: Long) {
+  fun validate(
+    srcNodeId: Bytes,
+    srcIp: InetAddress,
+    now: Long,
+    topic: Bytes
+  ) {
     require(this.srcNodeId == srcNodeId) { TICKET_INVALID_MSG }
     require(this.srcIp == srcIp) { TICKET_INVALID_MSG }
+    require(this.topic == topic) { TICKET_INVALID_MSG }
     val windowStart = this.requestTime + this.waitTime
     require(now >= windowStart && now <= windowStart + TIME_WINDOW_MS) { TICKET_INVALID_MSG }
   }

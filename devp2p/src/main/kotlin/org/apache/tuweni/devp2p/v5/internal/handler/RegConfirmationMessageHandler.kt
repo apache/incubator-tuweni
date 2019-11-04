@@ -20,7 +20,6 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.devp2p.v5.MessageHandler
 import org.apache.tuweni.devp2p.v5.UdpConnector
 import org.apache.tuweni.devp2p.v5.packet.RegConfirmationMessage
-import org.apache.tuweni.devp2p.v5.topic.Topic
 import java.net.InetSocketAddress
 
 
@@ -33,8 +32,8 @@ class RegConfirmationMessageHandler : MessageHandler<RegConfirmationMessage> {
     connector: UdpConnector
   ) {
     val ticketHolder = connector.getTicketHolder()
-    ticketHolder.removeSelfTicket(message.requestId)
-    // todo stop job
+    ticketHolder.removeTicket(message.requestId)
+    connector.getTopicRegistrar().registerTopic(message.topic, true)
   }
 
 }

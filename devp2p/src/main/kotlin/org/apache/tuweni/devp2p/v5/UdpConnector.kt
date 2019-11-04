@@ -23,6 +23,7 @@ import org.apache.tuweni.devp2p.v5.dht.RoutingTable
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
 import org.apache.tuweni.devp2p.v5.topic.TicketHolder
+import org.apache.tuweni.devp2p.v5.topic.TopicRegistrar
 import org.apache.tuweni.devp2p.v5.topic.TopicTable
 import java.net.InetSocketAddress
 
@@ -126,4 +127,8 @@ interface UdpConnector {
   fun getTicketHolder(): TicketHolder
 
   fun getAwaitingPongRecord(nodeId: Bytes): Bytes?
+
+  fun getTopicRegistrar(): TopicRegistrar
+
+  fun getSessionInitiatorKey(nodeId: Bytes): Bytes
 }

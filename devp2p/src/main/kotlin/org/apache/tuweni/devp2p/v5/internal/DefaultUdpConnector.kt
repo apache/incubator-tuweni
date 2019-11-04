@@ -27,6 +27,7 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
+import org.apache.tuweni.devp2p.v5.AuthenticationProvider
 import org.apache.tuweni.devp2p.v5.MessageHandler
 import org.apache.tuweni.devp2p.v5.PacketCodec
 import org.apache.tuweni.devp2p.v5.UdpConnector
@@ -73,7 +74,8 @@ class DefaultUdpConnector(
   private val nodesTable: RoutingTable = RoutingTable(selfEnr),
   private val topicTable: TopicTable = TopicTable(),
   private val ticketHolder: TicketHolder = TicketHolder(),
-  private val packetCodec: PacketCodec = DefaultPacketCodec(keyPair, nodesTable),
+  private val authenticationProvider: AuthenticationProvider = DefaultAuthenticationProvider(keyPair, nodesTable),
+  private val packetCodec: PacketCodec = DefaultPacketCodec(keyPair, nodesTable, nodeId, authenticationProvider),
   private val authenticatingPeers: MutableMap<InetSocketAddress, Bytes> = mutableMapOf(),
   private val selfNodeRecord: EthereumNodeRecord = EthereumNodeRecord.fromRLP(selfEnr),
   override val coroutineContext: CoroutineContext = Dispatchers.IO
@@ -91,6 +93,8 @@ class DefaultUdpConnector(
   private val regTopicMessageHandler: MessageHandler<RegTopicMessage> = RegTopicMessageHandler()
   private val ticketMessageHandler: MessageHandler<TicketMessage> = TicketMessageHandler()
   private val topicQueryMessageHandler: MessageHandler<TopicQueryMessage> = TopicQueryMessageHandler()
+
+  private val topicRegistrar = TopicRegistrar(coroutineContext, this)
 
   private val pings: Cache<String, Bytes> = CacheBuilder.newBuilder()
     .expireAfterWrite(Duration.ofMillis(PING_TIMEOUT))
@@ -168,11 +172,18 @@ class DefaultUdpConnector(
 
   override fun getTicketHolder(): TicketHolder = ticketHolder
 
+  override fun getTopicRegistrar(): TopicRegistrar = topicRegistrar
+
   override fun getAwaitingPongRecord(nodeId: Bytes): Bytes? {
     val nodeIdHex = nodeId.toHexString()
     val result = pings.getIfPresent(nodeIdHex)
     pings.invalidate(nodeIdHex)
     return result
+  }
+
+  override fun getSessionInitiatorKey(nodeId: Bytes): Bytes {
+    return authenticationProvider.findSessionKey(nodeId.toHexString())?.initiatorKey
+      ?: throw IllegalArgumentException("Session key not found.")
   }
 
   private fun processDatagram(datagram: ByteBuffer, address: InetSocketAddress) {

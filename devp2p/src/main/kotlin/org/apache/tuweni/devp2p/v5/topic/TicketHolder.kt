@@ -17,29 +17,18 @@
 package org.apache.tuweni.devp2p.v5.topic
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.concurrent.ExpiringMap
 
 class TicketHolder {
 
-  private val ticketKeys: ExpiringMap<Bytes, Bytes> = ExpiringMap() // requestId to signing key
-  private val selfTickets: MutableMap<Bytes, Bytes> = hashMapOf() // requestId to ticket
+  private val tickets: MutableMap<Bytes, Bytes> = hashMapOf() // requestId to ticket
 
 
-  fun putKey(requestId: Bytes, key: Bytes, expiry: Long) {
-    ticketKeys.put(requestId, key, expiry)
+  fun putTicket(requestId: Bytes, ticket: Bytes) {
+    tickets[requestId] = ticket
   }
 
-  fun getKey(requestId: Bytes): Bytes? = ticketKeys[requestId]
+  fun getTicket(requestId: Bytes): Bytes =
+    tickets[requestId] ?: throw IllegalArgumentException("Ticket not found.")
 
-  fun removeKey(requestId: Bytes): Bytes? = ticketKeys.remove(requestId)
-
-
-  fun putSelfTicket(requestId: Bytes, ticket: Bytes) {
-    selfTickets[requestId] = ticket
-  }
-
-  fun getSelfTicket(requestId: Bytes): Bytes? = selfTickets[requestId]
-
-  fun removeSelfTicket(requestId: Bytes): Bytes? = selfTickets.remove(requestId)
-
+  fun removeTicket(requestId: Bytes): Bytes? = tickets.remove(requestId)
 }

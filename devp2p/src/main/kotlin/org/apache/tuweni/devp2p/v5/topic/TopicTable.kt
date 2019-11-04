@@ -60,7 +60,7 @@ class TopicTable(
         topicQueue.put(nodeId, TargetAd(timeSupplier(), enr))
         return 0 // put immediately
       } else {
-        // Queue if full (wait time = target-ad-lifetime - oldest-ad-lifetime)
+        // Queue if full (wait time = target-ad-lifetime - oldest ad lifetime in queue)
         return TARGET_AD_LIFETIME_MS - (timeSupplier() - topicQueue.oldest().regTime)
       }
     }
@@ -69,14 +69,18 @@ class TopicTable(
       table[topic] = createNewQueue().apply { put(nodeId, TargetAd(timeSupplier(), enr)) }
       return 0 // put immediately
     } else {
-      //table is full (wait time = oldest of youngest from queue)
-      val oldest = table.entries.map { it.value.youngest().regTime }.min() ?: -1
-      return timeSupplier() - oldest
+      //table is full (wait time = target-ad-lifetime - oldest in table of youngest in queue)
+      val oldestInTable = table.entries.map { it.value.youngest().regTime }.min() ?: -1
+      return TARGET_AD_LIFETIME_MS - (timeSupplier() - oldestInTable)
     }
 
   }
 
   fun contains(topic: Topic): Boolean = table.containsKey(topic)
+
+  fun isEmpty(): Boolean = table.isEmpty()
+
+  fun clear() = table.clear()
 
   private fun createNewQueue(): Cache<String, TargetAd> {
     return CacheBuilder.newBuilder()
@@ -90,17 +94,19 @@ class TopicTable(
   }
 
   private fun Cache<String, TargetAd>.oldest(): TargetAd {
-    return asMap().values.minBy { it.regTime } ?: throw IllegalArgumentException("Queue is empty.")
+    return asMap().values.minBy { it.regTime } ?: throw IllegalArgumentException(QUEUE_EMPTY_MSG)
   }
 
   private fun Cache<String, TargetAd>.youngest(): TargetAd {
-    return asMap().values.maxBy { it.regTime } ?: throw IllegalArgumentException("Queue is empty.")
+    return asMap().values.maxBy { it.regTime } ?: throw IllegalArgumentException(QUEUE_EMPTY_MSG)
   }
 
   companion object {
     internal const val MAX_ENTRIES_PER_TOPIC: Int = 100
     private const val MAX_TABLE_CAPACITY: Int = 500
     private const val TARGET_AD_LIFETIME_MS: Long = 15 * 60 * 1000 // 15 min
+
+    private const val QUEUE_EMPTY_MSG = "Queue is empty."
   }
 }
 
