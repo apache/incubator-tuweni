@@ -49,6 +49,7 @@ import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.time.Duration
+import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Logger
 import kotlin.coroutines.CoroutineContext
 
@@ -75,6 +76,10 @@ class DefaultUdpConnector(
   private val pingMessageHandler: MessageHandler<PingMessage> = PingMessageHandler()
   private val pongMessageHandler: MessageHandler<PongMessage> = PongMessageHandler()
 
+  private val pendingMessages: MutableMap<String, UdpMessage> = ConcurrentHashMap()
+
+  private val askedNodes: MutableList<Bytes> = mutableListOf()
+
   private val pings: Cache<String, Bytes> = CacheBuilder.newBuilder()
     .expireAfterWrite(Duration.ofMillis(PING_TIMEOUT))
     .removalListener<String, Bytes> {
@@ -83,24 +88,14 @@ class DefaultUdpConnector(
 
   private lateinit var refreshJob: Job
   private lateinit var receiveJob: Job
+  private lateinit var lookupJob: Job
+
 
   override fun start() {
     receiveChannel.bind(bindAddress)
 
-    receiveJob = launch {
-      val datagram = ByteBuffer.allocate(UdpMessage.MAX_UDP_MESSAGE_SIZE)
-      while (receiveChannel.isOpen) {
-        datagram.clear()
-        val address = receiveChannel.receive(datagram) as InetSocketAddress
-        datagram.flip()
-        try {
-          processDatagram(datagram, address)
-        } catch (ex: Exception) {
-          log.warning(ex.message)
-        }
-      }
-    }
-
+    receiveJob = receiveDatagram()
+    lookupJob = lookupNodes()
     refreshJob = refreshNodesTable()
   }
 
@@ -112,6 +107,7 @@ class DefaultUdpConnector(
   ) {
     launch {
       val buffer = packetCodec.encode(message, destNodeId, handshakeParams)
+      pendingMessages[destNodeId.toHexString()] = message
       sendChannel.send(ByteBuffer.wrap(buffer.toArray()), address)
     }
   }
@@ -120,8 +116,9 @@ class DefaultUdpConnector(
     receiveChannel.close()
     sendChannel.close()
 
-    receiveJob.cancel()
     refreshJob.cancel()
+    lookupJob.cancel()
+    receiveJob.cancel()
   }
 
   override fun available(): Boolean = receiveChannel.isOpen
@@ -136,9 +133,13 @@ class DefaultUdpConnector(
     authenticatingPeers[address] = nodeId
   }
 
+  override fun findPendingMessage(nodeId: Bytes): UdpMessage? {
+    return pendingMessages[nodeId.toHexString()]
+  }
+
   override fun getNodeKeyPair(): SECP256K1.KeyPair = keyPair
 
-  override fun getPendingNodeIdByAddress(address: InetSocketAddress): Bytes {
+  override fun findPendingNodeId(address: InetSocketAddress): Bytes {
     val result = authenticatingPeers[address]
       ?: throw IllegalArgumentException("Authenticated peer not found with address ${address.hostName}:${address.port}")
     authenticatingPeers.remove(address)
@@ -154,6 +155,43 @@ class DefaultUdpConnector(
     return result
   }
 
+  private fun lookupNodes() = launch {
+    while (true) {
+      val nearestNodes = getNodesTable().nearest(selfEnr)
+      if (16 > nearestNodes.size) {
+        lookupInternal(nearestNodes)
+      } else {
+        askedNodes.clear()
+      }
+      delay(LOOKUP_REFRESH_RATE)
+    }
+  }
+
+  private fun lookupInternal(nearest: List<Bytes>) {
+    val targetNode = if (nearest.isNotEmpty()) nearest.random() else selfEnr
+    val distance = getNodesTable().distanceToSelf(targetNode)
+    for(target in nearest.take(3)) {
+      val enr = EthereumNodeRecord.fromRLP(target)
+      val message = FindNodeMessage(distance = distance)
+      val address = InetSocketAddress(enr.ip(), enr.udp())
+      send(address, message, Hash.sha2_256(target))
+    }
+  }
+
+  private fun receiveDatagram() = launch {
+    val datagram = ByteBuffer.allocate(UdpMessage.MAX_UDP_MESSAGE_SIZE)
+    while (receiveChannel.isOpen) {
+      datagram.clear()
+      val address = receiveChannel.receive(datagram) as InetSocketAddress
+      datagram.flip()
+      try {
+        processDatagram(datagram, address)
+      } catch (ex: Exception) {
+        log.warning(ex.message)
+      }
+    }
+  }
+
   private fun processDatagram(datagram: ByteBuffer, address: InetSocketAddress) {
     val messageBytes = Bytes.wrapByteBuffer(datagram)
     val decodeResult = packetCodec.decode(messageBytes)
@@ -167,6 +205,7 @@ class DefaultUdpConnector(
       is PongMessage -> pongMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
       else -> throw IllegalArgumentException("Unexpected message has been received - ${message::class.java.simpleName}")
     }
+    pendingMessages.remove(decodeResult.srcNodeId.toHexString())
   }
 
   private fun refreshNodesTable(): Job = launch {
@@ -181,12 +220,13 @@ class DefaultUdpConnector(
         send(address, message, nodeId)
         pings.put(nodeId.toHexString(), enrBytes)
       }
-      delay(REFRESH_RATE)
+      delay(TABLE_REFRESH_RATE)
     }
   }
 
   companion object {
-    private const val REFRESH_RATE: Long = 1000
+    private const val LOOKUP_REFRESH_RATE: Long = 3000
+    private const val TABLE_REFRESH_RATE: Long = 1000
     private const val PING_TIMEOUT: Long = 20000
   }
 }

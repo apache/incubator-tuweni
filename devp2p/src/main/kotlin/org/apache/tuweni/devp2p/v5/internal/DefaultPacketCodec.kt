@@ -40,6 +40,7 @@ import org.apache.tuweni.devp2p.v5.packet.TicketMessage
 import org.apache.tuweni.devp2p.v5.packet.TopicQueryMessage
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.rlp.RLPReader
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.IllegalArgumentException
 
 class DefaultPacketCodec(
@@ -115,7 +116,7 @@ class DefaultPacketCodec(
 
     // Decrypt
     val decryptionKey = authenticationProvider.findSessionKey(senderNodeId.toHexString())?.initiatorKey
-      ?: return RandomMessage(encryptedContent)
+      ?: return RandomMessage.create(encryptedContent)
     val decryptMetadata = authHeader?.let { Bytes.wrap(tag, authHeader.asRlp()) } ?: tag
     val decryptedContent = AES128GCM.decrypt(encryptedContent, decryptionKey, decryptMetadata)
     val messageType = decryptedContent.slice(0, Byte.SIZE_BYTES)

@@ -84,7 +84,7 @@ interface UdpConnector {
    *
    * @return node identifier
    */
-  fun getPendingNodeIdByAddress(address: InetSocketAddress): Bytes
+  fun findPendingNodeId(address: InetSocketAddress): Bytes
 
   /**
    * Provides node's key pair
@@ -110,4 +110,6 @@ interface UdpConnector {
   fun getNodesTable(): RoutingTable
 
   fun getAwaitingPongRecord(nodeId: Bytes): Bytes?
+
+  fun findPendingMessage(nodeId: Bytes): UdpMessage?
 }

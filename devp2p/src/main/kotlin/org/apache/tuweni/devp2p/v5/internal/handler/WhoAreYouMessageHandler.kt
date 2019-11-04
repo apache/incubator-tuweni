@@ -36,11 +36,11 @@ class WhoAreYouMessageHandler(
     connector: UdpConnector
   ) {
     // Retrieve enr
-    val destRlp = connector.getPendingNodeIdByAddress(address)
+    val destRlp = connector.findPendingNodeId(address)
     val handshakeParams = HandshakeInitParameters(message.idNonce, message.authTag, destRlp)
     val destNodeId = Hash.sha2_256(destRlp)
 
-    val findNodeMessage = FindNodeMessage()
-    connector.send(address, findNodeMessage, destNodeId, handshakeParams)
+    val response = connector.findPendingMessage(srcNodeId) ?: FindNodeMessage()
+    connector.send(address, response, destNodeId, handshakeParams)
   }
 }
