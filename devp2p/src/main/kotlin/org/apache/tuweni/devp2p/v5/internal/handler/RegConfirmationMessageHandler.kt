@@ -32,7 +32,7 @@ class RegConfirmationMessageHandler : MessageHandler<RegConfirmationMessage> {
     connector: UdpConnector
   ) {
     val ticketHolder = connector.getTicketHolder()
-    ticketHolder.removeTicket(message.requestId)
+    ticketHolder.remove(message.requestId)
     connector.getTopicRegistrar().registerTopic(message.topic, true)
   }
 

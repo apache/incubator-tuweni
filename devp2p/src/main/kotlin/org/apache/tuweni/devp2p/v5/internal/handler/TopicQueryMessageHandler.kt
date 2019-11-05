@@ -35,11 +35,9 @@ class TopicQueryMessageHandler : MessageHandler<TopicQueryMessage> {
     val topicTable = connector.getTopicTable()
     val nodes = topicTable.getNodes(Topic(message.topic.toHexString()))
 
-    var caret = 0
-    while (caret < nodes.size) {
-      val response = NodesMessage(message.requestId, nodes.size, nodes.subList(caret, caret + MAX_NODES_IN_RESPONSE))
+    nodes.chunked(MAX_NODES_IN_RESPONSE).forEach {
+      val response = NodesMessage(message.requestId, nodes.size, it)
       connector.send(address, response, srcNodeId)
-      caret += MAX_NODES_IN_RESPONSE
     }
   }
 

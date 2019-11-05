@@ -27,13 +27,12 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
-import org.apache.tuweni.devp2p.v5.ENRStorage
 import org.apache.tuweni.devp2p.v5.AuthenticationProvider
+import org.apache.tuweni.devp2p.v5.ENRStorage
 import org.apache.tuweni.devp2p.v5.MessageHandler
 import org.apache.tuweni.devp2p.v5.MessageObserver
 import org.apache.tuweni.devp2p.v5.PacketCodec
 import org.apache.tuweni.devp2p.v5.UdpConnector
-import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.devp2p.v5.internal.handler.FindNodeMessageHandler
 import org.apache.tuweni.devp2p.v5.internal.handler.NodesMessageHandler
 import org.apache.tuweni.devp2p.v5.internal.handler.PingMessageHandler
@@ -45,12 +44,8 @@ import org.apache.tuweni.devp2p.v5.internal.handler.TicketMessageHandler
 import org.apache.tuweni.devp2p.v5.internal.handler.TopicQueryMessageHandler
 import org.apache.tuweni.devp2p.v5.internal.handler.WhoAreYouMessageHandler
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
-import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
-import org.apache.tuweni.devp2p.v5.packet.RandomMessage
-import org.apache.tuweni.devp2p.v5.packet.UdpMessage
-import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
-import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
 import org.apache.tuweni.devp2p.v5.misc.TrackingMessage
+import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
 import org.apache.tuweni.devp2p.v5.packet.NodesMessage
 import org.apache.tuweni.devp2p.v5.packet.PingMessage
 import org.apache.tuweni.devp2p.v5.packet.PongMessage
@@ -61,16 +56,17 @@ import org.apache.tuweni.devp2p.v5.packet.TicketMessage
 import org.apache.tuweni.devp2p.v5.packet.TopicQueryMessage
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
+import org.apache.tuweni.devp2p.v5.storage.DefaultENRStorage
+import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.devp2p.v5.topic.TicketHolder
 import org.apache.tuweni.devp2p.v5.topic.TopicRegistrar
 import org.apache.tuweni.devp2p.v5.topic.TopicTable
-import org.apache.tuweni.devp2p.v5.storage.DefaultENRStorage
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
+import java.time.Duration
 import java.util.logging.Logger
 import kotlin.coroutines.CoroutineContext
-import java.time.Duration
 
 class DefaultUdpConnector(
   private val bindAddress: InetSocketAddress,
@@ -81,9 +77,9 @@ class DefaultUdpConnector(
   private val nodesTable: RoutingTable = RoutingTable(selfEnr),
   private val topicTable: TopicTable = TopicTable(),
   private val ticketHolder: TicketHolder = TicketHolder(),
-  private val authenticationProvider: AuthenticationProvider = DefaultAuthenticationProvider(keyPair, nodesTable),
-  private val packetCodec: PacketCodec = DefaultPacketCodec(keyPair, nodesTable, nodeId, authenticationProvider),
   private val authenticatingPeers: MutableMap<InetSocketAddress, Bytes> = mutableMapOf(),
+  private val authenticationProvider: AuthenticationProvider = DefaultAuthenticationProvider(keyPair, nodesTable),
+  private val packetCodec: PacketCodec = DefaultPacketCodec(keyPair, nodesTable),
   private val selfNodeRecord: EthereumNodeRecord = EthereumNodeRecord.fromRLP(selfEnr),
   private val messageListeners: MutableList<MessageObserver> = mutableListOf(),
   override val coroutineContext: CoroutineContext = Dispatchers.IO

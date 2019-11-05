@@ -27,7 +27,7 @@ class TicketMessageHandler : MessageHandler<TicketMessage> {
 
   override fun handle(message: TicketMessage, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector) {
     val ticketHolder = connector.getTicketHolder()
-    ticketHolder.putTicket(message.requestId, message.ticket)
+    ticketHolder.put(message.requestId, message.ticket)
 
     if (message.waitTime != 0L) {
       val key = connector.getSessionInitiatorKey(srcNodeId)

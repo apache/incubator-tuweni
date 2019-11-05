@@ -23,12 +23,14 @@ class TicketHolder {
   private val tickets: MutableMap<Bytes, Bytes> = hashMapOf() // requestId to ticket
 
 
-  fun putTicket(requestId: Bytes, ticket: Bytes) {
+  fun put(requestId: Bytes, ticket: Bytes) {
     tickets[requestId] = ticket
   }
 
-  fun getTicket(requestId: Bytes): Bytes =
+  fun get(requestId: Bytes): Bytes =
     tickets[requestId] ?: throw IllegalArgumentException("Ticket not found.")
 
-  fun removeTicket(requestId: Bytes): Bytes? = tickets.remove(requestId)
+  fun remove(requestId: Bytes): Bytes? = tickets.remove(requestId)
+
+  fun contains(ticket: Bytes): Boolean = tickets.containsValue(ticket)
 }
