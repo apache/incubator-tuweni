@@ -18,6 +18,7 @@ import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetAddress
 import java.net.InetSocketAddress
+import kotlin.random.Random
 
 @ExtendWith(BouncyCastleExtension::class)
 abstract class AbstractIntegrationTest {

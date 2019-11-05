@@ -50,10 +50,11 @@ import org.apache.tuweni.devp2p.v5.packet.PingMessage
 import org.apache.tuweni.devp2p.v5.packet.PongMessage
 import org.apache.tuweni.devp2p.v5.storage.DefaultENRStorage
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
+import org.logl.Logger
+import org.logl.LoggerProvider
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.time.Duration
-import java.util.logging.Logger
 import kotlin.coroutines.CoroutineContext
 
 class DefaultUdpConnector(
@@ -70,7 +71,7 @@ class DefaultUdpConnector(
   override val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : UdpConnector, CoroutineScope {
 
-  private val log: Logger = Logger.getLogger(this.javaClass.simpleName)
+  private val log: Logger = LoggerProvider.nullProvider().getLogger(DefaultUdpConnector::class.java)
 
   private val randomMessageHandler: MessageHandler<RandomMessage> = RandomMessageHandler()
   private val whoAreYouMessageHandler: MessageHandler<WhoAreYouMessage> = WhoAreYouMessageHandler()
@@ -85,9 +86,11 @@ class DefaultUdpConnector(
     .expireAfterWrite(Duration.ofMillis(REQUEST_TIMEOUT))
     .build()
   private val pings: Cache<String, Bytes> = CacheBuilder.newBuilder()
-    .expireAfterWrite(Duration.ofMillis(REQUEST_TIMEOUT))
+    .expireAfterWrite(Duration.ofMillis(REQUEST_TIMEOUT + PING_TIMEOUT))
     .removalListener<String, Bytes> {
-      getNodesTable().evict(it.value)
+      if (it.wasEvicted()) {
+        getNodesTable().evict(it.value)
+      }
     }.build()
 
   private lateinit var refreshJob: Job
@@ -171,7 +174,7 @@ class DefaultUdpConnector(
   private fun lookupNodes() = launch {
     while (true) {
       val nearestNodes = getNodesTable().nearest(selfEnr)
-      if (16 > nearestNodes.size) {
+      if (REQUIRED_LOOKUP_NODES > nearestNodes.size) {
         lookupInternal(nearestNodes)
       } else {
         askedNodes.clear()
@@ -181,13 +184,15 @@ class DefaultUdpConnector(
   }
 
   private fun lookupInternal(nearest: List<Bytes>) {
-    val targetNode = if (nearest.isNotEmpty()) nearest.random() else Bytes.random(32)
+    val nonAskedNodes = nearest - askedNodes
+    val targetNode = if (nonAskedNodes.isNotEmpty()) nonAskedNodes.random() else Bytes.random(32)
     val distance = getNodesTable().distanceToSelf(targetNode)
-    for(target in nearest.take(3)) {
+    for(target in nearest.take(LOOKUP_MAX_REQUESTED_NODES)) {
       val enr = EthereumNodeRecord.fromRLP(target)
       val message = FindNodeMessage(distance = distance)
       val address = InetSocketAddress(enr.ip(), enr.udp())
       send(address, message, Hash.sha2_256(target))
+      askedNodes.add(target)
     }
   }
 
@@ -201,7 +206,7 @@ class DefaultUdpConnector(
       try {
         processDatagram(datagram, address)
       } catch (ex: Exception) {
-        log.warning(ex.message)
+        log.error(ex.message)
       }
     }
   }
@@ -240,8 +245,12 @@ class DefaultUdpConnector(
   }
 
   companion object {
+    private const val REQUIRED_LOOKUP_NODES: Int = 16
+    private const val LOOKUP_MAX_REQUESTED_NODES: Int = 3
+
     private const val LOOKUP_REFRESH_RATE: Long = 3000
     private const val TABLE_REFRESH_RATE: Long = 1000
     private const val REQUEST_TIMEOUT: Long = 1000
+    private const val PING_TIMEOUT: Long = 500
   }
 }
