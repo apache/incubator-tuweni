@@ -19,6 +19,7 @@ package org.apache.tuweni.devp2p.v5
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.misc.DecodeResult
+import org.apache.tuweni.devp2p.v5.misc.EncodeResult
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
 
 /**
@@ -43,7 +44,7 @@ interface PacketCodec {
    *
    * @return encoded message
    */
-  fun encode(message: UdpMessage, destNodeId: Bytes, handshakeParams: HandshakeInitParameters? = null): Bytes
+  fun encode(message: UdpMessage, destNodeId: Bytes, handshakeParams: HandshakeInitParameters? = null): EncodeResult
 
   /**
    * Decodes message, decrypting it's body

@@ -21,14 +21,16 @@ import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.v5.AuthenticationProvider
 import org.apache.tuweni.devp2p.v5.PacketCodec
-import org.apache.tuweni.devp2p.v5.dht.RoutingTable
+import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
+import org.apache.tuweni.devp2p.v5.encrypt.SessionKeyGenerator
 import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
 import org.apache.tuweni.devp2p.v5.packet.RandomMessage
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
 import org.apache.tuweni.devp2p.v5.misc.AuthHeader
 import org.apache.tuweni.devp2p.v5.misc.DecodeResult
+import org.apache.tuweni.devp2p.v5.misc.EncodeResult
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
 import org.apache.tuweni.devp2p.v5.packet.NodesMessage
 import org.apache.tuweni.devp2p.v5.packet.PingMessage
@@ -48,37 +50,36 @@ class DefaultPacketCodec(
   private val authenticationProvider: AuthenticationProvider = DefaultAuthenticationProvider(keyPair, routingTable)
 ) : PacketCodec {
 
-  override fun encode(message: UdpMessage, destNodeId: Bytes, handshakeParams: HandshakeInitParameters?): Bytes {
+  override fun encode(message: UdpMessage, destNodeId: Bytes, handshakeParams: HandshakeInitParameters?): EncodeResult {
     if (message is WhoAreYouMessage) {
       val magic = UdpMessage.magic(nodeId)
       val content = message.encode()
-      return Bytes.wrap(magic, content)
+      return EncodeResult(magic, Bytes.wrap(magic, content))
     }
 
     val tag = UdpMessage.tag(nodeId, destNodeId)
     if (message is RandomMessage) {
-      val authTag = UdpMessage.authTag()
-      val rlpAuthTag = RLP.encodeValue(authTag)
+      val rlpAuthTag = RLP.encodeValue(message.authTag)
       val content = message.encode()
-      return Bytes.wrap(tag, rlpAuthTag, content)
+      return EncodeResult(message.authTag, Bytes.wrap(tag, rlpAuthTag, content))
     }
 
     val authHeader = handshakeParams?.let { authenticationProvider.authenticate(handshakeParams) }
 
     val initiatorKey = authenticationProvider.findSessionKey(destNodeId.toHexString())?.initiatorKey
-      ?: throw IllegalArgumentException() // TODO handle
+      ?: Bytes.random(SessionKeyGenerator.DERIVED_KEY_SIZE) // encrypt with random key, to initiate handshake
     val messagePlain = Bytes.wrap(message.getMessageType(), message.encode())
     return if (null != authHeader) {
       val encodedHeader = authHeader.asRlp()
       val authTag = authHeader.authTag
       val encryptionMeta = Bytes.wrap(tag, encodedHeader)
       val encryptionResult = AES128GCM.encrypt(initiatorKey, authTag, messagePlain, encryptionMeta)
-      Bytes.wrap(tag, encodedHeader, encryptionResult)
+      EncodeResult(authTag, Bytes.wrap(tag, encodedHeader, encryptionResult))
     } else {
       val authTag = UdpMessage.authTag()
       val authTagHeader = RLP.encodeValue(authTag)
       val encryptionResult = AES128GCM.encrypt(initiatorKey, authTag, messagePlain, tag)
-      Bytes.wrap(tag, authTagHeader, encryptionResult)
+      EncodeResult(authTag, Bytes.wrap(tag, authTagHeader, encryptionResult))
     }
   }
 
@@ -93,6 +94,7 @@ class DefaultPacketCodec(
   private fun read(tag: Bytes, senderNodeId: Bytes, contentWithHeader: Bytes, reader: RLPReader): UdpMessage {
     // Distinguish auth header or auth tag
     var authHeader: AuthHeader? = null
+    var authTag: Bytes = Bytes.EMPTY
     if (reader.nextIsList()) {
       if (WHO_ARE_YOU_MESSAGE_LENGTH == contentWithHeader.size()) {
         return WhoAreYouMessage.create(contentWithHeader)
@@ -107,14 +109,14 @@ class DefaultPacketCodec(
       }
       authenticationProvider.finalizeHandshake(senderNodeId, authHeader)
     } else {
-      reader.readValue()
+      authTag = reader.readValue()
     }
 
     val encryptedContent = contentWithHeader.slice(reader.position())
 
     // Decrypt
     val decryptionKey = authenticationProvider.findSessionKey(senderNodeId.toHexString())?.initiatorKey
-      ?: return RandomMessage(encryptedContent)
+      ?: return RandomMessage.create(authTag, encryptedContent)
     val decryptMetadata = authHeader?.let { Bytes.wrap(tag, authHeader.asRlp()) } ?: tag
     val decryptedContent = AES128GCM.decrypt(encryptedContent, decryptionKey, decryptMetadata)
     val messageType = decryptedContent.slice(0, Byte.SIZE_BYTES)

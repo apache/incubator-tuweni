@@ -14,12 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.dht
+package org.apache.tuweni.devp2p.v5.storage
 
+import com.google.common.math.IntMath
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.kademlia.KademliaRoutingTable
 import org.apache.tuweni.kademlia.xorDist
+import java.math.RoundingMode
 
 class RoutingTable(
   private val selfEnr: Bytes
@@ -32,11 +34,18 @@ class RoutingTable(
     selfId = selfNodeId,
     k = BUCKET_SIZE,
     nodeId = nodeIdCalculation,
-    distanceToSelf = { key(it) xorDist selfNodeId })
+    distanceToSelf = { IntMath.log2(key(it) xorDist selfNodeId, RoundingMode.FLOOR) })
+
+  val size: Int
+    get() = table.size
 
   fun getSelfEnr(): Bytes = selfEnr
 
   fun add(enr: Bytes): Bytes? = table.add(enr)
+
+  fun nearest(targetId: Bytes, limit: Int = BUCKET_SIZE): List<Bytes> = table.nearest(key(targetId), limit)
+
+  fun distanceToSelf(targetId: Bytes): Int = table.logDistToSelf(targetId)
 
   fun evict(enr: Bytes): Boolean = table.evict(enr)
 
@@ -53,4 +62,5 @@ class RoutingTable(
   companion object {
     private const val BUCKET_SIZE: Int = 16
   }
+
 }

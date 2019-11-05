@@ -27,7 +27,7 @@ import org.bouncycastle.crypto.params.HKDFParameters
  */
 object SessionKeyGenerator {
 
-  private const val DERIVED_KEY_SIZE: Int = 16
+  const val DERIVED_KEY_SIZE: Int = 16
 
   private val INFO_PREFIX = Bytes.wrap("discovery v5 key agreement".toByteArray())
 

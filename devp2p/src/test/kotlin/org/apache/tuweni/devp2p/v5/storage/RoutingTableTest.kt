@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.dht
+package org.apache.tuweni.devp2p.v5.storage
 
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.SECP256K1

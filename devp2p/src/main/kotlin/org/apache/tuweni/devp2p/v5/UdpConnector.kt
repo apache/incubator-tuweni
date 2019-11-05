@@ -19,9 +19,10 @@ package org.apache.tuweni.devp2p.v5
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
-import org.apache.tuweni.devp2p.v5.dht.RoutingTable
+import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
+import org.apache.tuweni.devp2p.v5.misc.TrackingMessage
 import org.apache.tuweni.devp2p.v5.topic.TicketHolder
 import org.apache.tuweni.devp2p.v5.topic.TopicRegistrar
 import org.apache.tuweni.devp2p.v5.topic.TopicTable
@@ -87,7 +88,7 @@ interface UdpConnector {
    *
    * @return node identifier
    */
-  fun getPendingNodeIdByAddress(address: InetSocketAddress): Bytes
+  fun findPendingNodeId(address: InetSocketAddress): Bytes
 
   /**
    * Provides node's key pair
@@ -110,6 +111,10 @@ interface UdpConnector {
    */
   fun getEnr(): EthereumNodeRecord
 
+  fun attachObserver(observer: MessageObserver)
+
+  fun detachObserver(observer: MessageObserver)
+
   fun getNodesTable(): RoutingTable
 
   /**
@@ -127,6 +132,10 @@ interface UdpConnector {
   fun getTicketHolder(): TicketHolder
 
   fun getAwaitingPongRecord(nodeId: Bytes): Bytes?
+
+  fun getPendingMessage(authTag: Bytes): TrackingMessage
+
+  fun getNodeRecords(): ENRStorage
 
   fun getTopicRegistrar(): TopicRegistrar
 

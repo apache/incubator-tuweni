@@ -22,7 +22,7 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.AuthenticationProvider
 import org.apache.tuweni.devp2p.v5.PacketCodec
-import org.apache.tuweni.devp2p.v5.dht.RoutingTable
+import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
 import org.apache.tuweni.devp2p.v5.misc.SessionKey
 import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
@@ -54,8 +54,8 @@ class DefaultPacketCodecTest {
 
     val encodedResult = codec.encode(message, destNodeId)
 
-    val encodedContent = encodedResult.slice(45)
-    val result = RandomMessage.create(encodedContent)
+    val encodedContent = encodedResult.content.slice(45)
+    val result = RandomMessage.create(UdpMessage.authTag(), encodedContent)
 
     assert(result.data == message.data)
   }
@@ -66,7 +66,7 @@ class DefaultPacketCodecTest {
 
     val encodedResult = codec.encode(message, destNodeId)
 
-    val encodedContent = encodedResult.slice(32)
+    val encodedContent = encodedResult.content.slice(32)
     val result = WhoAreYouMessage.create(encodedContent)
 
     assert(result.idNonce == message.idNonce)
@@ -85,8 +85,8 @@ class DefaultPacketCodecTest {
 
     val encodedResult = codec.encode(message, destNodeId)
 
-    val tag = encodedResult.slice(0, UdpMessage.TAG_LENGTH)
-    val encryptedContent = encodedResult.slice(45)
+    val tag = encodedResult.content.slice(0, UdpMessage.TAG_LENGTH)
+    val encryptedContent = encodedResult.content.slice(45)
     val content = AES128GCM.decrypt(encryptedContent, sessionKey.initiatorKey, tag).slice(1)
     val result = FindNodeMessage.create(content)
 
@@ -95,21 +95,12 @@ class DefaultPacketCodecTest {
   }
 
   @Test
-  fun encodeFailsIfSessionKeyIsNotExists() {
-    val message = FindNodeMessage()
-
-    assertThrows<IllegalArgumentException> {
-      codec.encode(message, destNodeId)
-    }
-  }
-
-  @Test
   fun decodePerformsValidDecodingOfRandomMessasge() {
     val message = RandomMessage()
 
     val encodedResult = codec.encode(message, destNodeId)
 
-    val result = codec.decode(encodedResult).message as? RandomMessage
+    val result = codec.decode(encodedResult.content).message as? RandomMessage
 
     assert(null != result)
     assert(result!!.data == message.data)
@@ -121,7 +112,7 @@ class DefaultPacketCodecTest {
 
     val encodedResult = codec.encode(message, destNodeId)
 
-    val result = codec.decode(encodedResult).message as? WhoAreYouMessage
+    val result = codec.decode(encodedResult.content).message as? WhoAreYouMessage
 
     assert(null != result)
     assert(result!!.idNonce == message.idNonce)
@@ -141,7 +132,7 @@ class DefaultPacketCodecTest {
 
     val encodedResult = codec.encode(message, nodeId)
 
-    val result = codec.decode(encodedResult).message as? FindNodeMessage
+    val result = codec.decode(encodedResult.content).message as? FindNodeMessage
 
     assert(result!!.requestId == message.requestId)
     assert(result.distance == message.distance)

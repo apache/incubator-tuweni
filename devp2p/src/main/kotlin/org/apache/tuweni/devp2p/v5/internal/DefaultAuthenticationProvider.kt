@@ -24,7 +24,7 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.ENR_REQUEST_RETRY_DELAY_MS
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.AuthenticationProvider
-import org.apache.tuweni.devp2p.v5.dht.RoutingTable
+import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
 import org.apache.tuweni.devp2p.v5.encrypt.SessionKeyGenerator
 import org.apache.tuweni.devp2p.v5.misc.AuthHeader
@@ -40,7 +40,7 @@ class DefaultAuthenticationProvider(
 
   private val sessionKeys: Cache<String, SessionKey> = CacheBuilder
     .newBuilder()
-    .expireAfterWrite(ENR_REQUEST_RETRY_DELAY_MS, TimeUnit.MILLISECONDS)
+    .expireAfterWrite(SESSION_KEY_EXPIRATION, TimeUnit.MINUTES)
     .build()
   private val nodeId: Bytes = Hash.sha2_256(routingTable.getSelfEnr())
 
@@ -133,6 +133,8 @@ class DefaultAuthenticationProvider(
   }
 
   companion object {
+    private const val SESSION_KEY_EXPIRATION: Long = 5
+
     private const val ZERO_NONCE_SIZE: Int = 12
     private const val VERSION: Int = 5
 
