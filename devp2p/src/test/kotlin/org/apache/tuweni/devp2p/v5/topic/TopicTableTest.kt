@@ -48,7 +48,7 @@ class TopicTableTest {
 
     val waitTime = topicTable.put(topic, enr)
 
-    assert(waitTime != 0L)
+    assert(waitTime > 0L)
   }
 
   @Test
@@ -58,8 +58,7 @@ class TopicTableTest {
 
     val waitTime = topicTable.put(Topic("C"), enr)
 
-    println(waitTime)
-    assert(waitTime != 0L)
+    assert(waitTime > 0L)
   }
 
   @Test
