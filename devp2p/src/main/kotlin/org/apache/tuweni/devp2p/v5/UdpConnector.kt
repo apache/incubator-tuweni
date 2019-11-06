@@ -137,7 +137,17 @@ interface UdpConnector {
 
   fun getNodeRecords(): ENRStorage
 
+  /**
+   * Provides node's topic registrar
+   *
+   * @return node's topic registrar
+   */
   fun getTopicRegistrar(): TopicRegistrar
 
+  /**
+   * Provides node's session initiator key
+   *
+   * @return node's session initiator key
+   */
   fun getSessionInitiatorKey(nodeId: Bytes): Bytes
 }
