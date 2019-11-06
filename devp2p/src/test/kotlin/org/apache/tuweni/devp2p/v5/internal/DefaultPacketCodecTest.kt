@@ -31,7 +31,6 @@ import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetAddress
 
@@ -49,7 +48,7 @@ class DefaultPacketCodecTest {
   private val destNodeId: Bytes = Bytes.random(32)
 
   @Test
-  fun encodePerformsValidEncodingOfRandomMessasge() {
+  fun encodePerformsValidEncodingOfRandomMessage() {
     val message = RandomMessage()
 
     val encodedResult = codec.encode(message, destNodeId)

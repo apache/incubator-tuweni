@@ -18,6 +18,7 @@ package org.apache.tuweni.devp2p.v5.internal
 
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
+import com.google.common.cache.RemovalCause
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -50,11 +51,10 @@ import org.apache.tuweni.devp2p.v5.packet.PingMessage
 import org.apache.tuweni.devp2p.v5.packet.PongMessage
 import org.apache.tuweni.devp2p.v5.storage.DefaultENRStorage
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
-import org.logl.Logger
-import org.logl.LoggerProvider
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.time.Duration
+import java.util.logging.Logger
 import kotlin.coroutines.CoroutineContext
 
 class DefaultUdpConnector(
@@ -65,13 +65,12 @@ class DefaultUdpConnector(
   private val receiveChannel: CoroutineDatagramChannel = CoroutineDatagramChannel.open(),
   private val nodesTable: RoutingTable = RoutingTable(selfEnr),
   private val packetCodec: PacketCodec = DefaultPacketCodec(keyPair, nodesTable),
-  private val authenticatingPeers: MutableMap<InetSocketAddress, Bytes> = mutableMapOf(),
   private val selfNodeRecord: EthereumNodeRecord = EthereumNodeRecord.fromRLP(selfEnr),
   private val messageListeners: MutableList<MessageObserver> = mutableListOf(),
   override val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : UdpConnector, CoroutineScope {
 
-  private val log: Logger = LoggerProvider.nullProvider().getLogger(DefaultUdpConnector::class.java)
+  private val log: Logger = Logger.getLogger(DefaultUdpConnector::class.java.simpleName)
 
   private val randomMessageHandler: MessageHandler<RandomMessage> = RandomMessageHandler()
   private val whoAreYouMessageHandler: MessageHandler<WhoAreYouMessage> = WhoAreYouMessageHandler()
@@ -88,7 +87,7 @@ class DefaultUdpConnector(
   private val pings: Cache<String, Bytes> = CacheBuilder.newBuilder()
     .expireAfterWrite(Duration.ofMillis(REQUEST_TIMEOUT + PING_TIMEOUT))
     .removalListener<String, Bytes> {
-      if (it.wasEvicted()) {
+      if (RemovalCause.EXPIRED == it.cause) {
         getNodesTable().evict(it.value)
       }
     }.build()
@@ -112,8 +111,7 @@ class DefaultUdpConnector(
   override fun getNodeKeyPair(): SECP256K1.KeyPair = keyPair
 
   override fun getPendingMessage(authTag: Bytes): TrackingMessage = pendingMessages.getIfPresent(authTag.toHexString())
-      ?: throw IllegalArgumentException("Pending message not found")
-
+    ?: throw IllegalArgumentException("Pending message not found")
 
   override fun start() {
     receiveChannel.bind(bindAddress)
@@ -152,17 +150,6 @@ class DefaultUdpConnector(
     messageListeners.remove(observer)
   }
 
-  override fun addPendingNodeId(address: InetSocketAddress, nodeId: Bytes) {
-    authenticatingPeers[address] = nodeId
-  }
-
-  override fun findPendingNodeId(address: InetSocketAddress): Bytes {
-    val result = authenticatingPeers[address]
-      ?: throw IllegalArgumentException("Authenticated peer not found with address ${address.hostName}:${address.port}")
-    authenticatingPeers.remove(address)
-    return result
-  }
-
   override fun getAwaitingPongRecord(nodeId: Bytes): Bytes? {
     val nodeIdHex = nodeId.toHexString()
     val result = pings.getIfPresent(nodeIdHex)
@@ -187,7 +174,7 @@ class DefaultUdpConnector(
     val nonAskedNodes = nearest - askedNodes
     val targetNode = if (nonAskedNodes.isNotEmpty()) nonAskedNodes.random() else Bytes.random(32)
     val distance = getNodesTable().distanceToSelf(targetNode)
-    for(target in nearest.take(LOOKUP_MAX_REQUESTED_NODES)) {
+    for (target in nearest.take(LOOKUP_MAX_REQUESTED_NODES)) {
       val enr = EthereumNodeRecord.fromRLP(target)
       val message = FindNodeMessage(distance = distance)
       val address = InetSocketAddress(enr.ip(), enr.udp())
@@ -198,20 +185,24 @@ class DefaultUdpConnector(
 
   // Process packets
   private fun receiveDatagram() = launch {
-    val datagram = ByteBuffer.allocate(UdpMessage.MAX_UDP_MESSAGE_SIZE)
     while (receiveChannel.isOpen) {
-      datagram.clear()
+      val datagram = ByteBuffer.allocate(UdpMessage.MAX_UDP_MESSAGE_SIZE)
       val address = receiveChannel.receive(datagram) as InetSocketAddress
       datagram.flip()
-      try {
-        processDatagram(datagram, address)
-      } catch (ex: Exception) {
-        log.error(ex.message)
+      launch {
+        try {
+          processDatagram(datagram, address)
+        } catch (ex: Exception) {
+          log.warning("${ex.message}")
+        }
       }
     }
   }
 
   private fun processDatagram(datagram: ByteBuffer, address: InetSocketAddress) {
+    if (datagram.limit() > UdpMessage.MAX_UDP_MESSAGE_SIZE) {
+      return
+    }
     val messageBytes = Bytes.wrapByteBuffer(datagram)
     val decodeResult = packetCodec.decode(messageBytes)
     val message = decodeResult.message
@@ -233,12 +224,14 @@ class DefaultUdpConnector(
       if (!getNodesTable().isEmpty()) {
         val enrBytes = getNodesTable().random()
         val nodeId = Hash.sha2_256(enrBytes)
-        val enr = EthereumNodeRecord.fromRLP(enrBytes)
-        val address = InetSocketAddress(enr.ip(), enr.udp())
-        val message = PingMessage(enrSeq = enr.seq)
+        if (null == pings.getIfPresent(nodeId.toHexString())) {
+          val enr = EthereumNodeRecord.fromRLP(enrBytes)
+          val address = InetSocketAddress(enr.ip(), enr.udp())
+          val message = PingMessage(enrSeq = enr.seq)
 
-        send(address, message, nodeId)
-        pings.put(nodeId.toHexString(), enrBytes)
+          send(address, message, nodeId)
+          pings.put(nodeId.toHexString(), enrBytes)
+        }
       }
       delay(TABLE_REFRESH_RATE)
     }

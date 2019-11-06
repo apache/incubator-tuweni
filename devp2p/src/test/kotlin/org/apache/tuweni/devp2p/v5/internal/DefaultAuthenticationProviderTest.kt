@@ -22,7 +22,6 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
-import org.apache.tuweni.devp2p.v5.misc.SessionKey
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -80,18 +79,5 @@ class DefaultAuthenticationProviderTest {
     val result = authenticationProvider.findSessionKey(Bytes.random(32).toHexString())
 
     assert(result == null)
-  }
-
-  @Test
-  fun setSessionKeyPersistsSessionKeyIfExists() {
-    val nodeId = Bytes.random(32).toHexString()
-    val bytes = Bytes.random(32)
-    val sessionKey = SessionKey(bytes, bytes, bytes)
-
-    authenticationProvider.setSessionKey(nodeId, sessionKey)
-
-    val result = authenticationProvider.findSessionKey(nodeId)
-
-    assert(result != null)
   }
 }

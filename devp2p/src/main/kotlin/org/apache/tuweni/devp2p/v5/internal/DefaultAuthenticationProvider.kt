@@ -43,6 +43,7 @@ class DefaultAuthenticationProvider(
     .build()
   private val nodeId: Bytes = Hash.sha2_256(routingTable.getSelfEnr())
 
+  @Synchronized
   override fun authenticate(handshakeParams: HandshakeInitParameters): AuthHeader {
     // Generate ephemeral key pair
     val ephemeralKeyPair = SECP256K1.KeyPair.random()
@@ -57,7 +58,7 @@ class DefaultAuthenticationProvider(
     // Derive keys
     val sessionKey = SessionKeyGenerator.generate(nodeId, destNodeId, secret, handshakeParams.idNonce)
 
-    setSessionKey(destNodeId.toHexString(), sessionKey)
+    sessionKeys.put(destNodeId.toHexString(), sessionKey)
 
     val signature = sign(keyPair, handshakeParams)
 
@@ -70,14 +71,17 @@ class DefaultAuthenticationProvider(
     )
   }
 
+  @Synchronized
   override fun findSessionKey(nodeId: String): SessionKey? {
     return sessionKeys.getIfPresent(nodeId)
   }
 
+  @Synchronized
   override fun setSessionKey(nodeId: String, sessionKey: SessionKey) {
     sessionKeys.put(nodeId, sessionKey)
   }
 
+  @Synchronized
   override fun finalizeHandshake(senderNodeId: Bytes, authHeader: AuthHeader) {
     val ephemeralPublicKey = SECP256K1.PublicKey.fromBytes(authHeader.ephemeralPublicKey)
     val secret = SECP256K1.calculateKeyAgreement(keyPair.secretKey(), ephemeralPublicKey)
@@ -95,7 +99,7 @@ class DefaultAuthenticationProvider(
       if (!signatureVerified) {
         throw IllegalArgumentException("Signature is not verified")
       }
-      setSessionKey(senderNodeId.toHexString(), sessionKey)
+      sessionKeys.put(senderNodeId.toHexString(), sessionKey)
       routingTable.add(enrRLP)
     }
   }

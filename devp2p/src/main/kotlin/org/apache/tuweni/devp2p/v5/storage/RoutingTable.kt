@@ -69,5 +69,4 @@ class RoutingTable(
   companion object {
     private const val BUCKET_SIZE: Int = 16
   }
-
 }

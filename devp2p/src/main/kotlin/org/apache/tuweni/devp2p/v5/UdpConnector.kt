@@ -71,23 +71,6 @@ interface UdpConnector {
   fun started(): Boolean
 
   /**
-   * Add node identifier which awaits for authentication
-   *
-   * @param address socket address
-   * @param nodeId node identifier
-   */
-  fun addPendingNodeId(address: InetSocketAddress, nodeId: Bytes)
-
-  /**
-   * Get node identifier which awaits for authentication
-   *
-   * @param address socket address
-   *
-   * @return node identifier
-   */
-  fun findPendingNodeId(address: InetSocketAddress): Bytes
-
-  /**
    * Provides node's key pair
    *
    * @return node's key pair
@@ -108,15 +91,49 @@ interface UdpConnector {
    */
   fun getEnr(): EthereumNodeRecord
 
+  /**
+   * Attach observer for listening processed messages
+   *
+   * @param observer instance, proceeding observation
+   */
   fun attachObserver(observer: MessageObserver)
 
+  /**
+   * Remove observer for listening processed message
+   *
+   * @param observer observer for removal
+   */
   fun detachObserver(observer: MessageObserver)
 
+  /**
+   * Get kademlia routing table
+   *
+   * @return kademlia table
+   */
   fun getNodesTable(): RoutingTable
 
+  /**
+   * Retrieve enr of pinging node
+   *
+   * @param node identifier
+   *
+   * @return node record
+   */
   fun getAwaitingPongRecord(nodeId: Bytes): Bytes?
 
+  /**
+   * Retrieve last sent message, in case if it unauthorized and node can resend with authentication header
+   *
+   * @param authTag message's authentication tag
+   *
+   * @return message, including node identifier
+   */
   fun getPendingMessage(authTag: Bytes): TrackingMessage
 
+  /**
+   * Provides enr storage of known nodes
+   *
+   * @return nodes storage
+   */
   fun getNodeRecords(): ENRStorage
 }

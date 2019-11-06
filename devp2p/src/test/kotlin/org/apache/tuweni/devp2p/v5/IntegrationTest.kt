@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.tuweni.devp2p.v5
 
 import kotlinx.coroutines.delay
@@ -7,7 +23,7 @@ import org.apache.tuweni.devp2p.v5.packet.PongMessage
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-class HandshakeTest: AbstractIntegrationTest() {
+class IntegrationTest : AbstractIntegrationTest() {
 
   @Test
   fun testHandshake() {
@@ -47,7 +63,7 @@ class HandshakeTest: AbstractIntegrationTest() {
 
       node2.service.terminate( true)
 
-      delay(3000)
+      delay(5000)
 
       assert(node1.routingTable.isEmpty())
 
@@ -97,13 +113,9 @@ class HandshakeTest: AbstractIntegrationTest() {
     handshake(targetNode, node1)
     handshake(targetNode, node4)
     handshake(targetNode, node7)
-    handshake(targetNode, node10)
-    handshake(targetNode, node13)
-    handshake(targetNode, node14)
-    handshake(targetNode, node17)
 
     var size = targetNode.routingTable.size
-    while(size < 16) {
+    while (size < 8) {
       val newSize = targetNode.routingTable.size
       if (size < newSize) {
         size = newSize
@@ -131,5 +143,4 @@ class HandshakeTest: AbstractIntegrationTest() {
 
     targetNode.service.terminate(true)
   }
-
 }

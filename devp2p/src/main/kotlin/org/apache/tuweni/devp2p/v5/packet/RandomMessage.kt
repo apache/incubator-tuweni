@@ -28,7 +28,7 @@ class RandomMessage(
   }
 
   companion object {
-    fun create(authTag: Bytes, content: Bytes): RandomMessage {
+    fun create(authTag: Bytes, content: Bytes = randomData()): RandomMessage {
       return RandomMessage(authTag, content)
     }
   }

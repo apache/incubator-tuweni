@@ -41,6 +41,6 @@ class FindNodeMessageHandler : MessageHandler<FindNodeMessage> {
   }
 
   companion object {
-    private const val MAX_NODES_IN_RESPONSE: Int = 16
+    private const val MAX_NODES_IN_RESPONSE: Int = 4
   }
 }
