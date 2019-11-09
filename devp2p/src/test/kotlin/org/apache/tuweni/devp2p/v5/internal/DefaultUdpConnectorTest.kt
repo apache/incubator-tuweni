@@ -16,13 +16,18 @@
  */
 package org.apache.tuweni.devp2p.v5.internal
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
+import org.apache.tuweni.devp2p.v5.MessageObserver
 import org.apache.tuweni.devp2p.v5.UdpConnector
 import org.apache.tuweni.devp2p.v5.packet.RandomMessage
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
+import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import org.junit.jupiter.api.AfterEach
@@ -37,18 +42,17 @@ import java.nio.ByteBuffer
 class DefaultUdpConnectorTest {
 
   private val keyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
-  private val nodeId: Bytes = Bytes.fromHexString("0x98EB6D611291FA21F6169BFF382B9369C33D997FE4DC93410987E27796360640")
   private val address: InetSocketAddress = InetSocketAddress(9090)
   private val selfEnr: Bytes = EthereumNodeRecord.toRLP(keyPair, ip = address.address)
 
   private val data: Bytes = UdpMessage.randomData()
-  private val message: RandomMessage = RandomMessage(data)
+  private val message: RandomMessage = RandomMessage(UdpMessage.authTag(), data)
 
-  private var connector: UdpConnector = DefaultUdpConnector(address, keyPair, selfEnr, nodeId)
+  private var connector: UdpConnector = DefaultUdpConnector(address, keyPair, selfEnr)
 
   @BeforeEach
   fun setUp() {
-    connector = DefaultUdpConnector(address, keyPair, selfEnr, nodeId)
+    connector = DefaultUdpConnector(address, keyPair, selfEnr)
   }
 
   @AfterEach
@@ -93,10 +97,66 @@ class DefaultUdpConnectorTest {
       buffer.flip()
 
       val messageContent = Bytes.wrapByteBuffer(buffer).slice(45)
-      val message = RandomMessage.create(messageContent)
+      val message = RandomMessage.create(UdpMessage.authTag(), messageContent)
 
       assert(message.data == data)
     }
     socketChannel.close()
+  }
+
+  @Test
+  @UseExperimental(ExperimentalCoroutinesApi::class)
+  fun attachObserverRegistersListener() {
+    val observer = object : MessageObserver {
+      var result: Channel<RandomMessage> = Channel()
+      override fun observe(message: UdpMessage) {
+        if (message is RandomMessage) {
+          result.offer(message)
+        }
+      }
+    }
+    connector.attachObserver(observer)
+    connector.start()
+
+    assert(observer.result.isEmpty)
+
+    val codec = DefaultPacketCodec(SECP256K1.KeyPair.random(), RoutingTable(Bytes.random(32)))
+    val socketChannel = CoroutineDatagramChannel.open()
+
+    runBlocking {
+      val message = RandomMessage()
+      val encodedRandomMessage = codec.encode(message, Hash.sha2_256(connector.getEnrBytes()))
+      val buffer = ByteBuffer.wrap(encodedRandomMessage.content.toArray())
+      socketChannel.send(buffer, InetSocketAddress(InetAddress.getLocalHost(), 9090))
+      val expectedResult = observer.result.receive()
+      assert(expectedResult.data == message.data)
+    }
+  }
+
+  @Test
+  @UseExperimental(ExperimentalCoroutinesApi::class)
+  fun detachObserverRemovesListener() {
+    val observer = object : MessageObserver {
+      var result: Channel<RandomMessage> = Channel()
+      override fun observe(message: UdpMessage) {
+        if (message is RandomMessage) {
+          result.offer(message)
+        }
+      }
+    }
+    connector.attachObserver(observer)
+    connector.detachObserver(observer)
+    connector.start()
+
+    val codec = DefaultPacketCodec(SECP256K1.KeyPair.random(), RoutingTable(Bytes.random(32)))
+    val socketChannel = CoroutineDatagramChannel.open()
+
+    runBlocking {
+      val message = RandomMessage()
+      val encodedRandomMessage = codec.encode(message, Hash.sha2_256(connector.getEnrBytes()))
+      val buffer = ByteBuffer.wrap(encodedRandomMessage.content.toArray())
+      socketChannel.send(buffer, InetSocketAddress(InetAddress.getLocalHost(), 9090))
+      assert(observer.result.isEmpty)
+    }
   }
 }

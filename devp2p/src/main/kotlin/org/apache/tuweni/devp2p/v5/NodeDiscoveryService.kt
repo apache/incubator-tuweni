@@ -22,10 +22,12 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.internal.DefaultUdpConnector
 import org.apache.tuweni.devp2p.v5.packet.RandomMessage
+import org.apache.tuweni.devp2p.v5.storage.DefaultENRStorage
 import org.apache.tuweni.io.Base64URLSafe
 import java.net.InetSocketAddress
 import java.time.Instant
@@ -46,7 +48,6 @@ interface NodeDiscoveryService {
    * Executes service shut down
    */
   fun terminate(await: Boolean = false)
-
 }
 
 internal class DefaultNodeDiscoveryService(
@@ -63,7 +64,8 @@ internal class DefaultNodeDiscoveryService(
     null,
     bindAddress.port
   ),
-  private val connector: UdpConnector = DefaultUdpConnector(bindAddress, keyPair, selfENR),
+  private val enrStorage: ENRStorage = DefaultENRStorage(),
+  private val connector: UdpConnector = DefaultUdpConnector(bindAddress, keyPair, selfENR, enrStorage),
   override val coroutineContext: CoroutineContext = Dispatchers.Default
 ) : NodeDiscoveryService, CoroutineScope {
 
@@ -91,8 +93,10 @@ internal class DefaultNodeDiscoveryService(
         val randomMessage = RandomMessage()
         val address = InetSocketAddress(enr.ip(), enr.udp())
 
-        connector.addPendingNodeId(address, rlpENR)
-        connector.send(address, randomMessage, rlpENR)
+        val destNodeId = Hash.sha2_256(rlpENR)
+        enrStorage.set(rlpENR)
+        connector.getNodesTable().add(rlpENR)
+        connector.send(address, randomMessage, destNodeId)
       }
     }
   }

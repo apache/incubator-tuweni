@@ -19,14 +19,28 @@ package org.apache.tuweni.devp2p.v5.internal.handler
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.devp2p.v5.MessageHandler
 import org.apache.tuweni.devp2p.v5.UdpConnector
-import org.apache.tuweni.devp2p.v5.packet.RandomMessage
-import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
+import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
+import org.apache.tuweni.devp2p.v5.packet.NodesMessage
 import java.net.InetSocketAddress
 
-class RandomMessageHandler : MessageHandler<RandomMessage> {
+class FindNodeMessageHandler : MessageHandler<FindNodeMessage> {
 
-  override fun handle(message: RandomMessage, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector) {
-    val response = WhoAreYouMessage(message.authTag)
-    connector.send(address, response, srcNodeId)
+  override fun handle(message: FindNodeMessage, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector) {
+    if (0 == message.distance) {
+      val response = NodesMessage(message.requestId, 1, listOf(connector.getEnrBytes()))
+      connector.send(address, response, srcNodeId)
+      return
+    }
+
+    val nodes = connector.getNodesTable().nodesOfDistance(message.distance)
+
+    nodes.chunked(MAX_NODES_IN_RESPONSE).forEach {
+      val response = NodesMessage(message.requestId, nodes.size, it)
+      connector.send(address, response, srcNodeId)
+    }
+  }
+
+  companion object {
+    private const val MAX_NODES_IN_RESPONSE: Int = 4
   }
 }

@@ -19,6 +19,7 @@ package org.apache.tuweni.devp2p.v5.packet
 import org.apache.tuweni.bytes.Bytes
 
 class RandomMessage(
+  val authTag: Bytes = authTag(),
   val data: Bytes = randomData()
 ) : UdpMessage() {
 
@@ -27,8 +28,8 @@ class RandomMessage(
   }
 
   companion object {
-    fun create(content: Bytes): RandomMessage {
-      return RandomMessage(content)
+    fun create(authTag: Bytes, content: Bytes = randomData()): RandomMessage {
+      return RandomMessage(authTag, content)
     }
   }
 }

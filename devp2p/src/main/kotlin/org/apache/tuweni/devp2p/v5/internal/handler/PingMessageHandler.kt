@@ -14,33 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.packet
+package org.apache.tuweni.devp2p.v5.internal.handler
 
 import org.apache.tuweni.bytes.Bytes
-import org.junit.jupiter.api.Test
+import org.apache.tuweni.devp2p.v5.MessageHandler
+import org.apache.tuweni.devp2p.v5.UdpConnector
+import org.apache.tuweni.devp2p.v5.packet.PingMessage
+import org.apache.tuweni.devp2p.v5.packet.PongMessage
+import java.net.InetSocketAddress
 
-class FindNodeMessageTest {
+class PingMessageHandler : MessageHandler<PingMessage> {
 
-  @Test
-  fun encodeCreatesValidBytesSequence() {
-    val expectedEncodingResult = "0xCA88C6E32C5E89CAA75480"
-
-    val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
-    val message = FindNodeMessage(requestId)
-
-    val encodingResult = message.encode()
-    assert(encodingResult.toHexString() == expectedEncodingResult)
-
-    val decodingResult = FindNodeMessage.create(encodingResult)
-
-    assert(decodingResult.requestId == requestId)
-    assert(decodingResult.distance == 0)
-  }
-
-  @Test
-  fun getMessageTypeHasValidIndex() {
-    val message = FindNodeMessage()
-
-    assert(3 == message.getMessageType().toInt())
+  override fun handle(message: PingMessage, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector) {
+    val response = PongMessage(message.requestId, connector.getEnr().seq, address.address, address.port)
+    connector.send(address, response, srcNodeId)
   }
 }
