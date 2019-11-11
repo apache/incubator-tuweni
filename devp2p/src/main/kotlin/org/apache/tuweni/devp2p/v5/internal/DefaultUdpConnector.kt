@@ -18,6 +18,7 @@ package org.apache.tuweni.devp2p.v5.internal
 
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
+import com.google.common.cache.RemovalCause
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -85,7 +86,7 @@ class DefaultUdpConnector(
   override val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : UdpConnector, CoroutineScope {
 
-  private val log: Logger = Logger.getLogger(this.javaClass.simpleName)
+  private val log: Logger = Logger.getLogger(DefaultUdpConnector::class.java.simpleName)
 
   private val randomMessageHandler: MessageHandler<RandomMessage> = RandomMessageHandler()
   private val whoAreYouMessageHandler: MessageHandler<WhoAreYouMessage> = WhoAreYouMessageHandler()
@@ -106,9 +107,11 @@ class DefaultUdpConnector(
     .expireAfterWrite(Duration.ofMillis(REQUEST_TIMEOUT))
     .build()
   private val pings: Cache<String, Bytes> = CacheBuilder.newBuilder()
-    .expireAfterWrite(Duration.ofMillis(REQUEST_TIMEOUT))
+    .expireAfterWrite(Duration.ofMillis(REQUEST_TIMEOUT + PING_TIMEOUT))
     .removalListener<String, Bytes> {
-      getNodesTable().evict(it.value)
+      if (RemovalCause.EXPIRED == it.cause) {
+        getNodesTable().evict(it.value)
+      }
     }.build()
 
   private lateinit var refreshJob: Job
@@ -131,7 +134,6 @@ class DefaultUdpConnector(
 
   override fun getPendingMessage(authTag: Bytes): TrackingMessage = pendingMessages.getIfPresent(authTag.toHexString())
     ?: throw IllegalArgumentException("Pending message not found")
-
 
   override fun start() {
     receiveChannel.bind(bindAddress)
@@ -170,23 +172,6 @@ class DefaultUdpConnector(
     messageListeners.remove(observer)
   }
 
-  override fun addPendingNodeId(address: InetSocketAddress, nodeId: Bytes) {
-    authenticatingPeers[address] = nodeId
-  }
-
-  override fun findPendingNodeId(address: InetSocketAddress): Bytes {
-    val result = authenticatingPeers[address]
-      ?: throw IllegalArgumentException("Authenticated peer not found with address ${address.hostName}:${address.port}")
-    authenticatingPeers.remove(address)
-    return result
-  }
-
-  override fun getTopicTable(): TopicTable = topicTable
-
-  override fun getTicketHolder(): TicketHolder = ticketHolder
-
-  override fun getTopicRegistrar(): TopicRegistrar = topicRegistrar
-
   override fun getAwaitingPongRecord(nodeId: Bytes): Bytes? {
     val nodeIdHex = nodeId.toHexString()
     val result = pings.getIfPresent(nodeIdHex)
@@ -199,11 +184,17 @@ class DefaultUdpConnector(
       ?: throw IllegalArgumentException("Session key not found.")
   }
 
+  override fun getTopicTable(): TopicTable = topicTable
+
+  override fun getTicketHolder(): TicketHolder = ticketHolder
+
+  override fun getTopicRegistrar(): TopicRegistrar = topicRegistrar
+
   // Lookup nodes
   private fun lookupNodes() = launch {
     while (true) {
       val nearestNodes = getNodesTable().nearest(selfEnr)
-      if (16 > nearestNodes.size) {
+      if (REQUIRED_LOOKUP_NODES > nearestNodes.size) {
         lookupInternal(nearestNodes)
       } else {
         askedNodes.clear()
@@ -213,32 +204,38 @@ class DefaultUdpConnector(
   }
 
   private fun lookupInternal(nearest: List<Bytes>) {
-    val targetNode = if (nearest.isNotEmpty()) nearest.random() else Bytes.random(32)
+    val nonAskedNodes = nearest - askedNodes
+    val targetNode = if (nonAskedNodes.isNotEmpty()) nonAskedNodes.random() else Bytes.random(32)
     val distance = getNodesTable().distanceToSelf(targetNode)
-    for (target in nearest.take(3)) {
+    for (target in nearest.take(LOOKUP_MAX_REQUESTED_NODES)) {
       val enr = EthereumNodeRecord.fromRLP(target)
       val message = FindNodeMessage(distance = distance)
       val address = InetSocketAddress(enr.ip(), enr.udp())
       send(address, message, Hash.sha2_256(target))
+      askedNodes.add(target)
     }
   }
 
   // Process packets
   private fun receiveDatagram() = launch {
-    val datagram = ByteBuffer.allocate(UdpMessage.MAX_UDP_MESSAGE_SIZE)
     while (receiveChannel.isOpen) {
-      datagram.clear()
+      val datagram = ByteBuffer.allocate(UdpMessage.MAX_UDP_MESSAGE_SIZE)
       val address = receiveChannel.receive(datagram) as InetSocketAddress
       datagram.flip()
-      try {
-        processDatagram(datagram, address)
-      } catch (ex: Exception) {
-        log.warning(ex.message)
+      launch {
+        try {
+          processDatagram(datagram, address)
+        } catch (ex: Exception) {
+          log.warning("${ex.message}")
+        }
       }
     }
   }
 
   private fun processDatagram(datagram: ByteBuffer, address: InetSocketAddress) {
+    if (datagram.limit() > UdpMessage.MAX_UDP_MESSAGE_SIZE) {
+      return
+    }
     val messageBytes = Bytes.wrapByteBuffer(datagram)
     val decodeResult = packetCodec.decode(messageBytes)
     val message = decodeResult.message
@@ -264,20 +261,26 @@ class DefaultUdpConnector(
       if (!getNodesTable().isEmpty()) {
         val enrBytes = getNodesTable().random()
         val nodeId = Hash.sha2_256(enrBytes)
-        val enr = EthereumNodeRecord.fromRLP(enrBytes)
-        val address = InetSocketAddress(enr.ip(), enr.udp())
-        val message = PingMessage(enrSeq = enr.seq)
+        if (null == pings.getIfPresent(nodeId.toHexString())) {
+          val enr = EthereumNodeRecord.fromRLP(enrBytes)
+          val address = InetSocketAddress(enr.ip(), enr.udp())
+          val message = PingMessage(enrSeq = enr.seq)
 
-        send(address, message, nodeId)
-        pings.put(nodeId.toHexString(), enrBytes)
+          send(address, message, nodeId)
+          pings.put(nodeId.toHexString(), enrBytes)
+        }
       }
       delay(TABLE_REFRESH_RATE)
     }
   }
 
   companion object {
+    private const val REQUIRED_LOOKUP_NODES: Int = 16
+    private const val LOOKUP_MAX_REQUESTED_NODES: Int = 3
+
     private const val LOOKUP_REFRESH_RATE: Long = 3000
     private const val TABLE_REFRESH_RATE: Long = 1000
     private const val REQUEST_TIMEOUT: Long = 1000
+    private const val PING_TIMEOUT: Long = 500
   }
 }

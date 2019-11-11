@@ -34,14 +34,21 @@ class RoutingTable(
     selfId = selfNodeId,
     k = BUCKET_SIZE,
     nodeId = nodeIdCalculation,
-    distanceToSelf = { IntMath.log2(key(it) xorDist selfNodeId, RoundingMode.FLOOR) })
+    distanceToSelf = {
+      val xorResult = key(it) xorDist selfNodeId
+      IntMath.log2(xorResult, RoundingMode.FLOOR)
+    })
 
   val size: Int
     get() = table.size
 
   fun getSelfEnr(): Bytes = selfEnr
 
-  fun add(enr: Bytes): Bytes? = table.add(enr)
+  fun add(enr: Bytes) {
+    if (enr != selfEnr) {
+      table.add(enr)
+    }
+  }
 
   fun nearest(targetId: Bytes, limit: Int = BUCKET_SIZE): List<Bytes> = table.nearest(key(targetId), limit)
 
@@ -62,5 +69,4 @@ class RoutingTable(
   companion object {
     private const val BUCKET_SIZE: Int = 16
   }
-
 }

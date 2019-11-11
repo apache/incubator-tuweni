@@ -14,21 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.storage
+package org.apache.tuweni.devp2p.v5
 
-import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.crypto.Hash
-import org.apache.tuweni.devp2p.v5.ENRStorage
-import java.util.concurrent.ConcurrentHashMap
+import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 
-class DefaultENRStorage : ENRStorage {
+/**
+ * Udp message listener for message observance, generally for test purposes
+ */
+interface MessageObserver {
 
-  private val storage: MutableMap<String, Bytes> = ConcurrentHashMap()
-
-  override fun find(nodeId: Bytes): Bytes? = storage[nodeId.toHexString()]
-
-  override fun set(enr: Bytes) {
-    val nodeId = Hash.sha2_256(enr)
-    storage[nodeId.toHexString()] = enr
-  }
+  /**
+   * Perform message observation
+   *
+   * @param incoming processed message
+   */
+  fun observe(message: UdpMessage)
 }

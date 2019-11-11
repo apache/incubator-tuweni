@@ -34,15 +34,13 @@ class FindNodeMessageHandler : MessageHandler<FindNodeMessage> {
 
     val nodes = connector.getNodesTable().nodesOfDistance(message.distance)
 
-    var caret = 0
-    while (caret < nodes.size) {
-      val response = NodesMessage(message.requestId, nodes.size, nodes.subList(caret, caret + MAX_NODES_IN_RESPONSE))
+    nodes.chunked(MAX_NODES_IN_RESPONSE).forEach {
+      val response = NodesMessage(message.requestId, nodes.size, it)
       connector.send(address, response, srcNodeId)
-      caret += MAX_NODES_IN_RESPONSE
     }
   }
 
   companion object {
-      private const val MAX_NODES_IN_RESPONSE: Int = 16
+    private const val MAX_NODES_IN_RESPONSE: Int = 4
   }
 }

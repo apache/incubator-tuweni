@@ -23,7 +23,6 @@ import org.apache.tuweni.devp2p.v5.AuthenticationProvider
 import org.apache.tuweni.devp2p.v5.PacketCodec
 import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
-import org.apache.tuweni.devp2p.v5.encrypt.SessionKeyGenerator
 import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
 import org.apache.tuweni.devp2p.v5.packet.RandomMessage
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
@@ -59,21 +58,27 @@ class DefaultPacketCodec(
 
     val tag = UdpMessage.tag(nodeId, destNodeId)
     if (message is RandomMessage) {
-      val rlpAuthTag = RLP.encodeValue(message.authTag)
-      val content = message.encode()
-      return EncodeResult(message.authTag, Bytes.wrap(tag, rlpAuthTag, content))
+      return encodeRandomMessage(tag, message)
     }
 
-    val authHeader = handshakeParams?.let { authenticationProvider.authenticate(handshakeParams) }
+    val sessionKey = authenticationProvider.findSessionKey(destNodeId.toHexString())
+    val authHeader = handshakeParams?.let {
+      if (null == sessionKey) {
+        authenticationProvider.authenticate(handshakeParams)
+      } else null
+    }
 
     val initiatorKey = authenticationProvider.findSessionKey(destNodeId.toHexString())?.initiatorKey
-      ?: Bytes.random(SessionKeyGenerator.DERIVED_KEY_SIZE) // encrypt with random key, to initiate handshake
+      ?: return encodeRandomMessage(tag, RandomMessage())
     val messagePlain = Bytes.wrap(message.getMessageType(), message.encode())
     return if (null != authHeader) {
       val encodedHeader = authHeader.asRlp()
       val authTag = authHeader.authTag
       val encryptionMeta = Bytes.wrap(tag, encodedHeader)
       val encryptionResult = AES128GCM.encrypt(initiatorKey, authTag, messagePlain, encryptionMeta)
+      if (message is NodesMessage) {
+        println(encryptionResult)
+      }
       EncodeResult(authTag, Bytes.wrap(tag, encodedHeader, encryptionResult))
     } else {
       val authTag = UdpMessage.authTag()
@@ -134,6 +139,12 @@ class DefaultPacketCodec(
       8 -> TopicQueryMessage.create(message)
       else -> throw IllegalArgumentException("Unknown message retrieved")
     }
+  }
+
+  private fun encodeRandomMessage(tag: Bytes, message: RandomMessage): EncodeResult {
+    val rlpAuthTag = RLP.encodeValue(message.authTag)
+    val content = message.encode()
+    return EncodeResult(message.authTag, Bytes.wrap(tag, rlpAuthTag, content))
   }
 
   companion object {
