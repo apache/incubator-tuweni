@@ -113,7 +113,7 @@ abstract class AbstractIntegrationTest {
     initiator.connector.send(recipient.address, message, recipient.nodeId)
   }
 
-  protected inline fun <reified T : UdpMessage> sendAndAwait(
+  internal inline fun <reified T : UdpMessage> sendAndAwait(
     initiator: TestNode,
     recipient: TestNode,
     message: UdpMessage
