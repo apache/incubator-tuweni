@@ -57,7 +57,7 @@ class TopicRegistrar(
     val nodeEnr = connector.getEnrBytes()
     val message = RegTopicMessage(requestId, nodeEnr, topic, ticket)
 
-    val distance = 1  //TODO: use ticket radius when specification will be created
+    val distance = 1
     val receivers = connector.getNodesTable().nodesOfDistance(distance)
     receivers.forEach { rlp ->
       val receiver = EthereumNodeRecord.fromRLP(rlp)
