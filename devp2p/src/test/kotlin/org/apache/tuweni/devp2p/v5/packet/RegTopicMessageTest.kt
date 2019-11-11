@@ -24,7 +24,7 @@ class RegTopicMessageTest {
   @Test
   fun encodeCreatesValidBytesSequence() {
     val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
-    val message = RegTopicMessage(requestId, Bytes.random(32), Bytes.random(32))
+    val message = RegTopicMessage(requestId, Bytes.random(32), Bytes.random(32), Bytes.random(16))
 
     val encodingResult = message.encode()
 
@@ -37,8 +37,8 @@ class RegTopicMessageTest {
 
   @Test
   fun getMessageTypeHasValidIndex() {
-    val message = RegTopicMessage(ticket = Bytes.random(32), nodeRecord = Bytes.random(32))
+    val message = RegTopicMessage(ticket = Bytes.random(32), nodeRecord = Bytes.random(32), topic = Bytes.random(16))
 
-    assert(7 == message.getMessageType().toInt())
+    assert(5 == message.getMessageType().toInt())
   }
 }

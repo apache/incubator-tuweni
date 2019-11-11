@@ -28,28 +28,40 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
+import org.apache.tuweni.devp2p.v5.AuthenticationProvider
 import org.apache.tuweni.devp2p.v5.ENRStorage
 import org.apache.tuweni.devp2p.v5.MessageHandler
 import org.apache.tuweni.devp2p.v5.MessageObserver
 import org.apache.tuweni.devp2p.v5.PacketCodec
 import org.apache.tuweni.devp2p.v5.UdpConnector
-import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.devp2p.v5.internal.handler.FindNodeMessageHandler
 import org.apache.tuweni.devp2p.v5.internal.handler.NodesMessageHandler
 import org.apache.tuweni.devp2p.v5.internal.handler.PingMessageHandler
 import org.apache.tuweni.devp2p.v5.internal.handler.PongMessageHandler
 import org.apache.tuweni.devp2p.v5.internal.handler.RandomMessageHandler
+import org.apache.tuweni.devp2p.v5.internal.handler.RegConfirmationMessageHandler
+import org.apache.tuweni.devp2p.v5.internal.handler.RegTopicMessageHandler
+import org.apache.tuweni.devp2p.v5.internal.handler.TicketMessageHandler
+import org.apache.tuweni.devp2p.v5.internal.handler.TopicQueryMessageHandler
 import org.apache.tuweni.devp2p.v5.internal.handler.WhoAreYouMessageHandler
-import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
-import org.apache.tuweni.devp2p.v5.packet.RandomMessage
-import org.apache.tuweni.devp2p.v5.packet.UdpMessage
-import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
 import org.apache.tuweni.devp2p.v5.misc.TrackingMessage
+import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
 import org.apache.tuweni.devp2p.v5.packet.NodesMessage
 import org.apache.tuweni.devp2p.v5.packet.PingMessage
 import org.apache.tuweni.devp2p.v5.packet.PongMessage
+import org.apache.tuweni.devp2p.v5.packet.RandomMessage
+import org.apache.tuweni.devp2p.v5.packet.RegConfirmationMessage
+import org.apache.tuweni.devp2p.v5.packet.RegTopicMessage
+import org.apache.tuweni.devp2p.v5.packet.TicketMessage
+import org.apache.tuweni.devp2p.v5.packet.TopicQueryMessage
+import org.apache.tuweni.devp2p.v5.packet.UdpMessage
+import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
 import org.apache.tuweni.devp2p.v5.storage.DefaultENRStorage
+import org.apache.tuweni.devp2p.v5.storage.RoutingTable
+import org.apache.tuweni.devp2p.v5.topic.TicketHolder
+import org.apache.tuweni.devp2p.v5.topic.TopicRegistrar
+import org.apache.tuweni.devp2p.v5.topic.TopicTable
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
@@ -64,6 +76,10 @@ class DefaultUdpConnector(
   private val enrStorage: ENRStorage = DefaultENRStorage(),
   private val receiveChannel: CoroutineDatagramChannel = CoroutineDatagramChannel.open(),
   private val nodesTable: RoutingTable = RoutingTable(selfEnr),
+  private val topicTable: TopicTable = TopicTable(),
+  private val ticketHolder: TicketHolder = TicketHolder(),
+  private val authenticatingPeers: MutableMap<InetSocketAddress, Bytes> = mutableMapOf(),
+  private val authenticationProvider: AuthenticationProvider = DefaultAuthenticationProvider(keyPair, nodesTable),
   private val packetCodec: PacketCodec = DefaultPacketCodec(keyPair, nodesTable),
   private val selfNodeRecord: EthereumNodeRecord = EthereumNodeRecord.fromRLP(selfEnr),
   private val messageListeners: MutableList<MessageObserver> = mutableListOf(),
@@ -78,6 +94,12 @@ class DefaultUdpConnector(
   private val nodesMessageHandler: MessageHandler<NodesMessage> = NodesMessageHandler()
   private val pingMessageHandler: MessageHandler<PingMessage> = PingMessageHandler()
   private val pongMessageHandler: MessageHandler<PongMessage> = PongMessageHandler()
+  private val regConfirmationMessageHandler: MessageHandler<RegConfirmationMessage> = RegConfirmationMessageHandler()
+  private val regTopicMessageHandler: MessageHandler<RegTopicMessage> = RegTopicMessageHandler()
+  private val ticketMessageHandler: MessageHandler<TicketMessage> = TicketMessageHandler()
+  private val topicQueryMessageHandler: MessageHandler<TopicQueryMessage> = TopicQueryMessageHandler()
+
+  private val topicRegistrar = TopicRegistrar(coroutineContext, this)
 
   private val askedNodes: MutableList<Bytes> = mutableListOf()
 
@@ -157,6 +179,17 @@ class DefaultUdpConnector(
     return result
   }
 
+  override fun getSessionInitiatorKey(nodeId: Bytes): Bytes {
+    return authenticationProvider.findSessionKey(nodeId.toHexString())?.initiatorKey
+      ?: throw IllegalArgumentException("Session key not found.")
+  }
+
+  override fun getTopicTable(): TopicTable = topicTable
+
+  override fun getTicketHolder(): TicketHolder = ticketHolder
+
+  override fun getTopicRegistrar(): TopicRegistrar = topicRegistrar
+
   // Lookup nodes
   private fun lookupNodes() = launch {
     while (true) {
@@ -213,6 +246,10 @@ class DefaultUdpConnector(
       is NodesMessage -> nodesMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
       is PingMessage -> pingMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
       is PongMessage -> pongMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
+      is RegTopicMessage -> regTopicMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
+      is RegConfirmationMessage -> regConfirmationMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
+      is TicketMessage -> ticketMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
+      is TopicQueryMessage -> topicQueryMessageHandler.handle(message, address, decodeResult.srcNodeId, this)
       else -> throw IllegalArgumentException("Unexpected message has been received - ${message::class.java.simpleName}")
     }
     messageListeners.forEach { it.observe(message) }

@@ -24,7 +24,7 @@ class TopicQueryMessage(
   val topic: Bytes
 ) : UdpMessage() {
 
-  private val encodedMessageType: Bytes = Bytes.fromHexString("0x09")
+  private val encodedMessageType: Bytes = Bytes.fromHexString("0x08")
 
   override fun getMessageType(): Bytes = encodedMessageType
 

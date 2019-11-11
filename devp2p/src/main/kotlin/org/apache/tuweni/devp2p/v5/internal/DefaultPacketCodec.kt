@@ -36,7 +36,6 @@ import org.apache.tuweni.devp2p.v5.packet.PingMessage
 import org.apache.tuweni.devp2p.v5.packet.PongMessage
 import org.apache.tuweni.devp2p.v5.packet.RegConfirmationMessage
 import org.apache.tuweni.devp2p.v5.packet.RegTopicMessage
-import org.apache.tuweni.devp2p.v5.packet.ReqTicketMessage
 import org.apache.tuweni.devp2p.v5.packet.TicketMessage
 import org.apache.tuweni.devp2p.v5.packet.TopicQueryMessage
 import org.apache.tuweni.rlp.RLP
@@ -134,11 +133,10 @@ class DefaultPacketCodec(
       2 -> PongMessage.create(message)
       3 -> FindNodeMessage.create(message)
       4 -> NodesMessage.create(message)
-      5 -> ReqTicketMessage.create(message)
+      5 -> RegTopicMessage.create(message)
       6 -> TicketMessage.create(message)
-      7 -> RegTopicMessage.create(message)
-      8 -> RegConfirmationMessage.create(message)
-      9 -> TopicQueryMessage.create(message)
+      7 -> RegConfirmationMessage.create(message)
+      8 -> TopicQueryMessage.create(message)
       else -> throw IllegalArgumentException("Unknown message retrieved")
     }
   }

@@ -23,6 +23,9 @@ import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
 import org.apache.tuweni.devp2p.v5.misc.TrackingMessage
+import org.apache.tuweni.devp2p.v5.topic.TicketHolder
+import org.apache.tuweni.devp2p.v5.topic.TopicRegistrar
+import org.apache.tuweni.devp2p.v5.topic.TopicTable
 import java.net.InetSocketAddress
 
 /**
@@ -136,4 +139,32 @@ interface UdpConnector {
    * @return nodes storage
    */
   fun getNodeRecords(): ENRStorage
+
+  /**
+   * Provides node's topic table
+   *
+   * @return node's topic table
+   */
+  fun getTopicTable(): TopicTable
+
+  /**
+   * Provides node's ticket holder
+   *
+   * @return node's ticket holder
+   */
+  fun getTicketHolder(): TicketHolder
+
+  /**
+   * Provides node's topic registrar
+   *
+   * @return node's topic registrar
+   */
+  fun getTopicRegistrar(): TopicRegistrar
+
+  /**
+   * Provides node's session initiator key
+   *
+   * @return node's session initiator key
+   */
+  fun getSessionInitiatorKey(nodeId: Bytes): Bytes
 }

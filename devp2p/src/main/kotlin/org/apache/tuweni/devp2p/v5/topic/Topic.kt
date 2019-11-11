@@ -14,30 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.packet
+package org.apache.tuweni.devp2p.v5.topic
 
 import org.apache.tuweni.bytes.Bytes
-import org.junit.jupiter.api.Test
 
-class TopicQueryMessageTest {
+data class Topic(
+  val content: String
+) {
 
-  @Test
-  fun encodeCreatesValidBytesSequence() {
-    val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
-    val message = TopicQueryMessage(requestId, Bytes.random(32))
+  fun toBytes(): Bytes = Bytes.fromHexString(content)
 
-    val encodingResult = message.encode()
-
-    val decodingResult = TopicQueryMessage.create(encodingResult)
-
-    assert(decodingResult.requestId == requestId)
-    assert(decodingResult.topic == message.topic)
-  }
-
-  @Test
-  fun getMessageTypeHasValidIndex() {
-    val message = TopicQueryMessage(topic = Bytes.random(32))
-
-    assert(8 == message.getMessageType().toInt())
-  }
 }

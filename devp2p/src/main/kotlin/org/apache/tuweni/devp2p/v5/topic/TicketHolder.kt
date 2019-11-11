@@ -14,34 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.packet
+package org.apache.tuweni.devp2p.v5.topic
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.rlp.RLP
 
-class ReqTicketMessage(
-  val requestId: Bytes = UdpMessage.requestId(),
-  val topic: Bytes
-) : UdpMessage() {
+class TicketHolder {
 
-  private val encodedMessageType: Bytes = Bytes.fromHexString("0x05")
+  private val tickets: MutableMap<Bytes, Bytes> = hashMapOf() // requestId to ticket
 
-  override fun getMessageType(): Bytes = encodedMessageType
 
-  override fun encode(): Bytes {
-    return RLP.encodeList { writer ->
-      writer.writeValue(requestId)
-      writer.writeValue(topic)
-    }
+  fun put(requestId: Bytes, ticket: Bytes) {
+    tickets[requestId] = ticket
   }
 
-  companion object {
-    fun create(content: Bytes): ReqTicketMessage {
-      return RLP.decodeList(content) { reader ->
-        val requestId = reader.readValue()
-        val topic = reader.readValue()
-        return@decodeList ReqTicketMessage(requestId, topic)
-      }
-    }
-  }
+  fun get(requestId: Bytes): Bytes =
+    tickets[requestId] ?: throw IllegalArgumentException("Ticket not found.")
+
+  fun remove(requestId: Bytes): Bytes? = tickets.remove(requestId)
+
+  fun contains(ticket: Bytes): Boolean = tickets.containsValue(ticket)
 }

@@ -21,17 +21,17 @@ import org.apache.tuweni.rlp.RLP
 
 class RegConfirmationMessage(
   val requestId: Bytes = UdpMessage.requestId(),
-  val registered: Boolean = true
+  val topic: Bytes
 ) : UdpMessage() {
 
-  private val encodedMessageType: Bytes = Bytes.fromHexString("0x08")
+  private val encodedMessageType: Bytes = Bytes.fromHexString("0x07")
 
   override fun getMessageType(): Bytes = encodedMessageType
 
   override fun encode(): Bytes {
     return RLP.encodeList { writer ->
       writer.writeValue(requestId)
-      writer.writeByte(if (registered) 1 else 0)
+      writer.writeValue(topic)
     }
   }
 
@@ -39,8 +39,8 @@ class RegConfirmationMessage(
     fun create(content: Bytes): RegConfirmationMessage {
       return RLP.decodeList(content) { reader ->
         val requestId = reader.readValue()
-        val registered = (reader.readByte() == 1.toByte())
-        return@decodeList RegConfirmationMessage(requestId, registered)
+        val topic = reader.readValue()
+        return@decodeList RegConfirmationMessage(requestId, topic)
       }
     }
   }

@@ -30,6 +30,8 @@ import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
 import org.apache.tuweni.devp2p.v5.storage.DefaultENRStorage
 import org.apache.tuweni.devp2p.v5.storage.RoutingTable
+import org.apache.tuweni.devp2p.v5.topic.TicketHolder
+import org.apache.tuweni.devp2p.v5.topic.TopicTable
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetAddress
@@ -47,6 +49,8 @@ abstract class AbstractIntegrationTest {
     routingTable: RoutingTable = RoutingTable(enr),
     address: InetSocketAddress = InetSocketAddress(InetAddress.getLocalHost(), port),
     authenticationProvider: AuthenticationProvider = DefaultAuthenticationProvider(keyPair, routingTable),
+    topicTable: TopicTable = TopicTable(),
+    ticketHolder: TicketHolder = TicketHolder(),
     packetCodec: PacketCodec = DefaultPacketCodec(
       keyPair,
       routingTable,
@@ -58,7 +62,10 @@ abstract class AbstractIntegrationTest {
       enr,
       enrStorage,
       nodesTable = routingTable,
-      packetCodec = packetCodec
+      packetCodec = packetCodec,
+      authenticationProvider = authenticationProvider,
+      topicTable = topicTable,
+      ticketHolder = ticketHolder
     ),
     service: NodeDiscoveryService =
       DefaultNodeDiscoveryService(
@@ -81,7 +88,9 @@ abstract class AbstractIntegrationTest {
       authenticationProvider,
       packetCodec,
       connector,
-      service
+      service,
+      topicTable,
+      ticketHolder
     )
   }
 
@@ -97,14 +106,14 @@ abstract class AbstractIntegrationTest {
     }
   }
 
-  protected fun send(initiator: TestNode, recipient: TestNode, message: UdpMessage) {
+  internal fun send(initiator: TestNode, recipient: TestNode, message: UdpMessage) {
     if (message is RandomMessage || message is WhoAreYouMessage) {
       throw IllegalArgumentException("Can't send handshake initiation message")
     }
     initiator.connector.send(recipient.address, message, recipient.nodeId)
   }
 
-  protected inline fun <reified T : UdpMessage> sendAndAwait(
+  internal inline fun <reified T : UdpMessage> sendAndAwait(
     initiator: TestNode,
     recipient: TestNode,
     message: UdpMessage
@@ -141,5 +150,7 @@ class TestNode(
   val packetCodec: PacketCodec,
   val connector: UdpConnector,
   val service: NodeDiscoveryService,
+  val topicTable: TopicTable,
+  val ticketHolder: TicketHolder,
   val nodeId: Bytes = Hash.sha2_256(enr)
 )

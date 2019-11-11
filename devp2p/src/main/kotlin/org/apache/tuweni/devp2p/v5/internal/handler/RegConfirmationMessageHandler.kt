@@ -14,30 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.packet
+package org.apache.tuweni.devp2p.v5.internal.handler
 
 import org.apache.tuweni.bytes.Bytes
-import org.junit.jupiter.api.Test
+import org.apache.tuweni.devp2p.v5.MessageHandler
+import org.apache.tuweni.devp2p.v5.UdpConnector
+import org.apache.tuweni.devp2p.v5.packet.RegConfirmationMessage
+import java.net.InetSocketAddress
 
-class TopicQueryMessageTest {
 
-  @Test
-  fun encodeCreatesValidBytesSequence() {
-    val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
-    val message = TopicQueryMessage(requestId, Bytes.random(32))
+class RegConfirmationMessageHandler : MessageHandler<RegConfirmationMessage> {
 
-    val encodingResult = message.encode()
-
-    val decodingResult = TopicQueryMessage.create(encodingResult)
-
-    assert(decodingResult.requestId == requestId)
-    assert(decodingResult.topic == message.topic)
+  override fun handle(
+    message: RegConfirmationMessage,
+    address: InetSocketAddress,
+    srcNodeId: Bytes,
+    connector: UdpConnector
+  ) {
+    val ticketHolder = connector.getTicketHolder()
+    ticketHolder.remove(message.requestId)
+    connector.getTopicRegistrar().registerTopic(message.topic, true)
   }
 
-  @Test
-  fun getMessageTypeHasValidIndex() {
-    val message = TopicQueryMessage(topic = Bytes.random(32))
-
-    assert(8 == message.getMessageType().toInt())
-  }
 }

@@ -21,19 +21,21 @@ import org.apache.tuweni.rlp.RLP
 
 class RegTopicMessage(
   val requestId: Bytes = UdpMessage.requestId(),
-  val ticket: Bytes,
-  val nodeRecord: Bytes
+  val nodeRecord: Bytes,
+  val topic: Bytes,
+  val ticket: Bytes
 ) : UdpMessage() {
 
-  private val encodedMessageType: Bytes = Bytes.fromHexString("0x07")
+  private val encodedMessageType: Bytes = Bytes.fromHexString("0x05")
 
   override fun getMessageType(): Bytes = encodedMessageType
 
   override fun encode(): Bytes {
     return RLP.encodeList { writer ->
       writer.writeValue(requestId)
-      writer.writeValue(ticket)
       writer.writeValue(nodeRecord)
+      writer.writeValue(topic)
+      writer.writeValue(ticket)
     }
   }
 
@@ -41,9 +43,10 @@ class RegTopicMessage(
     fun create(content: Bytes): RegTopicMessage {
       return RLP.decodeList(content) { reader ->
         val requestId = reader.readValue()
-        val ticket = reader.readValue()
         val nodeRecord = reader.readValue()
-        return@decodeList RegTopicMessage(requestId, ticket, nodeRecord)
+        val topic = reader.readValue()
+        val ticket = reader.readValue()
+        return@decodeList RegTopicMessage(requestId, nodeRecord, topic, ticket)
       }
     }
   }
