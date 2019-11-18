@@ -63,7 +63,7 @@ class ConcatenatedBytesTest {
   void shouldReadConcatenatedValue() {
     Bytes bytes = wrap(fromHexString("0x01234567"), fromHexString("0x89ABCDEF"));
     assertEquals(8, bytes.size());
-    assertEquals("0x0123456789ABCDEF", bytes.toHexString());
+    assertEquals("0x0123456789abcdef", bytes.toHexString());
   }
 
   @Test
@@ -74,16 +74,16 @@ class ConcatenatedBytesTest {
         fromHexString("0x01234567"),
         fromHexString("0x89ABCDEF"));
     assertEquals("0x", bytes.slice(4, 0).toHexString());
-    assertEquals("0x0123456789ABCDEF0123456789ABCDEF", bytes.slice(0, 16).toHexString());
+    assertEquals("0x0123456789abcdef0123456789abcdef", bytes.slice(0, 16).toHexString());
     assertEquals("0x01234567", bytes.slice(0, 4).toHexString());
     assertEquals("0x0123", bytes.slice(0, 2).toHexString());
     assertEquals("0x6789", bytes.slice(3, 2).toHexString());
-    assertEquals("0x89ABCDEF", bytes.slice(4, 4).toHexString());
-    assertEquals("0xABCD", bytes.slice(5, 2).toHexString());
-    assertEquals("0xEF012345", bytes.slice(7, 4).toHexString());
+    assertEquals("0x89abcdef", bytes.slice(4, 4).toHexString());
+    assertEquals("0xabcd", bytes.slice(5, 2).toHexString());
+    assertEquals("0xef012345", bytes.slice(7, 4).toHexString());
     assertEquals("0x01234567", bytes.slice(8, 4).toHexString());
-    assertEquals("0x456789ABCDEF", bytes.slice(10, 6).toHexString());
-    assertEquals("0x89ABCDEF", bytes.slice(12, 4).toHexString());
+    assertEquals("0x456789abcdef", bytes.slice(10, 6).toHexString());
+    assertEquals("0x89abcdef", bytes.slice(12, 4).toHexString());
   }
 
   @Test
@@ -94,6 +94,6 @@ class ConcatenatedBytesTest {
         fromHexString("0x01234567"),
         fromHexString("0x89ABCDEF"));
     assertEquals(24, bytes.size());
-    assertEquals("0x0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF", bytes.toHexString());
+    assertEquals("0x0123456789abcdef0123456789abcdef0123456789abcdef", bytes.toHexString());
   }
 }

@@ -518,7 +518,7 @@ abstract class CommonBytesTests {
     assertEquals("0x", Bytes.EMPTY.toString());
 
     assertEquals("0x01", of(1).toString());
-    assertEquals("0x0AFF03", of(0x0a, 0xff, 0x03).toString());
+    assertEquals("0x0aff03", of(0x0a, 0xff, 0x03).toString());
   }
 
   @Test

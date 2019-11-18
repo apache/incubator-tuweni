@@ -24,7 +24,7 @@ class RandomMessageTest {
   @Test
   fun encodeCreatesValidBytesSequence() {
     val expectedEncodingResult =
-      "0xB53CCF732982B8E950836D1E02898C8B38CFDBFDF86BC65C8826506B454E14618EA73612A0F5582C130FF666"
+      "0xb53ccf732982b8e950836d1e02898c8b38cfdbfdf86bc65c8826506b454e14618ea73612a0f5582c130ff666"
 
     val data = Bytes.fromHexString(expectedEncodingResult)
     val message = RandomMessage(UdpMessage.authTag(), data)
