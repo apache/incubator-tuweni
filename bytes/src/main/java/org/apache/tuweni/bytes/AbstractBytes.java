@@ -18,7 +18,7 @@ package org.apache.tuweni.bytes;
  */
 public abstract class AbstractBytes implements Bytes {
 
-  static final char[] HEX_CODE = "0123456789ABCDEF".toCharArray();
+  static final char[] HEX_CODE = "0123456789abcdef".toCharArray();
 
   /**
    * Compare this value and the provided one for equality.

@@ -23,7 +23,7 @@ class FindNodeMessageTest {
 
   @Test
   fun encodeCreatesValidBytesSequence() {
-    val expectedEncodingResult = "0xCA88C6E32C5E89CAA75480"
+    val expectedEncodingResult = "0xca88c6e32c5e89caa75480"
 
     val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
     val message = FindNodeMessage(requestId)
