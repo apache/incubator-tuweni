@@ -23,5 +23,4 @@ data class Topic(
 ) {
 
   fun toBytes(): Bytes = Bytes.fromHexString(content)
-
 }

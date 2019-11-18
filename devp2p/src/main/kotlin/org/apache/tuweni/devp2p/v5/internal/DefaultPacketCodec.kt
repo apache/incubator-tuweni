@@ -21,26 +21,25 @@ import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.v5.AuthenticationProvider
 import org.apache.tuweni.devp2p.v5.PacketCodec
-import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
-import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
-import org.apache.tuweni.devp2p.v5.packet.RandomMessage
-import org.apache.tuweni.devp2p.v5.packet.UdpMessage
-import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
 import org.apache.tuweni.devp2p.v5.misc.AuthHeader
 import org.apache.tuweni.devp2p.v5.misc.DecodeResult
 import org.apache.tuweni.devp2p.v5.misc.EncodeResult
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
+import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
 import org.apache.tuweni.devp2p.v5.packet.NodesMessage
 import org.apache.tuweni.devp2p.v5.packet.PingMessage
 import org.apache.tuweni.devp2p.v5.packet.PongMessage
+import org.apache.tuweni.devp2p.v5.packet.RandomMessage
 import org.apache.tuweni.devp2p.v5.packet.RegConfirmationMessage
 import org.apache.tuweni.devp2p.v5.packet.RegTopicMessage
 import org.apache.tuweni.devp2p.v5.packet.TicketMessage
 import org.apache.tuweni.devp2p.v5.packet.TopicQueryMessage
+import org.apache.tuweni.devp2p.v5.packet.UdpMessage
+import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
+import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.rlp.RLPReader
-import kotlin.IllegalArgumentException
 
 class DefaultPacketCodec(
   private val keyPair: SECP256K1.KeyPair,

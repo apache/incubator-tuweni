@@ -26,6 +26,7 @@ import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.io.Base64URLSafe
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetAddress
@@ -38,10 +39,10 @@ class DefaultNodeDiscoveryServiceTest {
 
   private val recipientKeyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
   private val recipientEnr: Bytes =
-    EthereumNodeRecord.toRLP(recipientKeyPair, ip = InetAddress.getLocalHost(), udp = 9091)
+    EthereumNodeRecord.toRLP(recipientKeyPair, ip = InetAddress.getLocalHost(), udp = 9001)
   private val encodedEnr: String = "enr:${Base64URLSafe.encode(recipientEnr)}"
   private val keyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
-  private val localPort: Int = 9090
+  private val localPort: Int = 9000
   private val bindAddress: InetSocketAddress = InetSocketAddress(localPort)
   private val bootstrapENRList: List<String> = listOf(encodedEnr)
   private val enrSeq: Long = Instant.now().toEpochMilli()
@@ -68,37 +69,26 @@ class DefaultNodeDiscoveryServiceTest {
     )
 
   @Test
-  fun startInitializesConnectorAndBootstraps() {
+  fun startInitializesConnectorAndBootstraps() = runBlocking {
     val recipientSocket = CoroutineDatagramChannel.open()
-    recipientSocket.bind(InetSocketAddress(9091))
+    recipientSocket.bind(InetSocketAddress(9001))
 
     nodeDiscoveryService.start()
 
-    runBlocking {
-      val buffer = ByteBuffer.allocate(UdpMessage.MAX_UDP_MESSAGE_SIZE)
-      recipientSocket.receive(buffer)
-      buffer.flip()
-      val receivedBytes = Bytes.wrapByteBuffer(buffer)
-      val content = receivedBytes.slice(45)
+    val buffer = ByteBuffer.allocate(UdpMessage.MAX_UDP_MESSAGE_SIZE)
+    recipientSocket.receive(buffer)
+    buffer.flip()
+    val receivedBytes = Bytes.wrapByteBuffer(buffer)
+    val content = receivedBytes.slice(45)
 
-      val message = RandomMessage.create(UdpMessage.authTag(), content)
-      assert(message.data.size() == UdpMessage.RANDOM_DATA_LENGTH)
-    }
+    val message = RandomMessage.create(UdpMessage.authTag(), content)
+    assertTrue(message.data.size() == UdpMessage.RANDOM_DATA_LENGTH)
 
-    assert(connector.started())
+    assertTrue(connector.started())
 
     recipientSocket.close()
     nodeDiscoveryService.terminate()
-  }
 
-  @Test
-  fun terminateShutsDownService() {
-    nodeDiscoveryService.start()
-
-    assert(connector.started())
-
-    nodeDiscoveryService.terminate(true)
-
-    assert(!connector.available())
+    assertTrue(!connector.started())
   }
 }

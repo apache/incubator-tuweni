@@ -16,8 +16,10 @@
  */
 package org.apache.tuweni.devp2p.v5
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.delay
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
@@ -40,7 +42,8 @@ import java.net.InetSocketAddress
 @ExtendWith(BouncyCastleExtension::class)
 abstract class AbstractIntegrationTest {
 
-  protected fun createNode(
+  @UseExperimental(ExperimentalCoroutinesApi::class)
+  protected suspend fun createNode(
     port: Int = 9090,
     bootList: List<String> = emptyList(),
     enrStorage: ENRStorage = DefaultENRStorage(),
@@ -73,7 +76,8 @@ abstract class AbstractIntegrationTest {
         port,
         enrStorage = enrStorage,
         bootstrapENRList = bootList,
-        connector = connector
+        connector = connector,
+        coroutineContext = Dispatchers.Unconfined
       )
   ): TestNode {
     service.start()
@@ -94,26 +98,23 @@ abstract class AbstractIntegrationTest {
     )
   }
 
-  protected fun handshake(initiator: TestNode, recipient: TestNode): Boolean {
+  protected suspend fun handshake(initiator: TestNode, recipient: TestNode): Boolean {
     initiator.enrStorage.set(recipient.enr)
     initiator.routingTable.add(recipient.enr)
     val message = RandomMessage()
     initiator.connector.send(recipient.address, message, recipient.nodeId)
-    while (true) {
-      if (null != recipient.authenticationProvider.findSessionKey(initiator.nodeId.toHexString())) {
-        return true
-      }
-    }
+    delay(1000)
+    return (null != recipient.authenticationProvider.findSessionKey(initiator.nodeId.toHexString()))
   }
 
-  internal fun send(initiator: TestNode, recipient: TestNode, message: UdpMessage) {
+  internal suspend fun send(initiator: TestNode, recipient: TestNode, message: UdpMessage) {
     if (message is RandomMessage || message is WhoAreYouMessage) {
       throw IllegalArgumentException("Can't send handshake initiation message")
     }
     initiator.connector.send(recipient.address, message, recipient.nodeId)
   }
 
-  internal inline fun <reified T : UdpMessage> sendAndAwait(
+  internal suspend inline fun <reified T : UdpMessage> sendAndAwait(
     initiator: TestNode,
     recipient: TestNode,
     message: UdpMessage
@@ -128,13 +129,11 @@ abstract class AbstractIntegrationTest {
       }
     }
 
-    return runBlocking {
-      initiator.connector.attachObserver(listener)
-      send(initiator, recipient, message)
-      val result = listener.result.receive()
-      initiator.connector.detachObserver(listener)
-      result
-    }
+    initiator.connector.attachObserver(listener)
+    send(initiator, recipient, message)
+    val result = listener.result.receive()
+    initiator.connector.detachObserver(listener)
+    return result
   }
 }
 

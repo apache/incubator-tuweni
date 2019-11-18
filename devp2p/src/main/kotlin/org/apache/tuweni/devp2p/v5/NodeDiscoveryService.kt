@@ -18,9 +18,7 @@ package org.apache.tuweni.devp2p.v5
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
@@ -42,12 +40,12 @@ interface NodeDiscoveryService {
   /**
    * Initializes node discovery
    */
-  fun start()
+  suspend fun start()
 
   /**
    * Executes service shut down
    */
-  fun terminate(await: Boolean = false)
+  suspend fun terminate()
 }
 
 internal class DefaultNodeDiscoveryService(
@@ -69,21 +67,16 @@ internal class DefaultNodeDiscoveryService(
   override val coroutineContext: CoroutineContext = Dispatchers.Default
 ) : NodeDiscoveryService, CoroutineScope {
 
-  override fun start() {
+  override suspend fun start() {
     connector.start()
     launch { bootstrap() }
   }
 
-  override fun terminate(await: Boolean) {
-    runBlocking {
-      val job = async { connector.terminate() }
-      if (await) {
-        job.await()
-      }
-    }
+  override suspend fun terminate() {
+    connector.terminate()
   }
 
-  private fun bootstrap() {
+  private suspend fun bootstrap() {
     bootstrapENRList.forEach {
       if (it.startsWith("enr:")) {
         val encodedEnr = it.substringAfter("enr:")

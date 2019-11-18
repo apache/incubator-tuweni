@@ -25,7 +25,12 @@ import java.net.InetSocketAddress
 
 class TicketMessageHandler : MessageHandler<TicketMessage> {
 
-  override fun handle(message: TicketMessage, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector) {
+  override suspend fun handle(
+    message: TicketMessage,
+    address: InetSocketAddress,
+    srcNodeId: Bytes,
+    connector: UdpConnector
+  ) {
     val ticketHolder = connector.getTicketHolder()
     ticketHolder.put(message.requestId, message.ticket)
 

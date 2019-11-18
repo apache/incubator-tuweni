@@ -31,5 +31,5 @@ interface MessageHandler<T : UdpMessage> {
    * @param srcNodeId sender node identifier
    * @param connector connector for response send if required
    */
-  fun handle(message: T, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector)
+  suspend fun handle(message: T, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector)
 }

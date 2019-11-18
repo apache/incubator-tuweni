@@ -88,7 +88,6 @@ fun <E> MutableList<E>.orderedInsert(element: E, comparison: (E, E) -> Int) {
  * @param nodeId a function for obtaining the id of a network node
  * @param <K> the network node type
  *
- * @author Chris Leishman - https://cleishm.github.io/
  */
 class KademliaRoutingTable<T>(
   private val selfId: ByteArray,

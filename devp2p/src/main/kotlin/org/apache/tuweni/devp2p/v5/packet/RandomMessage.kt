@@ -22,6 +22,9 @@ class RandomMessage(
   val authTag: Bytes = authTag(),
   val data: Bytes = randomData()
 ) : UdpMessage() {
+  override fun getMessageType(): Bytes {
+    throw UnsupportedOperationException("Message type unsupported for random messages")
+  }
 
   override fun encode(): Bytes {
     return data

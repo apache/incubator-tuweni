@@ -33,7 +33,6 @@ import java.nio.channels.WritableByteChannel
 /**
  * A co-routine channel that can read bytes.
  *
- * @author Chris Leishman - https://cleishm.github.io/
  */
 interface ReadableCoroutineByteChannel {
   /**
@@ -96,7 +95,6 @@ internal class ReadableCoroutineByteChannelMixin<T>(
 /**
  * A co-routine channel that can write bytes.
  *
- * @author Chris Leishman - https://cleishm.github.io/
  */
 interface WritableCoroutineByteChannel {
 
@@ -155,7 +153,6 @@ internal class WritableCoroutineByteChannelMixin<T>(
 /**
  * A co-routine channel that can read and write bytes.
  *
- * @author Chris Leishman - https://cleishm.github.io/
  */
 interface CoroutineByteChannel : ReadableCoroutineByteChannel, WritableCoroutineByteChannel
 
@@ -172,7 +169,6 @@ internal class CoroutineByteChannelMixin<T>(
 /**
  * A channel that can read bytes into a sequence of buffers.
  *
- * @author Chris Leishman - https://cleishm.github.io/
  */
 interface ScatteringCoroutineByteChannel : ReadableCoroutineByteChannel {
   /**
@@ -239,7 +235,6 @@ internal class ScatteringCoroutineByteChannelMixin<T>(
 /**
  * A channel that can write bytes from a sequence of buffers.
  *
- * @author Chris Leishman - https://cleishm.github.io/
  */
 interface GatheringCoroutineByteChannel : WritableCoroutineByteChannel {
   /**

@@ -21,12 +21,6 @@ import org.apache.tuweni.crypto.Hash
 
 abstract class UdpMessage {
 
-  abstract fun encode(): Bytes
-
-  open fun getMessageType(): Bytes {
-    throw UnsupportedOperationException("Message don't identified with type")
-  }
-
   companion object {
 
     const val MAX_UDP_MESSAGE_SIZE = 1280
@@ -61,4 +55,8 @@ abstract class UdpMessage {
 
     fun idNonce(): Bytes = Bytes.random(ID_NONCE_LENGTH)
   }
+
+  abstract fun encode(): Bytes
+
+  abstract fun getMessageType(): Bytes
 }

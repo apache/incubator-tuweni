@@ -29,7 +29,6 @@ import java.nio.channels.UnsupportedAddressTypeException
 /**
  * A co-routine based network channel.
  *
- * @author Chris Leishman - https://cleishm.github.io/
  */
 interface CoroutineNetworkChannel : NetworkChannel {
 

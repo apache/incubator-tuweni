@@ -25,7 +25,12 @@ import java.net.InetSocketAddress
 
 class RandomMessageHandler : MessageHandler<RandomMessage> {
 
-  override fun handle(message: RandomMessage, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector) {
+  override suspend fun handle(
+    message: RandomMessage,
+    address: InetSocketAddress,
+    srcNodeId: Bytes,
+    connector: UdpConnector
+  ) {
     val response = WhoAreYouMessage(message.authTag)
     connector.send(address, response, srcNodeId)
   }

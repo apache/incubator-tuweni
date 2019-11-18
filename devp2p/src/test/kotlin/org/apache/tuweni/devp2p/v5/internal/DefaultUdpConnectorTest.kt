@@ -17,6 +17,7 @@
 package org.apache.tuweni.devp2p.v5.internal
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
@@ -24,89 +25,100 @@ import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.MessageObserver
-import org.apache.tuweni.devp2p.v5.UdpConnector
 import org.apache.tuweni.devp2p.v5.packet.RandomMessage
 import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.parallel.Execution
+import org.junit.jupiter.api.parallel.ExecutionMode
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 
+@ObsoleteCoroutinesApi
 @ExtendWith(BouncyCastleExtension::class)
+@Execution(ExecutionMode.SAME_THREAD)
 class DefaultUdpConnectorTest {
 
-  private val keyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
-  private val address: InetSocketAddress = InetSocketAddress(9090)
-  private val selfEnr: Bytes = EthereumNodeRecord.toRLP(keyPair, ip = address.address)
+  companion object {
+    private var counter = 0
+  }
 
-  private val data: Bytes = UdpMessage.randomData()
-  private val message: RandomMessage = RandomMessage(UdpMessage.authTag(), data)
-
-  private var connector: UdpConnector = DefaultUdpConnector(address, keyPair, selfEnr)
+  private var connector: DefaultUdpConnector? = null
 
   @BeforeEach
   fun setUp() {
+    val address = InetSocketAddress(9090 + counter)
+    val keyPair = SECP256K1.KeyPair.random()
+    val selfEnr = EthereumNodeRecord.toRLP(keyPair, ip = address.address)
     connector = DefaultUdpConnector(address, keyPair, selfEnr)
+    counter += 1
   }
 
   @AfterEach
   fun tearDown() {
-    if (connector.started()) {
-      connector.terminate()
+    runBlocking {
+      connector!!.terminate()
     }
   }
 
   @Test
   fun startOpensChannelForMessages() {
-    connector.start()
+    assertTrue(!connector!!.started())
+    runBlocking {
+      connector!!.start()
+    }
 
-    assert(connector.available())
+    assertTrue(connector!!.started())
   }
 
   @Test
-  fun terminateShutdownsConnector() {
-    connector.start()
+  fun terminateShutdownsConnector() = runBlocking {
 
-    assert(connector.available())
+    connector!!.start()
 
-    connector.terminate()
+    assertTrue(connector!!.started())
 
-    assert(!connector.available())
+    connector!!.terminate()
+
+    assertTrue(!connector!!.started())
   }
 
   @Test
-  fun sendSendsValidDatagram() {
-    connector.start()
+  fun sendSendsValidDatagram() = runBlocking {
+    connector!!.start()
 
     val destNodeId = Bytes.random(32)
 
-    val receiverAddress = InetSocketAddress(InetAddress.getLocalHost(), 9091)
+    val receiverAddress = InetSocketAddress(InetAddress.getLocalHost(), 5000)
     val socketChannel = CoroutineDatagramChannel.open()
     socketChannel.bind(receiverAddress)
 
-    runBlocking {
-      connector.send(receiverAddress, message, destNodeId)
-      val buffer = ByteBuffer.allocate(UdpMessage.MAX_UDP_MESSAGE_SIZE)
-      socketChannel.receive(buffer) as InetSocketAddress
-      buffer.flip()
+    val data = UdpMessage.randomData()
+    val randomMessage = RandomMessage(UdpMessage.authTag(), data)
+    connector!!.send(receiverAddress, randomMessage, destNodeId)
+    val buffer = ByteBuffer.allocate(UdpMessage.MAX_UDP_MESSAGE_SIZE)
+    socketChannel.receive(buffer) as InetSocketAddress
+    buffer.flip()
 
-      val messageContent = Bytes.wrapByteBuffer(buffer).slice(45)
-      val message = RandomMessage.create(UdpMessage.authTag(), messageContent)
+    val messageContent = Bytes.wrapByteBuffer(buffer).slice(45)
+    val message = RandomMessage.create(UdpMessage.authTag(), messageContent)
 
-      assert(message.data == data)
-    }
+    assertEquals(message.data, data)
+
     socketChannel.close()
   }
 
+  @ExperimentalCoroutinesApi
   @Test
-  @UseExperimental(ExperimentalCoroutinesApi::class)
-  fun attachObserverRegistersListener() {
+  fun attachObserverRegistersListener() = runBlocking {
     val observer = object : MessageObserver {
       var result: Channel<RandomMessage> = Channel()
       override fun observe(message: UdpMessage) {
@@ -115,27 +127,22 @@ class DefaultUdpConnectorTest {
         }
       }
     }
-    connector.attachObserver(observer)
-    connector.start()
-
-    assert(observer.result.isEmpty)
-
+    connector!!.attachObserver(observer)
+    connector!!.start()
+    assertTrue(observer.result.isEmpty)
     val codec = DefaultPacketCodec(SECP256K1.KeyPair.random(), RoutingTable(Bytes.random(32)))
     val socketChannel = CoroutineDatagramChannel.open()
-
-    runBlocking {
-      val message = RandomMessage()
-      val encodedRandomMessage = codec.encode(message, Hash.sha2_256(connector.getEnrBytes()))
-      val buffer = ByteBuffer.wrap(encodedRandomMessage.content.toArray())
-      socketChannel.send(buffer, InetSocketAddress(InetAddress.getLocalHost(), 9090))
-      val expectedResult = observer.result.receive()
-      assert(expectedResult.data == message.data)
-    }
+    val message = RandomMessage()
+    val encodedRandomMessage = codec.encode(message, Hash.sha2_256(connector!!.getEnrBytes()))
+    val buffer = ByteBuffer.wrap(encodedRandomMessage.content.toArray())
+    socketChannel.send(buffer, InetSocketAddress(InetAddress.getLocalHost(), 9090))
+    val expectedResult = observer.result.receive()
+    assertEquals(expectedResult.data, message.data)
   }
 
   @Test
   @UseExperimental(ExperimentalCoroutinesApi::class)
-  fun detachObserverRemovesListener() {
+  fun detachObserverRemovesListener() = runBlocking {
     val observer = object : MessageObserver {
       var result: Channel<RandomMessage> = Channel()
       override fun observe(message: UdpMessage) {
@@ -144,19 +151,16 @@ class DefaultUdpConnectorTest {
         }
       }
     }
-    connector.attachObserver(observer)
-    connector.detachObserver(observer)
-    connector.start()
-
+    connector!!.attachObserver(observer)
+    connector!!.detachObserver(observer)
+    connector!!.start()
     val codec = DefaultPacketCodec(SECP256K1.KeyPair.random(), RoutingTable(Bytes.random(32)))
     val socketChannel = CoroutineDatagramChannel.open()
 
-    runBlocking {
-      val message = RandomMessage()
-      val encodedRandomMessage = codec.encode(message, Hash.sha2_256(connector.getEnrBytes()))
-      val buffer = ByteBuffer.wrap(encodedRandomMessage.content.toArray())
-      socketChannel.send(buffer, InetSocketAddress(InetAddress.getLocalHost(), 9090))
-      assert(observer.result.isEmpty)
-    }
+    val message = RandomMessage()
+    val encodedRandomMessage = codec.encode(message, Hash.sha2_256(connector!!.getEnrBytes()))
+    val buffer = ByteBuffer.wrap(encodedRandomMessage.content.toArray())
+    socketChannel.send(buffer, InetSocketAddress(InetAddress.getLocalHost(), 9090))
+    assertTrue(observer.result.isEmpty)
   }
 }

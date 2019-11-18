@@ -22,7 +22,8 @@ import com.google.common.cache.RemovalCause
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.launch
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
@@ -65,8 +66,9 @@ import org.apache.tuweni.devp2p.v5.topic.TopicTable
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
+import java.nio.channels.ClosedChannelException
 import java.time.Duration
-import java.util.logging.Logger
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
 
 class DefaultUdpConnector(
@@ -78,7 +80,6 @@ class DefaultUdpConnector(
   private val nodesTable: RoutingTable = RoutingTable(selfEnr),
   private val topicTable: TopicTable = TopicTable(),
   private val ticketHolder: TicketHolder = TicketHolder(),
-  private val authenticatingPeers: MutableMap<InetSocketAddress, Bytes> = mutableMapOf(),
   private val authenticationProvider: AuthenticationProvider = DefaultAuthenticationProvider(keyPair, nodesTable),
   private val packetCodec: PacketCodec = DefaultPacketCodec(keyPair, nodesTable),
   private val selfNodeRecord: EthereumNodeRecord = EthereumNodeRecord.fromRLP(selfEnr),
@@ -86,7 +87,14 @@ class DefaultUdpConnector(
   override val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : UdpConnector, CoroutineScope {
 
-  private val log: Logger = Logger.getLogger(DefaultUdpConnector::class.java.simpleName)
+  companion object {
+    private const val LOOKUP_MAX_REQUESTED_NODES: Int = 3
+    private const val LOOKUP_REFRESH_RATE: Long = 3000
+    private const val PING_TIMEOUT: Long = 500
+    private const val REQUEST_TIMEOUT: Long = 1000
+    private const val REQUIRED_LOOKUP_NODES: Int = 16
+    private const val TABLE_REFRESH_RATE: Long = 1000
+  }
 
   private val randomMessageHandler: MessageHandler<RandomMessage> = RandomMessageHandler()
   private val whoAreYouMessageHandler: MessageHandler<WhoAreYouMessage> = WhoAreYouMessageHandler()
@@ -98,9 +106,7 @@ class DefaultUdpConnector(
   private val regTopicMessageHandler: MessageHandler<RegTopicMessage> = RegTopicMessageHandler()
   private val ticketMessageHandler: MessageHandler<TicketMessage> = TicketMessageHandler()
   private val topicQueryMessageHandler: MessageHandler<TopicQueryMessage> = TopicQueryMessageHandler()
-
   private val topicRegistrar = TopicRegistrar(coroutineContext, this)
-
   private val askedNodes: MutableList<Bytes> = mutableListOf()
 
   private val pendingMessages: Cache<String, TrackingMessage> = CacheBuilder.newBuilder()
@@ -118,9 +124,9 @@ class DefaultUdpConnector(
   private lateinit var receiveJob: Job
   private lateinit var lookupJob: Job
 
-  override fun available(): Boolean = receiveChannel.isOpen
+  private val started = AtomicBoolean(false)
 
-  override fun started(): Boolean = ::receiveJob.isInitialized && available()
+  override fun started(): Boolean = started.get()
 
   override fun getEnrBytes(): Bytes = selfEnr
 
@@ -132,36 +138,47 @@ class DefaultUdpConnector(
 
   override fun getNodeKeyPair(): SECP256K1.KeyPair = keyPair
 
-  override fun getPendingMessage(authTag: Bytes): TrackingMessage = pendingMessages.getIfPresent(authTag.toHexString())
-    ?: throw IllegalArgumentException("Pending message not found")
+  override fun getPendingMessage(authTag: Bytes): TrackingMessage? = pendingMessages.getIfPresent(authTag.toHexString())
 
-  override fun start() {
-    receiveChannel.bind(bindAddress)
+  @ObsoleteCoroutinesApi
+  override suspend fun start() {
+    if (started.compareAndSet(false, true)) {
+      receiveChannel.bind(bindAddress)
 
-    receiveJob = receiveDatagram()
-    lookupJob = lookupNodes()
-    refreshJob = refreshNodesTable()
+      receiveJob = launch { receiveDatagram() }
+      val lookupTimer = ticker(delayMillis = LOOKUP_REFRESH_RATE, initialDelayMillis = LOOKUP_REFRESH_RATE)
+      val refreshTimer = ticker(delayMillis = TABLE_REFRESH_RATE, initialDelayMillis = TABLE_REFRESH_RATE)
+      lookupJob = launch {
+        for (event in lookupTimer) {
+          lookupNodes()
+        }
+      }
+      refreshJob = launch {
+        for (event in refreshTimer) {
+          refreshNodesTable()
+        }
+      }
+    }
   }
 
-  override fun send(
+  override suspend fun send(
     address: InetSocketAddress,
     message: UdpMessage,
     destNodeId: Bytes,
     handshakeParams: HandshakeInitParameters?
   ) {
-    launch {
-      val encodeResult = packetCodec.encode(message, destNodeId, handshakeParams)
-      pendingMessages.put(encodeResult.authTag.toHexString(), TrackingMessage(message, destNodeId))
-      receiveChannel.send(ByteBuffer.wrap(encodeResult.content.toArray()), address)
-    }
+    val encodeResult = packetCodec.encode(message, destNodeId, handshakeParams)
+    pendingMessages.put(encodeResult.authTag.toHexString(), TrackingMessage(message, destNodeId))
+    receiveChannel.send(ByteBuffer.wrap(encodeResult.content.toArray()), address)
   }
 
-  override fun terminate() {
-    receiveChannel.close()
-
-    refreshJob.cancel()
-    lookupJob.cancel()
-    receiveJob.cancel()
+  override suspend fun terminate() {
+    if (started.compareAndSet(true, false)) {
+      refreshJob.cancel()
+      lookupJob.cancel()
+      receiveJob.cancel()
+      receiveChannel.close()
+    }
   }
 
   override fun attachObserver(observer: MessageObserver) {
@@ -190,20 +207,19 @@ class DefaultUdpConnector(
 
   override fun getTopicRegistrar(): TopicRegistrar = topicRegistrar
 
-  // Lookup nodes
-  private fun lookupNodes() = launch {
-    while (true) {
-      val nearestNodes = getNodesTable().nearest(selfEnr)
-      if (REQUIRED_LOOKUP_NODES > nearestNodes.size) {
-        lookupInternal(nearestNodes)
-      } else {
-        askedNodes.clear()
-      }
-      delay(LOOKUP_REFRESH_RATE)
+  /**
+   * Look up nodes, starting with nearest ones, until we have enough stored.
+   */
+  private suspend fun lookupNodes() {
+    val nearestNodes = getNodesTable().nearest(selfEnr)
+    if (REQUIRED_LOOKUP_NODES > nearestNodes.size) {
+      lookupInternal(nearestNodes)
+    } else {
+      askedNodes.clear()
     }
   }
 
-  private fun lookupInternal(nearest: List<Bytes>) {
+  private suspend fun lookupInternal(nearest: List<Bytes>) {
     val nonAskedNodes = nearest - askedNodes
     val targetNode = if (nonAskedNodes.isNotEmpty()) nonAskedNodes.random() else Bytes.random(32)
     val distance = getNodesTable().distanceToSelf(targetNode)
@@ -217,22 +233,20 @@ class DefaultUdpConnector(
   }
 
   // Process packets
-  private fun receiveDatagram() = launch {
+  private suspend fun receiveDatagram() {
     while (receiveChannel.isOpen) {
       val datagram = ByteBuffer.allocate(UdpMessage.MAX_UDP_MESSAGE_SIZE)
       val address = receiveChannel.receive(datagram) as InetSocketAddress
       datagram.flip()
-      launch {
-        try {
-          processDatagram(datagram, address)
-        } catch (ex: Exception) {
-          log.warning("${ex.message}")
-        }
+      try {
+        processDatagram(datagram, address)
+      } catch (e: ClosedChannelException) {
+        break
       }
     }
   }
 
-  private fun processDatagram(datagram: ByteBuffer, address: InetSocketAddress) {
+  private suspend fun processDatagram(datagram: ByteBuffer, address: InetSocketAddress) {
     if (datagram.limit() > UdpMessage.MAX_UDP_MESSAGE_SIZE) {
       return
     }
@@ -256,31 +270,18 @@ class DefaultUdpConnector(
   }
 
   // Ping nodes
-  private fun refreshNodesTable(): Job = launch {
-    while (true) {
-      if (!getNodesTable().isEmpty()) {
-        val enrBytes = getNodesTable().random()
-        val nodeId = Hash.sha2_256(enrBytes)
-        if (null == pings.getIfPresent(nodeId.toHexString())) {
-          val enr = EthereumNodeRecord.fromRLP(enrBytes)
-          val address = InetSocketAddress(enr.ip(), enr.udp())
-          val message = PingMessage(enrSeq = enr.seq)
+  private suspend fun refreshNodesTable() {
+    if (!getNodesTable().isEmpty()) {
+      val enrBytes = getNodesTable().random()
+      val nodeId = Hash.sha2_256(enrBytes)
+      if (null == pings.getIfPresent(nodeId.toHexString())) {
+        val enr = EthereumNodeRecord.fromRLP(enrBytes)
+        val address = InetSocketAddress(enr.ip(), enr.udp())
+        val message = PingMessage(enrSeq = enr.seq)
 
-          send(address, message, nodeId)
-          pings.put(nodeId.toHexString(), enrBytes)
-        }
+        send(address, message, nodeId)
+        pings.put(nodeId.toHexString(), enrBytes)
       }
-      delay(TABLE_REFRESH_RATE)
     }
-  }
-
-  companion object {
-    private const val REQUIRED_LOOKUP_NODES: Int = 16
-    private const val LOOKUP_MAX_REQUESTED_NODES: Int = 3
-
-    private const val LOOKUP_REFRESH_RATE: Long = 3000
-    private const val TABLE_REFRESH_RATE: Long = 1000
-    private const val REQUEST_TIMEOUT: Long = 1000
-    private const val PING_TIMEOUT: Long = 500
   }
 }

@@ -25,7 +25,12 @@ import java.net.InetSocketAddress
 
 class NodesMessageHandler : MessageHandler<NodesMessage> {
 
-  override fun handle(message: NodesMessage, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector) {
+  override suspend fun handle(
+    message: NodesMessage,
+    address: InetSocketAddress,
+    srcNodeId: Bytes,
+    connector: UdpConnector
+  ) {
     message.nodeRecords.forEach {
       EthereumNodeRecord.fromRLP(it)
       connector.getNodeRecords().set(it)

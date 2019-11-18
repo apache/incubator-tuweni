@@ -31,8 +31,12 @@ class RegTopicMessageHandler : MessageHandler<RegTopicMessage> {
 
   private val now: () -> Long = CURRENT_TIME_SUPPLIER
 
-
-  override fun handle(message: RegTopicMessage, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector) {
+  override suspend fun handle(
+    message: RegTopicMessage,
+    address: InetSocketAddress,
+    srcNodeId: Bytes,
+    connector: UdpConnector
+  ) {
     val topic = Topic(message.topic.toHexString())
     val key = connector.getSessionInitiatorKey(srcNodeId)
 

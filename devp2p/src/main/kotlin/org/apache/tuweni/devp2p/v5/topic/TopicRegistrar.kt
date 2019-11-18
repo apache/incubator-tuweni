@@ -19,7 +19,6 @@ package org.apache.tuweni.devp2p.v5.topic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.devp2p.EthereumNodeRecord
@@ -34,26 +33,30 @@ class TopicRegistrar(
   private val connector: DefaultUdpConnector
 ) : CoroutineScope {
 
-  fun delayRegTopic(requestId: Bytes, topic: Bytes, waitTime: Long) {
-    launch {
-      delay(waitTime)
-
-      val ticket = connector.getTicketHolder().get(requestId)
-      sendRegTopic(topic, ticket, requestId)
-    }
+  companion object {
+    private const val SEND_REGTOPIC_DELAY_MS = 15 * 60 * 1000L // 15 min
   }
 
-  fun registerTopic(topic: Bytes, withDelay: Boolean = false) {
-    launch {
-      if (withDelay) {
-        delay(SEND_REGTOPIC_DELAY_MS)
-      }
+  suspend fun delayRegTopic(requestId: Bytes, topic: Bytes, waitTime: Long) {
+    delay(waitTime)
 
-      sendRegTopic(topic)
-    }
+    val ticket = connector.getTicketHolder().get(requestId)
+    sendRegTopic(topic, ticket, requestId)
   }
 
-  private fun sendRegTopic(topic: Bytes, ticket: Bytes = Bytes.EMPTY, requestId: Bytes = UdpMessage.requestId()) {
+  suspend fun registerTopic(topic: Bytes, withDelay: Boolean = false) {
+    if (withDelay) {
+      delay(SEND_REGTOPIC_DELAY_MS)
+    }
+
+    sendRegTopic(topic)
+  }
+
+  private suspend fun sendRegTopic(
+    topic: Bytes,
+    ticket: Bytes = Bytes.EMPTY,
+    requestId: Bytes = UdpMessage.requestId()
+  ) {
     val nodeEnr = connector.getEnrBytes()
     val message = RegTopicMessage(requestId, nodeEnr, topic, ticket)
 
@@ -65,9 +68,5 @@ class TopicRegistrar(
       val nodeId = Hash.sha2_256(rlp)
       connector.send(address, message, nodeId)
     }
-  }
-
-  companion object {
-    private const val SEND_REGTOPIC_DELAY_MS = 15 * 60 * 1000L // 15 min
   }
 }

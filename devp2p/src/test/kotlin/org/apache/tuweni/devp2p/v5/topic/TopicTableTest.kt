@@ -94,5 +94,4 @@ class TopicTableTest {
     private const val TABLE_CAPACITY = 2
     private const val QUEUE_CAPACITY = 2
   }
-
 }

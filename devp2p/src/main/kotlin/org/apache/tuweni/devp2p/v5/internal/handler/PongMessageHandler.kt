@@ -26,7 +26,12 @@ import java.net.InetSocketAddress
 
 class PongMessageHandler : MessageHandler<PongMessage> {
 
-  override fun handle(message: PongMessage, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector) {
+  override suspend fun handle(
+    message: PongMessage,
+    address: InetSocketAddress,
+    srcNodeId: Bytes,
+    connector: UdpConnector
+  ) {
     val enrBytes = connector.getAwaitingPongRecord(srcNodeId) ?: return
     val enr = EthereumNodeRecord.fromRLP(enrBytes)
     if (enr.seq != message.enrSeq) {

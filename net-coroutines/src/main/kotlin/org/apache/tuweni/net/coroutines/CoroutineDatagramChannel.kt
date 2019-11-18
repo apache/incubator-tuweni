@@ -28,7 +28,6 @@ import java.nio.channels.SelectionKey
 /**
  * A co-routine based datagram-oriented network channel.
  *
- * @author Chris Leishman - https://cleishm.github.io/
  */
 class CoroutineDatagramChannel private constructor(
   private val channel: DatagramChannel,

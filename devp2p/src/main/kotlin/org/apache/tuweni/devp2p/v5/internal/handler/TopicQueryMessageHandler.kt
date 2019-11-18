@@ -26,7 +26,11 @@ import java.net.InetSocketAddress
 
 class TopicQueryMessageHandler : MessageHandler<TopicQueryMessage> {
 
-  override fun handle(
+  companion object {
+    private const val MAX_NODES_IN_RESPONSE: Int = 16
+  }
+
+  override suspend fun handle(
     message: TopicQueryMessage,
     address: InetSocketAddress,
     srcNodeId: Bytes,
@@ -39,9 +43,5 @@ class TopicQueryMessageHandler : MessageHandler<TopicQueryMessage> {
       val response = NodesMessage(message.requestId, nodes.size, it)
       connector.send(address, response, srcNodeId)
     }
-  }
-
-  companion object {
-    private const val MAX_NODES_IN_RESPONSE: Int = 16
   }
 }

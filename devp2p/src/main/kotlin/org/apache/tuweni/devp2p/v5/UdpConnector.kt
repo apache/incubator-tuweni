@@ -19,10 +19,10 @@ package org.apache.tuweni.devp2p.v5
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
-import org.apache.tuweni.devp2p.v5.storage.RoutingTable
-import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
 import org.apache.tuweni.devp2p.v5.misc.TrackingMessage
+import org.apache.tuweni.devp2p.v5.packet.UdpMessage
+import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.devp2p.v5.topic.TicketHolder
 import org.apache.tuweni.devp2p.v5.topic.TopicRegistrar
 import org.apache.tuweni.devp2p.v5.topic.TopicTable
@@ -37,12 +37,12 @@ interface UdpConnector {
   /**
    * Bootstraps receive loop for incoming message handling
    */
-  fun start()
+  suspend fun start()
 
   /**
    * Shut downs both udp receive loop and sender socket
    */
-  fun terminate()
+  suspend fun terminate()
 
   /**
    * Sends udp message by socket address
@@ -52,19 +52,12 @@ interface UdpConnector {
    * @param destNodeId destination node identifier
    * @param handshakeParams optional parameter to create handshake
    */
-  fun send(
+  suspend fun send(
     address: InetSocketAddress,
     message: UdpMessage,
     destNodeId: Bytes,
     handshakeParams: HandshakeInitParameters? = null
   )
-
-  /**
-   * Gives information about connector, whether receive channel is working
-   *
-   * @return availability information
-   */
-  fun available(): Boolean
 
   /**
    * Gives information about connector, whether receive loop is working
@@ -131,7 +124,7 @@ interface UdpConnector {
    *
    * @return message, including node identifier
    */
-  fun getPendingMessage(authTag: Bytes): TrackingMessage
+  fun getPendingMessage(authTag: Bytes): TrackingMessage?
 
   /**
    * Provides enr storage of known nodes

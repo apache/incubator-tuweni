@@ -22,7 +22,6 @@ class TicketHolder {
 
   private val tickets: MutableMap<Bytes, Bytes> = hashMapOf() // requestId to ticket
 
-
   fun put(requestId: Bytes, ticket: Bytes) {
     tickets[requestId] = ticket
   }

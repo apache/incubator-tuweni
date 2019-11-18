@@ -20,79 +20,79 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.devp2p.v5.packet.PingMessage
 import org.apache.tuweni.devp2p.v5.packet.PongMessage
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class IntegrationTest : AbstractIntegrationTest() {
 
   @Test
-  fun testHandshake() {
-    val node1 = createNode(9090)
-    val node2 = createNode(9091)
+  fun testHandshake() = runBlocking {
+    val node1 = createNode(19090)
+    val node2 = createNode(19091)
 
     val result = handshake(node1, node2)
+    assertTrue(result)
 
-    assert(result)
-
-    node1.service.terminate(true)
-    node2.service.terminate(true)
+    node1.service.terminate()
+    node2.service.terminate()
   }
 
   @Test
-  fun testPing() {
-    val node1 = createNode(9090)
-    val node2 = createNode(9091)
+  fun testPing() = runBlocking {
+    val node1 = createNode(29090)
+    val node2 = createNode(29091)
 
     handshake(node1, node2)
+
     val pong = sendAndAwait<PongMessage>(node1, node2, PingMessage())
 
-    assert(node1.port == pong.recipientPort)
+    assertTrue(node1.port == pong.recipientPort)
 
-    node1.service.terminate(true)
-    node2.service.terminate(true)
+    node1.service.terminate()
+    node2.service.terminate()
   }
 
   @Test
-  fun testTableMaintenance() {
-    val node1 = createNode(9090)
-    val node2 = createNode(9091)
+  fun testTableMaintenance() = runBlocking {
+    val node1 = createNode(39090)
+    val node2 = createNode(39091)
 
     handshake(node1, node2)
-    runBlocking {
-      assert(!node1.routingTable.isEmpty())
 
-      node2.service.terminate( true)
+    assertTrue(!node1.routingTable.isEmpty())
 
-      delay(5000)
+    node2.service.terminate()
 
-      assert(node1.routingTable.isEmpty())
+    delay(5000)
 
-      node1.service.terminate(true)
-    }
+    assertTrue(node1.routingTable.isEmpty())
+
+    node1.service.terminate()
   }
 
   @Test
   @Disabled
-  fun testNetworkLookup() {
-    val targetNode = createNode(9090)
+  fun testNetworkLookup() = runBlocking {
+    val targetNode = createNode(49090)
 
-    val node1 = createNode(9091)
-    val node2 = createNode(9092)
-    val node3 = createNode(9093)
-    val node4 = createNode(9094)
-    val node5 = createNode(9095)
-    val node6 = createNode(9096)
-    val node7 = createNode(9097)
-    val node8 = createNode(9098)
-    val node9 = createNode(9099)
-    val node10 = createNode(9100)
-    val node11 = createNode(9101)
-    val node12 = createNode(9102)
-    val node13 = createNode(9103)
-    val node14 = createNode(9104)
-    val node15 = createNode(9105)
-    val node16 = createNode(9106)
-    val node17 = createNode(9107)
+    val node1 = createNode(49091)
+    val node2 = createNode(49092)
+    val node3 = createNode(49093)
+    val node4 = createNode(49094)
+    val node5 = createNode(49095)
+    val node6 = createNode(49096)
+    val node7 = createNode(49097)
+    val node8 = createNode(49098)
+    val node9 = createNode(49099)
+    val node10 = createNode(49100)
+    val node11 = createNode(49101)
+    val node12 = createNode(49102)
+    val node13 = createNode(49103)
+    val node14 = createNode(49104)
+    val node15 = createNode(49105)
+    val node16 = createNode(49106)
+    val node17 = createNode(49107)
 
     handshake(node1, node2)
     handshake(node2, node3)
@@ -123,24 +123,24 @@ class IntegrationTest : AbstractIntegrationTest() {
       }
     }
 
-    node1.service.terminate(true)
-    node2.service.terminate(true)
-    node3.service.terminate(true)
-    node4.service.terminate(true)
-    node5.service.terminate(true)
-    node6.service.terminate(true)
-    node7.service.terminate(true)
-    node8.service.terminate(true)
-    node9.service.terminate(true)
-    node10.service.terminate(true)
-    node11.service.terminate(true)
-    node12.service.terminate(true)
-    node13.service.terminate(true)
-    node14.service.terminate(true)
-    node15.service.terminate(true)
-    node16.service.terminate(true)
-    node17.service.terminate(true)
+    node1.service.terminate()
+    node2.service.terminate()
+    node3.service.terminate()
+    node4.service.terminate()
+    node5.service.terminate()
+    node6.service.terminate()
+    node7.service.terminate()
+    node8.service.terminate()
+    node9.service.terminate()
+    node10.service.terminate()
+    node11.service.terminate()
+    node12.service.terminate()
+    node13.service.terminate()
+    node14.service.terminate()
+    node15.service.terminate()
+    node16.service.terminate()
+    node17.service.terminate()
 
-    targetNode.service.terminate(true)
+    targetNode.service.terminate()
   }
 }

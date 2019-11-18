@@ -25,14 +25,6 @@ class WhoAreYouMessage(
   val enrSeq: Long = 0
 ) : UdpMessage() {
 
-  override fun encode(): Bytes {
-    return RLP.encodeList { w ->
-      w.writeValue(authTag)
-      w.writeValue(idNonce)
-      w.writeLong(enrSeq)
-    }
-  }
-
   companion object {
     fun create(content: Bytes): WhoAreYouMessage {
       return RLP.decodeList(content) { r ->
@@ -41,6 +33,18 @@ class WhoAreYouMessage(
         val enrSeq = r.readLong()
         return@decodeList WhoAreYouMessage(authTag, idNonce, enrSeq)
       }
+    }
+  }
+
+  override fun getMessageType(): Bytes {
+    throw UnsupportedOperationException("Message type unsupported for whoareyou messages")
+  }
+
+  override fun encode(): Bytes {
+    return RLP.encodeList { w ->
+      w.writeValue(authTag)
+      w.writeValue(idNonce)
+      w.writeLong(enrSeq)
     }
   }
 }

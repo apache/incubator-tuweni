@@ -25,7 +25,12 @@ import java.net.InetSocketAddress
 
 class FindNodeMessageHandler : MessageHandler<FindNodeMessage> {
 
-  override fun handle(message: FindNodeMessage, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector) {
+  override suspend fun handle(
+    message: FindNodeMessage,
+    address: InetSocketAddress,
+    srcNodeId: Bytes,
+    connector: UdpConnector
+  ) {
     if (0 == message.distance) {
       val response = NodesMessage(message.requestId, 1, listOf(connector.getEnrBytes()))
       connector.send(address, response, srcNodeId)

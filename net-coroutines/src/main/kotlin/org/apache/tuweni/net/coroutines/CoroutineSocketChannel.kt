@@ -28,7 +28,6 @@ import java.nio.channels.SocketChannel
 /**
  * A co-routine based stream-oriented network channel.
  *
- * @author Chris Leishman - https://cleishm.github.io/
  */
 class CoroutineSocketChannel internal constructor(
   private val channel: SocketChannel,

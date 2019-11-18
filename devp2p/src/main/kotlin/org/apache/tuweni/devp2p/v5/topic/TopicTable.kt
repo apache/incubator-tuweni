@@ -21,7 +21,6 @@ import com.google.common.cache.CacheBuilder
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.devp2p.DiscoveryService
-import org.apache.tuweni.devp2p.EthereumNodeRecord
 import java.util.concurrent.TimeUnit
 
 class TopicTable(
@@ -31,7 +30,6 @@ class TopicTable(
 
   private val timeSupplier: () -> Long = DiscoveryService.CURRENT_TIME_SUPPLIER
   private val table: HashMap<Topic, Cache<String, TargetAd>> = HashMap(tableCapacity)
-
 
   init {
     require(tableCapacity > 0) { "Table capacity value must be positive" }
@@ -73,7 +71,6 @@ class TopicTable(
       val oldestInTable = table.entries.map { it.value.youngest().regTime }.min() ?: -1
       return TARGET_AD_LIFETIME_MS - (timeSupplier() - oldestInTable)
     }
-
   }
 
   fun contains(topic: Topic): Boolean = table.containsKey(topic)
@@ -110,9 +107,4 @@ class TopicTable(
   }
 }
 
-class TargetAd(
-  val regTime: Long,
-  val enr: Bytes
-)
-
-
+class TargetAd(val regTime: Long, val enr: Bytes)

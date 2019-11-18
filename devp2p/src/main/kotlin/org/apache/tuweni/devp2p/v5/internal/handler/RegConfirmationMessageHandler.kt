@@ -22,10 +22,9 @@ import org.apache.tuweni.devp2p.v5.UdpConnector
 import org.apache.tuweni.devp2p.v5.packet.RegConfirmationMessage
 import java.net.InetSocketAddress
 
-
 class RegConfirmationMessageHandler : MessageHandler<RegConfirmationMessage> {
 
-  override fun handle(
+  override suspend fun handle(
     message: RegConfirmationMessage,
     address: InetSocketAddress,
     srcNodeId: Bytes,
@@ -35,5 +34,4 @@ class RegConfirmationMessageHandler : MessageHandler<RegConfirmationMessage> {
     ticketHolder.remove(message.requestId)
     connector.getTopicRegistrar().registerTopic(message.topic, true)
   }
-
 }

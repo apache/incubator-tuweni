@@ -25,7 +25,12 @@ import java.net.InetSocketAddress
 
 class PingMessageHandler : MessageHandler<PingMessage> {
 
-  override fun handle(message: PingMessage, address: InetSocketAddress, srcNodeId: Bytes, connector: UdpConnector) {
+  override suspend fun handle(
+    message: PingMessage,
+    address: InetSocketAddress,
+    srcNodeId: Bytes,
+    connector: UdpConnector
+  ) {
     val response = PongMessage(message.requestId, connector.getEnr().seq, address.address, address.port)
     connector.send(address, response, srcNodeId)
   }
