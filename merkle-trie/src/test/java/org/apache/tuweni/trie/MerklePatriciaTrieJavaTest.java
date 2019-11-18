@@ -40,7 +40,7 @@ class MerklePatriciaTrieJavaTest {
 
   @Test
   void testEmptyTreeHasKnownRootHash() {
-    assertEquals("0x56E81F171BCC55A6FF8345E692C0F86E5B48E01B996CADC001622FB5E363B421", trie.rootHash().toString());
+    assertEquals("0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421", trie.rootHash().toString());
   }
 
   @Test
