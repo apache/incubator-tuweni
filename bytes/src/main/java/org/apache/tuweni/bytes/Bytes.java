@@ -41,7 +41,7 @@ import io.vertx.core.buffer.Buffer;
  * specific implementations may be thread-safe. For instance, the value returned by {@link #copy} is guaranteed to be
  * thread-safe as it is immutable.
  */
-public interface Bytes {
+public interface Bytes extends Comparable<Bytes> {
 
   /**
    * The empty value (with 0 bytes).
@@ -1462,5 +1462,23 @@ public interface Bytes {
    */
   default String toBase64String() {
     return Base64.getEncoder().encodeToString(toArrayUnsafe());
+  }
+
+  @Override
+  default int compareTo(Bytes b) {
+    checkNotNull(b);
+
+    int sizeCmp = Integer.compare(bitLength(), b.bitLength());
+    if (sizeCmp != 0) {
+      return sizeCmp;
+    }
+
+    for (int i = 0; i < size(); i++) {
+      int cmp = Integer.compare(get(i) & 0xff, b.get(i) & 0xff);
+      if (cmp != 0) {
+        return cmp;
+      }
+    }
+    return 0;
   }
 }

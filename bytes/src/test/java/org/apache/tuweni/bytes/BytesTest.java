@@ -275,6 +275,27 @@ class BytesTest extends CommonBytesTests {
   }
 
   @Test
+  void compareTo() {
+    assertEquals(1, Bytes.of(0x05).compareTo(Bytes.of(0x01)));
+    assertEquals(1, Bytes.of(0x05).compareTo(Bytes.of(0x01)));
+    assertEquals(1, Bytes.of(0xef).compareTo(Bytes.of(0x01)));
+    assertEquals(1, Bytes.of(0xef).compareTo(Bytes.of(0x00, 0x01)));
+    assertEquals(1, Bytes.of(0x00, 0x00, 0xef).compareTo(Bytes.of(0x00, 0x01)));
+    assertEquals(1, Bytes.of(0x00, 0xef).compareTo(Bytes.of(0x00, 0x00, 0x01)));
+    assertEquals(1, Bytes.of(0xef, 0xf0).compareTo(Bytes.of(0xff)));
+    assertEquals(1, Bytes.of(0xef, 0xf0).compareTo(Bytes.of(0x01)));
+    assertEquals(1, Bytes.of(0xef, 0xf1).compareTo(Bytes.of(0xef, 0xf0)));
+    assertEquals(1, Bytes.of(0x00, 0x00, 0x01).compareTo(Bytes.of(0x00, 0x00)));
+    assertEquals(0, Bytes.of(0xef, 0xf0).compareTo(Bytes.of(0xef, 0xf0)));
+    assertEquals(-1, Bytes.of(0xef, 0xf0).compareTo(Bytes.of(0xef, 0xf5)));
+    assertEquals(-1, Bytes.of(0xef).compareTo(Bytes.of(0xff)));
+    assertEquals(-1, Bytes.of(0x01).compareTo(Bytes.of(0xff)));
+    assertEquals(-1, Bytes.of(0x01).compareTo(Bytes.of(0x01, 0xff)));
+    assertEquals(-1, Bytes.of(0x00, 0x00, 0x01).compareTo(Bytes.of(0x00, 0x02)));
+    assertEquals(-1, Bytes.of(0x00, 0x01).compareTo(Bytes.of(0x00, 0x00, 0x05)));
+  }
+
+  @Test
   void fromHexStringLenientInvalidInput() {
     Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes.fromHexStringLenient("foo"));
     assertEquals("Illegal character 'o' found at index 1 in hex binary representation", exception.getMessage());
