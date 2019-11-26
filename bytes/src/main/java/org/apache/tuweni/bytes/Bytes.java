@@ -1440,6 +1440,18 @@ public interface Bytes extends Comparable<Bytes> {
     }
   }
 
+  /**
+   * @return This value represented as hexadecimal, with no prefix.
+   */
+  default String toUnprefixedHexString() {
+    try {
+      return appendHexTo(new StringBuilder()).toString();
+    } catch (IOException e) {
+      // not thrown
+      throw new RuntimeException(e);
+    }
+  }
+
   /** @return This value represented as a minimal hexadecimal string (without any leading zero). */
   default String toShortHexString() {
     StringBuilder hex;

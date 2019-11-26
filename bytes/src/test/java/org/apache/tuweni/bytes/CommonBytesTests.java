@@ -434,6 +434,17 @@ abstract class CommonBytesTests {
   }
 
   @Test
+  void testHexString() {
+    assertEquals("0x", h("0x").toShortHexString());
+    assertEquals("0x", h("0x0000").toShortHexString());
+    assertEquals("0x1000001", h("0x01000001").toShortHexString());
+
+    assertEquals("0000", h("0x0000").toUnprefixedHexString());
+    assertEquals("1234", h("0x1234").toUnprefixedHexString());
+    assertEquals("0022", h("0x0022").toUnprefixedHexString());
+  }
+
+  @Test
   void slideToEnd() {
     assertEquals(Bytes.of(1, 2, 3, 4), Bytes.of(1, 2, 3, 4).slice(0));
     assertEquals(Bytes.of(2, 3, 4), Bytes.of(1, 2, 3, 4).slice(1));
