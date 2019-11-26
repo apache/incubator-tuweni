@@ -82,7 +82,8 @@ public interface Bytes32 extends Bytes {
     if (value instanceof Bytes32) {
       return (Bytes32) value;
     }
-    return DelegatingBytes32.delegateTo(value);
+    checkArgument(value.size() == SIZE, "Expected %s bytes but got %s", SIZE, value.size());
+    return new DelegatingBytes32(value);
   }
 
   /**
@@ -110,7 +111,7 @@ public interface Bytes32 extends Bytes {
     if (slice instanceof Bytes32) {
       return (Bytes32) slice;
     }
-    return DelegatingBytes32.delegateTo(slice);
+    return new DelegatingBytes32(value);
   }
 
   /**

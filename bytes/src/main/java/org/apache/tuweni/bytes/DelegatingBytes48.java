@@ -12,7 +12,6 @@
  */
 package org.apache.tuweni.bytes;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -20,17 +19,18 @@ import java.security.MessageDigest;
 
 import io.vertx.core.buffer.Buffer;
 
-final class DelegatingBytes48 implements Bytes48 {
+/**
+ * A class that holds and delegates all operations to its inner bytes field.
+ *
+ * <p>
+ * This class may be used to create more types that represent 48 bytes, but need a different name for business logic.
+ */
+public class DelegatingBytes48 implements Bytes48 {
 
   private final Bytes delegate;
 
-  private DelegatingBytes48(Bytes delegate) {
+  protected DelegatingBytes48(Bytes delegate) {
     this.delegate = delegate;
-  }
-
-  static Bytes48 delegateTo(Bytes value) {
-    checkArgument(value.size() == SIZE, "Expected %s bytes but got %s", SIZE, value.size());
-    return new DelegatingBytes48(value);
   }
 
   @Override

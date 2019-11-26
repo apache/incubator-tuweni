@@ -82,7 +82,8 @@ public interface Bytes48 extends Bytes {
     if (value instanceof Bytes48) {
       return (Bytes48) value;
     }
-    return DelegatingBytes48.delegateTo(value);
+    checkArgument(value.size() == SIZE, "Expected %s bytes but got %s", SIZE, value.size());
+    return new DelegatingBytes48(value);
   }
 
   /**
@@ -110,7 +111,7 @@ public interface Bytes48 extends Bytes {
     if (slice instanceof Bytes48) {
       return (Bytes48) slice;
     }
-    return DelegatingBytes48.delegateTo(slice);
+    return new DelegatingBytes48(Bytes48.wrap(slice));
   }
 
   /**

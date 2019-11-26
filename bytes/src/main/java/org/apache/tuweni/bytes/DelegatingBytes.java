@@ -22,19 +22,19 @@ import io.vertx.core.buffer.Buffer;
  * A class that holds and delegates all operations to its inner bytes field.
  *
  * <p>
- * This class may be used to create more types that represent 32 bytes, but need a different name for business logic.
+ * This class may be used to create more types that represent bytes, but need a different name for business logic.
  */
-public class DelegatingBytes32 implements Bytes32 {
+public class DelegatingBytes implements Bytes {
 
   private final Bytes delegate;
 
-  protected DelegatingBytes32(Bytes delegate) {
+  protected DelegatingBytes(Bytes delegate) {
     this.delegate = delegate;
   }
 
   @Override
   public int size() {
-    return Bytes32.SIZE;
+    return delegate.size();
   }
 
   @Override
@@ -158,13 +158,13 @@ public class DelegatingBytes32 implements Bytes32 {
   }
 
   @Override
-  public Bytes32 copy() {
-    return Bytes32.wrap(toArray());
+  public Bytes copy() {
+    return Bytes.wrap(toArray());
   }
 
   @Override
-  public MutableBytes32 mutableCopy() {
-    return MutableBytes32.wrap(toArray());
+  public MutableBytes mutableCopy() {
+    return MutableBytes.wrap(toArray());
   }
 
   @Override
