@@ -191,7 +191,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
     result[INTS_SIZE - 2] = (int) (sum & LONG_MASK);
     constant &= result[INTS_SIZE - 2] == 0;
     long signExtent = (value >> 63) & LONG_MASK;
-    for (int i = INTS_SIZE - 3; i >= 0; --i) {
+    for (int i = INTS_SIZE - 2; i >= 0; --i) {
       sum = (this.ints[i] & LONG_MASK) + signExtent + (sum >>> 32);
       result[i] = (int) (sum & LONG_MASK);
       constant &= result[i] == 0;
@@ -295,7 +295,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
     }
 
     boolean constant = true;
-    for (int i = INTS_SIZE; i < (INTS_SIZE + INTS_SIZE) - 2; ++i) {
+    for (int i = INTS_SIZE; i < (INTS_SIZE + INTS_SIZE) - 1; ++i) {
       constant &= (result[i] == 0);
     }
     if (constant && result[INTS_SIZE + INTS_SIZE - 1] >= 0 && result[INTS_SIZE + INTS_SIZE - 1] <= MAX_CONSTANT) {

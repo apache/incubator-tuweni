@@ -389,6 +389,7 @@ class BaseUInt256ValueTest {
         Arguments.of(v(20), 1L, v(20)),
         Arguments.of(hv("0x0a0000000000"), 1L, hv("0x0a0000000000")),
         Arguments.of(v(1), 10995116277760L, hv("0x0a0000000000")),
+        Arguments.of(v(7), 1152921504606846976L, hv("0x07000000000000000")),
         Arguments.of(v(0), 2L, v(0)),
         Arguments.of(v(1), 2L, v(2)),
         Arguments.of(v(2), 2L, v(4)),

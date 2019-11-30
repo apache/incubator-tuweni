@@ -198,6 +198,9 @@ public abstract class BaseUInt256Value<T extends UInt256Value<T>> implements UIn
     if (value.equals(UInt256.ONE)) {
       return copy();
     }
+    if (this.value.equals(UInt256.ONE)) {
+      return ctor.apply(value);
+    }
     return ctor.apply(this.value.multiply(value));
   }
 
@@ -208,6 +211,9 @@ public abstract class BaseUInt256Value<T extends UInt256Value<T>> implements UIn
     }
     if (value == 1) {
       return copy();
+    }
+    if (this.value.equals(UInt256.ONE)) {
+      return ctor.apply(UInt256.valueOf(value));
     }
     return ctor.apply(this.value.multiply(value));
   }
