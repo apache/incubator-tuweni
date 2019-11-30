@@ -59,7 +59,8 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Comparable<T> {
   /**
    * Returns a value that is {@code (this + value)}.
    *
-   * <p>This notation can be used in Kotlin with the {@code +} operator.
+   * <p>
+   * This notation can be used in Kotlin with the {@code +} operator.
    *
    * @param value The amount to be added to this value.
    * @return {@code this + value}
@@ -71,7 +72,8 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Comparable<T> {
   /**
    * Returns a value that is {@code (this + value)}.
    *
-   * <p>This notation can be used in Kotlin with the {@code +} operator.
+   * <p>
+   * This notation can be used in Kotlin with the {@code +} operator.
    *
    * @param value The amount to be added to this value.
    * @return {@code this + value}
