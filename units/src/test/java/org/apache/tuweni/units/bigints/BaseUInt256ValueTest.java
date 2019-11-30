@@ -306,6 +306,12 @@ class BaseUInt256ValueTest {
 
   private static Stream<Arguments> multiplyProvider() {
     return Stream.of(
+        Arguments.of(v(0), v(1), v(0)),
+        Arguments.of(v(1), v(0), v(0)),
+        Arguments.of(v(1), v(20), v(20)),
+        Arguments.of(v(20), v(1), v(20)),
+        Arguments.of(hv("0x0a0000000000"), v(1), hv("0x0a0000000000")),
+        Arguments.of(v(1), hv("0x0a0000000000"), hv("0x0a0000000000")),
         Arguments.of(v(0), v(2), v(0)),
         Arguments.of(v(1), v(2), v(2)),
         Arguments.of(v(2), v(2), v(4)),
@@ -332,6 +338,13 @@ class BaseUInt256ValueTest {
 
   private static Stream<Arguments> multiplyUInt256Provider() {
     return Stream.of(
+        Arguments.of(v(0), UInt256.valueOf(1), v(0)),
+        Arguments.of(v(1), UInt256.valueOf(0), v(0)),
+        Arguments.of(v(1), UInt256.valueOf(20), v(20)),
+        Arguments.of(v(20), UInt256.valueOf(1), v(20)),
+
+        Arguments.of(hv("0x0a0000000000"), UInt256.valueOf(1), hv("0x0a0000000000")),
+        Arguments.of(v(1), UInt256.fromHexString("0x0a0000000000"), hv("0x0a0000000000")),
         Arguments.of(v(0), UInt256.valueOf(2), v(0)),
         Arguments.of(v(1), UInt256.valueOf(2), v(2)),
         Arguments.of(v(2), UInt256.valueOf(2), v(4)),
@@ -370,6 +383,12 @@ class BaseUInt256ValueTest {
 
   private static Stream<Arguments> multiplyLongProvider() {
     return Stream.of(
+        Arguments.of(v(0), 1L, v(0)),
+        Arguments.of(v(1), 0L, v(0)),
+        Arguments.of(v(1), 20L, v(20)),
+        Arguments.of(v(20), 1L, v(20)),
+        Arguments.of(hv("0x0a0000000000"), 1L, hv("0x0a0000000000")),
+        Arguments.of(v(1), 10995116277760L, hv("0x0a0000000000")),
         Arguments.of(v(0), 2L, v(0)),
         Arguments.of(v(1), 2L, v(2)),
         Arguments.of(v(2), 2L, v(4)),
@@ -732,6 +751,11 @@ class BaseUInt256ValueTest {
   void shouldThrowForModLongByZero() {
     Throwable exception = assertThrows(ArithmeticException.class, () -> v(5).mod(0));
     assertEquals("mod by zero", exception.getMessage());
+  }
+
+  @Test
+  void shouldReturnZeroForMod0LongByZero() {
+    assertEquals(UInt256.ZERO, v(5).mod0(0).toUInt256());
   }
 
   @Test

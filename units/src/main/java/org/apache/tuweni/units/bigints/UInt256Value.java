@@ -59,6 +59,30 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Comparable<T> {
   /**
    * Returns a value that is {@code (this + value)}.
    *
+   * <p>This notation can be used in Kotlin with the {@code +} operator.
+   *
+   * @param value The amount to be added to this value.
+   * @return {@code this + value}
+   */
+  default T plus(T value) {
+    return add(value);
+  }
+
+  /**
+   * Returns a value that is {@code (this + value)}.
+   *
+   * <p>This notation can be used in Kotlin with the {@code +} operator.
+   *
+   * @param value The amount to be added to this value.
+   * @return {@code this + value}
+   */
+  default T plus(long value) {
+    return add(value);
+  }
+
+  /**
+   * Returns a value that is {@code (this + value)}.
+   *
    * @param value the amount to be added to this value
    * @return {@code this + value}
    * @throws ArithmeticException if the result of the addition overflows
@@ -236,6 +260,24 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Comparable<T> {
   T divide(long value);
 
   /**
+   * Returns a value that is {@code ceiling(this / value)}.
+   *
+   * @param value The amount to divide this value by.
+   * @return {@code this / value + ( this % value == 0 ? 0 : 1)}
+   * @throws ArithmeticException {@code value} == 0.
+   */
+  T divideCeil(T value);
+
+  /**
+   * Returns a value that is {@code ceiling(this / value)}.
+   *
+   * @param value The amount to divide this value by.
+   * @return {@code this / value + ( this % value == 0 ? 0 : 1)}
+   * @throws ArithmeticException {@code value} == 0.
+   */
+  T divideCeil(long value);
+
+  /**
    * Returns a value that is {@code (this<sup>exponent</sup> mod 2<sup>256</sup>)}
    *
    * <p>
@@ -277,6 +319,22 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Comparable<T> {
    * @throws ArithmeticException {@code modulus} &le; 0.
    */
   T mod(long modulus);
+
+  /**
+   * Returns a value that is {@code (this mod modulus)}, or 0 if modulus is 0.
+   *
+   * @param modulus The modulus.
+   * @return {@code this mod modulus}.
+   */
+  T mod0(UInt256 modulus);
+
+  /**
+   * Returns a value that is {@code (this mod modulus)}, or 0 if modulus is 0.
+   *
+   * @param modulus The modulus.
+   * @return {@code this mod modulus}.
+   */
+  T mod0(long modulus);
 
   /**
    * @return True if this value fits a java {@code int} (i.e. is less or equal to {@code Integer.MAX_VALUE}).

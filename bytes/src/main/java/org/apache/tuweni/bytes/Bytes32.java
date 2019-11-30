@@ -104,9 +104,6 @@ public interface Bytes32 extends Bytes {
    */
   static Bytes32 wrap(Bytes value, int offset) {
     checkNotNull(value);
-    if (value instanceof Bytes32) {
-      return (Bytes32) value;
-    }
     Bytes slice = value.slice(offset, Bytes32.SIZE);
     if (slice instanceof Bytes32) {
       return (Bytes32) slice;

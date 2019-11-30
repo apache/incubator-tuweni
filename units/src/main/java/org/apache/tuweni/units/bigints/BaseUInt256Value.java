@@ -261,6 +261,27 @@ public abstract class BaseUInt256Value<T extends UInt256Value<T>> implements UIn
   }
 
   @Override
+  public T divideCeil(T value) {
+    return divideCeil(value.toUInt256());
+  }
+
+  /**
+   * Returns a value that is {@code (this / value)}.
+   *
+   * @param value The amount to divide this value by.
+   * @return {@code this / value}
+   * @throws ArithmeticException {@code value} == 0.
+   */
+  public T divideCeil(UInt256 value) {
+    return ctor.apply(this.value.divideCeil(value));
+  }
+
+  @Override
+  public T divideCeil(long value) {
+    return ctor.apply(this.value.divideCeil(value));
+  }
+
+  @Override
   public T pow(UInt256 exponent) {
     return ctor.apply(this.value.pow(exponent));
   }
@@ -278,6 +299,16 @@ public abstract class BaseUInt256Value<T extends UInt256Value<T>> implements UIn
   @Override
   public T mod(long modulus) {
     return ctor.apply(this.value.mod(modulus));
+  }
+
+  @Override
+  public T mod0(UInt256 modulus) {
+    return ctor.apply(this.value.mod0(modulus));
+  }
+
+  @Override
+  public T mod0(long modulus) {
+    return ctor.apply(this.value.mod0(modulus));
   }
 
   @Override

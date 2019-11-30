@@ -248,6 +248,11 @@ class UInt256Test {
 
   private static Stream<Arguments> multiplyProvider() {
     return Stream.of(
+        Arguments.of(v(0), v(1), v(0)),
+        Arguments.of(v(1), v(0), v(0)),
+        Arguments.of(v(1), v(20), v(20)),
+        Arguments.of(hv("0x0a0000000000"), v(1), hv("0x0a0000000000")),
+        Arguments.of(v(1), hv("0x0a0000000000"), hv("0x0a0000000000")),
         Arguments.of(v(0), v(2), v(0)),
         Arguments.of(v(1), v(2), v(2)),
         Arguments.of(v(2), v(2), v(4)),
@@ -274,6 +279,12 @@ class UInt256Test {
 
   private static Stream<Arguments> multiplyLongProvider() {
     return Stream.of(
+        Arguments.of(v(0), 1L, v(0)),
+        Arguments.of(v(1), 0L, v(0)),
+        Arguments.of(v(1), 20L, v(20)),
+        Arguments.of(v(20), 1L, v(20)),
+        Arguments.of(hv("0x0a0000000000"), v(1), hv("0x0a0000000000")),
+        Arguments.of(v(1), hv("0x0a0000000000"), hv("0x0a0000000000")),
         Arguments.of(v(0), 2L, v(0)),
         Arguments.of(v(1), 2L, v(2)),
         Arguments.of(v(2), 2L, v(4)),
@@ -434,6 +445,40 @@ class UInt256Test {
   }
 
   @ParameterizedTest
+  @MethodSource("divideCeilProvider")
+  void divideCeil(UInt256 v1, UInt256 v2, UInt256 expected) {
+    assertValueEquals(expected, v1.divideCeil(v2));
+  }
+
+  private static Stream<Arguments> divideCeilProvider() {
+    return Stream.of(
+        Arguments.of(v(0), v(2), v(0)),
+        Arguments.of(v(1), v(2), v(1)),
+        Arguments.of(v(2), v(2), v(1)),
+        Arguments.of(v(3), v(2), v(2)),
+        Arguments.of(v(4), v(2), v(2)),
+        Arguments.of(biv("13492324908428420834234908341"), v(2), biv("6746162454214210417117454171")),
+        Arguments.of(biv("13492324908428420834234908342"), v(2), biv("6746162454214210417117454171")),
+        Arguments.of(biv("13492324908428420834234908343"), v(2), biv("6746162454214210417117454172")),
+        Arguments.of(v(2), v(8), v(1)),
+        Arguments.of(v(7), v(8), v(1)),
+        Arguments.of(v(8), v(8), v(1)),
+        Arguments.of(v(9), v(8), v(2)),
+        Arguments.of(v(17), v(8), v(3)),
+        Arguments.of(v(1024), v(8), v(128)),
+        Arguments.of(v(1026), v(8), v(129)),
+        Arguments.of(biv("13492324908428420834234908342"), v(8), biv("1686540613553552604279363543")),
+        Arguments.of(biv("13492324908428420834234908342"), v(2048), biv("6588049271693564860466264")),
+        Arguments.of(biv("13492324908428420834234908342"), v(131072), biv("102938269870211950944786")));
+  }
+
+  @Test
+  void shouldThrowForDivideCeilByZero() {
+    Throwable exception = assertThrows(ArithmeticException.class, () -> v(5).divideCeil(v(0)));
+    assertEquals("divide by zero", exception.getMessage());
+  }
+
+  @ParameterizedTest
   @MethodSource("divideLongProvider")
   void divideLong(UInt256 v1, long v2, UInt256 expected) {
     assertValueEquals(expected, v1.divide(v2));
@@ -547,6 +592,17 @@ class UInt256Test {
   @Test
   void shouldThrowForModLongByNegative() {
     Throwable exception = assertThrows(ArithmeticException.class, () -> v(5).mod(-5));
+    assertEquals("mod by negative", exception.getMessage());
+  }
+
+  @Test
+  void shouldReturnZeroForMod0LongByZero() {
+    assertEquals(UInt256.ZERO, v(5).mod0(0));
+  }
+
+  @Test
+  void shouldThrowForMod0LongByNegative() {
+    Throwable exception = assertThrows(ArithmeticException.class, () -> v(5).mod0(-5));
     assertEquals("mod by negative", exception.getMessage());
   }
 
