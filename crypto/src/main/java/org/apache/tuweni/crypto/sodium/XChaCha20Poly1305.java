@@ -208,8 +208,6 @@ public final class XChaCha20Poly1305 {
      * WARNING: This will cause the key to be copied into heap memory.
      *
      * @return The bytes of this key.
-     * @deprecated Use {@link #bytesArray()} to obtain the bytes as an array, which should be overwritten when no longer
-     *             required.
      */
     public Bytes bytes() {
       return value.bytes();

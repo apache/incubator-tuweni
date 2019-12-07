@@ -192,8 +192,6 @@ public class SHA256Hash {
      * WARNING: This will cause the hash to be copied into heap memory.
      *
      * @return The bytes of this hash.
-     * @deprecated Use {@link #bytesArray()} to obtain the bytes as an array, which should be overwritten when no longer
-     *             required.
      */
     public Bytes bytes() {
       return value.bytes();

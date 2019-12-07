@@ -11,7 +11,7 @@ Tuweni is a set of libraries and other tools to aid development of blockchain an
 
 It includes a low-level bytes library, serialization and deserialization codecs (e.g. [RLP](https://github.com/ethereum/wiki/wiki/RLP)), various cryptography functions and primatives, and lots of other helpful utilities.
 
-Tuweni is developed for JDK 1.8 or higher.
+Tuweni is developed for JDK 11 or higher.
 
 ## Build Instructions
 

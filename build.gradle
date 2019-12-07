@@ -31,8 +31,8 @@ plugins {
   id 'io.spring.dependency-management' version '1.0.6.RELEASE'
   id 'com.github.hierynomus.license' version '0.15.0'
   id 'org.gradle.crypto.checksum' version '1.1.0'
-  id 'org.jetbrains.kotlin.jvm' version '1.3.20'
-  id 'org.jetbrains.dokka' version '0.9.17'
+  id 'org.jetbrains.kotlin.jvm' version '1.3.30'
+  id 'org.jetbrains.dokka' version '0.10.0'
   id 'maven-publish'
   id 'com.jfrog.bintray' version '1.8.3'
 }
@@ -49,7 +49,7 @@ if (!file("${rootDir}/eth-reference-tests/src/test/resources/eth2.0-tests/README
 //////
 // Version numbering
 
-def versionNumber = '0.11.0'
+def versionNumber = '1.0.0'
 def buildVersion = versionNumber + buildTag()
 
 static String buildTag() {
@@ -201,8 +201,8 @@ allprojects {
   //////
   // Compiler arguments
 
-  sourceCompatibility = '1.8'
-  targetCompatibility = '1.8'
+  sourceCompatibility = '1.11'
+  targetCompatibility = '1.11'
 
   jacoco { toolVersion = '0.8.2' }
 
@@ -219,12 +219,6 @@ allprojects {
   }
 
   tasks.withType(JavaCompile) {
-    // Until https://github.com/gradle/gradle/issues/2510 is resolved and
-    // something like a `releaseCompability` property is added, we have to add
-    // the --release flag explicitly
-    if (JavaVersion.current() > JavaVersion.VERSION_1_8) {
-      options.compilerArgs.addAll(['--release', '8'])
-    }
     options.compilerArgs += [
       '-Xlint:unchecked',
       '-Xlint:cast',
@@ -246,7 +240,7 @@ allprojects {
 
   tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
-      jvmTarget = "1.8"
+      jvmTarget = "11"
       allWarningsAsErrors = true
       freeCompilerArgs = [
         '-Xjsr305=strict',
@@ -269,13 +263,17 @@ allprojects {
   dokka {
     outputFormat = 'html'
     outputDirectory = "$buildDir/docs/dokka"
-    jdkVersion = 8
-    includeNonPublic = false
-    def relativePath = rootDir.toPath().relativize(projectDir.toPath()).toString()
-    linkMapping {
-      dir = projectDir.toString()
-      url = "https://github.com/apache/incubator-tuweni/blob/master/$relativePath"
-      suffix = "#L"
+    configuration {
+      noStdlibLink = true
+      noJdkLink = true
+      jdkVersion = 11
+      includeNonPublic = false
+      def relativePath = rootDir.toPath().relativize(projectDir.toPath()).toString()
+      sourceLink {
+        path = projectDir.toString()
+        url = "https://github.com/apache/incubator-tuweni/blob/master/$relativePath"
+        lineSuffix = "#L"
+      }
     }
   }
 
@@ -568,35 +566,27 @@ javadoc {
 }
 
 dokka {
-  moduleName = rootProject.name
-  subprojects.each {
-    dependsOn it.classes
-    it.sourceSets.main.output.each { d ->
-      if (d.exists()) {
-        classpath += d
+
+  configuration {
+    noStdlibLink = true
+    noJdkLink = true
+    moduleName = rootProject.name
+    subprojects.each {
+      dependsOn it.classes
+      it.sourceSets.main.output.each { d ->
+        if (d.exists()) {
+          classpath += d
+        }
       }
     }
-  }
-  sourceDirs = files(subprojects.collect {
-    return [
-      new File(it.projectDir, '/src/main/kotlin'),
-      new File(it.projectDir, '/src/main/java')
-    ]
-  })
-  linkMapping {
-    dir = rootDir.toString()
-    url = "https://github.com/apache/incubator-tuweni/blob/master"
-    suffix = "#L"
-  }
 
-  includes = ['PACKAGES.md']
+    sourceLink {
+      path = rootDir.toString()
+      url = "https://github.com/apache/incubator-tuweni/blob/master"
+      lineSuffix = "#L"
+    }
 
-  externalDocumentationLink {
-    url = new URL("https://docs.oracle.com/javase/8/docs/api/")
-  }
-
-  externalDocumentationLink {
-    url = new URL('https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/')
+    includes = ['PACKAGES.md']
   }
 }
 
