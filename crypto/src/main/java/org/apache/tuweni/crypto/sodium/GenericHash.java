@@ -128,6 +128,106 @@ public final class GenericHash {
   }
 
   /**
+   * Key of generic hash function.
+   */
+  public static final class Key implements Destroyable {
+    private final Allocated value;
+
+    private Key(Pointer ptr, int length) {
+      this.value = new Allocated(ptr, length);
+    }
+
+    @Override
+    public void destroy() {
+      value.destroy();
+    }
+
+    @Override
+    public boolean isDestroyed() {
+      return value.isDestroyed();
+    }
+
+    /**
+     *
+     * @return the length of the key
+     */
+    public int length() {
+      return value.length();
+    }
+
+    /**
+     * Create a {@link GenericHash.Key} from a pointer.
+     *
+     * @param allocated the allocated pointer
+     * @return A key.
+     */
+    public static Key fromPointer(Allocated allocated) {
+      return new Key(Sodium.dup(allocated.pointer(), allocated.length()), allocated.length());
+    }
+
+    /**
+     * Create a {@link GenericHash.Key} from a hash.
+     *
+     * @param hash the hash
+     * @return A key.
+     */
+    public static Key fromHash(Hash hash) {
+      return new Key(Sodium.dup(hash.value.pointer(), hash.value.length()), hash.value.length());
+    }
+
+    /**
+     * Create a {@link GenericHash.Key} from an array of bytes.
+     *
+     * @param bytes The bytes for the key.
+     * @return A key.
+     */
+    public static Key fromBytes(Bytes bytes) {
+      return fromBytes(bytes.toArrayUnsafe());
+    }
+
+    /**
+     * Create a {@link GenericHash.Key} from an array of bytes.
+     *
+     * @param bytes The bytes for the key.
+     * @return A key.
+     */
+    public static Key fromBytes(byte[] bytes) {
+      return Sodium.dup(bytes, GenericHash.Key::new);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (!(obj instanceof GenericHash.Key)) {
+        return false;
+      }
+      Key other = (Key) obj;
+      return other.value.equals(value);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(value);
+    }
+
+    /**
+     * @return The bytes of this key.
+     */
+    public Bytes bytes() {
+      return value.bytes();
+    }
+
+    /**
+     * @return The bytes of this key.
+     */
+    public byte[] bytesArray() {
+      return value.bytesArray();
+    }
+  }
+
+  /**
    * Generic hash function output.
    */
   public static final class Hash implements Destroyable {
@@ -208,6 +308,26 @@ public final class GenericHash {
   public static Hash hash(int hashLength, Input input) {
     Pointer output = Sodium.malloc(hashLength);
     Sodium.crypto_generichash(output, hashLength, input.value.pointer(), input.length(), null, 0);
+    return new Hash(output, hashLength);
+  }
+
+  /**
+   * Creates a generic hash of specified length of the input
+   *
+   * @param hashLength the length of the hash
+   * @param input the input of the hash function
+   * @param key the key of the hash function
+   * @return the hash of the input
+   */
+  public static Hash hash(int hashLength, Input input, Key key) {
+    Pointer output = Sodium.malloc(hashLength);
+    Sodium.crypto_generichash(
+        output,
+        hashLength,
+        input.value.pointer(),
+        input.length(),
+        key.value.pointer(),
+        key.length());
     return new Hash(output, hashLength);
   }
 }
