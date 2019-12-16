@@ -16,7 +16,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.createDirectories;
 import static org.apache.tuweni.crypto.Hash.sha2_256;
 
-import jdk.internal.joptsimple.internal.Strings;
 import org.apache.tuweni.bytes.Bytes;
 
 import java.io.BufferedReader;
@@ -38,6 +37,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
+import com.google.common.base.Strings;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
@@ -86,11 +86,13 @@ public final class TLS {
    *
    * @param key The key path.
    * @param certificate The certificate path.
-   * @param commonName the name to use for the CN attribute of the certificate. If null or empty, a random value is used.
+   * @param commonName the name to use for the CN attribute of the certificate. If null or empty, a random value is
+   *        used.
    * @return {@code true} if a self-signed certificate was created.
    * @throws IOException If an IO error occurs creating the certificate.
    */
-  public static boolean createSelfSignedCertificateIfMissing(Path key, Path certificate, String commonName) throws IOException {
+  public static boolean createSelfSignedCertificateIfMissing(Path key, Path certificate, String commonName)
+      throws IOException {
     if (Files.exists(certificate) || Files.exists(key)) {
       return false;
     }
@@ -112,7 +114,8 @@ public final class TLS {
     return true;
   }
 
-  private static void createSelfSignedCertificate(Date now, Path key, Path certificate, String commonName) throws NoSuchAlgorithmException,
+  private static void createSelfSignedCertificate(Date now, Path key, Path certificate, String commonName)
+      throws NoSuchAlgorithmException,
       IOException,
       OperatorCreationException,
       CertificateException {
