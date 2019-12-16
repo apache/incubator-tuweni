@@ -16,6 +16,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.createDirectories;
 import static org.apache.tuweni.crypto.Hash.sha2_256;
 
+import jdk.internal.joptsimple.internal.Strings;
 import org.apache.tuweni.bytes.Bytes;
 
 import java.io.BufferedReader;
@@ -35,6 +36,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
@@ -73,6 +75,22 @@ public final class TLS {
    * @throws IOException If an IO error occurs creating the certificate.
    */
   public static boolean createSelfSignedCertificateIfMissing(Path key, Path certificate) throws IOException {
+    return createSelfSignedCertificateIfMissing(key, certificate, null);
+  }
+
+  /**
+   * Create a self-signed certificate, if it is not already present.
+   *
+   * <p>
+   * If both the key or the certificate file are missing, they will be re-created as a self-signed certificate.
+   *
+   * @param key The key path.
+   * @param certificate The certificate path.
+   * @param commonName the name to use for the CN attribute of the certificate. If null or empty, a random value is used.
+   * @return {@code true} if a self-signed certificate was created.
+   * @throws IOException If an IO error occurs creating the certificate.
+   */
+  public static boolean createSelfSignedCertificateIfMissing(Path key, Path certificate, String commonName) throws IOException {
     if (Files.exists(certificate) || Files.exists(key)) {
       return false;
     }
@@ -84,7 +102,7 @@ public final class TLS {
     Path certFile = Files.createTempFile(certificate.getParent(), "client-cert", ".tmp");
 
     try {
-      createSelfSignedCertificate(new Date(), keyFile, certFile);
+      createSelfSignedCertificate(new Date(), keyFile, certFile, commonName);
     } catch (CertificateException | NoSuchAlgorithmException | OperatorCreationException e) {
       throw new TLSEnvironmentException("Could not generate certificate: " + e.getMessage(), e);
     }
@@ -94,7 +112,7 @@ public final class TLS {
     return true;
   }
 
-  private static void createSelfSignedCertificate(Date now, Path key, Path certificate) throws NoSuchAlgorithmException,
+  private static void createSelfSignedCertificate(Date now, Path key, Path certificate, String commonName) throws NoSuchAlgorithmException,
       IOException,
       OperatorCreationException,
       CertificateException {
@@ -108,7 +126,11 @@ public final class TLS {
     cal.add(Calendar.YEAR, 1);
     Date yearFromNow = cal.getTime();
 
-    X500Name dn = new X500Name("CN=example.com");
+    if (Strings.isNullOrEmpty(commonName)) {
+      commonName = UUID.randomUUID().toString() + ".com";
+    }
+
+    X500Name dn = new X500Name("CN=" + commonName);
 
     X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(
         dn,
