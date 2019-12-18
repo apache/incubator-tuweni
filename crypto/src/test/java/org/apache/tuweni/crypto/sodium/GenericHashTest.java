@@ -37,7 +37,8 @@ class GenericHashTest {
 
   @Test
   void hashWithKeyValue() {
-    GenericHash.Hash output = GenericHash.hash(64, GenericHash.Input.fromBytes(Bytes.random(384)), GenericHash.Key.fromBytes(Bytes.random(32)));
+    GenericHash.Hash output = GenericHash
+        .hash(64, GenericHash.Input.fromBytes(Bytes.random(384)), GenericHash.Key.fromBytes(Bytes.random(32)));
     assertNotNull(output);
     assertEquals(64, output.bytes().size());
   }
