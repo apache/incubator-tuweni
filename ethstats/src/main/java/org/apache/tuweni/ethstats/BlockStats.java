@@ -13,14 +13,14 @@
 package org.apache.tuweni.ethstats;
 
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import org.apache.tuweni.eth.Address;
 import org.apache.tuweni.eth.BlockHeader;
 import org.apache.tuweni.eth.Hash;
-import org.apache.tuweni.eth.Transaction;
 import org.apache.tuweni.units.bigints.UInt256;
 
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
 
 public final class BlockStats {
 
@@ -39,7 +39,20 @@ public final class BlockStats {
   private final List<BlockHeader> uncles;
 
 
-  BlockStats(UInt256 blockNumber, Hash hash, Hash parentHash, long timestamp, Address miner, long gasUsed, long gasLimit, UInt256 difficulty, UInt256 totalDifficulty, List<TxStats> transactions, Hash transactionsRoot, Hash stateRoot, List<BlockHeader> uncles) {
+  BlockStats(
+      UInt256 blockNumber,
+      Hash hash,
+      Hash parentHash,
+      long timestamp,
+      Address miner,
+      long gasUsed,
+      long gasLimit,
+      UInt256 difficulty,
+      UInt256 totalDifficulty,
+      List<TxStats> transactions,
+      Hash transactionsRoot,
+      Hash stateRoot,
+      List<BlockHeader> uncles) {
     this.blockNumber = blockNumber;
     this.hash = hash;
     this.parentHash = parentHash;

@@ -18,13 +18,12 @@ import org.apache.tuweni.eth.Address;
 import org.apache.tuweni.eth.Hash;
 import org.apache.tuweni.junit.VertxExtension;
 import org.apache.tuweni.junit.VertxInstance;
+import org.apache.tuweni.units.bigints.UInt256;
 
 import java.net.URI;
 import java.util.Collections;
 
 import io.vertx.core.Vertx;
-import org.apache.tuweni.units.bigints.UInt256;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.logl.Level;
@@ -42,7 +41,7 @@ public class EthStatsReporterTest {
     EthStatsReporter reporter = new EthStatsReporter(
         vertx,
         logger,
-        URI.create("ws://192.168.1.10:3000/api"),
+        URI.create("ws://localhost:3000/api"),
         "wat",
         "name",
         "node",
@@ -51,21 +50,75 @@ public class EthStatsReporterTest {
         "eth/63",
         "Windoz",
         "64",
-            () -> new BlockStats(UInt256.ONE, Hash.fromBytes(Bytes32.random()),
-            Hash.fromBytes(Bytes32.random()), 3L, Address.fromBytes(Bytes.random(20)),
-                    42L,
-                    43, UInt256.valueOf(42L),
-                    UInt256.valueOf(84L), Collections.emptyList(),
-                    Hash.fromBytes(Bytes32.random()),
-                    Hash.fromBytes(Bytes32.random()),
-                    Collections.emptyList()),
-            () -> 42,
-            () -> new NodeStats(true, false, true, 42, 9, 4000, 100));
+            (blockNumbers) -> {});
 
+
+    reporter.sendNewHead(new BlockStats(
+            UInt256.ONE,
+            Hash.fromBytes(Bytes32.random()),
+            Hash.fromBytes(Bytes32.random()),
+            3L,
+            Address.fromBytes(Bytes.random(20)),
+            42L,
+            43,
+            UInt256.valueOf(42L),
+            UInt256.valueOf(84L),
+            Collections.emptyList(),
+            Hash.fromBytes(Bytes32.random()),
+            Hash.fromBytes(Bytes32.random()),
+            Collections.emptyList()));
+
+    reporter.sendNewNodeStats(new NodeStats(true, false, true, 42, 9, 4000, 100));
+    reporter.sendNewPendingTransactionCount(42);
     reporter.start();
 
-    Thread.sleep(300 * 1000);
-
+    Thread.sleep( 1000);
+    reporter.sendNewHead(new BlockStats(
+            UInt256.valueOf(2),
+            Hash.fromBytes(Bytes32.random()),
+            Hash.fromBytes(Bytes32.random()),
+            3L,
+            Address.fromBytes(Bytes.random(20)),
+            42L,
+            43,
+            UInt256.valueOf(42L),
+            UInt256.valueOf(84L),
+            Collections.emptyList(),
+            Hash.fromBytes(Bytes32.random()),
+            Hash.fromBytes(Bytes32.random()),
+            Collections.emptyList()));
+    Thread.sleep( 1000);
+    Thread.sleep( 1000);
+    reporter.sendNewHead(new BlockStats(
+            UInt256.valueOf(3),
+            Hash.fromBytes(Bytes32.random()),
+            Hash.fromBytes(Bytes32.random()),
+            3L,
+            Address.fromBytes(Bytes.random(20)),
+            42L,
+            43,
+            UInt256.valueOf(42L),
+            UInt256.valueOf(84L),
+            Collections.emptyList(),
+            Hash.fromBytes(Bytes32.random()),
+            Hash.fromBytes(Bytes32.random()),
+            Collections.emptyList()));
+    Thread.sleep( 1000);
+    reporter.sendNewHead(new BlockStats(
+            UInt256.valueOf(4),
+            Hash.fromBytes(Bytes32.random()),
+            Hash.fromBytes(Bytes32.random()),
+            3L,
+            Address.fromBytes(Bytes.random(20)),
+            42L,
+            43,
+            UInt256.valueOf(42L),
+            UInt256.valueOf(84L),
+            Collections.emptyList(),
+            Hash.fromBytes(Bytes32.random()),
+            Hash.fromBytes(Bytes32.random()),
+            Collections.emptyList()));
+    Thread.sleep( 5000);
     reporter.stop();
   }
 }

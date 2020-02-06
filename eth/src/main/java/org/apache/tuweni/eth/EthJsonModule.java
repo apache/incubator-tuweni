@@ -1,9 +1,17 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
+ * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
+ * to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package org.apache.tuweni.eth;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.apache.tuweni.units.ethereum.Gas;
@@ -11,86 +19,91 @@ import org.apache.tuweni.units.ethereum.Gas;
 import java.io.IOException;
 import java.time.Instant;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+
 public class EthJsonModule extends SimpleModule {
 
-    static class HashSerializer extends StdSerializer<Hash> {
+  static class HashSerializer extends StdSerializer<Hash> {
 
-        HashSerializer() {
-            super(Hash.class);
-        }
-
-        @Override
-        public void serialize(Hash value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            gen.writeString(value.toHexString());
-        }
+    HashSerializer() {
+      super(Hash.class);
     }
 
-    static class AddressSerializer extends StdSerializer<Address> {
+    @Override
+    public void serialize(Hash value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+      gen.writeString(value.toHexString());
+    }
+  }
 
-        AddressSerializer() {
-            super(Address.class);
-        }
+  static class AddressSerializer extends StdSerializer<Address> {
 
-        @Override
-        public void serialize(Address value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            gen.writeString(value.toHexString());
-        }
+    AddressSerializer() {
+      super(Address.class);
     }
 
-    static class BytesSerializer extends StdSerializer<Bytes> {
+    @Override
+    public void serialize(Address value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+      gen.writeString(value.toHexString());
+    }
+  }
 
-        BytesSerializer() {
-            super(Bytes.class);
-        }
+  static class BytesSerializer extends StdSerializer<Bytes> {
 
-        @Override
-        public void serialize(Bytes value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            gen.writeString(value.toHexString());
-        }
+    BytesSerializer() {
+      super(Bytes.class);
     }
 
-    static class GasSerializer extends StdSerializer<Gas> {
+    @Override
+    public void serialize(Bytes value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+      gen.writeString(value.toHexString());
+    }
+  }
 
-        GasSerializer() {
-            super(Gas.class);
-        }
+  static class GasSerializer extends StdSerializer<Gas> {
 
-        @Override
-        public void serialize(Gas value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            gen.writeString(value.toBytes().toHexString());
-        }
+    GasSerializer() {
+      super(Gas.class);
     }
 
-    static class UInt256Serializer extends StdSerializer<UInt256> {
+    @Override
+    public void serialize(Gas value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+      gen.writeString(value.toBytes().toHexString());
+    }
+  }
 
-        UInt256Serializer() {
-            super(UInt256.class);
-        }
+  static class UInt256Serializer extends StdSerializer<UInt256> {
 
-        @Override
-        public void serialize(UInt256 value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            gen.writeString(value.toHexString());
-        }
+    UInt256Serializer() {
+      super(UInt256.class);
     }
 
-    static class InstantSerializer extends StdSerializer<Instant> {
+    @Override
+    public void serialize(UInt256 value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+      gen.writeString(value.toHexString());
+    }
+  }
 
-        InstantSerializer() {
-            super(Instant.class);
-        }
+  static class InstantSerializer extends StdSerializer<Instant> {
 
-        @Override
-        public void serialize(Instant value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            gen.writeNumber(value.toEpochMilli());
-        }
+    InstantSerializer() {
+      super(Instant.class);
     }
 
-    public EthJsonModule() {
-        addSerializer(Hash.class, new HashSerializer());
-        addSerializer(Address.class, new AddressSerializer());
-        addSerializer(Bytes.class, new BytesSerializer());
-        addSerializer(Gas.class, new GasSerializer());
-        addSerializer(UInt256.class, new UInt256Serializer());
-        addSerializer(Instant.class, new InstantSerializer());
+    @Override
+    public void serialize(Instant value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+      gen.writeNumber(value.toEpochMilli());
     }
+  }
+
+  public EthJsonModule() {
+    addSerializer(Hash.class, new HashSerializer());
+    addSerializer(Address.class, new AddressSerializer());
+    addSerializer(Bytes.class, new BytesSerializer());
+    addSerializer(Gas.class, new GasSerializer());
+    addSerializer(UInt256.class, new UInt256Serializer());
+    addSerializer(Instant.class, new InstantSerializer());
+  }
 }

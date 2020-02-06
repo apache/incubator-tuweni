@@ -14,7 +14,6 @@ package org.apache.tuweni.eth;
 
 import static java.util.Objects.requireNonNull;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.rlp.RLP;
 import org.apache.tuweni.rlp.RLPReader;
@@ -25,6 +24,7 @@ import org.apache.tuweni.units.ethereum.Gas;
 import java.time.Instant;
 import javax.annotation.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.google.common.base.Objects;
 
 /**
