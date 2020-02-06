@@ -12,12 +12,19 @@
  */
 package org.apache.tuweni.ethstats;
 
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
+import org.apache.tuweni.eth.Address;
+import org.apache.tuweni.eth.Hash;
 import org.apache.tuweni.junit.VertxExtension;
 import org.apache.tuweni.junit.VertxInstance;
 
 import java.net.URI;
+import java.util.Collections;
 
 import io.vertx.core.Vertx;
+import org.apache.tuweni.units.bigints.UInt256;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.logl.Level;
@@ -27,7 +34,7 @@ import org.logl.logl.SimpleLogger;
 @ExtendWith(VertxExtension.class)
 public class EthStatsReporterTest {
 
-
+  //@Disabled
   @Test
   void testConnectToLocalEthStats(@VertxInstance Vertx vertx) throws InterruptedException {
     Logger logger = SimpleLogger.withLogLevel(Level.DEBUG).toOutputStream(System.out).getLogger("wat");
@@ -35,7 +42,7 @@ public class EthStatsReporterTest {
     EthStatsReporter reporter = new EthStatsReporter(
         vertx,
         logger,
-        URI.create("ws://localhost:3000/api"),
+        URI.create("ws://192.168.1.10:3000/api"),
         "wat",
         "name",
         "node",
@@ -43,11 +50,21 @@ public class EthStatsReporterTest {
         "10",
         "eth/63",
         "Windoz",
-        "64");
+        "64",
+            () -> new BlockStats(UInt256.ONE, Hash.fromBytes(Bytes32.random()),
+            Hash.fromBytes(Bytes32.random()), 3L, Address.fromBytes(Bytes.random(20)),
+                    42L,
+                    43, UInt256.valueOf(42L),
+                    UInt256.valueOf(84L), Collections.emptyList(),
+                    Hash.fromBytes(Bytes32.random()),
+                    Hash.fromBytes(Bytes32.random()),
+                    Collections.emptyList()),
+            () -> 42,
+            () -> new NodeStats(true, false, true, 42, 9, 4000, 100));
 
     reporter.start();
 
-    Thread.sleep(30 * 1000);
+    Thread.sleep(300 * 1000);
 
     reporter.stop();
   }

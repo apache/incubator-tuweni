@@ -20,7 +20,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -34,6 +37,7 @@ import io.vertx.core.WorkerExecutor;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.WebSocket;
+import org.apache.tuweni.eth.EthJsonModule;
 import org.logl.Logger;
 
 /**
@@ -47,10 +51,14 @@ import org.logl.Logger;
 public final class EthStatsReporter {
 
   private final static ObjectMapper mapper = new ObjectMapper();
+
+  static {
+    mapper.registerModule(new EthJsonModule());
+  }
   private final static long DELAY = 5000;
-  private final static long PING_PERIOD = 15000;
   private final static long REPORTING_PERIOD = 15000;
 
+  private final String id;
   private final Vertx vertx;
   private final URI ethstatsServerURI;
   private final Logger logger;
@@ -58,6 +66,10 @@ public final class EthStatsReporter {
   private final AtomicBoolean waitingOnPong = new AtomicBoolean(false);
   private final NodeInfo nodeInfo;
   private final String secret;
+  private final Supplier<BlockStats> blockStatsSupplier;
+  private final IntSupplier pendingSupplier;
+  private final Supplier<NodeStats> nodeStatsSupplier;
+
   private WorkerExecutor executor;
   private HttpClient client;
 
@@ -72,12 +84,19 @@ public final class EthStatsReporter {
       String network,
       String protocol,
       String os,
-      String osVer) {
+      String osVer,
+      Supplier<BlockStats> blockStatsSupplier,
+      IntSupplier pendingSupplier,
+      Supplier<NodeStats> nodeStatsSupplier) {
+    this.id = UUID.randomUUID().toString();
     this.vertx = vertx;
     this.logger = logger;
     this.ethstatsServerURI = ethstatsServerURI;
     this.secret = secret;
     this.nodeInfo = new NodeInfo(name, node, port, network, protocol, os, osVer);
+    this.blockStatsSupplier = blockStatsSupplier;
+    this.pendingSupplier = pendingSupplier;
+    this.nodeStatsSupplier= nodeStatsSupplier;
   }
 
   public void start() {
@@ -138,6 +157,7 @@ public final class EthStatsReporter {
 
                     // we are connected and now sending information
                     reportPeriodically(ws);
+                    report(ws);
                   }
                 } else {
                   handleEmitEvent((ArrayNode) emitEvent, ws);
@@ -151,7 +171,7 @@ public final class EthStatsReporter {
             }
           });
 
-          writeCommand(ws, "hello", new AuthMessage(nodeInfo, secret));
+          writeCommand(ws, "hello", new AuthMessage(nodeInfo, id, secret));
         },
         e -> {
           result.fail(e);
@@ -166,7 +186,7 @@ public final class EthStatsReporter {
         if (!waitingOnPong.compareAndSet(true, false)) {
           logger.warn("Received pong when we didn't expect one");
         } else {
-          long start = event.get(1).get("start").longValue();
+          long start = event.get(1).get("clientTime").longValue();
           long latency = (Instant.now().toEpochMilli() - start) / (2 * 1000);
           Map<String, Object> payload = new HashMap<>();
           payload.put("id", nodeInfo.getName());
@@ -184,8 +204,9 @@ public final class EthStatsReporter {
   }
 
   private void writePing(WebSocket ws) {
+    waitingOnPong.set(true);
     Map<String, Object> payload = new HashMap<>();
-    payload.put("id", nodeInfo.getName());
+    payload.put("id", id);
     payload.put("clientTime", Instant.now().toEpochMilli());
     writeCommand(ws, "node-ping", payload);
   }
@@ -203,23 +224,36 @@ public final class EthStatsReporter {
   private void report(WebSocket ws) {
     writePing(ws);
     writeBlock(ws);
+    writePending(ws);
+    writeStats(ws);
   }
 
   private void writeBlock(WebSocket ws) {
     Map<String, Object> details = new HashMap<>();
-    details.put("id", nodeInfo.getName());
-    details.put("block", assembleBlockStats());
+    details.put("id", id);
+    details.put("block", blockStatsSupplier.get());
     writeCommand(ws, "block", details);
   }
 
-  private Object assembleBlockStats() {}
+  private void writePending(WebSocket ws) {
+    Map<String, Object> details = new HashMap<>();
+    details.put("id", id);
+    details.put("stats", Collections.singletonMap("pending",pendingSupplier.getAsInt()));
+    writeCommand(ws, "pending", details);
+  }
 
+  private void writeStats(WebSocket ws) {
+    Map<String, Object> details = new HashMap<>();
+    details.put("id", id);
+    details.put("stats", nodeStatsSupplier.get());
+    writeCommand(ws, "stats", details);
+  }
 
   private void writeCommand(WebSocket ws, String command, Object payload) {
     try {
       String message =
           mapper.writer().writeValueAsString(Collections.singletonMap("emit", Arrays.asList(command, payload)));
-      logger.debug("Sending ping message {}", message);
+      logger.debug("Sending {} message {}", command, message);
       ws.writeTextMessage(message);
     } catch (JsonProcessingException e) {
       throw new UncheckedIOException(e);

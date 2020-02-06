@@ -27,7 +27,7 @@ final class NodeInfo {
   private final String os;
   private final String osVer;
   private final String client = CLIENT_VERSION;
-  private final boolean history = false;
+  private final boolean history = true;
 
   NodeInfo(String name, String node, int port, String network, String protocol, String os, String osVer) {
     this.name = name;

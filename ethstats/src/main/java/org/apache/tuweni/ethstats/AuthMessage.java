@@ -18,15 +18,17 @@ final class AuthMessage {
 
   private final NodeInfo info;
   private final String secret;
+  private final String id;
 
-  public AuthMessage(NodeInfo info, String secret) {
+  public AuthMessage(NodeInfo info, String id, String secret) {
     this.info = info;
+    this.id = id;
     this.secret = secret;
   }
 
   @JsonGetter("id")
   public String getID() {
-    return info.getNode();
+    return id;
   }
 
   @JsonGetter("info")

@@ -22,7 +22,7 @@ import org.apache.tuweni.units.bigints.UInt256;
 
 import java.util.List;
 
-final class BlockStats {
+public final class BlockStats {
 
   private final UInt256 blockNumber;
   private final Hash hash;
