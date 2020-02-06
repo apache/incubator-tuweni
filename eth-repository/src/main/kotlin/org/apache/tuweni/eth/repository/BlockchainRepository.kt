@@ -93,9 +93,9 @@ class BlockchainRepository
    * @return a handle to the storage operation completion
    */
   suspend fun storeBlock(block: Block) {
-    storeBlockBody(block.header().hash(), block.body())
-    blockHeaderStore.put(block.header().hash().toBytes(), block.header().toBytes())
-    indexBlockHeader(block.header())
+    storeBlockBody(block.getHeader().getHash(), block.getBody())
+    blockHeaderStore.put(block.getHeader().getHash().toBytes(), block.getHeader().toBytes())
+    indexBlockHeader(block.getHeader())
   }
 
   /**
@@ -138,13 +138,13 @@ class BlockchainRepository
    * @return handle to the storage operation completion
    */
   suspend fun storeBlockHeader(header: BlockHeader) {
-    blockHeaderStore.put(header.hash().toBytes(), header.toBytes())
+    blockHeaderStore.put(header.getHash().toBytes(), header.toBytes())
     indexBlockHeader(header)
   }
 
   private suspend fun indexBlockHeader(header: BlockHeader) {
     blockchainIndex.index { writer -> writer.indexBlockHeader(header) }
-    for (hash in findBlocksByParentHash(header.hash())) {
+    for (hash in findBlocksByParentHash(header.getHash())) {
       blockHeaderStore.get(hash.toBytes())?.let { bytes ->
         indexBlockHeader(BlockHeader.fromBytes(bytes))
       }
@@ -282,7 +282,7 @@ class BlockchainRepository
    */
   suspend fun retrieveChainHeadHeader(): BlockHeader? {
     return blockchainIndex.findByLargest(BlockHeaderFields.TOTAL_DIFFICULTY)
-      ?.let { retrieveBlockHeader(it) } ?: retrieveGenesisBlock()?.header()
+      ?.let { retrieveBlockHeader(it) } ?: retrieveGenesisBlock()?.getHeader()
   }
 
   /**
@@ -347,6 +347,6 @@ class BlockchainRepository
 
   private suspend fun setGenesisBlock(block: Block) {
     return chainMetadata
-      .put(GENESIS_BLOCK, block.header().hash().toBytes())
+      .put(GENESIS_BLOCK, block.getHeader().getHash().toBytes())
   }
 }

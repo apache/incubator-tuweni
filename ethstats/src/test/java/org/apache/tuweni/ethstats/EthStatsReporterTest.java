@@ -50,10 +50,12 @@ public class EthStatsReporterTest {
         "eth/63",
         "Windoz",
         "64",
-            (blockNumbers) -> {});
+        (blockNumbers) -> {
+        });
 
 
-    reporter.sendNewHead(new BlockStats(
+    reporter.sendNewHead(
+        new BlockStats(
             UInt256.ONE,
             Hash.fromBytes(Bytes32.random()),
             Hash.fromBytes(Bytes32.random()),
@@ -72,8 +74,9 @@ public class EthStatsReporterTest {
     reporter.sendNewPendingTransactionCount(42);
     reporter.start();
 
-    Thread.sleep( 1000);
-    reporter.sendNewHead(new BlockStats(
+    Thread.sleep(1000);
+    reporter.sendNewHead(
+        new BlockStats(
             UInt256.valueOf(2),
             Hash.fromBytes(Bytes32.random()),
             Hash.fromBytes(Bytes32.random()),
@@ -87,9 +90,10 @@ public class EthStatsReporterTest {
             Hash.fromBytes(Bytes32.random()),
             Hash.fromBytes(Bytes32.random()),
             Collections.emptyList()));
-    Thread.sleep( 1000);
-    Thread.sleep( 1000);
-    reporter.sendNewHead(new BlockStats(
+    Thread.sleep(1000);
+    Thread.sleep(1000);
+    reporter.sendNewHead(
+        new BlockStats(
             UInt256.valueOf(3),
             Hash.fromBytes(Bytes32.random()),
             Hash.fromBytes(Bytes32.random()),
@@ -103,8 +107,9 @@ public class EthStatsReporterTest {
             Hash.fromBytes(Bytes32.random()),
             Hash.fromBytes(Bytes32.random()),
             Collections.emptyList()));
-    Thread.sleep( 1000);
-    reporter.sendNewHead(new BlockStats(
+    Thread.sleep(1000);
+    reporter.sendNewHead(
+        new BlockStats(
             UInt256.valueOf(4),
             Hash.fromBytes(Bytes32.random()),
             Hash.fromBytes(Bytes32.random()),
@@ -118,7 +123,7 @@ public class EthStatsReporterTest {
             Hash.fromBytes(Bytes32.random()),
             Hash.fromBytes(Bytes32.random()),
             Collections.emptyList()));
-    Thread.sleep( 5000);
+    Thread.sleep(5000);
     reporter.stop();
   }
 }

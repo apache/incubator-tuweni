@@ -58,9 +58,9 @@ class TransactionTestSuite {
   private void testValidTransaction(String rlp, String hash, String sender) {
     Bytes rlpBytes = Bytes.fromHexString(rlp);
     Transaction tx = Transaction.fromBytes(rlpBytes);
-    assertEquals(Address.fromBytes(Bytes.fromHexString(sender)), tx.sender());
+    assertEquals(Address.fromBytes(Bytes.fromHexString(sender)), tx.getSender());
     assertEquals(rlpBytes, tx.toBytes());
-    assertEquals(Bytes.fromHexString(hash), tx.hash().toBytes());
+    assertEquals(Bytes.fromHexString(hash), tx.getHash().toBytes());
   }
 
   private void testInvalidTransaction(String rlp, String milestone) {
@@ -78,16 +78,16 @@ class TransactionTestSuite {
       return;
     }
 
-    if (tx.sender() == null) {
+    if (tx.getSender() == null) {
       return;
     }
 
     if ("Constantinople".equals(milestone) || "Byzantium".equals(milestone) || "EIP158".equals(milestone)) {
-      if (tx.chainId() == null) {
+      if (tx.getChainId() == null) {
         return;
       }
     } else {
-      if (tx.chainId() != null) {
+      if (tx.getChainId() != null) {
         return;
       }
     }

@@ -76,7 +76,7 @@ internal class BlockchainIndexTest {
     val reader = DirectoryReader.open(writer)
     val searcher = IndexSearcher(reader)
     val collector = TopScoreDocCollector.create(10, ScoreDoc(1, 1.0f))
-    searcher.search(TermQuery(Term("_id", BytesRef(header.hash().toBytes().toArrayUnsafe()))), collector)
+    searcher.search(TermQuery(Term("_id", BytesRef(header.hash.toBytes().toArrayUnsafe()))), collector)
     val hits = collector.topDocs().scoreDocs
     assertEquals(1, hits.size)
   }
@@ -108,7 +108,7 @@ internal class BlockchainIndexTest {
     val reader = DirectoryReader.open(index)
     val searcher = IndexSearcher(reader)
     val collector = TopScoreDocCollector.create(10, ScoreDoc(1, 1.0f))
-    searcher.search(TermQuery(Term("_id", BytesRef(header.hash().toBytes().toArrayUnsafe()))), collector)
+    searcher.search(TermQuery(Term("_id", BytesRef(header.hash.toBytes().toArrayUnsafe()))), collector)
     val hits = collector.topDocs().scoreDocs
     assertEquals(1, hits.size)
   }
@@ -139,75 +139,76 @@ internal class BlockchainIndexTest {
     val reader = blockchainIndex as BlockchainIndexReader
 
     run {
-      val entries = reader.findBy(BlockHeaderFields.PARENT_HASH, header.parentHash()!!)
+      val entries = reader.findBy(BlockHeaderFields.PARENT_HASH, header.parentHash!!)
       assertEquals(1, entries.size)
-      assertEquals(header.hash(), entries[0])
+      assertEquals(header.hash, entries[0])
     }
 
     run {
-      val entries = reader.findBy(BlockHeaderFields.OMMERS_HASH, header.ommersHash())
+      val entries = reader.findBy(BlockHeaderFields.OMMERS_HASH, header.ommersHash)
       assertEquals(1, entries.size)
-      assertEquals(header.hash(), entries[0])
+      assertEquals(header.hash, entries[0])
     }
 
     run {
-      val entries = reader.findBy(BlockHeaderFields.COINBASE, header.coinbase())
+      val entries = reader.findBy(BlockHeaderFields.COINBASE, header.coinbase)
       assertEquals(1, entries.size)
-      assertEquals(header.hash(), entries[0])
+      assertEquals(header.hash, entries[0])
     }
 
     run {
-      val entries = reader.findBy(BlockHeaderFields.STATE_ROOT, header.stateRoot())
+      val entries = reader.findBy(BlockHeaderFields.STATE_ROOT, header.stateRoot)
       assertEquals(1, entries.size)
-      assertEquals(header.hash(), entries[0])
+      assertEquals(header.hash, entries[0])
     }
 
     run {
-      val entries = reader.findBy(BlockHeaderFields.STATE_ROOT, header.stateRoot())
+      val entries = reader.findBy(BlockHeaderFields.STATE_ROOT, header.stateRoot)
       assertEquals(1, entries.size)
-      assertEquals(header.hash(), entries[0])
+      assertEquals(header.hash, entries[0])
     }
 
     run {
-      val entries = reader.findBy(BlockHeaderFields.DIFFICULTY, header.difficulty())
+      val entries = reader.findBy(BlockHeaderFields.DIFFICULTY, header.difficulty)
       assertEquals(1, entries.size)
-      assertEquals(header.hash(), entries[0])
+      assertEquals(header.hash, entries[0])
     }
 
     run {
-      val entries = reader.findBy(BlockHeaderFields.TIMESTAMP, header.timestamp().toEpochMilli())
+      val entries = reader.findBy(BlockHeaderFields.TIMESTAMP, header.timestamp.toEpochMilli())
       assertEquals(1, entries.size)
-      assertEquals(header.hash(), entries[0])
+      assertEquals(header.hash, entries[0])
     }
 
     run {
-      val entries = reader.findBy(BlockHeaderFields.NUMBER, header.number())
+      val entries = reader.findBy(BlockHeaderFields.NUMBER, header.number)
       assertEquals(1, entries.size)
-      assertEquals(header.hash(), entries[0])
+      assertEquals(header.hash, entries[0])
     }
 
     run {
-      val entries = reader.findInRange(BlockHeaderFields.NUMBER, header.number().subtract(5), header.number().add(5))
+      val entries = reader.findInRange(BlockHeaderFields.NUMBER, header.number.subtract(5),
+        header.number.add(5))
       assertEquals(1, entries.size)
-      assertEquals(header.hash(), entries[0])
+      assertEquals(header.hash, entries[0])
     }
 
     run {
-      val entries = reader.findBy(BlockHeaderFields.EXTRA_DATA, header.extraData())
+      val entries = reader.findBy(BlockHeaderFields.EXTRA_DATA, header.extraData)
       assertEquals(1, entries.size)
-      assertEquals(header.hash(), entries[0])
+      assertEquals(header.hash, entries[0])
     }
 
     run {
-      val entries = reader.findBy(BlockHeaderFields.GAS_LIMIT, header.gasLimit())
+      val entries = reader.findBy(BlockHeaderFields.GAS_LIMIT, header.gasLimit)
       assertEquals(1, entries.size, entries.toString())
-      assertEquals(header.hash(), entries[0])
+      assertEquals(header.hash, entries[0])
     }
 
     run {
-      val entries = reader.findBy(BlockHeaderFields.GAS_USED, header.gasUsed())
+      val entries = reader.findBy(BlockHeaderFields.GAS_USED, header.gasUsed)
       assertEquals(1, entries.size)
-      assertEquals(header.hash(), entries[0])
+      assertEquals(header.hash, entries[0])
     }
   }
 
@@ -232,10 +233,10 @@ internal class BlockchainIndexTest {
       Bytes32.random()
     )
     blockchainIndex.index { w -> w.indexBlockHeader(header) }
-    assertEquals(UInt256.valueOf(1), blockchainIndex.totalDifficulty(header.hash()))
+    assertEquals(UInt256.valueOf(1), blockchainIndex.totalDifficulty(header.hash))
 
     val childHeader = BlockHeader(
-      header.hash(),
+      header.hash,
       Hash.fromBytes(Bytes32.random()),
       Address.fromBytes(Bytes.random(20)),
       Hash.fromBytes(Bytes32.random()),
@@ -254,7 +255,7 @@ internal class BlockchainIndexTest {
 
     blockchainIndex.index { w -> w.indexBlockHeader(childHeader) }
 
-    assertEquals(UInt256.valueOf(4), blockchainIndex.totalDifficulty(childHeader.hash()))
+    assertEquals(UInt256.valueOf(4), blockchainIndex.totalDifficulty(childHeader.hash))
   }
 
   @Test
@@ -308,37 +309,37 @@ internal class BlockchainIndexTest {
     }
 
     run {
-      val entries = reader.findBy(TransactionReceiptFields.BLOOM_FILTER, txReceipt.bloomFilter().toBytes())
+      val entries = reader.findBy(TransactionReceiptFields.BLOOM_FILTER, txReceipt.bloomFilter.toBytes())
       assertEquals(1, entries.size)
       assertEquals(txHash, entries[0])
     }
 
     run {
-      val entries = reader.findBy(TransactionReceiptFields.STATE_ROOT, txReceipt.stateRoot())
+      val entries = reader.findBy(TransactionReceiptFields.STATE_ROOT, txReceipt.stateRoot)
       assertEquals(1, entries.size)
       assertEquals(txHash, entries[0])
     }
 
     run {
-      val entries = reader.findBy(TransactionReceiptFields.LOGGER, txReceipt.logs()[0].logger())
+      val entries = reader.findBy(TransactionReceiptFields.LOGGER, txReceipt.logs[0].logger)
       assertEquals(1, entries.size)
       assertEquals(txHash, entries[0])
     }
 
     run {
-      val entries = reader.findBy(TransactionReceiptFields.LOG_TOPIC, txReceipt.logs()[0].topics()[0])
+      val entries = reader.findBy(TransactionReceiptFields.LOG_TOPIC, txReceipt.logs[0].topics[0])
       assertEquals(1, entries.size)
       assertEquals(txHash, entries[0])
     }
 
     run {
-      val entries = reader.findBy(TransactionReceiptFields.STATUS, txReceiptWithStatus.status())
+      val entries = reader.findBy(TransactionReceiptFields.STATUS, txReceiptWithStatus.status)
       assertEquals(1, entries.size)
       assertEquals(txHash2, entries[0])
     }
 
     run {
-      val entries = reader.findBy(TransactionReceiptFields.CUMULATIVE_GAS_USED, txReceipt.cumulativeGasUsed())
+      val entries = reader.findBy(TransactionReceiptFields.CUMULATIVE_GAS_USED, txReceipt.cumulativeGasUsed)
       assertEquals(1, entries.size)
       assertEquals(txHash, entries[0])
     }

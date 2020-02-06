@@ -322,10 +322,10 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
 
   override fun indexBlockHeader(blockHeader: BlockHeader) {
     val document = mutableListOf<IndexableField>()
-    val id = toBytesRef(blockHeader.hash())
+    val id = toBytesRef(blockHeader.getHash())
     document.add(StringField("_id", id, Field.Store.YES))
     document.add(StringField("_type", "block", Field.Store.NO))
-    blockHeader.parentHash()?.let { hash ->
+    blockHeader.getParentHash()?.let { hash ->
       val hashRef = toBytesRef(hash)
       document += StringField(
         PARENT_HASH.fieldName,
@@ -334,26 +334,26 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
       )
       queryBlockDocs(TermQuery(Term("_id", hashRef)), listOf(TOTAL_DIFFICULTY)).firstOrNull()?.let {
         it.getField(TOTAL_DIFFICULTY.fieldName)?.let {
-          val totalDifficulty = blockHeader.difficulty().add(UInt256.fromBytes(Bytes.wrap(it.binaryValue().bytes)))
+          val totalDifficulty = blockHeader.getDifficulty().add(UInt256.fromBytes(Bytes.wrap(it.binaryValue().bytes)))
           val diffBytes = toBytesRef(totalDifficulty.toBytes())
           document += StringField(TOTAL_DIFFICULTY.fieldName, diffBytes, Field.Store.YES)
           document += SortedDocValuesField(TOTAL_DIFFICULTY.fieldName, diffBytes)
         }
       }
     } ?: run {
-      val diffBytes = toBytesRef(blockHeader.difficulty().toBytes())
+      val diffBytes = toBytesRef(blockHeader.getDifficulty().toBytes())
       document += StringField(TOTAL_DIFFICULTY.fieldName, diffBytes, Field.Store.YES)
       document += SortedDocValuesField(TOTAL_DIFFICULTY.fieldName, diffBytes)
     }
-    document += StringField(OMMERS_HASH.fieldName, toBytesRef(blockHeader.ommersHash()), Field.Store.NO)
-    document += StringField(COINBASE.fieldName, toBytesRef(blockHeader.coinbase()), Field.Store.NO)
-    document += StringField(STATE_ROOT.fieldName, toBytesRef(blockHeader.stateRoot()), Field.Store.NO)
-    document += StringField(DIFFICULTY.fieldName, toBytesRef(blockHeader.difficulty()), Field.Store.NO)
-    document += StringField(NUMBER.fieldName, toBytesRef(blockHeader.number()), Field.Store.NO)
-    document += StringField(GAS_LIMIT.fieldName, toBytesRef(blockHeader.gasLimit()), Field.Store.NO)
-    document += StringField(GAS_USED.fieldName, toBytesRef(blockHeader.gasUsed()), Field.Store.NO)
-    document += StringField(EXTRA_DATA.fieldName, toBytesRef(blockHeader.extraData()), Field.Store.NO)
-    document += NumericDocValuesField(TIMESTAMP.fieldName, blockHeader.timestamp().toEpochMilli())
+    document += StringField(OMMERS_HASH.fieldName, toBytesRef(blockHeader.getOmmersHash()), Field.Store.NO)
+    document += StringField(COINBASE.fieldName, toBytesRef(blockHeader.getCoinbase()), Field.Store.NO)
+    document += StringField(STATE_ROOT.fieldName, toBytesRef(blockHeader.getStateRoot()), Field.Store.NO)
+    document += StringField(DIFFICULTY.fieldName, toBytesRef(blockHeader.getDifficulty()), Field.Store.NO)
+    document += StringField(NUMBER.fieldName, toBytesRef(blockHeader.getNumber()), Field.Store.NO)
+    document += StringField(GAS_LIMIT.fieldName, toBytesRef(blockHeader.getGasLimit()), Field.Store.NO)
+    document += StringField(GAS_USED.fieldName, toBytesRef(blockHeader.getGasUsed()), Field.Store.NO)
+    document += StringField(EXTRA_DATA.fieldName, toBytesRef(blockHeader.getExtraData()), Field.Store.NO)
+    document += NumericDocValuesField(TIMESTAMP.fieldName, blockHeader.getTimestamp().toEpochMilli())
 
     try {
       indexWriter.updateDocument(Term("_id", id), document)
@@ -372,20 +372,20 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     document += StringField(TransactionReceiptFields.TRANSACTION_HASH.fieldName, id, Field.Store.NO)
     document += StringField(TransactionReceiptFields.BLOCK_HASH.fieldName, toBytesRef(blockHash.toBytes()),
       Field.Store.NO)
-    for (log in txReceipt.logs()) {
-      document += StringField(TransactionReceiptFields.LOGGER.fieldName, toBytesRef(log.logger()), Field.Store.NO)
-      for (logTopic in log.topics()) {
+    for (log in txReceipt.getLogs()) {
+      document += StringField(TransactionReceiptFields.LOGGER.fieldName, toBytesRef(log.getLogger()), Field.Store.NO)
+      for (logTopic in log.getTopics()) {
         document += StringField(TransactionReceiptFields.LOG_TOPIC.fieldName, toBytesRef(logTopic), Field.Store.NO)
       }
     }
-    txReceipt.stateRoot()?.let {
+    txReceipt.getStateRoot()?.let {
       document += StringField(TransactionReceiptFields.STATE_ROOT.fieldName, toBytesRef(it), Field.Store.NO)
     }
     document += StringField(TransactionReceiptFields.BLOOM_FILTER.fieldName,
-      toBytesRef(txReceipt.bloomFilter().toBytes()), Field.Store.NO)
+      toBytesRef(txReceipt.getBloomFilter().toBytes()), Field.Store.NO)
     document += NumericDocValuesField(TransactionReceiptFields.CUMULATIVE_GAS_USED.fieldName,
-      txReceipt.cumulativeGasUsed())
-    txReceipt.status()?.let {
+      txReceipt.getCumulativeGasUsed())
+    txReceipt.getStatus()?.let {
       document += NumericDocValuesField(TransactionReceiptFields.STATUS.fieldName, it.toLong())
     }
 

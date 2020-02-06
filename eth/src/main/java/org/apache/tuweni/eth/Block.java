@@ -82,14 +82,14 @@ public final class Block {
   /**
    * @return the block body.
    */
-  public BlockBody body() {
+  public BlockBody getBody() {
     return body;
   }
 
   /**
    * @return the block header.
    */
-  public BlockHeader header() {
+  public BlockHeader getHeader() {
     return header;
   }
 

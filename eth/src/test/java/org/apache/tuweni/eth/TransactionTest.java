@@ -58,7 +58,7 @@ class TransactionTest {
     SECP256K1.KeyPair keyPair = SECP256K1.KeyPair.random();
     Address sender = Address.fromBytes(Bytes.wrap(keccak256(keyPair.publicKey().bytesArray()), 12, 20));
     Transaction tx = generateTransaction(keyPair);
-    assertEquals(sender, tx.sender());
+    assertEquals(sender, tx.getSender());
   }
 
   @Test
@@ -74,6 +74,6 @@ class TransactionTest {
         16 * 16 * 3);
     Bytes bytes = tx.toBytes();
     Transaction read = Transaction.fromBytes(bytes);
-    assertEquals(16 * 16 * 3, (int) read.chainId());
+    assertEquals(16 * 16 * 3, (int) read.getChainId());
   }
 }

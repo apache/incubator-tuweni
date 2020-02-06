@@ -58,8 +58,8 @@ class BlockRLPTestSuite {
     Block rlpBlock = Block.fromHexString(rlp);
     assertEquals(block, rlpBlock);
     assertEquals(Bytes.fromHexString(rlp), block.toBytes());
-    assertEquals(Hash.fromHexString(hash), block.header().hash());
-    assertEquals(Hash.fromHexString(hash), rlpBlock.header().hash());
+    assertEquals(Hash.fromHexString(hash), block.getHeader().getHash());
+    assertEquals(Hash.fromHexString(hash), rlpBlock.getHeader().getHash());
   }
 
   @MustBeClosed
