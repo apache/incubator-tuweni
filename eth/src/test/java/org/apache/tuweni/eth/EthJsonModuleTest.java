@@ -12,9 +12,13 @@
  */
 package org.apache.tuweni.eth;
 
+import org.apache.tuweni.junit.BouncyCastleExtension;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(BouncyCastleExtension.class)
 class EthJsonModuleTest {
 
   @Test
