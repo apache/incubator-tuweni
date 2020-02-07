@@ -75,9 +75,9 @@ public final class LogsBloomFilter {
   }
 
   public void insertLog(final Log log) {
-    setBits(keccak256(log.logger().toBytes()));
+    setBits(keccak256(log.getLogger().toBytes()));
 
-    for (final Bytes32 topic : log.topics()) {
+    for (final Bytes32 topic : log.getTopics()) {
       setBits(keccak256(topic));
     }
   }

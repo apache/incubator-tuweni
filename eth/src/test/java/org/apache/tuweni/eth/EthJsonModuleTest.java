@@ -10,19 +10,22 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-description = 'Classes and utilities for working with Ethereum.'
+package org.apache.tuweni.eth;
 
-dependencies {
-  compile 'com.fasterxml.jackson.core:jackson-databind'
-  compile project(':bytes')
-  compile project(':crypto')
-  compile project(':rlp')
-  compile project(':units')
+import org.apache.tuweni.junit.BouncyCastleExtension;
 
-  testCompile project(':junit')
-  testCompile 'org.bouncycastle:bcprov-jdk15on'
-  testCompile 'org.junit.jupiter:junit-jupiter-api'
-  testCompile 'org.junit.jupiter:junit-jupiter-params'
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+@ExtendWith(BouncyCastleExtension.class)
+class EthJsonModuleTest {
+
+  @Test
+  void testSerialize() throws Exception {
+    BlockHeader header = BlockHeaderTest.generateBlockHeader();
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.registerModule(new EthJsonModule());
+    mapper.writer().writeValueAsString(header);
+  }
 }

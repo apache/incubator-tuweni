@@ -114,7 +114,7 @@ internal class LESSubProtocolHandler(
     val bodies = ArrayList<BlockBody>()
     for (blockHash in blockBodiesMessage.blockHashes) {
       repo.retrieveBlock(blockHash)?.let { block ->
-        bodies.add(block.body())
+        bodies.add(block.getBody())
       }
     }
     return service.send(
@@ -167,16 +167,16 @@ internal class LESSubProtocolHandler(
     return asyncCompletion {
         val head = repo.retrieveChainHead()!!
         val genesis = repo.retrieveGenesisBlock()!!
-        val headTd = head.header().difficulty()
-        val headHash = head.header().hash()
+        val headTd = head.getHeader().getDifficulty()
+        val headHash = head.getHeader().getHash()
         val state = peerStateMap.computeIfAbsent(connectionId) { LESPeerState() }
         state.ourStatusMessage = StatusMessage(
           subProtocolIdentifier.version(),
           networkId,
           headTd,
           headHash.toBytes(),
-          head.header().number(),
-          genesis.header().hash().toBytes(),
+          head.getHeader().getNumber(),
+          genesis.getHeader().getHash().toBytes(),
           serveHeaders,
           serveChainSince,
           serveStateSince,

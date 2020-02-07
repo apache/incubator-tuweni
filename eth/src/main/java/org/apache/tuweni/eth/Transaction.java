@@ -236,21 +236,21 @@ public final class Transaction {
   /**
    * @return The transaction nonce.
    */
-  public UInt256 nonce() {
+  public UInt256 getNonce() {
     return nonce;
   }
 
   /**
    * @return The transaction gas price.
    */
-  public Wei gasPrice() {
+  public Wei getGasPrice() {
     return gasPrice;
   }
 
   /**
    * @return The transaction gas limit.
    */
-  public Gas gasLimit() {
+  public Gas getGasLimit() {
     return gasLimit;
   }
 
@@ -258,7 +258,7 @@ public final class Transaction {
    * @return The target contract address, or null if not present.
    */
   @Nullable
-  public Address to() {
+  public Address getTo() {
     return to;
   }
 
@@ -272,21 +272,21 @@ public final class Transaction {
   /**
    * @return The amount of Eth to transfer.
    */
-  public Wei value() {
+  public Wei getValue() {
     return value;
   }
 
   /**
    * @return The transaction signature.
    */
-  public SECP256K1.Signature signature() {
+  public SECP256K1.Signature getSignature() {
     return signature;
   }
 
   /**
    * @return The transaction payload.
    */
-  public Bytes payload() {
+  public Bytes getPayload() {
     return payload;
   }
 
@@ -294,7 +294,7 @@ public final class Transaction {
    * @return the chain id of the transaction, or null if no chain id was encoded on the transaction.
    * @see <a href="https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md">EIP-155</a>
    */
-  public Integer chainId() {
+  public Integer getChainId() {
     return chainId;
   }
 
@@ -303,7 +303,7 @@ public final class Transaction {
    *
    * @return The hash.
    */
-  public Hash hash() {
+  public Hash getHash() {
     if (hash != null) {
       return hash;
     }
@@ -316,7 +316,7 @@ public final class Transaction {
    * @return The sender of the transaction, or {@code null} if the signature is invalid.
    */
   @Nullable
-  public Address sender() {
+  public Address getSender() {
     if (validSignature != null) {
       return sender;
     }

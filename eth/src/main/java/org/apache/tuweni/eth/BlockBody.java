@@ -78,14 +78,14 @@ public final class BlockBody {
   /**
    * @return the transactions of the block.
    */
-  public List<Transaction> transactions() {
+  public List<Transaction> getTransactions() {
     return transactions;
   }
 
   /**
    * @return the list of ommers for this block.
    */
-  public List<BlockHeader> ommers() {
+  public List<BlockHeader> getOmmers() {
     return ommers;
   }
 

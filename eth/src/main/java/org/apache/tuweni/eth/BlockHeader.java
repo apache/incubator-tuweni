@@ -24,6 +24,7 @@ import org.apache.tuweni.units.ethereum.Gas;
 import java.time.Instant;
 import javax.annotation.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.google.common.base.Objects;
 
 /**
@@ -155,42 +156,48 @@ public final class BlockHeader {
   /**
    * @return the block's beneficiary's address.
    */
-  public Address coinbase() {
+  @JsonGetter("miner")
+  public Address getCoinbase() {
     return coinbase;
   }
 
   /**
    * @return the difficulty of the block.
    */
-  public UInt256 difficulty() {
+  @JsonGetter("difficulty")
+  public UInt256 getDifficulty() {
     return difficulty;
   }
 
   /**
    * @return the extra data stored with the block.
    */
-  public Bytes extraData() {
+  @JsonGetter("extraData")
+  public Bytes getExtraData() {
     return extraData;
   }
 
   /**
    * @return the gas limit of the block.
    */
-  public Gas gasLimit() {
+  @JsonGetter("gasLimit")
+  public Gas getGasLimit() {
     return gasLimit;
   }
 
   /**
    * @return the gas used for the block.
    */
-  public Gas gasUsed() {
+  @JsonGetter("gasUsed")
+  public Gas getGasUsed() {
     return gasUsed;
   }
 
   /**
    * @return the hash of the block header.
    */
-  public Hash hash() {
+  @JsonGetter("hash")
+  public Hash getHash() {
     if (hash == null) {
       Bytes rlp = toBytes();
       hash = Hash.hash(rlp);
@@ -201,35 +208,40 @@ public final class BlockHeader {
   /**
    * @return the bloom filter of the logs of the block.
    */
-  public Bytes logsBloom() {
+  @JsonGetter("logsBloom")
+  public Bytes getLogsBloom() {
     return logsBloom;
   }
 
   /**
    * @return the hash associated with computional work on the block.
    */
-  public Hash mixHash() {
+  @JsonGetter("mixHash")
+  public Hash getMixHash() {
     return mixHash;
   }
 
   /**
    * @return the nonce of the block.
    */
-  public Bytes nonce() {
+  @JsonGetter("nonce")
+  public Bytes getNonce() {
     return nonce;
   }
 
   /**
    * @return the number of the block.
    */
-  public UInt256 number() {
+  @JsonGetter("number")
+  public UInt256 getNumber() {
     return number;
   }
 
   /**
    * @return the ommer hash.
    */
-  public Hash ommersHash() {
+  @JsonGetter("sha3Uncles")
+  public Hash getOmmersHash() {
     return ommersHash;
   }
 
@@ -237,35 +249,40 @@ public final class BlockHeader {
    * @return the parent hash, or null if none was available.
    */
   @Nullable
-  public Hash parentHash() {
+  @JsonGetter("parentHash")
+  public Hash getParentHash() {
     return parentHash;
   }
 
   /**
    * @return the hash associated with the transaction receipts tree.
    */
-  public Hash receiptsRoot() {
+  @JsonGetter("receiptsRoot")
+  public Hash getReceiptsRoot() {
     return receiptsRoot;
   }
 
   /**
    * @return the hash associated with the state tree.
    */
-  public Hash stateRoot() {
+  @JsonGetter("stateRoot")
+  public Hash getStateRoot() {
     return stateRoot;
   }
 
   /**
    * @return the timestamp of the block.
    */
-  public Instant timestamp() {
+  @JsonGetter("timestamp")
+  public Instant getTimestamp() {
     return timestamp;
   }
 
   /**
    * @return the hash associated with the transactions tree.
    */
-  public Hash transactionsRoot() {
+  @JsonGetter("transactionsRoot")
+  public Hash getTransactionsRoot() {
     return transactionsRoot;
   }
 

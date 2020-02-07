@@ -77,7 +77,7 @@ public final class Log {
    *
    * @return the address of the contract that produced this log.
    */
-  public Address logger() {
+  public Address getLogger() {
     return logger;
   }
 
@@ -85,7 +85,7 @@ public final class Log {
    *
    * @return data associated with this log.
    */
-  public Bytes data() {
+  public Bytes getData() {
     return data;
   }
 
@@ -93,7 +93,7 @@ public final class Log {
    *
    * @return indexable topics associated with this log.
    */
-  public List<Bytes32> topics() {
+  public List<Bytes32> getTopics() {
     return topics;
   }
 

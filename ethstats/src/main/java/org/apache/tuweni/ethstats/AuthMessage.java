@@ -10,19 +10,34 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-description = 'Classes and utilities for working with Ethereum.'
+package org.apache.tuweni.ethstats;
 
-dependencies {
-  compile 'com.fasterxml.jackson.core:jackson-databind'
-  compile project(':bytes')
-  compile project(':crypto')
-  compile project(':rlp')
-  compile project(':units')
+import com.fasterxml.jackson.annotation.JsonGetter;
 
-  testCompile project(':junit')
-  testCompile 'org.bouncycastle:bcprov-jdk15on'
-  testCompile 'org.junit.jupiter:junit-jupiter-api'
-  testCompile 'org.junit.jupiter:junit-jupiter-params'
+final class AuthMessage {
 
-  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+  private final NodeInfo info;
+  private final String secret;
+  private final String id;
+
+  public AuthMessage(NodeInfo info, String id, String secret) {
+    this.info = info;
+    this.id = id;
+    this.secret = secret;
+  }
+
+  @JsonGetter("id")
+  public String getID() {
+    return id;
+  }
+
+  @JsonGetter("info")
+  public NodeInfo getInfo() {
+    return info;
+  }
+
+  @JsonGetter("secret")
+  public String getSecret() {
+    return secret;
+  }
 }

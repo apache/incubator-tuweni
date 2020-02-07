@@ -163,7 +163,7 @@ constructor() {
       assertNotNull(message)
       assertEquals(2, message.protocolVersion)
       assertEquals(UInt256.ZERO, message.flowControlBufferLimit)
-      assertEquals(block.header().hash().toBytes(), message.genesisHash)
+      assertEquals(block.getHeader().getHash().toBytes(), message.genesisHash)
     }
 
   @Test
@@ -374,7 +374,7 @@ constructor() {
       handler.handleNewPeerConnection("abc").await()
       handler.handle("abc", 0, status).await()
       handler.handle("abc", 3, BlockHeadersMessage(1, 2, listOf(header)).toBytes()).await()
-      val retrieved = repo.retrieveBlockHeader(header.hash())
+      val retrieved = repo.retrieveBlockHeader(header.getHash())
       assertEquals(header, retrieved)
   }
 
