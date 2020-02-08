@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
 @ExtendWith(VertxExtension::class)
@@ -33,17 +34,18 @@ class TCPPersistentTest {
   @Test
   fun testTwoTCPConnections(@VertxInstance vertx: Vertx) {
     val ref = AtomicReference<Message>()
+    val newPort = AtomicInteger()
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
     runBlocking {
-      client1.createTCPEndpoint("foo", port = 10000, handler = ref::set)
+      client1.createTCPEndpoint("foo", port = 0, handler = ref::set, portUpdateListener = newPort::set)
       client1.start()
       client2.start()
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
         "0.0.0.0",
-        10000
+        newPort.get()
       )
     }
     Thread.sleep(200)
@@ -56,17 +58,18 @@ class TCPPersistentTest {
   @Test
   fun testTwoTCPConnectionsWithTLS(@VertxInstance vertx: Vertx) {
     val ref = AtomicReference<Message>()
+    val newPort = AtomicInteger()
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
     runBlocking {
-      client1.createTCPEndpoint("foo", port = 11000, handler = ref::set, tls = true)
+      client1.createTCPEndpoint("foo", port = 0, handler = ref::set, tls = true, portUpdateListener = newPort::set)
       client1.start()
       client2.start()
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
         "0.0.0.0",
-        11000
+        newPort.get()
       )
     }
     Thread.sleep(200)
@@ -79,24 +82,26 @@ class TCPPersistentTest {
   fun testTwoEndpoints(@VertxInstance vertx: Vertx) {
     val ref = AtomicReference<Message>()
     val ref2 = AtomicReference<Message>()
+    val newPort = AtomicInteger()
+    val newPort2 = AtomicInteger()
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
     runBlocking {
-      client1.createTCPEndpoint("foo", port = 12000, handler = ref::set)
-      client1.createTCPEndpoint("bar", port = 12001, handler = ref2::set)
+      client1.createTCPEndpoint("foo", port = 0, handler = ref::set, portUpdateListener = newPort::set)
+      client1.createTCPEndpoint("bar", port = 0, handler = ref2::set, portUpdateListener = newPort2::set)
       client1.start()
       client2.start()
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
         "0.0.0.0",
-        12000
+        newPort.get()
       )
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
         "0.0.0.0",
-        12001
+        newPort2.get()
       )
     }
     Thread.sleep(200)
@@ -114,13 +119,14 @@ class HTTPTest {
     val ref = AtomicReference<Message>()
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
+    val newPort = AtomicInteger()
 
     runBlocking {
-      client1.createHTTPEndpoint("foo", port = 13000, handler = ref::set)
+      client1.createHTTPEndpoint("foo", port = 0, handler = ref::set, portUpdateListener = newPort::set)
       client1.start()
       client2.start()
       client2.sendMessage(Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"),
-        headers = Bytes.random(16)), Transport.HTTP, "0.0.0.0", 13000)
+        headers = Bytes.random(16)), Transport.HTTP, "0.0.0.0", newPort.get())
     }
     Thread.sleep(200)
     assertEquals(Bytes.fromHexString("deadbeef"), ref.get().body)
@@ -134,22 +140,24 @@ class HTTPTest {
     val ref2 = AtomicReference<Message>()
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
+    val newPort = AtomicInteger()
+    val newPort2 = AtomicInteger()
     runBlocking {
-      client1.createHTTPEndpoint("foo", port = 14000, handler = ref::set)
-      client1.createHTTPEndpoint("bar", port = 14001, handler = ref2::set)
+      client1.createHTTPEndpoint("foo", port = 0, handler = ref::set, portUpdateListener = newPort::set)
+      client1.createHTTPEndpoint("bar", port = 0, handler = ref2::set, portUpdateListener = newPort2::set)
       client1.start()
       client2.start()
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.HTTP,
         "0.0.0.0",
-        14000
+        newPort.get()
       )
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.HTTP,
         "0.0.0.0",
-        14001
+        newPort2.get()
       )
     }
     Thread.sleep(200)
@@ -221,13 +229,14 @@ class WebSocketTest {
     val ref = AtomicReference<Message>()
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
+    val newPort = AtomicInteger()
 
     runBlocking {
-      client1.createWSEndpoint("foo", port = 17000, handler = ref::set)
+      client1.createWSEndpoint("foo", port = 0, handler = ref::set, portUpdateListener = newPort::set)
       client1.start()
       client2.start()
       client2.sendMessage(Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"),
-        headers = Bytes.random(16)), Transport.WS, "0.0.0.0", 17000)
+        headers = Bytes.random(16)), Transport.WS, "0.0.0.0", newPort.get())
     }
     Thread.sleep(200)
     assertEquals(Bytes.fromHexString("deadbeef"), ref.get().body)
@@ -241,24 +250,26 @@ class WebSocketTest {
     val ref2 = AtomicReference<Message>()
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
+    val newPort = AtomicInteger()
+    val newPort2 = AtomicInteger()
     runBlocking {
       client1.exceptionHandler { it.printStackTrace() }
       client2.exceptionHandler { it.printStackTrace() }
-      client1.createWSEndpoint("foo", port = 18000, handler = ref::set)
-      client1.createWSEndpoint("bar", port = 18001, handler = ref2::set)
+      client1.createWSEndpoint("foo", port = 0, handler = ref::set, portUpdateListener = newPort::set)
+      client1.createWSEndpoint("bar", port = 0, handler = ref2::set, portUpdateListener = newPort2::set)
       client1.start()
       client2.start()
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.WS,
         "0.0.0.0",
-        18000
+        newPort.get()
       )
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.WS,
         "0.0.0.0",
-        18001
+        newPort2.get()
       )
     }
     Thread.sleep(200)

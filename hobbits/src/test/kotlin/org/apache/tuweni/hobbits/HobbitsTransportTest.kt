@@ -70,11 +70,11 @@ class HobbitsTransportTest {
       it.handler {
           completion.complete(Bytes.wrapBuffer(it))
       }
-    }.listen(10000, "localhost")
+    }.listen(0, "localhost")
     val server = HobbitsTransport(vertx)
     server.start()
     val msg = Message(protocol = Protocol.RPC, headers = Bytes.EMPTY, body = Bytes.EMPTY)
-    server.sendMessage(msg, Transport.TCP, "localhost", 10000)
+    server.sendMessage(msg, Transport.TCP, "localhost", listening.actualPort())
     val result = completion.await()
     assertEquals(msg.toBytes(), result)
   }

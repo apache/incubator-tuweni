@@ -93,10 +93,11 @@ class HobbitsTransport(
     port: Int = 9337,
     requestURI: String? = null,
     tls: Boolean = false,
-    handler: (Message) -> Unit
+    handler: (Message) -> Unit,
+    portUpdateListener: (Int) -> Unit = {}
   ) {
     checkNotStarted()
-    httpEndpoints[id] = Endpoint(networkInterface, port, requestURI, tls, handler)
+    httpEndpoints[id] = Endpoint(networkInterface, port, requestURI, tls, handler, portUpdateListener)
   }
 
   /**
@@ -111,10 +112,11 @@ class HobbitsTransport(
     networkInterface: String = "0.0.0.0",
     port: Int = 9237,
     tls: Boolean = false,
-    handler: (Message) -> Unit
+    handler: (Message) -> Unit,
+    portUpdateListener: (Int) -> Unit = {}
   ) {
     checkNotStarted()
-    tcpEndpoints[id] = Endpoint(networkInterface, port, null, tls, handler)
+    tcpEndpoints[id] = Endpoint(networkInterface, port, null, tls, handler, portUpdateListener)
   }
 
   /**
@@ -148,10 +150,11 @@ class HobbitsTransport(
     port: Int = 9037,
     requestURI: String? = null,
     tls: Boolean = false,
-    handler: (Message) -> Unit
+    handler: (Message) -> Unit,
+    portUpdateListener: (Int) -> Unit = {}
   ) {
     checkNotStarted()
-    wsEndpoints[id] = Endpoint(networkInterface, port, requestURI, tls, handler)
+    wsEndpoints[id] = Endpoint(networkInterface, port, requestURI, tls, handler, portUpdateListener)
   }
 
   /**
@@ -280,6 +283,9 @@ class HobbitsTransport(
             completion.completeExceptionally(it.cause())
           } else {
             completion.complete()
+            if (endpoint.port == 0) {
+              endpoint.updatePort(it.result().actualPort())
+            }
           }
         }
         completions.add(completion)
@@ -302,6 +308,9 @@ class HobbitsTransport(
             completion.completeExceptionally(it.cause())
           } else {
             completion.complete()
+            if (endpoint.port == 0) {
+              endpoint.updatePort(it.result().actualPort())
+            }
           }
         }
         completions.add(completion)
@@ -359,6 +368,9 @@ class HobbitsTransport(
             completion.completeExceptionally(it.cause())
           } else {
             completion.complete()
+            if (endpoint.port == 0) {
+              endpoint.updatePort(it.result().actualPort())
+            }
           }
         }
         completions.add(completion)
@@ -402,11 +414,18 @@ class HobbitsTransport(
 
 internal data class Endpoint(
   val networkInterface: String,
-  val port: Int,
+  var port: Int,
   val requestURI: String?,
   val tls: Boolean,
-  val handler: (Message) -> Unit
-)
+  val handler: (Message) -> Unit,
+  val portUpdateListener: (Int) -> Unit = {}
+) {
+
+  fun updatePort(newPort: Int) {
+    port = newPort
+    portUpdateListener(newPort)
+  }
+}
 
 /**
  * Transport types supported.
