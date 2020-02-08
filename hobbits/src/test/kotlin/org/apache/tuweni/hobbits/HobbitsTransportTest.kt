@@ -70,12 +70,15 @@ class HobbitsTransportTest {
       it.handler {
           completion.complete(Bytes.wrapBuffer(it))
       }
-    }.listen(0, "localhost")
-    val server = HobbitsTransport(vertx)
-    server.start()
-    val msg = Message(protocol = Protocol.RPC, headers = Bytes.EMPTY, body = Bytes.EMPTY)
-    server.sendMessage(msg, Transport.TCP, "localhost", listening.actualPort())
-    val result = completion.await()
-    assertEquals(msg.toBytes(), result)
+    }.listen(0, "localhost") {
+      runBlocking {
+        val server = HobbitsTransport(vertx)
+        server.start()
+        val msg = Message(protocol = Protocol.RPC, headers = Bytes.EMPTY, body = Bytes.EMPTY)
+        server.sendMessage(msg, Transport.TCP, "localhost", listening.actualPort())
+        val result = completion.await()
+        assertEquals(msg.toBytes(), result)
+      }
+    }
   }
 }
