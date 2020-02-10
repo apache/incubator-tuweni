@@ -12,7 +12,7 @@
  */
 package org.apache.tuweni.ethstats;
 
-import org.apache.tuweni.crypto.Hash;
+import org.apache.tuweni.eth.Hash;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 
