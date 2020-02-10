@@ -16,11 +16,14 @@ import org.apache.tuweni.crypto.Hash;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 
-final class TxStats {
+/**
+ * Stats reported to ethnetstats representing the hash of a transaction.
+ */
+public final class TxStats {
 
   private final Hash hash;
 
-  TxStats(Hash hash) {
+  public TxStats(Hash hash) {
     this.hash = hash;
   }
 

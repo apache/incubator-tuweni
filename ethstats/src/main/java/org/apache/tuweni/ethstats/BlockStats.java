@@ -22,6 +22,9 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 
+/**
+ * Block statistics reported to ethnetstats.
+ */
 public final class BlockStats {
 
   private final UInt256 blockNumber;
@@ -38,8 +41,24 @@ public final class BlockStats {
   private final Hash stateRoot;
   private final List<BlockHeader> uncles;
 
-
-  BlockStats(
+  /**
+   * Default constructor.
+   * 
+   * @param blockNumber the block number
+   * @param hash the block hash
+   * @param parentHash the hash of the parent block, or null.
+   * @param timestamp the timestamp of the block
+   * @param miner the coinbase address of the block
+   * @param gasUsed the gas used by the block
+   * @param gasLimit the gas limit of the block
+   * @param difficulty the difficulty of the block
+   * @param totalDifficulty the total difficulty up to this block (including this block)
+   * @param transactions the list of transaction hashes associated with the block
+   * @param transactionsRoot the hash root of transactions
+   * @param stateRoot the hash root of the state
+   * @param uncles the block ommers associated with this block
+   */
+  public BlockStats(
       UInt256 blockNumber,
       Hash hash,
       Hash parentHash,
