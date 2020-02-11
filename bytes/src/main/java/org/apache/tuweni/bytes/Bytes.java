@@ -1470,6 +1470,29 @@ public interface Bytes extends Comparable<Bytes> {
   }
 
   /**
+   * @return This value represented as a minimal hexadecimal string (without any leading zero, except if it's valued
+   *         zero or empty, in which case it returns 0x0).
+   */
+  default String toQuantityHexString() {
+    if (Bytes.EMPTY.equals(this)) {
+      return "0x0";
+    }
+    StringBuilder hex;
+    try {
+      hex = appendHexTo(new StringBuilder());
+    } catch (IOException e) {
+      // not thrown
+      throw new RuntimeException(e);
+    }
+
+    int i = 0;
+    while (i < hex.length() - 1 && hex.charAt(i) == '0') {
+      i++;
+    }
+    return "0x" + hex.substring(hex.charAt(hex.length() - 1) == '0' ? i : i++);
+  }
+
+  /**
    * @return This value represented as base 64.
    */
   default String toBase64String() {

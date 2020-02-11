@@ -434,6 +434,13 @@ abstract class CommonBytesTests {
   }
 
   @Test
+  void testQuantityHexString() {
+    assertEquals("0x0", h("0x").toQuantityHexString());
+    assertEquals("0x0", h("0x0000").toQuantityHexString());
+    assertEquals("0x1000001", h("0x01000001").toQuantityHexString());
+  }
+
+  @Test
   void testHexString() {
     assertEquals("0x", h("0x").toShortHexString());
     assertEquals("0x", h("0x0000").toShortHexString());
