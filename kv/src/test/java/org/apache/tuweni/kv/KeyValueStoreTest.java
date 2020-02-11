@@ -22,8 +22,11 @@ import org.apache.tuweni.junit.TempDirectory;
 import org.apache.tuweni.junit.TempDirectoryExtension;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,6 +51,17 @@ class KeyValueStoreTest {
     Map<Bytes, Bytes> map = new HashMap<>();
     KeyValueStore store = MapKeyValueStore.open(map);
     assertNull(store.getAsync(Bytes.of(123)).get());
+  }
+
+  @Test
+  void testKeys() throws Exception {
+    Map<Bytes, Bytes> map = new HashMap<>();
+    KeyValueStore store = MapKeyValueStore.open(map);
+    AsyncCompletion completion = store.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
+    completion.join();
+    Set<Bytes> keys = new HashSet<>();
+    store.keysAsync().get().forEach(keys::add);
+    assertEquals(new HashSet<>(Arrays.asList(Bytes.of(123))), keys);
   }
 
   @Test

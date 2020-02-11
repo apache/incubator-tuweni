@@ -16,9 +16,7 @@
  */
 package org.apache.tuweni.kv
 
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.AsyncResult
@@ -29,7 +27,7 @@ import java.io.Closeable
 /**
  * A key-value store.
  */
-interface KeyValueStore : Closeable {
+interface KeyValueStore : Closeable, CoroutineScope {
 
   /**
    * Retrieves data from the store.
@@ -46,18 +44,7 @@ interface KeyValueStore : Closeable {
    * @return An [AsyncResult] that will complete with the stored content,
    *         or an empty optional if no content was available.
    */
-  fun getAsync(key: Bytes): AsyncResult<Bytes?> = getAsync(Dispatchers.Default, key)
-
-  /**
-   * Retrieves data from the store.
-   *
-   * @param key The key for the content.
-   * @param dispatcher The co-routine dispatcher for asynchronous tasks.
-   * @return An [AsyncResult] that will complete with the stored content,
-   *         or an empty optional if no content was available.
-   */
-  fun getAsync(dispatcher: CoroutineDispatcher, key: Bytes): AsyncResult<Bytes?> =
-    GlobalScope.asyncResult(dispatcher) { get(key) }
+  fun getAsync(key: Bytes): AsyncResult<Bytes?> = asyncResult { get(key) }
 
   /**
    * Puts data into the store.
@@ -77,19 +64,19 @@ interface KeyValueStore : Closeable {
    * @param value The data to store.
    * @return An [AsyncCompletion] that will complete when the content is stored.
    */
-  fun putAsync(key: Bytes, value: Bytes): AsyncCompletion = putAsync(Dispatchers.Default, key, value)
+  fun putAsync(key: Bytes, value: Bytes): AsyncCompletion = asyncCompletion { put(key, value) }
 
   /**
-   * Puts data into the store.
+   * Provides an iterator over the keys of the store.
    *
-   * Note: if the storage implementation already contains content for the given key, it does not need to replace the
-   * existing content.
-   *
-   * @param key The key to associate with the data, for use when retrieving.
-   * @param value The data to store.
-   * @param dispatcher The co-routine dispatcher for asynchronous tasks.
-   * @return An [AsyncCompletion] that will complete when the content is stored.
+   * @return An [Iterable] allowing to iterate over the set of keys.
    */
-  fun putAsync(dispatcher: CoroutineDispatcher, key: Bytes, value: Bytes): AsyncCompletion =
-    GlobalScope.asyncCompletion(dispatcher) { put(key, value) }
+  suspend fun keys(): Iterable<Bytes>
+
+  /**
+   * Provides an iterator over the keys of the store.
+   *
+   * @return An [Iterable] allowing to iterate over the set of keys.
+   */
+  fun keysAsync(): AsyncResult<Iterable<Bytes>> = asyncResult { keys() }
 }

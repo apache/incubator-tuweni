@@ -21,10 +21,12 @@ import io.lettuce.core.RedisURI
 import io.lettuce.core.api.StatefulRedisConnection
 import io.lettuce.core.api.async.RedisAsyncCommands
 import io.lettuce.core.codec.RedisCodec
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import org.apache.tuweni.bytes.Bytes
 import java.net.InetAddress
 import java.util.concurrent.CompletionStage
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A key-value store backed by Redis.
@@ -32,7 +34,10 @@ import java.util.concurrent.CompletionStage
  * @param uri The uri to the Redis store.
  * @constructor Open a Redis-backed key-value store.
  */
-class RedisKeyValueStore(uri: String) : KeyValueStore {
+class RedisKeyValueStore(
+  uri: String,
+  override val coroutineContext: CoroutineContext = Dispatchers.IO
+) : KeyValueStore {
 
   companion object {
     /**
@@ -98,7 +103,7 @@ class RedisKeyValueStore(uri: String) : KeyValueStore {
 
   init {
     val redisClient = RedisClient.create(uri)
-    conn = redisClient.connect(RedisKeyValueStore.codec())
+    conn = redisClient.connect(codec())
     asyncCommands = conn.async()
   }
 
@@ -108,6 +113,8 @@ class RedisKeyValueStore(uri: String) : KeyValueStore {
     val future: CompletionStage<String> = asyncCommands.set(key, value)
     future.await()
   }
+
+  override suspend fun keys(): Iterable<Bytes> = asyncCommands.keys(Bytes.EMPTY).await()
 
   override fun close() {
     conn.close()

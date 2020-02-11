@@ -16,9 +16,7 @@
  */
 package org.apache.tuweni.kv
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.apache.tuweni.bytes.Bytes
 import org.mapdb.DB
 import org.mapdb.DBMaker
@@ -28,12 +26,13 @@ import org.mapdb.HTreeMap
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A key-value store backed by a MapDB instance.
  *
  * @param dbPath The path to the MapDB database.
- * @param dispatcher The co-routine dispatcher for blocking tasks.
+ * @param coroutineContext The co-routine context for blocking tasks.
  * @return A key-value store.
  * @throws IOException If an I/O error occurs.
  * @constructor Open a MapDB-backed key-value store.
@@ -42,7 +41,7 @@ class MapDBKeyValueStore
 @Throws(IOException::class)
 constructor(
   dbPath: Path,
-  private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+  override val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : KeyValueStore {
 
   companion object {
@@ -71,14 +70,14 @@ constructor(
     ).createOrOpen()
   }
 
-  override suspend fun get(key: Bytes): Bytes? = withContext(dispatcher) {
-    storageData[key]
-  }
+  override suspend fun get(key: Bytes): Bytes? = storageData[key]
 
-  override suspend fun put(key: Bytes, value: Bytes) = withContext(dispatcher) {
+  override suspend fun put(key: Bytes, value: Bytes) {
     storageData[key] = value
     db.commit()
   }
+
+  override suspend fun keys(): Iterable<Bytes> = storageData.keys
 
   /**
    * Closes the underlying MapDB instance.
