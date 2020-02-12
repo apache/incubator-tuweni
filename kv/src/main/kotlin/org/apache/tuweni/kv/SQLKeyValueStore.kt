@@ -38,27 +38,45 @@ import kotlin.coroutines.CoroutineContext
  * @throws IOException If an I/O error occurs.
  * @constructor Open a relational database backed key-value store.
  */
-class SQLKeyValueStore
+class SQLKeyValueStore<K, V>
 @Throws(IOException::class)
 constructor(
   jdbcurl: String,
   val tableName: String = "store",
   val keyColumn: String = "key",
   val valueColumn: String = "value",
+  private val keySerializer: (K) -> Bytes,
+  private val valueSerializer: (V) -> Bytes,
+  private val keyDeserializer: (Bytes) -> K,
+  private val valueDeserializer: (Bytes?) -> V?,
   override val coroutineContext: CoroutineContext = Dispatchers.IO
-) : KeyValueStore {
+) : KeyValueStore<K, V> {
 
   companion object {
     /**
      * Open a relational database backed key-value store.
      *
      * @param jdbcUrl The JDBC url to connect to the database.
+     * @param keySerializer the serializer of key objects to bytes
+     * @param valueSerializer the serializer of value objects to bytes
+     * @param keyDeserializer the deserializer of keys from bytes
+     * @param valueDeserializer the deserializer of values from bytes
      * @return A key-value store.
      * @throws IOException If an I/O error occurs.
      */
     @JvmStatic
     @Throws(IOException::class)
-    fun open(jdbcUrl: String) = SQLKeyValueStore(jdbcUrl)
+    fun <K, V> open(
+      jdbcUrl: String,
+      keySerializer: (K) -> Bytes,
+      valueSerializer: (V) -> Bytes,
+      keyDeserializer: (Bytes) -> K,
+      valueDeserializer: (Bytes?) -> V?
+    ) = SQLKeyValueStore<K, V>(jdbcurl = jdbcUrl,
+      keySerializer = keySerializer,
+      valueSerializer = valueSerializer,
+    keyDeserializer = keyDeserializer,
+      valueDeserializer = valueDeserializer)
 
     /**
      * Open a relational database backed key-value store.
@@ -67,13 +85,33 @@ constructor(
      * @param tableName the name of the table to use for storage.
      * @param keyColumn the key column of the store.
      * @param valueColumn the value column of the store.
+     * @param keySerializer the serializer of key objects to bytes
+     * @param valueSerializer the serializer of value objects to bytes
+     * @param keyDeserializer the deserializer of keys from bytes
+     * @param valueDeserializer the deserializer of values from bytes
      * @return A key-value store.
      * @throws IOException If an I/O error occurs.
      */
     @JvmStatic
     @Throws(IOException::class)
-    fun open(jdbcUrl: String, tableName: String, keyColumn: String, valueColumn: String) =
-      SQLKeyValueStore(jdbcUrl, tableName, keyColumn, valueColumn)
+    fun <K, V> open(
+      jdbcUrl: String,
+      tableName: String,
+      keyColumn: String,
+      valueColumn: String,
+      keySerializer: (K) -> Bytes,
+      valueSerializer: (V) -> Bytes,
+      keyDeserializer: (Bytes) -> K,
+      valueDeserializer: (Bytes?) -> V?
+    ) =
+      SQLKeyValueStore<K, V>(jdbcUrl,
+        tableName,
+        keyColumn,
+        valueColumn,
+        keySerializer,
+        valueSerializer,
+        keyDeserializer,
+        valueDeserializer)
   }
 
   private val connectionPool: BoneCP
@@ -85,34 +123,34 @@ constructor(
     connectionPool = BoneCP(config)
   }
 
-  override suspend fun get(key: Bytes): Bytes? {
+  override suspend fun get(key: K): V? {
       connectionPool.asyncConnection.await().use {
         val stmt = it.prepareStatement("SELECT $valueColumn FROM $tableName WHERE $keyColumn = ?")
-        stmt.setBytes(1, key.toArrayUnsafe())
+        stmt.setBytes(1, keySerializer(key).toArrayUnsafe())
         stmt.execute()
 
         val rs = stmt.resultSet
 
         return if (rs.next()) {
-          Bytes.wrap(rs.getBytes(1))
+          valueDeserializer(Bytes.wrap(rs.getBytes(1)))
         } else {
           null
         }
       }
   }
 
-  override suspend fun put(key: Bytes, value: Bytes) {
+  override suspend fun put(key: K, value: V) {
     connectionPool.asyncConnection.await().use {
         val stmt = it.prepareStatement("INSERT INTO $tableName($keyColumn, $valueColumn) VALUES(?,?)")
-        stmt.setBytes(1, key.toArrayUnsafe())
-        stmt.setBytes(2, value.toArrayUnsafe())
+        stmt.setBytes(1, keySerializer(key).toArrayUnsafe())
+        stmt.setBytes(2, valueSerializer(value).toArrayUnsafe())
         it.autoCommit = false
         try {
           stmt.execute()
         } catch (e: SQLException) {
           val updateStmt = it.prepareStatement("UPDATE $tableName SET $valueColumn=? WHERE $keyColumn=?")
-          updateStmt.setBytes(1, value.toArrayUnsafe())
-          updateStmt.setBytes(2, key.toArrayUnsafe())
+          updateStmt.setBytes(1, valueSerializer(value).toArrayUnsafe())
+          updateStmt.setBytes(2, keySerializer(key).toArrayUnsafe())
           updateStmt.execute()
         }
         it.commit()
@@ -120,24 +158,24 @@ constructor(
       }
   }
 
-  private class SQLIterator(val resultSet: ResultSet) : Iterator<Bytes> {
+  private class SQLIterator<K>(val resultSet: ResultSet, val keyDeserializer: (Bytes) -> K) : Iterator<K> {
 
     private var next = resultSet.next()
 
     override fun hasNext(): Boolean = next
 
-    override fun next(): Bytes {
-      val key = Bytes.wrap(resultSet.getBytes(1))
+    override fun next(): K {
+      val key = keyDeserializer(Bytes.wrap(resultSet.getBytes(1)))
       next = resultSet.next()
       return key
     }
   }
 
-  override suspend fun keys(): Iterable<Bytes> {
+  override suspend fun keys(): Iterable<K> {
     connectionPool.asyncConnection.await().use {
       val stmt = it.prepareStatement("SELECT $keyColumn FROM $tableName")
       stmt.execute()
-      return Iterable { SQLIterator(stmt.resultSet) }
+      return Iterable { SQLIterator(stmt.resultSet, keyDeserializer) }
     }
   }
 

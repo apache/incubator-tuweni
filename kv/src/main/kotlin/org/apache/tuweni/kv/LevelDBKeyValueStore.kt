@@ -25,49 +25,91 @@ import org.iq80.leveldb.Options
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.function.Function
 import kotlin.coroutines.CoroutineContext
 
 /**
  * A key-value store backed by LevelDB.
  *
  * @param dbPath The path to the levelDB database.
+ * @param keySerializer the serializer of key objects to bytes
+ * @param valueSerializer the serializer of value objects to bytes
+ * @param keyDeserializer the deserializer of keys from bytes
+ * @param valueDeserializer the deserializer of values from bytes
  * @param options Options for the levelDB database.
  * @param coroutineContext The co-routine context for blocking tasks.
  * @return A key-value store.
  * @throws IOException If an I/O error occurs.
  * @constructor Open a LevelDB-backed key-value store.
  */
-class LevelDBKeyValueStore
+class LevelDBKeyValueStore<K, V>
 @Throws(IOException::class)
 constructor(
   dbPath: Path,
+  private val keySerializer: (K) -> Bytes,
+  private val valueSerializer: (V) -> Bytes,
+  private val keyDeserializer: (Bytes) -> K,
+  private val valueDeserializer: (Bytes) -> V,
   options: Options = Options().createIfMissing(true).cacheSize((100 * 1048576).toLong()),
   override val coroutineContext: CoroutineContext = Dispatchers.IO
-) : KeyValueStore {
+) : KeyValueStore<K, V> {
 
   companion object {
+
     /**
      * Open a LevelDB-backed key-value store.
      *
      * @param dbPath The path to the levelDB database.
+     * @param keySerializer the serializer of key objects to bytes
+     * @param valueSerializer the serializer of value objects to bytes
+     * @param keyDeserializer the deserializer of keys from bytes
+     * @param valueDeserializer the deserializer of values from bytes
      * @return A key-value store.
      * @throws IOException If an I/O error occurs.
      */
     @JvmStatic
     @Throws(IOException::class)
-    fun open(dbPath: Path) = LevelDBKeyValueStore(dbPath)
+    fun <K, V> open(
+      dbPath: Path,
+      keySerializer: Function<K, Bytes>,
+      valueSerializer: Function<V, Bytes>,
+      keyDeserializer: Function<Bytes, K>,
+      valueDeserializer: Function<Bytes, V>
+    ): LevelDBKeyValueStore<K, V> =
+      LevelDBKeyValueStore(dbPath,
+        keySerializer::apply,
+        valueSerializer::apply,
+        keyDeserializer::apply,
+        valueDeserializer::apply)
 
     /**
      * Open a LevelDB-backed key-value store.
      *
      * @param dbPath The path to the levelDB database.
+     * @param keySerializer the serializer of key objects to bytes
+     * @param valueSerializer the serializer of value objects to bytes
+     * @param keyDeserializer the deserializer of keys from bytes
+     * @param valueDeserializer the deserializer of values from bytes
      * @param options Options for the levelDB database.
      * @return A key-value store.
      * @throws IOException If an I/O error occurs.
      */
     @JvmStatic
     @Throws(IOException::class)
-    fun open(dbPath: Path, options: Options) = LevelDBKeyValueStore(dbPath, options)
+    fun <K, V> open(
+      dbPath: Path,
+      keySerializer: Function<K, Bytes>,
+      valueSerializer: Function<V, Bytes>,
+      keyDeserializer: Function<Bytes, K>,
+      valueDeserializer: Function<Bytes, V>,
+      options: Options
+    ) =
+      LevelDBKeyValueStore(dbPath,
+        keySerializer::apply,
+        valueSerializer::apply,
+        keyDeserializer::apply,
+        valueDeserializer::apply,
+        options)
   }
 
   private val db: DB
@@ -77,27 +119,28 @@ constructor(
     db = JniDBFactory.factory.open(dbPath.toFile(), options)
   }
 
-  override suspend fun get(key: Bytes): Bytes? {
-    val rawValue = db[key.toArrayUnsafe()]
+  override suspend fun get(key: K): V? {
+    val rawValue = db[keySerializer(key).toArrayUnsafe()]
     return if (rawValue == null) {
       null
     } else {
-      Bytes.wrap(rawValue)
+      valueDeserializer(Bytes.wrap(rawValue))
     }
   }
 
-  override suspend fun put(key: Bytes, value: Bytes) = db.put(key.toArrayUnsafe(), value.toArrayUnsafe())
+  override suspend fun put(key: K, value: V) = db.put(keySerializer(key).toArrayUnsafe(),
+    valueSerializer(value).toArrayUnsafe())
 
-  private class BytesIterator(val iter: DBIterator) : Iterator<Bytes> {
+  private class KIterator<K>(val iter: DBIterator, val keyDeserializer: (Bytes) -> K) : Iterator<K> {
     override fun hasNext(): Boolean = iter.hasNext()
 
-    override fun next(): Bytes = Bytes.wrap(iter.next().key)
+    override fun next(): K = keyDeserializer(Bytes.wrap(iter.next().key))
   }
 
-  override suspend fun keys(): Iterable<Bytes> {
+  override suspend fun keys(): Iterable<K> {
     val iter = db.iterator()
     iter.seekToFirst()
-    return Iterable { BytesIterator(iter) }
+    return Iterable { KIterator(iter, keyDeserializer) }
   }
 
   /**

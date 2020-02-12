@@ -22,6 +22,7 @@ import org.apache.tuweni.junit.RedisPort;
 import org.apache.tuweni.junit.RedisServerExtension;
 
 import java.net.InetAddress;
+import java.util.function.Function;
 
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
@@ -34,7 +35,8 @@ class RedisKeyValueStoreTest {
 
   @Test
   void testPutAndGet(@RedisPort Integer redisPort) throws Exception {
-    KeyValueStore store = RedisKeyValueStore.open(redisPort);
+    KeyValueStore<Bytes, Bytes> store = RedisKeyValueStore
+        .open(redisPort, Function.identity(), Function.identity(), Function.identity(), Function.identity());
     AsyncCompletion completion = store.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
     completion.join();
     Bytes value = store.getAsync(Bytes.of(123)).get();
@@ -49,13 +51,24 @@ class RedisKeyValueStoreTest {
 
   @Test
   void testNoValue(@RedisPort Integer redisPort) throws Exception {
-    KeyValueStore store = RedisKeyValueStore.open(redisPort, InetAddress.getLoopbackAddress());
+    KeyValueStore<Bytes, Bytes> store = RedisKeyValueStore.open(
+        redisPort,
+        InetAddress.getLoopbackAddress(),
+        Function.identity(),
+        Function.identity(),
+        Function.identity(),
+        Function.identity());
     assertNull(store.getAsync(Bytes.of(124)).get());
   }
 
   @Test
   void testRedisCloseable(@RedisPort Integer redisPort) throws Exception {
-    try (RedisKeyValueStore redis = RedisKeyValueStore.open("redis://127.0.0.1:" + redisPort)) {
+    try (RedisKeyValueStore<Bytes, Bytes> redis = RedisKeyValueStore.open(
+        "redis://127.0.0.1:" + redisPort,
+        Function.identity(),
+        Function.identity(),
+        Function.identity(),
+        Function.identity())) {
       AsyncCompletion completion = redis.putAsync(Bytes.of(125), Bytes.of(10, 12, 13));
       completion.join();
       Bytes value = redis.getAsync(Bytes.of(125)).get();

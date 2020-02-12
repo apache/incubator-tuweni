@@ -110,7 +110,7 @@ object InfinispanKeyValueStoreSpec : Spek({
       runBlocking {
         kv.put(bar, foo)
         kv.put(foo, bar)
-          val keys = (kv.keys().map { it })
+        val keys = (kv.keys().map { it })
         keys.should.contain(bar)
         keys.should.contain(foo)
       }
@@ -120,7 +120,12 @@ object InfinispanKeyValueStoreSpec : Spek({
 
 object MapDBKeyValueStoreSpec : Spek({
   val testDir = Files.createTempDirectory("data")
-  val kv = MapDBKeyValueStore(testDir.resolve("data.db"))
+  val kv = MapDBKeyValueStore(
+    testDir.resolve("data.db"),
+    keySerializer = { it },
+    valueSerializer = { it },
+    keyDeserializer = { it },
+    valueDeserializer = { it })
 
   describe("a MapDB-backed key value store") {
 
@@ -141,12 +146,19 @@ object MapDBKeyValueStoreSpec : Spek({
       runBlocking {
         kv.put(foobar, foo)
         kv.put(foo, bar)
-        kv.keys().should.equal(setOf(foobar, foo))
+        val keys = kv.keys().map { it }
+        keys.should.contain(foo)
+        keys.should.contain(foobar)
       }
     }
 
     it("should not allow usage after the DB is closed") {
-      val kv2 = MapDBKeyValueStore(testDir.resolve("data2.db"))
+      val kv2 = MapDBKeyValueStore(
+        testDir.resolve("data2.db"),
+        keySerializer = { it },
+        valueSerializer = { it },
+        keyDeserializer = { it },
+        valueDeserializer = { it })
       kv2.close()
       runBlocking {
         var caught = false
@@ -168,7 +180,12 @@ object MapDBKeyValueStoreSpec : Spek({
 
 object LevelDBKeyValueStoreSpec : Spek({
   val path = Files.createTempDirectory("leveldb")
-  val kv = LevelDBKeyValueStore(path)
+  val kv = LevelDBKeyValueStore(
+    path,
+    keySerializer = { it },
+    valueSerializer = { it },
+    keyDeserializer = { it },
+    valueDeserializer = { it })
   afterGroup {
     kv.close()
     MoreFiles.deleteRecursively(path, RecursiveDeleteOption.ALLOW_INSECURE)
@@ -197,7 +214,12 @@ object LevelDBKeyValueStoreSpec : Spek({
     }
 
     it("should not allow usage after the DB is closed") {
-      val kv2 = LevelDBKeyValueStore(path.resolve("subdb"))
+      val kv2 = LevelDBKeyValueStore(
+        path.resolve("subdb"),
+        keySerializer = { it },
+        valueSerializer = { it },
+        keyDeserializer = { it },
+        valueDeserializer = { it })
       kv2.close()
       runBlocking {
         var caught = false
@@ -214,7 +236,12 @@ object LevelDBKeyValueStoreSpec : Spek({
 
 object RocksDBKeyValueStoreSpec : Spek({
   val path = Files.createTempDirectory("rocksdb")
-  val kv = RocksDBKeyValueStore(path)
+  val kv = RocksDBKeyValueStore(
+    path,
+    keySerializer = { it },
+    valueSerializer = { it },
+    keyDeserializer = { it },
+    valueDeserializer = { it })
   afterGroup {
     kv.close()
     MoreFiles.deleteRecursively(path, RecursiveDeleteOption.ALLOW_INSECURE)
@@ -245,7 +272,12 @@ object RocksDBKeyValueStoreSpec : Spek({
     }
 
     it("should not allow usage after the DB is closed") {
-      val kv2 = RocksDBKeyValueStore(path.resolve("subdb"))
+      val kv2 = RocksDBKeyValueStore(
+        path.resolve("subdb"),
+        keySerializer = { it },
+        valueSerializer = { it },
+        keyDeserializer = { it },
+        valueDeserializer = { it })
       kv2.close()
       runBlocking {
         var caught = false
@@ -269,8 +301,21 @@ object SQLKeyValueStoreSpec : Spek({
     st.executeUpdate("create table store(key binary, value binary, primary key(key))")
     st.executeUpdate("create table store2(id binary, val binary, primary key(id))")
   }
-  val kv = SQLKeyValueStore(jdbcUrl)
-  val otherkv = SQLKeyValueStore.open(jdbcUrl, "store2", "id", "val")
+  val kv = SQLKeyValueStore(
+    jdbcUrl,
+    keySerializer = { it },
+    valueSerializer = { it },
+    keyDeserializer = { it },
+    valueDeserializer = { it })
+  val otherkv = SQLKeyValueStore.open(
+    jdbcUrl,
+    "store2",
+    "id",
+    "val",
+    keySerializer = { it },
+    valueSerializer = { it },
+    keyDeserializer = { it },
+    valueDeserializer = { it })
   afterGroup {
     kv.close()
     otherkv.close()
@@ -316,7 +361,12 @@ object SQLKeyValueStoreSpec : Spek({
     }
 
     it("should not allow usage after the DB is closed") {
-      val kv2 = SQLKeyValueStore("jdbc:h2:mem:testdb")
+      val kv2 = SQLKeyValueStore(
+        "jdbc:h2:mem:testdb",
+        keySerializer = { it },
+        valueSerializer = { it },
+        keyDeserializer = { it },
+        valueDeserializer = { it })
       kv2.close()
       runBlocking {
         var caught = false

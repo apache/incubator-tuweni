@@ -24,58 +24,131 @@ import io.lettuce.core.codec.RedisCodec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import org.apache.tuweni.bytes.Bytes
+import org.checkerframework.checker.units.qual.K
 import java.net.InetAddress
 import java.util.concurrent.CompletionStage
+import java.util.function.Function
 import kotlin.coroutines.CoroutineContext
 
 /**
  * A key-value store backed by Redis.
  *
  * @param uri The uri to the Redis store.
+ * @param keySerializer the serializer of key objects to bytes
+ * @param valueSerializer the serializer of value objects to bytes
+ * @param keyDeserializer the deserializer of keys from bytes
+ * @param valueDeserializer the deserializer of values from bytes
+ * @param coroutineContext the co-routine context in which this store executes
  * @constructor Open a Redis-backed key-value store.
  */
-class RedisKeyValueStore(
+class RedisKeyValueStore<K, V>(
   uri: String,
+  private val keySerializer: (K) -> Bytes,
+  private val valueSerializer: (V) -> Bytes,
+  private val keyDeserializer: (Bytes) -> K,
+  private val valueDeserializer: (Bytes) -> V,
   override val coroutineContext: CoroutineContext = Dispatchers.IO
-) : KeyValueStore {
+) : KeyValueStore<K, V> {
 
   companion object {
     /**
      * Open a Redis-backed key-value store.
      *
      * @param uri The uri to the Redis store.
+     * @param keySerializer the serializer of key objects to bytes
+     * @param valueSerializer the serializer of value objects to bytes
+     * @param keyDeserializer the deserializer of keys from bytes
+     * @param valueDeserializer the deserializer of values from bytes
      * @return A key-value store.
      */
     @JvmStatic
-    fun open(uri: String) = RedisKeyValueStore(uri)
+    fun <K, V> open(
+      uri: String,
+      keySerializer: Function<K, Bytes>,
+      valueSerializer: Function<V, Bytes>,
+      keyDeserializer: Function<Bytes, K>,
+      valueDeserializer: Function<Bytes, V>
+    ) = RedisKeyValueStore(uri,
+      keySerializer::apply,
+      valueSerializer::apply,
+      keyDeserializer::apply,
+      valueDeserializer::apply)
 
     /**
      * Open a Redis-backed key-value store.
      *
      * @param port The port for the Redis store.
+     * @param keySerializer the serializer of key objects to bytes
+     * @param valueSerializer the serializer of value objects to bytes
+     * @param keyDeserializer the deserializer of keys from bytes
+     * @param valueDeserializer the deserializer of values from bytes
      * @return A key-value store.
      */
     @JvmStatic
-    fun open(port: Int) = RedisKeyValueStore(port)
+    fun <K, V> open(
+      port: Int,
+      keySerializer: Function<K, Bytes>,
+      valueSerializer: Function<V, Bytes>,
+      keyDeserializer: Function<Bytes, K>,
+      valueDeserializer: Function<Bytes, V>
+    ) =
+      RedisKeyValueStore(port = port,
+        keySerializer = keySerializer::apply,
+        valueSerializer = valueSerializer::apply,
+        keyDeserializer = keyDeserializer::apply,
+        valueDeserializer = valueDeserializer::apply)
 
     /**
      * Open a Redis-backed key-value store.
      *
      * @param address The address for the Redis store.
+     * @param keySerializer the serializer of key objects to bytes
+     * @param valueSerializer the serializer of value objects to bytes
+     * @param keyDeserializer the deserializer of keys from bytes
+     * @param valueDeserializer the deserializer of values from bytes
      * @return A key-value store.
      */
     @JvmStatic
-    fun open(address: InetAddress) = RedisKeyValueStore(6379, address)
+    fun <K, V> open(
+      address: InetAddress,
+      keySerializer: Function<K, Bytes>,
+      valueSerializer: Function<V, Bytes>,
+      keyDeserializer: Function<Bytes, K>,
+      valueDeserializer: Function<Bytes, V>
+    ) =
+      RedisKeyValueStore(6379,
+        address,
+        keySerializer::apply,
+        valueSerializer::apply,
+        keyDeserializer::apply,
+        valueDeserializer::apply)
 
     /**
      * Open a Redis-backed key-value store.
      *
      * @param port The port for the Redis store.
      * @param address The address for the Redis store.
+     * @param keySerializer the serializer of key objects to bytes
+     * @param valueSerializer the serializer of value objects to bytes
+     * @param keyDeserializer the deserializer of keys from bytes
+     * @param valueDeserializer the deserializer of values from bytes
      * @return A key-value store.
      */
     @JvmStatic
-    fun open(port: Int, address: InetAddress) = RedisKeyValueStore(port, address)
+    fun <K, V> open(
+      port: Int,
+      address: InetAddress,
+      keySerializer: Function<K, Bytes>,
+      valueSerializer: Function<V, Bytes>,
+      keyDeserializer: Function<Bytes, K>,
+      valueDeserializer: Function<Bytes, V>
+    ) =
+      RedisKeyValueStore(port,
+        address,
+        keySerializer::apply,
+        valueSerializer::apply,
+        keyDeserializer::apply,
+        valueDeserializer::apply)
 
     /**
      * A [RedisCodec] for working with Bytes classes.
@@ -94,12 +167,24 @@ class RedisKeyValueStore(
    *
    * @param port The port for the Redis store.
    * @param address The address for the Redis store.
+   * @param keySerializer the serializer of key objects to bytes
+   * @param valueSerializer the serializer of value objects to bytes
+   * @param keyDeserializer the deserializer of keys from bytes
+   * @param valueDeserializer the deserializer of values from bytes
    */
   @JvmOverloads
   constructor(
     port: Int = 6379,
-    address: InetAddress = InetAddress.getLoopbackAddress()
-  ) : this(RedisURI.create(address.hostAddress, port).toURI().toString())
+    address: InetAddress = InetAddress.getLoopbackAddress(),
+    keySerializer: (K) -> Bytes,
+    valueSerializer: (V) -> Bytes,
+    keyDeserializer: (Bytes) -> K,
+    valueDeserializer: (Bytes) -> V
+  ) : this(RedisURI.create(address.hostAddress, port).toURI().toString(),
+    keySerializer,
+    valueSerializer,
+    keyDeserializer,
+    valueDeserializer)
 
   init {
     val redisClient = RedisClient.create(uri)
@@ -107,14 +192,20 @@ class RedisKeyValueStore(
     asyncCommands = conn.async()
   }
 
-  override suspend fun get(key: Bytes): Bytes? = asyncCommands.get(key).await()
+  override suspend fun get(key: K): V? = asyncCommands.get(keySerializer(key)).thenApply {
+    if (it == null) {
+      null
+    } else {
+      valueDeserializer(it)
+    }
+  }.await()
 
-  override suspend fun put(key: Bytes, value: Bytes) {
-    val future: CompletionStage<String> = asyncCommands.set(key, value)
+  override suspend fun put(key: K, value: V) {
+    val future: CompletionStage<String> = asyncCommands.set(keySerializer(key), valueSerializer(value))
     future.await()
   }
 
-  override suspend fun keys(): Iterable<Bytes> = asyncCommands.keys(Bytes.EMPTY).await()
+  override suspend fun keys(): Iterable<K> = asyncCommands.keys(Bytes.EMPTY).await().map(keyDeserializer)
 
   override fun close() {
     conn.close()

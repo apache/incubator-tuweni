@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,10 +35,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(TempDirectoryExtension.class)
 class KeyValueStoreTest {
 
+  private static final Function<Bytes, Bytes> bytesIdentityFn = Function.identity();
+
   @Test
   void testPutAndGet() throws Exception {
     Map<Bytes, Bytes> map = new HashMap<>();
-    KeyValueStore store = MapKeyValueStore.open(map);
+    KeyValueStore<Bytes, Bytes> store = MapKeyValueStore.open(map);
     AsyncCompletion completion = store.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
     completion.join();
     Bytes value = store.getAsync(Bytes.of(123)).get();
@@ -49,14 +52,14 @@ class KeyValueStoreTest {
   @Test
   void testNoValue() throws Exception {
     Map<Bytes, Bytes> map = new HashMap<>();
-    KeyValueStore store = MapKeyValueStore.open(map);
+    KeyValueStore<Bytes, Bytes> store = MapKeyValueStore.open(map);
     assertNull(store.getAsync(Bytes.of(123)).get());
   }
 
   @Test
   void testKeys() throws Exception {
     Map<Bytes, Bytes> map = new HashMap<>();
-    KeyValueStore store = MapKeyValueStore.open(map);
+    KeyValueStore<Bytes, Bytes> store = MapKeyValueStore.open(map);
     AsyncCompletion completion = store.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
     completion.join();
     Set<Bytes> keys = new HashSet<>();
@@ -66,7 +69,12 @@ class KeyValueStoreTest {
 
   @Test
   void testLevelDBWithoutOptions(@TempDirectory Path tempDirectory) throws Exception {
-    try (LevelDBKeyValueStore leveldb = LevelDBKeyValueStore.open(tempDirectory.resolve("foo").resolve("bar"))) {
+    try (LevelDBKeyValueStore<Bytes, Bytes> leveldb = LevelDBKeyValueStore.open(
+        tempDirectory.resolve("foo").resolve("bar"),
+        bytesIdentityFn,
+        bytesIdentityFn,
+        bytesIdentityFn,
+        bytesIdentityFn)) {
       AsyncCompletion completion = leveldb.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
       completion.join();
       Bytes value = leveldb.getAsync(Bytes.of(123)).get();
@@ -77,7 +85,12 @@ class KeyValueStoreTest {
 
   @Test
   void testRocksDBWithoutOptions(@TempDirectory Path tempDirectory) throws Exception {
-    try (RocksDBKeyValueStore rocksdb = RocksDBKeyValueStore.open(tempDirectory.resolve("foo").resolve("bar"))) {
+    try (RocksDBKeyValueStore<Bytes, Bytes> rocksdb = RocksDBKeyValueStore.open(
+        tempDirectory.resolve("foo").resolve("bar"),
+        bytesIdentityFn,
+        bytesIdentityFn,
+        bytesIdentityFn,
+        bytesIdentityFn)) {
       AsyncCompletion completion = rocksdb.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
       completion.join();
       Bytes value = rocksdb.getAsync(Bytes.of(123)).get();

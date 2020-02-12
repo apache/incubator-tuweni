@@ -25,6 +25,7 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.function.Function
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -37,37 +38,72 @@ import kotlin.coroutines.CoroutineContext
  * @throws IOException If an I/O error occurs.
  * @constructor Open a RocksDB-backed key-value store.
  */
-class RocksDBKeyValueStore
+class RocksDBKeyValueStore<K, V>
 @Throws(IOException::class)
 constructor(
   dbPath: Path,
+  private val keySerializer: (K) -> Bytes,
+  private val valueSerializer: (V) -> Bytes,
+  private val keyDeserializer: (Bytes) -> K,
+  private val valueDeserializer: (Bytes) -> V,
   options: Options = Options().setCreateIfMissing(true).setWriteBufferSize(268435456).setMaxOpenFiles(-1),
   override val coroutineContext: CoroutineContext = Dispatchers.IO
-) : KeyValueStore {
+) : KeyValueStore<K, V> {
 
   companion object {
     /**
      * Open a RocksDB-backed key-value store.
      *
      * @param dbPath The path to the RocksDB database.
+     * @param keySerializer the serializer of key objects to bytes
+     * @param valueSerializer the serializer of value objects to bytes
+     * @param keyDeserializer the deserializer of keys from bytes
+     * @param valueDeserializer the deserializer of values from bytes
      * @return A key-value store.
      * @throws IOException If an I/O error occurs.
      */
     @JvmStatic
     @Throws(IOException::class)
-    fun open(dbPath: Path) = RocksDBKeyValueStore(dbPath)
+    fun <K, V> open(
+      dbPath: Path,
+      keySerializer: Function<K, Bytes>,
+      valueSerializer: Function<V, Bytes>,
+      keyDeserializer: Function<Bytes, K>,
+      valueDeserializer: Function<Bytes, V>
+    ) = RocksDBKeyValueStore(dbPath,
+      keySerializer::apply,
+      valueSerializer::apply,
+      keyDeserializer::apply,
+      valueDeserializer::apply)
 
     /**
      * Open a RocksDB-backed key-value store.
      *
      * @param dbPath The path to the RocksDB database.
+     * @param keySerializer the serializer of key objects to bytes
+     * @param valueSerializer the serializer of value objects to bytes
+     * @param keyDeserializer the deserializer of keys from bytes
+     * @param valueDeserializer the deserializer of values from bytes
      * @param options Options for the RocksDB database.
      * @return A key-value store.
      * @throws IOException If an I/O error occurs.
      */
     @JvmStatic
     @Throws(IOException::class)
-    fun open(dbPath: Path, options: Options) = RocksDBKeyValueStore(dbPath, options)
+    fun <K, V> open(
+      dbPath: Path,
+      keySerializer: Function<K, Bytes>,
+      valueSerializer: Function<V, Bytes>,
+      keyDeserializer: Function<Bytes, K>,
+      valueDeserializer: Function<Bytes, V>,
+      options: Options
+    ) =
+      RocksDBKeyValueStore(dbPath,
+        keySerializer::apply,
+        valueSerializer::apply,
+        keyDeserializer::apply,
+        valueDeserializer::apply,
+        options)
   }
 
   private val db: RocksDB
@@ -79,43 +115,43 @@ constructor(
     db = RocksDB.open(options, dbPath.toAbsolutePath().toString())
   }
 
-  override suspend fun get(key: Bytes): Bytes? {
+  override suspend fun get(key: K): V? {
     if (closed.get()) {
       throw IllegalStateException("Closed DB")
     }
-    val rawValue = db[key.toArrayUnsafe()]
+    val rawValue = db[keySerializer(key).toArrayUnsafe()]
     return if (rawValue == null) {
       null
     } else {
-      Bytes.wrap(rawValue)
+      valueDeserializer(Bytes.wrap(rawValue))
     }
   }
 
-  override suspend fun put(key: Bytes, value: Bytes) {
+  override suspend fun put(key: K, value: V) {
     if (closed.get()) {
       throw IllegalStateException("Closed DB")
     }
-    db.put(key.toArrayUnsafe(), value.toArrayUnsafe())
+    db.put(keySerializer(key).toArrayUnsafe(), valueSerializer(value).toArrayUnsafe())
   }
 
-  private class BytesIterator(val rIterator: RocksIterator) : Iterator<Bytes> {
+  private class BytesIterator<K>(val rIterator: RocksIterator, val keyDeserializer: (Bytes) -> K) : Iterator<K> {
 
     override fun hasNext(): Boolean = rIterator.isValid
 
-    override fun next(): Bytes {
-      val key = Bytes.wrap(rIterator.key())
+    override fun next(): K {
+      val key = rIterator.key()
       rIterator.next()
-      return key
+      return keyDeserializer(Bytes.wrap(key))
     }
   }
 
-  override suspend fun keys(): Iterable<Bytes> {
+  override suspend fun keys(): Iterable<K> {
     if (closed.get()) {
       throw IllegalStateException("Closed DB")
     }
     val iter = db.newIterator()
     iter.seekToFirst()
-    return Iterable { BytesIterator(iter) }
+    return Iterable { BytesIterator(iter, keyDeserializer) }
   }
 
   /**

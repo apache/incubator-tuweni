@@ -32,29 +32,48 @@ import kotlin.coroutines.CoroutineContext
  * A key-value store backed by a MapDB instance.
  *
  * @param dbPath The path to the MapDB database.
+ * @param keySerializer the serializer of key objects to bytes
+ * @param valueSerializer the serializer of value objects to bytes
+ * @param keyDeserializer the deserializer of keys from bytes
+ * @param valueDeserializer the deserializer of values from bytes
  * @param coroutineContext The co-routine context for blocking tasks.
  * @return A key-value store.
  * @throws IOException If an I/O error occurs.
  * @constructor Open a MapDB-backed key-value store.
  */
-class MapDBKeyValueStore
+class MapDBKeyValueStore<K, V>
 @Throws(IOException::class)
 constructor(
   dbPath: Path,
+  private val keySerializer: (K) -> Bytes,
+  private val valueSerializer: (V) -> Bytes,
+  private val keyDeserializer: (Bytes) -> K,
+  private val valueDeserializer: (Bytes?) -> V?,
   override val coroutineContext: CoroutineContext = Dispatchers.IO
-) : KeyValueStore {
+) : KeyValueStore<K, V> {
 
   companion object {
     /**
      * Open a MapDB-backed key-value store.
      *
      * @param dbPath The path to the MapDB database.
+     * @param keySerializer the serializer of key objects to bytes
+     * @param valueSerializer the serializer of value objects to bytes
+     * @param keyDeserializer the deserializer of keys from bytes
+     * @param valueDeserializer the deserializer of values from bytes
      * @return A key-value store.
      * @throws IOException If an I/O error occurs.
      */
     @JvmStatic
     @Throws(IOException::class)
-    fun open(dbPath: Path) = MapDBKeyValueStore(dbPath)
+    fun <K, V> open(
+      dbPath: Path,
+      keySerializer: (K) -> Bytes,
+      valueSerializer: (V) -> Bytes,
+      keyDeserializer: (Bytes) -> K,
+      valueDeserializer: (Bytes?) -> V?
+    ) =
+      MapDBKeyValueStore<K, V>(dbPath, keySerializer, valueSerializer, keyDeserializer, valueDeserializer)
   }
 
   private val db: DB
@@ -70,14 +89,14 @@ constructor(
     ).createOrOpen()
   }
 
-  override suspend fun get(key: Bytes): Bytes? = storageData[key]
+  override suspend fun get(key: K): V? = valueDeserializer(storageData[keySerializer(key)])
 
-  override suspend fun put(key: Bytes, value: Bytes) {
-    storageData[key] = value
+  override suspend fun put(key: K, value: V) {
+    storageData[keySerializer(key)] = valueSerializer(value)
     db.commit()
   }
 
-  override suspend fun keys(): Iterable<Bytes> = storageData.keys
+  override suspend fun keys(): Iterable<K> = storageData.keys.map(keyDeserializer)
 
   /**
    * Closes the underlying MapDB instance.
