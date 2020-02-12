@@ -17,7 +17,6 @@
 package org.apache.tuweni.kv
 
 import kotlinx.coroutines.Dispatchers
-import org.apache.tuweni.bytes.Bytes
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -27,11 +26,11 @@ import kotlin.coroutines.CoroutineContext
  * @return A key-value store.
  * @constructor Open an in-memory key-value store.
  */
-class MapKeyValueStore
+class MapKeyValueStore<K, V>
 constructor(
-  private val map: MutableMap<Bytes, Bytes> = HashMap(),
+  private val map: MutableMap<K, V> = HashMap(),
   override val coroutineContext: CoroutineContext = Dispatchers.IO
-) : KeyValueStore {
+) : KeyValueStore<K, V> {
 
   companion object {
     /**
@@ -42,7 +41,7 @@ constructor(
      * @return A key-value store.
      */
     @JvmStatic
-    fun open(): MapKeyValueStore = MapKeyValueStore()
+    fun <K, V> open() = MapKeyValueStore<K, V>()
 
     /**
      * Open an in-memory key-value store.
@@ -51,16 +50,16 @@ constructor(
      * @return A key-value store.
      */
     @JvmStatic
-    fun open(map: MutableMap<Bytes, Bytes>) = MapKeyValueStore(map)
+    fun <K, V> open(map: MutableMap<K, V>) = MapKeyValueStore(map)
   }
 
-  override suspend fun get(key: Bytes): Bytes? = map[key]
+  override suspend fun get(key: K): V? = map[key]
 
-  override suspend fun put(key: Bytes, value: Bytes) {
+  override suspend fun put(key: K, value: V) {
     map[key] = value
   }
 
-  override suspend fun keys(): Iterable<Bytes> = map.keys
+  override suspend fun keys(): Iterable<K> = map.keys
 
   /**
    * Has no effect in this KeyValueStore implementation.

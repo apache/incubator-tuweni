@@ -18,7 +18,7 @@ package org.apache.tuweni.kv
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
-import org.apache.tuweni.bytes.Bytes
+import org.checkerframework.checker.units.qual.K
 import org.infinispan.Cache
 import kotlin.coroutines.CoroutineContext
 
@@ -26,10 +26,10 @@ import kotlin.coroutines.CoroutineContext
  * A key-value store backed by [Infinispan](https://infinispan.org)
  *
  */
-class InfinispanKeyValueStore constructor(
-  private val cache: Cache<Bytes, Bytes>,
+class InfinispanKeyValueStore<K, V> constructor(
+  private val cache: Cache<K, V>,
   override val coroutineContext: CoroutineContext = Dispatchers.IO
-) : KeyValueStore {
+) : KeyValueStore<K, V> {
 
   companion object {
 
@@ -40,16 +40,16 @@ class InfinispanKeyValueStore constructor(
      * @return A key-value store.
      */
     @JvmStatic
-    fun open(cache: Cache<Bytes, Bytes>) = InfinispanKeyValueStore(cache)
+    fun <K, V> open(cache: Cache<K, V>) = InfinispanKeyValueStore(cache)
   }
 
-  override suspend fun get(key: Bytes): Bytes? = cache.getAsync(key).await()
+  override suspend fun get(key: K): V? = cache.getAsync(key).await()
 
-  override suspend fun put(key: Bytes, value: Bytes) {
+  override suspend fun put(key: K, value: V) {
     cache.putAsync(key, value).await()
   }
 
-  override suspend fun keys(): Iterable<Bytes> = cache.keys
+  override suspend fun keys(): Iterable<K> = cache.keys
 
   /**
    * The cache is managed outside the scope of this key-value store.

@@ -41,10 +41,10 @@ class BlockchainRepository
  * @param blockchainIndex the blockchain index to index values
  */
   (
-    private val chainMetadata: KeyValueStore,
-    private val blockBodyStore: KeyValueStore,
-    private val blockHeaderStore: KeyValueStore,
-    private val transactionReceiptsStore: KeyValueStore,
+    private val chainMetadata: KeyValueStore<Bytes, Bytes>,
+    private val blockBodyStore: KeyValueStore<Bytes, Bytes>,
+    private val blockHeaderStore: KeyValueStore<Bytes, Bytes>,
+    private val transactionReceiptsStore: KeyValueStore<Bytes, Bytes>,
     private val blockchainIndex: BlockchainIndex
   ) {
 
@@ -58,10 +58,10 @@ class BlockchainRepository
      * @return a new blockchain repository made from the metadata passed in parameter.
      */
     suspend fun init(
-      blockBodyStore: KeyValueStore,
-      blockHeaderStore: KeyValueStore,
-      chainMetadata: KeyValueStore,
-      transactionReceiptsStore: KeyValueStore,
+      blockBodyStore: KeyValueStore<Bytes, Bytes>,
+      blockHeaderStore: KeyValueStore<Bytes, Bytes>,
+      chainMetadata: KeyValueStore<Bytes, Bytes>,
+      transactionReceiptsStore: KeyValueStore<Bytes, Bytes>,
       blockchainIndex: BlockchainIndex,
       genesisBlock: Block
     ): BlockchainRepository {

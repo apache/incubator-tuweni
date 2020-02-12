@@ -17,7 +17,6 @@
 package org.apache.tuweni.kv
 
 import kotlinx.coroutines.CoroutineScope
-import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.coroutines.asyncCompletion
@@ -27,7 +26,7 @@ import java.io.Closeable
 /**
  * A key-value store.
  */
-interface KeyValueStore : Closeable, CoroutineScope {
+interface KeyValueStore<K, V> : Closeable, CoroutineScope {
 
   /**
    * Retrieves data from the store.
@@ -35,7 +34,7 @@ interface KeyValueStore : Closeable, CoroutineScope {
    * @param key The key for the content.
    * @return The stored data, or null if no data was stored under the specified key.
    */
-  suspend fun get(key: Bytes): Bytes?
+  suspend fun get(key: K): V?
 
   /**
    * Retrieves data from the store.
@@ -44,7 +43,7 @@ interface KeyValueStore : Closeable, CoroutineScope {
    * @return An [AsyncResult] that will complete with the stored content,
    *         or an empty optional if no content was available.
    */
-  fun getAsync(key: Bytes): AsyncResult<Bytes?> = asyncResult { get(key) }
+  fun getAsync(key: K): AsyncResult<V?> = asyncResult { get(key) }
 
   /**
    * Puts data into the store.
@@ -52,7 +51,7 @@ interface KeyValueStore : Closeable, CoroutineScope {
    * @param key The key to associate with the data, for use when retrieving.
    * @param value The data to store.
    */
-  suspend fun put(key: Bytes, value: Bytes)
+  suspend fun put(key: K, value: V)
 
   /**
    * Puts data into the store.
@@ -64,19 +63,19 @@ interface KeyValueStore : Closeable, CoroutineScope {
    * @param value The data to store.
    * @return An [AsyncCompletion] that will complete when the content is stored.
    */
-  fun putAsync(key: Bytes, value: Bytes): AsyncCompletion = asyncCompletion { put(key, value) }
+  fun putAsync(key: K, value: V): AsyncCompletion = asyncCompletion { put(key, value) }
 
   /**
    * Provides an iterator over the keys of the store.
    *
    * @return An [Iterable] allowing to iterate over the set of keys.
    */
-  suspend fun keys(): Iterable<Bytes>
+  suspend fun keys(): Iterable<K>
 
   /**
    * Provides an iterator over the keys of the store.
    *
    * @return An [Iterable] allowing to iterate over the set of keys.
    */
-  fun keysAsync(): AsyncResult<Iterable<Bytes>> = asyncResult { keys() }
+  fun keysAsync(): AsyncResult<Iterable<K>> = asyncResult { keys() }
 }
