@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
  * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
  * to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
@@ -10,40 +10,16 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-rootProject.name='tuweni'
-include 'bytes'
-include 'concurrent'
-include 'concurrent-coroutines'
-include 'config'
-include 'crypto'
-include 'devp2p'
-include 'dist'
-include 'dns-discovery'
-include 'eth'
-include 'eth2-reference-tests'
-include 'eth-reference-tests'
-include 'eth-repository'
-include 'ethstats'
-include 'gossip'
-include 'hobbits'
-include 'hobbits-relayer'
-include 'io'
-include 'junit'
-include 'kademlia'
-include 'kv'
-include 'les'
-include 'merkle-trie'
-include 'net'
-include 'net-coroutines'
-include 'plumtree'
-include 'progpow'
-include 'rlp'
-include 'rlpx'
-include 'scuttlebutt'
-include 'scuttlebutt-discovery'
-include 'scuttlebutt-handshake'
-include 'scuttlebutt-rpc'
-include 'scuttlebutt-client-lib'
-include 'ssz'
-include 'toml'
-include 'units'
+jar { enabled = false }
+
+dependencies {
+
+    testCompile project(':junit')
+    testCompile 'com.fasterxml.jackson.core:jackson-databind'
+    testCompile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+    testCompile 'org.bouncycastle:bcprov-jdk15on'
+    testCompile 'org.junit.jupiter:junit-jupiter-api'
+    testCompile 'org.junit.jupiter:junit-jupiter-params'
+
+    testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+}
