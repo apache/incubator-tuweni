@@ -16,7 +16,9 @@
  */
 package org.apache.tuweni.kv
 
+import kotlinx.coroutines.Dispatchers
 import org.apache.tuweni.bytes.Bytes
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A key-value store backed by an in-memory Map.
@@ -26,7 +28,10 @@ import org.apache.tuweni.bytes.Bytes
  * @constructor Open an in-memory key-value store.
  */
 class MapKeyValueStore
-constructor(private val map: MutableMap<Bytes, Bytes> = HashMap()) : KeyValueStore {
+constructor(
+  private val map: MutableMap<Bytes, Bytes> = HashMap(),
+  override val coroutineContext: CoroutineContext = Dispatchers.IO
+) : KeyValueStore {
 
   companion object {
     /**
@@ -54,6 +59,8 @@ constructor(private val map: MutableMap<Bytes, Bytes> = HashMap()) : KeyValueSto
   override suspend fun put(key: Bytes, value: Bytes) {
     map[key] = value
   }
+
+  override suspend fun keys(): Iterable<Bytes> = map.keys
 
   /**
    * Has no effect in this KeyValueStore implementation.

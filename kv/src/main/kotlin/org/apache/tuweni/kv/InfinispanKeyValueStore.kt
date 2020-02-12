@@ -16,15 +16,20 @@
  */
 package org.apache.tuweni.kv
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import org.apache.tuweni.bytes.Bytes
 import org.infinispan.Cache
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A key-value store backed by [Infinispan](https://infinispan.org)
  *
  */
-class InfinispanKeyValueStore constructor(private val cache: Cache<Bytes, Bytes>) : KeyValueStore {
+class InfinispanKeyValueStore constructor(
+  private val cache: Cache<Bytes, Bytes>,
+  override val coroutineContext: CoroutineContext = Dispatchers.IO
+) : KeyValueStore {
 
   companion object {
 
@@ -43,6 +48,8 @@ class InfinispanKeyValueStore constructor(private val cache: Cache<Bytes, Bytes>
   override suspend fun put(key: Bytes, value: Bytes) {
     cache.putAsync(key, value).await()
   }
+
+  override suspend fun keys(): Iterable<Bytes> = cache.keys
 
   /**
    * The cache is managed outside the scope of this key-value store.

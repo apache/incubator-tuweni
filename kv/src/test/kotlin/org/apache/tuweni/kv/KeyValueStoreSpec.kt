@@ -21,6 +21,7 @@ import com.google.common.io.RecursiveDeleteOption
 import com.winterbe.expekt.should
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.kv.Vars.bar
 import org.apache.tuweni.kv.Vars.foo
 import org.apache.tuweni.kv.Vars.foobar
 import org.infinispan.Cache
@@ -37,6 +38,7 @@ import java.util.concurrent.RejectedExecutionException
 
 object Vars {
   val foo = Bytes.wrap("foo".toByteArray())!!
+  val bar = Bytes.wrap("bar".toByteArray())!!
   val foobar = Bytes.wrap("foobar".toByteArray())!!
 }
 
@@ -63,6 +65,14 @@ object KeyValueStoreSpec : Spek({
     it("should return null when no value is present") {
       runBlocking {
         kv.get(Bytes.wrap("foofoobar".toByteArray())).should.be.`null`
+      }
+    }
+
+    it("should iterate over keys") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.put(foo, bar)
+        kv.keys().should.equal(setOf(foobar, foo))
       }
     }
   }
@@ -95,6 +105,16 @@ object InfinispanKeyValueStoreSpec : Spek({
         kv.get(Bytes.wrap("foofoobar".toByteArray())).should.be.`null`
       }
     }
+
+    it("should iterate over keys") {
+      runBlocking {
+        kv.put(bar, foo)
+        kv.put(foo, bar)
+          val keys = (kv.keys().map { it })
+        keys.should.contain(bar)
+        keys.should.contain(foo)
+      }
+    }
   }
 })
 
@@ -114,6 +134,14 @@ object MapDBKeyValueStoreSpec : Spek({
     it("should return null when no value is present") {
       runBlocking {
         kv.get(Bytes.wrap("foofoobar".toByteArray())).should.be.`null`
+      }
+    }
+
+    it("should iterate over keys") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.put(foo, bar)
+        kv.keys().should.equal(setOf(foobar, foo))
       }
     }
 
@@ -160,6 +188,14 @@ object LevelDBKeyValueStoreSpec : Spek({
       }
     }
 
+    it("should iterate over keys") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.put(foo, bar)
+        setOf(foobar, foo).should.equal(kv.keys().map { it }.toSet())
+      }
+    }
+
     it("should not allow usage after the DB is closed") {
       val kv2 = LevelDBKeyValueStore(path.resolve("subdb"))
       kv2.close()
@@ -195,6 +231,16 @@ object RocksDBKeyValueStoreSpec : Spek({
     it("should return null when no value is present") {
       runBlocking {
         kv.get(Bytes.wrap("foofoobar".toByteArray())).should.be.`null`
+      }
+    }
+
+    it("should iterate over keys") {
+      runBlocking {
+        kv.put(bar, foo)
+        kv.put(foo, bar)
+        val keys = kv.keys().map { it }
+        keys.should.contain(bar)
+        keys.should.contain(foo)
       }
     }
 
@@ -238,6 +284,14 @@ object SQLKeyValueStoreSpec : Spek({
       }
     }
 
+    it("should allow to update values") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.put(foobar, bar)
+        kv.get(foobar).should.equal(bar)
+      }
+    }
+
     it("should allow to retrieve values when configured with a different table") {
       runBlocking {
         otherkv.put(foobar, foo)
@@ -248,6 +302,16 @@ object SQLKeyValueStoreSpec : Spek({
     it("should return null when no value is present") {
       runBlocking {
         kv.get(Bytes.wrap("foofoobar".toByteArray())).should.be.`null`
+      }
+    }
+
+    it("should iterate over keys") {
+      runBlocking {
+        kv.put(bar, foo)
+        kv.put(foo, bar)
+        val keys = kv.keys().map { it }
+        keys.should.contain(bar)
+        keys.should.contain(foo)
       }
     }
 

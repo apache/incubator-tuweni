@@ -18,12 +18,13 @@ package org.apache.tuweni.kv
 
 import com.jolbox.bonecp.BoneCP
 import com.jolbox.bonecp.BoneCPConfig
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.guava.await
-import kotlinx.coroutines.withContext
 import org.apache.tuweni.bytes.Bytes
 import java.io.IOException
+import java.sql.ResultSet
+import java.sql.SQLException
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A key-value store backed by a relational database.
@@ -32,7 +33,7 @@ import java.io.IOException
  * @param tableName the name of the table to use for storage.
  * @param keyColumn the key column of the store.
  * @param valueColumn the value column of the store.
- * @param dispatcher The co-routine context for blocking tasks.
+ * @param coroutineContext The co-routine context for blocking tasks.
  * @return A key-value store.
  * @throws IOException If an I/O error occurs.
  * @constructor Open a relational database backed key-value store.
@@ -44,7 +45,7 @@ constructor(
   val tableName: String = "store",
   val keyColumn: String = "key",
   val valueColumn: String = "value",
-  private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+  override val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : KeyValueStore {
 
   companion object {
@@ -84,7 +85,7 @@ constructor(
     connectionPool = BoneCP(config)
   }
 
-  override suspend fun get(key: Bytes): Bytes? = withContext(dispatcher) {
+  override suspend fun get(key: Bytes): Bytes? {
       connectionPool.asyncConnection.await().use {
         val stmt = it.prepareStatement("SELECT $valueColumn FROM $tableName WHERE $keyColumn = ?")
         stmt.setBytes(1, key.toArrayUnsafe())
@@ -92,7 +93,7 @@ constructor(
 
         val rs = stmt.resultSet
 
-        if (rs.next()) {
+        return if (rs.next()) {
           Bytes.wrap(rs.getBytes(1))
         } else {
           null
@@ -100,14 +101,44 @@ constructor(
       }
   }
 
-  override suspend fun put(key: Bytes, value: Bytes) = withContext(dispatcher) {
+  override suspend fun put(key: Bytes, value: Bytes) {
     connectionPool.asyncConnection.await().use {
         val stmt = it.prepareStatement("INSERT INTO $tableName($keyColumn, $valueColumn) VALUES(?,?)")
         stmt.setBytes(1, key.toArrayUnsafe())
         stmt.setBytes(2, value.toArrayUnsafe())
-        stmt.execute()
+        it.autoCommit = false
+        try {
+          stmt.execute()
+        } catch (e: SQLException) {
+          val updateStmt = it.prepareStatement("UPDATE $tableName SET $valueColumn=? WHERE $keyColumn=?")
+          updateStmt.setBytes(1, value.toArrayUnsafe())
+          updateStmt.setBytes(2, key.toArrayUnsafe())
+          updateStmt.execute()
+        }
+        it.commit()
         Unit
       }
+  }
+
+  private class SQLIterator(val resultSet: ResultSet) : Iterator<Bytes> {
+
+    private var next = resultSet.next()
+
+    override fun hasNext(): Boolean = next
+
+    override fun next(): Bytes {
+      val key = Bytes.wrap(resultSet.getBytes(1))
+      next = resultSet.next()
+      return key
+    }
+  }
+
+  override suspend fun keys(): Iterable<Bytes> {
+    connectionPool.asyncConnection.await().use {
+      val stmt = it.prepareStatement("SELECT $keyColumn FROM $tableName")
+      stmt.execute()
+      return Iterable { SQLIterator(stmt.resultSet) }
+    }
   }
 
   /**

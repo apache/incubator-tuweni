@@ -16,23 +16,23 @@
  */
 package org.apache.tuweni.kv
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.apache.tuweni.bytes.Bytes
 import org.fusesource.leveldbjni.JniDBFactory
 import org.iq80.leveldb.DB
+import org.iq80.leveldb.DBIterator
 import org.iq80.leveldb.Options
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A key-value store backed by LevelDB.
  *
  * @param dbPath The path to the levelDB database.
  * @param options Options for the levelDB database.
- * @param dispatcher The co-routine context for blocking tasks.
+ * @param coroutineContext The co-routine context for blocking tasks.
  * @return A key-value store.
  * @throws IOException If an I/O error occurs.
  * @constructor Open a LevelDB-backed key-value store.
@@ -42,7 +42,7 @@ class LevelDBKeyValueStore
 constructor(
   dbPath: Path,
   options: Options = Options().createIfMissing(true).cacheSize((100 * 1048576).toLong()),
-  private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+  override val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : KeyValueStore {
 
   companion object {
@@ -77,17 +77,27 @@ constructor(
     db = JniDBFactory.factory.open(dbPath.toFile(), options)
   }
 
-  override suspend fun get(key: Bytes): Bytes? = withContext(dispatcher) {
+  override suspend fun get(key: Bytes): Bytes? {
     val rawValue = db[key.toArrayUnsafe()]
-    if (rawValue == null) {
+    return if (rawValue == null) {
       null
     } else {
       Bytes.wrap(rawValue)
     }
   }
 
-  override suspend fun put(key: Bytes, value: Bytes) = withContext(dispatcher) {
-    db.put(key.toArrayUnsafe(), value.toArrayUnsafe())
+  override suspend fun put(key: Bytes, value: Bytes) = db.put(key.toArrayUnsafe(), value.toArrayUnsafe())
+
+  private class BytesIterator(val iter: DBIterator) : Iterator<Bytes> {
+    override fun hasNext(): Boolean = iter.hasNext()
+
+    override fun next(): Bytes = Bytes.wrap(iter.next().key)
+  }
+
+  override suspend fun keys(): Iterable<Bytes> {
+    val iter = db.iterator()
+    iter.seekToFirst()
+    return Iterable { BytesIterator(iter) }
   }
 
   /**
