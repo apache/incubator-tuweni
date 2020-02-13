@@ -21,6 +21,7 @@ import com.google.common.io.RecursiveDeleteOption
 import com.winterbe.expekt.should
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.io.Base64
 import org.apache.tuweni.kv.Vars.bar
 import org.apache.tuweni.kv.Vars.foo
 import org.apache.tuweni.kv.Vars.foobar
@@ -35,6 +36,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.sql.DriverManager
 import java.util.concurrent.RejectedExecutionException
+import javax.persistence.Persistence
 
 object Vars {
   val foo = Bytes.wrap("foo".toByteArray())!!
@@ -376,6 +378,103 @@ object SQLKeyValueStoreSpec : Spek({
           caught = true
         }
         caught.should.be.`true`
+      }
+    }
+  }
+})
+
+object EntityManagerKeyValueStoreSpec : Spek({
+  val entityManagerFactory = Persistence.createEntityManagerFactory("h2")
+  val kv = EntityManagerKeyValueStore(entityManagerFactory::createEntityManager, Store::class.java, { it.key })
+  afterGroup {
+    kv.close()
+  }
+  describe("a JPA entity manager-backed key value store") {
+
+    it("should allow to retrieve values") {
+      runBlocking {
+        kv.put("foo", Store("foo", "bar"))
+        kv.get("foo").should.equal(Store("foo", "bar"))
+      }
+    }
+
+    it("should allow to update values") {
+      runBlocking {
+        kv.put("foo", Store("foo", "bar"))
+        kv.put("foo", Store("foo", "foobar"))
+        kv.get("foo").should.equal(Store("foo", "foobar"))
+      }
+    }
+
+    it("should allow to update values without keys") {
+      runBlocking {
+        kv.put(Store("foo2", "bar2"))
+        kv.put(Store("foo2", "foobar2"))
+        kv.get("foo2").should.equal(Store("foo2", "foobar2"))
+      }
+    }
+
+    it("should return null when no value is present") {
+      runBlocking {
+        kv.get("foobar").should.be.`null`
+      }
+    }
+
+    it("should iterate over keys") {
+      runBlocking {
+        kv.put("foo", Store("foo", "bar"))
+        kv.put("bar", Store("bar", "bar"))
+        val keys = kv.keys().map { it }
+        keys.should.contain("bar")
+        keys.should.contain("foo")
+      }
+    }
+  }
+})
+
+object ProxyKeyValueStoreSpec : Spek({
+  val kv = MapKeyValueStore<String, String>()
+  val proxy = ProxyKeyValueStore(
+    kv,
+    Base64::decode,
+    Base64::encode,
+    { if (it == null) { null } else { Base64.decode(it) } },
+    Base64::encode
+  )
+  afterGroup {
+    proxy.close()
+  }
+  describe("a proixy key value store") {
+
+    it("should allow to retrieve values") {
+      runBlocking {
+        proxy.put(foo, bar)
+        proxy.get(foo).should.equal(bar)
+        kv.get(Base64.encode(foo)).should.equal(Base64.encode(bar))
+      }
+    }
+
+    it("should allow to update values") {
+      runBlocking {
+        proxy.put(foo, bar)
+        proxy.put(foo, foobar)
+        proxy.get(foo).should.equal(foobar)
+      }
+    }
+
+    it("should return null when no value is present") {
+      runBlocking {
+        proxy.get(foobar).should.be.`null`
+      }
+    }
+
+    it("should iterate over keys") {
+      runBlocking {
+        proxy.put(foo, bar)
+        proxy.put(bar, foo)
+        val keys = proxy.keys().map { it }
+        keys.should.contain(bar)
+        keys.should.contain(foo)
       }
     }
   }

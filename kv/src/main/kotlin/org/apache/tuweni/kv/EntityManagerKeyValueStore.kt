@@ -16,7 +16,6 @@
  */
 package org.apache.tuweni.kv
 
-import kotlin.jvm.Throws
 import kotlinx.coroutines.Dispatchers
 
 import java.io.IOException
@@ -27,7 +26,6 @@ import javax.persistence.EntityManager
 import kotlin.coroutines.CoroutineContext
 
 class EntityManagerKeyValueStore<K, V>
-        @Throws(IOException::class)
         constructor(
           private val entityManagerProvider: () -> EntityManager,
           private val entityClass: Class<V>,
@@ -44,12 +42,11 @@ class EntityManagerKeyValueStore<K, V>
      * @throws IOException If an I/O error occurs.
      */
     @JvmStatic
-    @Throws(IOException::class)
     fun <K, V> open(
       entityManagerProvider: Supplier<EntityManager>,
       entityClass: Class<V>,
       idAccessor: Function<V, K>
-    ) = EntityManagerKeyValueStore<K, V>(entityManagerProvider::get, entityClass, idAccessor::apply)
+    ) = EntityManagerKeyValueStore(entityManagerProvider::get, entityClass, idAccessor::apply)
   }
 
   override suspend fun get(key: K): V? {
@@ -62,6 +59,8 @@ class EntityManagerKeyValueStore<K, V>
       em.close()
     }
   }
+
+  suspend fun put(value: V) = put(idAccessor(value), value)
 
   override suspend fun put(key: K, value: V) {
     val em = entityManagerProvider()
@@ -76,8 +75,11 @@ class EntityManagerKeyValueStore<K, V>
 
   override suspend fun keys(): Iterable<K> {
     val em = entityManagerProvider()
-    val query = em.createQuery(em.criteriaBuilder.createQuery(entityClass))
-    val resultStream: Stream<V> = query.resultStream
+    val query = em.criteriaBuilder.createQuery(entityClass)
+    val root = query.from(entityClass)
+    val all = query.select(root)
+    val finalAll = em.createQuery(all)
+    val resultStream: Stream<V> = finalAll.resultStream
     return Iterable { resultStream.map(idAccessor).iterator() }
   }
 

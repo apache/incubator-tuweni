@@ -12,7 +12,40 @@
  */
 description = 'Key value store implementations.'
 
+task openJPAEnhance {
+  description "Enhance JPA model classes using OpenJPA Enhancer"
+  dependsOn compileTestJava
+
+  doLast {
+    // define the entity classes
+    def entityFiles = sourceSets.test.output.asFileTree.filter { it.name == "Store.class" }
+
+    println "Enhancing with OpenJPA, the following files..."
+    entityFiles.getFiles().each { println it }
+
+    // define Ant task for Enhancer
+    ant.taskdef(
+      name : 'openjpac',
+      classpath : sourceSets.test.runtimeClasspath.asPath,
+      classname : 'org.apache.openjpa.ant.PCEnhancerTask'
+      )
+
+    // Run the OpenJPA Enhancer as an Ant task
+    //   - see OpenJPA 'PCEnhancerTask' for supported arguments
+    //   - this invocation of the enhancer adds support for a default-ctor
+    //   - as well as ensuring JPA property use is valid.
+    ant.openjpac(
+      classpath: sourceSets.test.runtimeClasspath.asPath,
+      addDefaultConstructor: true,
+      enforcePropertyRestrictions: true) {
+        entityFiles.addToAntBuilder(ant, 'fileset', FileCollection.AntType.FileSet)
+      }
+  }
+}
+test { dependsOn openJPAEnhance }
+
 dependencies {
+
   compile project(':bytes')
   compile project(':concurrent-coroutines')
   compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
@@ -41,6 +74,8 @@ dependencies {
   testCompile 'org.junit.jupiter:junit-jupiter-params'
   testCompile 'org.mapdb:mapdb'
   testCompile 'org.rocksdb:rocksdbjni'
+  testRuntime 'org.apache.openjpa:openjpa'
+
 
   testRuntime 'org.jetbrains.spek:spek-junit-platform-engine'
   testRuntime 'org.junit.jupiter:junit-jupiter-engine'

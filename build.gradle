@@ -22,7 +22,10 @@ buildscript {
   repositories { jcenter() // jcenter
   }
 
-  dependencies { classpath "org.ajoberstar.grgit:grgit-core:3.1.1" }
+  dependencies {
+    classpath "org.ajoberstar.grgit:grgit-core:3.1.1"
+    classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
+  }
 }
 
 plugins {
