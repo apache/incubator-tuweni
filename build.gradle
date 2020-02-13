@@ -45,6 +45,10 @@ if (!file("${rootDir}/eth-reference-tests/src/test/resources/eth2.0-tests/README
   throw new GradleException("eth-reference-tests/src/test/resources/eth2.0-tests/README.md missing: please clone submodules (git submodule update --init --recursive)")
 }
 
+if (!file("${rootDir}/eth2-reference-tests/src/test/resources").exists()) {
+  throw new GradleException("${rootDir}/eth2-reference-tests/src/test/resources missing: please clone submodules (git submodule update --init --recursive)")
+}
+
 
 //////
 // Version numbering
@@ -326,7 +330,7 @@ allprojects {
     }
   }
 
-  if (project.name != 'eth-reference-tests' && project.name != 'dist') {
+  if (project.name != 'eth-reference-tests' && project.name != 'eth2-reference-tests' && project.name != 'dist') {
 
     artifacts {
       archives sourcesJar
@@ -537,6 +541,7 @@ dependencies {
   subprojects.each { p ->
     switch (p.name) {
       case 'eth-reference-tests':
+      case 'eth2-reference-tests':
       // ignore
         break
       case 'crypto':
@@ -553,7 +558,7 @@ dependencies {
 
 jar {
   subprojects.each { subproject ->
-    if (subproject.name != 'eth-reference-tests') {
+    if (subproject.name != 'eth-reference-tests' && subproject.name != 'eth2-reference-tests') {
       from subproject.configurations.archives.collect { it.path.endsWith('.jar') }.files.collect { zipTree(it) }
     }
   }

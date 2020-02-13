@@ -44,7 +44,7 @@ distributions {
       def libs = []
       def sources = []
       rootProject.subprojects.each { s ->
-        if (s.name != 'eth-reference-tests' && s.name != 'dist') {
+        if (s.name != 'eth-reference-tests' && s.name != 'eth2-reference-tests' && s.name != 'dist') {
           libs << s.signArchives.signatureFiles[0]
           sources << s.signArchives.signatureFiles[1]
           docs << s.signArchives.signatureFiles[2]
