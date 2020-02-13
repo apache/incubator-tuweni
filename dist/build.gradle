@@ -10,6 +10,9 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+import org.gradle.crypto.checksum.Checksum
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
 plugins { id 'com.bmuschko.docker-remote-api' version '3.2.3' }
 
 description = 'Tuweni distribution.'
@@ -68,7 +71,6 @@ distributions {
   }
   sources {
     baseName = 'tuweni-src'
-    zip64 = true
     contents {
       mandatoryFiles(it)
       into('') {
@@ -129,7 +131,7 @@ distributions {
   }
 }
 
-import org.gradle.crypto.checksum.Checksum
+sourcesDistZip { zip64 = true }
 
 distTar{ compression = Compression.GZIP }
 
@@ -170,8 +172,6 @@ task createChecksums(type: Checksum, dependsOn: [
 }
 
 build.dependsOn('createChecksums')
-
-import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 
 task buildGossipImage(type: DockerBuildImage) {
   dependsOn gossipDistTar
