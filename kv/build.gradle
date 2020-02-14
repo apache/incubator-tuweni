@@ -12,38 +12,6 @@
  */
 description = 'Key value store implementations.'
 
-task openJPAEnhance {
-  description "Enhance JPA model classes using OpenJPA Enhancer"
-  dependsOn compileTestJava
-
-  doLast {
-    // define the entity classes
-    def entityFiles = sourceSets.test.output.asFileTree.filter { it.name == "Store.class" }
-
-    println "Enhancing with OpenJPA, the following files..."
-    entityFiles.getFiles().each { println it }
-
-    // define Ant task for Enhancer
-    ant.taskdef(
-      name : 'openjpac',
-      classpath : sourceSets.test.runtimeClasspath.asPath,
-      classname : 'org.apache.openjpa.ant.PCEnhancerTask'
-      )
-
-    // Run the OpenJPA Enhancer as an Ant task
-    //   - see OpenJPA 'PCEnhancerTask' for supported arguments
-    //   - this invocation of the enhancer adds support for a default-ctor
-    //   - as well as ensuring JPA property use is valid.
-    ant.openjpac(
-      classpath: sourceSets.test.runtimeClasspath.asPath,
-      addDefaultConstructor: true,
-      enforcePropertyRestrictions: true) {
-        entityFiles.addToAntBuilder(ant, 'fileset', FileCollection.AntType.FileSet)
-      }
-  }
-}
-test { dependsOn openJPAEnhance }
-
 dependencies {
 
   compile project(':bytes')
