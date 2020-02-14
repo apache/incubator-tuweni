@@ -19,6 +19,7 @@ package org.apache.tuweni.kv
 import kotlinx.coroutines.Dispatchers
 import org.apache.tuweni.bytes.Bytes
 import org.mapdb.DB
+import org.mapdb.DB.Keys.valueSerializer
 import org.mapdb.DBMaker
 import org.mapdb.DataInput2
 import org.mapdb.DataOutput2
@@ -26,6 +27,7 @@ import org.mapdb.HTreeMap
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.function.Function
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -42,7 +44,6 @@ import kotlin.coroutines.CoroutineContext
  * @constructor Open a MapDB-backed key-value store.
  */
 class MapDBKeyValueStore<K, V>
-@Throws(IOException::class)
 constructor(
   dbPath: Path,
   private val keySerializer: (K) -> Bytes,
@@ -65,15 +66,35 @@ constructor(
      * @throws IOException If an I/O error occurs.
      */
     @JvmStatic
-    @Throws(IOException::class)
     fun <K, V> open(
       dbPath: Path,
-      keySerializer: (K) -> Bytes,
-      valueSerializer: (V) -> Bytes,
-      keyDeserializer: (Bytes) -> K,
-      valueDeserializer: (Bytes?) -> V?
+      keySerializer: Function<K, Bytes>,
+      valueSerializer: Function<V, Bytes>,
+      keyDeserializer: Function<Bytes, K>,
+      valueDeserializer: Function<Bytes?, V?>
     ) =
-      MapDBKeyValueStore<K, V>(dbPath, keySerializer, valueSerializer, keyDeserializer, valueDeserializer)
+      MapDBKeyValueStore<K, V>(dbPath,
+        keySerializer::apply,
+        valueSerializer::apply,
+        keyDeserializer::apply,
+        valueDeserializer::apply)
+
+    /**
+     * Open a MapDB-backed key-value store using Bytes keys and values.
+     *
+     * @param dbPath The path to the MapDB database.
+     * @return A key-value store dealing with bytes.
+     * @throws IOException If an I/O error occurs.
+     */
+    @JvmStatic
+    fun open(
+      dbPath: Path
+    ) =
+      MapDBKeyValueStore<Bytes, Bytes>(dbPath,
+        Function.identity<Bytes>()::apply,
+        Function.identity<Bytes>()::apply,
+        Function.identity<Bytes>()::apply,
+        Function.identity<Bytes>()::apply)
   }
 
   private val db: DB

@@ -25,6 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import org.apache.tuweni.bytes.Bytes
 import org.checkerframework.checker.units.qual.K
+import java.io.IOException
 import java.net.InetAddress
 import java.util.concurrent.CompletionStage
 import java.util.function.Function
@@ -51,6 +52,25 @@ class RedisKeyValueStore<K, V>(
 ) : KeyValueStore<K, V> {
 
   companion object {
+
+    /**
+     * Open a Redis-backed key-value store using Bytes keys and values.
+     *
+     * @param uri The uri to the Redis store.
+     * @return A key-value store dealing with bytes.
+     * @throws IOException If an I/O error occurs.
+     */
+    @JvmStatic
+    @Throws(IOException::class)
+    fun open(
+      uri: String
+    ) =
+      RedisKeyValueStore<Bytes, Bytes>(uri,
+        Function.identity<Bytes>()::apply,
+        Function.identity<Bytes>()::apply,
+        Function.identity<Bytes>()::apply,
+        Function.identity<Bytes>()::apply)
+
     /**
      * Open a Redis-backed key-value store.
      *

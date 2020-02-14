@@ -50,6 +50,27 @@ class KeyValueStoreTest {
   }
 
   @Test
+  void testPutAndGetMapDB(@TempDirectory Path tmpDir) throws Exception {
+    KeyValueStore<Bytes, Bytes> store = MapDBKeyValueStore
+        .open(tmpDir.resolve("mapdb"), bytesIdentityFn, bytesIdentityFn, bytesIdentityFn, bytesIdentityFn);
+    AsyncCompletion completion = store.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
+    completion.join();
+    Bytes value = store.getAsync(Bytes.of(123)).get();
+    assertNotNull(value);
+    assertEquals(Bytes.of(10, 12, 13), value);
+  }
+
+  @Test
+  void testPutAndGetMapDBDirect(@TempDirectory Path tmpDir) throws Exception {
+    KeyValueStore<Bytes, Bytes> store = MapDBKeyValueStore.open(tmpDir.resolve("mapdb"));
+    AsyncCompletion completion = store.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
+    completion.join();
+    Bytes value = store.getAsync(Bytes.of(123)).get();
+    assertNotNull(value);
+    assertEquals(Bytes.of(10, 12, 13), value);
+  }
+
+  @Test
   void testNoValue() throws Exception {
     Map<Bytes, Bytes> map = new HashMap<>();
     KeyValueStore<Bytes, Bytes> store = MapKeyValueStore.open(map);

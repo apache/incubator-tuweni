@@ -110,6 +110,24 @@ constructor(
         keyDeserializer::apply,
         valueDeserializer::apply,
         options)
+
+    /**
+     * Open a LevelDB-backed key-value store using Bytes keys and values.
+     *
+     * @param dbPath The path to the levelDB database.
+     * @return A key-value store dealing with bytes.
+     * @throws IOException If an I/O error occurs.
+     */
+    @JvmStatic
+    @Throws(IOException::class)
+    fun open(
+      dbPath: Path
+    ) =
+      LevelDBKeyValueStore<Bytes, Bytes>(dbPath,
+        Function.identity<Bytes>()::apply,
+        Function.identity<Bytes>()::apply,
+        Function.identity<Bytes>()::apply,
+        Function.identity<Bytes>()::apply)
   }
 
   private val db: DB
