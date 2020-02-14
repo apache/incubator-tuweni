@@ -438,7 +438,7 @@ object ProxyKeyValueStoreSpec : Spek({
     kv,
     Base64::decode,
     Base64::encode,
-    { if (it == null) { null } else { Base64.decode(it) } },
+    Base64::decode,
     Base64::encode
   )
   afterGroup {

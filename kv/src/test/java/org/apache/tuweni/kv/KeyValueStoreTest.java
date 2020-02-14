@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.concurrent.AsyncCompletion;
+import org.apache.tuweni.io.Base64;
 import org.apache.tuweni.junit.TempDirectory;
 import org.apache.tuweni.junit.TempDirectoryExtension;
 
@@ -51,23 +52,41 @@ class KeyValueStoreTest {
 
   @Test
   void testPutAndGetMapDB(@TempDirectory Path tmpDir) throws Exception {
+    try (KeyValueStore<Bytes, Bytes> store = MapDBKeyValueStore
+        .open(tmpDir.resolve("mapdb"), bytesIdentityFn, bytesIdentityFn, bytesIdentityFn, bytesIdentityFn)) {
+      AsyncCompletion completion = store.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
+      completion.join();
+      Bytes value = store.getAsync(Bytes.of(123)).get();
+      assertNotNull(value);
+      assertEquals(Bytes.of(10, 12, 13), value);
+    }
+  }
+
+  @Test
+  void testPutAndGetProxied(@TempDirectory Path tmpDir) throws Exception {
     KeyValueStore<Bytes, Bytes> store = MapDBKeyValueStore
-        .open(tmpDir.resolve("mapdb"), bytesIdentityFn, bytesIdentityFn, bytesIdentityFn, bytesIdentityFn);
-    AsyncCompletion completion = store.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
-    completion.join();
-    Bytes value = store.getAsync(Bytes.of(123)).get();
-    assertNotNull(value);
-    assertEquals(Bytes.of(10, 12, 13), value);
+        .open(tmpDir.resolve("mapdbproxy"), bytesIdentityFn, bytesIdentityFn, bytesIdentityFn, bytesIdentityFn);
+    try (ProxyKeyValueStore<String, String, Bytes, Bytes> proxy =
+        ProxyKeyValueStore.open(store, Base64::encode, Base64::decode, Base64::encode, Base64::decode)) {
+      AsyncCompletion completion = proxy.putAsync(Base64.encode(Bytes.of(123)), Base64.encode(Bytes.of(10, 12, 13)));
+      completion.join();
+      String value = proxy.getAsync(Base64.encode(Bytes.of(123))).get();
+      assertNotNull(value);
+      assertEquals(Base64.encode(Bytes.of(10, 12, 13)), value);
+      assertEquals(Bytes.of(10, 12, 13), store.getAsync(Bytes.of(123)).get());
+    }
+
   }
 
   @Test
   void testPutAndGetMapDBDirect(@TempDirectory Path tmpDir) throws Exception {
-    KeyValueStore<Bytes, Bytes> store = MapDBKeyValueStore.open(tmpDir.resolve("mapdb"));
-    AsyncCompletion completion = store.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
-    completion.join();
-    Bytes value = store.getAsync(Bytes.of(123)).get();
-    assertNotNull(value);
-    assertEquals(Bytes.of(10, 12, 13), value);
+    try (KeyValueStore<Bytes, Bytes> store = MapDBKeyValueStore.open(tmpDir.resolve("mapdbdirect"))) {
+      AsyncCompletion completion = store.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
+      completion.join();
+      Bytes value = store.getAsync(Bytes.of(123)).get();
+      assertNotNull(value);
+      assertEquals(Bytes.of(10, 12, 13), value);
+    }
   }
 
   @Test

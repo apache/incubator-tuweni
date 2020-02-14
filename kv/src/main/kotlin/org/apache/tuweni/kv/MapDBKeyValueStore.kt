@@ -49,7 +49,7 @@ constructor(
   private val keySerializer: (K) -> Bytes,
   private val valueSerializer: (V) -> Bytes,
   private val keyDeserializer: (Bytes) -> K,
-  private val valueDeserializer: (Bytes?) -> V?,
+  private val valueDeserializer: (Bytes) -> V,
   override val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : KeyValueStore<K, V> {
 
@@ -71,7 +71,7 @@ constructor(
       keySerializer: Function<K, Bytes>,
       valueSerializer: Function<V, Bytes>,
       keyDeserializer: Function<Bytes, K>,
-      valueDeserializer: Function<Bytes?, V?>
+      valueDeserializer: Function<Bytes, V>
     ) =
       MapDBKeyValueStore<K, V>(dbPath,
         keySerializer::apply,
@@ -110,7 +110,14 @@ constructor(
     ).createOrOpen()
   }
 
-  override suspend fun get(key: K): V? = valueDeserializer(storageData[keySerializer(key)])
+  override suspend fun get(key: K): V? {
+    val value = storageData[keySerializer(key)]
+    return if (value == null) {
+      value
+    } else {
+      return valueDeserializer(value)
+    }
+  }
 
   override suspend fun put(key: K, value: V) {
     storageData[keySerializer(key)] = valueSerializer(value)
