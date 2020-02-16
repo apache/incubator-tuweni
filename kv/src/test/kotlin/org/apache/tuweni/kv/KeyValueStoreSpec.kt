@@ -439,7 +439,7 @@ object ProxyKeyValueStoreSpec : Spek({
     Base64::decode,
     Base64::encode,
     Base64::decode,
-    Base64::encode
+    { _: Bytes, value: Bytes -> Base64.encode(value) }
   )
   afterGroup {
     proxy.close()

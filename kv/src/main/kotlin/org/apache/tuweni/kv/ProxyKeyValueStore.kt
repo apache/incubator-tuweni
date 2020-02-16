@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.kv
 
+import java.util.function.BiFunction
 import kotlin.coroutines.CoroutineContext
 import java.util.function.Function
 
@@ -30,7 +31,7 @@ class ProxyKeyValueStore<K, V, E, R>(
   private val unproxyKey: (E) -> K,
   private val proxyKey: (K) -> E,
   private val unproxyValue: (R) -> V,
-  private val proxyValue: (V) -> R,
+  private val proxyValue: (K, V) -> R,
   override val coroutineContext: CoroutineContext = store.coroutineContext
 ) : KeyValueStore<K, V> {
 
@@ -51,7 +52,7 @@ class ProxyKeyValueStore<K, V, E, R>(
       unproxyKey: Function<E, K>,
       proxyKey: Function<K, E>,
       unproxyValue: Function<R, V>,
-      proxyValue: Function<V, R>
+      proxyValue: BiFunction<K, V, R>
     ) =
       ProxyKeyValueStore(store, unproxyKey::apply, proxyKey::apply, unproxyValue::apply, proxyValue::apply)
   }
@@ -65,7 +66,7 @@ class ProxyKeyValueStore<K, V, E, R>(
     }
   }
 
-    override suspend fun put(key: K, value: V) = store.put(proxyKey(key), proxyValue(value))
+    override suspend fun put(key: K, value: V) = store.put(proxyKey(key), proxyValue(key, value))
 
     override suspend fun keys(): Iterable<K> = store.keys().map(unproxyKey)
 

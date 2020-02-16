@@ -66,8 +66,8 @@ class KeyValueStoreTest {
   void testPutAndGetProxied(@TempDirectory Path tmpDir) throws Exception {
     KeyValueStore<Bytes, Bytes> store = MapDBKeyValueStore
         .open(tmpDir.resolve("mapdbproxy"), bytesIdentityFn, bytesIdentityFn, bytesIdentityFn, bytesIdentityFn);
-    try (ProxyKeyValueStore<String, String, Bytes, Bytes> proxy =
-        ProxyKeyValueStore.open(store, Base64::encode, Base64::decode, Base64::encode, Base64::decode)) {
+    try (ProxyKeyValueStore<String, String, Bytes, Bytes> proxy = ProxyKeyValueStore
+        .open(store, Base64::encode, Base64::decode, Base64::encode, (key, value) -> Base64.decode(value))) {
       AsyncCompletion completion = proxy.putAsync(Base64.encode(Bytes.of(123)), Base64.encode(Bytes.of(10, 12, 13)));
       completion.join();
       String value = proxy.getAsync(Base64.encode(Bytes.of(123))).get();
