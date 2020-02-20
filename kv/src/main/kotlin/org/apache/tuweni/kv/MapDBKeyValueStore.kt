@@ -126,6 +126,10 @@ constructor(
 
   override suspend fun keys(): Iterable<K> = storageData.keys.map(keyDeserializer)
 
+  override suspend fun clear() {
+    storageData.clear()
+  }
+
   /**
    * Closes the underlying MapDB instance.
    */

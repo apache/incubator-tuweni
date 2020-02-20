@@ -69,7 +69,7 @@ public final class Files {
   public static void deleteRecursively(Path directory) throws IOException {
     checkNotNull(directory);
 
-    walkFileTree(directory, new SimpleFileVisitor<Path>() {
+    walkFileTree(directory, new SimpleFileVisitor<>() {
       @Override
       public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         delete(file);

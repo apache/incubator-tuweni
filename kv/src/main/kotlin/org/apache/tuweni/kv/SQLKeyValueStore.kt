@@ -179,6 +179,13 @@ constructor(
     }
   }
 
+  override suspend fun clear() {
+    connectionPool.asyncConnection.await().use {
+      val stmt = it.prepareStatement("DELETE FROM $tableName")
+      stmt.execute()
+    }
+  }
+
   /**
    * Closes the underlying connection pool.
    */

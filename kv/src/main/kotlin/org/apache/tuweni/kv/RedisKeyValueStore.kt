@@ -227,6 +227,10 @@ class RedisKeyValueStore<K, V>(
 
   override suspend fun keys(): Iterable<K> = asyncCommands.keys(Bytes.EMPTY).await().map(keyDeserializer)
 
+  override suspend fun clear() {
+    asyncCommands.flushdb().await()
+  }
+
   override fun close() {
     conn.close()
   }

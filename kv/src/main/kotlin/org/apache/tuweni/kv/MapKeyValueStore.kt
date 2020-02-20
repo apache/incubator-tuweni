@@ -61,6 +61,10 @@ constructor(
 
   override suspend fun keys(): Iterable<K> = map.keys
 
+  override suspend fun clear() {
+    map.clear()
+  }
+
   /**
    * Has no effect in this KeyValueStore implementation.
    */

@@ -18,6 +18,7 @@ package org.apache.tuweni.kv
 
 import kotlinx.coroutines.Dispatchers
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.io.file.Files.deleteRecursively
 import org.fusesource.leveldbjni.JniDBFactory
 import org.iq80.leveldb.DB
 import org.iq80.leveldb.DBIterator
@@ -45,12 +46,12 @@ import kotlin.coroutines.CoroutineContext
 class LevelDBKeyValueStore<K, V>
 @Throws(IOException::class)
 constructor(
-  dbPath: Path,
+  private val dbPath: Path,
   private val keySerializer: (K) -> Bytes,
   private val valueSerializer: (V) -> Bytes,
   private val keyDeserializer: (Bytes) -> K,
   private val valueDeserializer: (Bytes) -> V,
-  options: Options = Options().createIfMissing(true).cacheSize((100 * 1048576).toLong()),
+  private val options: Options = Options().createIfMissing(true).cacheSize((100 * 1048576).toLong()),
   override val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : KeyValueStore<K, V> {
 
@@ -130,11 +131,15 @@ constructor(
         Function.identity<Bytes>()::apply)
   }
 
-  private val db: DB
+  private var db: DB
 
   init {
+    db = create()
+  }
+
+  private fun create(): DB {
     Files.createDirectories(dbPath)
-    db = JniDBFactory.factory.open(dbPath.toFile(), options)
+    return JniDBFactory.factory.open(dbPath.toFile(), options)
   }
 
   override suspend fun get(key: K): V? {
@@ -159,6 +164,12 @@ constructor(
     val iter = db.iterator()
     iter.seekToFirst()
     return Iterable { KIterator(iter, keyDeserializer) }
+  }
+
+  override suspend fun clear() {
+    close()
+    deleteRecursively(dbPath)
+    db = create()
   }
 
   /**

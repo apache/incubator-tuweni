@@ -78,4 +78,14 @@ interface KeyValueStore<K, V> : Closeable, CoroutineScope {
    * @return An [Iterable] allowing to iterate over the set of keys.
    */
   fun keysAsync(): AsyncResult<Iterable<K>> = asyncResult { keys() }
+
+  /**
+   * Clears the contents of the store.
+   */
+  suspend fun clear()
+
+  /**
+   * Clears the contents of the store.
+   */
+  suspend fun clearAsync() = asyncResult { clear() }
 }

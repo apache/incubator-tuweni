@@ -38,6 +38,7 @@ class EntityManagerKeyValueStore<K, V>
      * Open a relational database backed key-value store using a JPA entity manager.
      *
      * @param entityManagerProvider The supplier of entity manager to operate.
+     * @param entityClass The class of objects to store in the store
      * @return A key-value store.
      * @throws IOException If an I/O error occurs.
      */
@@ -75,12 +76,30 @@ class EntityManagerKeyValueStore<K, V>
 
   override suspend fun keys(): Iterable<K> {
     val em = entityManagerProvider()
-    val query = em.criteriaBuilder.createQuery(entityClass)
-    val root = query.from(entityClass)
-    val all = query.select(root)
-    val finalAll = em.createQuery(all)
-    val resultStream: Stream<V> = finalAll.resultStream
-    return Iterable { resultStream.map(idAccessor).iterator() }
+    em.transaction.begin()
+    try {
+      val query = em.criteriaBuilder.createQuery(entityClass)
+      val root = query.from(entityClass)
+      val all = query.select(root)
+      val finalAll = em.createQuery(all)
+      val resultStream: Stream<V> = finalAll.resultStream
+      return Iterable { resultStream.map(idAccessor).iterator() }
+    } finally {
+      em.transaction.commit()
+      em.close()
+    }
+  }
+
+  override suspend fun clear() {
+    val em = entityManagerProvider()
+    em.transaction.begin()
+    try {
+      val deleteAll = em.createQuery("DELETE FROM ${em.metamodel.entity(entityClass).name}")
+      deleteAll.executeUpdate()
+    } finally {
+      em.transaction.commit()
+      em.close()
+    }
   }
 
   override fun close() {

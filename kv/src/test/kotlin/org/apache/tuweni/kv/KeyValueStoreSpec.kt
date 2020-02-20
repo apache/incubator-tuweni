@@ -77,6 +77,14 @@ object KeyValueStoreSpec : Spek({
         kv.keys().should.equal(setOf(foobar, foo))
       }
     }
+
+    it("can clear its contents") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.clear()
+        kv.get(foobar).should.be.`null`
+      }
+    }
   }
 })
 
@@ -117,6 +125,14 @@ object InfinispanKeyValueStoreSpec : Spek({
         keys.should.contain(foo)
       }
     }
+
+    it("can clear its contents") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.clear()
+        kv.get(foobar).should.be.`null`
+      }
+    }
   }
 })
 
@@ -151,6 +167,14 @@ object MapDBKeyValueStoreSpec : Spek({
         val keys = kv.keys().map { it }
         keys.should.contain(foo)
         keys.should.contain(foobar)
+      }
+    }
+
+    it("can clear its contents") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.clear()
+        kv.get(foobar).should.be.`null`
       }
     }
 
@@ -215,6 +239,14 @@ object LevelDBKeyValueStoreSpec : Spek({
       }
     }
 
+    it("can clear its contents") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.clear()
+        kv.get(foobar).should.be.`null`
+      }
+    }
+
     it("should not allow usage after the DB is closed") {
       val kv2 = LevelDBKeyValueStore(
         path.resolve("subdb"),
@@ -270,6 +302,14 @@ object RocksDBKeyValueStoreSpec : Spek({
         val keys = kv.keys().map { it }
         keys.should.contain(bar)
         keys.should.contain(foo)
+      }
+    }
+
+    it("can clear its contents") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.clear()
+        kv.get(foobar).should.be.`null`
       }
     }
 
@@ -362,6 +402,14 @@ object SQLKeyValueStoreSpec : Spek({
       }
     }
 
+    it("can clear its contents") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.clear()
+        kv.get(foobar).should.be.`null`
+      }
+    }
+
     it("should not allow usage after the DB is closed") {
       val kv2 = SQLKeyValueStore(
         "jdbc:h2:mem:testdb",
@@ -429,6 +477,14 @@ object EntityManagerKeyValueStoreSpec : Spek({
         keys.should.contain("foo")
       }
     }
+
+    it("can clear its contents") {
+      runBlocking {
+        kv.put(Store("foo", "bar"))
+        kv.clear()
+        kv.get("foo").should.be.`null`
+      }
+    }
   }
 })
 
@@ -444,7 +500,7 @@ object ProxyKeyValueStoreSpec : Spek({
   afterGroup {
     proxy.close()
   }
-  describe("a proixy key value store") {
+  describe("a proxy key value store") {
 
     it("should allow to retrieve values") {
       runBlocking {
@@ -475,6 +531,14 @@ object ProxyKeyValueStoreSpec : Spek({
         val keys = proxy.keys().map { it }
         keys.should.contain(bar)
         keys.should.contain(foo)
+      }
+    }
+
+    it("can clear its contents") {
+      runBlocking {
+        proxy.put(foo, bar)
+        proxy.clear()
+        proxy.get(foo).should.be.`null`
       }
     }
   }

@@ -16,7 +16,7 @@ import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
-@Entity(name = "STORE")
+@Entity(name = "FOO_STORE")
 public class Store {
 
   public Store() {}

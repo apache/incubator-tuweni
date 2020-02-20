@@ -18,6 +18,7 @@ package org.apache.tuweni.kv
 
 import kotlinx.coroutines.Dispatchers
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.io.file.Files.deleteRecursively
 import org.rocksdb.Options
 import org.rocksdb.RocksDB
 import org.rocksdb.RocksIterator
@@ -41,12 +42,12 @@ import kotlin.coroutines.CoroutineContext
 class RocksDBKeyValueStore<K, V>
 @Throws(IOException::class)
 constructor(
-  dbPath: Path,
+  private val dbPath: Path,
   private val keySerializer: (K) -> Bytes,
   private val valueSerializer: (V) -> Bytes,
   private val keyDeserializer: (Bytes) -> K,
   private val valueDeserializer: (Bytes) -> V,
-  options: Options = Options().setCreateIfMissing(true).setWriteBufferSize(268435456).setMaxOpenFiles(-1),
+  private val options: Options = Options().setCreateIfMissing(true).setWriteBufferSize(268435456).setMaxOpenFiles(-1),
   override val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : KeyValueStore<K, V> {
 
@@ -106,13 +107,17 @@ constructor(
         options)
   }
 
-  private val db: RocksDB
+  private var db: RocksDB
   private val closed = AtomicBoolean(false)
 
   init {
     RocksDB.loadLibrary()
+    db = create()
+  }
+
+  private fun create(): RocksDB {
     Files.createDirectories(dbPath)
-    db = RocksDB.open(options, dbPath.toAbsolutePath().toString())
+    return RocksDB.open(options, dbPath.toAbsolutePath().toString())
   }
 
   override suspend fun get(key: K): V? {
@@ -152,6 +157,14 @@ constructor(
     val iter = db.newIterator()
     iter.seekToFirst()
     return Iterable { BytesIterator(iter, keyDeserializer) }
+  }
+
+  override suspend fun clear() {
+    close()
+    if (closed.compareAndSet(true, false)) {
+      deleteRecursively(dbPath)
+      db = create()
+    }
   }
 
   /**
