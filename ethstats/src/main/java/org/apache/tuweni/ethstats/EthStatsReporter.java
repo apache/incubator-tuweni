@@ -58,6 +58,7 @@ public final class EthStatsReporter {
   static {
     mapper.registerModule(new EthJsonModule());
   }
+
   private final static long DELAY = 5000;
   private final static long REPORTING_PERIOD = 1000;
   private final static long PING_PERIOD = 15000;
@@ -65,7 +66,7 @@ public final class EthStatsReporter {
 
   private final String id;
   private final Vertx vertx;
-  private final URI ethstatsServerURI;
+  private final List<URI> ethstatsServerURIs;
   private final Logger logger;
   private final AtomicBoolean started = new AtomicBoolean(false);
   private final AtomicBoolean waitingOnPong = new AtomicBoolean(false);
@@ -82,10 +83,11 @@ public final class EthStatsReporter {
 
   /**
    * Default constructor.
-   * 
+   *
    * @param vertx a Vert.x instance, externally managed.
    * @param logger a logger
-   * @param ethstatsServerURI the URI to connect to eth-netstats, such as ws://www.ethnetstats.org:3000/api
+   * @param ethstatsServerURIs the URIs to connect to eth-netstats, such as ws://www.ethnetstats.org:3000/api. URIs are
+   *        tried in sequence, and the first one to work is used.
    * @param secret the secret to use when we connect to eth-netstats
    * @param name the name of the node to be reported in the UI
    * @param node the node name to be reported in the UI
@@ -99,7 +101,7 @@ public final class EthStatsReporter {
   public EthStatsReporter(
       Vertx vertx,
       Logger logger,
-      URI ethstatsServerURI,
+      List<URI> ethstatsServerURIs,
       String secret,
       String name,
       String node,
@@ -112,7 +114,7 @@ public final class EthStatsReporter {
     this.id = UUID.randomUUID().toString();
     this.vertx = vertx;
     this.logger = logger;
-    this.ethstatsServerURI = ethstatsServerURI;
+    this.ethstatsServerURIs = ethstatsServerURIs;
     this.secret = secret;
     this.nodeInfo = new NodeInfo(name, node, port, network, protocol, os, osVer);
     this.historyRequester = historyRequester;
@@ -150,25 +152,30 @@ public final class EthStatsReporter {
   }
 
   private void startInternal() {
-    executor.executeBlocking(this::connect, result -> {
-      if (started.get()) {
-        if ((result.failed() || !result.result())) {
-          logger.debug("Attempting to connect", result.cause());
-          attemptConnect(null);
-        }
+    AtomicBoolean connectedOK = new AtomicBoolean(false);
+    for (URI uri : ethstatsServerURIs) {
+      executor.executeBlocking((Future<Boolean> handler) -> connect(handler, uri), result -> {
+        logger.debug("Attempting to connect", result.cause());
+        connectedOK.set(!result.failed() && result.result());
+      });
+      if (connectedOK.get()) {
+        break;
       }
-    });
+    }
+    if (!connectedOK.get() && started.get()) {
+      attemptConnect(null);
+    }
   }
 
   private void attemptConnect(Void aVoid) {
     vertx.setTimer(DELAY, handler -> this.startInternal());
   }
 
-  private void connect(Future<Boolean> result) {
+  private void connect(Future<Boolean> result, URI uri) {
     client.websocket(
-        ethstatsServerURI.getPort(),
-        ethstatsServerURI.getHost(),
-        ethstatsServerURI.toString(),
+        uri.getPort(),
+        uri.getHost(),
+        uri.toString(),
         MultiMap.caseInsensitiveMultiMap().add("origin", "http://localhost"),
         ws -> {
           ws.closeHandler(this::attemptConnect);

@@ -41,7 +41,7 @@ public class EthStatsReporterTest {
     EthStatsReporter reporter = new EthStatsReporter(
         vertx,
         logger,
-        URI.create("ws://localhost:3000/api"),
+        Collections.singletonList(URI.create("ws://localhost:3000/api")),
         "wat",
         "name",
         "node",
