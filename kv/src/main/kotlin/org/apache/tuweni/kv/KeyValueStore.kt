@@ -86,6 +86,7 @@ interface KeyValueStore<K, V> : Closeable, CoroutineScope {
 
   /**
    * Clears the contents of the store.
+   * @return An [AsyncCompletion] that will complete when the content is cleared.
    */
-  suspend fun clearAsync() = asyncResult { clear() }
+  fun clearAsync() = asyncCompletion { clear() }
 }
