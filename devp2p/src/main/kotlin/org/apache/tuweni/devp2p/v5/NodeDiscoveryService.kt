@@ -18,8 +18,7 @@ package org.apache.tuweni.devp2p.v5
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.concurrent.coroutines.asyncCompletion
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
@@ -35,41 +34,91 @@ import kotlin.coroutines.CoroutineContext
  * Service executes network discovery, according to discv5 specification
  * (https://github.com/ethereum/devp2p/blob/master/discv5/discv5.md)
  */
-interface NodeDiscoveryService {
+interface NodeDiscoveryService : CoroutineScope {
 
   /**
-   * Initializes node discovery
+   * Starts the node discovery service.
    */
   suspend fun start()
 
   /**
-   * Executes service shut down
+   * Stops the node discovery service.
    */
   suspend fun terminate()
+
+  /**
+   * Starts the discovery service, providing a handle to the completion of the start operation.
+   */
+  fun startAsync() = asyncCompletion { start() }
+
+  /**
+   * Stops the node discovery service, providing a handle to the completion of the shutdown operation.
+   */
+  fun terminateAsync() = asyncCompletion { terminate() }
 }
 
-internal class DefaultNodeDiscoveryService(
-  private val keyPair: SECP256K1.KeyPair,
-  private val localPort: Int,
-  private val bindAddress: InetSocketAddress = InetSocketAddress(localPort),
-  private val bootstrapENRList: List<String> = emptyList(),
-  private val enrSeq: Long = Instant.now().toEpochMilli(),
-  private val selfENR: Bytes = EthereumNodeRecord.toRLP(
-    keyPair,
-    enrSeq,
-    emptyMap(),
-    bindAddress.address,
-    null,
-    bindAddress.port
-  ),
-  private val enrStorage: ENRStorage = DefaultENRStorage(),
-  private val connector: UdpConnector = DefaultUdpConnector(bindAddress, keyPair, selfENR, enrStorage),
+class DefaultNodeDiscoveryService(
+  private val bootstrapENRList: List<String>,
+  private val enrStorage: ENRStorage,
+  private val connector: UdpConnector,
   override val coroutineContext: CoroutineContext = Dispatchers.Default
-) : NodeDiscoveryService, CoroutineScope {
+) : NodeDiscoveryService {
+
+  companion object {
+    /**
+     * Creates a new discovery service, generating the node ENR and configuring the UDP connector.
+     * @param keyPair the key pair identifying the node running the service.
+     * @param bindAddress the address to bind the node to.
+     * @param enrSeq the sequence of the ENR of the node
+     * @param bootstrapENRList the list of other nodes to connect to on bootstrap.
+     * @param enrStorage the permanent storage of ENRs. Defaults to an in-memory store.
+     * @param coroutineContext the coroutine context associated with the store.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun open(
+      keyPair: SECP256K1.KeyPair,
+      localPort: Int,
+      bindAddress: InetSocketAddress = InetSocketAddress(localPort),
+      enrSeq: Long = Instant.now().toEpochMilli(),
+      bootstrapENRList: List<String> = emptyList(),
+      enrStorage: ENRStorage = DefaultENRStorage(),
+      coroutineContext: CoroutineContext = Dispatchers.Default
+    ): NodeDiscoveryService {
+      val selfENR = EthereumNodeRecord.toRLP(
+        keyPair,
+        enrSeq,
+        emptyMap(),
+        bindAddress.address,
+        null,
+        bindAddress.port
+      )
+      val connector = DefaultUdpConnector(bindAddress, keyPair, selfENR, enrStorage)
+      return open(bootstrapENRList, enrStorage, connector, coroutineContext)
+    }
+
+    /**
+     * Creates a new discovery service with the UDP service provided.
+     * @param bootstrapENRList the list of other nodes to connect to on bootstrap.
+     * @param enrStorage the permanent storage of ENRs. Defaults to an in-memory store.
+     * @param connector the UDP service providing network access.
+     * @param coroutineContext the coroutine context associated with the store.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun open(
+      bootstrapENRList: List<String> = emptyList(),
+      enrStorage: ENRStorage = DefaultENRStorage(),
+      connector: UdpConnector,
+      coroutineContext: CoroutineContext = Dispatchers.Default
+    ): NodeDiscoveryService {
+      return DefaultNodeDiscoveryService(bootstrapENRList, enrStorage, connector, coroutineContext)
+    }
+  }
 
   override suspend fun start() {
     connector.start()
-    launch { bootstrap() }
+    bootstrap()
   }
 
   override suspend fun terminate() {

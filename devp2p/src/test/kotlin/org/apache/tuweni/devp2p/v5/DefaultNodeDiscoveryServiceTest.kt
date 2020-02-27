@@ -58,13 +58,8 @@ class DefaultNodeDiscoveryServiceTest {
     DefaultUdpConnector(bindAddress, keyPair, selfENR)
 
   private val nodeDiscoveryService: NodeDiscoveryService =
-    DefaultNodeDiscoveryService(
-      keyPair,
-      localPort,
-      bindAddress,
+    DefaultNodeDiscoveryService.open(
       bootstrapENRList,
-      enrSeq,
-      selfENR,
       connector = connector
     )
 

@@ -17,25 +17,34 @@
 package org.apache.tuweni.devp2p.v5
 
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.crypto.Hash
 
 /**
- * In-memory storage of node records
+ * Storage of node records
  */
 interface ENRStorage {
 
   /**
-   * Persist node record into storage
+   * Add an ENR record to the store
    *
    * @param enr node record
    */
-  fun set(enr: Bytes)
+  fun set(enr: Bytes) {
+    val nodeId = Hash.sha2_256(enr)
+    put(nodeId, enr)
+  }
 
   /**
-   * Find node record into storage
+   * Store an ENR record associated with a nodeId in the store.
+   */
+  fun put(nodeId: Bytes, enr: Bytes)
+
+  /**
+   * Find a stored node record
    *
    * @param nodeId node identifier
    *
-   * @return node record
+   * @return node record, if present.
    */
   fun find(nodeId: Bytes): Bytes?
 }

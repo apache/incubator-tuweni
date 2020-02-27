@@ -46,10 +46,8 @@ class RelayerApp {
         System.out.println(it)
       })
       Runtime.getRuntime().addShutdownHook(Thread {
-        println("Relayer stopping")
         relayer.stop()
         vertx.close()
-        println("Relayer stopped")
       })
       runBlocking {
         relayer.start()

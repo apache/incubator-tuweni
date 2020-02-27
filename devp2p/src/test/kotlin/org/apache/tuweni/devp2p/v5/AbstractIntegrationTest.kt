@@ -71,9 +71,7 @@ abstract class AbstractIntegrationTest {
       ticketHolder = ticketHolder
     ),
     service: NodeDiscoveryService =
-      DefaultNodeDiscoveryService(
-        keyPair,
-        port,
+      DefaultNodeDiscoveryService.open(
         enrStorage = enrStorage,
         bootstrapENRList = bootList,
         connector = connector,

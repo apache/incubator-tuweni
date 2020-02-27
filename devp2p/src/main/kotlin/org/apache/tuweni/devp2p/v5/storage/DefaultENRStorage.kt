@@ -17,18 +17,17 @@
 package org.apache.tuweni.devp2p.v5.storage
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.devp2p.v5.ENRStorage
 import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * Default storage for Ethereum Node Records, backed by an in-memory hash map.
+ */
 class DefaultENRStorage : ENRStorage {
 
-  private val storage: MutableMap<String, Bytes> = ConcurrentHashMap()
+  private val storage: MutableMap<Bytes, Bytes> = ConcurrentHashMap()
 
-  override fun find(nodeId: Bytes): Bytes? = storage[nodeId.toHexString()]
+  override fun find(nodeId: Bytes): Bytes? = storage[nodeId]
 
-  override fun set(enr: Bytes) {
-    val nodeId = Hash.sha2_256(enr)
-    storage[nodeId.toHexString()] = enr
-  }
+  override fun put(nodeId: Bytes, enr: Bytes) { storage.put(nodeId, enr) }
 }
