@@ -23,7 +23,7 @@ public class NodeDiscoveryServiceTest {
 
   @Test
   void testStartAndStop() throws InterruptedException {
-    NodeDiscoveryService service = DefaultNodeDiscoveryService.open(SECP256K1.KeyPair.random(), 1000);
+    NodeDiscoveryService service = DefaultNodeDiscoveryService.open(SECP256K1.KeyPair.random(), 10000);
     service.startAsync().join();
     service.terminateAsync().join();
   }
