@@ -41,5 +41,6 @@ public interface CompletableAsyncCompletion extends AsyncCompletion {
    *
    * Note taking action directly on this future will impact this object.
    */
+  @Override
   CompletableFuture<Void> toFuture();
 }
