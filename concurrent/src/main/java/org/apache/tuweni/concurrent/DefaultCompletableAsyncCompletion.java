@@ -371,4 +371,9 @@ final class DefaultCompletableAsyncCompletion implements CompletableAsyncComplet
       return null;
     }));
   }
+
+  @Override
+  public CompletableFuture<Void> toFuture() {
+    return future;
+  }
 }

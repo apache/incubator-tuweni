@@ -12,6 +12,8 @@
  */
 package org.apache.tuweni.concurrent;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * An {@link AsyncCompletion} that can later be completed successfully or with a provided exception.
  */
@@ -33,4 +35,11 @@ public interface CompletableAsyncCompletion extends AsyncCompletion {
    *         {@code false}.
    */
   boolean completeExceptionally(Throwable ex);
+
+  /**
+   * Returns the underlying completable future associated with this instance.
+   *
+   * Note taking action directly on this future will impact this object.
+   */
+  CompletableFuture<Void> toFuture();
 }

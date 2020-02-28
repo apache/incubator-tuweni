@@ -20,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -475,4 +476,11 @@ public interface AsyncCompletion {
    * @return A new result.
    */
   AsyncCompletion accept(Consumer<? super Throwable> consumer);
+
+  /**
+   * Returns the underlying future associated with this instance.
+   *
+   * Note taking action directly on this future will impact this object.
+   */
+  Future<Void> toFuture();
 }
