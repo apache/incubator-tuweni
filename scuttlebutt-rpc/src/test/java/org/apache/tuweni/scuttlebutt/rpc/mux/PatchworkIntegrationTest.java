@@ -29,10 +29,7 @@ import org.apache.tuweni.scuttlebutt.rpc.RPCFunction;
 import org.apache.tuweni.scuttlebutt.rpc.RPCResponse;
 import org.apache.tuweni.scuttlebutt.rpc.RPCStreamRequest;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -47,16 +44,9 @@ import io.vertx.core.Vertx;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.logl.Level;
-import org.logl.LoggerProvider;
-import org.logl.logl.SimpleLogger;
-import org.logl.vertx.LoglLogDelegateFactory;
 
 @ExtendWith(VertxExtension.class)
 public class PatchworkIntegrationTest {
-
-  LoggerProvider loggerProvider = SimpleLogger.withLogLevel(Level.DEBUG).toPrintWriter(
-      new PrintWriter(new BufferedWriter(new OutputStreamWriter(System.out, UTF_8))));
 
   @Test
   @Disabled
@@ -198,17 +188,14 @@ public class PatchworkIntegrationTest {
 
     String host = "localhost";
     int port = 8008;
-    LoggerProvider loggerProvider = SimpleLogger.withLogLevel(Level.DEBUG).toPrintWriter(
-        new PrintWriter(new BufferedWriter(new OutputStreamWriter(System.out, UTF_8))));
-    LoglLogDelegateFactory.setProvider(loggerProvider);
 
     SecureScuttlebuttVertxClient secureScuttlebuttVertxClient =
-        new SecureScuttlebuttVertxClient(loggerProvider, vertx, keyPair, networkKeyBytes32);
+        new SecureScuttlebuttVertxClient(vertx, keyPair, networkKeyBytes32);
 
     AsyncResult<RPCHandler> onConnect =
         secureScuttlebuttVertxClient.connectTo(port, host, keyPair.publicKey(), (sender, terminationFn) -> {
 
-          return new RPCHandler(vertx, sender, terminationFn, new ObjectMapper(), loggerProvider);
+          return new RPCHandler(vertx, sender, terminationFn, new ObjectMapper());
         });
 
     return onConnect.get();

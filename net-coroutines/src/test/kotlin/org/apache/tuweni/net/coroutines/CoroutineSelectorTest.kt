@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.logl.logl.SimpleLogger
 import java.lang.IllegalArgumentException
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
@@ -145,7 +144,7 @@ internal class CoroutineSelectorTest {
 
     client.configureBlocking(false)
     server.configureBlocking(false)
-    val selector = CoroutineSelector.open(loggerProvider = SimpleLogger.toOutputStream(System.err))
+    val selector = CoroutineSelector.open()
 
     assertFalse(selector.cancelSelections(client))
 
@@ -174,7 +173,7 @@ internal class CoroutineSelectorTest {
   fun shouldThrowWhenSelectingClosedChannel() {
     val pipe = Pipe.open()
     pipe.source().configureBlocking(false)
-    val selector = CoroutineSelector.open(loggerProvider = SimpleLogger.toOutputStream(System.err))
+    val selector = CoroutineSelector.open()
 
     pipe.source().close()
     assertThrows<ClosedChannelException> {
@@ -190,7 +189,7 @@ internal class CoroutineSelectorTest {
     pipe1.source().configureBlocking(false)
     val pipe2 = Pipe.open()
     pipe2.source().configureBlocking(false)
-    val selector = CoroutineSelector.open(loggerProvider = SimpleLogger.toOutputStream(System.err))
+    val selector = CoroutineSelector.open()
 
     val job1 = async {
       selector.select(pipe1.source(), SelectionKey.OP_READ)
@@ -217,7 +216,7 @@ internal class CoroutineSelectorTest {
     pipe1.source().configureBlocking(false)
     val pipe2 = Pipe.open()
     pipe2.source().configureBlocking(false)
-    val selector = CoroutineSelector.open(loggerProvider = SimpleLogger.toOutputStream(System.err))
+    val selector = CoroutineSelector.open()
 
     val job1 = async {
       selector.select(pipe1.source(), SelectionKey.OP_READ)

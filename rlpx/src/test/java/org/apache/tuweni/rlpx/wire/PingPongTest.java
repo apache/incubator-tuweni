@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.logl.LoggerProvider;
 
 @ExtendWith(BouncyCastleExtension.class)
 class PingPongTest {
@@ -43,7 +42,6 @@ class PingPongTest {
         "abc",
         nodeId,
         peerNodeId,
-        LoggerProvider.nullProvider().getLogger("rlpx"),
         capturedPing::set,
 
         helloMessage -> {
@@ -66,20 +64,10 @@ class PingPongTest {
   @Test
   void pongPingRoundtrip() {
     AtomicReference<RLPxMessage> capturedPong = new AtomicReference<>();
-    DefaultWireConnection conn = new DefaultWireConnection(
-        "abc",
-        nodeId,
-        peerNodeId,
-        LoggerProvider.nullProvider().getLogger("rlpx"),
-        capturedPong::set,
-        helloMessage -> {
-        },
-        () -> {
-        },
-        new LinkedHashMap<>(),
-        1,
-        "abc",
-        10000);
+    DefaultWireConnection conn =
+        new DefaultWireConnection("abc", nodeId, peerNodeId, capturedPong::set, helloMessage -> {
+        }, () -> {
+        }, new LinkedHashMap<>(), 1, "abc", 10000);
 
     conn.messageReceived(new RLPxMessage(2, Bytes.EMPTY));
     assertNotNull(capturedPong.get());

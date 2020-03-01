@@ -29,8 +29,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.logl.Level
-import org.logl.logl.SimpleLogger
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.SocketAddress
@@ -71,7 +69,6 @@ internal class DiscoveryServiceTest {
   fun shouldRespondToPingAndRecordEndpoint() = runBlocking {
     val peerRepository = EphemeralPeerRepository()
     val discoveryService = DiscoveryService.open(
-      loggerProvider = SimpleLogger.withLogLevel(Level.ERROR).toOutputStream(System.err),
       keyPair = SECP256K1.KeyPair.random(),
       peerRepository = peerRepository
     )
@@ -103,7 +100,6 @@ internal class DiscoveryServiceTest {
     val peerRepository = EphemeralPeerRepository()
     val routingTable = DevP2PPeerRoutingTable(serviceKeyPair.publicKey())
     val discoveryService = DiscoveryService.open(
-      loggerProvider = SimpleLogger.withLogLevel(Level.ERROR).toOutputStream(System.err),
       keyPair = serviceKeyPair,
       bootstrapURIs = listOf(
         URI("enode://" + bootstrapKeyPair.publicKey().toHexString() + "@127.0.0.1:" + bootstrapClient.localPort)
@@ -145,7 +141,6 @@ internal class DiscoveryServiceTest {
     val peerRepository = EphemeralPeerRepository()
     val routingTable = DevP2PPeerRoutingTable(serviceKeyPair.publicKey())
     val discoveryService = DiscoveryService.open(
-      loggerProvider = SimpleLogger.withLogLevel(Level.ERROR).toOutputStream(System.err),
       keyPair = serviceKeyPair,
       bootstrapURIs = listOf(
         URI("enode://" + bootstrapKeyPair.publicKey().toHexString() + "@127.0.0.1:" + bootstrapClient.localPort)
@@ -178,7 +173,6 @@ internal class DiscoveryServiceTest {
     val boostrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress(0))
 
     val discoveryService = DiscoveryService.open(
-      loggerProvider = SimpleLogger.withLogLevel(Level.ERROR).toOutputStream(System.err),
       keyPair = SECP256K1.KeyPair.random(),
       bootstrapURIs = listOf(
         URI("enode://" + bootstrapKeyPair.publicKey().bytes().toHexString() + "@127.0.0.1:" + boostrapClient.localPort)
@@ -202,7 +196,6 @@ internal class DiscoveryServiceTest {
     val boostrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress(0))
 
     val discoveryService = DiscoveryService.open(
-      loggerProvider = SimpleLogger.withLogLevel(Level.ERROR).toOutputStream(System.err),
       keyPair = SECP256K1.KeyPair.random(),
       bootstrapURIs = listOf(
         URI("enode://" + bootstrapKeyPair.publicKey().bytes().toHexString() + "@127.0.0.1:" + boostrapClient.localPort)
@@ -228,7 +221,6 @@ internal class DiscoveryServiceTest {
   fun shouldRequirePingPongBeforeRespondingToFindNodesFromUnverifiedPeer() = runBlocking {
     val peerRepository = EphemeralPeerRepository()
     val discoveryService = DiscoveryService.open(
-      loggerProvider = SimpleLogger.withLogLevel(Level.ERROR).toOutputStream(System.err),
       keyPair = SECP256K1.KeyPair.random(),
       peerRepository = peerRepository
     )
@@ -271,8 +263,7 @@ internal class DiscoveryServiceTest {
     /* ktlint-enable */
     val discoveryService = DiscoveryService.open(
       SECP256K1.KeyPair.random(),
-      bootstrapURIs = boostrapNodes,
-      loggerProvider = SimpleLogger.withLogLevel(Level.DEBUG).toOutputStream(System.out)
+      bootstrapURIs = boostrapNodes
     )
 
     runBlocking {

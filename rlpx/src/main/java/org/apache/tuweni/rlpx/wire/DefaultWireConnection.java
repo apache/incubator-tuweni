@@ -27,16 +27,18 @@ import com.google.common.collect.BoundType;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
-import org.logl.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A stateful connection between two peers under the Devp2p wire protocol.
  */
 public final class DefaultWireConnection implements WireConnection {
 
+  private final static Logger logger = LoggerFactory.getLogger(DefaultWireConnection.class);
+
   private final Bytes nodeId;
   private final Bytes peerNodeId;
-  private final Logger logger;
   private final String id;
   private final Consumer<RLPxMessage> writer;
   private final Consumer<HelloMessage> afterHandshakeListener;
@@ -70,7 +72,6 @@ public final class DefaultWireConnection implements WireConnection {
       String id,
       Bytes nodeId,
       Bytes peerNodeId,
-      Logger logger,
       Consumer<RLPxMessage> writer,
       Consumer<HelloMessage> afterHandshakeListener,
       Runnable disconnectHandler,
@@ -81,7 +82,6 @@ public final class DefaultWireConnection implements WireConnection {
     this.id = id;
     this.nodeId = nodeId;
     this.peerNodeId = peerNodeId;
-    this.logger = logger;
     this.writer = writer;
     this.afterHandshakeListener = afterHandshakeListener;
     this.disconnectHandler = disconnectHandler;

@@ -19,7 +19,7 @@ dependencies {
   compileOnly 'io.vertx:vertx-core'
   compile project(':scuttlebutt')
   compile project(':scuttlebutt-handshake')
-  compile 'org.logl:logl-api'
+  compile 'org.slf4j:slf4j-api'
 
   compile 'com.fasterxml.jackson.core:jackson-databind'
 
@@ -30,9 +30,6 @@ dependencies {
   testCompile 'org.junit.jupiter:junit-jupiter-api'
   testCompile 'org.junit.jupiter:junit-jupiter-params'
   testCompile 'io.vertx:vertx-core'
-
-  testCompile 'org.logl:logl-logl'
-  testCompile 'org.logl:logl-vertx'
 
   testRuntime 'org.junit.jupiter:junit-jupiter-engine'
 }

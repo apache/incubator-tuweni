@@ -12,7 +12,6 @@
  */
 package org.apache.tuweni.scuttlebutt.lib;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
@@ -22,16 +21,10 @@ import org.apache.tuweni.io.Base64;
 import org.apache.tuweni.scuttlebutt.handshake.vertx.SecureScuttlebuttVertxClient;
 import org.apache.tuweni.scuttlebutt.rpc.mux.RPCHandler;
 
-import java.io.BufferedWriter;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.Vertx;
-import org.logl.Level;
-import org.logl.LoggerProvider;
-import org.logl.logl.SimpleLogger;
 
 /**
  * A factory for constructing a new instance of ScuttlebuttClient with the given configuration parameters
@@ -85,10 +78,8 @@ public final class ScuttlebuttClientFactory {
       String host,
       int port,
       Signature.KeyPair keyPair) {
-    LoggerProvider loggerProvider = SimpleLogger.withLogLevel(Level.DEBUG).toPrintWriter(
-        new PrintWriter(new BufferedWriter(new OutputStreamWriter(System.out, UTF_8))));
 
-    return fromNetWithNetworkKey(vertx, host, port, keyPair, DEFAULT_NETWORK, mapper, loggerProvider);
+    return fromNetWithNetworkKey(vertx, host, port, keyPair, DEFAULT_NETWORK, mapper);
   }
 
   /**
@@ -98,7 +89,6 @@ public final class ScuttlebuttClientFactory {
    * @param keyPair The keys to use for the secret handshake
    * @param networkIdentifier The scuttlebutt network key to use.
    * @param objectMapper The ObjectMapper for serializing the content of published scuttlebutt messages
-   * @param loggerProvider the logging configuration provider
    * @return the scuttlebutt client
    */
   public static AsyncResult<ScuttlebuttClient> fromNetWithNetworkKey(
@@ -107,11 +97,10 @@ public final class ScuttlebuttClientFactory {
       int port,
       Signature.KeyPair keyPair,
       Bytes32 networkIdentifier,
-      ObjectMapper objectMapper,
-      LoggerProvider loggerProvider) {
+      ObjectMapper objectMapper) {
 
     SecureScuttlebuttVertxClient secureScuttlebuttVertxClient =
-        new SecureScuttlebuttVertxClient(loggerProvider, vertx, keyPair, networkIdentifier);
+        new SecureScuttlebuttVertxClient(vertx, keyPair, networkIdentifier);
 
     return secureScuttlebuttVertxClient
         .connectTo(
@@ -120,7 +109,7 @@ public final class ScuttlebuttClientFactory {
             keyPair.publicKey(),
             (
                 Consumer<Bytes> sender,
-                Runnable terminationFn) -> new RPCHandler(vertx, sender, terminationFn, objectMapper, loggerProvider))
+                Runnable terminationFn) -> new RPCHandler(vertx, sender, terminationFn, objectMapper))
         .thenApply(handler -> new ScuttlebuttClient(handler, objectMapper));
   }
 

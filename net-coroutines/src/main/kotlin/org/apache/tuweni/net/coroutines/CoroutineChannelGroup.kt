@@ -16,7 +16,7 @@
  */
 package org.apache.tuweni.net.coroutines
 
-import org.logl.LoggerProvider
+import org.slf4j.LoggerFactory
 import java.nio.channels.Channel
 import java.nio.channels.SelectableChannel
 import java.nio.channels.ShutdownChannelGroupException
@@ -61,12 +61,11 @@ sealed class CoroutineChannelGroup {
     fun open(
       nSelectors: Int = Runtime.getRuntime().availableProcessors(),
       executor: Executor = Executors.newFixedThreadPool(nSelectors, CoroutineSelector.DEFAULT_THREAD_FACTORY),
-      loggerProvider: LoggerProvider = LoggerProvider.nullProvider(),
       selectTimeout: Long = 1000,
       idleTimeout: Long = 10000
     ): CoroutineChannelGroup {
       require(nSelectors > 0) { "nSelectors must be larger than zero" }
-      return CoroutineSelectorChannelGroup(nSelectors, executor, loggerProvider, selectTimeout, idleTimeout)
+      return CoroutineSelectorChannelGroup(nSelectors, executor, selectTimeout, idleTimeout)
     }
   }
 
@@ -113,15 +112,16 @@ sealed class CoroutineChannelGroup {
 internal class CoroutineSelectorChannelGroup(
   nSelectors: Int,
   private val executor: Executor,
-  loggerProvider: LoggerProvider,
   selectTimeout: Long,
   idleTimeout: Long
 ) : CoroutineChannelGroup() {
 
-  private val logger = loggerProvider.getLogger(CoroutineChannelGroup::class.java)
+  companion object {
+    private val logger = LoggerFactory.getLogger(CoroutineChannelGroup::class.java)
+  }
 
   private var selectors: Array<CoroutineSelector>? = Array(nSelectors) {
-    CoroutineSelector.open(executor, loggerProvider, selectTimeout, idleTimeout)
+    CoroutineSelector.open(executor, selectTimeout, idleTimeout)
   }
   private val channels = Collections.synchronizedSet(Collections.newSetFromMap(WeakHashMap<Channel, Boolean>()))
   @Volatile

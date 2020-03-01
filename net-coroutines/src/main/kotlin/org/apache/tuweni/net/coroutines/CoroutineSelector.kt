@@ -17,11 +17,10 @@
 package org.apache.tuweni.net.coroutines
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder
+import org.slf4j.LoggerFactory
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.logl.LogMessage
-import org.logl.LoggerProvider
 import java.nio.channels.CancelledKeyException
 import java.nio.channels.ClosedChannelException
 import java.nio.channels.ClosedSelectorException
@@ -57,7 +56,6 @@ sealed class CoroutineSelector {
      */
     fun open(
       executor: Executor = Executors.newSingleThreadExecutor(DEFAULT_THREAD_FACTORY),
-      loggerProvider: LoggerProvider = LoggerProvider.nullProvider(),
       selectTimeout: Long = 1000,
       idleTimeout: Long = 10000
     ): CoroutineSelector {
@@ -66,7 +64,7 @@ sealed class CoroutineSelector {
       val idleTasks = idleTimeout / selectTimeout
       require(idleTasks <= Integer.MAX_VALUE) { "idleTimeout is too large" }
 
-      return SingleThreadCoroutineSelector(executor, Selector.open(), loggerProvider, selectTimeout, idleTasks.toInt())
+      return SingleThreadCoroutineSelector(executor, Selector.open(), selectTimeout, idleTasks.toInt())
     }
   }
 
@@ -118,12 +116,13 @@ sealed class CoroutineSelector {
 internal class SingleThreadCoroutineSelector(
   private val executor: Executor,
   private val selector: Selector,
-  loggerProvider: LoggerProvider,
   private val selectTimeout: Long,
   private val idleTasks: Int
 ) : CoroutineSelector() {
 
-  private val logger = loggerProvider.getLogger(CoroutineSelector::class.java)
+  companion object {
+    private val logger = LoggerFactory.getLogger(CoroutineSelector::class.java)
+  }
 
   private val pendingInterests = Channel<SelectionInterest>(capacity = Channel.UNLIMITED)
   private val pendingCancellations = Channel<SelectionCancellation>(capacity = Channel.UNLIMITED)
@@ -258,8 +257,7 @@ internal class SingleThreadCoroutineSelector(
       processPendingCloses()
     } catch (e: Throwable) {
       selector.close()
-      logger.error(LogMessage.patternFormat("Selector {}: An unexpected exception occurred in selection loop",
-        System.identityHashCode(selector)), e)
+      logger.error("Selector System.identityHashCode(selector)): An unexpected exception occurred in selection loop", e)
       cancelAll(e)
       processPendingCloses(e)
     }

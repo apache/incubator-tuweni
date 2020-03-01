@@ -12,7 +12,6 @@
  */
 package org.apache.tuweni.rlpx.vertx;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -31,9 +30,6 @@ import org.apache.tuweni.rlpx.wire.SubProtocol;
 import org.apache.tuweni.rlpx.wire.SubProtocolHandler;
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
 
-import java.io.BufferedWriter;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,10 +42,6 @@ import io.vertx.core.Vertx;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.logl.Level;
-import org.logl.Logger;
-import org.logl.LoggerProvider;
-import org.logl.logl.SimpleLogger;
 
 @ExtendWith({VertxExtension.class, BouncyCastleExtension.class})
 class VertxAcceptanceTest {
@@ -122,24 +114,13 @@ class VertxAcceptanceTest {
     SECP256K1.KeyPair secondKp = SECP256K1.KeyPair.random();
     MyCustomSubProtocol sp = new MyCustomSubProtocol(1);
     MyCustomSubProtocol secondSp = new MyCustomSubProtocol(2);
-    LoggerProvider logProvider = SimpleLogger.withLogLevel(Level.DEBUG).toPrintWriter(
-        new PrintWriter(new BufferedWriter(new OutputStreamWriter(System.err, UTF_8))));
     MemoryWireConnectionsRepository repository = new MemoryWireConnectionsRepository();
-    VertxRLPxService service = new VertxRLPxService(
-        vertx,
-        logProvider,
-        0,
-        "localhost",
-        10000,
-        kp,
-        Collections.singletonList(sp),
-        "Client 1",
-        repository);
+    VertxRLPxService service =
+        new VertxRLPxService(vertx, 0, "localhost", 10000, kp, Collections.singletonList(sp), "Client 1", repository);
     MemoryWireConnectionsRepository secondRepository = new MemoryWireConnectionsRepository();
 
     VertxRLPxService secondService = new VertxRLPxService(
         vertx,
-        logProvider,
         0,
         "localhost",
         10000,
@@ -178,22 +159,10 @@ class VertxAcceptanceTest {
     MemoryWireConnectionsRepository repository = new MemoryWireConnectionsRepository();
     MemoryWireConnectionsRepository secondRepository = new MemoryWireConnectionsRepository();
 
-
-    LoggerProvider logProvider =
-        SimpleLogger.toPrintWriter(new PrintWriter(new BufferedWriter(new OutputStreamWriter(System.err, UTF_8))));
-    VertxRLPxService service = new VertxRLPxService(
-        vertx,
-        logProvider,
-        0,
-        "localhost",
-        10000,
-        kp,
-        Collections.singletonList(sp),
-        "Client 1",
-        repository);
+    VertxRLPxService service =
+        new VertxRLPxService(vertx, 0, "localhost", 10000, kp, Collections.singletonList(sp), "Client 1", repository);
     VertxRLPxService secondService = new VertxRLPxService(
         vertx,
-        logProvider,
         0,
         "localhost",
         10000,
@@ -243,27 +212,16 @@ class VertxAcceptanceTest {
   @Test
   @Disabled
   void connectToPeer(@VertxInstance Vertx vertx) throws Exception {
-    LoggerProvider logProvider = SimpleLogger.withLogLevel(Level.DEBUG).toPrintWriter(
-        new PrintWriter(new BufferedWriter(new OutputStreamWriter(System.err, UTF_8))));
-    Logger logger = logProvider.getLogger("test");
+
 
     SECP256K1.KeyPair kp = SECP256K1.KeyPair.fromSecretKey(
         SECP256K1.SecretKey
             .fromBytes(Bytes32.fromHexString("0x2CADB9DDEA3E675CC5349A1AF053CF2E144AF657016A6155DF4AD767F561F18E")));
-    logger.debug(kp.secretKey().bytes().toHexString());
-
-    logger.debug("enode://" + kp.publicKey().toHexString() + "@127.0.0.1:36000");
 
     MemoryWireConnectionsRepository repository = new MemoryWireConnectionsRepository();
 
-    VertxRLPxService service = new VertxRLPxService(
-        vertx,
-        logProvider,
-        36000,
-        "localhost",
-        36000,
-        kp,
-        Collections.singletonList(new SubProtocol() {
+    VertxRLPxService service =
+        new VertxRLPxService(vertx, 36000, "localhost", 36000, kp, Collections.singletonList(new SubProtocol() {
           @Override
           public SubProtocolIdentifier id() {
             return new SubProtocolIdentifier() {
@@ -293,9 +251,7 @@ class VertxAcceptanceTest {
           public SubProtocolHandler createHandler(RLPxService service) {
             return null;
           }
-        }),
-        "Client 1",
-        repository);
+        }), "Client 1", repository);
     service.start().join();
 
     AsyncCompletion completion = service.connectTo(

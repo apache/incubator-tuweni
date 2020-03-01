@@ -30,8 +30,8 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetSocket;
-import org.logl.Logger;
-import org.logl.LoggerProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Secure Scuttlebutt client using Vert.x to manage persistent TCP connections.
@@ -39,9 +39,10 @@ import org.logl.LoggerProvider;
  */
 public final class SecureScuttlebuttVertxClient {
 
+  private static final Logger logger = LoggerFactory.getLogger(NetSocketClientHandler.class);
+
   private class NetSocketClientHandler<T extends ClientHandler> {
 
-    private final Logger logger;
     private final NetSocket socket;
     private final SecureScuttlebuttHandshakeClient handshakeClient;
     private final ClientHandlerFactory<T> handlerFactory;
@@ -53,12 +54,10 @@ public final class SecureScuttlebuttVertxClient {
     private Bytes messageBuffer = Bytes.EMPTY;
 
     NetSocketClientHandler(
-        Logger logger,
         NetSocket socket,
         Signature.PublicKey remotePublicKey,
         ClientHandlerFactory<T> handlerFactory,
         CompletableAsyncResult<T> completionHandle) {
-      this.logger = logger;
       this.socket = socket;
       this.handshakeClient = SecureScuttlebuttHandshakeClient.create(keyPair, networkIdentifier, remotePublicKey);
       this.handlerFactory = handlerFactory;
@@ -149,7 +148,6 @@ public final class SecureScuttlebuttVertxClient {
     return size.toInt();
   }
 
-  private final LoggerProvider loggerProvider;
   private final Vertx vertx;
   private final Signature.KeyPair keyPair;
   private final Bytes32 networkIdentifier;
@@ -158,17 +156,11 @@ public final class SecureScuttlebuttVertxClient {
   /**
    * Default constructor.
    *
-   * @param loggerProvider the LoggerProvider
    * @param vertx the Vert.x instance
    * @param keyPair the identity of the server according to the Secure Scuttlebutt protocol
    * @param networkIdentifier the network identifier of the server according to the Secure Scuttlebutt protocol
    */
-  public SecureScuttlebuttVertxClient(
-      LoggerProvider loggerProvider,
-      Vertx vertx,
-      Signature.KeyPair keyPair,
-      Bytes32 networkIdentifier) {
-    this.loggerProvider = loggerProvider;
+  public SecureScuttlebuttVertxClient(Vertx vertx, Signature.KeyPair keyPair, Bytes32 networkIdentifier) {
     this.vertx = vertx;
     this.keyPair = keyPair;
     this.networkIdentifier = networkIdentifier;
@@ -195,12 +187,7 @@ public final class SecureScuttlebuttVertxClient {
         completion.completeExceptionally(res.cause());
       } else {
         NetSocket socket = res.result();
-        new NetSocketClientHandler<T>(
-            loggerProvider.getLogger(host + ":" + port),
-            socket,
-            remotePublicKey,
-            handlerFactory,
-            completion);
+        new NetSocketClientHandler<T>(socket, remotePublicKey, handlerFactory, completion);
       }
     });
 

@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.logl.LoggerProvider;
 
 @ExtendWith(BouncyCastleExtension.class)
 class DefaultWireConnectionTest {
@@ -36,20 +35,10 @@ class DefaultWireConnectionTest {
   @Test
   void disconnectIfNoHelloExchanged() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
-    DefaultWireConnection conn = new DefaultWireConnection(
-        "abc",
-        nodeId,
-        peerNodeId,
-        LoggerProvider.nullProvider().getLogger("rlpx"),
-        capturedDisconnect::set,
-        helloMessage -> {
-        },
-        () -> {
-        },
-        new LinkedHashMap<>(),
-        3,
-        "abc",
-        10000);
+    DefaultWireConnection conn =
+        new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
+        }, () -> {
+        }, new LinkedHashMap<>(), 3, "abc", 10000);
 
     conn.messageReceived(new RLPxMessage(45, Bytes.EMPTY));
     assertEquals(1, capturedDisconnect.get().messageId());
@@ -61,20 +50,10 @@ class DefaultWireConnectionTest {
   @Test
   void disconnectIfNoHelloReceived() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
-    DefaultWireConnection conn = new DefaultWireConnection(
-        "abc",
-        nodeId,
-        peerNodeId,
-        LoggerProvider.nullProvider().getLogger("rlpx"),
-        capturedDisconnect::set,
-        helloMessage -> {
-        },
-        () -> {
-        },
-        new LinkedHashMap<>(),
-        4,
-        "abc",
-        10000);
+    DefaultWireConnection conn =
+        new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
+        }, () -> {
+        }, new LinkedHashMap<>(), 4, "abc", 10000);
     conn.sendHello();
     conn.messageReceived(new RLPxMessage(45, Bytes.EMPTY));
     assertEquals(1, capturedDisconnect.get().messageId());
@@ -86,20 +65,10 @@ class DefaultWireConnectionTest {
   @Test
   void disconnectIfNoMapping() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
-    DefaultWireConnection conn = new DefaultWireConnection(
-        "abc",
-        nodeId,
-        peerNodeId,
-        LoggerProvider.nullProvider().getLogger("rlpx"),
-        capturedDisconnect::set,
-        helloMessage -> {
-        },
-        () -> {
-        },
-        new LinkedHashMap<>(),
-        28,
-        "abc",
-        10000);
+    DefaultWireConnection conn =
+        new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
+        }, () -> {
+        }, new LinkedHashMap<>(), 28, "abc", 10000);
     conn.sendHello();
     conn.messageReceived(
         new RLPxMessage(
@@ -115,20 +84,10 @@ class DefaultWireConnectionTest {
   @Test
   void disconnectIfNoNodeID() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
-    DefaultWireConnection conn = new DefaultWireConnection(
-        "abc",
-        nodeId,
-        peerNodeId,
-        LoggerProvider.nullProvider().getLogger("rlpx"),
-        capturedDisconnect::set,
-        helloMessage -> {
-        },
-        () -> {
-        },
-        new LinkedHashMap<>(),
-        32,
-        "abc",
-        10000);
+    DefaultWireConnection conn =
+        new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
+        }, () -> {
+        }, new LinkedHashMap<>(), 32, "abc", 10000);
     conn.sendHello();
     conn.messageReceived(
         new RLPxMessage(0, HelloMessage.create(Bytes.EMPTY, 30303, 4, "blah", Collections.emptyList()).toBytes()));
@@ -142,20 +101,10 @@ class DefaultWireConnectionTest {
   @Test
   void disconnectIfNodeIDMismatches() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
-    DefaultWireConnection conn = new DefaultWireConnection(
-        "abc",
-        nodeId,
-        peerNodeId,
-        LoggerProvider.nullProvider().getLogger("rlpx"),
-        capturedDisconnect::set,
-        helloMessage -> {
-        },
-        () -> {
-        },
-        new LinkedHashMap<>(),
-        32,
-        "abc",
-        10000);
+    DefaultWireConnection conn =
+        new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
+        }, () -> {
+        }, new LinkedHashMap<>(), 32, "abc", 10000);
     conn.sendHello();
     conn.messageReceived(
         new RLPxMessage(
@@ -171,20 +120,10 @@ class DefaultWireConnectionTest {
   @Test
   void disconnectIfConnectedToSelf() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
-    DefaultWireConnection conn = new DefaultWireConnection(
-        "abc",
-        nodeId,
-        nodeId,
-        LoggerProvider.nullProvider().getLogger("rlpx"),
-        capturedDisconnect::set,
-        helloMessage -> {
-        },
-        () -> {
-        },
-        new LinkedHashMap<>(),
-        33,
-        "abc",
-        10000);
+    DefaultWireConnection conn =
+        new DefaultWireConnection("abc", nodeId, nodeId, capturedDisconnect::set, helloMessage -> {
+        }, () -> {
+        }, new LinkedHashMap<>(), 33, "abc", 10000);
     conn.sendHello();
     conn.messageReceived(
         new RLPxMessage(0, HelloMessage.create(nodeId, 30303, 1, "blah", Collections.emptyList()).toBytes()));
@@ -198,20 +137,10 @@ class DefaultWireConnectionTest {
   @Test
   void disconnectIfInvalidP2PConnection() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
-    DefaultWireConnection conn = new DefaultWireConnection(
-        "abc",
-        nodeId,
-        peerNodeId,
-        LoggerProvider.nullProvider().getLogger("rlpx"),
-        capturedDisconnect::set,
-        helloMessage -> {
-        },
-        () -> {
-        },
-        new LinkedHashMap<>(),
-        5,
-        "abc",
-        10000);
+    DefaultWireConnection conn =
+        new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
+        }, () -> {
+        }, new LinkedHashMap<>(), 5, "abc", 10000);
     conn.sendHello();
     conn.messageReceived(
         new RLPxMessage(0, HelloMessage.create(peerNodeId, 30303, 6, "blah", Collections.emptyList()).toBytes()));

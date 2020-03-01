@@ -63,14 +63,11 @@ dependencyManagement {
       entry 'spek-api'
       entry 'spek-junit-platform-engine'
     }
-    dependencySet(group: 'org.logl', version: '0.3.1') {
-      entry 'logl-api'
-      entry 'logl-logl'
-      entry 'logl-vertx'
-    }
     dependency('org.mapdb:mapdb:3.0.7')
     dependency('org.miracl.milagro.amcl:milagro-crypto-java:0.4.0')
     dependency('org.rocksdb:rocksdbjni:5.17.2')
+    dependency('org.slf4j:slf4j-api:1.7.30')
+
     dependency('org.xerial.snappy:snappy-java:1.1.7.2')
   }
 }

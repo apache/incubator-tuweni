@@ -17,8 +17,8 @@ dependencies {
   compile project(':concurrent')
   compile project(':crypto')
   compile project(':scuttlebutt')
+  compile 'org.slf4j:slf4j-api'
   compileOnly 'io.vertx:vertx-core'
-  compile 'org.logl:logl-api'
 
   testCompile project(':junit')
 
@@ -27,8 +27,6 @@ dependencies {
   testCompile 'org.junit.jupiter:junit-jupiter-params'
 
   testCompile 'io.vertx:vertx-core'
-  testCompile 'org.logl:logl-logl'
-  testCompile 'org.logl:logl-vertx'
 
   testCompile project(':scuttlebutt-rpc')
 

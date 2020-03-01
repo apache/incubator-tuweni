@@ -12,7 +12,6 @@
  */
 package org.apache.tuweni.scuttlebutt.handshake.vertx;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,9 +26,6 @@ import org.apache.tuweni.junit.VertxInstance;
 import org.apache.tuweni.scuttlebutt.rpc.RPCCodec;
 import org.apache.tuweni.scuttlebutt.rpc.RPCFlag;
 
-import java.io.BufferedWriter;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -38,10 +34,6 @@ import io.vertx.core.Vertx;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.logl.Level;
-import org.logl.LoggerProvider;
-import org.logl.logl.SimpleLogger;
-import org.logl.vertx.LoglLogDelegateFactory;
 
 
 @ExtendWith(VertxExtension.class)
@@ -100,9 +92,6 @@ class VertxIntegrationTest {
 
   @Test
   void connectToServer(@VertxInstance Vertx vertx) throws Exception {
-    LoggerProvider provider = SimpleLogger.withLogLevel(Level.DEBUG).toPrintWriter(
-        new PrintWriter(new BufferedWriter(new OutputStreamWriter(System.out, UTF_8))));
-    LoglLogDelegateFactory.setProvider(provider);
     Signature.KeyPair serverKeyPair = Signature.KeyPair.random();
     Bytes32 networkIdentifier = Bytes32.random();
     AtomicReference<MyServerHandler> serverHandlerRef = new AtomicReference<>();
@@ -119,7 +108,7 @@ class VertxIntegrationTest {
     server.start().join();
 
     SecureScuttlebuttVertxClient client =
-        new SecureScuttlebuttVertxClient(provider, vertx, Signature.KeyPair.random(), networkIdentifier);
+        new SecureScuttlebuttVertxClient(vertx, Signature.KeyPair.random(), networkIdentifier);
     MyClientHandler handler = client.connectTo(20000, "0.0.0.0", serverKeyPair.publicKey(), MyClientHandler::new).get();
 
     Thread.sleep(1000);

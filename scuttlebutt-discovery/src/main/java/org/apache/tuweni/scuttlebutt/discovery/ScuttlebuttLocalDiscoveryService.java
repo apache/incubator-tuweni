@@ -26,7 +26,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.datagram.DatagramPacket;
 import io.vertx.core.datagram.DatagramSocket;
-import org.logl.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Scuttlebutt local discovery service, based on the Scuttlebutt network protocol defined
@@ -42,10 +43,10 @@ import org.logl.Logger;
  *
  */
 public class ScuttlebuttLocalDiscoveryService {
+  private final static Logger logger = LoggerFactory.getLogger(ScuttlebuttLocalDiscoveryService.class);
 
   private final AtomicBoolean started = new AtomicBoolean(false);
   private final Vertx vertx;
-  private final Logger logger;
   private final List<Consumer<LocalIdentity>> listeners = new ArrayList<>();
   private final List<LocalIdentity> identities = new ArrayList<>();
   private final int listenPort;
@@ -60,24 +61,21 @@ public class ScuttlebuttLocalDiscoveryService {
    * Default constructor.
    *
    * @param vertx Vert.x instance used to create the UDP socket
-   * @param logger the logger used to log events and errors
    * @param listenPort the port to bind the UDP socket to
    * @param listenNetworkInterface the network interface to bind the UDP socket to
    * @param multicastAddress the address to broadcast multicast packets to
    */
   public ScuttlebuttLocalDiscoveryService(
       Vertx vertx,
-      Logger logger,
       int listenPort,
       String listenNetworkInterface,
       String multicastAddress) {
-    this(vertx, logger, listenPort, listenPort, listenNetworkInterface, multicastAddress, true);
+    this(vertx, listenPort, listenPort, listenNetworkInterface, multicastAddress, true);
   }
 
 
   ScuttlebuttLocalDiscoveryService(
       Vertx vertx,
-      Logger logger,
       int listenPort,
       int broadcastPort,
       String listenNetworkInterface,
@@ -90,7 +88,6 @@ public class ScuttlebuttLocalDiscoveryService {
       }
     }
     this.vertx = vertx;
-    this.logger = logger;
     this.listenPort = listenPort;
     this.broadcastPort = broadcastPort;
     this.listenNetworkInterface = listenNetworkInterface;

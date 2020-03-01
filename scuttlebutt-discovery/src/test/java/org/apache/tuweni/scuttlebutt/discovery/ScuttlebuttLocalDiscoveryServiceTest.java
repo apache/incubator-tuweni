@@ -12,7 +12,6 @@
  */
 package org.apache.tuweni.scuttlebutt.discovery;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,18 +23,12 @@ import org.apache.tuweni.junit.VertxExtension;
 import org.apache.tuweni.junit.VertxInstance;
 import org.apache.tuweni.scuttlebutt.Identity;
 
-import java.io.BufferedWriter;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.vertx.core.Vertx;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.logl.Level;
-import org.logl.LoggerProvider;
-import org.logl.logl.SimpleLogger;
 
 @ExtendWith(VertxExtension.class)
 class ScuttlebuttLocalDiscoveryServiceTest {
@@ -47,24 +40,14 @@ class ScuttlebuttLocalDiscoveryServiceTest {
 
   @Test
   void startStop(@VertxInstance Vertx vertx) throws Exception {
-    ScuttlebuttLocalDiscoveryService service = new ScuttlebuttLocalDiscoveryService(
-        vertx,
-        LoggerProvider.nullProvider().getLogger("test"),
-        0,
-        "0.0.0.0",
-        "233.0.10.0");
+    ScuttlebuttLocalDiscoveryService service = new ScuttlebuttLocalDiscoveryService(vertx, 0, "0.0.0.0", "233.0.10.0");
     service.start().join();
     service.stop().join();
   }
 
   @Test
   void startStart(@VertxInstance Vertx vertx) throws Exception {
-    ScuttlebuttLocalDiscoveryService service = new ScuttlebuttLocalDiscoveryService(
-        vertx,
-        LoggerProvider.nullProvider().getLogger("test"),
-        0,
-        "0.0.0.0",
-        "233.0.10.0");
+    ScuttlebuttLocalDiscoveryService service = new ScuttlebuttLocalDiscoveryService(vertx, 0, "0.0.0.0", "233.0.10.0");
     service.start().join();
     service.start().join();
     service.stop().join();
@@ -74,22 +57,12 @@ class ScuttlebuttLocalDiscoveryServiceTest {
   void invalidMulticastAddress(@VertxInstance Vertx vertx) throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new ScuttlebuttLocalDiscoveryService(
-            vertx,
-            LoggerProvider.nullProvider().getLogger("test"),
-            8008,
-            "0.0.0.0",
-            "10.0.0.0"));
+        () -> new ScuttlebuttLocalDiscoveryService(vertx, 8008, "0.0.0.0", "10.0.0.0"));
   }
 
   @Test
   void stopFirst(@VertxInstance Vertx vertx) throws Exception {
-    ScuttlebuttLocalDiscoveryService service = new ScuttlebuttLocalDiscoveryService(
-        vertx,
-        LoggerProvider.nullProvider().getLogger("test"),
-        0,
-        "0.0.0.0",
-        "233.0.10.0");
+    ScuttlebuttLocalDiscoveryService service = new ScuttlebuttLocalDiscoveryService(vertx, 0, "0.0.0.0", "233.0.10.0");
     service.stop().join();
     service.start().join();
     service.stop().join();
@@ -97,24 +70,10 @@ class ScuttlebuttLocalDiscoveryServiceTest {
 
   @Test
   void broadcastAndListen(@VertxInstance Vertx vertx) throws Exception {
-    LoggerProvider loggerProvider = SimpleLogger.withLogLevel(Level.DEBUG).toPrintWriter(
-        new PrintWriter(new BufferedWriter(new OutputStreamWriter(System.err, UTF_8))));
-    ScuttlebuttLocalDiscoveryService service = new ScuttlebuttLocalDiscoveryService(
-        vertx,
-        loggerProvider.getLogger("test"),
-        18008,
-        18009,
-        "127.0.0.1",
-        "127.0.0.1",
-        false);
-    ScuttlebuttLocalDiscoveryService service2 = new ScuttlebuttLocalDiscoveryService(
-        vertx,
-        loggerProvider.getLogger("test2"),
-        18009,
-        18008,
-        "127.0.0.1",
-        "127.0.0.1",
-        false);
+    ScuttlebuttLocalDiscoveryService service =
+        new ScuttlebuttLocalDiscoveryService(vertx, 18008, 18009, "127.0.0.1", "127.0.0.1", false);
+    ScuttlebuttLocalDiscoveryService service2 =
+        new ScuttlebuttLocalDiscoveryService(vertx, 18009, 18008, "127.0.0.1", "127.0.0.1", false);
 
     try {
       service2.start().join();

@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.devp2p
 
+import org.slf4j.LoggerFactory
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import kotlinx.coroutines.CancellationException
@@ -53,8 +54,6 @@ import org.apache.tuweni.kademlia.xorDistCmp
 import org.apache.tuweni.net.coroutines.CommonCoroutineGroup
 import org.apache.tuweni.net.coroutines.CoroutineChannelGroup
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
-import org.logl.LogMessage.patternFormat
-import org.logl.LoggerProvider
 import java.io.IOException
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -115,7 +114,6 @@ interface DiscoveryService {
      * @param advertiseTcpPort the TCP port to advertise to peers, or `null` if it should be the same as the UDP port.
      * @param routingTable a [PeerRoutingTable] which handles the ÐΞVp2p routing table
      * @param packetFilter a filter for incoming packets
-     * @param loggerProvider a provider for a logger
      * @param channelGroup the [CoroutineChannelGroup] for network channels created by this service
      * @param bufferAllocator a [ByteBuffer] allocator, which must return buffers of size 1280 bytes or larger
      * @param timeSupplier a function supplying the current time, in milliseconds since the epoch
@@ -134,7 +132,6 @@ interface DiscoveryService {
       advertiseTcpPort: Int? = null,
       routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
       packetFilter: ((SECP256K1.PublicKey, InetSocketAddress) -> Boolean)? = null,
-      loggerProvider: LoggerProvider = LoggerProvider.nullProvider(),
       channelGroup: CoroutineChannelGroup = CommonCoroutineGroup,
       bufferAllocator: () -> ByteBuffer = DEFAULT_BUFFER_ALLOCATOR,
       timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER
@@ -152,7 +149,6 @@ interface DiscoveryService {
         advertiseTcpPort,
         routingTable,
         packetFilter,
-        loggerProvider,
         channelGroup,
         bufferAllocator,
         timeSupplier
@@ -173,7 +169,6 @@ interface DiscoveryService {
      * @param advertiseTcpPort the TCP port to advertise to peers, or `null` if it should be the same as the UDP port.
      * @param routingTable a [PeerRoutingTable] which handles the ÐΞVp2p routing table
      * @param packetFilter a filter for incoming packets
-     * @param loggerProvider a provider for a logger
      * @param channelGroup the [CoroutineChannelGroup] for network channels created by this service
      * @param bufferAllocator a [ByteBuffer] allocator, which must return buffers of size 1280 bytes or larger
      * @param timeSupplier a function supplying the current time, in milliseconds since the epoch
@@ -191,14 +186,13 @@ interface DiscoveryService {
       advertiseTcpPort: Int? = null,
       routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
       packetFilter: ((SECP256K1.PublicKey, InetSocketAddress) -> Boolean)? = null,
-      loggerProvider: LoggerProvider = LoggerProvider.nullProvider(),
       channelGroup: CoroutineChannelGroup = CommonCoroutineGroup,
       bufferAllocator: () -> ByteBuffer = DEFAULT_BUFFER_ALLOCATOR,
       timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER
     ): DiscoveryService {
       return CoroutineDiscoveryService(
         keyPair, seq, enrData, bindAddress, bootstrapURIs, advertiseAddress, advertiseUdpPort, advertiseTcpPort,
-        peerRepository, routingTable, packetFilter, loggerProvider, channelGroup, bufferAllocator, timeSupplier
+        peerRepository, routingTable, packetFilter, channelGroup, bufferAllocator, timeSupplier
       )
     }
   }
@@ -290,14 +284,16 @@ internal class CoroutineDiscoveryService(
   private val peerRepository: PeerRepository = EphemeralPeerRepository(),
   private val routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
   private val packetFilter: ((SECP256K1.PublicKey, InetSocketAddress) -> Boolean)? = null,
-  loggerProvider: LoggerProvider = LoggerProvider.nullProvider(),
   channelGroup: CoroutineChannelGroup = CommonCoroutineGroup,
   private val bufferAllocator: () -> ByteBuffer = DiscoveryService.DEFAULT_BUFFER_ALLOCATOR,
   private val timeSupplier: () -> Long = DiscoveryService.CURRENT_TIME_SUPPLIER,
   private val channel: CoroutineDatagramChannel = CoroutineDatagramChannel.open(channelGroup)
 ) : DiscoveryService, CoroutineScope {
 
-  private val logger = loggerProvider.getLogger(DiscoveryService::class.java)
+  companion object {
+    internal val logger = LoggerFactory.getLogger(DiscoveryService::class.java)
+  }
+
   private val serviceDescriptor = "ÐΞVp2p discovery " + System.identityHashCode(this)
   private val selfEndpoint: Endpoint
   private val enr: Bytes
@@ -455,7 +451,7 @@ internal class CoroutineDiscoveryService(
         try {
           receivePacket(datagram, address, arrivalTime)
         } catch (e: Throwable) {
-          logger.error(patternFormat("{}: unexpected error during packet handling", serviceDescriptor), e)
+          logger.error(serviceDescriptor + ": unexpected error during packet handling", e)
         }
       }
       job.invokeOnCompletion { activityLatch.countDown() }
@@ -961,7 +957,7 @@ internal class CoroutineDiscoveryService(
         // ignore
       } catch (e: Exception) {
         logger.error(
-          patternFormat("{}: Error while sending FindNode requests for peer {}", serviceDescriptor, peer.nodeId),
+          "$serviceDescriptor: Error while sending FindNode requests for peer ${peer.nodeId}",
           e
         )
       }

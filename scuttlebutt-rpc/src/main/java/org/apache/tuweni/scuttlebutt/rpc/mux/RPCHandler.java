@@ -35,16 +35,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import org.logl.Logger;
-import org.logl.LoggerProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles RPC requests and responses from an active connection to a scuttlebutt node.
  */
 public class RPCHandler implements Multiplexer, ClientHandler {
+  private final static Logger logger = LoggerFactory.getLogger(RPCHandler.class);
 
   private final Consumer<Bytes> messageSender;
-  private final Logger logger;
   private final Runnable connectionCloser;
   private final ObjectMapper objectMapper;
 
@@ -66,21 +66,14 @@ public class RPCHandler implements Multiplexer, ClientHandler {
    * @param messageSender sends the request to the node
    * @param terminationFn closes the connection
    * @param objectMapper the objectMapper to serialize and deserialize message request and response bodies
-   * @param logger
    */
-  public RPCHandler(
-      Vertx vertx,
-      Consumer<Bytes> messageSender,
-      Runnable terminationFn,
-      ObjectMapper objectMapper,
-      LoggerProvider logger) {
+  public RPCHandler(Vertx vertx, Consumer<Bytes> messageSender, Runnable terminationFn, ObjectMapper objectMapper) {
     this.vertx = vertx;
     this.messageSender = messageSender;
     this.connectionCloser = terminationFn;
     this.closed = false;
     this.objectMapper = objectMapper;
 
-    this.logger = logger.getLogger("rpc handler");
   }
 
   @Override
@@ -153,7 +146,7 @@ public class RPCHandler implements Multiplexer, ClientHandler {
 
   private void logOutgoingRequest(RPCMessage rpcMessage) {
     if (logger.isDebugEnabled()) {
-      String requestString = new String(rpcMessage.asString());
+      String requestString = rpcMessage.asString();
       String logMessage = String.format("[%d] Outgoing request: %s", rpcMessage.requestNumber(), requestString);
       logger.debug(logMessage);
     }

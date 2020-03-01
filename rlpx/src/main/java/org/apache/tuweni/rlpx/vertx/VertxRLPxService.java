@@ -46,8 +46,8 @@ import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.NetSocket;
-import org.logl.Logger;
-import org.logl.LoggerProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of RLPx service using Vert.x.
@@ -55,9 +55,8 @@ import org.logl.LoggerProvider;
 public final class VertxRLPxService implements RLPxService {
 
   private final static int DEVP2P_VERSION = 5;
+  private final static Logger logger = LoggerFactory.getLogger(VertxRLPxService.class);
 
-  private final LoggerProvider loggerProvider;
-  private final Logger logger;
   private final AtomicBoolean started = new AtomicBoolean(false);
   private final Vertx vertx;
   private final int listenPort;
@@ -83,7 +82,6 @@ public final class VertxRLPxService implements RLPxService {
    * Default constructor.
    *
    * @param vertx Vert.x object used to build the network components
-   * @param loggerProvider logger provider to log messages
    * @param listenPort the port to listen to
    * @param networkInterface the network interface to bind to
    * @param advertisedPort the port to advertise in HELLO messages to peers
@@ -93,7 +91,6 @@ public final class VertxRLPxService implements RLPxService {
    */
   public VertxRLPxService(
       Vertx vertx,
-      LoggerProvider loggerProvider,
       int listenPort,
       String networkInterface,
       int advertisedPort,
@@ -102,7 +99,6 @@ public final class VertxRLPxService implements RLPxService {
       String clientId) {
     this(
         vertx,
-        loggerProvider,
         listenPort,
         networkInterface,
         advertisedPort,
@@ -116,7 +112,6 @@ public final class VertxRLPxService implements RLPxService {
    * Default constructor.
    *
    * @param vertx Vert.x object used to build the network components
-   * @param loggerProvider logger provider to log messages
    * @param listenPort the port to listen to
    * @param networkInterface the network interface to bind to
    * @param advertisedPort the port to advertise in HELLO messages to peers
@@ -127,7 +122,6 @@ public final class VertxRLPxService implements RLPxService {
    */
   public VertxRLPxService(
       Vertx vertx,
-      LoggerProvider loggerProvider,
       int listenPort,
       String networkInterface,
       int advertisedPort,
@@ -141,7 +135,6 @@ public final class VertxRLPxService implements RLPxService {
       throw new IllegalArgumentException("Client ID must contain a valid identifier");
     }
     this.vertx = vertx;
-    this.loggerProvider = loggerProvider;
     this.listenPort = listenPort;
     this.networkInterface = networkInterface;
     this.advertisedPort = advertisedPort;
@@ -149,8 +142,6 @@ public final class VertxRLPxService implements RLPxService {
     this.subProtocols = subProtocols;
     this.clientId = clientId;
     this.repository = repository;
-
-    this.logger = loggerProvider.getLogger("VertxRLPxService");
   }
 
   @Override
@@ -360,23 +351,13 @@ public final class VertxRLPxService implements RLPxService {
 
   private DefaultWireConnection createConnection(RLPxConnection conn, NetSocket netSocket) {
     String id = UUID.randomUUID().toString();
-    DefaultWireConnection wireConnection = new DefaultWireConnection(
-        id,
-        conn.publicKey().bytes(),
-        conn.peerPublicKey().bytes(),
-        loggerProvider.getLogger("wireConnection-" + id),
-        message -> {
+    DefaultWireConnection wireConnection =
+        new DefaultWireConnection(id, conn.publicKey().bytes(), conn.peerPublicKey().bytes(), message -> {
           synchronized (conn) {
             Bytes bytes = conn.write(message);
             vertx.eventBus().send(netSocket.writeHandlerID(), Buffer.buffer(bytes.toArrayUnsafe()));
           }
-        },
-        conn::configureAfterHandshake,
-        netSocket::end,
-        handlers,
-        DEVP2P_VERSION,
-        clientId,
-        advertisedPort());
+        }, conn::configureAfterHandshake, netSocket::end, handlers, DEVP2P_VERSION, clientId, advertisedPort());
     repository.add(wireConnection);
     return wireConnection;
   }

@@ -27,10 +27,7 @@ import org.apache.tuweni.junit.VertxInstance;
 import org.apache.tuweni.scuttlebutt.handshake.vertx.ClientHandler;
 import org.apache.tuweni.scuttlebutt.handshake.vertx.SecureScuttlebuttVertxClient;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,10 +41,6 @@ import io.vertx.core.Vertx;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.logl.Level;
-import org.logl.LoggerProvider;
-import org.logl.logl.SimpleLogger;
-import org.logl.vertx.LoglLogDelegateFactory;
 
 /**
  * Test used with a local installation of Patchwork on the developer machine.
@@ -99,9 +92,6 @@ class PatchworkIntegrationTest {
   void runWithPatchWork(@VertxInstance Vertx vertx) throws Exception {
     String host = "localhost";
     int port = 8008;
-    LoggerProvider loggerProvider = SimpleLogger.withLogLevel(Level.DEBUG).toPrintWriter(
-        new PrintWriter(new BufferedWriter(new OutputStreamWriter(System.out, UTF_8))));
-    LoglLogDelegateFactory.setProvider(loggerProvider);
 
     Optional<String> ssbDir = Optional.fromNullable(System.getenv().get("ssb_dir"));
     Optional<String> homePath =
@@ -156,7 +146,7 @@ class PatchworkIntegrationTest {
     Bytes32 networkKeyBytes32 = Bytes32.wrap(Base64.decode(networkKeyBase64));
 
     SecureScuttlebuttVertxClient secureScuttlebuttVertxClient =
-        new SecureScuttlebuttVertxClient(loggerProvider, vertx, keyPair, networkKeyBytes32);
+        new SecureScuttlebuttVertxClient(vertx, keyPair, networkKeyBytes32);
 
     AsyncResult<ClientHandler> onConnect =
         secureScuttlebuttVertxClient.connectTo(port, host, publicKey, MyClientHandler::new);

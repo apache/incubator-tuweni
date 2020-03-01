@@ -41,7 +41,8 @@ import io.vertx.core.WorkerExecutor;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.WebSocket;
-import org.logl.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * ETHNetStats reporting service.
@@ -54,6 +55,7 @@ import org.logl.Logger;
 public final class EthStatsReporter {
 
   private final static ObjectMapper mapper = new ObjectMapper();
+  private final static Logger logger = LoggerFactory.getLogger(EthStatsReporter.class);
 
   static {
     mapper.registerModule(new EthJsonModule());
@@ -67,7 +69,6 @@ public final class EthStatsReporter {
   private final String id;
   private final Vertx vertx;
   private final List<URI> ethstatsServerURIs;
-  private final Logger logger;
   private final AtomicBoolean started = new AtomicBoolean(false);
   private final AtomicBoolean waitingOnPong = new AtomicBoolean(false);
   private final NodeInfo nodeInfo;
@@ -85,7 +86,6 @@ public final class EthStatsReporter {
    * Default constructor.
    *
    * @param vertx a Vert.x instance, externally managed.
-   * @param logger a logger
    * @param ethstatsServerURIs the URIs to connect to eth-netstats, such as ws://www.ethnetstats.org:3000/api. URIs are
    *        tried in sequence, and the first one to work is used.
    * @param secret the secret to use when we connect to eth-netstats
@@ -100,7 +100,6 @@ public final class EthStatsReporter {
    */
   public EthStatsReporter(
       Vertx vertx,
-      Logger logger,
       List<URI> ethstatsServerURIs,
       String secret,
       String name,
@@ -113,7 +112,6 @@ public final class EthStatsReporter {
       Consumer<List<UInt256>> historyRequester) {
     this.id = UUID.randomUUID().toString();
     this.vertx = vertx;
-    this.logger = logger;
     this.ethstatsServerURIs = ethstatsServerURIs;
     this.secret = secret;
     this.nodeInfo = new NodeInfo(name, node, port, network, protocol, os, osVer);

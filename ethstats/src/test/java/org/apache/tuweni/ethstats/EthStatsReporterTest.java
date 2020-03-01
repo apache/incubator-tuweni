@@ -26,9 +26,6 @@ import java.util.Collections;
 import io.vertx.core.Vertx;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.logl.Level;
-import org.logl.Logger;
-import org.logl.logl.SimpleLogger;
 
 @ExtendWith(VertxExtension.class)
 public class EthStatsReporterTest {
@@ -36,11 +33,9 @@ public class EthStatsReporterTest {
   //@Disabled
   @Test
   void testConnectToLocalEthStats(@VertxInstance Vertx vertx) throws InterruptedException {
-    Logger logger = SimpleLogger.withLogLevel(Level.DEBUG).toOutputStream(System.out).getLogger("wat");
 
     EthStatsReporter reporter = new EthStatsReporter(
         vertx,
-        logger,
         Collections.singletonList(URI.create("ws://localhost:3000/api")),
         "wat",
         "name",
