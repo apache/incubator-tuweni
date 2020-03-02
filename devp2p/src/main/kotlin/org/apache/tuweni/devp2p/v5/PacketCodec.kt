@@ -36,7 +36,7 @@ import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 interface PacketCodec {
 
   /**
-   * Encodes message, encrypting it's body
+   * Encodes message, encrypting its body
    *
    * @param message message for encoding
    * @param destNodeId receiver node identifier for tag creation
@@ -47,7 +47,7 @@ interface PacketCodec {
   fun encode(message: UdpMessage, destNodeId: Bytes, handshakeParams: HandshakeInitParameters? = null): EncodeResult
 
   /**
-   * Decodes message, decrypting it's body
+   * Decodes message, decrypting its body
    *
    * @param message message for decoding
    *

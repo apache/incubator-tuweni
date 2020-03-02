@@ -19,7 +19,7 @@ package org.apache.tuweni.devp2p.v5.packet
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
 
-abstract class UdpMessage {
+interface UdpMessage {
 
   companion object {
 
@@ -51,12 +51,10 @@ abstract class UdpMessage {
 
     fun authTag(): Bytes = Bytes.random(AUTH_TAG_LENGTH)
 
-    fun randomData(): Bytes = Bytes.random(RANDOM_DATA_LENGTH)
-
     fun idNonce(): Bytes = Bytes.random(ID_NONCE_LENGTH)
   }
 
-  abstract fun encode(): Bytes
+  fun encode(): Bytes
 
-  abstract fun getMessageType(): Bytes
+  fun getMessageType(): Bytes
 }

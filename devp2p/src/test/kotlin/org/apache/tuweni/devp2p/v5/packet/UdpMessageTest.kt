@@ -66,17 +66,6 @@ class UdpMessageTest {
   }
 
   @Test
-  fun randomDataGivesRandom44Bytes() {
-    val firstResult = UdpMessage.randomData()
-
-    assert(UdpMessage.RANDOM_DATA_LENGTH == firstResult.size())
-
-    val secondResult = UdpMessage.randomData()
-
-    assert(secondResult != firstResult)
-  }
-
-  @Test
   fun idNonceGivesRandom32Bytes() {
     val firstResult = UdpMessage.idNonce()
 

@@ -36,7 +36,7 @@ final class FileBackedFingerprintRepository implements FingerprintRepository {
 
   FileBackedFingerprintRepository(Path fingerprintFile) {
     try {
-      createDirectories(fingerprintFile.getParent());
+      createDirectories(fingerprintFile.toAbsolutePath().getParent());
       createFileIfMissing(fingerprintFile);
     } catch (IOException e) {
       throw new TLSEnvironmentException("Cannot create fingerprint file " + fingerprintFile, e);

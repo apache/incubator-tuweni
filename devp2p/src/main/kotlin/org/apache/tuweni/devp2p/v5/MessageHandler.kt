@@ -21,7 +21,7 @@ import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import java.net.InetSocketAddress
 
 /**
- * Udp message handler, aimed to process it's parameters and sending result
+ * Udp message handler, aimed to process its parameters and sending result
  */
 interface MessageHandler<T : UdpMessage> {
 

@@ -36,4 +36,15 @@ class RandomMessageTest {
 
     assert(decodingResult.data == data)
   }
+
+  @Test
+  fun randomDataGivesRandom44Bytes() {
+    val firstResult = RandomMessage.randomData()
+
+    assert(UdpMessage.RANDOM_DATA_LENGTH == firstResult.size())
+
+    val secondResult = RandomMessage.randomData()
+
+    assert(secondResult != firstResult)
+  }
 }

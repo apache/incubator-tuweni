@@ -101,7 +101,7 @@ class DefaultUdpConnectorTest {
     val socketChannel = CoroutineDatagramChannel.open()
     socketChannel.bind(receiverAddress)
 
-    val data = UdpMessage.randomData()
+    val data = RandomMessage.randomData()
     val randomMessage = RandomMessage(UdpMessage.authTag(), data)
     connector!!.send(receiverAddress, randomMessage, destNodeId)
     val buffer = ByteBuffer.allocate(UdpMessage.MAX_UDP_MESSAGE_SIZE)

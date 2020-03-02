@@ -25,6 +25,11 @@ import org.apache.tuweni.devp2p.v5.packet.RandomMessage
 import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
 import java.net.InetSocketAddress
 
+/**
+ * Handles WHOAREYOU messages.
+ *
+ * WHOAREYOU is sent by the other node after the first message is sent, asking to initiate the connection.
+ */
 class WhoAreYouMessageHandler : MessageHandler<WhoAreYouMessage> {
 
   override suspend fun handle(
@@ -35,6 +40,7 @@ class WhoAreYouMessageHandler : MessageHandler<WhoAreYouMessage> {
   ) {
     // Retrieve enr
     val trackingMessage = connector.getPendingMessage(message.authTag)
+    // If no message was sent to the node, ignore the WHOAREYOU request.
     trackingMessage?.let {
       val rlpEnr = connector.getNodeRecords().find(trackingMessage.nodeId)
       rlpEnr?.let {

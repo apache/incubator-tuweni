@@ -13,6 +13,7 @@
 package org.apache.tuweni.net.tls;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.tuweni.io.file.Files.deleteRecursively;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,6 +25,7 @@ import org.apache.tuweni.junit.TempDirectoryExtension;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
 
 import org.junit.jupiter.api.Test;
@@ -38,6 +40,15 @@ class FileBackedFingerprintRepositoryTest {
     byte[] bytes = new byte[32];
     secureRandom.nextBytes(bytes);
     return Bytes.wrap(bytes);
+  }
+
+  @Test
+  void testRelativePath() throws IOException {
+    try {
+      FileBackedFingerprintRepository repo = new FileBackedFingerprintRepository(Paths.get("tmp", "foo"));
+    } finally {
+      deleteRecursively(Paths.get("tmp"));
+    }
   }
 
   @Test

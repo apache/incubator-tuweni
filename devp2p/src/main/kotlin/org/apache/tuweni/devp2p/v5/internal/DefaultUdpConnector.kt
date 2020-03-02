@@ -169,7 +169,7 @@ public class DefaultUdpConnector(
   ) {
     val encodeResult = packetCodec.encode(message, destNodeId, handshakeParams)
     pendingMessages.put(encodeResult.authTag.toHexString(), TrackingMessage(message, destNodeId))
-    receiveChannel.send(ByteBuffer.wrap(encodeResult.content.toArray()), address)
+    receiveChannel.send(ByteBuffer.wrap(encodeResult.content.toArrayUnsafe()), address)
   }
 
   override suspend fun terminate() {
