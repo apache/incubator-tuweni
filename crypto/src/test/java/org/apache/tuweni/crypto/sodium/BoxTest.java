@@ -15,8 +15,10 @@ package org.apache.tuweni.crypto.sodium;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -190,5 +192,14 @@ class BoxTest {
 
     Box.KeyPair boxKeyPair = Box.KeyPair.forSignatureKeyPair(keyPair);
     assertEquals(boxKeyPair, Box.KeyPair.forSecretKey(boxSecretKey));
+  }
+
+  @Test
+  void testDestroyPublicKey() {
+    Box.KeyPair keyPair = Box.KeyPair.random();
+    Box.PublicKey boxPubKey = Box.PublicKey.fromBytes(keyPair.publicKey().bytes());
+    boxPubKey.destroy();
+    assertTrue(boxPubKey.isDestroyed());
+    assertFalse(keyPair.publicKey().isDestroyed());
   }
 }

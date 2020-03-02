@@ -56,7 +56,7 @@ public final class Signature {
   /**
    * A signing public key.
    */
-  public static final class PublicKey {
+  public static final class PublicKey implements Destroyable {
     final Allocated value;
 
     private PublicKey(Pointer ptr, int length) {
@@ -155,6 +155,16 @@ public final class Signature {
      */
     public byte[] bytesArray() {
       return value.bytesArray();
+    }
+
+    @Override
+    public void destroy() {
+      value.destroy();
+    }
+
+    @Override
+    public boolean isDestroyed() {
+      return value.isDestroyed();
     }
   }
 

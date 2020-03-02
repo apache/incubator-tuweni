@@ -13,6 +13,7 @@
 package org.apache.tuweni.crypto.sodium;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -49,6 +50,15 @@ class SignatureTest {
     Bytes signed = Signature.sign(Bytes.fromHexString("deadbeef"), keyPair.secretKey());
     Bytes messageBytes = Signature.verify(signed, keyPair.publicKey());
     assertEquals(Bytes.fromHexString("deadbeef"), messageBytes);
+  }
+
+  @Test
+  void testDestroyPublicKey() {
+    Signature.KeyPair keyPair = Signature.KeyPair.random();
+    Signature.PublicKey sigPubKey = Signature.PublicKey.fromBytes(keyPair.publicKey().bytes());
+    sigPubKey.destroy();
+    assertTrue(sigPubKey.isDestroyed());
+    assertFalse(keyPair.publicKey().isDestroyed());
   }
 
 }

@@ -74,7 +74,7 @@ public final class Box implements AutoCloseable {
   /**
    * A Box public key.
    */
-  public static final class PublicKey {
+  public static final class PublicKey implements Destroyable {
     final Allocated value;
 
     private PublicKey(Pointer ptr, int length) {
@@ -180,6 +180,16 @@ public final class Box implements AutoCloseable {
      */
     public byte[] bytesArray() {
       return value.bytesArray();
+    }
+
+    @Override
+    public void destroy() {
+      value.destroy();
+    }
+
+    @Override
+    public boolean isDestroyed() {
+      return value.isDestroyed();
     }
   }
 
