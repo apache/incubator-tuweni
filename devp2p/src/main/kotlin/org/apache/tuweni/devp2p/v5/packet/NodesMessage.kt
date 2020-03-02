@@ -23,7 +23,7 @@ class NodesMessage(
   val requestId: Bytes = UdpMessage.requestId(),
   val total: Int,
   val nodeRecords: List<Bytes>
-) : UdpMessage() {
+) : UdpMessage {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x04")
 

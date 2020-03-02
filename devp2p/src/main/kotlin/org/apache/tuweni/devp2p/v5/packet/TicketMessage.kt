@@ -23,7 +23,7 @@ class TicketMessage(
   val requestId: Bytes = UdpMessage.requestId(),
   val ticket: Bytes,
   val waitTime: Long
-) : UdpMessage() {
+) : UdpMessage {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x06")
 

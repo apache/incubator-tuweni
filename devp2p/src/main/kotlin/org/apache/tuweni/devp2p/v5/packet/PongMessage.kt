@@ -25,7 +25,7 @@ class PongMessage(
   val enrSeq: Long = 0,
   val recipientIp: InetAddress,
   val recipientPort: Int
-) : UdpMessage() {
+) : UdpMessage {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x02")
 

@@ -24,7 +24,7 @@ class RegTopicMessage(
   val nodeRecord: Bytes,
   val topic: Bytes,
   val ticket: Bytes
-) : UdpMessage() {
+) : UdpMessage {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x05")
 

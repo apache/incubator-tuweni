@@ -22,7 +22,7 @@ import org.apache.tuweni.rlp.RLP
 class FindNodeMessage(
   val requestId: Bytes = UdpMessage.requestId(),
   val distance: Int = 0
-) : UdpMessage() {
+) : UdpMessage {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x03")
 

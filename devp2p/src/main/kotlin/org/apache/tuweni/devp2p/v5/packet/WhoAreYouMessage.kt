@@ -20,10 +20,10 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.rlp.RLP
 
 class WhoAreYouMessage(
-  val authTag: Bytes = authTag(),
-  val idNonce: Bytes = idNonce(),
+  val authTag: Bytes = UdpMessage.authTag(),
+  val idNonce: Bytes = UdpMessage.idNonce(),
   val enrSeq: Long = 0
-) : UdpMessage() {
+) : UdpMessage {
 
   companion object {
     fun create(content: Bytes): WhoAreYouMessage {

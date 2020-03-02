@@ -22,7 +22,7 @@ import org.apache.tuweni.rlp.RLP
 class PingMessage(
   val requestId: Bytes = UdpMessage.requestId(),
   val enrSeq: Long = 0
-) : UdpMessage() {
+) : UdpMessage {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x01")
 

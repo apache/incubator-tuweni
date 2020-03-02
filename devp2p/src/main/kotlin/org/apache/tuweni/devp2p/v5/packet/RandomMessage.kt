@@ -17,11 +17,12 @@
 package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.devp2p.v5.packet.UdpMessage.Companion.RANDOM_DATA_LENGTH
 
 class RandomMessage(
-  val authTag: Bytes = authTag(),
+  val authTag: Bytes = UdpMessage.authTag(),
   val data: Bytes = randomData()
-) : UdpMessage() {
+) : UdpMessage {
 
   companion object {
     fun randomData(): Bytes = Bytes.random(RANDOM_DATA_LENGTH)
