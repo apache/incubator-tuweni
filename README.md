@@ -15,24 +15,15 @@ Tuweni is developed for JDK 11 or higher.
 
 ## Build Instructions
 
-You need to have [Gradle](https://www.gradle.org/installation) and [Java](https://www.oracle.com/technetwork/java/javase/downloads/index.html) installed.
-
-Tuweni requires Gradle 5.0 or higher.
-
-Java 8 should be used for building in order to support both Java 8 and Java 11 at runtime.
+Install [Docker](https://docs.docker.com/get-docker/).
 
 ## Clone along with submodules ##
     git clone https://github.com/apache/incubator-tuweni.git tuweni
     cd tuweni
     git submodule update --init --recursive
 
-### First bootstrap and download the wrapper ###
-    gradle setup
-    
-This downloads gradle and installs helper scripts for the project under `./gradlew` and `./gradlew.bat`.
-
 ### Build the project ###
-    ./gradlew build
+    ./build.sh
 
 
 After a successful build, libraries will be available in `build/libs`.
