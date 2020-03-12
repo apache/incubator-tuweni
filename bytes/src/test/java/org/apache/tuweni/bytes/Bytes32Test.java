@@ -66,4 +66,17 @@ class Bytes32Test {
     Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes32.rightPad(MutableBytes.create(33)));
     assertEquals("Expected at most 32 bytes but got 33", exception.getMessage());
   }
+
+  @Test
+  void testWrapSlicesCorrectly() {
+    Bytes input = Bytes.fromHexString(
+        "0xA99A76ED7796F7BE22D5B7E85DEEB7C5677E88E511E0B337618F8C4EB61349B4BF2D153F649F7B53359FE8B94A38E44C00000000000000000000000000000000");
+    Bytes32 value = Bytes32.wrap(input, 0);
+    assertEquals(Bytes.fromHexString("0xA99A76ED7796F7BE22D5B7E85DEEB7C5677E88E511E0B337618F8C4EB61349B4"), value);
+
+    Bytes32 secondValue = Bytes32.wrap(input, 32);
+    assertEquals(
+        Bytes.fromHexString("0xBF2D153F649F7B53359FE8B94A38E44C00000000000000000000000000000000"),
+        secondValue);
+  }
 }
