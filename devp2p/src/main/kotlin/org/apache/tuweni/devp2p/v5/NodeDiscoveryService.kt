@@ -125,6 +125,16 @@ class DefaultNodeDiscoveryService(
     connector.terminate()
   }
 
+  suspend fun addPeer(enr: Bytes) {
+    val randomMessage = RandomMessage()
+    val address = InetSocketAddress(enr.ip(), enr.udp())
+
+    val destNodeId = Hash.sha2_256(rlpENR)
+    enrStorage.set(rlpENR)
+    connector.getNodesTable().add(rlpENR)
+    connector.send(address, randomMessage, destNodeId)
+  }
+
   private suspend fun bootstrap() {
     bootstrapENRList.forEach {
       if (it.startsWith("enr:")) {
@@ -132,13 +142,7 @@ class DefaultNodeDiscoveryService(
         val rlpENR = Base64URLSafe.decode(encodedEnr)
         val enr = EthereumNodeRecord.fromRLP(rlpENR)
 
-        val randomMessage = RandomMessage()
-        val address = InetSocketAddress(enr.ip(), enr.udp())
-
-        val destNodeId = Hash.sha2_256(rlpENR)
-        enrStorage.set(rlpENR)
-        connector.getNodesTable().add(rlpENR)
-        connector.send(address, randomMessage, destNodeId)
+        addPeer(enr)
       }
     }
   }

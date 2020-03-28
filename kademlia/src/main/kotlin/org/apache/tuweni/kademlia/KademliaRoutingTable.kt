@@ -215,6 +215,9 @@ class KademliaRoutingTable<T>(
     buckets.forEach { bucket -> bucket.clear() }
   }
 
+  /**
+   * Returns all peers at a given distance of the original ID.
+   */
   fun peersOfDistance(value: Int): List<T> {
     return buckets[value].toList()
   }
