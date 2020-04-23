@@ -16,15 +16,17 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 import static org.apache.tuweni.crypto.Hash.keccak256;
 
+import org.apache.tuweni.bytes.AbstractBytes;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 
 import com.google.common.base.Objects;
+import org.apache.tuweni.bytes.DelegatingBytes32;
 
 /**
  * An Ethereum hash.
  */
-public final class Hash {
+public final class Hash extends DelegatingBytes32 {
 
   /**
    * Create a Hash from Bytes.
@@ -52,6 +54,10 @@ public final class Hash {
     return new Hash(bytes);
   }
 
+  private Hash(Bytes delegate) {
+    super(delegate);
+  }
+
   /**
    * Parse a hexadecimal string into a {@link Hash}.
    *
@@ -67,50 +73,5 @@ public final class Hash {
 
   public static Hash hash(Bytes value) {
     return new Hash(keccak256(value));
-  }
-
-  private static final int SIZE = 32;
-
-  private final Bytes32 delegate;
-
-  private Hash(Bytes32 value) {
-    requireNonNull(value);
-    this.delegate = value;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (!(obj instanceof Hash)) {
-      return false;
-    }
-    Hash hash = (Hash) obj;
-    return delegate.equals(hash.delegate);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(delegate);
-  }
-
-  @Override
-  public String toString() {
-    return "Hash{" + delegate.toHexString() + '}';
-  }
-
-  /**
-   * @return A hex-encoded version of the hash.
-   */
-  public String toHexString() {
-    return delegate.toHexString();
-  }
-
-  /**
-   * @return The bytes for this hash.
-   */
-  public Bytes32 toBytes() {
-    return delegate;
   }
 }

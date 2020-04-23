@@ -18,11 +18,12 @@ import static java.util.Objects.requireNonNull;
 import org.apache.tuweni.bytes.Bytes;
 
 import com.google.common.base.Objects;
+import org.apache.tuweni.bytes.DelegatingBytes;
 
 /**
  * An Ethereum account address.
  */
-public final class Address {
+public final class Address extends DelegatingBytes {
 
   /**
    * Create an address from Bytes.
@@ -55,45 +56,7 @@ public final class Address {
 
   private static final int SIZE = 20;
 
-  private final Bytes delegate;
-
   private Address(Bytes value) {
-    this.delegate = value;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (!(obj instanceof Address)) {
-      return false;
-    }
-    Address other = (Address) obj;
-    return delegate.equals(other.delegate);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(delegate);
-  }
-
-  @Override
-  public String toString() {
-    return "Address{" + delegate.toHexString() + '}';
-  }
-
-  /**
-   * @return A hex-encoded version of the address.
-   */
-  public String toHexString() {
-    return delegate.toHexString();
-  }
-
-  /**
-   * @return The bytes for this address.
-   */
-  public Bytes toBytes() {
-    return delegate;
+    super(value);
   }
 }
