@@ -48,7 +48,11 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: gradle build
-        run: ./gradlew allDependencies checkLicenses spotlessCheck test assemble
+      - name: gradle checks
+        run: ./gradlew spotlessCheck checkLicenses
+      - name: gradle assemble
+          run: ./gradlew assemble -x test
+      - name: gradle test
+        run: ./gradlew test
       - name: Collect JUnit tests
         uses: danger/danger-js@9.1.8
