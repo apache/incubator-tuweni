@@ -51,7 +51,7 @@ jobs:
       - name: gradle checks
         run: ./gradlew spotlessCheck checkLicenses
       - name: gradle assemble
-          run: ./gradlew assemble -x test
+        run: ./gradlew assemble -x test
       - name: gradle test
         run: ./gradlew test
       - name: Collect JUnit tests
