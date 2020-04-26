@@ -50,3 +50,5 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       - name: gradle build
         run: ./gradlew allDependencies checkLicenses spotlessCheck test assemble
+      - name: Collect JUnit tests
+        uses: danger/danger-js@9.1.8
