@@ -109,7 +109,7 @@ internal class BlockchainRepositoryTest {
     )
     val block = Block(header, body)
     repo.storeBlock(block)
-    val read = repo.retrieveBlock(block.getHeader().getHash().toBytes())
+    val read = repo.retrieveBlock(block.getHeader().getHash())
     assertEquals(block, read)
     assertEquals(block.getHeader(), repo.retrieveBlockHeader(block.getHeader().getHash()))
   }

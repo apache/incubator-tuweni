@@ -25,7 +25,7 @@ internal data class GetBlockBodiesMessage(val reqID: Long, val blockHashes: List
   fun toBytes(): Bytes {
     return RLP.encodeList { writer ->
       writer.writeLong(reqID)
-      writer.writeList(blockHashes) { eltWriter, hash -> eltWriter.writeValue(hash.toBytes()) }
+      writer.writeList(blockHashes) { eltWriter, hash -> eltWriter.writeValue(hash) }
     }
   }
 

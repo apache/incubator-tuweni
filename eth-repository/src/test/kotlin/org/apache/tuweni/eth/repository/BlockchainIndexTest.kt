@@ -76,7 +76,7 @@ internal class BlockchainIndexTest {
     val reader = DirectoryReader.open(writer)
     val searcher = IndexSearcher(reader)
     val collector = TopScoreDocCollector.create(10, ScoreDoc(1, 1.0f))
-    searcher.search(TermQuery(Term("_id", BytesRef(header.hash.toBytes().toArrayUnsafe()))), collector)
+    searcher.search(TermQuery(Term("_id", BytesRef(header.hash.toArrayUnsafe()))), collector)
     val hits = collector.topDocs().scoreDocs
     assertEquals(1, hits.size)
   }
@@ -108,7 +108,7 @@ internal class BlockchainIndexTest {
     val reader = DirectoryReader.open(index)
     val searcher = IndexSearcher(reader)
     val collector = TopScoreDocCollector.create(10, ScoreDoc(1, 1.0f))
-    searcher.search(TermQuery(Term("_id", BytesRef(header.hash.toBytes().toArrayUnsafe()))), collector)
+    searcher.search(TermQuery(Term("_id", BytesRef(header.hash.toArrayUnsafe()))), collector)
     val hits = collector.topDocs().scoreDocs
     assertEquals(1, hits.size)
   }

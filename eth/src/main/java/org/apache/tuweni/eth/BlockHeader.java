@@ -381,12 +381,12 @@ public final class BlockHeader {
    * @param writer The RLP writer.
    */
   void writeTo(RLPWriter writer) {
-    writer.writeValue((parentHash != null) ? parentHash.toBytes() : Bytes.EMPTY);
-    writer.writeValue(ommersHash.toBytes());
-    writer.writeValue(coinbase.toBytes());
-    writer.writeValue(stateRoot.toBytes());
-    writer.writeValue(transactionsRoot.toBytes());
-    writer.writeValue(receiptsRoot.toBytes());
+    writer.writeValue((parentHash != null) ? parentHash : Bytes.EMPTY);
+    writer.writeValue(ommersHash);
+    writer.writeValue(coinbase);
+    writer.writeValue(stateRoot);
+    writer.writeValue(transactionsRoot);
+    writer.writeValue(receiptsRoot);
     writer.writeValue(logsBloom);
     writer.writeValue(difficulty.toMinimalBytes());
     writer.writeValue(number.toMinimalBytes());
@@ -394,7 +394,7 @@ public final class BlockHeader {
     writer.writeValue(gasUsed.toMinimalBytes());
     writer.writeLong(timestamp.getEpochSecond());
     writer.writeValue(extraData);
-    writer.writeValue(mixHash.toBytes());
+    writer.writeValue(mixHash);
     writer.writeValue(nonce);
   }
 }

@@ -63,7 +63,7 @@ public final class Log {
    */
   public void writeTo(final RLPWriter writer) {
     writer.writeList(out -> {
-      out.writeValue(logger.toBytes());
+      out.writeValue(logger);
       out.writeList(topicsWriter -> {
         for (Bytes32 topic : topics) {
           topicsWriter.writeValue(topic);

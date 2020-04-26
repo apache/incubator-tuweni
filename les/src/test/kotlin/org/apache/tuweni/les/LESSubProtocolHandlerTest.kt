@@ -163,7 +163,7 @@ constructor() {
       assertNotNull(message)
       assertEquals(2, message.protocolVersion)
       assertEquals(UInt256.ZERO, message.flowControlBufferLimit)
-      assertEquals(block.getHeader().getHash().toBytes(), message.genesisHash)
+      assertEquals(block.getHeader().getHash(), message.genesisHash)
     }
 
   @Test

@@ -18,6 +18,7 @@ package org.apache.tuweni.devp2p.v5
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.coroutines.asyncCompletion
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
@@ -125,7 +126,8 @@ class DefaultNodeDiscoveryService(
     connector.terminate()
   }
 
-  suspend fun addPeer(enr: Bytes) {
+  suspend fun addPeer(rlpENR: Bytes) {
+    val enr: EthereumNodeRecord = EthereumNodeRecord.fromRLP(rlpENR)
     val randomMessage = RandomMessage()
     val address = InetSocketAddress(enr.ip(), enr.udp())
 
@@ -140,9 +142,7 @@ class DefaultNodeDiscoveryService(
       if (it.startsWith("enr:")) {
         val encodedEnr = it.substringAfter("enr:")
         val rlpENR = Base64URLSafe.decode(encodedEnr)
-        val enr = EthereumNodeRecord.fromRLP(rlpENR)
-
-        addPeer(enr)
+        addPeer(rlpENR)
       }
     }
   }

@@ -390,7 +390,7 @@ public final class Transaction {
     writer.writeUInt256(nonce);
     writer.writeUInt256(gasPrice.toUInt256());
     writer.writeLong(gasLimit.toLong());
-    writer.writeValue((to != null) ? to.toBytes() : Bytes.EMPTY);
+    writer.writeValue((to != null) ? to : Bytes.EMPTY);
     writer.writeUInt256(value.toUInt256());
     writer.writeValue(payload);
     if (chainId != null) {
@@ -427,7 +427,7 @@ public final class Transaction {
       writer.writeUInt256(nonce);
       writer.writeValue(gasPrice.toMinimalBytes());
       writer.writeValue(gasLimit.toMinimalBytes());
-      writer.writeValue((to != null) ? to.toBytes() : Bytes.EMPTY);
+      writer.writeValue((to != null) ? to : Bytes.EMPTY);
       writer.writeValue(value.toMinimalBytes());
       writer.writeValue(payload);
       if (chainId != null) {

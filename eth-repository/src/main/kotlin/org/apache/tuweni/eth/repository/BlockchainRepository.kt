@@ -83,7 +83,7 @@ class BlockchainRepository
    * @return a handle to the storage operation completion
    */
   suspend fun storeBlockBody(blockHash: Hash, blockBody: BlockBody) {
-    blockBodyStore.put(blockHash.toBytes(), blockBody.toBytes())
+    blockBodyStore.put(blockHash, blockBody.toBytes())
   }
 
   /**
@@ -94,7 +94,7 @@ class BlockchainRepository
    */
   suspend fun storeBlock(block: Block) {
     storeBlockBody(block.getHeader().getHash(), block.getBody())
-    blockHeaderStore.put(block.getHeader().getHash().toBytes(), block.getHeader().toBytes())
+    blockHeaderStore.put(block.getHeader().getHash(), block.getHeader().toBytes())
     indexBlockHeader(block.getHeader())
   }
 
@@ -107,7 +107,7 @@ class BlockchainRepository
    * @param txHash the hash of the transaction
    * @param blockHash the hash of the block that this transaction belongs to
    */
-  suspend fun storeTransactionReceipts(vararg transactionReceipts: TransactionReceipt, txHash: Hash, blockHash: Hash) {
+  suspend fun storeTransactionReceipts(vararg transactionReceipts: TransactionReceipt, txHash: Bytes, blockHash: Bytes) {
     for (i in 0 until transactionReceipts.size) {
       storeTransactionReceipt(transactionReceipts[i], i, txHash, blockHash)
     }
@@ -124,10 +124,10 @@ class BlockchainRepository
   suspend fun storeTransactionReceipt(
     transactionReceipt: TransactionReceipt,
     txIndex: Int,
-    txHash: Hash,
-    blockHash: Hash
+    txHash: Bytes,
+    blockHash: Bytes
   ) {
-    transactionReceiptsStore.put(txHash.toBytes(), transactionReceipt.toBytes())
+    transactionReceiptsStore.put(txHash, transactionReceipt.toBytes())
     indexTransactionReceipt(transactionReceipt, txIndex, txHash, blockHash)
   }
 
@@ -138,14 +138,14 @@ class BlockchainRepository
    * @return handle to the storage operation completion
    */
   suspend fun storeBlockHeader(header: BlockHeader) {
-    blockHeaderStore.put(header.getHash().toBytes(), header.toBytes())
+    blockHeaderStore.put(header.getHash(), header.toBytes())
     indexBlockHeader(header)
   }
 
   private suspend fun indexBlockHeader(header: BlockHeader) {
     blockchainIndex.index { writer -> writer.indexBlockHeader(header) }
     for (hash in findBlocksByParentHash(header.getHash())) {
-      blockHeaderStore.get(hash.toBytes())?.let { bytes ->
+      blockHeaderStore.get(hash)?.let { bytes ->
         indexBlockHeader(BlockHeader.fromBytes(bytes))
       }
     }
@@ -154,22 +154,12 @@ class BlockchainRepository
   private suspend fun indexTransactionReceipt(
     txReceipt: TransactionReceipt,
     txIndex: Int,
-    txHash: Hash,
-    blockHash: Hash
+    txHash: Bytes,
+    blockHash: Bytes
   ) {
     blockchainIndex.index {
       it.indexTransactionReceipt(txReceipt, txIndex, txHash, blockHash)
     }
-  }
-
-  /**
-   * Retrieves a block into the repository as its serialized RLP bytes representation.
-   *
-   * @param blockHash the hash of the block stored
-   * @return a future with the bytes if found
-   */
-  suspend fun retrieveBlockBodyBytes(blockHash: Hash): Bytes? {
-    return retrieveBlockBodyBytes(blockHash.toBytes())
   }
 
   /**
@@ -188,28 +178,8 @@ class BlockchainRepository
    * @param blockHash the hash of the block stored
    * @return a future with the block if found
    */
-  suspend fun retrieveBlockBody(blockHash: Hash): BlockBody? {
-    return retrieveBlockBody(blockHash.toBytes())
-  }
-
-  /**
-   * Retrieves a block body into the repository.
-   *
-   * @param blockHash the hash of the block stored
-   * @return a future with the block if found
-   */
   suspend fun retrieveBlockBody(blockHash: Bytes): BlockBody? {
     return retrieveBlockBodyBytes(blockHash)?.let { BlockBody.fromBytes(it) }
-  }
-
-  /**
-   * Retrieves a block into the repository.
-   *
-   * @param blockHash the hash of the block stored
-   * @return a future with the block if found
-   */
-  suspend fun retrieveBlock(blockHash: Hash): Block? {
-    return retrieveBlock(blockHash.toBytes())
   }
 
   /**
@@ -230,28 +200,8 @@ class BlockchainRepository
    * @param blockHash the hash of the block stored
    * @return a future with the block header bytes if found
    */
-  suspend fun retrieveBlockHeaderBytes(blockHash: Hash): Bytes? {
-    return retrieveBlockBodyBytes(blockHash.toBytes())
-  }
-
-  /**
-   * Retrieves a block header into the repository as its serialized RLP bytes representation.
-   *
-   * @param blockHash the hash of the block stored
-   * @return a future with the block header bytes if found
-   */
   suspend fun retrieveBlockHeaderBytes(blockHash: Bytes): Bytes? {
     return blockHeaderStore.get(blockHash)
-  }
-
-  /**
-   * Retrieves a block header into the repository.
-   *
-   * @param blockHash the hash of the block stored
-   * @return a future with the block header if found
-   */
-  suspend fun retrieveBlockHeader(blockHash: Hash): BlockHeader? {
-    return retrieveBlockHeaderBytes(blockHash.toBytes())?.let { BlockHeader.fromBytes(it) } ?: return null
   }
 
   /**
@@ -300,9 +250,9 @@ class BlockchainRepository
    * @param blockHash the hash of the block
    * @return all transaction receipts associated with a block, in the correct order
    */
-  suspend fun retrieveTransactionReceipts(blockHash: Hash): List<TransactionReceipt?> {
+  suspend fun retrieveTransactionReceipts(blockHash: Bytes): List<TransactionReceipt?> {
     return blockchainIndex.findBy(TransactionReceiptFields.BLOCK_HASH, blockHash).map {
-      transactionReceiptsStore.get(it.toBytes())?.let { TransactionReceipt.fromBytes(it) }
+      transactionReceiptsStore.get(it)?.let { TransactionReceipt.fromBytes(it) }
     }
   }
 
@@ -311,9 +261,9 @@ class BlockchainRepository
    * @param blockHash the hash of the block
    * @param index the index of the transaction in the block
    */
-  suspend fun retrieveTransactionReceipt(blockHash: Hash, index: Int): TransactionReceipt? {
+  suspend fun retrieveTransactionReceipt(blockHash: Bytes, index: Int): TransactionReceipt? {
     return blockchainIndex.findByBlockHashAndIndex(blockHash, index)?.let {
-      transactionReceiptsStore.get(it.toBytes())?.let { TransactionReceipt.fromBytes(it) }
+      transactionReceiptsStore.get(it)?.let { TransactionReceipt.fromBytes(it) }
     }
   }
 
@@ -322,7 +272,7 @@ class BlockchainRepository
    * @param txHash the hash of the transaction
    */
   suspend fun retrieveTransactionReceipt(txHash: Hash): TransactionReceipt? {
-    return transactionReceiptsStore.get(txHash.toBytes())?.let { TransactionReceipt.fromBytes(it) }
+    return transactionReceiptsStore.get(txHash)?.let { TransactionReceipt.fromBytes(it) }
   }
 
   /**
@@ -341,12 +291,12 @@ class BlockchainRepository
    * @param parentHash the parent hash
    * @return the matching blocks
    */
-  fun findBlocksByParentHash(parentHash: Hash): List<Hash> {
+  fun findBlocksByParentHash(parentHash: Bytes): List<Hash> {
     return blockchainIndex.findBy(BlockHeaderFields.PARENT_HASH, parentHash)
   }
 
   private suspend fun setGenesisBlock(block: Block) {
     return chainMetadata
-      .put(GENESIS_BLOCK, block.getHeader().getHash().toBytes())
+      .put(GENESIS_BLOCK, block.getHeader().getHash())
   }
 }

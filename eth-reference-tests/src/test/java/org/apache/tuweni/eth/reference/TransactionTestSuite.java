@@ -60,7 +60,7 @@ class TransactionTestSuite {
     Transaction tx = Transaction.fromBytes(rlpBytes);
     assertEquals(Address.fromBytes(Bytes.fromHexString(sender)), tx.getSender());
     assertEquals(rlpBytes, tx.toBytes());
-    assertEquals(Bytes.fromHexString(hash), tx.getHash().toBytes());
+    assertEquals(Bytes.fromHexString(hash), tx.getHash());
   }
 
   private void testInvalidTransaction(String rlp, String milestone) {

@@ -233,7 +233,7 @@ interface BlockchainIndexReader {
    * @param index the index of the transaction in the block
    * @return the matching hash of the transaction if found
    */
-  fun findByBlockHashAndIndex(blockHash: Hash, index: Int): Hash?
+  fun findByBlockHashAndIndex(blockHash: Bytes, index: Int): Hash?
 
   /**
    * Retrieves the total difficulty of the block header, if it has been computed.
@@ -241,7 +241,7 @@ interface BlockchainIndexReader {
    * @param hash the hash of the header
    * @return the total difficulty of the header if it could be computed.
    */
-  fun totalDifficulty(hash: Hash): UInt256?
+  fun totalDifficulty(hash: Bytes): UInt256?
 }
 
 /**
@@ -264,7 +264,7 @@ interface BlockchainIndexWriter {
    * @param txHash the hash of the transaction
    * @param blockHash the hash of the block
    */
-  fun indexTransactionReceipt(txReceipt: TransactionReceipt, txIndex: Int, txHash: Hash, blockHash: Hash)
+  fun indexTransactionReceipt(txReceipt: TransactionReceipt, txIndex: Int, txHash: Bytes, blockHash: Bytes)
 }
 
 /**
@@ -362,7 +362,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     }
   }
 
-  override fun indexTransactionReceipt(txReceipt: TransactionReceipt, txIndex: Int, txHash: Hash, blockHash: Hash) {
+  override fun indexTransactionReceipt(txReceipt: TransactionReceipt, txIndex: Int, txHash: Bytes, blockHash: Bytes) {
     val document = mutableListOf<IndexableField>()
     val id = toBytesRef(txHash)
     document += StringField("_id", id, Field.Store.YES)
@@ -370,7 +370,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
 
     document += NumericDocValuesField(TransactionReceiptFields.INDEX.fieldName, txIndex.toLong())
     document += StringField(TransactionReceiptFields.TRANSACTION_HASH.fieldName, id, Field.Store.NO)
-    document += StringField(TransactionReceiptFields.BLOCK_HASH.fieldName, toBytesRef(blockHash.toBytes()),
+    document += StringField(TransactionReceiptFields.BLOCK_HASH.fieldName, toBytesRef(blockHash),
       Field.Store.NO)
     for (log in txReceipt.getLogs()) {
       document += StringField(TransactionReceiptFields.LOGGER.fieldName, toBytesRef(log.getLogger()), Field.Store.NO)
@@ -570,7 +570,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     return findByOneTerm(field, toBytesRef(value))
   }
 
-  override fun findByBlockHashAndIndex(blockHash: Hash, index: Int): Hash? {
+  override fun findByBlockHashAndIndex(blockHash: Bytes, index: Int): Hash? {
     return queryTxReceipts(
       BooleanQuery.Builder()
         .add(
@@ -596,7 +596,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     return queryBlocks(query)
   }
 
-  override fun totalDifficulty(hash: Hash): UInt256? =
+  override fun totalDifficulty(hash: Bytes): UInt256? =
     queryBlockDocs(TermQuery(Term("_id", toBytesRef(hash))), listOf(TOTAL_DIFFICULTY)).firstOrNull()?.let {
       it.getField(TOTAL_DIFFICULTY.fieldName)?.binaryValue()?.bytes?.let { bytes ->
         UInt256.fromBytes(Bytes.wrap(bytes))
@@ -621,14 +621,6 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
 
   private fun toBytesRef(uint: UInt256): BytesRef {
     return toBytesRef(uint.toBytes())
-  }
-
-  private fun toBytesRef(address: Address): BytesRef {
-    return toBytesRef(address.toBytes())
-  }
-
-  private fun toBytesRef(hash: Hash): BytesRef {
-    return toBytesRef(hash.toBytes())
   }
 
   companion object {
