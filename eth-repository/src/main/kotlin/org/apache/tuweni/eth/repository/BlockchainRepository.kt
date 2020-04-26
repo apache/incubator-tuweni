@@ -107,7 +107,11 @@ class BlockchainRepository
    * @param txHash the hash of the transaction
    * @param blockHash the hash of the block that this transaction belongs to
    */
-  suspend fun storeTransactionReceipts(vararg transactionReceipts: TransactionReceipt, txHash: Bytes, blockHash: Bytes) {
+  suspend fun storeTransactionReceipts(
+    vararg transactionReceipts: TransactionReceipt,
+    txHash: Bytes,
+    blockHash: Bytes
+  ) {
     for (i in 0 until transactionReceipts.size) {
       storeTransactionReceipt(transactionReceipts[i], i, txHash, blockHash)
     }

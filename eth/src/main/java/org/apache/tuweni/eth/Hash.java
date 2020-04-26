@@ -16,11 +16,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 import static org.apache.tuweni.crypto.Hash.keccak256;
 
-import org.apache.tuweni.bytes.AbstractBytes;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
-
-import com.google.common.base.Objects;
 import org.apache.tuweni.bytes.DelegatingBytes32;
 
 /**

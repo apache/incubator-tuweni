@@ -16,8 +16,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import org.apache.tuweni.bytes.Bytes;
-
-import com.google.common.base.Objects;
 import org.apache.tuweni.bytes.DelegatingBytes;
 
 /**
