@@ -260,7 +260,10 @@ allprojects {
   //////
   // Use JUnit5 for testing
 
-  test { useJUnitPlatform() { includeEngines 'spek', 'junit-jupiter' } }
+  test {
+    useJUnitPlatform() { includeEngines 'spek', 'junit-jupiter' }
+    timeout = Duration.ofMinutes(30)
+  }
 
 
   //////
