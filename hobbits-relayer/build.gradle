@@ -33,3 +33,23 @@ dependencies {
 
 application { mainClassName = 'org.apache.tuweni.relayer.RelayerApp' }
 applicationDefaultJvmArgs = ["-Xms512m", "-Xmx1g"]
+
+sourceSets {
+  integrationTest {
+    java.srcDir 'src/integrationTest/java'
+    kotlin.srcDir 'src/integrationTest/kotlin'
+    resources.srcDir 'src/integrationTest/resources'
+    compileClasspath += main.output
+    runtimeClasspath += main.output
+  }
+}
+
+configurations {
+  integrationTestImplementation.extendsFrom testImplementation
+  integrationTestRuntime.extendsFrom testRuntime
+}
+
+task integrationTest(type: Test) {
+  testClassesDirs = sourceSets.integrationTest.output.classesDirs
+  classpath = sourceSets.integrationTest.runtimeClasspath
+}
