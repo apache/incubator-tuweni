@@ -137,6 +137,8 @@ spotless {
   }
 }
 
+task integrationTest(type: Test) {
+}
 
 subprojects {
 
@@ -166,9 +168,9 @@ subprojects {
 
   sourceSets {
     integrationTest {
-      java.srcDir 'src/integrationTest/java'
-      kotlin.srcDir 'src/integrationTest/kotlin'
-      resources.srcDir 'src/integrationTest/resources'
+      java.srcDir 'src/integration-test/java'
+      kotlin.srcDir 'src/integration-test/kotlin'
+      resources.srcDir 'src/integration-test/resources'
       compileClasspath += main.output
       runtimeClasspath += main.output
     }
@@ -183,7 +185,7 @@ subprojects {
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
   }
-
+  rootProject.integrationTest.dependsOn project.integrationTest
 
   //////
   // Parallel build execution
