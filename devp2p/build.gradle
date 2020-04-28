@@ -12,16 +12,6 @@
  */
 description = 'Ethereum ÐΞVp2p implementation.'
 
-sourceSets {
-  integrationTest {
-    java.srcDir 'src/integrationTest/java'
-    kotlin.srcDir 'src/integrationTest/kotlin'
-    resources.srcDir 'src/integrationTest/resources'
-    compileClasspath += main.output
-    runtimeClasspath += main.output
-  }
-}
-
 dependencies {
   compile project(':bytes')
   compile project(':concurrent')
@@ -42,21 +32,4 @@ dependencies {
   testCompile 'org.junit.jupiter:junit-jupiter-params'
 
   testRuntime 'org.junit.jupiter:junit-jupiter-engine'
-
-  integrationTestCompile project(':junit')
-  integrationTestCompile 'org.bouncycastle:bcprov-jdk15on'
-  integrationTestCompile 'org.junit.jupiter:junit-jupiter-api'
-  integrationTestCompile 'org.junit.jupiter:junit-jupiter-params'
-
-  integrationTestRuntime 'org.junit.jupiter:junit-jupiter-engine'
-}
-
-configurations {
-  integrationTestImplementation.extendsFrom testImplementation
-  integrationTestRuntime.extendsFrom testRuntime
-}
-
-task integrationTest(type: Test) {
-  testClassesDirs = sourceSets.integrationTest.output.classesDirs
-  classpath = sourceSets.integrationTest.runtimeClasspath
 }
