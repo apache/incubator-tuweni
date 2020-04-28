@@ -65,8 +65,8 @@ jobs:
       - name: gradle test
         run: ./gradlew test
       - uses: actions/upload-artifact@v1
-          with:
-            name: Reports
-            path: build/reports
+        with:
+          name: Reports
+          path: build/reports
       - name: Collect JUnit tests
         uses: danger/danger-js@9.1.8
