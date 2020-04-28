@@ -152,10 +152,10 @@ class PatchworkIntegrationTest {
         secureScuttlebuttVertxClient.connectTo(port, host, publicKey, MyClientHandler::new);
 
     MyClientHandler clientHandler = (MyClientHandler) onConnect.get();
-    assertTrue(onConnect.isDone());
-    assertFalse(onConnect.isCompletedExceptionally());
+    Assertions.assertTrue(onConnect.isDone());
+    Assertions.assertFalse(onConnect.isCompletedExceptionally());
     Thread.sleep(1000);
-    assertNotNull(clientHandler);
+    Assertions.assertNotNull(clientHandler);
     // An RPC command that just tells us our public key (like ssb-server whoami on the command line.)
     String rpcRequestBody = "{\"name\": [\"whoami\"],\"type\": \"async\",\"args\":[]}";
     Bytes rpcRequest = RPCCodec.encodeRequest(rpcRequestBody, RPCFlag.BodyType.JSON);

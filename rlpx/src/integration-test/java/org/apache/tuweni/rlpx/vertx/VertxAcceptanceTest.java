@@ -135,15 +135,15 @@ class VertxAcceptanceTest {
       service.connectTo(secondKp.publicKey(), new InetSocketAddress("localhost", secondService.actualPort()));
 
       Thread.sleep(3000);
-      assertEquals(1, repository.asMap().size());
-      assertEquals(1, secondRepository.asMap().size());
+      Assertions.assertEquals(1, repository.asMap().size());
+      Assertions.assertEquals(1, secondRepository.asMap().size());
 
-      assertEquals(1, sp.handler.messages.size());
-      assertEquals(1, secondSp.handler.messages.size());
+      Assertions.assertEquals(1, sp.handler.messages.size());
+      Assertions.assertEquals(1, secondSp.handler.messages.size());
 
       AsyncCompletion completion = ((DefaultWireConnection) repository.asMap().values().iterator().next()).sendPing();
       completion.join();
-      assertTrue(completion.isDone());
+      Assertions.assertTrue(completion.isDone());
     } finally {
       AsyncCompletion.allOf(service.stop(), secondService.stop());
     }
@@ -177,11 +177,11 @@ class VertxAcceptanceTest {
       service.connectTo(secondKp.publicKey(), new InetSocketAddress("localhost", secondService.actualPort()));
 
       Thread.sleep(3000);
-      assertEquals(1, repository.asMap().size());
-      assertEquals(1, secondRepository.asMap().size());
+      Assertions.assertEquals(1, repository.asMap().size());
+      Assertions.assertEquals(1, secondRepository.asMap().size());
 
-      assertEquals(1, sp.handler.messages.size());
-      assertEquals(1, secondSp.handler.messages.size());
+      Assertions.assertEquals(1, sp.handler.messages.size());
+      Assertions.assertEquals(1, secondSp.handler.messages.size());
 
       List<AsyncCompletion> completionList = new ArrayList<>();
       ExecutorService threadPool = Executors.newFixedThreadPool(16);
@@ -202,7 +202,7 @@ class VertxAcceptanceTest {
 
       AsyncCompletion allTasks = AsyncCompletion.allOf(completionList);
       allTasks.join(30, TimeUnit.SECONDS);
-      assertTrue(allTasks.isDone());
+      Assertions.assertTrue(allTasks.isDone());
 
     } finally {
       AsyncCompletion.allOf(service.stop(), secondService.stop());

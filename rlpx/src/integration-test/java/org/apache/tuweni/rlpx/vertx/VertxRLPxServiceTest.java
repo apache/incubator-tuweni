@@ -35,28 +35,28 @@ class VertxRLPxServiceTest {
 
   @Test
   void invalidPort(@VertxInstance Vertx vertx) {
-    assertThrows(
+    Assertions.assertThrows(
         IllegalArgumentException.class,
         () -> new VertxRLPxService(vertx, -1, "localhost", 30, SECP256K1.KeyPair.random(), new ArrayList<>(), "a"));
   }
 
   @Test
   void invalidAdvertisedPort(@VertxInstance Vertx vertx) {
-    assertThrows(
+    Assertions.assertThrows(
         IllegalArgumentException.class,
         () -> new VertxRLPxService(vertx, 3, "localhost", -1, SECP256K1.KeyPair.random(), new ArrayList<>(), "a"));
   }
 
   @Test
   void invalidClientId(@VertxInstance Vertx vertx) {
-    assertThrows(
+    Assertions.assertThrows(
         IllegalArgumentException.class,
         () -> new VertxRLPxService(vertx, 34, "localhost", 23, SECP256K1.KeyPair.random(), new ArrayList<>(), null));
   }
 
   @Test
   void invalidClientIdSpaces(@VertxInstance Vertx vertx) {
-    assertThrows(
+    Assertions.assertThrows(
         IllegalArgumentException.class,
         () -> new VertxRLPxService(vertx, 34, "localhost", 23, SECP256K1.KeyPair.random(), new ArrayList<>(), "   "));
   }
@@ -81,7 +81,7 @@ class VertxRLPxServiceTest {
 
     service.start().join();
     try {
-      assertTrue(service.actualPort() != 0);
+      Assertions.assertTrue(service.actualPort() != 0);
       assertEquals(service.actualPort(), service.advertisedPort());
     } finally {
       service.stop();
@@ -93,7 +93,7 @@ class VertxRLPxServiceTest {
     VertxRLPxService service =
         new VertxRLPxService(vertx, 0, "localhost", 10000, SECP256K1.KeyPair.random(), new ArrayList<>(), "abc");
     AsyncCompletion completion = service.stop();
-    assertTrue(completion.isDone());
+    Assertions.assertTrue(completion.isDone());
   }
 
   @Test
@@ -133,7 +133,7 @@ class VertxRLPxServiceTest {
     try {
       service.connectTo(peerPair.publicKey(), new InetSocketAddress("localhost", peerService.actualPort()));
       Thread.sleep(3000);
-      assertEquals(1, repository.asMap().size());
+      Assertions.assertEquals(1, repository.asMap().size());
 
     } finally {
       service.stop();

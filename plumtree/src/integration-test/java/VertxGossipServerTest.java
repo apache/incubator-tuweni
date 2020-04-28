@@ -10,7 +10,6 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.tuweni.plumtree.vertx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -80,7 +79,7 @@ class VertxGossipServerTest {
         break;
       }
     }
-    assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);
+    Assertions.assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);
 
     server1.stop().join();
     server2.stop().join();
@@ -142,9 +141,9 @@ class VertxGossipServerTest {
         break;
       }
     }
-    assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);
-    assertEquals(Bytes.fromHexString("deadbeef"), messageReceived3.message);
-    assertNull(messageReceived1.message);
+    Assertions.assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);
+    Assertions.assertEquals(Bytes.fromHexString("deadbeef"), messageReceived3.message);
+    Assertions.assertNull(messageReceived1.message);
 
     server1.stop().join();
     server2.stop().join();
@@ -200,14 +199,14 @@ class VertxGossipServerTest {
     server1.connectTo("127.0.0.1", 10001).join();
     server2.connectTo("127.0.0.1", 10002).join();
     server1.connectTo("127.0.0.1", 10002).join();
-    assertEquals(2, peerRepository1.eagerPushPeers().size());
+    Assertions.assertEquals(2, peerRepository1.eagerPushPeers().size());
     String attributes = "{\"message_type\": \"BLOCK\"}";
     server1.gossip(attributes, Bytes.fromHexString("deadbeef"));
     Thread.sleep(1000);
-    assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);
+    Assertions.assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);
     Thread.sleep(1000);
 
-    assertTrue(peerRepository1.lazyPushPeers().size() > 0 || peerRepository3.lazyPushPeers().size() > 0);
+    Assertions.assertTrue(peerRepository1.lazyPushPeers().size() > 0 || peerRepository3.lazyPushPeers().size() > 0);
 
     server1.stop().join();
     server2.stop().join();

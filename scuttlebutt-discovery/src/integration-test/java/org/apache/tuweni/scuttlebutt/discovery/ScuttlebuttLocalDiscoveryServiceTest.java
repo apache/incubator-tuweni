@@ -35,7 +35,7 @@ class ScuttlebuttLocalDiscoveryServiceTest {
 
   @BeforeAll
   static void checkAvailable() {
-    assumeTrue(Sodium.isAvailable(), "Sodium native library is not available");
+    Assumptions.assumeTrue(Sodium.isAvailable(), "Sodium native library is not available");
   }
 
   @Test
@@ -55,7 +55,7 @@ class ScuttlebuttLocalDiscoveryServiceTest {
 
   @Test
   void invalidMulticastAddress(@VertxInstance Vertx vertx) throws Exception {
-    assertThrows(
+    Assertions.assertThrows(
         IllegalArgumentException.class,
         () -> new ScuttlebuttLocalDiscoveryService(vertx, 8008, "0.0.0.0", "10.0.0.0"));
   }
@@ -85,8 +85,8 @@ class ScuttlebuttLocalDiscoveryServiceTest {
       service.start().join();
       service.broadcast();
       Thread.sleep(1000);
-      assertNotNull(ref.get());
-      assertEquals(localId, ref.get());
+      Assertions.assertNotNull(ref.get());
+      Assertions.assertEquals(localId, ref.get());
     } finally {
       AsyncCompletion.allOf(service2.stop(), service.stop()).join();
     }
