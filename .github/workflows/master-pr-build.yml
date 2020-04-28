@@ -45,7 +45,7 @@ jobs:
       - name: Cache Gradle packages
         uses: actions/cache@v1
         with:
-        path: ~/.gradle/caches
+          path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
       - name: Cache Maven Repository
