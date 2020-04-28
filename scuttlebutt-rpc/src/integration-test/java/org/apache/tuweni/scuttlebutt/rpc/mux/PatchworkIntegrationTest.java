@@ -68,7 +68,7 @@ public class PatchworkIntegrationTest {
     AsyncResult<List<RPCResponse>> allResults = AsyncResult.combine(results);
     List<RPCResponse> rpcMessages = allResults.get();
 
-    Assertions.assertEquals(10, rpcMessages.size());
+    assertEquals(10, rpcMessages.size());
   }
 
 

@@ -41,7 +41,7 @@ class VertxIntegrationTest {
 
   @BeforeAll
   static void checkAvailable() {
-    Assumptions.assumeTrue(Sodium.isAvailable(), "Sodium native library is not available");
+    assumeTrue(Sodium.isAvailable(), "Sodium native library is not available");
   }
 
   private static class MyClientHandler implements ClientHandler {
@@ -112,7 +112,7 @@ class VertxIntegrationTest {
     MyClientHandler handler = client.connectTo(20000, "0.0.0.0", serverKeyPair.publicKey(), MyClientHandler::new).get();
 
     Thread.sleep(1000);
-    Assertions.assertNotNull(handler);
+    assertNotNull(handler);
 
     String rpcRequestBody = "{\"name\": [\"whoami\"],\"type\": \"async\",\"args\":[]}";
     Bytes rpcRequest = RPCCodec.encodeRequest(rpcRequestBody, RPCFlag.BodyType.JSON);
@@ -127,11 +127,11 @@ class VertxIntegrationTest {
 
     Bytes requestBody = rpcRequest.slice(9);
 
-    Assertions.assertEquals(requestBody, receivedBody);
+    assertEquals(requestBody, receivedBody);
 
     handler.closeStream();
     Thread.sleep(1000);
-    Assertions.assertTrue(serverHandler.closed);
+    assertTrue(serverHandler.closed);
 
     client.stop();
     server.stop();

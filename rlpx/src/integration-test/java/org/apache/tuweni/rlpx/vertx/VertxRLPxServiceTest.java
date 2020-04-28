@@ -42,21 +42,21 @@ class VertxRLPxServiceTest {
 
   @Test
   void invalidAdvertisedPort(@VertxInstance Vertx vertx) {
-    Assertions.assertThrows(
+    assertThrows(
         IllegalArgumentException.class,
         () -> new VertxRLPxService(vertx, 3, "localhost", -1, SECP256K1.KeyPair.random(), new ArrayList<>(), "a"));
   }
 
   @Test
   void invalidClientId(@VertxInstance Vertx vertx) {
-    Assertions.assertThrows(
+    assertThrows(
         IllegalArgumentException.class,
         () -> new VertxRLPxService(vertx, 34, "localhost", 23, SECP256K1.KeyPair.random(), new ArrayList<>(), null));
   }
 
   @Test
   void invalidClientIdSpaces(@VertxInstance Vertx vertx) {
-    Assertions.assertThrows(
+    assertThrows(
         IllegalArgumentException.class,
         () -> new VertxRLPxService(vertx, 34, "localhost", 23, SECP256K1.KeyPair.random(), new ArrayList<>(), "   "));
   }
@@ -81,7 +81,7 @@ class VertxRLPxServiceTest {
 
     service.start().join();
     try {
-      Assertions.assertTrue(service.actualPort() != 0);
+      assertTrue(service.actualPort() != 0);
       assertEquals(service.actualPort(), service.advertisedPort());
     } finally {
       service.stop();
@@ -93,7 +93,7 @@ class VertxRLPxServiceTest {
     VertxRLPxService service =
         new VertxRLPxService(vertx, 0, "localhost", 10000, SECP256K1.KeyPair.random(), new ArrayList<>(), "abc");
     AsyncCompletion completion = service.stop();
-    Assertions.assertTrue(completion.isDone());
+    assertTrue(completion.isDone());
   }
 
   @Test
@@ -133,7 +133,7 @@ class VertxRLPxServiceTest {
     try {
       service.connectTo(peerPair.publicKey(), new InetSocketAddress("localhost", peerService.actualPort()));
       Thread.sleep(3000);
-      Assertions.assertEquals(1, repository.asMap().size());
+      assertEquals(1, repository.asMap().size());
 
     } finally {
       service.stop();
