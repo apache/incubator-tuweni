@@ -55,15 +55,15 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
           restore-keys: ${{ runner.os }}-m2
       - name: gradle checks
-        run: ./gradlew spotlessCheck checkLicenses
+        run: ./gradlew --no-daemon spotlessCheck checkLicenses
       - name: gradle assemble
-        run: ./gradlew assemble -x test
+        run: ./gradlew --no-daemon assemble -x test
       - uses: actions/upload-artifact@v1
         with:
           name: Libs
           path: build/libs
       - name: gradle test
-        run: ./gradlew test
+        run: ./gradlew --no-daemon test
       - uses: actions/upload-artifact@v1
         with:
           name: Reports
