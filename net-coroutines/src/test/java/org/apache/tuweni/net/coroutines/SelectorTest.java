@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +40,11 @@ class SelectorTest {
   @BeforeAll
   static void setup() {
     executor = Executors.newCachedThreadPool();
+  }
+
+  @AfterAll
+  static void tearDown() {
+    executor.shutdown();
   }
 
   @Test
