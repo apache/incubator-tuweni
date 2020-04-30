@@ -564,12 +564,9 @@ allprojects {
 // Configure root project as a virtual package that depends on all components
 
 dependencies {
-  subprojects.each { p ->
+  subprojects.findAll { !it.name.contains('reference-tests')
+  }.each { p ->
     switch (p.name) {
-      case 'eth-reference-tests':
-      case 'eth2-reference-tests':
-      // ignore
-        break
       case 'crypto':
         compile(p) {
           exclude group: 'com.github.jnr', module: 'jnr-ffi'
