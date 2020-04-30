@@ -46,9 +46,10 @@ public class RPCAsyncRequest {
    * @throws JsonProcessingException thrown if there is an error while serializing the request to bytes
    */
   public Bytes toEncodedRpcMessage(ObjectMapper objectMapper) throws JsonProcessingException {
-    return RPCCodec.encodeRequest(
-        new RPCRequestBody(function.asList(), RPCRequestType.ASYNC, arguments).asBytes(objectMapper),
-        getRPCFlags());
+    return RPCCodec
+        .encodeRequest(
+            new RPCRequestBody(function.asList(), RPCRequestType.ASYNC, arguments).asBytes(objectMapper),
+            getRPCFlags());
   }
 
   public RPCFlag[] getRPCFlags() {

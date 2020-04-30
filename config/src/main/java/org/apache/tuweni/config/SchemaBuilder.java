@@ -186,8 +186,11 @@ public final class SchemaBuilder {
       Integer intValue;
       if (value instanceof Long) {
         if (((Long) value) > Integer.MAX_VALUE) {
-          return Collections.singletonList(
-              new ConfigurationError(position, "Value of property '" + canonicalKey + "' is too large for an integer"));
+          return Collections
+              .singletonList(
+                  new ConfigurationError(
+                      position,
+                      "Value of property '" + canonicalKey + "' is too large for an integer"));
         }
         intValue = ((Long) value).intValue();
       } else {
@@ -377,22 +380,25 @@ public final class SchemaBuilder {
         for (int i = 0; i < objs.size(); ++i) {
           Object obj = objs.get(i);
           if (obj == null) {
-            return Collections.singletonList(
-                new ConfigurationError(position, "Value of property '" + vkey + "', index " + i + ", is null"));
+            return Collections
+                .singletonList(
+                    new ConfigurationError(position, "Value of property '" + vkey + "', index " + i + ", is null"));
           }
           if (!(obj instanceof Integer) && !(obj instanceof Long)) {
-            return Collections.singletonList(
-                new ConfigurationError(
-                    position,
-                    "Value of property '" + vkey + "', index " + i + ", is not an integer"));
+            return Collections
+                .singletonList(
+                    new ConfigurationError(
+                        position,
+                        "Value of property '" + vkey + "', index " + i + ", is not an integer"));
           }
           if (obj instanceof Long) {
             containsLong = true;
             if (((Long) obj) > Integer.MAX_VALUE) {
-              return Collections.singletonList(
-                  new ConfigurationError(
-                      position,
-                      "Value of property '" + vkey + "', index " + i + ", is too large for an integer"));
+              return Collections
+                  .singletonList(
+                      new ConfigurationError(
+                          position,
+                          "Value of property '" + vkey + "', index " + i + ", is too large for an integer"));
             }
           }
         }
@@ -457,8 +463,9 @@ public final class SchemaBuilder {
 
     validateProperty(key, (canonicalKey, position, value) -> {
       if (value != null && !(value instanceof List)) {
-        return Collections.singletonList(
-            new ConfigurationError(position, "Property at '" + canonicalKey + "' requires a list of longs"));
+        return Collections
+            .singletonList(
+                new ConfigurationError(position, "Property at '" + canonicalKey + "' requires a list of longs"));
       }
 
       boolean containsInteger = false;
@@ -467,15 +474,19 @@ public final class SchemaBuilder {
         for (int i = 0; i < objs.size(); ++i) {
           Object obj = objs.get(i);
           if (obj == null) {
-            return Collections.singletonList(
-                new ConfigurationError(position, "Value of property '" + canonicalKey + "', index " + i + ", is null"));
+            return Collections
+                .singletonList(
+                    new ConfigurationError(
+                        position,
+                        "Value of property '" + canonicalKey + "', index " + i + ", is null"));
           }
 
           if (!(obj instanceof Long) && !(obj instanceof Integer)) {
-            return Collections.singletonList(
-                new ConfigurationError(
-                    position,
-                    "Value of property '" + canonicalKey + "', index " + i + ", is not a long"));
+            return Collections
+                .singletonList(
+                    new ConfigurationError(
+                        position,
+                        "Value of property '" + canonicalKey + "', index " + i + ", is not a long"));
           }
           containsInteger |= (obj instanceof Integer);
         }
@@ -606,8 +617,9 @@ public final class SchemaBuilder {
     }
     validateProperty(key, (canonicalKey, position, value) -> {
       if (value != null && !clazz.isInstance(value)) {
-        return Collections.singletonList(
-            new ConfigurationError(position, "Property at '" + canonicalKey + "' requires a " + typeName));
+        return Collections
+            .singletonList(
+                new ConfigurationError(position, "Property at '" + canonicalKey + "' requires a " + typeName));
       }
       if (validator == null || (defaultValue != null && value == null)) {
         return Collections.emptyList();
@@ -639,10 +651,11 @@ public final class SchemaBuilder {
 
     validateProperty(key, (canonicalKey, position, value) -> {
       if (value != null && !(value instanceof List)) {
-        return Collections.singletonList(
-            new ConfigurationError(
-                position,
-                "Property at '" + canonicalKey + "' requires a list of " + typeName + "s"));
+        return Collections
+            .singletonList(
+                new ConfigurationError(
+                    position,
+                    "Property at '" + canonicalKey + "' requires a list of " + typeName + "s"));
       }
 
       if (value != null) {
@@ -650,14 +663,18 @@ public final class SchemaBuilder {
         for (int i = 0; i < objs.size(); ++i) {
           Object obj = objs.get(i);
           if (obj == null) {
-            return Collections.singletonList(
-                new ConfigurationError(position, "Value of property '" + canonicalKey + "', index " + i + ", is null"));
+            return Collections
+                .singletonList(
+                    new ConfigurationError(
+                        position,
+                        "Value of property '" + canonicalKey + "', index " + i + ", is null"));
           }
           if (!innerClass.isInstance(obj)) {
-            return Collections.singletonList(
-                new ConfigurationError(
-                    position,
-                    "Value of property '" + canonicalKey + "', index " + i + ", is not a " + typeName));
+            return Collections
+                .singletonList(
+                    new ConfigurationError(
+                        position,
+                        "Value of property '" + canonicalKey + "', index " + i + ", is not a " + typeName));
           }
         }
       }

@@ -93,9 +93,10 @@ class ClientRecordTest {
   @BeforeEach
   void setupClient(@TempDirectory Path tempDir, @VertxInstance Vertx vertx) throws Exception {
     knownServersFile = tempDir.resolve("known-hosts.txt");
-    Files.write(
-        knownServersFile,
-        Arrays.asList("#First line", "localhost:" + foobarServer.actualPort() + " " + DUMMY_FINGERPRINT));
+    Files
+        .write(
+            knownServersFile,
+            Arrays.asList("#First line", "localhost:" + foobarServer.actualPort() + " " + DUMMY_FINGERPRINT));
 
     HttpClientOptions options = new HttpClientOptions();
     options

@@ -222,11 +222,12 @@ public final class GossipApp {
       node.put("value", bytes.toHexString());
       try {
         Path path = Paths.get(messageLog);
-        Files.write(
-            path,
-            Collections.singletonList(mapper.writeValueAsString(node)),
-            StandardCharsets.UTF_8,
-            Files.exists(path) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);
+        Files
+            .write(
+                path,
+                Collections.singletonList(mapper.writeValueAsString(node)),
+                StandardCharsets.UTF_8,
+                Files.exists(path) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);
       } catch (IOException e) {
         err.println(e.getMessage());
       }

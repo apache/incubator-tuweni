@@ -31,11 +31,12 @@ final class ResponderHandshakeMessage implements HandshakeMessage {
   }
 
   static ResponderHandshakeMessage decode(Bytes payload) {
-    return RLP.decodeList(
-        payload,
-        reader -> new ResponderHandshakeMessage(
-            PublicKey.fromBytes(reader.readValue()),
-            Bytes32.wrap(reader.readValue())));
+    return RLP
+        .decodeList(
+            payload,
+            reader -> new ResponderHandshakeMessage(
+                PublicKey.fromBytes(reader.readValue()),
+                Bytes32.wrap(reader.readValue())));
   }
 
   private ResponderHandshakeMessage(PublicKey ephemeralPublicKey, Bytes32 nonce) {

@@ -174,8 +174,10 @@ final class GossipCommandLineOptions {
     if (config() != null) {
       List<ConfigurationError> errors = config().errors();
       if (errors.size() > 0) {
-        String message = errors.stream().map(err -> "[" + err.position() + "] " + err.getMessage()).collect(
-            Collectors.joining("\n"));
+        String message = errors
+            .stream()
+            .map(err -> "[" + err.position() + "] " + err.getMessage())
+            .collect(Collectors.joining("\n"));
         throw new IllegalArgumentException(message);
       }
     }

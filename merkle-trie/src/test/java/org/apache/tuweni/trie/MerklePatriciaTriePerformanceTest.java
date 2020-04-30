@@ -77,12 +77,14 @@ class MerklePatriciaTriePerformanceTest {
       allKeys.add(key);
       AsyncCompletion completion = trie.putAsync(key, UUID.randomUUID().toString());
       if (i % 1000 == 0) {
-        return completion.thenRun(
-            () -> System.out.println(
-                String.format("%020d", (System.nanoTime() - beforeInsertion) / 1000)
-                    + " ms Record #"
-                    + i
-                    + " ingested"));
+        return completion
+            .thenRun(
+                () -> System.out
+                    .println(
+                        String.format("%020d", (System.nanoTime() - beforeInsertion) / 1000)
+                            + " ms Record #"
+                            + i
+                            + " ingested"));
       } else {
         return completion;
       }

@@ -370,19 +370,20 @@ public final class DiffieHelman {
      */
     public static Secret forKeys(SecretKey secretKey, PublicKey publicKey) {
       checkState(!secretKey.isDestroyed(), "SecretKey has been destroyed");
-      return Sodium.scalarMult(
-          secretKey.value.pointer(),
-          secretKey.value.length(),
-          publicKey.value.pointer(),
-          publicKey.value.length(),
-          (ptr, len) -> {
-            int secretLength = Secret.length();
-            if (len != secretLength) {
-              throw new IllegalStateException(
-                  "Secret length " + secretLength + " is not same as generated key length " + len);
-            }
-            return new Secret(ptr, secretLength);
-          });
+      return Sodium
+          .scalarMult(
+              secretKey.value.pointer(),
+              secretKey.value.length(),
+              publicKey.value.pointer(),
+              publicKey.value.length(),
+              (ptr, len) -> {
+                int secretLength = Secret.length();
+                if (len != secretLength) {
+                  throw new IllegalStateException(
+                      "Secret length " + secretLength + " is not same as generated key length " + len);
+                }
+                return new Secret(ptr, secretLength);
+              });
     }
 
     /**

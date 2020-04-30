@@ -63,9 +63,12 @@ class ServerCaOrTofaTest {
   static void setupClients(@TempDirectory Path tempDir, @VertxInstance Vertx vertx) throws Exception {
     SelfSignedCertificate caClientCert = SelfSignedCertificate.create();
     SecurityTestUtils.configureJDKTrustStore(tempDir, caClientCert);
-    caClient = vertx.createHttpClient(
-        new HttpClientOptions().setTrustOptions(InsecureTrustOptions.INSTANCE).setSsl(true).setKeyCertOptions(
-            caClientCert.keyCertOptions()));
+    caClient = vertx
+        .createHttpClient(
+            new HttpClientOptions()
+                .setTrustOptions(InsecureTrustOptions.INSTANCE)
+                .setSsl(true)
+                .setKeyCertOptions(caClientCert.keyCertOptions()));
 
     SelfSignedCertificate fooCert = SelfSignedCertificate.create("foo.com");
     fooFingerprint = certificateHexFingerprint(Paths.get(fooCert.keyCertOptions().getCertPath()));

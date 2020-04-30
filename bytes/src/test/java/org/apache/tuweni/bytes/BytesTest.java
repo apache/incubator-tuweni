@@ -64,11 +64,12 @@ class BytesTest extends CommonBytesTests {
   }
 
   private static Stream<Arguments> wrapProvider() {
-    return Stream.of(
-        Arguments.of(new Object[] {new byte[10]}),
-        Arguments.of(new Object[] {new byte[] {1}}),
-        Arguments.of(new Object[] {new byte[] {1, 2, 3, 4}}),
-        Arguments.of(new Object[] {new byte[] {-1, 127, -128}}));
+    return Stream
+        .of(
+            Arguments.of(new Object[] {new byte[10]}),
+            Arguments.of(new Object[] {new byte[] {1}}),
+            Arguments.of(new Object[] {new byte[] {1, 2, 3, 4}}),
+            Arguments.of(new Object[] {new byte[] {-1, 127, -128}}));
   }
 
   @Test
@@ -108,11 +109,12 @@ class BytesTest extends CommonBytesTests {
   }
 
   private static Stream<Arguments> wrapSliceProvider() {
-    return Stream.of(
-        Arguments.of(new byte[] {1, 2, 3, 4}, 0, 4),
-        Arguments.of(new byte[] {1, 2, 3, 4}, 0, 2),
-        Arguments.of(new byte[] {1, 2, 3, 4}, 2, 1),
-        Arguments.of(new byte[] {1, 2, 3, 4}, 2, 2));
+    return Stream
+        .of(
+            Arguments.of(new byte[] {1, 2, 3, 4}, 0, 4),
+            Arguments.of(new byte[] {1, 2, 3, 4}, 0, 2),
+            Arguments.of(new byte[] {1, 2, 3, 4}, 2, 1),
+            Arguments.of(new byte[] {1, 2, 3, 4}, 2, 2));
   }
 
   private void assertWrapSlice(byte[] bytes, int offset, int length) {

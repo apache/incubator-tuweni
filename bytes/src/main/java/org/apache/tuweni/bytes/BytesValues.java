@@ -59,17 +59,19 @@ final class BytesValues {
       int l = hexToBin(hex.charAt(i + 1));
       if (h == -1) {
         throw new IllegalArgumentException(
-            String.format(
-                "Illegal character '%c' found at index %d in hex binary representation",
-                hex.charAt(i),
-                i - idxShift));
+            String
+                .format(
+                    "Illegal character '%c' found at index %d in hex binary representation",
+                    hex.charAt(i),
+                    i - idxShift));
       }
       if (l == -1) {
         throw new IllegalArgumentException(
-            String.format(
-                "Illegal character '%c' found at index %d in hex binary representation",
-                hex.charAt(i + 1),
-                i + 1 - idxShift));
+            String
+                .format(
+                    "Illegal character '%c' found at index %d in hex binary representation",
+                    hex.charAt(i + 1),
+                    i + 1 - idxShift));
       }
 
       out[destOffset + (i / 2)] = (byte) (h * 16 + l);

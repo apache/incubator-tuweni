@@ -70,8 +70,9 @@ class SSZTestSuite {
       } else if (bitLength < 62) {
         read = Bytes.ofUnsignedLong(SSZ.decode(Bytes.fromHexString(ssz), reader -> reader.readULong(bitLength)));
       } else {
-        read = Bytes.wrap(
-            SSZ.decode(Bytes.fromHexString(ssz), reader -> reader.readUnsignedBigInteger(bitLength)).toByteArray());
+        read = Bytes
+            .wrap(
+                SSZ.decode(Bytes.fromHexString(ssz), reader -> reader.readUnsignedBigInteger(bitLength)).toByteArray());
       }
       assertEquals(Bytes.wrap(new BigInteger(value).toByteArray()).toShortHexString(), read.toShortHexString());
     }
@@ -100,8 +101,9 @@ class SSZTestSuite {
       } else if (bitLength < 62) {
         read = Bytes.ofUnsignedLong(SSZ.decode(Bytes.fromHexString(ssz), reader -> reader.readULong(bitLength)));
       } else {
-        read = Bytes.wrap(
-            SSZ.decode(Bytes.fromHexString(ssz), reader -> reader.readUnsignedBigInteger(bitLength)).toByteArray());
+        read = Bytes
+            .wrap(
+                SSZ.decode(Bytes.fromHexString(ssz), reader -> reader.readUnsignedBigInteger(bitLength)).toByteArray());
       }
       assertEquals(Bytes.wrap(new BigInteger(value).toByteArray()).toShortHexString(), read.toShortHexString());
     }
@@ -171,8 +173,10 @@ class SSZTestSuite {
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
     Map allTests = mapper.readerFor(Map.class).readValue(in);
 
-    return ((List<Map>) allTests.get("test_cases")).stream().map(
-        testCase -> Arguments
-            .of(testCase.get("type"), testCase.get("valid"), testCase.get("value"), testCase.get("ssz")));
+    return ((List<Map>) allTests.get("test_cases"))
+        .stream()
+        .map(
+            testCase -> Arguments
+                .of(testCase.get("type"), testCase.get("valid"), testCase.get("value"), testCase.get("ssz")));
   }
 }

@@ -631,12 +631,13 @@ public final class KeyExchange {
     try {
       rxPtr = Sodium.malloc(sessionkeybytes);
       txPtr = Sodium.malloc(sessionkeybytes);
-      int rc = Sodium.crypto_kx_client_session_keys(
-          rxPtr,
-          txPtr,
-          clientKeys.publicKey.value.pointer(),
-          clientKeys.secretKey.value.pointer(),
-          serverKey.value.pointer());
+      int rc = Sodium
+          .crypto_kx_client_session_keys(
+              rxPtr,
+              txPtr,
+              clientKeys.publicKey.value.pointer(),
+              clientKeys.secretKey.value.pointer(),
+              serverKey.value.pointer());
       if (rc != 0) {
         throw new SodiumException("crypto_kx_client_session_keys: failed with result " + rc);
       }
@@ -674,12 +675,13 @@ public final class KeyExchange {
     try {
       rxPtr = Sodium.malloc(sessionkeybytes);
       txPtr = Sodium.malloc(sessionkeybytes);
-      int rc = Sodium.crypto_kx_server_session_keys(
-          rxPtr,
-          txPtr,
-          serverKeys.publicKey.value.pointer(),
-          serverKeys.secretKey.value.pointer(),
-          clientKey.value.pointer());
+      int rc = Sodium
+          .crypto_kx_server_session_keys(
+              rxPtr,
+              txPtr,
+              serverKeys.publicKey.value.pointer(),
+              serverKeys.secretKey.value.pointer(),
+              clientKey.value.pointer());
       if (rc != 0) {
         throw new SodiumException("crypto_kx_client_session_keys: failed with result " + rc);
       }

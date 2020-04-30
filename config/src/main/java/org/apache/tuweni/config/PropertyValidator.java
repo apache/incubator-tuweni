@@ -66,8 +66,10 @@ public interface PropertyValidator<T> {
   static <T> PropertyValidator<List<T>> allInList(PropertyValidator<? super T> validator) {
     return (key, position, value) -> {
       if (value != null) {
-        return value.stream().flatMap(elem -> validator.validate(key, position, elem).stream()).collect(
-            Collectors.toList());
+        return value
+            .stream()
+            .flatMap(elem -> validator.validate(key, position, elem).stream())
+            .collect(Collectors.toList());
       }
       return noErrors();
     };

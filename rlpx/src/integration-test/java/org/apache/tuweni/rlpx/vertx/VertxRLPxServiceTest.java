@@ -35,9 +35,10 @@ class VertxRLPxServiceTest {
 
   @Test
   void invalidPort(@VertxInstance Vertx vertx) {
-    Assertions.assertThrows(
-        IllegalArgumentException.class,
-        () -> new VertxRLPxService(vertx, -1, "localhost", 30, SECP256K1.KeyPair.random(), new ArrayList<>(), "a"));
+    Assertions
+        .assertThrows(
+            IllegalArgumentException.class,
+            () -> new VertxRLPxService(vertx, -1, "localhost", 30, SECP256K1.KeyPair.random(), new ArrayList<>(), "a"));
   }
 
   @Test

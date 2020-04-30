@@ -83,15 +83,16 @@ public final class State {
               messageSender.sendMessage(MessageSender.Verb.GOSSIP, attributes, peer, hash, message);
             }
           }
-          lazyQueue.addAll(
-              peerRepository
-                  .lazyPushPeers()
-                  .stream()
-                  .filter(p -> !lazyPeers.contains(p))
-                  .map(
-                      peer -> (Runnable) (() -> messageSender
-                          .sendMessage(MessageSender.Verb.IHAVE, null, peer, hash, null)))
-                  .collect(Collectors.toList()));
+          lazyQueue
+              .addAll(
+                  peerRepository
+                      .lazyPushPeers()
+                      .stream()
+                      .filter(p -> !lazyPeers.contains(p))
+                      .map(
+                          peer -> (Runnable) (() -> messageSender
+                              .sendMessage(MessageSender.Verb.IHAVE, null, peer, hash, null)))
+                      .collect(Collectors.toList()));
           if (sender != null) {
             messageListener.listen(message, attributes);
           }

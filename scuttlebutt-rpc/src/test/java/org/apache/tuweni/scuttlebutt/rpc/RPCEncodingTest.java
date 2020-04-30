@@ -39,10 +39,11 @@ class RPCEncodingTest {
 
   @Test
   void rpcRoundtripJSON() throws Exception {
-    Bytes message = RPCCodec.encodeRequest(
-        Bytes.wrap("\"some JSON string\"".getBytes(StandardCharsets.UTF_8)),
-        RPCFlag.BodyType.JSON,
-        RPCFlag.Stream.STREAM);
+    Bytes message = RPCCodec
+        .encodeRequest(
+            Bytes.wrap("\"some JSON string\"".getBytes(StandardCharsets.UTF_8)),
+            RPCFlag.BodyType.JSON,
+            RPCFlag.Stream.STREAM);
     RPCMessage decoded = new RPCMessage(message);
     assertTrue(decoded.stream());
     assertEquals("some JSON string", decoded.asJSON(new ObjectMapper(), String.class));

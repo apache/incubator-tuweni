@@ -314,22 +314,23 @@ public final class BlockHeader {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(
-        parentHash,
-        ommersHash,
-        coinbase,
-        stateRoot,
-        transactionsRoot,
-        receiptsRoot,
-        logsBloom,
-        difficulty,
-        number,
-        gasLimit,
-        gasUsed,
-        timestamp,
-        extraData,
-        mixHash,
-        nonce);
+    return Objects
+        .hashCode(
+            parentHash,
+            ommersHash,
+            coinbase,
+            stateRoot,
+            transactionsRoot,
+            receiptsRoot,
+            logsBloom,
+            difficulty,
+            number,
+            gasLimit,
+            gasUsed,
+            timestamp,
+            extraData,
+            mixHash,
+            nonce);
   }
 
   @Override

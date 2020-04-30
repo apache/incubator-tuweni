@@ -55,17 +55,18 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> addProvider() {
-    return Stream.of(
-        Arguments.of(v(1), v(0), v(1)),
-        Arguments.of(v(5), v(0), v(5)),
-        Arguments.of(v(0), v(1), v(1)),
-        Arguments.of(v(0), v(100), v(100)),
-        Arguments.of(v(2), v(2), v(4)),
-        Arguments.of(v(100), v(90), v(190)),
-        Arguments.of(Value.MAX_VALUE, v(1), v(0)),
-        Arguments.of(Value.MAX_VALUE, v(2), v(1)),
-        Arguments.of(hv("0xFFFFFFF0"), v(1), hv("0xFFFFFFF1")),
-        Arguments.of(hv("0xFFFFFFFE"), v(1), Value.MAX_VALUE));
+    return Stream
+        .of(
+            Arguments.of(v(1), v(0), v(1)),
+            Arguments.of(v(5), v(0), v(5)),
+            Arguments.of(v(0), v(1), v(1)),
+            Arguments.of(v(0), v(100), v(100)),
+            Arguments.of(v(2), v(2), v(4)),
+            Arguments.of(v(100), v(90), v(190)),
+            Arguments.of(Value.MAX_VALUE, v(1), v(0)),
+            Arguments.of(Value.MAX_VALUE, v(2), v(1)),
+            Arguments.of(hv("0xFFFFFFF0"), v(1), hv("0xFFFFFFF1")),
+            Arguments.of(hv("0xFFFFFFFE"), v(1), Value.MAX_VALUE));
   }
 
   @ParameterizedTest
@@ -75,17 +76,18 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> addUInt32Provider() {
-    return Stream.of(
-        Arguments.of(v(1), UInt32.ZERO, v(1)),
-        Arguments.of(v(5), UInt32.ZERO, v(5)),
-        Arguments.of(v(0), UInt32.ONE, v(1)),
-        Arguments.of(v(0), UInt32.valueOf(100), v(100)),
-        Arguments.of(v(2), UInt32.valueOf(2), v(4)),
-        Arguments.of(v(100), UInt32.valueOf(90), v(190)),
-        Arguments.of(Value.MAX_VALUE, UInt32.valueOf(1), v(0)),
-        Arguments.of(Value.MAX_VALUE, UInt32.valueOf(2), v(1)),
-        Arguments.of(hv("0xFFFFFFF0"), UInt32.valueOf(1), hv("0xFFFFFFF1")),
-        Arguments.of(hv("0xFFFFFFFE"), UInt32.valueOf(1), Value.MAX_VALUE));
+    return Stream
+        .of(
+            Arguments.of(v(1), UInt32.ZERO, v(1)),
+            Arguments.of(v(5), UInt32.ZERO, v(5)),
+            Arguments.of(v(0), UInt32.ONE, v(1)),
+            Arguments.of(v(0), UInt32.valueOf(100), v(100)),
+            Arguments.of(v(2), UInt32.valueOf(2), v(4)),
+            Arguments.of(v(100), UInt32.valueOf(90), v(190)),
+            Arguments.of(Value.MAX_VALUE, UInt32.valueOf(1), v(0)),
+            Arguments.of(Value.MAX_VALUE, UInt32.valueOf(2), v(1)),
+            Arguments.of(hv("0xFFFFFFF0"), UInt32.valueOf(1), hv("0xFFFFFFF1")),
+            Arguments.of(hv("0xFFFFFFFE"), UInt32.valueOf(1), Value.MAX_VALUE));
   }
 
   @ParameterizedTest
@@ -95,19 +97,20 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> addLongProvider() {
-    return Stream.of(
-        Arguments.of(v(1), 0, v(1)),
-        Arguments.of(v(5), 0, v(5)),
-        Arguments.of(v(0), 1, v(1)),
-        Arguments.of(v(0), 100, v(100)),
-        Arguments.of(v(2), 2, v(4)),
-        Arguments.of(v(100), 90, v(190)),
-        Arguments.of(Value.MAX_VALUE, 1, v(0)),
-        Arguments.of(Value.MAX_VALUE, 2, v(1)),
-        Arguments.of(hv("0xFFFFFFF0"), 1, hv("0xFFFFFFF1")),
-        Arguments.of(hv("0xFFFFFFFE"), 1, Value.MAX_VALUE),
-        Arguments.of(v(10), -5, v(5)),
-        Arguments.of(v(0), -1, Value.MAX_VALUE));
+    return Stream
+        .of(
+            Arguments.of(v(1), 0, v(1)),
+            Arguments.of(v(5), 0, v(5)),
+            Arguments.of(v(0), 1, v(1)),
+            Arguments.of(v(0), 100, v(100)),
+            Arguments.of(v(2), 2, v(4)),
+            Arguments.of(v(100), 90, v(190)),
+            Arguments.of(Value.MAX_VALUE, 1, v(0)),
+            Arguments.of(Value.MAX_VALUE, 2, v(1)),
+            Arguments.of(hv("0xFFFFFFF0"), 1, hv("0xFFFFFFF1")),
+            Arguments.of(hv("0xFFFFFFFE"), 1, Value.MAX_VALUE),
+            Arguments.of(v(10), -5, v(5)),
+            Arguments.of(v(0), -1, Value.MAX_VALUE));
   }
 
   @ParameterizedTest
@@ -117,14 +120,15 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> addModProvider() {
-    return Stream.of(
-        Arguments.of(v(0), v(1), UInt32.valueOf(2), v(1)),
-        Arguments.of(v(1), v(1), UInt32.valueOf(2), v(0)),
-        Arguments.of(Value.MAX_VALUE.subtract(2), v(1), UInt32.MAX_VALUE, Value.MAX_VALUE.subtract(1)),
-        Arguments.of(Value.MAX_VALUE.subtract(1), v(1), UInt32.MAX_VALUE, v(0)),
-        Arguments.of(v(2), v(1), UInt32.valueOf(2), v(1)),
-        Arguments.of(v(3), v(2), UInt32.valueOf(6), v(5)),
-        Arguments.of(v(3), v(4), UInt32.valueOf(2), v(1)));
+    return Stream
+        .of(
+            Arguments.of(v(0), v(1), UInt32.valueOf(2), v(1)),
+            Arguments.of(v(1), v(1), UInt32.valueOf(2), v(0)),
+            Arguments.of(Value.MAX_VALUE.subtract(2), v(1), UInt32.MAX_VALUE, Value.MAX_VALUE.subtract(1)),
+            Arguments.of(Value.MAX_VALUE.subtract(1), v(1), UInt32.MAX_VALUE, v(0)),
+            Arguments.of(v(2), v(1), UInt32.valueOf(2), v(1)),
+            Arguments.of(v(3), v(2), UInt32.valueOf(6), v(5)),
+            Arguments.of(v(3), v(4), UInt32.valueOf(2), v(1)));
   }
 
   @Test
@@ -140,14 +144,15 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> addModUInt32UInt32Provider() {
-    return Stream.of(
-        Arguments.of(v(0), UInt32.ONE, UInt32.valueOf(2), v(1)),
-        Arguments.of(v(1), UInt32.ONE, UInt32.valueOf(2), v(0)),
-        Arguments.of(Value.MAX_VALUE.subtract(2), UInt32.ONE, UInt32.MAX_VALUE, Value.MAX_VALUE.subtract(1)),
-        Arguments.of(Value.MAX_VALUE.subtract(1), UInt32.ONE, UInt32.MAX_VALUE, v(0)),
-        Arguments.of(v(2), UInt32.ONE, UInt32.valueOf(2), v(1)),
-        Arguments.of(v(3), UInt32.valueOf(2), UInt32.valueOf(6), v(5)),
-        Arguments.of(v(3), UInt32.valueOf(4), UInt32.valueOf(2), v(1)));
+    return Stream
+        .of(
+            Arguments.of(v(0), UInt32.ONE, UInt32.valueOf(2), v(1)),
+            Arguments.of(v(1), UInt32.ONE, UInt32.valueOf(2), v(0)),
+            Arguments.of(Value.MAX_VALUE.subtract(2), UInt32.ONE, UInt32.MAX_VALUE, Value.MAX_VALUE.subtract(1)),
+            Arguments.of(Value.MAX_VALUE.subtract(1), UInt32.ONE, UInt32.MAX_VALUE, v(0)),
+            Arguments.of(v(2), UInt32.ONE, UInt32.valueOf(2), v(1)),
+            Arguments.of(v(3), UInt32.valueOf(2), UInt32.valueOf(6), v(5)),
+            Arguments.of(v(3), UInt32.valueOf(4), UInt32.valueOf(2), v(1)));
   }
 
   @Test
@@ -163,14 +168,15 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> addModLongUInt32Provider() {
-    return Stream.of(
-        Arguments.of(v(0), 1, UInt32.valueOf(2), v(1)),
-        Arguments.of(v(1), 1, UInt32.valueOf(2), v(0)),
-        Arguments.of(Value.MAX_VALUE.subtract(2), 1, UInt32.MAX_VALUE, Value.MAX_VALUE.subtract(1)),
-        Arguments.of(Value.MAX_VALUE.subtract(1), 1, UInt32.MAX_VALUE, v(0)),
-        Arguments.of(v(2), 1, UInt32.valueOf(2), v(1)),
-        Arguments.of(v(2), -1, UInt32.valueOf(2), v(1)),
-        Arguments.of(v(1), -7, UInt32.valueOf(5), v(4)));
+    return Stream
+        .of(
+            Arguments.of(v(0), 1, UInt32.valueOf(2), v(1)),
+            Arguments.of(v(1), 1, UInt32.valueOf(2), v(0)),
+            Arguments.of(Value.MAX_VALUE.subtract(2), 1, UInt32.MAX_VALUE, Value.MAX_VALUE.subtract(1)),
+            Arguments.of(Value.MAX_VALUE.subtract(1), 1, UInt32.MAX_VALUE, v(0)),
+            Arguments.of(v(2), 1, UInt32.valueOf(2), v(1)),
+            Arguments.of(v(2), -1, UInt32.valueOf(2), v(1)),
+            Arguments.of(v(1), -7, UInt32.valueOf(5), v(4)));
   }
 
   @Test
@@ -208,14 +214,15 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> subtractProvider() {
-    return Stream.of(
-        Arguments.of(v(1), v(0), v(1)),
-        Arguments.of(v(5), v(0), v(5)),
-        Arguments.of(v(2), v(1), v(1)),
-        Arguments.of(v(100), v(100), v(0)),
-        Arguments.of(v(0), v(1), Value.MAX_VALUE),
-        Arguments.of(v(1), v(2), Value.MAX_VALUE),
-        Arguments.of(Value.MAX_VALUE, v(1), hv("0xFFFFFFFE")));
+    return Stream
+        .of(
+            Arguments.of(v(1), v(0), v(1)),
+            Arguments.of(v(5), v(0), v(5)),
+            Arguments.of(v(2), v(1), v(1)),
+            Arguments.of(v(100), v(100), v(0)),
+            Arguments.of(v(0), v(1), Value.MAX_VALUE),
+            Arguments.of(v(1), v(2), Value.MAX_VALUE),
+            Arguments.of(Value.MAX_VALUE, v(1), hv("0xFFFFFFFE")));
   }
 
   @ParameterizedTest
@@ -225,14 +232,15 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> subtractUInt32Provider() {
-    return Stream.of(
-        Arguments.of(v(1), UInt32.ZERO, v(1)),
-        Arguments.of(v(5), UInt32.ZERO, v(5)),
-        Arguments.of(v(2), UInt32.ONE, v(1)),
-        Arguments.of(v(100), UInt32.valueOf(100), v(0)),
-        Arguments.of(v(0), UInt32.ONE, Value.MAX_VALUE),
-        Arguments.of(v(1), UInt32.valueOf(2), Value.MAX_VALUE),
-        Arguments.of(Value.MAX_VALUE, UInt32.ONE, hv("0xFFFFFFFE")));
+    return Stream
+        .of(
+            Arguments.of(v(1), UInt32.ZERO, v(1)),
+            Arguments.of(v(5), UInt32.ZERO, v(5)),
+            Arguments.of(v(2), UInt32.ONE, v(1)),
+            Arguments.of(v(100), UInt32.valueOf(100), v(0)),
+            Arguments.of(v(0), UInt32.ONE, Value.MAX_VALUE),
+            Arguments.of(v(1), UInt32.valueOf(2), Value.MAX_VALUE),
+            Arguments.of(Value.MAX_VALUE, UInt32.ONE, hv("0xFFFFFFFE")));
   }
 
   @ParameterizedTest
@@ -242,17 +250,18 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> subtractLongProvider() {
-    return Stream.of(
-        Arguments.of(v(1), 0, v(1)),
-        Arguments.of(v(5), 0, v(5)),
-        Arguments.of(v(2), 1, v(1)),
-        Arguments.of(v(100), 100, v(0)),
-        Arguments.of(v(0), 1, Value.MAX_VALUE),
-        Arguments.of(v(1), 2, Value.MAX_VALUE),
-        Arguments.of(Value.MAX_VALUE, 1, hv("0xFFFFFFFE")),
-        Arguments.of(v(0), -1, v(1)),
-        Arguments.of(v(0), -100, v(100)),
-        Arguments.of(v(2), -2, v(4)));
+    return Stream
+        .of(
+            Arguments.of(v(1), 0, v(1)),
+            Arguments.of(v(5), 0, v(5)),
+            Arguments.of(v(2), 1, v(1)),
+            Arguments.of(v(100), 100, v(0)),
+            Arguments.of(v(0), 1, Value.MAX_VALUE),
+            Arguments.of(v(1), 2, Value.MAX_VALUE),
+            Arguments.of(Value.MAX_VALUE, 1, hv("0xFFFFFFFE")),
+            Arguments.of(v(0), -1, v(1)),
+            Arguments.of(v(0), -100, v(100)),
+            Arguments.of(v(2), -2, v(4)));
   }
 
   @ParameterizedTest
@@ -262,18 +271,19 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> multiplyProvider() {
-    return Stream.of(
-        Arguments.of(v(0), v(2), v(0)),
-        Arguments.of(v(1), v(2), v(2)),
-        Arguments.of(v(2), v(2), v(4)),
-        Arguments.of(v(3), v(2), v(6)),
-        Arguments.of(v(4), v(2), v(8)),
-        Arguments.of(v(10), v(18), v(180)),
-        Arguments.of(v(2), v(8), v(16)),
-        Arguments.of(v(7), v(8), v(56)),
-        Arguments.of(v(8), v(8), v(64)),
-        Arguments.of(v(17), v(8), v(136)),
-        Arguments.of(v(22), v(0), v(0)));
+    return Stream
+        .of(
+            Arguments.of(v(0), v(2), v(0)),
+            Arguments.of(v(1), v(2), v(2)),
+            Arguments.of(v(2), v(2), v(4)),
+            Arguments.of(v(3), v(2), v(6)),
+            Arguments.of(v(4), v(2), v(8)),
+            Arguments.of(v(10), v(18), v(180)),
+            Arguments.of(v(2), v(8), v(16)),
+            Arguments.of(v(7), v(8), v(56)),
+            Arguments.of(v(8), v(8), v(64)),
+            Arguments.of(v(17), v(8), v(136)),
+            Arguments.of(v(22), v(0), v(0)));
   }
 
   @ParameterizedTest
@@ -283,20 +293,21 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> multiplyUInt32Provider() {
-    return Stream.of(
-        Arguments.of(v(0), UInt32.valueOf(2), v(0)),
-        Arguments.of(v(1), UInt32.valueOf(2), v(2)),
-        Arguments.of(v(2), UInt32.valueOf(2), v(4)),
-        Arguments.of(v(3), UInt32.valueOf(2), v(6)),
-        Arguments.of(v(4), UInt32.valueOf(2), v(8)),
-        Arguments.of(v(10), UInt32.valueOf(18), v(180)),
-        Arguments.of(v(2), UInt32.valueOf(8), v(16)),
-        Arguments.of(v(7), UInt32.valueOf(8), v(56)),
-        Arguments.of(v(8), UInt32.valueOf(8), v(64)),
-        Arguments.of(v(17), UInt32.valueOf(8), v(136)),
-        Arguments.of(v(22), UInt32.ZERO, v(0)),
-        Arguments.of(hv("0xFFFFFFFF"), UInt32.valueOf(2), hv("0xFFFFFFFE")),
-        Arguments.of(hv("0xFFFFFFFF"), UInt32.valueOf(2), hv("0xFFFFFFFE")));
+    return Stream
+        .of(
+            Arguments.of(v(0), UInt32.valueOf(2), v(0)),
+            Arguments.of(v(1), UInt32.valueOf(2), v(2)),
+            Arguments.of(v(2), UInt32.valueOf(2), v(4)),
+            Arguments.of(v(3), UInt32.valueOf(2), v(6)),
+            Arguments.of(v(4), UInt32.valueOf(2), v(8)),
+            Arguments.of(v(10), UInt32.valueOf(18), v(180)),
+            Arguments.of(v(2), UInt32.valueOf(8), v(16)),
+            Arguments.of(v(7), UInt32.valueOf(8), v(56)),
+            Arguments.of(v(8), UInt32.valueOf(8), v(64)),
+            Arguments.of(v(17), UInt32.valueOf(8), v(136)),
+            Arguments.of(v(22), UInt32.ZERO, v(0)),
+            Arguments.of(hv("0xFFFFFFFF"), UInt32.valueOf(2), hv("0xFFFFFFFE")),
+            Arguments.of(hv("0xFFFFFFFF"), UInt32.valueOf(2), hv("0xFFFFFFFE")));
   }
 
   @ParameterizedTest
@@ -306,20 +317,21 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> multiplyLongProvider() {
-    return Stream.of(
-        Arguments.of(v(0), 2, v(0)),
-        Arguments.of(v(1), 2, v(2)),
-        Arguments.of(v(2), 2, v(4)),
-        Arguments.of(v(3), 2, v(6)),
-        Arguments.of(v(4), 2, v(8)),
-        Arguments.of(v(10), 18, v(180)),
-        Arguments.of(v(2), 8, v(16)),
-        Arguments.of(v(7), 8, v(56)),
-        Arguments.of(v(8), 8, v(64)),
-        Arguments.of(v(17), 8, v(136)),
-        Arguments.of(v(22), 0, v(0)),
-        Arguments.of(hv("0xFFFFFFFF"), 2, hv("0xFFFFFFFE")),
-        Arguments.of(hv("0xFFFFFFFF"), 2, hv("0xFFFFFFFE")));
+    return Stream
+        .of(
+            Arguments.of(v(0), 2, v(0)),
+            Arguments.of(v(1), 2, v(2)),
+            Arguments.of(v(2), 2, v(4)),
+            Arguments.of(v(3), 2, v(6)),
+            Arguments.of(v(4), 2, v(8)),
+            Arguments.of(v(10), 18, v(180)),
+            Arguments.of(v(2), 8, v(16)),
+            Arguments.of(v(7), 8, v(56)),
+            Arguments.of(v(8), 8, v(64)),
+            Arguments.of(v(17), 8, v(136)),
+            Arguments.of(v(22), 0, v(0)),
+            Arguments.of(hv("0xFFFFFFFF"), 2, hv("0xFFFFFFFE")),
+            Arguments.of(hv("0xFFFFFFFF"), 2, hv("0xFFFFFFFE")));
   }
 
   @Test
@@ -335,12 +347,13 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> multiplyModProvider() {
-    return Stream.of(
-        Arguments.of(v(0), v(5), UInt32.valueOf(2), v(0)),
-        Arguments.of(v(2), v(3), UInt32.valueOf(7), v(6)),
-        Arguments.of(v(2), v(3), UInt32.valueOf(6), v(0)),
-        Arguments.of(v(2), v(0), UInt32.valueOf(6), v(0)),
-        Arguments.of(hv("0xFFFFFFFE"), v(2), UInt32.MAX_VALUE, hv("0xFFFFFFFD")));
+    return Stream
+        .of(
+            Arguments.of(v(0), v(5), UInt32.valueOf(2), v(0)),
+            Arguments.of(v(2), v(3), UInt32.valueOf(7), v(6)),
+            Arguments.of(v(2), v(3), UInt32.valueOf(6), v(0)),
+            Arguments.of(v(2), v(0), UInt32.valueOf(6), v(0)),
+            Arguments.of(hv("0xFFFFFFFE"), v(2), UInt32.MAX_VALUE, hv("0xFFFFFFFD")));
   }
 
   @Test
@@ -356,12 +369,13 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> multiplyModUInt32UInt32Provider() {
-    return Stream.of(
-        Arguments.of(v(0), UInt32.valueOf(5), UInt32.valueOf(2), v(0)),
-        Arguments.of(v(2), UInt32.valueOf(3), UInt32.valueOf(7), v(6)),
-        Arguments.of(v(2), UInt32.valueOf(3), UInt32.valueOf(6), v(0)),
-        Arguments.of(v(2), UInt32.ZERO, UInt32.valueOf(6), v(0)),
-        Arguments.of(hv("0xFFFFFFFE"), UInt32.valueOf(2), UInt32.MAX_VALUE, hv("0xFFFFFFFD")));
+    return Stream
+        .of(
+            Arguments.of(v(0), UInt32.valueOf(5), UInt32.valueOf(2), v(0)),
+            Arguments.of(v(2), UInt32.valueOf(3), UInt32.valueOf(7), v(6)),
+            Arguments.of(v(2), UInt32.valueOf(3), UInt32.valueOf(6), v(0)),
+            Arguments.of(v(2), UInt32.ZERO, UInt32.valueOf(6), v(0)),
+            Arguments.of(hv("0xFFFFFFFE"), UInt32.valueOf(2), UInt32.MAX_VALUE, hv("0xFFFFFFFD")));
   }
 
   @Test
@@ -378,12 +392,13 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> multiplyModLongUInt32Provider() {
-    return Stream.of(
-        Arguments.of(v(0), 5, UInt32.valueOf(2), v(0)),
-        Arguments.of(v(2), 3, UInt32.valueOf(7), v(6)),
-        Arguments.of(v(2), 3, UInt32.valueOf(6), v(0)),
-        Arguments.of(v(2), 0, UInt32.valueOf(6), v(0)),
-        Arguments.of(hv("0xFFFFFFFE"), 2, UInt32.MAX_VALUE, hv("0xFFFFFFFD")));
+    return Stream
+        .of(
+            Arguments.of(v(0), 5, UInt32.valueOf(2), v(0)),
+            Arguments.of(v(2), 3, UInt32.valueOf(7), v(6)),
+            Arguments.of(v(2), 3, UInt32.valueOf(6), v(0)),
+            Arguments.of(v(2), 0, UInt32.valueOf(6), v(0)),
+            Arguments.of(hv("0xFFFFFFFE"), 2, UInt32.MAX_VALUE, hv("0xFFFFFFFD")));
   }
 
   @Test
@@ -405,12 +420,13 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> multiplyModLongLongProvider() {
-    return Stream.of(
-        Arguments.of(v(0), 5, 2, v(0)),
-        Arguments.of(v(2), 3, 7, v(6)),
-        Arguments.of(v(2), 3, 6, v(0)),
-        Arguments.of(v(2), 0, 6, v(0)),
-        Arguments.of(hv("0x0FFFFFFE"), 2, Integer.MAX_VALUE, hv("0x1FFFFFFC")));
+    return Stream
+        .of(
+            Arguments.of(v(0), 5, 2, v(0)),
+            Arguments.of(v(2), 3, 7, v(6)),
+            Arguments.of(v(2), 3, 6, v(0)),
+            Arguments.of(v(2), 0, 6, v(0)),
+            Arguments.of(hv("0x0FFFFFFE"), 2, Integer.MAX_VALUE, hv("0x1FFFFFFC")));
   }
 
   @Test
@@ -438,19 +454,20 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> divideProvider() {
-    return Stream.of(
-        Arguments.of(v(0), v(2), v(0)),
-        Arguments.of(v(1), v(2), v(0)),
-        Arguments.of(v(2), v(2), v(1)),
-        Arguments.of(v(3), v(2), v(1)),
-        Arguments.of(v(4), v(2), v(2)),
-        Arguments.of(v(2), v(8), v(0)),
-        Arguments.of(v(7), v(8), v(0)),
-        Arguments.of(v(8), v(8), v(1)),
-        Arguments.of(v(9), v(8), v(1)),
-        Arguments.of(v(17), v(8), v(2)),
-        Arguments.of(v(1024), v(8), v(128)),
-        Arguments.of(v(1026), v(8), v(128)));
+    return Stream
+        .of(
+            Arguments.of(v(0), v(2), v(0)),
+            Arguments.of(v(1), v(2), v(0)),
+            Arguments.of(v(2), v(2), v(1)),
+            Arguments.of(v(3), v(2), v(1)),
+            Arguments.of(v(4), v(2), v(2)),
+            Arguments.of(v(2), v(8), v(0)),
+            Arguments.of(v(7), v(8), v(0)),
+            Arguments.of(v(8), v(8), v(1)),
+            Arguments.of(v(9), v(8), v(1)),
+            Arguments.of(v(17), v(8), v(2)),
+            Arguments.of(v(1024), v(8), v(128)),
+            Arguments.of(v(1026), v(8), v(128)));
   }
 
   @Test
@@ -466,19 +483,20 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> divideUInt32Provider() {
-    return Stream.of(
-        Arguments.of(v(0), UInt32.valueOf(2), v(0)),
-        Arguments.of(v(1), UInt32.valueOf(2), v(0)),
-        Arguments.of(v(2), UInt32.valueOf(2), v(1)),
-        Arguments.of(v(3), UInt32.valueOf(2), v(1)),
-        Arguments.of(v(4), UInt32.valueOf(2), v(2)),
-        Arguments.of(v(2), UInt32.valueOf(8), v(0)),
-        Arguments.of(v(7), UInt32.valueOf(8), v(0)),
-        Arguments.of(v(8), UInt32.valueOf(8), v(1)),
-        Arguments.of(v(9), UInt32.valueOf(8), v(1)),
-        Arguments.of(v(17), UInt32.valueOf(8), v(2)),
-        Arguments.of(v(1024), UInt32.valueOf(8), v(128)),
-        Arguments.of(v(1026), UInt32.valueOf(8), v(128)));
+    return Stream
+        .of(
+            Arguments.of(v(0), UInt32.valueOf(2), v(0)),
+            Arguments.of(v(1), UInt32.valueOf(2), v(0)),
+            Arguments.of(v(2), UInt32.valueOf(2), v(1)),
+            Arguments.of(v(3), UInt32.valueOf(2), v(1)),
+            Arguments.of(v(4), UInt32.valueOf(2), v(2)),
+            Arguments.of(v(2), UInt32.valueOf(8), v(0)),
+            Arguments.of(v(7), UInt32.valueOf(8), v(0)),
+            Arguments.of(v(8), UInt32.valueOf(8), v(1)),
+            Arguments.of(v(9), UInt32.valueOf(8), v(1)),
+            Arguments.of(v(17), UInt32.valueOf(8), v(2)),
+            Arguments.of(v(1024), UInt32.valueOf(8), v(128)),
+            Arguments.of(v(1026), UInt32.valueOf(8), v(128)));
   }
 
   @Test
@@ -494,19 +512,20 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> divideLongProvider() {
-    return Stream.of(
-        Arguments.of(v(0), 2, v(0)),
-        Arguments.of(v(1), 2, v(0)),
-        Arguments.of(v(2), 2, v(1)),
-        Arguments.of(v(3), 2, v(1)),
-        Arguments.of(v(4), 2, v(2)),
-        Arguments.of(v(2), 8, v(0)),
-        Arguments.of(v(7), 8, v(0)),
-        Arguments.of(v(8), 8, v(1)),
-        Arguments.of(v(9), 8, v(1)),
-        Arguments.of(v(17), 8, v(2)),
-        Arguments.of(v(1024), 8, v(128)),
-        Arguments.of(v(1026), 8, v(128)));
+    return Stream
+        .of(
+            Arguments.of(v(0), 2, v(0)),
+            Arguments.of(v(1), 2, v(0)),
+            Arguments.of(v(2), 2, v(1)),
+            Arguments.of(v(3), 2, v(1)),
+            Arguments.of(v(4), 2, v(2)),
+            Arguments.of(v(2), 8, v(0)),
+            Arguments.of(v(7), 8, v(0)),
+            Arguments.of(v(8), 8, v(1)),
+            Arguments.of(v(9), 8, v(1)),
+            Arguments.of(v(17), 8, v(2)),
+            Arguments.of(v(1024), 8, v(128)),
+            Arguments.of(v(1026), 8, v(128)));
   }
 
   @Test
@@ -528,11 +547,12 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> powUInt32Provider() {
-    return Stream.of(
-        Arguments.of(v(0), UInt32.valueOf(2), v(0)),
-        Arguments.of(v(2), UInt32.valueOf(2), v(4)),
-        Arguments.of(v(2), UInt32.valueOf(8), v(256)),
-        Arguments.of(v(3), UInt32.valueOf(3), v(27)));
+    return Stream
+        .of(
+            Arguments.of(v(0), UInt32.valueOf(2), v(0)),
+            Arguments.of(v(2), UInt32.valueOf(2), v(4)),
+            Arguments.of(v(2), UInt32.valueOf(8), v(256)),
+            Arguments.of(v(3), UInt32.valueOf(3), v(27)));
   }
 
   @ParameterizedTest
@@ -542,11 +562,12 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> powLongProvider() {
-    return Stream.of(
-        Arguments.of(v(0), 2, v(0)),
-        Arguments.of(v(2), 2, v(4)),
-        Arguments.of(v(2), 8, v(256)),
-        Arguments.of(v(3), 3, v(27)));
+    return Stream
+        .of(
+            Arguments.of(v(0), 2, v(0)),
+            Arguments.of(v(2), 2, v(4)),
+            Arguments.of(v(2), 8, v(256)),
+            Arguments.of(v(3), 3, v(27)));
   }
 
   @ParameterizedTest
@@ -556,20 +577,21 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> modUInt32Provider() {
-    return Stream.of(
-        Arguments.of(v(0), UInt32.valueOf(2), v(0)),
-        Arguments.of(v(1), UInt32.valueOf(2), v(1)),
-        Arguments.of(v(2), UInt32.valueOf(2), v(0)),
-        Arguments.of(v(3), UInt32.valueOf(2), v(1)),
-        Arguments.of(v(0), UInt32.valueOf(8), v(0)),
-        Arguments.of(v(1), UInt32.valueOf(8), v(1)),
-        Arguments.of(v(2), UInt32.valueOf(8), v(2)),
-        Arguments.of(v(3), UInt32.valueOf(8), v(3)),
-        Arguments.of(v(7), UInt32.valueOf(8), v(7)),
-        Arguments.of(v(8), UInt32.valueOf(8), v(0)),
-        Arguments.of(v(9), UInt32.valueOf(8), v(1)),
-        Arguments.of(v(1024), UInt32.valueOf(8), v(0)),
-        Arguments.of(v(1026), UInt32.valueOf(8), v(2)));
+    return Stream
+        .of(
+            Arguments.of(v(0), UInt32.valueOf(2), v(0)),
+            Arguments.of(v(1), UInt32.valueOf(2), v(1)),
+            Arguments.of(v(2), UInt32.valueOf(2), v(0)),
+            Arguments.of(v(3), UInt32.valueOf(2), v(1)),
+            Arguments.of(v(0), UInt32.valueOf(8), v(0)),
+            Arguments.of(v(1), UInt32.valueOf(8), v(1)),
+            Arguments.of(v(2), UInt32.valueOf(8), v(2)),
+            Arguments.of(v(3), UInt32.valueOf(8), v(3)),
+            Arguments.of(v(7), UInt32.valueOf(8), v(7)),
+            Arguments.of(v(8), UInt32.valueOf(8), v(0)),
+            Arguments.of(v(9), UInt32.valueOf(8), v(1)),
+            Arguments.of(v(1024), UInt32.valueOf(8), v(0)),
+            Arguments.of(v(1026), UInt32.valueOf(8), v(2)));
   }
 
   @Test
@@ -585,20 +607,21 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> modLongProvider() {
-    return Stream.of(
-        Arguments.of(v(0), 2, v(0)),
-        Arguments.of(v(1), 2, v(1)),
-        Arguments.of(v(2), 2, v(0)),
-        Arguments.of(v(3), 2, v(1)),
-        Arguments.of(v(0), 8, v(0)),
-        Arguments.of(v(1), 8, v(1)),
-        Arguments.of(v(2), 8, v(2)),
-        Arguments.of(v(3), 8, v(3)),
-        Arguments.of(v(7), 8, v(7)),
-        Arguments.of(v(8), 8, v(0)),
-        Arguments.of(v(9), 8, v(1)),
-        Arguments.of(v(1024), 8, v(0)),
-        Arguments.of(v(1026), 8, v(2)));
+    return Stream
+        .of(
+            Arguments.of(v(0), 2, v(0)),
+            Arguments.of(v(1), 2, v(1)),
+            Arguments.of(v(2), 2, v(0)),
+            Arguments.of(v(3), 2, v(1)),
+            Arguments.of(v(0), 8, v(0)),
+            Arguments.of(v(1), 8, v(1)),
+            Arguments.of(v(2), 8, v(2)),
+            Arguments.of(v(3), 8, v(3)),
+            Arguments.of(v(7), 8, v(7)),
+            Arguments.of(v(8), 8, v(0)),
+            Arguments.of(v(9), 8, v(1)),
+            Arguments.of(v(1024), 8, v(0)),
+            Arguments.of(v(1026), 8, v(2)));
   }
 
   @Test
@@ -620,17 +643,18 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> compareToProvider() {
-    return Stream.of(
-        Arguments.of(v(5), v(5), 0),
-        Arguments.of(v(5), v(3), 1),
-        Arguments.of(v(5), v(6), -1),
-        Arguments.of(hv("0x00000000"), hv("0x00000000"), 0),
-        Arguments.of(hv("0xFFFFFFFF"), hv("0xFFFFFFFF"), 0),
-        Arguments.of(hv("0x0000FFFF"), hv("0x0000FFFF"), 0),
-        Arguments.of(hv("0xFFFFFFFF"), hv("0x00000000"), 1),
-        Arguments.of(hv("0x00000000"), hv("0xFFFFFFFF"), -1),
-        Arguments.of(hv("0x0001FFFF"), hv("0x0000FFFF"), 1),
-        Arguments.of(hv("0x0000FFFE"), hv("0x0000FFFF"), -1));
+    return Stream
+        .of(
+            Arguments.of(v(5), v(5), 0),
+            Arguments.of(v(5), v(3), 1),
+            Arguments.of(v(5), v(6), -1),
+            Arguments.of(hv("0x00000000"), hv("0x00000000"), 0),
+            Arguments.of(hv("0xFFFFFFFF"), hv("0xFFFFFFFF"), 0),
+            Arguments.of(hv("0x0000FFFF"), hv("0x0000FFFF"), 0),
+            Arguments.of(hv("0xFFFFFFFF"), hv("0x00000000"), 1),
+            Arguments.of(hv("0x00000000"), hv("0xFFFFFFFF"), -1),
+            Arguments.of(hv("0x0001FFFF"), hv("0x0000FFFF"), 1),
+            Arguments.of(hv("0x0000FFFE"), hv("0x0000FFFF"), -1));
   }
 
   @ParameterizedTest
@@ -640,9 +664,10 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> toBytesProvider() {
-    return Stream.of(
-        Arguments.of(hv("0x00"), Bytes.fromHexString("0x00000000")),
-        Arguments.of(hv("0x01000000"), Bytes.fromHexString("0x01000000")));
+    return Stream
+        .of(
+            Arguments.of(hv("0x00"), Bytes.fromHexString("0x00000000")),
+            Arguments.of(hv("0x01000000"), Bytes.fromHexString("0x01000000")));
   }
 
   @ParameterizedTest
@@ -663,13 +688,14 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> numberOfLeadingZerosProvider() {
-    return Stream.of(
-        Arguments.of(hv("0x00"), 32),
-        Arguments.of(hv("0x01"), 31),
-        Arguments.of(hv("0x02"), 30),
-        Arguments.of(hv("0x03"), 30),
-        Arguments.of(hv("0x0F"), 28),
-        Arguments.of(hv("0x8F"), 24));
+    return Stream
+        .of(
+            Arguments.of(hv("0x00"), 32),
+            Arguments.of(hv("0x01"), 31),
+            Arguments.of(hv("0x02"), 30),
+            Arguments.of(hv("0x03"), 30),
+            Arguments.of(hv("0x0F"), 28),
+            Arguments.of(hv("0x8F"), 24));
   }
 
   @ParameterizedTest
@@ -679,13 +705,14 @@ class BaseUInt32ValueTest {
   }
 
   private static Stream<Arguments> bitLengthProvider() {
-    return Stream.of(
-        Arguments.of(hv("0x00"), 0),
-        Arguments.of(hv("0x01"), 1),
-        Arguments.of(hv("0x02"), 2),
-        Arguments.of(hv("0x03"), 2),
-        Arguments.of(hv("0x0F"), 4),
-        Arguments.of(hv("0x8F"), 8));
+    return Stream
+        .of(
+            Arguments.of(hv("0x00"), 0),
+            Arguments.of(hv("0x01"), 1),
+            Arguments.of(hv("0x02"), 2),
+            Arguments.of(hv("0x03"), 2),
+            Arguments.of(hv("0x0F"), 4),
+            Arguments.of(hv("0x8F"), 8));
   }
 
   @ParameterizedTest

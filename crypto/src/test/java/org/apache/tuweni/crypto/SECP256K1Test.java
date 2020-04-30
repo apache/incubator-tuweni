@@ -73,20 +73,23 @@ class SECP256K1Test {
 
   @Test
   void testPublicKeyEquals() {
-    SECP256K1.PublicKey publicKey1 = SECP256K1.PublicKey.fromBytes(
-        fromHexString(
-            "a0434d9e47f3c86235477c7b1ae6ae5d3442d49b1943c2b752a68e2a47e247c7893aba425419bc27a3b6c7e693a24c696f794c2ed877a1593cbee53b037368d7"));
-    SECP256K1.PublicKey publicKey2 = SECP256K1.PublicKey.fromBytes(
-        fromHexString(
-            "a0434d9e47f3c86235477c7b1ae6ae5d3442d49b1943c2b752a68e2a47e247c7893aba425419bc27a3b6c7e693a24c696f794c2ed877a1593cbee53b037368d7"));
+    SECP256K1.PublicKey publicKey1 = SECP256K1.PublicKey
+        .fromBytes(
+            fromHexString(
+                "a0434d9e47f3c86235477c7b1ae6ae5d3442d49b1943c2b752a68e2a47e247c7893aba425419bc27a3b6c7e693a24c696f794c2ed877a1593cbee53b037368d7"));
+    SECP256K1.PublicKey publicKey2 = SECP256K1.PublicKey
+        .fromBytes(
+            fromHexString(
+                "a0434d9e47f3c86235477c7b1ae6ae5d3442d49b1943c2b752a68e2a47e247c7893aba425419bc27a3b6c7e693a24c696f794c2ed877a1593cbee53b037368d7"));
     assertEquals(publicKey1, publicKey2);
   }
 
   @Test
   void testPublicHashCode() {
-    SECP256K1.PublicKey publicKey = SECP256K1.PublicKey.fromBytes(
-        fromHexString(
-            "a0434d9e47f3c86235477c7b1ae6ae5d3442d49b1943c2b752a68e2a47e247c7893aba425419bc27a3b6c7e693a24c696f794c2ed877a1593cbee53b037368d7"));
+    SECP256K1.PublicKey publicKey = SECP256K1.PublicKey
+        .fromBytes(
+            fromHexString(
+                "a0434d9e47f3c86235477c7b1ae6ae5d3442d49b1943c2b752a68e2a47e247c7893aba425419bc27a3b6c7e693a24c696f794c2ed877a1593cbee53b037368d7"));
 
     assertNotEquals(0, publicKey.hashCode());
   }
@@ -117,12 +120,14 @@ class SECP256K1Test {
   void testKeyPairEquals() {
     SecretKey secretKey1 = SecretKey.fromInteger(BigInteger.TEN);
     SecretKey secretKey2 = SecretKey.fromInteger(BigInteger.TEN);
-    SECP256K1.PublicKey publicKey1 = SECP256K1.PublicKey.fromBytes(
-        fromHexString(
-            "a0434d9e47f3c86235477c7b1ae6ae5d3442d49b1943c2b752a68e2a47e247c7893aba425419bc27a3b6c7e693a24c696f794c2ed877a1593cbee53b037368d7"));
-    SECP256K1.PublicKey publicKey2 = SECP256K1.PublicKey.fromBytes(
-        fromHexString(
-            "a0434d9e47f3c86235477c7b1ae6ae5d3442d49b1943c2b752a68e2a47e247c7893aba425419bc27a3b6c7e693a24c696f794c2ed877a1593cbee53b037368d7"));
+    SECP256K1.PublicKey publicKey1 = SECP256K1.PublicKey
+        .fromBytes(
+            fromHexString(
+                "a0434d9e47f3c86235477c7b1ae6ae5d3442d49b1943c2b752a68e2a47e247c7893aba425419bc27a3b6c7e693a24c696f794c2ed877a1593cbee53b037368d7"));
+    SECP256K1.PublicKey publicKey2 = SECP256K1.PublicKey
+        .fromBytes(
+            fromHexString(
+                "a0434d9e47f3c86235477c7b1ae6ae5d3442d49b1943c2b752a68e2a47e247c7893aba425419bc27a3b6c7e693a24c696f794c2ed877a1593cbee53b037368d7"));
 
     SECP256K1.KeyPair keyPair1 = SECP256K1.KeyPair.create(secretKey1, publicKey1);
     SECP256K1.KeyPair keyPair2 = SECP256K1.KeyPair.create(secretKey2, publicKey2);
@@ -145,9 +150,10 @@ class SECP256K1Test {
   @Test
   void testPublicKeyRecovery() {
     SecretKey secretKey = SecretKey.fromInteger(BigInteger.TEN);
-    SECP256K1.PublicKey expectedPublicKey = SECP256K1.PublicKey.fromBytes(
-        fromHexString(
-            "a0434d9e47f3c86235477c7b1ae6ae5d3442d49b1943c2b752a68e2a47e247c7893aba425419bc27a3b6c7e693a24c696f794c2ed877a1593cbee53b037368d7"));
+    SECP256K1.PublicKey expectedPublicKey = SECP256K1.PublicKey
+        .fromBytes(
+            fromHexString(
+                "a0434d9e47f3c86235477c7b1ae6ae5d3442d49b1943c2b752a68e2a47e247c7893aba425419bc27a3b6c7e693a24c696f794c2ed877a1593cbee53b037368d7"));
 
     SECP256K1.PublicKey publicKey = SECP256K1.PublicKey.fromSecretKey(secretKey);
     assertEquals(expectedPublicKey, publicKey);
@@ -171,9 +177,10 @@ class SECP256K1Test {
 
   @Test
   void testCreateSignatureFromEncoding() {
-    SECP256K1.Signature signature = SECP256K1.Signature.fromBytes(
-        fromHexString(
-            "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000A01"));
+    SECP256K1.Signature signature = SECP256K1.Signature
+        .fromBytes(
+            fromHexString(
+                "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000A01"));
     assertEquals(BigInteger.ONE, signature.r());
     assertEquals(BigInteger.TEN, signature.s());
     assertEquals((byte) 1, signature.v());
@@ -256,10 +263,11 @@ class SECP256K1Test {
     }
 
     Bytes32 hash = Bytes32.fromHexString("ACB1C19AC0832320815B5E886C6B73AD7D6177853D44B026F2A7A9E11BB899FC");
-    SECP256K1.Signature signature = SECP256K1.Signature.create(
-        (byte) 1,
-        new BigInteger("62380806879052346173879701944100777919767605075819957043497305774369260714318"),
-        new BigInteger("38020116821208196490118623452490256423459205241616519723877133146103446128360"));
+    SECP256K1.Signature signature = SECP256K1.Signature
+        .create(
+            (byte) 1,
+            new BigInteger("62380806879052346173879701944100777919767605075819957043497305774369260714318"),
+            new BigInteger("38020116821208196490118623452490256423459205241616519723877133146103446128360"));
     assertNull(SECP256K1.PublicKey.recoverFromHashAndSignature(hash, signature));
   }
 

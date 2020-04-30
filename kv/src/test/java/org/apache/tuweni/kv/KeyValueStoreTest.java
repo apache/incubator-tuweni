@@ -109,12 +109,13 @@ class KeyValueStoreTest {
 
   @Test
   void testLevelDBWithoutOptions(@TempDirectory Path tempDirectory) throws Exception {
-    try (LevelDBKeyValueStore<Bytes, Bytes> leveldb = LevelDBKeyValueStore.open(
-        tempDirectory.resolve("foo").resolve("bar"),
-        bytesIdentityFn,
-        bytesIdentityFn,
-        bytesIdentityFn,
-        bytesIdentityFn)) {
+    try (LevelDBKeyValueStore<Bytes, Bytes> leveldb = LevelDBKeyValueStore
+        .open(
+            tempDirectory.resolve("foo").resolve("bar"),
+            bytesIdentityFn,
+            bytesIdentityFn,
+            bytesIdentityFn,
+            bytesIdentityFn)) {
       AsyncCompletion completion = leveldb.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
       completion.join();
       Bytes value = leveldb.getAsync(Bytes.of(123)).get();
@@ -125,12 +126,13 @@ class KeyValueStoreTest {
 
   @Test
   void testRocksDBWithoutOptions(@TempDirectory Path tempDirectory) throws Exception {
-    try (RocksDBKeyValueStore<Bytes, Bytes> rocksdb = RocksDBKeyValueStore.open(
-        tempDirectory.resolve("foo").resolve("bar"),
-        bytesIdentityFn,
-        bytesIdentityFn,
-        bytesIdentityFn,
-        bytesIdentityFn)) {
+    try (RocksDBKeyValueStore<Bytes, Bytes> rocksdb = RocksDBKeyValueStore
+        .open(
+            tempDirectory.resolve("foo").resolve("bar"),
+            bytesIdentityFn,
+            bytesIdentityFn,
+            bytesIdentityFn,
+            bytesIdentityFn)) {
       AsyncCompletion completion = rocksdb.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
       completion.join();
       Bytes value = rocksdb.getAsync(Bytes.of(123)).get();

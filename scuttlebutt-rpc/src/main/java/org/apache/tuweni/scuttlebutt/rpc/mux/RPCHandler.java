@@ -236,11 +236,12 @@ public class RPCHandler implements Multiplexer, ClientHandler {
           scuttlebuttStreamHandler.onMessage(successfulResponse);
         }
       } else {
-        logger.warn(
-            "Couldn't find stream handler for RPC response with request number "
-                + requestNumber
-                + " "
-                + response.asString());
+        logger
+            .warn(
+                "Couldn't find stream handler for RPC response with request number "
+                    + requestNumber
+                    + " "
+                    + response.asString());
       }
 
     } else {
@@ -258,11 +259,12 @@ public class RPCHandler implements Multiplexer, ClientHandler {
         }
 
       } else {
-        logger.warn(
-            "Couldn't find async handler for RPC response with request number "
-                + requestNumber
-                + " "
-                + response.asString());
+        logger
+            .warn(
+                "Couldn't find async handler for RPC response with request number "
+                    + requestNumber
+                    + " "
+                    + response.asString());
       }
     }
 

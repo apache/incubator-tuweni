@@ -363,15 +363,16 @@ public final class Transaction {
 
   @Override
   public String toString() {
-    return String.format(
-        "Transaction{nonce=%s, gasPrice=%s, gasLimit=%s, to=%s, value=%s, signature=%s, payload=%s",
-        nonce,
-        gasPrice,
-        gasLimit,
-        to,
-        value,
-        signature,
-        payload);
+    return String
+        .format(
+            "Transaction{nonce=%s, gasPrice=%s, gasLimit=%s, to=%s, value=%s, signature=%s, payload=%s",
+            nonce,
+            gasPrice,
+            gasLimit,
+            to,
+            value,
+            signature,
+            payload);
   }
 
   /**

@@ -748,13 +748,14 @@ public final class Box implements AutoCloseable {
     checkArgument(!sender.isDestroyed(), "SecretKey has been destroyed");
     byte[] cipherText = new byte[combinedCypherTextLength(message)];
 
-    int rc = Sodium.crypto_box_easy(
-        cipherText,
-        message,
-        message.length,
-        nonce.value.pointer(),
-        receiver.value.pointer(),
-        sender.value.pointer());
+    int rc = Sodium
+        .crypto_box_easy(
+            cipherText,
+            message,
+            message.length,
+            nonce.value.pointer(),
+            receiver.value.pointer(),
+            sender.value.pointer());
     if (rc != 0) {
       throw new SodiumException("crypto_box_easy: failed with result " + rc);
     }
@@ -903,14 +904,15 @@ public final class Box implements AutoCloseable {
     }
     byte[] mac = new byte[(int) macbytes];
 
-    int rc = Sodium.crypto_box_detached(
-        cipherText,
-        mac,
-        message,
-        message.length,
-        nonce.value.pointer(),
-        receiver.value.pointer(),
-        sender.value.pointer());
+    int rc = Sodium
+        .crypto_box_detached(
+            cipherText,
+            mac,
+            message,
+            message.length,
+            nonce.value.pointer(),
+            receiver.value.pointer(),
+            sender.value.pointer());
     if (rc != 0) {
       throw new SodiumException("crypto_box_detached: failed with result " + rc);
     }
@@ -983,13 +985,14 @@ public final class Box implements AutoCloseable {
     checkArgument(!receiver.isDestroyed(), "SecretKey has been destroyed");
     byte[] clearText = new byte[clearTextLength(cipherText)];
 
-    int rc = Sodium.crypto_box_open_easy(
-        clearText,
-        cipherText,
-        cipherText.length,
-        nonce.value.pointer(),
-        sender.value.pointer(),
-        receiver.value.pointer());
+    int rc = Sodium
+        .crypto_box_open_easy(
+            clearText,
+            cipherText,
+            cipherText.length,
+            nonce.value.pointer(),
+            sender.value.pointer(),
+            receiver.value.pointer());
     if (rc == -1) {
       return null;
     }
@@ -1082,12 +1085,13 @@ public final class Box implements AutoCloseable {
     }
     byte[] clearText = new byte[cipherText.length - ((int) sealbytes)];
 
-    int rc = Sodium.crypto_box_seal_open(
-        clearText,
-        cipherText,
-        cipherText.length,
-        sender.value.pointer(),
-        receiver.value.pointer());
+    int rc = Sodium
+        .crypto_box_seal_open(
+            clearText,
+            cipherText,
+            cipherText.length,
+            sender.value.pointer(),
+            receiver.value.pointer());
     if (rc == -1) {
       return null;
     }
@@ -1141,14 +1145,15 @@ public final class Box implements AutoCloseable {
     }
 
     byte[] clearText = new byte[cipherText.length];
-    int rc = Sodium.crypto_box_open_detached(
-        clearText,
-        cipherText,
-        mac,
-        cipherText.length,
-        nonce.value.pointer(),
-        sender.value.pointer(),
-        receiver.value.pointer());
+    int rc = Sodium
+        .crypto_box_open_detached(
+            clearText,
+            cipherText,
+            mac,
+            cipherText.length,
+            nonce.value.pointer(),
+            sender.value.pointer(),
+            receiver.value.pointer());
     if (rc == -1) {
       return null;
     }

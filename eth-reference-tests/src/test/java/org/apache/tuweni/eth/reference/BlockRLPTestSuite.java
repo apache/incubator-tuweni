@@ -124,19 +124,21 @@ class BlockRLPTestSuite {
         toAddress = toAddressBytes.isEmpty() ? null : Address.fromBytes(toAddressBytes);
       }
 
-      transactions.add(
-          new Transaction(
-              UInt256.fromHexString((String) txData.get("nonce")),
-              Wei.valueOf(UInt256.fromHexString((String) txData.get("gasPrice"))),
-              Gas.valueOf(UInt256.fromHexString((String) txData.get("gasLimit"))),
-              toAddress,
-              Wei.valueOf(UInt256.fromHexString((String) txData.get("value"))),
-              Bytes.fromHexString((String) txData.get("data")),
-              null,
-              Signature.create(
-                  (byte) ((int) Bytes.fromHexString((String) txData.get("v")).get(0) - 27),
-                  Bytes.fromHexString((String) txData.get("r")).toUnsignedBigInteger(),
-                  Bytes.fromHexString((String) txData.get("s")).toUnsignedBigInteger())));
+      transactions
+          .add(
+              new Transaction(
+                  UInt256.fromHexString((String) txData.get("nonce")),
+                  Wei.valueOf(UInt256.fromHexString((String) txData.get("gasPrice"))),
+                  Gas.valueOf(UInt256.fromHexString((String) txData.get("gasLimit"))),
+                  toAddress,
+                  Wei.valueOf(UInt256.fromHexString((String) txData.get("value"))),
+                  Bytes.fromHexString((String) txData.get("data")),
+                  null,
+                  Signature
+                      .create(
+                          (byte) ((int) Bytes.fromHexString((String) txData.get("v")).get(0) - 27),
+                          Bytes.fromHexString((String) txData.get("r")).toUnsignedBigInteger(),
+                          Bytes.fromHexString((String) txData.get("s")).toUnsignedBigInteger())));
     }
     List<BlockHeader> ommers = new ArrayList<>();
     for (Object ommerDataObj : (List) blockData.get("uncleHeaders")) {

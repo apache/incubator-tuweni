@@ -70,10 +70,13 @@ class DefaultWireConnectionTest {
         }, () -> {
         }, new LinkedHashMap<>(), 28, "abc", 10000);
     conn.sendHello();
-    conn.messageReceived(
-        new RLPxMessage(
-            0,
-            HelloMessage.create(Bytes.fromHexString("deadbeef"), 30303, 3, "blah", Collections.emptyList()).toBytes()));
+    conn
+        .messageReceived(
+            new RLPxMessage(
+                0,
+                HelloMessage
+                    .create(Bytes.fromHexString("deadbeef"), 30303, 3, "blah", Collections.emptyList())
+                    .toBytes()));
     conn.messageReceived(new RLPxMessage(45, Bytes.EMPTY));
     assertEquals(1, capturedDisconnect.get().messageId());
     DisconnectMessage msg = DisconnectMessage.read(capturedDisconnect.get().content());
@@ -89,8 +92,9 @@ class DefaultWireConnectionTest {
         }, () -> {
         }, new LinkedHashMap<>(), 32, "abc", 10000);
     conn.sendHello();
-    conn.messageReceived(
-        new RLPxMessage(0, HelloMessage.create(Bytes.EMPTY, 30303, 4, "blah", Collections.emptyList()).toBytes()));
+    conn
+        .messageReceived(
+            new RLPxMessage(0, HelloMessage.create(Bytes.EMPTY, 30303, 4, "blah", Collections.emptyList()).toBytes()));
 
     assertEquals(1, capturedDisconnect.get().messageId());
     DisconnectMessage msg = DisconnectMessage.read(capturedDisconnect.get().content());
@@ -106,10 +110,11 @@ class DefaultWireConnectionTest {
         }, () -> {
         }, new LinkedHashMap<>(), 32, "abc", 10000);
     conn.sendHello();
-    conn.messageReceived(
-        new RLPxMessage(
-            0,
-            HelloMessage.create(Bytes.of(1, 2, 3, 4), 30303, 3, "blah", Collections.emptyList()).toBytes()));
+    conn
+        .messageReceived(
+            new RLPxMessage(
+                0,
+                HelloMessage.create(Bytes.of(1, 2, 3, 4), 30303, 3, "blah", Collections.emptyList()).toBytes()));
 
     assertEquals(1, capturedDisconnect.get().messageId());
     DisconnectMessage msg = DisconnectMessage.read(capturedDisconnect.get().content());
@@ -125,8 +130,9 @@ class DefaultWireConnectionTest {
         }, () -> {
         }, new LinkedHashMap<>(), 33, "abc", 10000);
     conn.sendHello();
-    conn.messageReceived(
-        new RLPxMessage(0, HelloMessage.create(nodeId, 30303, 1, "blah", Collections.emptyList()).toBytes()));
+    conn
+        .messageReceived(
+            new RLPxMessage(0, HelloMessage.create(nodeId, 30303, 1, "blah", Collections.emptyList()).toBytes()));
 
     assertEquals(1, capturedDisconnect.get().messageId());
     DisconnectMessage msg = DisconnectMessage.read(capturedDisconnect.get().content());
@@ -142,8 +148,9 @@ class DefaultWireConnectionTest {
         }, () -> {
         }, new LinkedHashMap<>(), 5, "abc", 10000);
     conn.sendHello();
-    conn.messageReceived(
-        new RLPxMessage(0, HelloMessage.create(peerNodeId, 30303, 6, "blah", Collections.emptyList()).toBytes()));
+    conn
+        .messageReceived(
+            new RLPxMessage(0, HelloMessage.create(peerNodeId, 30303, 6, "blah", Collections.emptyList()).toBytes()));
 
     assertEquals(1, capturedDisconnect.get().messageId());
     DisconnectMessage msg = DisconnectMessage.read(capturedDisconnect.get().content());

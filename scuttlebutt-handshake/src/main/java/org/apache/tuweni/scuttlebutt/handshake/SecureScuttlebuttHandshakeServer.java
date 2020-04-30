@@ -93,12 +93,14 @@ public final class SecureScuttlebuttHandshakeServer {
   }
 
   void computeSharedSecrets() {
-    sharedSecret = DiffieHelman.Secret.forKeys(
-        DiffieHelman.SecretKey.forBoxSecretKey(ephemeralKeyPair.secretKey()),
-        DiffieHelman.PublicKey.forBoxPublicKey(clientEphemeralPublicKey));
-    sharedSecret2 = DiffieHelman.Secret.forKeys(
-        DiffieHelman.SecretKey.forSignatureSecretKey(longTermKeyPair.secretKey()),
-        DiffieHelman.PublicKey.forBoxPublicKey(clientEphemeralPublicKey));
+    sharedSecret = DiffieHelman.Secret
+        .forKeys(
+            DiffieHelman.SecretKey.forBoxSecretKey(ephemeralKeyPair.secretKey()),
+            DiffieHelman.PublicKey.forBoxPublicKey(clientEphemeralPublicKey));
+    sharedSecret2 = DiffieHelman.Secret
+        .forKeys(
+            DiffieHelman.SecretKey.forSignatureSecretKey(longTermKeyPair.secretKey()),
+            DiffieHelman.PublicKey.forBoxPublicKey(clientEphemeralPublicKey));
   }
 
   DiffieHelman.Secret sharedSecret() {
@@ -123,13 +125,21 @@ public final class SecureScuttlebuttHandshakeServer {
    * @param message the message containing the identity of the client
    */
   public void readIdentityMessage(Bytes message) {
-    Bytes plaintext = SecretBox.decrypt(
-        message,
-        SecretBox.Key.fromHash(
-            SHA256Hash.hash(
-                SHA256Hash.Input.fromPointer(
-                    new Concatenate().add(networkIdentifier).add(sharedSecret).add(sharedSecret2).concatenate()))),
-        SecretBox.Nonce.fromBytes(new byte[24]));
+    Bytes plaintext = SecretBox
+        .decrypt(
+            message,
+            SecretBox.Key
+                .fromHash(
+                    SHA256Hash
+                        .hash(
+                            SHA256Hash.Input
+                                .fromPointer(
+                                    new Concatenate()
+                                        .add(networkIdentifier)
+                                        .add(sharedSecret)
+                                        .add(sharedSecret2)
+                                        .concatenate()))),
+            SecretBox.Nonce.fromBytes(new byte[24]));
 
     if (plaintext == null) {
       throw new HandshakeException("Could not decrypt the plaintext with our shared secrets");
@@ -142,19 +152,21 @@ public final class SecureScuttlebuttHandshakeServer {
     detachedSignature = Allocated.fromBytes(plaintext.slice(0, 64));
     clientLongTermPublicKey = Signature.PublicKey.fromBytes(plaintext.slice(64, 32));
 
-    boolean verified = clientLongTermPublicKey.verify(
-        new Concatenate()
-            .add(networkIdentifier)
-            .add(longTermKeyPair.publicKey())
-            .add(SHA256Hash.hash(SHA256Hash.Input.fromSecret(sharedSecret)))
-            .concatenate(),
-        detachedSignature);
+    boolean verified = clientLongTermPublicKey
+        .verify(
+            new Concatenate()
+                .add(networkIdentifier)
+                .add(longTermKeyPair.publicKey())
+                .add(SHA256Hash.hash(SHA256Hash.Input.fromSecret(sharedSecret)))
+                .concatenate(),
+            detachedSignature);
     if (!verified) {
       throw new HandshakeException("Identity message signature does not match");
     }
-    sharedSecret3 = DiffieHelman.Secret.forKeys(
-        DiffieHelman.SecretKey.forBoxSecretKey(ephemeralKeyPair.secretKey()),
-        DiffieHelman.PublicKey.forSignaturePublicKey(clientLongTermPublicKey));
+    sharedSecret3 = DiffieHelman.Secret
+        .forKeys(
+            DiffieHelman.SecretKey.forBoxSecretKey(ephemeralKeyPair.secretKey()),
+            DiffieHelman.PublicKey.forSignaturePublicKey(clientLongTermPublicKey));
   }
 
   /**
@@ -163,27 +175,31 @@ public final class SecureScuttlebuttHandshakeServer {
    * @return a message to accept the handshake
    */
   public Bytes createAcceptMessage() {
-    Allocated signature = Signature.signDetached(
-        new Concatenate()
-            .add(networkIdentifier)
-            .add(detachedSignature)
-            .add(clientLongTermPublicKey)
-            .add(SHA256Hash.hash(SHA256Hash.Input.fromSecret(sharedSecret)))
-            .concatenate(),
-        longTermKeyPair.secretKey());
+    Allocated signature = Signature
+        .signDetached(
+            new Concatenate()
+                .add(networkIdentifier)
+                .add(detachedSignature)
+                .add(clientLongTermPublicKey)
+                .add(SHA256Hash.hash(SHA256Hash.Input.fromSecret(sharedSecret)))
+                .concatenate(),
+            longTermKeyPair.secretKey());
 
     return SecretBox
         .encrypt(
             signature,
-            SecretBox.Key.fromHash(
-                SHA256Hash.hash(
-                    SHA256Hash.Input.fromPointer(
-                        new Concatenate()
-                            .add(networkIdentifier)
-                            .add(sharedSecret)
-                            .add(sharedSecret2)
-                            .add(sharedSecret3)
-                            .concatenate()))),
+            SecretBox.Key
+                .fromHash(
+                    SHA256Hash
+                        .hash(
+                            SHA256Hash.Input
+                                .fromPointer(
+                                    new Concatenate()
+                                        .add(networkIdentifier)
+                                        .add(sharedSecret)
+                                        .add(sharedSecret2)
+                                        .add(sharedSecret3)
+                                        .concatenate()))),
             SecretBox.Nonce.fromBytes(new byte[24]))
         .bytes();
   }
@@ -195,22 +211,28 @@ public final class SecureScuttlebuttHandshakeServer {
    * @return a new secret box key for use with encrypting messages to the server.
    */
   SHA256Hash.Hash clientToServerSecretBoxKey() {
-    return SHA256Hash.hash(
-        SHA256Hash.Input.fromPointer(
-            new Concatenate()
-                .add(
-                    SHA256Hash.hash(
-                        SHA256Hash.Input.fromHash(
-                            SHA256Hash.hash(
-                                SHA256Hash.Input.fromPointer(
-                                    new Concatenate()
-                                        .add(networkIdentifier)
-                                        .add(sharedSecret)
-                                        .add(sharedSecret2)
-                                        .add(sharedSecret3)
-                                        .concatenate())))))
-                .add(longTermKeyPair.publicKey())
-                .concatenate()));
+    return SHA256Hash
+        .hash(
+            SHA256Hash.Input
+                .fromPointer(
+                    new Concatenate()
+                        .add(
+                            SHA256Hash
+                                .hash(
+                                    SHA256Hash.Input
+                                        .fromHash(
+                                            SHA256Hash
+                                                .hash(
+                                                    SHA256Hash.Input
+                                                        .fromPointer(
+                                                            new Concatenate()
+                                                                .add(networkIdentifier)
+                                                                .add(sharedSecret)
+                                                                .add(sharedSecret2)
+                                                                .add(sharedSecret3)
+                                                                .concatenate())))))
+                        .add(longTermKeyPair.publicKey())
+                        .concatenate()));
   }
 
   /**
@@ -230,22 +252,28 @@ public final class SecureScuttlebuttHandshakeServer {
    * @return a new secret box key for use with decrypting messages from the server.
    */
   SHA256Hash.Hash serverToClientSecretBoxKey() {
-    return SHA256Hash.hash(
-        SHA256Hash.Input.fromPointer(
-            new Concatenate()
-                .add(
-                    SHA256Hash.hash(
-                        SHA256Hash.Input.fromHash(
-                            SHA256Hash.hash(
-                                SHA256Hash.Input.fromPointer(
-                                    new Concatenate()
-                                        .add(networkIdentifier)
-                                        .add(sharedSecret)
-                                        .add(sharedSecret2)
-                                        .add(sharedSecret3)
-                                        .concatenate())))))
-                .add(clientLongTermPublicKey)
-                .concatenate()));
+    return SHA256Hash
+        .hash(
+            SHA256Hash.Input
+                .fromPointer(
+                    new Concatenate()
+                        .add(
+                            SHA256Hash
+                                .hash(
+                                    SHA256Hash.Input
+                                        .fromHash(
+                                            SHA256Hash
+                                                .hash(
+                                                    SHA256Hash.Input
+                                                        .fromPointer(
+                                                            new Concatenate()
+                                                                .add(networkIdentifier)
+                                                                .add(sharedSecret)
+                                                                .add(sharedSecret2)
+                                                                .add(sharedSecret3)
+                                                                .concatenate())))))
+                        .add(clientLongTermPublicKey)
+                        .concatenate()));
   }
 
   /**

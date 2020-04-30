@@ -109,44 +109,47 @@ final class FileBackedFingerprintRepository implements FingerprintRepository {
     HashSet<String> updatedIdentifiers = new HashSet<>(updatedFingerprints.keySet());
 
     try {
-      atomicReplace(fingerprintFile, writer -> {
-        // copy lines, replacing any updated fingerprints
-        for (int i = 0; i < lines.size(); ++i) {
-          String line = lines.get(i).trim();
-          if (line.isEmpty() || line.startsWith("#")) {
-            writer.write(lines.get(i));
-            writer.write(System.lineSeparator());
-            continue;
-          }
+      atomicReplace(
+          fingerprintFile,
+          writer -> {
+            // copy lines, replacing any updated fingerprints
+            for (int i = 0; i < lines.size(); ++i) {
+              String line = lines.get(i).trim();
+              if (line.isEmpty() || line.startsWith("#")) {
+                writer.write(lines.get(i));
+                writer.write(System.lineSeparator());
+                continue;
+              }
 
-          Entry<String, Bytes> entry;
-          try {
-            entry = parseLine(line);
-          } catch (IOException e) {
-            throw new TLSEnvironmentException(e.getMessage() + " in " + fingerprintFile + " (line " + (i + 1) + ")");
-          }
+              Entry<String, Bytes> entry;
+              try {
+                entry = parseLine(line);
+              } catch (IOException e) {
+                throw new TLSEnvironmentException(
+                    e.getMessage() + " in " + fingerprintFile + " (line " + (i + 1) + ")");
+              }
 
-          String identifier = entry.getKey();
-          Bytes fingerprint = updatedFingerprints.getOrDefault(identifier, entry.getValue());
-          fingerprints.put(identifier, fingerprint);
-          updatedIdentifiers.remove(identifier);
+              String identifier = entry.getKey();
+              Bytes fingerprint = updatedFingerprints.getOrDefault(identifier, entry.getValue());
+              fingerprints.put(identifier, fingerprint);
+              updatedIdentifiers.remove(identifier);
 
-          writer.write(identifier);
-          writer.write(' ');
-          writer.write(fingerprint.toHexString().substring(2).toLowerCase());
-          writer.write(System.lineSeparator());
-        }
+              writer.write(identifier);
+              writer.write(' ');
+              writer.write(fingerprint.toHexString().substring(2).toLowerCase());
+              writer.write(System.lineSeparator());
+            }
 
-        // write any new fingerprints at the end
-        for (String identifier : updatedIdentifiers) {
-          Bytes fingerprint = updatedFingerprints.get(identifier);
-          fingerprints.put(identifier, fingerprint);
-          writer.write(identifier);
-          writer.write(' ');
-          writer.write(fingerprint.toHexString().substring(2).toLowerCase());
-          writer.write(System.lineSeparator());
-        }
-      });
+            // write any new fingerprints at the end
+            for (String identifier : updatedIdentifiers) {
+              Bytes fingerprint = updatedFingerprints.get(identifier);
+              fingerprints.put(identifier, fingerprint);
+              writer.write(identifier);
+              writer.write(' ');
+              writer.write(fingerprint.toHexString().substring(2).toLowerCase());
+              writer.write(System.lineSeparator());
+            }
+          });
 
       return Collections.unmodifiableMap(fingerprints);
     } catch (IOException e) {

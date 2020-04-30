@@ -65,9 +65,12 @@ class ServerRecordTest {
     SelfSignedCertificate caClientCert = SelfSignedCertificate.create("example.com");
     caFingerprint = certificateHexFingerprint(Paths.get(caClientCert.keyCertOptions().getCertPath()));
     SecurityTestUtils.configureJDKTrustStore(tempDir, caClientCert);
-    caClient = vertx.createHttpClient(
-        new HttpClientOptions().setTrustOptions(InsecureTrustOptions.INSTANCE).setSsl(true).setKeyCertOptions(
-            caClientCert.keyCertOptions()));
+    caClient = vertx
+        .createHttpClient(
+            new HttpClientOptions()
+                .setTrustOptions(InsecureTrustOptions.INSTANCE)
+                .setSsl(true)
+                .setKeyCertOptions(caClientCert.keyCertOptions()));
 
     SelfSignedCertificate fooCert = SelfSignedCertificate.create("foo.com");
     fooFingerprint = certificateHexFingerprint(Paths.get(fooCert.keyCertOptions().getCertPath()));

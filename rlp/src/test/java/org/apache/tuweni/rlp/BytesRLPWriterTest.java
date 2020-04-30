@@ -83,9 +83,11 @@ class BytesRLPWriterTest {
     assertEquals(fromHexString("830186a0"), RLP.encode(writer -> writer.writeUInt256(UInt256.valueOf(100000L))));
     assertEquals(
         fromHexString("a00400000000000000000000000000000000000000000000000000f100000000ab"),
-        RLP.encode(
-            writer -> writer.writeUInt256(
-                UInt256.fromHexString("0x0400000000000000000000000000000000000000000000000000f100000000ab"))));
+        RLP
+            .encode(
+                writer -> writer
+                    .writeUInt256(
+                        UInt256.fromHexString("0x0400000000000000000000000000000000000000000000000000f100000000ab"))));
   }
 
   @Test

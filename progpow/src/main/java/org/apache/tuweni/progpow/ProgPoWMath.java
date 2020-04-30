@@ -63,12 +63,14 @@ final class ProgPoWMath {
   }
 
   static UInt32 rotl32(UInt32 var, UInt32 hops) {
-    return var.shiftLeft(hops.mod(UInt32.valueOf(32)).intValue()).or(
-        var.shiftRight(UInt32.valueOf(32).subtract(hops.mod(UInt32.valueOf(32))).intValue()));
+    return var
+        .shiftLeft(hops.mod(UInt32.valueOf(32)).intValue())
+        .or(var.shiftRight(UInt32.valueOf(32).subtract(hops.mod(UInt32.valueOf(32))).intValue()));
   }
 
   static UInt32 rotr32(UInt32 var, UInt32 hops) {
-    return var.shiftRight(hops.mod(UInt32.valueOf(32)).intValue()).or(
-        var.shiftLeft(UInt32.valueOf(32).subtract(hops.mod(UInt32.valueOf(32))).intValue()));
+    return var
+        .shiftRight(hops.mod(UInt32.valueOf(32)).intValue())
+        .or(var.shiftLeft(UInt32.valueOf(32).subtract(hops.mod(UInt32.valueOf(32))).intValue()));
   }
 }

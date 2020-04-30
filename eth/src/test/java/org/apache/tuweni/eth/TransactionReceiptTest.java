@@ -31,11 +31,12 @@ class TransactionReceiptTest {
 
   @Test
   void testRLPRoundtrip() {
-    List<Log> logs = Collections.singletonList(
-        new Log(
-            Address.fromBytes(Bytes.random(20)),
-            Bytes.of(1, 2, 3),
-            Arrays.asList(Bytes32.random(), Bytes32.random())));
+    List<Log> logs = Collections
+        .singletonList(
+            new Log(
+                Address.fromBytes(Bytes.random(20)),
+                Bytes.of(1, 2, 3),
+                Arrays.asList(Bytes32.random(), Bytes32.random())));
 
     LogsBloomFilter filter = LogsBloomFilter.compute(logs);
 
@@ -47,11 +48,12 @@ class TransactionReceiptTest {
 
   @Test
   void testRLPRoundtripWithStatus() {
-    List<Log> logs = Arrays.asList(
-        new Log(
-            Address.fromBytes(Bytes.random(20)),
-            Bytes.of(1, 2, 3),
-            Arrays.asList(Bytes32.random(), Bytes32.random())));
+    List<Log> logs = Arrays
+        .asList(
+            new Log(
+                Address.fromBytes(Bytes.random(20)),
+                Bytes.of(1, 2, 3),
+                Arrays.asList(Bytes32.random(), Bytes32.random())));
 
     LogsBloomFilter filter = LogsBloomFilter.compute(logs);
 

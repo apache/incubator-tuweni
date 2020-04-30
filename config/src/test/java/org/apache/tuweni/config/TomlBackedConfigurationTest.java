@@ -118,8 +118,9 @@ class TomlBackedConfigurationTest {
 
   @Test
   void throwsForInvalidType() throws Exception {
-    Configuration config = Configuration.fromToml(
-        "[foo]\n" + "bar=99\n" + "baz='buz'\n" + "biz=false\n" + "buz = [1,2,3]\n" + "sbuz = ['1', '2', '3']\n");
+    Configuration config = Configuration
+        .fromToml(
+            "[foo]\n" + "bar=99\n" + "baz='buz'\n" + "biz=false\n" + "buz = [1,2,3]\n" + "sbuz = ['1', '2', '3']\n");
     assertFalse(config.hasErrors());
 
     assertEquals(99, config.getInteger("foo.bar"));

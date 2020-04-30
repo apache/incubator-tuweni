@@ -109,8 +109,9 @@ public class NetworkService {
    * @return
    */
   public AsyncResult<List<Peer>> getConnectedPeers() {
-    return getAllKnownPeers().thenApply(
-        peers -> peers.stream().filter(peer -> peer.getState().equals("connected")).collect(Collectors.toList()));
+    return getAllKnownPeers()
+        .thenApply(
+            peers -> peers.stream().filter(peer -> peer.getState().equals("connected")).collect(Collectors.toList()));
   }
 
   /**

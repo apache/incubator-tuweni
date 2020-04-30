@@ -91,10 +91,11 @@ class MutableTomlTableTest {
   }
 
   private static Stream<Arguments> quotesComplexKeyInErrorSupplier() {
-    return Stream.of(
-        Arguments.of(Arrays.asList("", "bar"), "\"\".bar"),
-        Arguments.of(Arrays.asList("foo ", "bar"), "\"foo \".bar"),
-        Arguments.of(Arrays.asList("foo\n", "bar"), "\"foo\\n\".bar"));
+    return Stream
+        .of(
+            Arguments.of(Arrays.asList("", "bar"), "\"\".bar"),
+            Arguments.of(Arrays.asList("foo ", "bar"), "\"foo \".bar"),
+            Arguments.of(Arrays.asList("foo\n", "bar"), "\"foo\\n\".bar"));
   }
 
   @Test

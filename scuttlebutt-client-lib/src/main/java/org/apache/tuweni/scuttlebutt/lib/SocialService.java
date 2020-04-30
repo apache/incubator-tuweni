@@ -118,12 +118,13 @@ public class SocialService {
 
       AsyncResult<List<IsFollowingResponse>> allResults = AsyncResult.combine(results);
 
-      AsyncResult<List<String>> ids = allResults.thenApply(
-          queryResults -> queryResults
-              .stream()
-              .filter(result -> result.isFollowing())
-              .map(IsFollowingResponse::getSource)
-              .collect(Collectors.toList()));
+      AsyncResult<List<String>> ids = allResults
+          .thenApply(
+              queryResults -> queryResults
+                  .stream()
+                  .filter(result -> result.isFollowing())
+                  .map(IsFollowingResponse::getSource)
+                  .collect(Collectors.toList()));
 
       return ids.then(this::getProfiles);
     }));
@@ -142,9 +143,11 @@ public class SocialService {
           following.stream().map((follow) -> isFollowing(follow.getKey(), ident)).collect(Collectors.toList());
 
       return AsyncResult.combine(responses).then(response -> {
-        List<AsyncResult<Profile>> profiles =
-            response.stream().filter(f -> f.isFollowing()).map(item -> getProfile(item.getSource())).collect(
-                Collectors.toList());
+        List<AsyncResult<Profile>> profiles = response
+            .stream()
+            .filter(f -> f.isFollowing())
+            .map(item -> getProfile(item.getSource()))
+            .collect(Collectors.toList());
 
         return AsyncResult.combine(profiles);
       });

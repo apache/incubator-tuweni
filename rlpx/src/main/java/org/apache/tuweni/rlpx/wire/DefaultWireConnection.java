@@ -200,13 +200,17 @@ public final class DefaultWireConnection implements WireConnection {
   }
 
   void sendHello() {
-    myHelloMessage = HelloMessage.create(
-        nodeId,
-        advertisedPort,
-        p2pVersion,
-        clientId,
-        subprotocols.keySet().stream().map(sp -> new Capability(sp.id().name(), sp.id().version())).collect(
-            Collectors.toList()));
+    myHelloMessage = HelloMessage
+        .create(
+            nodeId,
+            advertisedPort,
+            p2pVersion,
+            clientId,
+            subprotocols
+                .keySet()
+                .stream()
+                .map(sp -> new Capability(sp.id().name(), sp.id().version()))
+                .collect(Collectors.toList()));
     logger.debug("Sending hello message {}", myHelloMessage);
     writer.accept(new RLPxMessage(0, myHelloMessage.toBytes()));
   }

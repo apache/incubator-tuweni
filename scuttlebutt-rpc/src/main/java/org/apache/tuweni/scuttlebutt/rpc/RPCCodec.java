@@ -79,11 +79,12 @@ public final class RPCCodec {
     for (RPCFlag flag : flags) {
       encodedFlags = flag.apply(encodedFlags);
     }
-    return Bytes.concatenate(
-        Bytes.of(encodedFlags),
-        Bytes.ofUnsignedInt(body.size()),
-        Bytes.ofUnsignedInt(requestNumber),
-        body);
+    return Bytes
+        .concatenate(
+            Bytes.of(encodedFlags),
+            Bytes.ofUnsignedInt(body.size()),
+            Bytes.ofUnsignedInt(requestNumber),
+            body);
   }
 
   /**
@@ -111,11 +112,12 @@ public final class RPCCodec {
     if (requestNumber < 1) {
       throw new IllegalArgumentException("Invalid request number");
     }
-    return Bytes.concatenate(
-        Bytes.of(flagByte),
-        Bytes.ofUnsignedInt(body.size()),
-        Bytes.wrap(ByteBuffer.allocate(4).putInt(-requestNumber).array()),
-        body);
+    return Bytes
+        .concatenate(
+            Bytes.of(flagByte),
+            Bytes.ofUnsignedInt(body.size()),
+            Bytes.wrap(ByteBuffer.allocate(4).putInt(-requestNumber).array()),
+            body);
   }
 
   /**
