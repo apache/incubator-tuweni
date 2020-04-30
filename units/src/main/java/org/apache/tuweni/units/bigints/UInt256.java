@@ -17,7 +17,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.bytes.MutableBytes;
-import org.apache.tuweni.bytes.MutableBytes32;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -98,8 +97,22 @@ public final class UInt256 implements UInt256Value<UInt256> {
    * @return A {@link UInt256} containing the specified value.
    * @throws IllegalArgumentException if {@code bytes.size() &gt; 32}.
    */
-  public static UInt256 fromBytes(Bytes bytes) {
-    return new UInt256(Bytes32.leftPad(bytes));
+  public static UInt256 fromBytes(final Bytes bytes) {
+    if (bytes instanceof Bytes32) {
+      final byte[] array = bytes.toArrayUnsafe();
+      return new UInt256(
+          new int[] {
+              ((int) array[0] << 24) | ((int) array[1] << 16) | ((int) array[2] << 8) | ((int) array[3]),
+              ((int) array[4] << 24) | ((int) array[5] << 16) | ((int) array[6] << 8) | ((int) array[7]),
+              ((int) array[8] << 24) | ((int) array[9] << 16) | ((int) array[10] << 8) | ((int) array[11]),
+              ((int) array[12] << 24) | ((int) array[13] << 16) | ((int) array[14] << 8) | ((int) array[15]),
+              ((int) array[16] << 24) | ((int) array[17] << 16) | ((int) array[18] << 8) | ((int) array[19]),
+              ((int) array[20] << 24) | ((int) array[21] << 16) | ((int) array[22] << 8) | ((int) array[23]),
+              ((int) array[24] << 24) | ((int) array[25] << 16) | ((int) array[26] << 8) | ((int) array[27]),
+              ((int) array[28] << 24) | ((int) array[29] << 16) | ((int) array[30] << 8) | ((int) array[31])});
+    } else {
+      return new UInt256(Bytes32.leftPad(bytes));
+    }
   }
 
   /**
@@ -743,11 +756,40 @@ public final class UInt256 implements UInt256Value<UInt256> {
 
   @Override
   public Bytes32 toBytes() {
-    MutableBytes32 bytes = MutableBytes32.create();
-    for (int i = 0, j = 0; i < INTS_SIZE; ++i, j += 4) {
-      bytes.setInt(j, this.ints[i]);
-    }
-    return bytes;
+    return Bytes32.wrap(
+        new byte[] {
+            (byte) (ints[0] >> 24),
+            (byte) (ints[0] >> 16),
+            (byte) (ints[0] >> 8),
+            (byte) (ints[0]),
+            (byte) (ints[1] >> 24),
+            (byte) (ints[1] >> 16),
+            (byte) (ints[1] >> 8),
+            (byte) (ints[1]),
+            (byte) (ints[2] >> 24),
+            (byte) (ints[2] >> 16),
+            (byte) (ints[2] >> 8),
+            (byte) (ints[2]),
+            (byte) (ints[3] >> 24),
+            (byte) (ints[3] >> 16),
+            (byte) (ints[3] >> 8),
+            (byte) (ints[3]),
+            (byte) (ints[4] >> 24),
+            (byte) (ints[4] >> 16),
+            (byte) (ints[4] >> 8),
+            (byte) (ints[4]),
+            (byte) (ints[5] >> 24),
+            (byte) (ints[5] >> 16),
+            (byte) (ints[5] >> 8),
+            (byte) (ints[5]),
+            (byte) (ints[6] >> 24),
+            (byte) (ints[6] >> 16),
+            (byte) (ints[6] >> 8),
+            (byte) (ints[6]),
+            (byte) (ints[7] >> 24),
+            (byte) (ints[7] >> 16),
+            (byte) (ints[7] >> 8),
+            (byte) (ints[7])});
   }
 
   @Override
