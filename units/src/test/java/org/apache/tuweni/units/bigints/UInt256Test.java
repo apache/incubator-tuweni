@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
 
 import java.math.BigInteger;
 import java.util.stream.Stream;
@@ -881,6 +882,30 @@ class UInt256Test {
         Arguments.of(
             hv("0x0400000000000000000000000000000000000000000000000000f100000000ab"),
             Bytes.fromHexString("0x0400000000000000000000000000000000000000000000000000f100000000ab")));
+  }
+
+  @ParameterizedTest
+  @MethodSource("fromBytesProvider")
+  void fromBytesTest(Bytes value, UInt256 expected, boolean isBytes32) {
+    assertEquals(expected, UInt256.fromBytes(value));
+    assertEquals(isBytes32, value instanceof Bytes32);
+  }
+
+  private static Stream<Arguments> fromBytesProvider() {
+    String onesString = "11111111111111111111111111111111";
+    String twosString = "22222222222222222222222222222222";
+    Bytes onesBytes = Bytes.fromHexString(onesString);
+    Bytes twosBytes = Bytes.fromHexString(twosString);
+    Bytes onetwoBytes = Bytes.fromHexString(onesString + twosString);
+    return Stream.of(
+        // Mutable Bytes
+        Arguments.of(Bytes.concatenate(onesBytes), hv(onesString), false),
+        Arguments.of(Bytes.concatenate(onesBytes, twosBytes), hv(onesString + twosString), true),
+        // Array Wrapping Bytes
+        Arguments.of(Bytes.fromHexString(onesString), hv(onesString), false),
+        Arguments.of(Bytes.fromHexString(onesString + twosString), hv(onesString + twosString), true),
+        // Delegating Bytes32
+        Arguments.of(Bytes32.wrap(onetwoBytes), hv(onesString + twosString), true));
   }
 
   @ParameterizedTest
