@@ -56,13 +56,14 @@ class GossipCommandLineOptionsTest {
 
   @Test
   void operateFromConfig() throws UnknownHostException {
-    Configuration config = Configuration.fromToml(
-        ""
-            + "peers=[\"tcp://127.0.0.1:2000\"]\n"
-            + "listenPort=1080\n"
-            + "networkInterface=\"127.0.0.1\"\n"
-            + "messageLog=\"D:/Temp\"",
-        GossipCommandLineOptions.createConfigFileSchema());
+    Configuration config = Configuration
+        .fromToml(
+            ""
+                + "peers=[\"tcp://127.0.0.1:2000\"]\n"
+                + "listenPort=1080\n"
+                + "networkInterface=\"127.0.0.1\"\n"
+                + "messageLog=\"D:/Temp\"",
+            GossipCommandLineOptions.createConfigFileSchema());
     GossipCommandLineOptions opts = new GossipCommandLineOptions(null, null, null, null, 3000, 0, 0, false, 50, config);
     opts.validate();
     assertEquals(1080, opts.listenPort());
@@ -74,13 +75,14 @@ class GossipCommandLineOptionsTest {
 
   @Test
   void invalidConfigFilePort() throws UnknownHostException {
-    Configuration config = Configuration.fromToml(
-        ""
-            + "peers=[\"tcp://127.0.0.1:3000\"]\n"
-            + "listenPort=500000\n"
-            + "networkInterface=\"127.0.0.1\"\n"
-            + "messageLog=\"D:/Temp\"",
-        GossipCommandLineOptions.createConfigFileSchema());
+    Configuration config = Configuration
+        .fromToml(
+            ""
+                + "peers=[\"tcp://127.0.0.1:3000\"]\n"
+                + "listenPort=500000\n"
+                + "networkInterface=\"127.0.0.1\"\n"
+                + "messageLog=\"D:/Temp\"",
+            GossipCommandLineOptions.createConfigFileSchema());
     GossipCommandLineOptions opts = new GossipCommandLineOptions(
         null,
         null,
@@ -98,12 +100,13 @@ class GossipCommandLineOptionsTest {
 
   @Test
   void cliConfigOverConfigFile() throws UnknownHostException {
-    Configuration config = Configuration.fromToml(
-        ""
-            + "peers=\"tcp://127.0.0.1:3000\"\n"
-            + "listenPort=1080\n"
-            + "networkInterface=\"127.0.0.1\"\n"
-            + "messageLog=\"D:/Temp\"");
+    Configuration config = Configuration
+        .fromToml(
+            ""
+                + "peers=\"tcp://127.0.0.1:3000\"\n"
+                + "listenPort=1080\n"
+                + "networkInterface=\"127.0.0.1\"\n"
+                + "messageLog=\"D:/Temp\"");
     GossipCommandLineOptions opts = new GossipCommandLineOptions(
         new String[] {"tcp://192.168.0.1:3000"},
         400,

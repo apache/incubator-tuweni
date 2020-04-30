@@ -39,14 +39,13 @@ class BlockchainRepository
  * @param blockBodyStore the key-value store to store block bodies
  * @param blockHeaderStore the key-value store to store block headers
  * @param blockchainIndex the blockchain index to index values
- */
-  (
-    private val chainMetadata: KeyValueStore<Bytes, Bytes>,
-    private val blockBodyStore: KeyValueStore<Bytes, Bytes>,
-    private val blockHeaderStore: KeyValueStore<Bytes, Bytes>,
-    private val transactionReceiptsStore: KeyValueStore<Bytes, Bytes>,
-    private val blockchainIndex: BlockchainIndex
-  ) {
+ */(
+   private val chainMetadata: KeyValueStore<Bytes, Bytes>,
+   private val blockBodyStore: KeyValueStore<Bytes, Bytes>,
+   private val blockHeaderStore: KeyValueStore<Bytes, Bytes>,
+   private val transactionReceiptsStore: KeyValueStore<Bytes, Bytes>,
+   private val blockchainIndex: BlockchainIndex
+ ) {
 
   companion object {
 

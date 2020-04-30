@@ -419,16 +419,17 @@ public final class AES256GCM implements AutoCloseable {
     byte[] cipherText = new byte[maxCombinedCypherTextLength(message)];
 
     LongLongByReference cipherTextLen = new LongLongByReference();
-    int rc = Sodium.crypto_aead_aes256gcm_encrypt(
-        cipherText,
-        cipherTextLen,
-        message,
-        message.length,
-        data,
-        data.length,
-        null,
-        nonce.value.pointer(),
-        key.value.pointer());
+    int rc = Sodium
+        .crypto_aead_aes256gcm_encrypt(
+            cipherText,
+            cipherTextLen,
+            message,
+            message.length,
+            data,
+            data.length,
+            null,
+            nonce.value.pointer(),
+            key.value.pointer());
     if (rc != 0) {
       throw new SodiumException("crypto_aead_aes256gcm_encrypt: failed with result " + rc);
     }
@@ -484,16 +485,17 @@ public final class AES256GCM implements AutoCloseable {
     byte[] cipherText = new byte[maxCombinedCypherTextLength(message)];
 
     LongLongByReference cipherTextLen = new LongLongByReference();
-    int rc = Sodium.crypto_aead_aes256gcm_encrypt_afternm(
-        cipherText,
-        cipherTextLen,
-        message,
-        message.length,
-        data,
-        data.length,
-        null,
-        nonce.value.pointer(),
-        ctx);
+    int rc = Sodium
+        .crypto_aead_aes256gcm_encrypt_afternm(
+            cipherText,
+            cipherTextLen,
+            message,
+            message.length,
+            data,
+            data.length,
+            null,
+            nonce.value.pointer(),
+            ctx);
     if (rc != 0) {
       throw new SodiumException("crypto_aead_aes256gcm_encrypt_afternm: failed with result " + rc);
     }
@@ -568,17 +570,18 @@ public final class AES256GCM implements AutoCloseable {
     byte[] mac = new byte[(int) abytes];
 
     LongLongByReference macLen = new LongLongByReference();
-    int rc = Sodium.crypto_aead_aes256gcm_encrypt_detached(
-        cipherText,
-        mac,
-        macLen,
-        message,
-        message.length,
-        data,
-        data.length,
-        null,
-        nonce.value.pointer(),
-        key.value.pointer());
+    int rc = Sodium
+        .crypto_aead_aes256gcm_encrypt_detached(
+            cipherText,
+            mac,
+            macLen,
+            message,
+            message.length,
+            data,
+            data.length,
+            null,
+            nonce.value.pointer(),
+            key.value.pointer());
     if (rc != 0) {
       throw new SodiumException("crypto_aead_aes256gcm_encrypt_detached: failed with result " + rc);
     }
@@ -641,17 +644,18 @@ public final class AES256GCM implements AutoCloseable {
     byte[] mac = new byte[(int) abytes];
 
     LongLongByReference macLen = new LongLongByReference();
-    int rc = Sodium.crypto_aead_aes256gcm_encrypt_detached_afternm(
-        cipherText,
-        mac,
-        macLen,
-        message,
-        message.length,
-        data,
-        data.length,
-        null,
-        nonce.value.pointer(),
-        ctx);
+    int rc = Sodium
+        .crypto_aead_aes256gcm_encrypt_detached_afternm(
+            cipherText,
+            mac,
+            macLen,
+            message,
+            message.length,
+            data,
+            data.length,
+            null,
+            nonce.value.pointer(),
+            ctx);
     if (rc != 0) {
       throw new SodiumException("crypto_aead_aes256gcm_encrypt_detached_afternm: failed with result " + rc);
     }
@@ -721,16 +725,17 @@ public final class AES256GCM implements AutoCloseable {
     byte[] clearText = new byte[maxClearTextLength(cipherText)];
 
     LongLongByReference clearTextLen = new LongLongByReference();
-    int rc = Sodium.crypto_aead_aes256gcm_decrypt(
-        clearText,
-        clearTextLen,
-        null,
-        cipherText,
-        cipherText.length,
-        data,
-        data.length,
-        nonce.value.pointer(),
-        key.value.pointer());
+    int rc = Sodium
+        .crypto_aead_aes256gcm_decrypt(
+            clearText,
+            clearTextLen,
+            null,
+            cipherText,
+            cipherText.length,
+            data,
+            data.length,
+            nonce.value.pointer(),
+            key.value.pointer());
     if (rc == -1) {
       return null;
     }
@@ -795,16 +800,17 @@ public final class AES256GCM implements AutoCloseable {
     byte[] clearText = new byte[maxClearTextLength(cipherText)];
 
     LongLongByReference clearTextLen = new LongLongByReference();
-    int rc = Sodium.crypto_aead_aes256gcm_decrypt_afternm(
-        clearText,
-        clearTextLen,
-        null,
-        cipherText,
-        cipherText.length,
-        data,
-        data.length,
-        nonce.value.pointer(),
-        ctx);
+    int rc = Sodium
+        .crypto_aead_aes256gcm_decrypt_afternm(
+            clearText,
+            clearTextLen,
+            null,
+            cipherText,
+            cipherText.length,
+            data,
+            data.length,
+            nonce.value.pointer(),
+            ctx);
     if (rc == -1) {
       return null;
     }
@@ -896,16 +902,17 @@ public final class AES256GCM implements AutoCloseable {
     }
 
     byte[] clearText = new byte[cipherText.length];
-    int rc = Sodium.crypto_aead_aes256gcm_decrypt_detached(
-        clearText,
-        null,
-        cipherText,
-        cipherText.length,
-        mac,
-        data,
-        data.length,
-        nonce.value.pointer(),
-        key.value.pointer());
+    int rc = Sodium
+        .crypto_aead_aes256gcm_decrypt_detached(
+            clearText,
+            null,
+            cipherText,
+            cipherText.length,
+            mac,
+            data,
+            data.length,
+            nonce.value.pointer(),
+            key.value.pointer());
     if (rc == -1) {
       return null;
     }
@@ -981,16 +988,17 @@ public final class AES256GCM implements AutoCloseable {
     }
 
     byte[] clearText = new byte[cipherText.length];
-    int rc = Sodium.crypto_aead_aes256gcm_decrypt_detached_afternm(
-        clearText,
-        null,
-        cipherText,
-        cipherText.length,
-        mac,
-        data,
-        data.length,
-        nonce.value.pointer(),
-        ctx);
+    int rc = Sodium
+        .crypto_aead_aes256gcm_decrypt_detached_afternm(
+            clearText,
+            null,
+            cipherText,
+            cipherText.length,
+            mac,
+            data,
+            data.length,
+            nonce.value.pointer(),
+            ctx);
     if (rc == -1) {
       return null;
     }

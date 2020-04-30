@@ -51,24 +51,26 @@ class RedisKeyValueStoreTest {
 
   @Test
   void testNoValue(@RedisPort Integer redisPort) throws Exception {
-    KeyValueStore<Bytes, Bytes> store = RedisKeyValueStore.open(
-        redisPort,
-        InetAddress.getLoopbackAddress(),
-        Function.identity(),
-        Function.identity(),
-        Function.identity(),
-        Function.identity());
+    KeyValueStore<Bytes, Bytes> store = RedisKeyValueStore
+        .open(
+            redisPort,
+            InetAddress.getLoopbackAddress(),
+            Function.identity(),
+            Function.identity(),
+            Function.identity(),
+            Function.identity());
     assertNull(store.getAsync(Bytes.of(124)).get());
   }
 
   @Test
   void testRedisCloseable(@RedisPort Integer redisPort) throws Exception {
-    try (RedisKeyValueStore<Bytes, Bytes> redis = RedisKeyValueStore.open(
-        "redis://127.0.0.1:" + redisPort,
-        Function.identity(),
-        Function.identity(),
-        Function.identity(),
-        Function.identity())) {
+    try (RedisKeyValueStore<Bytes, Bytes> redis = RedisKeyValueStore
+        .open(
+            "redis://127.0.0.1:" + redisPort,
+            Function.identity(),
+            Function.identity(),
+            Function.identity(),
+            Function.identity())) {
       AsyncCompletion completion = redis.putAsync(Bytes.of(125), Bytes.of(10, 12, 13));
       completion.join();
       Bytes value = redis.getAsync(Bytes.of(125)).get();

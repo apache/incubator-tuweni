@@ -93,7 +93,9 @@ class MerkleTrieTestSuite {
   @SuppressWarnings({"unchecked", "rawtypes"})
   private static Stream<Arguments> prepareTests(InputStream in) throws IOException {
     Map<String, Map> allTests = new ObjectMapper().readerFor(Map.class).readValue(in);
-    return allTests.entrySet().stream().map(
-        entry -> Arguments.of(entry.getKey(), entry.getValue().get("in"), entry.getValue().get("root")));
+    return allTests
+        .entrySet()
+        .stream()
+        .map(entry -> Arguments.of(entry.getKey(), entry.getValue().get("in"), entry.getValue().get("root")));
   }
 }

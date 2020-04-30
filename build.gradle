@@ -19,14 +19,15 @@ import java.util.regex.Pattern
 import net.ltgt.gradle.errorprone.CheckSeverity
 
 buildscript {
-  repositories { jcenter() // jcenter
+  repositories {
+    jcenter() // jcenter
   }
 
   dependencies { classpath "org.ajoberstar.grgit:grgit-core:3.1.1" }
 }
 
 plugins {
-  id 'com.diffplug.gradle.spotless' version '3.16.0'
+  id 'com.diffplug.gradle.spotless' version '3.28.1'
   id 'net.ltgt.errorprone' version '0.6'
   id 'io.spring.dependency-management' version '1.0.6.RELEASE'
   id 'com.github.hierynomus.license' version '0.15.0'
@@ -161,7 +162,7 @@ subprojects {
     }
     kotlin {
       licenseHeaderFile rootProject.file('gradle/spotless.license.txt')
-      ktlint().userData(['indent_size': '2', 'continuation_indent_size' : '2', 'max_line_length': '120'])
+      ktlint().userData(['indent_size': '2', 'continuation_indent_size' : '2', 'max_line_length': '120', 'disabled_rules': 'import-ordering'])
       endWithNewline()
     }
   }
@@ -564,12 +565,10 @@ allprojects {
 // Configure root project as a virtual package that depends on all components
 
 dependencies {
-  subprojects.each { p ->
+  subprojects.findAll {
+    !it.name.contains('reference-tests')
+  }.each { p ->
     switch (p.name) {
-      case 'eth-reference-tests':
-      case 'eth2-reference-tests':
-      // ignore
-        break
       case 'crypto':
         compile(p) {
           exclude group: 'com.github.jnr', module: 'jnr-ffi'

@@ -340,12 +340,13 @@ public final class SecretBox {
   public static Allocated encrypt(Allocated message, Key key, Nonce nonce) {
     int macbytes = macLength();
     Allocated cipherText = Allocated.allocate(macbytes + message.length());
-    int rc = Sodium.crypto_secretbox_easy(
-        cipherText.pointer(),
-        message.pointer(),
-        message.length(),
-        nonce.value.pointer(),
-        key.value.pointer());
+    int rc = Sodium
+        .crypto_secretbox_easy(
+            cipherText.pointer(),
+            message.pointer(),
+            message.length(),
+            nonce.value.pointer(),
+            key.value.pointer());
     if (rc != 0) {
       throw new SodiumException("crypto_secretbox_easy: failed with result " + rc);
     }
@@ -401,13 +402,14 @@ public final class SecretBox {
 
     byte[] cipherText = new byte[message.length];
     byte[] mac = new byte[macbytes];
-    int rc = Sodium.crypto_secretbox_detached(
-        cipherText,
-        mac,
-        message,
-        message.length,
-        nonce.value.pointer(),
-        key.value.pointer());
+    int rc = Sodium
+        .crypto_secretbox_detached(
+            cipherText,
+            mac,
+            message,
+            message.length,
+            nonce.value.pointer(),
+            key.value.pointer());
     if (rc != 0) {
       throw new SodiumException("crypto_secretbox_detached: failed with result " + rc);
     }
@@ -446,12 +448,13 @@ public final class SecretBox {
     }
 
     Allocated clearText = Allocated.allocate(cipherText.length() - macLength);
-    int rc = Sodium.crypto_secretbox_open_easy(
-        clearText.pointer(),
-        cipherText.pointer(),
-        cipherText.length(),
-        nonce.value.pointer(),
-        key.value.pointer());
+    int rc = Sodium
+        .crypto_secretbox_open_easy(
+            clearText.pointer(),
+            cipherText.pointer(),
+            cipherText.length(),
+            nonce.value.pointer(),
+            key.value.pointer());
     if (rc == -1) {
       return null;
     }
@@ -478,12 +481,13 @@ public final class SecretBox {
     }
 
     byte[] clearText = new byte[cipherText.length - macLength];
-    int rc = Sodium.crypto_secretbox_open_easy(
-        clearText,
-        cipherText,
-        cipherText.length,
-        nonce.value.pointer(),
-        key.value.pointer());
+    int rc = Sodium
+        .crypto_secretbox_open_easy(
+            clearText,
+            cipherText,
+            cipherText.length,
+            nonce.value.pointer(),
+            key.value.pointer());
     if (rc == -1) {
       return null;
     }
@@ -526,13 +530,14 @@ public final class SecretBox {
     }
 
     byte[] clearText = new byte[cipherText.length];
-    int rc = Sodium.crypto_secretbox_open_detached(
-        clearText,
-        cipherText,
-        mac,
-        cipherText.length,
-        nonce.value.pointer(),
-        key.value.pointer());
+    int rc = Sodium
+        .crypto_secretbox_open_detached(
+            clearText,
+            cipherText,
+            mac,
+            cipherText.length,
+            nonce.value.pointer(),
+            key.value.pointer());
     if (rc == -1) {
       return null;
     }
@@ -1091,13 +1096,14 @@ public final class SecretBox {
 
     int rc;
     try {
-      rc = Sodium.crypto_secretbox_detached(
-          cipherText,
-          mac,
-          message,
-          message.length,
-          nonce.value.pointer(),
-          key.value.pointer());
+      rc = Sodium
+          .crypto_secretbox_detached(
+              cipherText,
+              mac,
+              message,
+              message.length,
+              nonce.value.pointer(),
+              key.value.pointer());
     } finally {
       key.destroy();
     }
@@ -1369,12 +1375,13 @@ public final class SecretBox {
 
     int rc;
     try {
-      rc = Sodium.crypto_secretbox_open_easy(
-          clearText,
-          Arrays.copyOfRange(cipherText, noncebytes, cipherText.length),
-          cipherText.length - noncebytes,
-          nonce.value.pointer(),
-          key.value.pointer());
+      rc = Sodium
+          .crypto_secretbox_open_easy(
+              clearText,
+              Arrays.copyOfRange(cipherText, noncebytes, cipherText.length),
+              cipherText.length - noncebytes,
+              nonce.value.pointer(),
+              key.value.pointer());
     } finally {
       key.destroy();
     }
@@ -1725,13 +1732,14 @@ public final class SecretBox {
 
     int rc;
     try {
-      rc = Sodium.crypto_secretbox_open_detached(
-          clearText,
-          cipherText,
-          Arrays.copyOfRange(mac, noncebytes, mac.length),
-          cipherText.length,
-          nonce.value.pointer(),
-          key.value.pointer());
+      rc = Sodium
+          .crypto_secretbox_open_detached(
+              clearText,
+              cipherText,
+              Arrays.copyOfRange(mac, noncebytes, mac.length),
+              cipherText.length,
+              nonce.value.pointer(),
+              key.value.pointer());
     } finally {
       key.destroy();
     }

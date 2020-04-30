@@ -214,9 +214,11 @@ class VertxAcceptanceTest {
   void connectToPeer(@VertxInstance Vertx vertx) throws Exception {
 
 
-    SECP256K1.KeyPair kp = SECP256K1.KeyPair.fromSecretKey(
-        SECP256K1.SecretKey
-            .fromBytes(Bytes32.fromHexString("0x2CADB9DDEA3E675CC5349A1AF053CF2E144AF657016A6155DF4AD767F561F18E")));
+    SECP256K1.KeyPair kp = SECP256K1.KeyPair
+        .fromSecretKey(
+            SECP256K1.SecretKey
+                .fromBytes(
+                    Bytes32.fromHexString("0x2CADB9DDEA3E675CC5349A1AF053CF2E144AF657016A6155DF4AD767F561F18E")));
 
     MemoryWireConnectionsRepository repository = new MemoryWireConnectionsRepository();
 
@@ -254,10 +256,12 @@ class VertxAcceptanceTest {
         }), "Client 1", repository);
     service.start().join();
 
-    AsyncCompletion completion = service.connectTo(
-        SECP256K1.PublicKey.fromHexString(
-            "7a8fbb31bff7c48179f8504b047313ebb7446a0233175ffda6eb4c27aaa5d2aedcef4dd9501b4f17b4f16588f0fd037f9b9416b8caca655bee3b14b4ef67441a"),
-        new InetSocketAddress("localhost", 30303));
+    AsyncCompletion completion = service
+        .connectTo(
+            SECP256K1.PublicKey
+                .fromHexString(
+                    "7a8fbb31bff7c48179f8504b047313ebb7446a0233175ffda6eb4c27aaa5d2aedcef4dd9501b4f17b4f16588f0fd037f9b9416b8caca655bee3b14b4ef67441a"),
+            new InetSocketAddress("localhost", 30303));
     completion.join();
     Thread.sleep(10000);
 

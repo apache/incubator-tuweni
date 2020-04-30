@@ -42,8 +42,9 @@ final class TomlBackedConfiguration implements Configuration {
 
   TomlBackedConfiguration(TomlParseResult toml, @Nullable Schema schema) {
     List<ConfigurationError> errors = new ArrayList<>();
-    toml.errors().forEach(
-        err -> errors.add(new ConfigurationError(documentPosition(err.position()), err.getMessage(), err)));
+    toml
+        .errors()
+        .forEach(err -> errors.add(new ConfigurationError(documentPosition(err.position()), err.getMessage(), err)));
     if (schema != null) {
       schema.validate(new TomlBackedConfiguration(toml, null)).forEach(errors::add);
     } else {

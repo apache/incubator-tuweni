@@ -161,10 +161,11 @@ public final class RLPxConnection {
 
     if (!macBytes.equals(expectedMac)) {
       throw new InvalidMACException(
-          String.format(
-              "Header MAC did not match expected MAC; expected: %s, received: %s",
-              expectedMac.toHexString(),
-              macBytes.toHexString()));
+          String
+              .format(
+                  "Header MAC did not match expected MAC; expected: %s, received: %s",
+                  expectedMac.toHexString(),
+                  macBytes.toHexString()));
     }
 
     Bytes frameData = messageFrame.slice(32, frameSize);
@@ -176,10 +177,11 @@ public final class RLPxConnection {
     Bytes expectedFrameMac = updateIngress(newFrameMac.xor(frameMacSeed.slice(0, 16))).slice(0, 16);
     if (!expectedFrameMac.equals(frameMac)) {
       throw new InvalidMACException(
-          String.format(
-              "Frame MAC did not match expected MAC; expected: %s, received: %s",
-              expectedFrameMac.toHexString(),
-              frameMac.toHexString()));
+          String
+              .format(
+                  "Frame MAC did not match expected MAC; expected: %s, received: %s",
+                  expectedFrameMac.toHexString(),
+                  frameMac.toHexString()));
     }
 
     Bytes decryptedFrameData = Bytes.wrap(new byte[frameData.size()]);
@@ -248,12 +250,13 @@ public final class RLPxConnection {
     assert idBytes.size() == 1;
 
     Bytes encryptedPayload = Bytes.wrap(new byte[idBytes.size() + messageData.size() + pad]);
-    encryptionCipher.processBytes(
-        Bytes.concatenate(idBytes, messageData, Bytes.wrap(new byte[pad])).toArrayUnsafe(),
-        0,
-        encryptedPayload.size(),
-        encryptedPayload.toArrayUnsafe(),
-        0);
+    encryptionCipher
+        .processBytes(
+            Bytes.concatenate(idBytes, messageData, Bytes.wrap(new byte[pad])).toArrayUnsafe(),
+            0,
+            encryptedPayload.size(),
+            encryptedPayload.toArrayUnsafe(),
+            0);
 
     // Calculate the frame MAC.
     Bytes payloadMacSeed = updateEgress(encryptedPayload).slice(0, 16);
@@ -267,11 +270,12 @@ public final class RLPxConnection {
 
   private Bytes calculateMac(Bytes input, boolean ingress) {
     Bytes mac = Bytes.wrap(new byte[16]);
-    macEncryptionEngine.processBlock(
-        snapshot(ingress ? ingressMac : egressMac).slice(0, 16).toArrayUnsafe(),
-        0,
-        mac.toArrayUnsafe(),
-        0);
+    macEncryptionEngine
+        .processBlock(
+            snapshot(ingress ? ingressMac : egressMac).slice(0, 16).toArrayUnsafe(),
+            0,
+            mac.toArrayUnsafe(),
+            0);
     mac = mac.xor(input);
     if (ingress) {
       mac = updateIngress(mac).slice(0, 16);

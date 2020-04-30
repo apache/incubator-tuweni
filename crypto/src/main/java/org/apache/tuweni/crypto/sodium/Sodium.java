@@ -188,11 +188,12 @@ public final class Sodium {
   private static LibSodium initializeLibrary(LibSodium lib) {
     if (!supportsVersion(minSupportedVersion(), lib)) {
       throw new LinkageError(
-          String.format(
-              "Unsupported libsodium version %s (%s:%s)",
-              lib.sodium_version_string(),
-              lib.sodium_library_version_major(),
-              lib.sodium_library_version_minor()));
+          String
+              .format(
+                  "Unsupported libsodium version %s (%s:%s)",
+                  lib.sodium_version_string(),
+                  lib.sodium_library_version_major(),
+                  lib.sodium_library_version_minor()));
     }
     int result = lib.sodium_init();
     if (result == -1) {

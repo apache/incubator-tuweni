@@ -98,16 +98,17 @@ class HashTreeRootTest {
 
     assertEquals(
         Bytes.fromHexString("0x55DC6699E7B5713DD9102224C302996F931836C6DAE9A4EC6AB49C966F394685"),
-        SSZ.hashTreeRoot(
-            Bytes.wrap(_1s),
-            Bytes.wrap(_2s),
-            Bytes.wrap(_3s),
-            Bytes.wrap(_4s),
-            Bytes.wrap(_5s),
-            Bytes.wrap(_6s),
-            Bytes.wrap(_7s),
-            Bytes.wrap(_8s),
-            Bytes.wrap(_9s),
-            Bytes.wrap(_as)));
+        SSZ
+            .hashTreeRoot(
+                Bytes.wrap(_1s),
+                Bytes.wrap(_2s),
+                Bytes.wrap(_3s),
+                Bytes.wrap(_4s),
+                Bytes.wrap(_5s),
+                Bytes.wrap(_6s),
+                Bytes.wrap(_7s),
+                Bytes.wrap(_8s),
+                Bytes.wrap(_9s),
+                Bytes.wrap(_as)));
   }
 }

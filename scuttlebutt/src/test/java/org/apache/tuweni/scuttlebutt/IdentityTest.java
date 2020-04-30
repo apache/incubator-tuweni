@@ -109,9 +109,10 @@ class IdentityTest {
 
   @Test
   void signAndVerify() {
-    Signature.KeyPair kp = Signature.KeyPair.fromSeed(
-        Signature.Seed
-            .fromBytes(Bytes.fromHexString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef")));
+    Signature.KeyPair kp = Signature.KeyPair
+        .fromSeed(
+            Signature.Seed
+                .fromBytes(Bytes.fromHexString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef")));
     Bytes message = Bytes.fromHexString("deadbeef");
     Identity id = Identity.fromKeyPair(kp);
     Bytes signature = id.sign(message);

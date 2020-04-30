@@ -38,11 +38,12 @@ class ConcatenatedBytesTest {
   }
 
   private static Stream<Arguments> concatenatedWrapProvider() {
-    return Stream.of(
-        Arguments.of(new byte[] {}, new byte[] {}),
-        Arguments.of(new byte[] {}, new byte[] {1, 2, 3}),
-        Arguments.of(new byte[] {1, 2, 3}, new byte[] {}),
-        Arguments.of(new byte[] {1, 2, 3}, new byte[] {4, 5}));
+    return Stream
+        .of(
+            Arguments.of(new byte[] {}, new byte[] {}),
+            Arguments.of(new byte[] {}, new byte[] {1, 2, 3}),
+            Arguments.of(new byte[] {1, 2, 3}, new byte[] {}),
+            Arguments.of(new byte[] {1, 2, 3}, new byte[] {4, 5}));
   }
 
   @Test

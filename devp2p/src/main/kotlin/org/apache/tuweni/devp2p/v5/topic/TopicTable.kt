@@ -67,7 +67,7 @@ class TopicTable(
       table[topic] = createNewQueue().apply { put(nodeId, TargetAd(timeSupplier(), enr)) }
       return 0 // put immediately
     } else {
-      //table is full (wait time = target-ad-lifetime - oldest in table of youngest in queue)
+      // table is full (wait time = target-ad-lifetime - oldest in table of youngest in queue)
       val oldestInTable = table.entries.map { it.value.youngest().regTime }.min() ?: -1
       return TARGET_AD_LIFETIME_MS - (timeSupplier() - oldestInTable)
     }

@@ -474,7 +474,7 @@ internal class ENRResponsePacket private constructor(
     ): ENRResponsePacket {
       try {
         return RLP.decodeList(payload) { reader ->
-          //request-hash, ENR
+          // request-hash, ENR
           val requestHash = reader.readValue()
           val enr = reader.readValue()
           val expiration = reader.readLong()

@@ -140,9 +140,10 @@ final class SecureScuttlebuttStream implements SecureScuttlebuttStreamClient, Se
 
     ArrayList<Bytes> bytes = breakIntoParts(message);
 
-    List<Bytes> segments =
-        bytes.stream().map(slice -> encryptMessage(slice, clientToServerKey, clientToServerNonce)).collect(
-            Collectors.toList());
+    List<Bytes> segments = bytes
+        .stream()
+        .map(slice -> encryptMessage(slice, clientToServerKey, clientToServerNonce))
+        .collect(Collectors.toList());
 
     return Bytes.concatenate(segments.toArray(new Bytes[] {}));
   }

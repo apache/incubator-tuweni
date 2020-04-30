@@ -170,51 +170,52 @@ public final class EthStatsReporter {
   }
 
   private void connect(Future<Boolean> result, URI uri) {
-    client.websocket(
-        uri.getPort(),
-        uri.getHost(),
-        uri.toString(),
-        MultiMap.caseInsensitiveMultiMap().add("origin", "http://localhost"),
-        ws -> {
-          ws.closeHandler(this::attemptConnect);
-          ws.exceptionHandler(e -> {
-            logger.debug("Error while communicating with ethnetstats", e);
+    client
+        .websocket(
+            uri.getPort(),
+            uri.getHost(),
+            uri.toString(),
+            MultiMap.caseInsensitiveMultiMap().add("origin", "http://localhost"),
+            ws -> {
+              ws.closeHandler(this::attemptConnect);
+              ws.exceptionHandler(e -> {
+                logger.debug("Error while communicating with ethnetstats", e);
 
-          });
-          ws.textMessageHandler(message -> {
-            try {
-              JsonNode node = mapper.readTree(message);
-              JsonNode emitEvent = node.get("emit");
-              if (emitEvent.isArray()) {
-                String eventValue = emitEvent.get(0).textValue();
-                if (!result.isComplete()) {
-                  if (!"ready".equals(eventValue)) {
+              });
+              ws.textMessageHandler(message -> {
+                try {
+                  JsonNode node = mapper.readTree(message);
+                  JsonNode emitEvent = node.get("emit");
+                  if (emitEvent.isArray()) {
+                    String eventValue = emitEvent.get(0).textValue();
+                    if (!result.isComplete()) {
+                      if (!"ready".equals(eventValue)) {
+                        logger.warn(message);
+                        result.complete(false);
+                      } else {
+                        logger.debug("Connected OK! {}", message);
+                        result.complete(true);
+
+                        // we are connected and now sending information
+                        reportPeriodically(ws);
+                        writePing(ws);
+                        report(ws);
+                      }
+                    } else {
+                      handleEmitEvent((ArrayNode) emitEvent, ws);
+                    }
+                  } else {
                     logger.warn(message);
                     result.complete(false);
-                  } else {
-                    logger.debug("Connected OK! {}", message);
-                    result.complete(true);
-
-                    // we are connected and now sending information
-                    reportPeriodically(ws);
-                    writePing(ws);
-                    report(ws);
                   }
-                } else {
-                  handleEmitEvent((ArrayNode) emitEvent, ws);
+                } catch (IOException e) {
+                  throw new UncheckedIOException(e);
                 }
-              } else {
-                logger.warn(message);
-                result.complete(false);
-              }
-            } catch (IOException e) {
-              throw new UncheckedIOException(e);
-            }
-          });
+              });
 
-          writeCommand(ws, "hello", new AuthMessage(nodeInfo, id, secret));
-        },
-        result::fail);
+              writeCommand(ws, "hello", new AuthMessage(nodeInfo, id, secret));
+            },
+            result::fail);
   }
 
   private void handleEmitEvent(ArrayNode event, WebSocket ws) {

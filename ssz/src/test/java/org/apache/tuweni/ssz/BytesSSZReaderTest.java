@@ -148,8 +148,21 @@ class BytesSSZReaderTest {
     List<String> expected =
         Arrays.asList("asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer");
 
-    System.out.println(
-        SSZ.encodeStringList("asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer"));
+    System.out
+        .println(
+            SSZ
+                .encodeStringList(
+                    "asdf",
+                    "qwer",
+                    "zxcv",
+                    "asdf",
+                    "qwer",
+                    "zxcv",
+                    "asdf",
+                    "qwer",
+                    "zxcv",
+                    "asdf",
+                    "qwer"));
 
     List<String> result = SSZ.decodeStringList(SHORT_LIST);
     assertEquals(expected, result);
@@ -160,9 +173,23 @@ class BytesSSZReaderTest {
     List<String> expected =
         Arrays.asList("asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer");
 
-    System.out.println(
-        SSZ.encodeStringList(
-            Arrays.asList("asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer")));
+    System.out
+        .println(
+            SSZ
+                .encodeStringList(
+                    Arrays
+                        .asList(
+                            "asdf",
+                            "qwer",
+                            "zxcv",
+                            "asdf",
+                            "qwer",
+                            "zxcv",
+                            "asdf",
+                            "qwer",
+                            "zxcv",
+                            "asdf",
+                            "qwer")));
 
     List<String> result = SSZ.decodeStringList(SHORT_LIST);
     assertEquals(expected, result);

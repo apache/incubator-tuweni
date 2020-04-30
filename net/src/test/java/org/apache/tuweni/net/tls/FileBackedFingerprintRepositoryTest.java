@@ -78,9 +78,10 @@ class FileBackedFingerprintRepositoryTest {
   void testInvalidFingerprintAddedToFile(@TempDirectory Path tempFolder) throws IOException {
     FileBackedFingerprintRepository repo = new FileBackedFingerprintRepository(tempFolder.resolve("repo-bad2"));
     Bytes fingerprint = generateFingerprint();
-    Files.write(
-        tempFolder.resolve("repo-bad2"),
-        ("bar " + fingerprint.slice(8).toHexString().substring(2) + "GGG").getBytes(UTF_8));
+    Files
+        .write(
+            tempFolder.resolve("repo-bad2"),
+            ("bar " + fingerprint.slice(8).toHexString().substring(2) + "GGG").getBytes(UTF_8));
     assertThrows(TLSEnvironmentException.class, () -> repo.addFingerprint("foo", fingerprint));
   }
 }

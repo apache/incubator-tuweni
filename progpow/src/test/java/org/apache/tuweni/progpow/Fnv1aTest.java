@@ -37,11 +37,13 @@ class Fnv1aTest {
 
 
   private static Stream<Arguments> vectorSupplier() {
-    return Stream.of(
-        Arguments.arguments(
-            UInt32.fromHexString("0x811C9DC5"),
-            UInt32.fromHexString("0xDDD0A47B"),
-            UInt32.fromHexString("0xD37EE61A")));
+    return Stream
+        .of(
+            Arguments
+                .arguments(
+                    UInt32.fromHexString("0x811C9DC5"),
+                    UInt32.fromHexString("0xDDD0A47B"),
+                    UInt32.fromHexString("0xD37EE61A")));
   }
 
 }

@@ -51,9 +51,13 @@ public final class HelloMessage implements WireProtocolMessage {
       List<Capability> capabilities = reader.readList(capabilitiesReader -> {
         List<Capability> caps = new ArrayList<>();
         while (!capabilitiesReader.isComplete()) {
-          caps.add(
-              capabilitiesReader.readList(
-                  capabilityReader -> new Capability(capabilityReader.readString(), capabilityReader.readInt())));
+          caps
+              .add(
+                  capabilitiesReader
+                      .readList(
+                          capabilityReader -> new Capability(
+                              capabilityReader.readString(),
+                              capabilityReader.readInt())));
         }
         return caps;
       });

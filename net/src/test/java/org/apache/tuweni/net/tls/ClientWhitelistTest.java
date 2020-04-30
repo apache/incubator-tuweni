@@ -88,9 +88,10 @@ class ClientWhitelistTest {
   @BeforeEach
   void setupClient(@TempDirectory Path tempDir, @VertxInstance Vertx vertx) throws Exception {
     knownServersFile = tempDir.resolve("knownclients.txt");
-    Files.write(
-        knownServersFile,
-        Arrays.asList("#First line", "localhost:" + fooServer.actualPort() + " " + fooFingerprint));
+    Files
+        .write(
+            knownServersFile,
+            Arrays.asList("#First line", "localhost:" + fooServer.actualPort() + " " + fooFingerprint));
 
     HttpClientOptions options = new HttpClientOptions();
     options

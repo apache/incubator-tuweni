@@ -131,7 +131,9 @@ class RLPReferenceTestSuite {
   private static Stream<Arguments> prepareTests(InputStream in) throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     Map<String, Map> allTests = mapper.readerFor(Map.class).readValue(in);
-    return allTests.entrySet().stream().map(
-        entry -> Arguments.of(entry.getKey(), entry.getValue().get("in"), entry.getValue().get("out")));
+    return allTests
+        .entrySet()
+        .stream()
+        .map(entry -> Arguments.of(entry.getKey(), entry.getValue().get("in"), entry.getValue().get("out")));
   }
 }

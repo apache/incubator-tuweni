@@ -149,9 +149,11 @@ public class EthHash {
         int offset = j * HASH_BYTES;
         for (int k = 0; k < HASH_BYTES; ++k) {
           temp[k] = (byte) (completeCache.get((j - 1 + rows) % rows * HASH_BYTES + k)
-              ^ (completeCache.get(
-                  Integer.remainderUnsigned(completeCache.getInt(offset, ByteOrder.LITTLE_ENDIAN), rows) * HASH_BYTES
-                      + k)));
+              ^ (completeCache
+                  .get(
+                      Integer.remainderUnsigned(completeCache.getInt(offset, ByteOrder.LITTLE_ENDIAN), rows)
+                          * HASH_BYTES
+                          + k)));
         }
         temp = Hash.keccak512(temp);
         System.arraycopy(temp, 0, completeCache.toArrayUnsafe(), offset, HASH_BYTES);
@@ -187,8 +189,9 @@ public class EthHash {
       fnvHash(
           mixInts,
           cache,
-          fnv(UInt32.valueOf(index).xor(UInt32.valueOf(i)), mixInts[i % 16]).mod(UInt32.valueOf(rows)).multiply(
-              UInt32.valueOf(HASH_WORDS)));
+          fnv(UInt32.valueOf(index).xor(UInt32.valueOf(i)), mixInts[i % 16])
+              .mod(UInt32.valueOf(rows))
+              .multiply(UInt32.valueOf(HASH_WORDS)));
     }
     return Hash.keccak512(intToByte(mixInts));
   }

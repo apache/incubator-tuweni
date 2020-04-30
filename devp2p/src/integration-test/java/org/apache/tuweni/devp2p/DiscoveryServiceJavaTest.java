@@ -53,14 +53,16 @@ class DiscoveryServiceJavaTest {
   void managePeerRepository() throws Exception {
     SECP256K1.KeyPair peerKeyPair = SECP256K1.KeyPair.random();
     EphemeralPeerRepository repository = new EphemeralPeerRepository();
-    DiscoveryService service = DiscoveryService.Companion.open(
-        SECP256K1.KeyPair.random(),
-        0,
-        "localhost",
-        1,
-        emptyMap(),
-        Collections.singletonList(URI.create("enode://" + peerKeyPair.publicKey().toHexString() + "@127.0.0.1:10000")),
-        repository);
+    DiscoveryService service = DiscoveryService.Companion
+        .open(
+            SECP256K1.KeyPair.random(),
+            0,
+            "localhost",
+            1,
+            emptyMap(),
+            Collections
+                .singletonList(URI.create("enode://" + peerKeyPair.publicKey().toHexString() + "@127.0.0.1:10000")),
+            repository);
     AsyncResult<Peer> result = repository.getAsync(peerKeyPair.publicKey());
     assertEquals(peerKeyPair.publicKey(), result.get().getNodeId());
     AsyncResult<Peer> byURI =

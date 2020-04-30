@@ -82,11 +82,12 @@ public final class VertxGossipServer {
             state.receiveIHaveMessage(peer, Bytes.fromHexString(message.hash));
             break;
           case GOSSIP:
-            state.receiveGossipMessage(
-                peer,
-                message.attributes,
-                Bytes.fromHexString(message.payload),
-                Bytes.fromHexString(message.hash));
+            state
+                .receiveGossipMessage(
+                    peer,
+                    message.attributes,
+                    Bytes.fromHexString(message.payload),
+                    Bytes.fromHexString(message.hash));
             break;
           case GRAFT:
             state.receiveGraftMessage(peer, Bytes.fromHexString(message.payload));

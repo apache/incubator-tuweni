@@ -56,10 +56,12 @@ class ByteBufferWriterTest {
     assertEquals(fromHexString("830186a0"), Bytes.wrapByteBuffer(buffer));
 
     buffer.clear();
-    RLP.encodeTo(
-        buffer,
-        writer -> writer
-            .writeUInt256(UInt256.fromHexString("0x0400000000000000000000000000000000000000000000000000f100000000ab")));
+    RLP
+        .encodeTo(
+            buffer,
+            writer -> writer
+                .writeUInt256(
+                    UInt256.fromHexString("0x0400000000000000000000000000000000000000000000000000f100000000ab")));
     buffer.flip();
     assertEquals(
         fromHexString("a00400000000000000000000000000000000000000000000000000f100000000ab"),

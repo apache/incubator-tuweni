@@ -536,12 +536,13 @@ public final class Signature {
   public static Allocated signDetached(Allocated message, SecretKey secretKey) {
     checkArgument(!secretKey.value.isDestroyed(), "SecretKey has been destroyed");
     Allocated signature = Allocated.allocate(Sodium.crypto_sign_bytes());
-    int rc = Sodium.crypto_sign_detached(
-        signature.pointer(),
-        new LongLongByReference(Sodium.crypto_sign_bytes()),
-        message.pointer(),
-        (long) message.length(),
-        secretKey.value.pointer());
+    int rc = Sodium
+        .crypto_sign_detached(
+            signature.pointer(),
+            new LongLongByReference(Sodium.crypto_sign_bytes()),
+            message.pointer(),
+            (long) message.length(),
+            secretKey.value.pointer());
     if (rc != 0) {
       throw new SodiumException("crypto_sign_detached: failed with result " + rc);
     }
@@ -588,11 +589,12 @@ public final class Signature {
    * @return whether the signature matches the message according to the public key.
    */
   public static boolean verifyDetached(Allocated message, Allocated signature, PublicKey publicKey) {
-    int rc = Sodium.crypto_sign_verify_detached(
-        signature.pointer(),
-        message.pointer(),
-        message.length(),
-        publicKey.value.pointer());
+    int rc = Sodium
+        .crypto_sign_verify_detached(
+            signature.pointer(),
+            message.pointer(),
+            message.length(),
+            publicKey.value.pointer());
     if (rc == -1) {
       return false;
     }

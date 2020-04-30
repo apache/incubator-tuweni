@@ -39,8 +39,9 @@ public class PeerInfoTest {
     String inviteCode = System.getenv("ssb_invite_code");
 
     if (inviteCode == null) {
-      return AsyncResult.exceptional(
-          new Exception("Test requires an 'ssb_invite_code environment variable with a valid ssb invite code"));
+      return AsyncResult
+          .exceptional(
+              new Exception("Test requires an 'ssb_invite_code environment variable with a valid ssb invite code"));
     } else {
       return client.getNetworkService().redeemInviteCode(Invite.fromCanonicalForm(inviteCode));
     }

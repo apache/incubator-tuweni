@@ -33,13 +33,14 @@ class BlockTest {
         generateBlockHeader(),
         new BlockBody(
             Arrays.asList(generateTransaction(), generateTransaction(), generateTransaction(), generateTransaction()),
-            Arrays.asList(
-                generateBlockHeader(),
-                generateBlockHeader(),
-                generateBlockHeader(),
-                generateBlockHeader(),
-                generateBlockHeader(),
-                generateBlockHeader())));
+            Arrays
+                .asList(
+                    generateBlockHeader(),
+                    generateBlockHeader(),
+                    generateBlockHeader(),
+                    generateBlockHeader(),
+                    generateBlockHeader(),
+                    generateBlockHeader())));
     Bytes encoded = block.toBytes();
     Block read = Block.fromBytes(encoded);
     assertEquals(block, read);

@@ -31,13 +31,14 @@ class BlockBodyTest {
   void testRLPRoundtrip() {
     BlockBody blockBody = new BlockBody(
         Arrays.asList(generateTransaction(), generateTransaction(), generateTransaction(), generateTransaction()),
-        Arrays.asList(
-            generateBlockHeader(),
-            generateBlockHeader(),
-            generateBlockHeader(),
-            generateBlockHeader(),
-            generateBlockHeader(),
-            generateBlockHeader()));
+        Arrays
+            .asList(
+                generateBlockHeader(),
+                generateBlockHeader(),
+                generateBlockHeader(),
+                generateBlockHeader(),
+                generateBlockHeader(),
+                generateBlockHeader()));
     Bytes encoded = blockBody.toBytes();
     BlockBody read = BlockBody.fromBytes(encoded);
     assertEquals(blockBody, read);

@@ -409,16 +409,17 @@ public final class XChaCha20Poly1305 {
     byte[] cipherText = new byte[maxCypherTextLength(message)];
 
     LongLongByReference cipherTextLen = new LongLongByReference();
-    int rc = Sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
-        cipherText,
-        cipherTextLen,
-        message,
-        message.length,
-        data,
-        data.length,
-        null,
-        nonce.value.pointer(),
-        key.value.pointer());
+    int rc = Sodium
+        .crypto_aead_xchacha20poly1305_ietf_encrypt(
+            cipherText,
+            cipherTextLen,
+            message,
+            message.length,
+            data,
+            data.length,
+            null,
+            nonce.value.pointer(),
+            key.value.pointer());
     if (rc != 0) {
       throw new SodiumException("crypto_aead_xchacha20poly1305_ietf_encrypt: failed with result " + rc);
     }
@@ -492,17 +493,18 @@ public final class XChaCha20Poly1305 {
     byte[] mac = new byte[(int) abytes];
 
     LongLongByReference macLen = new LongLongByReference();
-    int rc = Sodium.crypto_aead_xchacha20poly1305_ietf_encrypt_detached(
-        cipherText,
-        mac,
-        macLen,
-        message,
-        message.length,
-        data,
-        data.length,
-        null,
-        nonce.value.pointer(),
-        key.value.pointer());
+    int rc = Sodium
+        .crypto_aead_xchacha20poly1305_ietf_encrypt_detached(
+            cipherText,
+            mac,
+            macLen,
+            message,
+            message.length,
+            data,
+            data.length,
+            null,
+            nonce.value.pointer(),
+            key.value.pointer());
     if (rc != 0) {
       throw new SodiumException("crypto_aead_xchacha20poly1305_ietf_encrypt_detached: failed with result " + rc);
     }
@@ -579,15 +581,16 @@ public final class XChaCha20Poly1305 {
       checkState(state != null, "stream has been destroyed");
       byte[] cipherText = new byte[abytes + clearText.length];
       byte tag = isFinal ? TAG_FINAL : 0;
-      int rc = Sodium.crypto_secretstream_xchacha20poly1305_push(
-          state,
-          cipherText,
-          null,
-          clearText,
-          clearText.length,
-          null,
-          0,
-          tag);
+      int rc = Sodium
+          .crypto_secretstream_xchacha20poly1305_push(
+              state,
+              cipherText,
+              null,
+              clearText,
+              clearText.length,
+              null,
+              0,
+              tag);
       if (rc != 0) {
         throw new SodiumException("crypto_secretstream_xchacha20poly1305_push: failed with result " + rc);
       }
@@ -671,16 +674,17 @@ public final class XChaCha20Poly1305 {
     byte[] clearText = new byte[maxClearTextLength(cipherText)];
 
     LongLongByReference clearTextLen = new LongLongByReference();
-    int rc = Sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
-        clearText,
-        clearTextLen,
-        null,
-        cipherText,
-        cipherText.length,
-        data,
-        data.length,
-        nonce.value.pointer(),
-        key.value.pointer());
+    int rc = Sodium
+        .crypto_aead_xchacha20poly1305_ietf_decrypt(
+            clearText,
+            clearTextLen,
+            null,
+            cipherText,
+            cipherText.length,
+            data,
+            data.length,
+            nonce.value.pointer(),
+            key.value.pointer());
     if (rc == -1) {
       return null;
     }
@@ -770,16 +774,17 @@ public final class XChaCha20Poly1305 {
     }
 
     byte[] clearText = new byte[cipherText.length];
-    int rc = Sodium.crypto_aead_xchacha20poly1305_ietf_decrypt_detached(
-        clearText,
-        null,
-        cipherText,
-        cipherText.length,
-        mac,
-        data,
-        data.length,
-        nonce.value.pointer(),
-        key.value.pointer());
+    int rc = Sodium
+        .crypto_aead_xchacha20poly1305_ietf_decrypt_detached(
+            clearText,
+            null,
+            cipherText,
+            cipherText.length,
+            mac,
+            data,
+            data.length,
+            nonce.value.pointer(),
+            key.value.pointer());
     if (rc == -1) {
       return null;
     }
@@ -853,15 +858,16 @@ public final class XChaCha20Poly1305 {
       }
       byte[] clearText = new byte[cipherText.length - abytes];
       ByteByReference tag = new ByteByReference();
-      int rc = Sodium.crypto_secretstream_xchacha20poly1305_pull(
-          state,
-          clearText,
-          null,
-          tag,
-          cipherText,
-          cipherText.length,
-          null,
-          0);
+      int rc = Sodium
+          .crypto_secretstream_xchacha20poly1305_pull(
+              state,
+              clearText,
+              null,
+              tag,
+              cipherText,
+              cipherText.length,
+              null,
+              0);
       if (rc != 0) {
         throw new SodiumException("crypto_secretstream_xchacha20poly1305_push: failed with result " + rc);
       }

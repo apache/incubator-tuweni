@@ -39,53 +39,58 @@ class PasswordHashTest {
     String password = "A very insecure password";
     Salt salt = Salt.random();
 
-    Bytes hash = PasswordHash.hash(
-        password,
-        20,
-        salt,
-        PasswordHash.interactiveOpsLimit(),
-        PasswordHash.interactiveMemLimit(),
-        Algorithm.recommended());
+    Bytes hash = PasswordHash
+        .hash(
+            password,
+            20,
+            salt,
+            PasswordHash.interactiveOpsLimit(),
+            PasswordHash.interactiveMemLimit(),
+            Algorithm.recommended());
     assertEquals(20, hash.size());
 
-    Bytes generated = PasswordHash.hash(
-        password,
-        20,
-        salt,
-        PasswordHash.interactiveOpsLimit(),
-        PasswordHash.interactiveMemLimit(),
-        Algorithm.recommended());
+    Bytes generated = PasswordHash
+        .hash(
+            password,
+            20,
+            salt,
+            PasswordHash.interactiveOpsLimit(),
+            PasswordHash.interactiveMemLimit(),
+            Algorithm.recommended());
     assertEquals(hash, generated);
 
-    generated = PasswordHash.hash(
-        password,
-        20,
-        Salt.random(),
-        PasswordHash.interactiveOpsLimit(),
-        PasswordHash.interactiveMemLimit(),
-        Algorithm.recommended());
+    generated = PasswordHash
+        .hash(
+            password,
+            20,
+            Salt.random(),
+            PasswordHash.interactiveOpsLimit(),
+            PasswordHash.interactiveMemLimit(),
+            Algorithm.recommended());
     assertNotEquals(hash, generated);
 
-    generated = PasswordHash.hash(
-        password,
-        20,
-        salt,
-        PasswordHash.moderateOpsLimit(),
-        PasswordHash.interactiveMemLimit(),
-        Algorithm.recommended());
+    generated = PasswordHash
+        .hash(
+            password,
+            20,
+            salt,
+            PasswordHash.moderateOpsLimit(),
+            PasswordHash.interactiveMemLimit(),
+            Algorithm.recommended());
     assertNotEquals(hash, generated);
   }
 
   @Test
   void shouldThrowForLowOpsLimitWithArgon2i() {
     assertThrows(IllegalArgumentException.class, () -> {
-      PasswordHash.hash(
-          "A very insecure password",
-          20,
-          Salt.random(),
-          1,
-          PasswordHash.moderateMemLimit(),
-          Algorithm.argon2i13());
+      PasswordHash
+          .hash(
+              "A very insecure password",
+              20,
+              Salt.random(),
+              1,
+              PasswordHash.moderateMemLimit(),
+              Algorithm.argon2i13());
     });
   }
 

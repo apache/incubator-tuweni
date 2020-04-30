@@ -40,17 +40,16 @@ class LESSubprotocol
  * @param networkId the identifier, as an integer of the chain to connect to. 0 for testnet, 1 for mainnet.
  * @param blockStore the key-value store for blocks
  * @param blockHeaderStore the key-value store for block headers
- */
-  (
-    private val networkId: Int,
-    private val serveHeaders: Boolean,
-    private val serveChainSince: UInt256,
-    private val serveStateSince: UInt256,
-    private val flowControlBufferLimit: UInt256,
-    private val flowControlMaximumRequestCostTable: UInt256,
-    private val flowControlMinimumRateOfRecharge: UInt256,
-    private val repo: BlockchainRepository
-  ) : SubProtocol {
+ */(
+   private val networkId: Int,
+   private val serveHeaders: Boolean,
+   private val serveChainSince: UInt256,
+   private val serveStateSince: UInt256,
+   private val flowControlBufferLimit: UInt256,
+   private val flowControlMaximumRequestCostTable: UInt256,
+   private val flowControlMinimumRateOfRecharge: UInt256,
+   private val repo: BlockchainRepository
+ ) : SubProtocol {
 
   override fun id(): SubProtocolIdentifier {
     return LES_ID

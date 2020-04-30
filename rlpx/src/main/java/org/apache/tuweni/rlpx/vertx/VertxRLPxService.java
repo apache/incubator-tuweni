@@ -211,10 +211,11 @@ public final class VertxRLPxService implements RLPxService {
       @Override
       public void handle(Buffer buffer) {
         if (conn == null) {
-          conn = RLPxConnectionFactory.respondToHandshake(
-              Bytes.wrapBuffer(buffer),
-              keyPair,
-              bytes -> netSocket.write(Buffer.buffer(bytes.toArrayUnsafe())));
+          conn = RLPxConnectionFactory
+              .respondToHandshake(
+                  Bytes.wrapBuffer(buffer),
+                  keyPair,
+                  bytes -> netSocket.write(Buffer.buffer(bytes.toArrayUnsafe())));
           if (wireConnection == null) {
             this.wireConnection = createConnection(conn, netSocket);
             wireConnection.handleConnectionStart();
@@ -288,64 +289,66 @@ public final class VertxRLPxService implements RLPxService {
     }
     CompletableAsyncCompletion connected = AsyncCompletion.incomplete();
     logger.debug("Connecting to {} with public key {}", peerAddress, peerPublicKey);
-    client.connect(
-        peerAddress.getPort(),
-        peerAddress.getHostString(),
-        netSocketFuture -> netSocketFuture.map(netSocket -> {
-          Bytes32 nonce = RLPxConnectionFactory.generateRandomBytes32();
-          KeyPair ephemeralKeyPair = KeyPair.random();
-          Bytes initHandshakeMessage = RLPxConnectionFactory.init(keyPair, peerPublicKey, ephemeralKeyPair, nonce);
-          logger.debug("Initiating handshake to {}", peerAddress);
-          netSocket.write(Buffer.buffer(initHandshakeMessage.toArrayUnsafe()));
+    client
+        .connect(
+            peerAddress.getPort(),
+            peerAddress.getHostString(),
+            netSocketFuture -> netSocketFuture.map(netSocket -> {
+              Bytes32 nonce = RLPxConnectionFactory.generateRandomBytes32();
+              KeyPair ephemeralKeyPair = KeyPair.random();
+              Bytes initHandshakeMessage = RLPxConnectionFactory.init(keyPair, peerPublicKey, ephemeralKeyPair, nonce);
+              logger.debug("Initiating handshake to {}", peerAddress);
+              netSocket.write(Buffer.buffer(initHandshakeMessage.toArrayUnsafe()));
 
-          netSocket.handler(new Handler<Buffer>() {
+              netSocket.handler(new Handler<Buffer>() {
 
-            private RLPxConnection conn;
+                private RLPxConnection conn;
 
-            private DefaultWireConnection wireConnection;
+                private DefaultWireConnection wireConnection;
 
-            @Override
-            public void handle(Buffer buffer) {
-              try {
-                Bytes messageBytes = Bytes.wrapBuffer(buffer);
-                if (conn == null) {
-                  int messageSize = RLPxConnectionFactory.messageSize(messageBytes);
-                  Bytes responseBytes = messageBytes;
-                  if (messageBytes.size() > messageSize) {
-                    responseBytes = responseBytes.slice(0, messageSize);
-                  }
-                  messageBytes = messageBytes.slice(messageSize);
-                  HandshakeMessage responseMessage =
-                      RLPxConnectionFactory.readResponse(responseBytes, keyPair.secretKey());
-                  conn = RLPxConnectionFactory.createConnection(
-                      true,
-                      initHandshakeMessage,
-                      responseBytes,
-                      ephemeralKeyPair.secretKey(),
-                      responseMessage.ephemeralPublicKey(),
-                      nonce,
-                      responseMessage.nonce(),
-                      keyPair.publicKey(),
-                      peerPublicKey);
+                @Override
+                public void handle(Buffer buffer) {
+                  try {
+                    Bytes messageBytes = Bytes.wrapBuffer(buffer);
+                    if (conn == null) {
+                      int messageSize = RLPxConnectionFactory.messageSize(messageBytes);
+                      Bytes responseBytes = messageBytes;
+                      if (messageBytes.size() > messageSize) {
+                        responseBytes = responseBytes.slice(0, messageSize);
+                      }
+                      messageBytes = messageBytes.slice(messageSize);
+                      HandshakeMessage responseMessage =
+                          RLPxConnectionFactory.readResponse(responseBytes, keyPair.secretKey());
+                      conn = RLPxConnectionFactory
+                          .createConnection(
+                              true,
+                              initHandshakeMessage,
+                              responseBytes,
+                              ephemeralKeyPair.secretKey(),
+                              responseMessage.ephemeralPublicKey(),
+                              nonce,
+                              responseMessage.nonce(),
+                              keyPair.publicKey(),
+                              peerPublicKey);
 
-                  this.wireConnection = createConnection(conn, netSocket);
-                  connected.complete();
-                  if (messageBytes.isEmpty()) {
-                    return;
+                      this.wireConnection = createConnection(conn, netSocket);
+                      connected.complete();
+                      if (messageBytes.isEmpty()) {
+                        return;
+                      }
+                    }
+                    if (conn != null) {
+                      conn.stream(messageBytes, wireConnection::messageReceived);
+                    }
+                  } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                    connected.completeExceptionally(e);
+                    netSocket.close();
                   }
                 }
-                if (conn != null) {
-                  conn.stream(messageBytes, wireConnection::messageReceived);
-                }
-              } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-                connected.completeExceptionally(e);
-                netSocket.close();
-              }
-            }
-          });
-          return null;
-        }));
+              });
+              return null;
+            }));
     return connected;
   }
 

@@ -118,8 +118,9 @@ class ProgPoWTest {
     long epochIndex = EthHash.epoch(30000);
 
     UInt32[] cache = EthHash.mkCache(Ints.checkedCast(EthHash.getCacheSize(blockNumber)), blockNumber);
-    Bytes expected = Bytes.fromHexString(
-        "0x6754e3b3e30274ae82a722853b35d8a2bd2347ffee05bcbfde4469deb8b5d2f0d3ba4cc797f700b1be60bc050b84404f6872e43593f9d69c59460e6a6ee438b8");
+    Bytes expected = Bytes
+        .fromHexString(
+            "0x6754e3b3e30274ae82a722853b35d8a2bd2347ffee05bcbfde4469deb8b5d2f0d3ba4cc797f700b1be60bc050b84404f6872e43593f9d69c59460e6a6ee438b8");
 
     assertEquals(expected, EthHash.calcDatasetItem(cache, 0));
   }
@@ -732,12 +733,13 @@ class ProgPoWTest {
     long blockNumber = 30000;
     UInt32[] cache = EthHash.mkCache(Ints.checkedCast(EthHash.getCacheSize(blockNumber)), blockNumber);
     UInt32[] cDag = ProgPoW.createDagCache(blockNumber, (ind) -> EthHash.calcDatasetItem(cache, ind));
-    Bytes32 digest = ProgPoW.progPowHash(
-        blockNumber,
-        0x123456789abcdef0L,
-        Bytes32.fromHexString("ffeeddccbbaa9988776655443322110000112233445566778899aabbccddeeff"),
-        cDag,
-        (ind) -> EthHash.calcDatasetItem(cache, ind));
+    Bytes32 digest = ProgPoW
+        .progPowHash(
+            blockNumber,
+            0x123456789abcdef0L,
+            Bytes32.fromHexString("ffeeddccbbaa9988776655443322110000112233445566778899aabbccddeeff"),
+            cDag,
+            (ind) -> EthHash.calcDatasetItem(cache, ind));
     assertEquals(Bytes32.fromHexString("5b7ccd472dbefdd95b895cac8ece67ff0deb5a6bd2ecc6e162383d00c3728ece"), digest);
   }
 }

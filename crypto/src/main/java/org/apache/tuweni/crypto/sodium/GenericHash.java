@@ -321,13 +321,14 @@ public final class GenericHash {
    */
   public static Hash hash(int hashLength, Input input, Key key) {
     Pointer output = Sodium.malloc(hashLength);
-    Sodium.crypto_generichash(
-        output,
-        hashLength,
-        input.value.pointer(),
-        input.length(),
-        key.value.pointer(),
-        key.length());
+    Sodium
+        .crypto_generichash(
+            output,
+            hashLength,
+            input.value.pointer(),
+            input.length(),
+            key.value.pointer(),
+            key.length());
     return new Hash(output, hashLength);
   }
 }

@@ -111,31 +111,34 @@ class BoxTest {
 
     DetachedEncryptionResult result =
         Box.encryptDetached(message, aliceKeyPair.publicKey(), bobKeyPair.secretKey(), nonce);
-    byte[] clearText = Box.decryptDetached(
-        result.cipherTextArray(),
-        result.macArray(),
-        bobKeyPair.publicKey(),
-        aliceKeyPair.secretKey(),
-        nonce);
+    byte[] clearText = Box
+        .decryptDetached(
+            result.cipherTextArray(),
+            result.macArray(),
+            bobKeyPair.publicKey(),
+            aliceKeyPair.secretKey(),
+            nonce);
 
     assertNotNull(clearText);
     assertArrayEquals(message, clearText);
 
-    clearText = Box.decryptDetached(
-        result.cipherTextArray(),
-        result.macArray(),
-        bobKeyPair.publicKey(),
-        aliceKeyPair.secretKey(),
-        nonce.increment());
+    clearText = Box
+        .decryptDetached(
+            result.cipherTextArray(),
+            result.macArray(),
+            bobKeyPair.publicKey(),
+            aliceKeyPair.secretKey(),
+            nonce.increment());
     assertNull(clearText);
 
     Box.KeyPair otherKeyPair = Box.KeyPair.random();
-    clearText = Box.decryptDetached(
-        result.cipherTextArray(),
-        result.macArray(),
-        otherKeyPair.publicKey(),
-        bobKeyPair.secretKey(),
-        nonce);
+    clearText = Box
+        .decryptDetached(
+            result.cipherTextArray(),
+            result.macArray(),
+            otherKeyPair.publicKey(),
+            bobKeyPair.secretKey(),
+            nonce);
     assertNull(clearText);
   }
 
@@ -151,12 +154,13 @@ class BoxTest {
       result = precomputed.encryptDetached(message, nonce);
     }
 
-    byte[] clearText = Box.decryptDetached(
-        result.cipherTextArray(),
-        result.macArray(),
-        bobKeyPair.publicKey(),
-        aliceKeyPair.secretKey(),
-        nonce);
+    byte[] clearText = Box
+        .decryptDetached(
+            result.cipherTextArray(),
+            result.macArray(),
+            bobKeyPair.publicKey(),
+            aliceKeyPair.secretKey(),
+            nonce);
 
     assertNotNull(clearText);
     assertArrayEquals(message, clearText);

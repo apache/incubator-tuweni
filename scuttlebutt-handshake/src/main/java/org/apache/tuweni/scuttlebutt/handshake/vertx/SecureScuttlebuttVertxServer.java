@@ -159,8 +159,9 @@ public final class SecureScuttlebuttVertxServer {
    * @return a handle to the completion of the operation
    */
   public AsyncCompletion start() {
-    server = vertx.createNetServer(
-        new NetServerOptions().setTcpKeepAlive(true).setHost(addr.getHostString()).setPort(addr.getPort()));
+    server = vertx
+        .createNetServer(
+            new NetServerOptions().setTcpKeepAlive(true).setHost(addr.getHostString()).setPort(addr.getPort()));
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
     server.connectHandler(new NetSocketHandler()::handle);
     server.listen(res -> {

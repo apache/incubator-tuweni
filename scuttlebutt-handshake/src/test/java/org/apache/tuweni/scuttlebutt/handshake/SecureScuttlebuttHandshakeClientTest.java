@@ -114,28 +114,32 @@ class SecureScuttlebuttHandshakeClientTest {
     client.readAcceptMessage(server.createAcceptMessage());
 
     {
-      Bytes encrypted = SecretBox.encrypt(
-          Bytes.fromHexString("deadbeef"),
-          SecretBox.Key.fromHash(server.serverToClientSecretBoxKey()),
-          SecretBox.Nonce.fromBytes(server.serverToClientNonce()));
+      Bytes encrypted = SecretBox
+          .encrypt(
+              Bytes.fromHexString("deadbeef"),
+              SecretBox.Key.fromHash(server.serverToClientSecretBoxKey()),
+              SecretBox.Nonce.fromBytes(server.serverToClientNonce()));
 
-      Bytes decrypted = SecretBox.decrypt(
-          encrypted,
-          SecretBox.Key.fromHash(client.serverToClientSecretBoxKey()),
-          SecretBox.Nonce.fromBytes(client.serverToClientNonce()));
+      Bytes decrypted = SecretBox
+          .decrypt(
+              encrypted,
+              SecretBox.Key.fromHash(client.serverToClientSecretBoxKey()),
+              SecretBox.Nonce.fromBytes(client.serverToClientNonce()));
       assertEquals(Bytes.fromHexString("deadbeef"), decrypted);
     }
 
     {
-      Bytes encrypted = SecretBox.encrypt(
-          Bytes.fromHexString("deadbeef"),
-          SecretBox.Key.fromHash(client.clientToServerSecretBoxKey()),
-          SecretBox.Nonce.fromBytes(client.clientToServerNonce()));
+      Bytes encrypted = SecretBox
+          .encrypt(
+              Bytes.fromHexString("deadbeef"),
+              SecretBox.Key.fromHash(client.clientToServerSecretBoxKey()),
+              SecretBox.Nonce.fromBytes(client.clientToServerNonce()));
 
-      Bytes decrypted = SecretBox.decrypt(
-          encrypted,
-          SecretBox.Key.fromHash(server.clientToServerSecretBoxKey()),
-          SecretBox.Nonce.fromBytes(server.clientToServerNonce()));
+      Bytes decrypted = SecretBox
+          .decrypt(
+              encrypted,
+              SecretBox.Key.fromHash(server.clientToServerSecretBoxKey()),
+              SecretBox.Nonce.fromBytes(server.clientToServerNonce()));
       assertEquals(Bytes.fromHexString("deadbeef"), decrypted);
     }
   }
@@ -144,9 +148,10 @@ class SecureScuttlebuttHandshakeClientTest {
   void fromInviteWrongCurve() {
     assertThrows(
         IllegalArgumentException.class,
-        () -> SecureScuttlebuttHandshakeClient.fromInvite(
-            Bytes32.random(),
-            new Invite("localhost", 30303, Identity.randomSECP256K1(), Signature.Seed.random())));
+        () -> SecureScuttlebuttHandshakeClient
+            .fromInvite(
+                Bytes32.random(),
+                new Invite("localhost", 30303, Identity.randomSECP256K1(), Signature.Seed.random())));
   }
 
 }
