@@ -960,6 +960,7 @@ class UInt256Test {
   @ParameterizedTest
   @MethodSource("fromBytesProvider")
   void fromBytesTest(Bytes value, UInt256 expected, boolean isBytes32) {
+    assertEquals(expected.toBytes(), UInt256.fromBytes(value).toBytes());
     assertEquals(expected, UInt256.fromBytes(value));
     assertEquals(isBytes32, value instanceof Bytes32);
   }
@@ -967,18 +968,27 @@ class UInt256Test {
   private static Stream<Arguments> fromBytesProvider() {
     String onesString = "11111111111111111111111111111111";
     String twosString = "22222222222222222222222222222222";
+    String eString = "e000000000e000000000e000000000e0";
     Bytes onesBytes = Bytes.fromHexString(onesString);
     Bytes twosBytes = Bytes.fromHexString(twosString);
+    Bytes eBytes = Bytes.fromHexString(eString);
     Bytes onetwoBytes = Bytes.fromHexString(onesString + twosString);
-    return Stream.of(
-        // Mutable Bytes
-        Arguments.of(Bytes.concatenate(onesBytes), hv(onesString), false),
-        Arguments.of(Bytes.concatenate(onesBytes, twosBytes), hv(onesString + twosString), true),
-        // Array Wrapping Bytes
-        Arguments.of(Bytes.fromHexString(onesString), hv(onesString), false),
-        Arguments.of(Bytes.fromHexString(onesString + twosString), hv(onesString + twosString), true),
-        // Delegating Bytes32
-        Arguments.of(Bytes32.wrap(onetwoBytes), hv(onesString + twosString), true));
+    Bytes oneeBytes = Bytes.fromHexString(onesString + eString);
+    return Stream
+        .of(
+            // Mutable Bytes
+            Arguments.of(Bytes.concatenate(onesBytes), hv(onesString), false),
+            Arguments.of(Bytes.concatenate(eBytes), hv(eString), false),
+            Arguments.of(Bytes.concatenate(onesBytes, twosBytes), hv(onesString + twosString), true),
+            Arguments.of(Bytes.concatenate(onesBytes, eBytes), hv(onesString + eString), true),
+            // Array Wrapping Bytes
+            Arguments.of(Bytes.fromHexString(onesString), hv(onesString), false),
+            Arguments.of(Bytes.fromHexString(eString), hv(eString), false),
+            Arguments.of(Bytes.fromHexString(onesString + twosString), hv(onesString + twosString), true),
+            Arguments.of(Bytes.fromHexString(onesString + eString), hv(onesString + eString), true),
+            // Delegating Bytes32
+            Arguments.of(Bytes32.wrap(onetwoBytes), hv(onesString + twosString), true),
+            Arguments.of(Bytes32.wrap(oneeBytes), hv(onesString + eString), true));
   }
 
   @ParameterizedTest
