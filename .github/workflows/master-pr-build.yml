@@ -111,7 +111,7 @@ jobs:
           gradle-version: 6.3
           arguments: test
       - name: Upload test reports
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: Reports
-          path: */build/reports
+          path: **/build/reports
