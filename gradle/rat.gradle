@@ -104,7 +104,6 @@ class RatPlugin implements Plugin<Project> {
     type: RatTask,
     group: 'Build',
     description: 'Runs Apache Rat checks.')
-    project.tasks[JavaPlugin.TEST_TASK_NAME].dependsOn ratTask
   }
 
   void configureDependencies(final Project project) {
