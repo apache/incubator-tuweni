@@ -120,11 +120,13 @@ if (file('.git').exists()) {
         'hard_example.toml',
         'toml-v0.5.0-spec-example.toml',
         'eth2-reference-tests/**',
-        'package-lock.json'
+        'package-lock.json',
+        '.github/pull_request_template.md'
       ])
       return list
     }
   }
+  spotlessCheck.dependsOn rat
 }
 
 //////
@@ -314,23 +316,23 @@ allprojects {
   // Artifact locations
 
   jar {
-    destinationDir = file("${rootProject.buildDir}/libs")
+    destinationDirectory = file("${rootProject.buildDir}/libs")
   }
 
   task sourcesJar(type: Jar, dependsOn: classes) {
-    destinationDir = file("${rootProject.buildDir}/src")
+    destinationDirectory = file("${rootProject.buildDir}/src")
     classifier = 'sources'
     from sourceSets.main.allSource
   }
 
   task javadocJar(type: Jar, dependsOn: javadoc) {
-    destinationDir = file("${rootProject.buildDir}/docs")
+    destinationDirectory = file("${rootProject.buildDir}/docs")
     classifier = 'javadoc'
-    from javadoc.destinationDir
+    from javadoc.outputDirectory
   }
 
   task dokkaJar(type: Jar, dependsOn: dokka) {
-    destinationDir = file("${rootProject.buildDir}/docs")
+    destinationDirectory = file("${rootProject.buildDir}/docs")
     classifier = 'dokka'
     from dokka.outputDirectory
   }
@@ -341,12 +343,12 @@ allprojects {
 
   tasks.withType(Jar) {
     if (rootProject == project) {
-      baseName = project.name
+      archiveBaseName = project.name
     } else {
-      baseName = rootProject.name + '-' + project.name
+      archiveBaseName = rootProject.name + '-' + project.name
     }
     manifest {
-      attributes('Implementation-Title': baseName,
+      attributes('Implementation-Title': archiveBaseName,
       'Implementation-Version': project.version)
     }
     from(rootProject.projectDir) {
@@ -414,11 +416,11 @@ allprojects {
           }
           artifact dokkaJar { classifier 'javadoc' }
           groupId 'org.apache.tuweni'
-          artifactId project.jar.baseName
+          artifactId project.jar.archiveBaseName.toString()
           version project.version
 
           pom {
-            name = project.jar.baseName
+            name = project.jar.archiveBaseName
             afterEvaluate { description = project.description }
             url = 'https://github.com/apache/incubator-tuweni'
             licenses {
@@ -622,9 +624,9 @@ dokka {
 }
 
 dokkaJar {
-  baseName = rootProject.name
+  archiveBaseName = rootProject.name
   manifest {
-    attributes('Implementation-Title': baseName,
+    attributes('Implementation-Title': archiveBaseName,
     'Implementation-Version': project.version)
   }
 }
