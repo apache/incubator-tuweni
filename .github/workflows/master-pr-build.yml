@@ -75,7 +75,8 @@ jobs:
         with:
           gradle-version: 6.3
           arguments: assemble -x test
-      - uses: actions/upload-artifact@v1
+      - name: Upload build
+        uses: actions/upload-artifact@v1
         with:
           name: Libs
           path: build/libs
@@ -109,7 +110,8 @@ jobs:
         with:
           gradle-version: 6.3
           arguments: test
-      - uses: actions/upload-artifact@v1
+      - name: Upload test reports
+        uses: actions/upload-artifact@v1
         with:
           name: Reports
-          path: build/reports
+          path: */build/reports
