@@ -1452,6 +1452,26 @@ public interface Bytes extends Comparable<Bytes> {
     }
   }
 
+  default String toEllipsisHexString() {
+    int size = size();
+    if (size < 6) {
+      return toHexString();
+    }
+    StringBuilder appendable = new StringBuilder("0x");
+    for (int i = 0; i < 2; i++) {
+      byte b = get(i);
+      appendable.append(AbstractBytes.HEX_CODE[b >> 4 & 15]);
+      appendable.append(AbstractBytes.HEX_CODE[b & 15]);
+    }
+    appendable.append("..");
+    for (int i = 0; i < 2; i++) {
+      byte b = get(i + size - 2);
+      appendable.append(AbstractBytes.HEX_CODE[b >> 4 & 15]);
+      appendable.append(AbstractBytes.HEX_CODE[b & 15]);
+    }
+    return appendable.toString();
+  }
+
   /** @return This value represented as a minimal hexadecimal string (without any leading zero). */
   default String toShortHexString() {
     StringBuilder hex;

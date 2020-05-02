@@ -452,6 +452,21 @@ abstract class CommonBytesTests {
   }
 
   @Test
+  void testEllipsisHexString() {
+    assertEquals("0x", h("0x").toEllipsisHexString());
+    assertEquals("0x0000", h("0x0000").toEllipsisHexString());
+    assertEquals("0x01000001", h("0x01000001").toEllipsisHexString());
+    assertEquals("0x0100000001", h("0x0100000001").toEllipsisHexString());
+    assertEquals("0x0100..0001", h("0x010000000001").toEllipsisHexString());
+    assertEquals("0x1234..5678", h("0x123456789abcdef012345678").toEllipsisHexString());
+    assertEquals("0x1234..789a", h("0x123456789abcdef0123456789a").toEllipsisHexString());
+    assertEquals("0x1234..9abc", h("0x123456789abcdef0123456789abc").toEllipsisHexString());
+    assertEquals("0x1234..bcde", h("0x123456789abcdef0123456789abcde").toEllipsisHexString());
+    assertEquals("0x1234..def0", h("0x123456789abcdef0123456789abcdef0").toEllipsisHexString());
+    assertEquals("0x1234..def0", h("0x123456789abcdef0123456789abcdef0").toEllipsisHexString());
+  }
+
+  @Test
   void slideToEnd() {
     assertEquals(Bytes.of(1, 2, 3, 4), Bytes.of(1, 2, 3, 4).slice(0));
     assertEquals(Bytes.of(2, 3, 4), Bytes.of(1, 2, 3, 4).slice(1));
