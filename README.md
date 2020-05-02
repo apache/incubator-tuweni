@@ -1,5 +1,6 @@
 # Tuweni: Apache Core Libraries for Java (& Kotlin)
 
+[![Slack](https://img.shields.io/badge/slack-%23tuweni-72eff8?logo=slack)](https://s.apache.org/slack-invite)
 [![Github build](https://github.com/apache/incubator-tuweni/workflows/master%20pr%20build/badge.svg)](https://github.com/apache/incubator-tuweni/actions?query=workflow%3A%22master+pr+build%22)
 [![Build Status](https://builds.apache.org/job/Apache%20Tuweni/job/CI/badge/icon)](https://builds.apache.org/job/Apache%20Tuweni/job/CI/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/incubator-tuweni/blob/master/LICENSE)
