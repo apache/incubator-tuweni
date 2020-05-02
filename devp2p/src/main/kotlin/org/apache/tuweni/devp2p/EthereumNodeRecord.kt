@@ -46,20 +46,26 @@ class EthereumNodeRecord(val signature: Bytes, val seq: Long, val data: Map<Stri
       if (rlp.size() > 300) {
         throw IllegalArgumentException("Record too long")
       }
-      return RLP.decodeList(rlp, {
-        val sig = it.readValue()
+      return RLP.decodeList(rlp) {
+          val sig = it.readValue()
 
-        val seq = it.readLong()
+          val seq = it.readLong()
 
-        val data = mutableMapOf<String, Bytes>()
-        while (!it.isComplete) {
-          val key = it.readString()
-          val value = it.readValue()
-          data[key] = value
-        }
+          val data = mutableMapOf<String, Bytes>()
+          while (!it.isComplete) {
+            val key = it.readString()
+            if (it.nextIsList()) {
+              it.skipNext()
+              // TODO("not ready yet to read list values")
+              // data[key] = it.readListContents { listreader -> listreader.readValue()}
+            } else {
+              val value = it.readValue()
+              data[key] = value
+            }
+          }
 
-        EthereumNodeRecord(sig, seq, data)
-      })
+          EthereumNodeRecord(sig, seq, data)
+      }
     }
 
     private fun encode(
@@ -167,6 +173,10 @@ class EthereumNodeRecord(val signature: Bytes, val seq: Long, val data: Map<Stri
 
   fun udp(): Int {
     return data["udp"]!!.toInt()
+  }
+
+  override fun toString(): String {
+    return "enr:${ip()}:${tcp()}?udp=${udp()}"
   }
 }
 
