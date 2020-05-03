@@ -20,9 +20,10 @@ dependencies {
   compileOnly 'io.vertx:vertx-core'
 
   testCompile project(':junit')
-  testCompile 'io.vertx:vertx-core'
   testCompile 'org.bouncycastle:bcprov-jdk15on'
   testCompile 'org.junit.jupiter:junit-jupiter-api'
   testCompile 'org.junit.jupiter:junit-jupiter-params'
   testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+
+  integrationTestCompile 'io.vertx:vertx-core'
 }

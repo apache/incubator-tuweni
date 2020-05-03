@@ -169,26 +169,36 @@ subprojects {
     }
   }
 
-  sourceSets {
-    integrationTest {
-      java.srcDir 'src/integration-test/java'
-      kotlin.srcDir 'src/integration-test/kotlin'
-      resources.srcDir 'src/integration-test/resources'
-      compileClasspath += main.output
-      runtimeClasspath += main.output
+  plugins.withId('java', { _ ->
+    sourceSets {
+      integrationTest {
+        compileClasspath += sourceSets.main.output + sourceSets.test.output
+        runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+      }
     }
-  }
 
-  configurations {
-    integrationTestImplementation.extendsFrom testImplementation
-    integrationTestRuntime.extendsFrom testRuntime
-  }
+    configurations {
+      integrationTestImplementation.extendsFrom testImplementation
+      integrationTestRuntime.extendsFrom testRuntime
+    }
+    dependencies {
+      integrationTestRuntime 'org.junit.jupiter:junit-jupiter-engine'
+      integrationTestRuntime 'ch.qos.logback:logback-classic'
+    }
 
-  task integrationTest(type: Test) {
-    testClassesDirs = sourceSets.integrationTest.output.classesDirs
-    classpath = sourceSets.integrationTest.runtimeClasspath
-  }
-  rootProject.integrationTest.dependsOn project.integrationTest
+    task integrationTest(type: Test) {
+      description = 'Runs integration tests.'
+      group = 'verification'
+
+      testClassesDirs = sourceSets.integrationTest.output.classesDirs
+      classpath = sourceSets.integrationTest.runtimeClasspath
+
+      useJUnitPlatform() { includeEngines 'spek', 'junit-jupiter' }
+      timeout = Duration.ofMinutes(30)
+    }
+
+    rootProject.integrationTest.dependsOn integrationTest
+  })
 
   //////
   // Parallel build execution

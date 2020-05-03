@@ -20,7 +20,7 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.crypto.SECP256K1
 
-internal enum class PacketType(
+enum class PacketType(
   val typeId: Byte
 ) {
 

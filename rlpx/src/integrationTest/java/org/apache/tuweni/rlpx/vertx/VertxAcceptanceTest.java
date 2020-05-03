@@ -135,11 +135,11 @@ class VertxAcceptanceTest {
       service.connectTo(secondKp.publicKey(), new InetSocketAddress("localhost", secondService.actualPort()));
 
       Thread.sleep(3000);
-      Assertions.assertEquals(1, repository.asMap().size());
-      Assertions.assertEquals(1, secondRepository.asMap().size());
+      assertEquals(1, repository.asMap().size());
+      assertEquals(1, secondRepository.asMap().size());
 
-      Assertions.assertEquals(1, sp.handler.messages.size());
-      Assertions.assertEquals(1, secondSp.handler.messages.size());
+      assertEquals(1, sp.handler.messages.size());
+      assertEquals(1, secondSp.handler.messages.size());
 
       AsyncCompletion completion = ((DefaultWireConnection) repository.asMap().values().iterator().next()).sendPing();
       completion.join();

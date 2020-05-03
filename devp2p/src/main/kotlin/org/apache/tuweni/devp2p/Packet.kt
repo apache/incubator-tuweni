@@ -25,14 +25,14 @@ import org.apache.tuweni.rlp.RLPException
 import org.apache.tuweni.rlp.RLPWriter
 import java.nio.ByteBuffer
 
-internal class DecodingException(message: String, cause: Throwable? = null) : Exception(message, cause)
+class DecodingException(message: String, cause: Throwable? = null) : Exception(message, cause)
 
-internal data class SigHash(val signature: SECP256K1.Signature, val hash: Bytes32)
+data class SigHash(val signature: SECP256K1.Signature, val hash: Bytes32)
 
 private fun msecToSec(time: Long) = (time + 999) / 1000
 private fun secToMsec(time: Long) = time * 1000
 
-internal sealed class Packet(
+sealed class Packet(
   val nodeId: SECP256K1.PublicKey,
   private val signature: SECP256K1.Signature,
   val hash: Bytes32,
@@ -108,7 +108,7 @@ internal sealed class Packet(
   }
 }
 
-internal class PingPacket private constructor(
+class PingPacket private constructor(
   nodeId: SECP256K1.PublicKey,
   signature: SECP256K1.Signature,
   hash: Bytes32,
@@ -185,7 +185,7 @@ internal class PingPacket private constructor(
   }
 }
 
-internal class PongPacket private constructor(
+class PongPacket private constructor(
   nodeId: SECP256K1.PublicKey,
   signature: SECP256K1.Signature,
   hash: Bytes32,
@@ -252,7 +252,7 @@ internal class PongPacket private constructor(
   }
 }
 
-internal class FindNodePacket private constructor(
+class FindNodePacket private constructor(
   nodeId: SECP256K1.PublicKey,
   signature: SECP256K1.Signature,
   hash: Bytes32,
@@ -306,7 +306,7 @@ internal class FindNodePacket private constructor(
   }
 }
 
-internal class NeighborsPacket private constructor(
+class NeighborsPacket private constructor(
   nodeId: SECP256K1.PublicKey,
   signature: SECP256K1.Signature,
   hash: Bytes32,
@@ -387,7 +387,7 @@ internal class NeighborsPacket private constructor(
   }
 }
 
-internal class ENRRequestPacket private constructor(
+class ENRRequestPacket private constructor(
   nodeId: SECP256K1.PublicKey,
   signature: SECP256K1.Signature,
   hash: Bytes32,
@@ -437,7 +437,7 @@ internal class ENRRequestPacket private constructor(
   }
 }
 
-internal class ENRResponsePacket private constructor(
+class ENRResponsePacket private constructor(
   nodeId: SECP256K1.PublicKey,
   signature: SECP256K1.Signature,
   hash: Bytes32,
