@@ -27,8 +27,8 @@ pipeline {
                     sh """if [ ! -f "gradle-5.0-bin.zip" ]; then
                             wget https://services.gradle.org/distributions/gradle-5.0-bin.zip
                             unzip gradle-5.0-bin.zip
-                            gradle-5.0/bin/gradle setup
                           fi
+                          gradle-5.0/bin/gradle setup
                         """
                 }
             }
