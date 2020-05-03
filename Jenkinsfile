@@ -24,7 +24,7 @@ pipeline {
         stage('Set up gradle') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
-                    sh """if [ ! -f "gradle-5.0-bin.zip" ]; then
+                    sh """if [ ! -f "gradle-6.3-bin.zip" ]; then
                             wget https://services.gradle.org/distributions/gradle-6.3-bin.zip
                             unzip gradle-6.3-bin.zip
                             gradle-6.3/bin/gradle setup
