@@ -426,7 +426,7 @@ allprojects {
           }
           artifact dokkaJar { classifier 'javadoc' }
           groupId 'org.apache.tuweni'
-          artifactId project.jar.archiveBaseName.toString()
+          artifactId project.jar.baseName
           version project.version
 
           pom {
