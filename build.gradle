@@ -430,7 +430,7 @@ allprojects {
           version project.version
 
           pom {
-            name = project.jar.archiveBaseName
+            name = project.jar.archiveBaseName.toString()
             afterEvaluate { description = project.description }
             url = 'https://github.com/apache/incubator-tuweni'
             licenses {
