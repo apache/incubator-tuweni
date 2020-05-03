@@ -25,10 +25,10 @@ pipeline {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
                     sh """if [ ! -f "gradle-5.0-bin.zip" ]; then
-                            wget https://services.gradle.org/distributions/gradle-5.0-bin.zip
-                            unzip gradle-5.0-bin.zip
+                            wget https://services.gradle.org/distributions/gradle-6.3-bin.zip
+                            unzip gradle-6.3-bin.zip
+                            gradle-6.3/bin/gradle setup
                           fi
-                          gradle-5.0/bin/gradle setup
                         """
                 }
             }
