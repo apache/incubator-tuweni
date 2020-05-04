@@ -22,6 +22,7 @@ import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.io.Base32
 import org.apache.tuweni.io.Base64URLSafe
 import org.apache.tuweni.rlp.InvalidRLPEncodingException
+import java.net.URI
 
 /**
  * Intermediate format to write DNS entries
@@ -41,16 +42,16 @@ public interface DNSEntry {
       if (record[0] == '"') {
         record = record.substring(1, record.length - 1)
       }
-      if (record.startsWith("enrtree-root")) {
+      if (record.startsWith("enrtree-root:")) {
         return ENRTreeRoot(readKV(record))
-      } else if (record.startsWith("enrtree-branch")) {
+      } else if (record.startsWith("enrtree-branch:")) {
         return ENRTree(record.substring("enrtree-branch:".length))
       } else if (record.startsWith("enr:")) {
         return ENRNode(readKV(record))
-      } else if (record.startsWith("enrtree-link:")) {
-        return ENRTreeLink(readKV(record))
+      } else if (record.startsWith("enrtree:")) {
+        return ENRTreeLink(record)
       } else {
-        throw InvalidEntryException("$serialized should contain enrtree-branch, enr, enrtree-root or enrtree-link")
+        throw InvalidEntryException("$serialized should contain enrtree-branch, enr, enrtree-root or enrtree")
       }
     }
 
@@ -100,9 +101,8 @@ class ENRTreeRoot(attrs: Map<String, String>) : DNSEntry {
   val version: String
   val seq: Int
   val sig: SECP256K1.Signature
-  val hash: Bytes
-  val encodedHash: String
-  val link: String
+  val enrRoot: String
+  val linkRoot: String
   init {
     if (attrs["enrtree-root"] == null || attrs["seq"] == null || attrs["sig"] == null || attrs["e"] == null ||
       attrs["l"] == null) {
@@ -114,15 +114,17 @@ class ENRTreeRoot(attrs: Map<String, String>) : DNSEntry {
     val sigBytes = Base64URLSafe.decode(attrs["sig"]!!)
     sig = SECP256K1.Signature.fromBytes(Bytes.concatenate(sigBytes,
       Bytes.wrap(ByteArray(Math.max(0, 65 - sigBytes.size())))))
-    encodedHash = attrs["e"]!!
-    hash = Base32.decode(encodedHash)
-    link = attrs["l"]!!
+    enrRoot = attrs["e"]!!
+    linkRoot = attrs["l"]!!
   }
 
   override fun toString(): String {
-    val encodedHash = Base32.encode(hash)
-    return "enrtree-root:$version e=${encodedHash.subSequence(0, encodedHash.indexOf("="))} " +
-      "l=$link seq=$seq sig=${Base64URLSafe.encode(sig.bytes())}"
+    return "enrtree-root:$version e=$enrRoot " +
+      "l=$linkRoot seq=$seq sig=${Base64URLSafe.encode(sig.bytes())}"
+  }
+
+  fun signedContent(): String {
+    return "enrtree-root:$version e=$enrRoot l=$linkRoot seq=$seq"
   }
 }
 
@@ -138,16 +140,24 @@ class ENRTree(entriesAsString: String) : DNSEntry {
   }
 }
 
-class ENRTreeLink(attrs: Map<String, String>) : DNSEntry {
+class ENRTreeLink(url: String) : DNSEntry {
 
   val domainName: String
+  val pubKey: String
   init {
-    val attr = attrs["enrtree-link"] ?: throw InvalidEntryException("Missing attributes on enrtree-link entry")
-    domainName = attr
+    val uri = URI.create(url)
+    domainName = uri.host
+    pubKey = uri.userInfo
+  }
+
+  fun publicKey(): SECP256K1.PublicKey {
+    val keyBytes = Base32.decodeBytes(pubKey)
+    val ecPoint = SECP256K1.Parameters.CURVE.getCurve().decodePoint(keyBytes)
+    return SECP256K1.PublicKey.fromBytes(Bytes.wrap(ecPoint.getEncoded(false)).slice(1))
   }
 
   override fun toString(): String {
-    return "enrtree-link=$domainName"
+    return "enrtree://$pubKey@$domainName"
   }
 }
 

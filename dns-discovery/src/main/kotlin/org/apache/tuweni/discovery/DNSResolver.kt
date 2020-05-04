@@ -32,6 +32,7 @@ package org.apache.tuweni.discovery
  * limitations under the License.
  */
 
+import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.slf4j.LoggerFactory
@@ -67,22 +68,18 @@ class DNSResolver(private val dnsServer: String? = null, private val signingKey:
     return resolveRecordRaw(domainName)?.let { DNSEntry.readDNSEntry(it) }
   }
 
-  private fun checkSignature(entry: ENRTreeRoot, sig: SECP256K1.Signature): Boolean {
-    if (signingKey == null) {
-      return true
-    }
-    TODO("not implemented, $entry $sig")
-    // val recovered = SECP256K1.PublicKey.recoverFromSignature(entry.signedContent(), sig)
-    // return signingKey.equals(recovered)
+  private fun checkSignature(root: ENRTreeRoot, pubKey: SECP256K1.PublicKey, sig: SECP256K1.Signature): Boolean {
+    val hash = Hash.keccak256(root.signedContent().toByteArray())
+    return SECP256K1.verifyHashed(hash, sig, pubKey)
   }
 
   /**
    * Convenience method to read all ENRs, from a top-level record.
    *
-   * @param domainName the DNS domain name to start with
+   * @param enrLink the ENR link to start with, of the form enrtree://PUBKEY@domain
    * @return all ENRs collected
    */
-  public fun collectAll(domainName: String): List<EthereumNodeRecord> {
+  public fun collectAll(enrLink: String): List<EthereumNodeRecord> {
     val nodes = mutableListOf<EthereumNodeRecord>()
     val visitor = object : DNSVisitor {
       override fun visit(enr: EthereumNodeRecord): Boolean {
@@ -90,45 +87,37 @@ class DNSResolver(private val dnsServer: String? = null, private val signingKey:
         return true
       }
     }
-    visitTree(domainName, visitor)
+    visitTree(enrLink, visitor)
     return nodes
   }
 
   /**
    * Reads a complete tree of record, starting with the top-level record.
-   * @param domainName the DNS domain name to start with
+   * @param enrLink the ENR link to start with
    * @param visitor the visitor that will look at each record
    */
-  public fun visitTree(domainName: String, visitor: DNSVisitor) {
-    val entry = resolveRecord(domainName)
-    if (entry !is ENRTreeRoot) {
-      logger.debug("Root domain name $domainName is not an ENR tree root")
-      return
-    }
-    val linkedStr = resolveRecordRaw("${entry.encodedHash}.$domainName")
-    if (linkedStr == null) {
-      logger.debug("No linked record under ${entry.encodedHash}.$domainName")
-      return
-    }
-    if (!checkSignature(entry, entry.sig)) {
-      logger.debug("ENR tree root $domainName failed signature check")
-      return
-    }
+  public fun visitTree(enrLink: String, visitor: DNSVisitor) {
+    val link = ENRTreeLink(enrLink)
+    visitTree(link, visitor)
+  }
 
-    val linkedEntry = DNSEntry.readDNSEntry(linkedStr)
-    // TODO check hash matches
-    if (linkedEntry is ENRNode) {
-      visitor.visit(linkedEntry.nodeRecord)
+  /**
+   * Reads a complete tree of record, starting with the top-level record.
+   * @param link the ENR link to start with
+   * @param visitor the visitor that will look at each record
+   */
+  public fun visitTree(link: ENRTreeLink, visitor: DNSVisitor) {
+    val entry = resolveRecord(link.domainName)
+    if (entry !is ENRTreeRoot) {
+      logger.debug("Root entry $entry is not an ENR tree root")
       return
-    } else if (linkedEntry is ENRTree) {
-      for (e in linkedEntry.entries) {
-        if (!internalVisit(e, domainName, visitor)) {
-          break
-        }
-      }
-    } else {
-      logger.debug("No linked record")
     }
+    if (!checkSignature(entry, link.publicKey(), entry.sig)) {
+      logger.debug("ENR tree root ${link.domainName} failed signature check")
+      return
+    }
+    internalVisit(entry.enrRoot, link.domainName, visitor)
+    internalVisit(entry.linkRoot, link.domainName, visitor)
   }
 
   /**
@@ -148,7 +137,7 @@ class DNSResolver(private val dnsServer: String? = null, private val signingKey:
       val rec = Record.newRecord(name, type, DClass.IN)
       val query = Message.newQuery(rec)
       val response = resolver.send(query)
-      val records = response.getSectionArray(Section.ANSWER)
+      val records = response.getSection(Section.ANSWER)
 
       if (records.isNotEmpty()) {
         return records[0].rdataToString()
@@ -179,7 +168,7 @@ class DNSResolver(private val dnsServer: String? = null, private val signingKey:
         }
       }
     } else if (entry is ENRTreeLink) {
-      visitTree(entry.domainName, visitor)
+      visitTree(entry, visitor)
     } else {
       logger.debug("Unsupported type of node $entry")
     }
