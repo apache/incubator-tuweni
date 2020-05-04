@@ -429,6 +429,15 @@ allprojects {
           artifactId project.jar.baseName
           version project.version
 
+          versionMapping {
+            usage('java-runtime'){
+              fromResolutionResult()
+            }
+            usage('java-api'){
+              fromResolutionResult()
+            }
+          }
+
           pom {
             name = project.jar.archiveBaseName.toString()
             afterEvaluate { description = project.description }
