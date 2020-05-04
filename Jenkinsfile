@@ -36,7 +36,7 @@ pipeline {
         stage('Build') {
             steps {
                 timeout(time: 60, unit: 'MINUTES') {
-                    sh "./gradlew allDependencies checkLicenses spotlessCheck assemble test integrationTest"
+                    sh "./gradlew clean allDependencies checkLicenses spotlessCheck assemble test integrationTest"
                 }
             }
         }
