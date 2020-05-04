@@ -31,7 +31,7 @@ class DNSEntryTest {
     val exception: InvalidEntryException = assertThrows {
       DNSEntry.readDNSEntry("garbage")
     }
-    assertEquals("garbage should contain enrtree-branch, enr, enrtree-root or enrtree-link", exception.message)
+    assertEquals("garbage should contain enrtree-branch, enr, enrtree-root or enrtree", exception.message)
   }
 
   @Test
@@ -47,14 +47,14 @@ class DNSEntryTest {
     val exception: InvalidEntryException = assertThrows {
       DNSEntry.readDNSEntry("garbage=abc def=gfh")
     }
-    assertEquals("garbage=abc def=gfh should contain enrtree-branch, enr, enrtree-root or enrtree-link",
+    assertEquals("garbage=abc def=gfh should contain enrtree-branch, enr, enrtree-root or enrtree",
       exception.message)
   }
 
   @Test
   fun missingSigEntry() {
     val exception: InvalidEntryException = assertThrows {
-      DNSEntry.readDNSEntry("enrtree-root=v1 hash=TO4Q75OQ2N7DX4EOOR7X66A6OM seq=3")
+      DNSEntry.readDNSEntry("enrtree-root:v1 hash=TO4Q75OQ2N7DX4EOOR7X66A6OM seq=3")
     }
     assertEquals("Missing attributes on root entry", exception.message)
   }
@@ -62,7 +62,7 @@ class DNSEntryTest {
   @Test
   fun missingSeqEntry() {
     val exception: InvalidEntryException = assertThrows {
-      DNSEntry.readDNSEntry("enrtree-root=v1 e=TO4Q75OQ2N7DX4EOOR7X66A6OM l=TO4Q75OQ2N7DX4EOOR7X66A6OM" +
+      DNSEntry.readDNSEntry("enrtree-root:v1 e=TO4Q75OQ2N7DX4EOOR7X66A6OM l=TO4Q75OQ2N7DX4EOOR7X66A6OM" +
         " sig=N-YY6UB9xD0hFx1Gmnt7v0RfSxch5tKyry2SRDoLx7B4GfPXagwLxQqyf7gAMvApFn_ORwZQekMWa_pXrcGCtwE=")
     }
     assertEquals("Missing attributes on root entry", exception.message)
@@ -80,9 +80,10 @@ class DNSEntryTest {
   @Test
   fun testValidENRTreeLink() {
     val entry = DNSEntry.readDNSEntry(
-      "enrtree-link:morenodes.example.org")
+      "enrtree://aabb@morenodes.example.org")
       as ENRTreeLink
     assertEquals("morenodes.example.org", entry.domainName)
+    assertEquals("aabb", entry.pubKey)
   }
 
   @Test
@@ -126,9 +127,9 @@ class DNSEntryTest {
 
   @Test
   fun testEntryLinkToString() {
-    val entry = DNSEntry.readDNSEntry("enrtree-link:AM5FCQLWIZX2QFPNJAP7VUERCCRNGRHWZG3YYHIUV7B" +
+    val entry = DNSEntry.readDNSEntry("enrtree://AM5FCQLWIZX2QFPNJAP7VUERCCRNGRHWZG3YYHIUV7B" +
       "VDQ5FDPRT2@morenodes.example.org")
-    assertEquals("enrtree-link=AM5FCQLWIZX2QFPNJAP7VUERCCRNGRHWZG3YYHIUV7BVDQ5FDPRT2@morenodes.example.org",
+    assertEquals("enrtree://AM5FCQLWIZX2QFPNJAP7VUERCCRNGRHWZG3YYHIUV7BVDQ5FDPRT2@morenodes.example.org",
       entry.toString())
   }
 }
