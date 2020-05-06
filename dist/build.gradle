@@ -83,9 +83,15 @@ distributions {
         include 'gradle/*'
         include 'gradle.properties'
       }
-      rootProject.subprojects.each {
-        include it.projectDir.name + '/src/**'
-        include it.projectDir.name + '/build.gradle'
+      rootProject.subprojects.each { s ->
+        into(s.name) {
+          if (project != s) {
+            from s.sourcesJar.outputs.files.collect {
+              zipTree(it)
+            }
+          }
+          from s.projectDir.toPath().resolve("build.gradle")
+        }
       }
     }
   }
@@ -128,6 +134,15 @@ distributions {
         from project(':hobbits-relayer').jar
       }
     }
+  }
+}
+
+rootProject.subprojects.each {
+  if (it != project) {
+    project.distZip.dependsOn it.assemble
+    project.distTar.dependsOn it.assemble
+    project.sourcesDistZip.dependsOn it.sourcesJar
+    project.sourcesDistTar.dependsOn it.sourcesJar
   }
 }
 
@@ -185,4 +200,12 @@ task buildRelayerImage(type: DockerBuildImage) {
   inputDir = projectDir
   dockerFile = file("docker/relayer.Dockerfile")
   tag = "apache-tuweni/relayer:$project.version"
+}
+integrationTest.dependsOn build
+
+dependencies {
+  integrationTestCompile 'org.junit.jupiter:junit-jupiter-api'
+  integrationTestCompile 'org.junit.jupiter:junit-jupiter-params'
+
+  integrationTestRuntime 'org.junit.jupiter:junit-jupiter-engine'
 }
