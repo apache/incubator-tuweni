@@ -39,7 +39,7 @@ class DistributionTest {
     while (!"dist".equals(parentFolder.getFileName().toString()) && parentFolder.getParent() != null) {
       parentFolder = parentFolder.getParent();
     }
-    return parentFolder.resolve("build/distributions");
+    return parentFolder.resolve("build").resolve("distributions").toAbsolutePath();
   }
 
   @Test
