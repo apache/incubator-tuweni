@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -33,7 +34,12 @@ import org.junit.jupiter.api.Test;
 class DistributionTest {
 
   private static Path distributionsFolder() {
-    File currentFile = new File(DistributionTest.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+    File currentFile = null;
+    try {
+      currentFile = new File(DistributionTest.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
     // dist/build/classes/java/org/apache/tuweni/dist
     Path parentFolder = currentFile.toPath();
     while (!"dist".equals(parentFolder.getFileName().toString()) && parentFolder.getParent() != null) {
