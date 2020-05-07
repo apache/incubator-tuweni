@@ -46,7 +46,10 @@ class DistributionTest {
   void testZipFileContents() throws IOException {
     Map<String, Set<String>> dupes = new HashMap<>();
     boolean foundOneZipFile = false;
-    for (File archive : distributionsFolder().toFile().listFiles()) {
+    Path distFolder = distributionsFolder();
+    File distFolderFile = distFolder.toFile();
+    assertTrue(distFolderFile.exists(), distFolder.toAbsolutePath() + " doesn't exist");
+    for (File archive : distFolderFile.listFiles()) {
       if (archive.getName().endsWith(".zip")) {
         foundOneZipFile = true;
         Set<String> duplicates = new HashSet<>();
