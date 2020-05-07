@@ -49,10 +49,13 @@ import org.xbill.DNS.WireParseException
  * Resolves a set of ENR nodes from a host name.
  *
  * @param dnsServer the DNS server to use for DNS query. If null, the default DNS server will be used.
- * @param signingKey the public key associated with the domain, to check that the root DNS record is valid.
- *
+ * @param seq the sequence number of the root record. If the root record seq is higher, proceed with visit.
  */
-class DNSResolver(private val dnsServer: String? = null, private val signingKey: SECP256K1.PublicKey? = null) {
+
+public class DNSResolver @JvmOverloads constructor(
+  private val dnsServer: String? = null,
+  var seq: Long = 0
+) {
 
   companion object {
     val logger = LoggerFactory.getLogger(DNSResolver::class.java)
@@ -116,6 +119,12 @@ class DNSResolver(private val dnsServer: String? = null, private val signingKey:
       logger.debug("ENR tree root ${link.domainName} failed signature check")
       return
     }
+    if (entry.seq <= seq) {
+      logger.debug("ENR tree root seq $entry.seq is not higher than $seq, aborting")
+      return
+    }
+    seq = entry.seq
+
     internalVisit(entry.enrRoot, link.domainName, visitor)
     internalVisit(entry.linkRoot, link.domainName, visitor)
   }

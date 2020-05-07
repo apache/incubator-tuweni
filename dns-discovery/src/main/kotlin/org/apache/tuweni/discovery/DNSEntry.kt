@@ -99,7 +99,7 @@ class ENRNode(attrs: Map<String, String>) : DNSEntry {
 class ENRTreeRoot(attrs: Map<String, String>) : DNSEntry {
 
   val version: String
-  val seq: Int
+  val seq: Long
   val sig: SECP256K1.Signature
   val enrRoot: String
   val linkRoot: String
@@ -110,7 +110,7 @@ class ENRTreeRoot(attrs: Map<String, String>) : DNSEntry {
     }
 
     version = attrs["enrtree-root"]!!
-    seq = attrs["seq"]!!.toInt()
+    seq = attrs["seq"]!!.toLong()
     val sigBytes = Base64URLSafe.decode(attrs["sig"]!!)
     sig = SECP256K1.Signature.fromBytes(Bytes.concatenate(sigBytes,
       Bytes.wrap(ByteArray(Math.max(0, 65 - sigBytes.size())))))

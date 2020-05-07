@@ -10,11 +10,13 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.tuweni.discovery;
+package org.apache.tuweni.discoveryint;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.tuweni.devp2p.EthereumNodeRecord;
+import org.apache.tuweni.discovery.DNSResolver;
+import org.apache.tuweni.discovery.DNSVisitor;
 import org.apache.tuweni.junit.BouncyCastleExtension;
 
 import java.util.ArrayList;
