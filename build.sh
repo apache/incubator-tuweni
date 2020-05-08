@@ -10,9 +10,6 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
-COMMAND=$1
-if [ -z "$COMMAND" ];then
-  COMMAND="build"
-fi
-docker run -it -v `pwd`:/home/gradle gradle:5.0-jdk11 gradle --no-daemon -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m" $COMMAND
+cd gradle/docker
+docker build -t tuweni_test -f test.Dockerfile ../..
+docker-compose up
