@@ -25,7 +25,9 @@ on:
 
 jobs:
   checks:
-    runs-on: tmio/tuweni-build:1.0
+    runs-on: ubuntu-latest
+    container:
+      image: tmio/tuweni-build:1.0
     steps:
       - uses: actions/checkout@v1
         with:
@@ -39,7 +41,9 @@ jobs:
 #      - name: Collect JUnit tests
 #        uses: danger/danger-js@9.1.8
   assemble:
-    runs-on: tmio/tuweni-build:1.0
+    runs-on: ubuntu-latest
+    container:
+      image: tmio/tuweni-build:1.0
     steps:
       - uses: actions/checkout@v1
         with:
@@ -67,7 +71,9 @@ jobs:
           name: Libs
           path: build/libs
   test:
-    runs-on: tmio/tuweni-build:1.0
+    runs-on: ubuntu-latest
+    container:
+      image: tmio/tuweni-build:1.0
     steps:
       - uses: actions/checkout@v1
         with:
