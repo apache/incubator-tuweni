@@ -84,7 +84,7 @@ class RelayerTest {
     val ref = AtomicReference<Message>()
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
-    val relayer = Relayer(vertx, "udp://localhost:12000", "udp://0.0.0.0:10000", { })
+    val relayer = Relayer(vertx, "udp://localhost:12000", "udp://localhost:10000", { })
     runBlocking {
       client1.createUDPEndpoint("foo", port = 10000, handler = ref::set)
       client1.start()

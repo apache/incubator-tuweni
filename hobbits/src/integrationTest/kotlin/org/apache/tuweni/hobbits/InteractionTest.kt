@@ -177,11 +177,11 @@ class UDPTest {
     val client2 = HobbitsTransport(vertx)
 
     runBlocking {
-      client1.createUDPEndpoint("foo", port = 15000, handler = ref::set)
+      client1.createUDPEndpoint("foo", "localhost", 15000, ref::set)
       client1.start()
       client2.start()
       client2.sendMessage(Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"),
-        headers = Bytes.random(16)), Transport.UDP, "0.0.0.0", 15000)
+        headers = Bytes.random(16)), Transport.UDP, "localhost", 15000)
     }
     Thread.sleep(200)
     assertEquals(Bytes.fromHexString("deadbeef"), ref.get().body)
@@ -196,20 +196,20 @@ class UDPTest {
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
     runBlocking {
-      client1.createUDPEndpoint("foo", port = 16000, handler = ref::set)
-      client1.createUDPEndpoint("bar", port = 16001, handler = ref2::set)
+      client1.createUDPEndpoint("foo", "localhost", 16000, ref::set)
+      client1.createUDPEndpoint("bar", "localhost", 16001, ref2::set)
       client1.start()
       client2.start()
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.UDP,
-        "0.0.0.0",
+        "localhost",
         16000
       )
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.UDP,
-        "0.0.0.0",
+        "localhost",
         16001
       )
     }
