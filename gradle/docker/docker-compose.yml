@@ -15,8 +15,8 @@ services:
     image: tuweni_test
     volumes:
       - ../../build/libs:/home/gradle/build/libs
-    command: gradle --no-daemon -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m" assemble test
+    command: gradle --no-daemon -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m" -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false assemble test
   integration-test:
     container_name: integration-test
     image: tuweni_test
-    command: gradle --no-daemon -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m" integrationTest
+    command: gradle --no-daemon -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m" -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false integrationTest -x test
