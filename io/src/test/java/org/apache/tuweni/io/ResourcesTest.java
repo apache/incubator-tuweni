@@ -89,9 +89,7 @@ class ResourcesTest {
         .forEach(File::delete);
 
     URLClassLoader classLoader = new URLClassLoader(
-        new URL[] {
-            folder.toUri().toURL(),
-            folder.resolve("resourceresolvertest.jar").toUri().toURL()});
+        new URL[] {folder.toUri().toURL(), folder.resolve("resourceresolvertest.jar").toUri().toURL()});
     List<URL> all =
         Resources.find(classLoader, "/org/apache/tuweni/io/file/resourceresolver/**").collect(Collectors.toList());
 
