@@ -17,6 +17,8 @@
 package org.apache.tuweni.discovery
 
 import org.apache.tuweni.devp2p.EthereumNodeRecord
+import org.xbill.DNS.Resolver
+import org.xbill.DNS.SimpleResolver
 import java.util.Timer
 import java.util.TimerTask
 import java.util.concurrent.atomic.AtomicReference
@@ -28,12 +30,14 @@ import java.util.concurrent.atomic.AtomicReference
  * @param seq the sequence number of the root record. If the root record seq is higher, proceed with visit.
  * @param enrLink the ENR link to start with, of the form enrtree://PUBKEY@domain
  * @param period the period at which to poll DNS records
+ * @param resolver
  */
 public class DNSDaemon @JvmOverloads constructor(
   private val dnsServer: String? = null,
   private val seq: Long = 0,
   private val enrLink: String,
-  private val period: Long = 60000L
+  private val period: Long = 60000L,
+  private val resolver: Resolver = SimpleResolver(dnsServer)
 ) {
 
   /**
@@ -45,7 +49,7 @@ public class DNSDaemon @JvmOverloads constructor(
   private val records = AtomicReference<EthereumNodeRecord>()
 
   init {
-    timer.scheduleAtFixedRate(DNSTimerTask(dnsServer, seq, enrLink, this::updateRecords), 0, period)
+    timer.scheduleAtFixedRate(DNSTimerTask(resolver, seq, enrLink, this::updateRecords), 0, period)
   }
 
   private fun updateRecords(records: List<EthereumNodeRecord>) {
@@ -61,15 +65,14 @@ public class DNSDaemon @JvmOverloads constructor(
 }
 
 class DNSTimerTask(
-  private val dnsServer: String? = null,
-  private var seq: Long,
+  private val resolver: Resolver,
+  private val seq: Long,
   private val enrLink: String,
-  private val records: (List<EthereumNodeRecord>) -> Unit
+  private val records: (List<EthereumNodeRecord>) -> Unit,
+  private val dnsResolver: DNSResolver = DNSResolver(null, seq, resolver)
 ) : TimerTask() {
 
   override fun run() {
-    val resolver = DNSResolver(dnsServer, seq)
-    records(resolver.collectAll(enrLink))
-    seq = resolver.seq
+    records(dnsResolver.collectAll(enrLink))
   }
 }

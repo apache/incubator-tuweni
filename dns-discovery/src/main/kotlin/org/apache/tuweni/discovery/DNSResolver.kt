@@ -40,6 +40,7 @@ import org.xbill.DNS.DClass
 import org.xbill.DNS.Message
 import org.xbill.DNS.Name
 import org.xbill.DNS.Record
+import org.xbill.DNS.Resolver
 import org.xbill.DNS.Section
 import org.xbill.DNS.SimpleResolver
 import org.xbill.DNS.Type
@@ -54,7 +55,8 @@ import org.xbill.DNS.WireParseException
 
 public class DNSResolver @JvmOverloads constructor(
   private val dnsServer: String? = null,
-  var seq: Long = 0
+  var seq: Long = 0,
+  private val resolver: Resolver = SimpleResolver(dnsServer)
 ) {
 
   companion object {
@@ -138,7 +140,7 @@ public class DNSResolver @JvmOverloads constructor(
    */
   fun resolveRecordRaw(domainName: String): String? {
     try {
-      val resolver = SimpleResolver(dnsServer)
+
       // required as TXT records are quite big, and dnsjava maxes out UDP payload.
       resolver.setTCP(true)
       val type = Type.TXT
