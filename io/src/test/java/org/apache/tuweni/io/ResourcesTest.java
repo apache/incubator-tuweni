@@ -90,8 +90,8 @@ class ResourcesTest {
 
     URLClassLoader classLoader = new URLClassLoader(
         new URL[] {
-            new URL("file:" + folder.toString() + "/"),
-            new URL("file:" + folder.resolve("resourceresolvertest.jar").toString())});
+            folder.toUri().toURL(),
+            folder.resolve("resourceresolvertest.jar").toUri().toURL()});
     List<URL> all =
         Resources.find(classLoader, "/org/apache/tuweni/io/file/resourceresolver/**").collect(Collectors.toList());
 
