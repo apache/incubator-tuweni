@@ -44,6 +44,10 @@ Kotlin coroutine based implementation of the Ethereum ÐΞVp2p protocol.
 
 These classes are included in the complete Tuweni distribution, or separately when using the gradle dependency `org.apache.tuweni:tuweni-devp2p` (`tuweni-devp2p.jar`).
 
+# Package org.apache.tuweni.discovery
+
+Implementation of DNS-based discovery of Ethereum Node Records after [EIP-1459](https://eips.ethereum.org/EIPS/eip-1459).
+
 # Package org.apache.tuweni.eth
 
 Classes and utilities for working in the Ethereum domain.
