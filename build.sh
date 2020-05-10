@@ -10,6 +10,8 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-cd gradle/docker
+pushd gradle/docker
 docker build -t tuweni_test -f test.Dockerfile ../..
-docker-compose up
+popd
+docker run tuweni_test bash -c 'gradle --version >> /dev/null && gradle -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m" test'
+docker run -v `pwd`/build/libs:/home/gradle/build/libs tuweni_test bash -c 'gradle --version >> /dev/null && gradle -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetcaspaceSize=512m" assemble integrationTest -x test'
