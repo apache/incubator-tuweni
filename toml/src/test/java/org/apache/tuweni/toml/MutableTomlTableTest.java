@@ -192,4 +192,26 @@ class MutableTomlTableTest {
         + "}\n";
     assertEquals(expected.replace("\n", System.lineSeparator()), table.toJson());
   }
+
+  @Test
+  void shouldSerializeToJSONForEscapeCharacter() {
+    MutableTomlTable table = new MutableTomlTable();
+    table.set("foo", "one'two", positionAt(1, 1));
+    table.set("bar", "hello\"there", positionAt(2, 1));
+    table.set("buz", "good\tbye", positionAt(3, 1));
+    table.set("bug", "alpha\bbeta", positionAt(4, 1));
+    table.set("egg", "bread\rham", positionAt(5, 1));
+    table.set("pet", "dog\fcat", positionAt(6, 1));
+    table.set("red", "black\nwhite", positionAt(7, 1));
+    String expected = "{\n"
+        + "  \"bar\" : \"hello\\\"there\",\n"
+        + "  \"bug\" : \"alpha\\bbeta\",\n"
+        + "  \"buz\" : \"good\\tbye\",\n"
+        + "  \"egg\" : \"bread\\rham\",\n"
+        + "  \"foo\" : \"one'two\",\n"
+        + "  \"pet\" : \"dog\\fcat\",\n"
+        + "  \"red\" : \"black\\nwhite\"\n"
+        + "}\n";
+    assertEquals(expected.replace("\n", System.lineSeparator()), table.toJson());
+  }
 }
