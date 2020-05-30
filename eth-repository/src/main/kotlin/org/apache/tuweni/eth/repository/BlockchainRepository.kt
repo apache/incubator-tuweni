@@ -253,8 +253,8 @@ class BlockchainRepository
    * @param blockHash the hash of the block
    * @return all transaction receipts associated with a block, in the correct order
    */
-  suspend fun retrieveTransactionReceipts(blockHash: Bytes): List<TransactionReceipt?> {
-    return blockchainIndex.findBy(TransactionReceiptFields.BLOCK_HASH, blockHash).map {
+  suspend fun retrieveTransactionReceipts(blockHash: Bytes): List<TransactionReceipt> {
+    return blockchainIndex.findBy(TransactionReceiptFields.BLOCK_HASH, blockHash).mapNotNull {
       transactionReceiptsStore.get(it)?.let { TransactionReceipt.fromBytes(it) }
     }
   }
