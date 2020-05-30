@@ -126,25 +126,25 @@ public class GenesisFile {
 
         parser.nextToken();
 
-        if ("nonce".equals(fieldName)) {
+        if ("nonce".equalsIgnoreCase(fieldName)) {
           nonce = parser.getValueAsString();
-        } else if ("difficulty".equals(fieldName)) {
+        } else if ("difficulty".equalsIgnoreCase(fieldName)) {
           difficulty = parser.getValueAsString();
-        } else if ("mixHash".equals(fieldName)) {
+        } else if ("mixHash".equalsIgnoreCase(fieldName)) {
           mixhash = parser.getValueAsString();
-        } else if ("coinbase".equals(fieldName)) {
+        } else if ("coinbase".equalsIgnoreCase(fieldName)) {
           coinbase = parser.getValueAsString();
-        } else if ("gasLimit".equals(fieldName)) {
+        } else if ("gasLimit".equalsIgnoreCase(fieldName)) {
           gasLimit = parser.getValueAsString();
-        } else if ("timestamp".equals(fieldName)) {
+        } else if ("timestamp".equalsIgnoreCase(fieldName)) {
           timestamp = parser.getValueAsString();
-        } else if ("extraData".equals(fieldName)) {
+        } else if ("extraData".equalsIgnoreCase(fieldName)) {
           extraData = parser.getValueAsString();
-        } else if ("parentHash".equals(fieldName)) {
+        } else if ("parentHash".equalsIgnoreCase(fieldName)) {
           parentHash = parser.getValueAsString();
-        } else if ("alloc".equals(fieldName)) {
+        } else if ("alloc".equalsIgnoreCase(fieldName)) {
           allocs = readAlloc(parser);
-        } else if ("chainId".equals(fieldName)) {
+        } else if ("chainId".equalsIgnoreCase(fieldName)) {
           chainId = parser.getValueAsInt();
         } else if (fieldName.contains("Block")) {
           forks.add(parser.getValueAsLong());
