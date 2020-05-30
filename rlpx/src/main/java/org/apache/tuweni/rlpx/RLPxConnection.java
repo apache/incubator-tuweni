@@ -29,6 +29,8 @@ import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.modes.SICBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
 
 /**
@@ -41,11 +43,13 @@ import org.xerial.snappy.Snappy;
  */
 public final class RLPxConnection {
 
+  private final static Logger logger = LoggerFactory.getLogger(RLPxConnection.class);
+
   /**
    * Checks if two RLPx connections represent both ends of a connection.
    * <p>
    * Used for testing.
-   * 
+   *
    * @param one one RLPx connection
    * @param other an other RLPx connection
    * @return true if both connections refer to the same peers, on each side of the connection
@@ -72,9 +76,12 @@ public final class RLPxConnection {
   private final SECP256K1.PublicKey publicKey;
   private final SECP256K1.PublicKey peerPublicKey;
   private final AESEngine macEncryptionEngine;
+  private final SICBlockCipher decryptionCipher;
+  private final SICBlockCipher encryptionCipher;
 
   private boolean applySnappyCompression = false;
   private Bytes buffer = Bytes.EMPTY;
+  private Integer lastFrameSize;
 
   RLPxConnection(
       Bytes32 aesSecret,
@@ -96,6 +103,17 @@ public final class RLPxConnection {
     updateIngress(ingressMac);
     this.publicKey = publicKey;
     this.peerPublicKey = peerPublicKey;
+
+    KeyParameter aesKey = new KeyParameter(aesSecret.toArrayUnsafe());
+
+    byte[] IV = new byte[16];
+    Arrays.fill(IV, (byte) 0);
+
+    decryptionCipher = new SICBlockCipher(new AESEngine());
+    decryptionCipher.init(false, new ParametersWithIV(aesKey, IV));
+
+    encryptionCipher = new SICBlockCipher(new AESEngine());
+    encryptionCipher.init(true, new ParametersWithIV(aesKey, IV));
   }
 
   /**
@@ -119,12 +137,14 @@ public final class RLPxConnection {
   }
 
   public synchronized void stream(Bytes newBytes, Consumer<RLPxMessage> messageConsumer) {
+    logger.debug("Adding new bytes to buffer {}", newBytes);
     buffer = Bytes.concatenate(buffer, newBytes);
     RLPxMessage message = null;
     do {
       message = readFrame(buffer);
       if (message != null) {
         buffer = buffer.slice(message.bytesLength());
+        logger.debug("Read message of type {}", message.messageId());
         messageConsumer.accept(message);
       }
     } while (buffer.size() != 0 && message != null);
@@ -134,41 +154,40 @@ public final class RLPxConnection {
     if (messageFrame.size() < 32) {
       return null;
     }
+    Integer frameSize = lastFrameSize;
+    if (frameSize == null) {
 
-    KeyParameter aesKey = new KeyParameter(aesSecret.toArrayUnsafe());
+      Bytes macBytes = messageFrame.slice(16, 16);
+      Bytes headerBytes = messageFrame.slice(0, 16);
 
-    byte[] IV = new byte[16];
-    Arrays.fill(IV, (byte) 0);
+      Bytes decryptedHeader = Bytes.wrap(new byte[16]);
+      decryptionCipher.processBytes(headerBytes.toArrayUnsafe(), 0, 16, decryptedHeader.toArrayUnsafe(), 0);
+      frameSize = decryptedHeader.get(0) & 0xff;
+      frameSize = (frameSize << 8) + (decryptedHeader.get(1) & 0xff);
+      frameSize = (frameSize << 8) + (decryptedHeader.get(2) & 0xff);
 
-    SICBlockCipher decryptionCipher = new SICBlockCipher(new AESEngine());
-    decryptionCipher.init(false, new ParametersWithIV(aesKey, IV));
+      Bytes expectedMac = calculateMac(headerBytes, true);
 
-    Bytes macBytes = messageFrame.slice(16, 16);
-    Bytes headerBytes = messageFrame.slice(0, 16);
-
-    Bytes decryptedHeader = Bytes.wrap(new byte[16]);
-    decryptionCipher.processBytes(headerBytes.toArrayUnsafe(), 0, 16, decryptedHeader.toArrayUnsafe(), 0);
-    int frameSize = decryptedHeader.get(0) & 0xff;
-    frameSize = (frameSize << 8) + (decryptedHeader.get(1) & 0xff);
-    frameSize = (frameSize << 8) + (decryptedHeader.get(2) & 0xff);
+      if (!macBytes.equals(expectedMac)) {
+        throw new InvalidMACException(
+            String
+                .format(
+                    "Header MAC did not match expected MAC; expected: %s, received: %s",
+                    expectedMac.toHexString(),
+                    macBytes.toHexString()));
+      }
+    }
     int pad = frameSize % 16 == 0 ? 0 : 16 - frameSize % 16;
-
     if (messageFrame.size() < 32 + frameSize + pad + 16) {
+      lastFrameSize = frameSize;
       return null;
+    } else {
+      lastFrameSize = null;
     }
 
-    Bytes expectedMac = calculateMac(headerBytes, true);
 
-    if (!macBytes.equals(expectedMac)) {
-      throw new InvalidMACException(
-          String
-              .format(
-                  "Header MAC did not match expected MAC; expected: %s, received: %s",
-                  expectedMac.toHexString(),
-                  macBytes.toHexString()));
-    }
 
-    Bytes frameData = messageFrame.slice(32, frameSize);
+    Bytes frameData = messageFrame.slice(32, frameSize + pad);
     Bytes frameMac = messageFrame.slice(32 + frameSize + pad, 16);
 
     Bytes newFrameMac = Bytes.wrap(new byte[16]);
@@ -190,7 +209,7 @@ public final class RLPxConnection {
 
     int messageType = RLP.decodeInt(decryptedFrameData.slice(0, 1));
 
-    Bytes messageData = decryptedFrameData.slice(1);
+    Bytes messageData = decryptedFrameData.slice(1, decryptedFrameData.size() - 1 - pad);
     if (applySnappyCompression) {
       try {
         messageData = Bytes.wrap(Snappy.uncompress(messageData.toArrayUnsafe()));
@@ -209,13 +228,6 @@ public final class RLPxConnection {
    * @return The framed message, as byte buffer.
    */
   public Bytes write(RLPxMessage message) {
-    KeyParameter aesKey = new KeyParameter(aesSecret.toArrayUnsafe());
-
-    byte[] IV = new byte[16];
-    Arrays.fill(IV, (byte) 0);
-
-    SICBlockCipher encryptionCipher = new SICBlockCipher(new AESEngine());
-    encryptionCipher.init(true, new ParametersWithIV(aesKey, IV));
 
     // Compress message
     Bytes messageData = message.content();
