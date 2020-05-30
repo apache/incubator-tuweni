@@ -121,7 +121,12 @@ if (file('.git').exists()) {
         'toml-v0.5.0-spec-example.toml',
         'eth2-reference-tests/**',
         'package-lock.json',
-        '.github/pull_request_template.md'
+        '.github/pull_request_template.md',
+        'devp2p-eth/src/test/resources/mainnet.json',
+        'eth/src/test/resources/mainnet.json',
+        'eth/src/test/resources/missing-difficulty.json',
+        'eth/src/test/resources/missing-nonce.json',
+        'eth/src/test/resources/valid-genesis.json'
       ])
       return list
     }
