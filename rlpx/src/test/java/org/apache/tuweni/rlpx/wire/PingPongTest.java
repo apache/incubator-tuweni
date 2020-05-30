@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.concurrent.AsyncCompletion;
+import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.junit.BouncyCastleExtension;
 import org.apache.tuweni.rlpx.RLPxMessage;
@@ -51,7 +52,8 @@ class PingPongTest {
         new LinkedHashMap<>(),
         2,
         "abc",
-        10000);
+        10000,
+        AsyncResult.incomplete());
 
     AsyncCompletion completion = conn.sendPing();
     assertFalse(completion.isDone());
@@ -67,7 +69,7 @@ class PingPongTest {
     DefaultWireConnection conn =
         new DefaultWireConnection("abc", nodeId, peerNodeId, capturedPong::set, helloMessage -> {
         }, () -> {
-        }, new LinkedHashMap<>(), 1, "abc", 10000);
+        }, new LinkedHashMap<>(), 1, "abc", 10000, AsyncResult.incomplete());
 
     conn.messageReceived(new RLPxMessage(2, Bytes.EMPTY));
     assertNotNull(capturedPong.get());

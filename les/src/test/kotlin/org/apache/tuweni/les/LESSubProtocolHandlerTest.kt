@@ -44,6 +44,7 @@ import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
 import org.apache.lucene.index.IndexWriter
+import org.apache.tuweni.concurrent.AsyncResult
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -97,7 +98,7 @@ constructor() {
     var message: Bytes? = null
     var disconnectReason: DisconnectReason? = null
 
-    override fun connectTo(peerPublicKey: SECP256K1.PublicKey, peerAddress: InetSocketAddress): AsyncCompletion? {
+    override fun connectTo(peerPublicKey: SECP256K1.PublicKey, peerAddress: InetSocketAddress): AsyncResult<String>? {
       return null
     }
 

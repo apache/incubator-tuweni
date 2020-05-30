@@ -15,7 +15,9 @@ package org.apache.tuweni.rlpx.vertx;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.concurrent.AsyncCompletion;
+import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
+import org.apache.tuweni.concurrent.CompletableAsyncResult;
 import org.apache.tuweni.crypto.SECP256K1.KeyPair;
 import org.apache.tuweni.crypto.SECP256K1.PublicKey;
 import org.apache.tuweni.rlpx.HandshakeMessage;
@@ -202,7 +204,7 @@ public final class VertxRLPxService implements RLPxService {
   }
 
   private void receiveMessage(NetSocket netSocket) {
-    netSocket.handler(new Handler<Buffer>() {
+    netSocket.handler(new Handler<>() {
 
       private RLPxConnection conn;
 
@@ -217,8 +219,7 @@ public final class VertxRLPxService implements RLPxService {
                   keyPair,
                   bytes -> netSocket.write(Buffer.buffer(bytes.toArrayUnsafe())));
           if (wireConnection == null) {
-            this.wireConnection = createConnection(conn, netSocket);
-            wireConnection.handleConnectionStart();
+            this.wireConnection = createConnection(conn, netSocket, AsyncResult.incomplete());
           }
         } else {
           conn.stream(Bytes.wrapBuffer(buffer), wireConnection::messageReceived);
@@ -283,11 +284,11 @@ public final class VertxRLPxService implements RLPxService {
   }
 
   @Override
-  public AsyncCompletion connectTo(PublicKey peerPublicKey, InetSocketAddress peerAddress) {
+  public AsyncResult<String> connectTo(PublicKey peerPublicKey, InetSocketAddress peerAddress) {
     if (!started.get()) {
       throw new IllegalStateException("The RLPx service is not active");
     }
-    CompletableAsyncCompletion connected = AsyncCompletion.incomplete();
+    CompletableAsyncResult<String> connected = AsyncResult.incomplete();
     logger.debug("Connecting to {} with public key {}", peerAddress, peerPublicKey);
     client
         .connect(
@@ -300,7 +301,14 @@ public final class VertxRLPxService implements RLPxService {
               logger.debug("Initiating handshake to {}", peerAddress);
               netSocket.write(Buffer.buffer(initHandshakeMessage.toArrayUnsafe()));
 
-              netSocket.handler(new Handler<Buffer>() {
+              netSocket.closeHandler(event -> {
+                logger.debug("Connection {} closed", peerAddress);
+                if (!connected.isDone()) {
+                  connected.cancel();
+                }
+              });
+
+              netSocket.handler(new Handler<>() {
 
                 private RLPxConnection conn;
 
@@ -331,8 +339,7 @@ public final class VertxRLPxService implements RLPxService {
                               keyPair.publicKey(),
                               peerPublicKey);
 
-                      this.wireConnection = createConnection(conn, netSocket);
-                      connected.complete();
+                      this.wireConnection = createConnection(conn, netSocket, connected);
                       if (messageBytes.isEmpty()) {
                         return;
                       }
@@ -352,7 +359,10 @@ public final class VertxRLPxService implements RLPxService {
     return connected;
   }
 
-  private DefaultWireConnection createConnection(RLPxConnection conn, NetSocket netSocket) {
+  private DefaultWireConnection createConnection(
+      RLPxConnection conn,
+      NetSocket netSocket,
+      CompletableAsyncResult<String> ready) {
     String id = UUID.randomUUID().toString();
     DefaultWireConnection wireConnection =
         new DefaultWireConnection(id, conn.publicKey().bytes(), conn.peerPublicKey().bytes(), message -> {
@@ -360,8 +370,9 @@ public final class VertxRLPxService implements RLPxService {
             Bytes bytes = conn.write(message);
             vertx.eventBus().send(netSocket.writeHandlerID(), Buffer.buffer(bytes.toArrayUnsafe()));
           }
-        }, conn::configureAfterHandshake, netSocket::end, handlers, DEVP2P_VERSION, clientId, advertisedPort());
+        }, conn::configureAfterHandshake, netSocket::end, handlers, DEVP2P_VERSION, clientId, advertisedPort(), ready);
     repository.add(wireConnection);
+    wireConnection.handleConnectionStart();
     return wireConnection;
   }
 

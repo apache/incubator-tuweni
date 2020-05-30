@@ -15,15 +15,16 @@ package org.apache.tuweni.rlpx.wire;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.concurrent.AsyncCompletion;
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
+import org.apache.tuweni.concurrent.CompletableAsyncResult;
 import org.apache.tuweni.rlpx.RLPxMessage;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.BoundType;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
@@ -47,6 +48,7 @@ public final class DefaultWireConnection implements WireConnection {
   private final int p2pVersion;
   private final String clientId;
   private final int advertisedPort;
+  private final CompletableAsyncResult<String> ready;
 
   private CompletableAsyncCompletion awaitingPong;
   private HelloMessage myHelloMessage;
@@ -59,7 +61,6 @@ public final class DefaultWireConnection implements WireConnection {
    * @param id the id of the connection
    * @param nodeId the node id of this node
    * @param peerNodeId the node id of the peer
-   * @param logger a logger
    * @param writer the message writer
    * @param afterHandshakeListener a listener called after the handshake is complete with the peer hello message.
    * @param disconnectHandler the handler to run upon receiving a disconnect message
@@ -67,6 +68,7 @@ public final class DefaultWireConnection implements WireConnection {
    * @param p2pVersion the version of the devp2p protocol supported by this client
    * @param clientId the client ID to announce in HELLO messages
    * @param advertisedPort the port we listen to, to announce in HELLO messages
+   * @param ready a handle to complete when the connection is ready for use.
    */
   public DefaultWireConnection(
       String id,
@@ -78,7 +80,8 @@ public final class DefaultWireConnection implements WireConnection {
       LinkedHashMap<SubProtocol, SubProtocolHandler> subprotocols,
       int p2pVersion,
       String clientId,
-      int advertisedPort) {
+      int advertisedPort,
+      CompletableAsyncResult<String> ready) {
     this.id = id;
     this.nodeId = nodeId;
     this.peerNodeId = peerNodeId;
@@ -89,6 +92,7 @@ public final class DefaultWireConnection implements WireConnection {
     this.p2pVersion = p2pVersion;
     this.clientId = clientId;
     this.advertisedPort = advertisedPort;
+    this.ready = ready;
     logger.debug("New wire connection created");
   }
 
@@ -97,24 +101,27 @@ public final class DefaultWireConnection implements WireConnection {
       peerHelloMessage = HelloMessage.read(message.content());
       logger.debug("Received peer Hello message {}", peerHelloMessage);
       initSupportedRange(peerHelloMessage.capabilities());
-
       if (peerHelloMessage.nodeId() == null || peerHelloMessage.nodeId().isEmpty()) {
         disconnect(DisconnectReason.NULL_NODE_IDENTITY_RECEIVED);
+        ready.cancel();
         return;
       }
 
       if (!peerHelloMessage.nodeId().equals(peerNodeId)) {
         disconnect(DisconnectReason.UNEXPECTED_IDENTITY);
+        ready.cancel();
         return;
       }
 
       if (peerHelloMessage.nodeId().equals(nodeId)) {
         disconnect(DisconnectReason.CONNECTED_TO_SELF);
+        ready.cancel();
         return;
       }
 
       if (peerHelloMessage.p2pVersion() > p2pVersion) {
         disconnect(DisconnectReason.INCOMPATIBLE_DEVP2P_VERSION);
+        ready.cancel();
         return;
       }
 
@@ -124,13 +131,22 @@ public final class DefaultWireConnection implements WireConnection {
 
       afterHandshakeListener.accept(peerHelloMessage);
 
-      for (SubProtocol subProtocol : subprotocolRangeMap.asMapOfRanges().values()) {
-        subprotocols.get(subProtocol).handleNewPeerConnection(id);
-      }
+      AsyncCompletion allSubProtocols = AsyncCompletion
+          .allOf(
+              subprotocolRangeMap
+                  .asMapOfRanges()
+                  .values()
+                  .stream()
+                  .map(subprotocols::get)
+                  .map(handler -> handler.handleNewPeerConnection(id)));
+      allSubProtocols.thenRun(() -> ready.complete(id));
       return;
     } else if (message.messageId() == 1) {
       DisconnectMessage.read(message.content());
       disconnectHandler.run();
+      if (!ready.isDone()) {
+        ready.cancel();
+      }
       return;
     }
 
@@ -148,23 +164,42 @@ public final class DefaultWireConnection implements WireConnection {
     } else {
       Map.Entry<Range<Integer>, SubProtocol> subProtocolEntry = subprotocolRangeMap.getEntry(message.messageId());
       if (subProtocolEntry == null) {
+        logger.debug("Unknown message received {}", message.messageId());
         disconnect(DisconnectReason.PROTOCOL_BREACH);
+        if (!ready.isDone()) {
+          ready.cancel();
+        }
       } else {
         int offset = subProtocolEntry.getKey().lowerEndpoint();
+        logger.debug("Received message of type {}", message.messageId() - offset);
         subprotocols.get(subProtocolEntry.getValue()).handle(id, message.messageId() - offset, message.content());
       }
     }
   }
 
   private void initSupportedRange(List<Capability> capabilities) {
-    int startRange = 17;
+    int startRange = 16;
+    Map<String, Capability> pickedCapabilities = new HashMap<>();
+    for (SubProtocol sp : subprotocols.keySet()) {
+      for (Capability cap : capabilities) {
+        if (sp.supports(SubProtocolIdentifier.of(cap.name(), cap.version()))) {
+          Capability oldPick = pickedCapabilities.get(cap.name());
+          if (oldPick == null || oldPick.version() < cap.version()) {
+            pickedCapabilities.put(cap.name(), cap);
+          }
+        }
+      }
+    }
+
     for (Capability cap : capabilities) {
+      if (!pickedCapabilities.containsValue(cap)) {
+        continue;
+      }
       for (SubProtocol sp : subprotocols.keySet()) {
         if (sp.supports(SubProtocolIdentifier.of(cap.name(), cap.version()))) {
           int numberOfMessageTypes = sp.versionRange(cap.version());
-          subprotocolRangeMap
-              .put(Range.range(startRange, BoundType.CLOSED, startRange + numberOfMessageTypes, BoundType.CLOSED), sp);
-          startRange += numberOfMessageTypes + 1;
+          subprotocolRangeMap.put(Range.closedOpen(startRange, startRange + numberOfMessageTypes), sp);
+          startRange += numberOfMessageTypes;
           break;
         }
       }
@@ -209,7 +244,12 @@ public final class DefaultWireConnection implements WireConnection {
             subprotocols
                 .keySet()
                 .stream()
-                .map(sp -> new Capability(sp.id().name(), sp.id().version()))
+                .map(SubProtocol::getCapabilities)
+                .flatMap(subProtocolIdentifiers -> subProtocolIdentifiers.stream())
+                .map(
+                    subProtocolIdentifier -> new Capability(
+                        subProtocolIdentifier.name(),
+                        subProtocolIdentifier.version()))
                 .collect(Collectors.toList()));
     logger.debug("Sending hello message {}", myHelloMessage);
     writer.accept(new RLPxMessage(0, myHelloMessage.toBytes()));
@@ -220,8 +260,9 @@ public final class DefaultWireConnection implements WireConnection {
     return id;
   }
 
+  @SuppressWarnings("CatchAndPrintStackTrace")
   public void sendMessage(SubProtocolIdentifier subProtocolIdentifier, int messageType, Bytes message) {
-    logger.debug("Sending sub-protocol message {}", message);
+    logger.debug("Sending sub-protocol message {} {}", messageType, message);
     Integer offset = null;
     for (Map.Entry<Range<Integer>, SubProtocol> entry : subprotocolRangeMap.asMapOfRanges().entrySet()) {
       if (entry.getValue().supports(subProtocolIdentifier)) {

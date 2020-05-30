@@ -12,12 +12,16 @@
  */
 package org.apache.tuweni.rlpx.wire;
 
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * Identifier of a subprotocol, comprised of a name and version.
  */
 public interface SubProtocolIdentifier {
 
   static SubProtocolIdentifier of(String name, int version) {
+    requireNonNull(name);
     return new DefaultSubProtocolIdentifier(name, version);
   }
 

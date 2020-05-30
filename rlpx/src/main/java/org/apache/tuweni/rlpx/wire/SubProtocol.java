@@ -15,6 +15,8 @@ package org.apache.tuweni.rlpx.wire;
 
 import org.apache.tuweni.rlpx.RLPxService;
 
+import java.util.List;
+
 /**
  * Defines a subprotocol to be used for wire connections
  */
@@ -46,4 +48,11 @@ public interface SubProtocol {
    * @return a new handler for the subprotocol, bound to the service.
    */
   SubProtocolHandler createHandler(RLPxService service);
+
+  /**
+   * Provides the capabilities supported by the subprotocol.
+   * 
+   * @return the capabilities for this protocol, ordered.
+   */
+  List<SubProtocolIdentifier> getCapabilities();
 }

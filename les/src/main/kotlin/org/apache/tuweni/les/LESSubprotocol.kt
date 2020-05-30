@@ -51,6 +51,8 @@ class LESSubprotocol
    private val repo: BlockchainRepository
  ) : SubProtocol {
 
+  override fun getCapabilities(): MutableList<SubProtocolIdentifier> = mutableListOf(SubProtocolIdentifier.of("les", 2))
+
   override fun id(): SubProtocolIdentifier {
     return LES_ID
   }

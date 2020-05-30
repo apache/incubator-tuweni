@@ -15,6 +15,7 @@ package org.apache.tuweni.rlpx.wire;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.junit.BouncyCastleExtension;
 import org.apache.tuweni.rlpx.RLPxMessage;
@@ -38,7 +39,7 @@ class DefaultWireConnectionTest {
     DefaultWireConnection conn =
         new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
-        }, new LinkedHashMap<>(), 3, "abc", 10000);
+        }, new LinkedHashMap<>(), 3, "abc", 10000, AsyncResult.incomplete());
 
     conn.messageReceived(new RLPxMessage(45, Bytes.EMPTY));
     assertEquals(1, capturedDisconnect.get().messageId());
@@ -53,7 +54,7 @@ class DefaultWireConnectionTest {
     DefaultWireConnection conn =
         new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
-        }, new LinkedHashMap<>(), 4, "abc", 10000);
+        }, new LinkedHashMap<>(), 4, "abc", 10000, AsyncResult.incomplete());
     conn.sendHello();
     conn.messageReceived(new RLPxMessage(45, Bytes.EMPTY));
     assertEquals(1, capturedDisconnect.get().messageId());
@@ -68,7 +69,7 @@ class DefaultWireConnectionTest {
     DefaultWireConnection conn =
         new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
-        }, new LinkedHashMap<>(), 28, "abc", 10000);
+        }, new LinkedHashMap<>(), 28, "abc", 10000, AsyncResult.incomplete());
     conn.sendHello();
     conn
         .messageReceived(
@@ -90,7 +91,7 @@ class DefaultWireConnectionTest {
     DefaultWireConnection conn =
         new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
-        }, new LinkedHashMap<>(), 32, "abc", 10000);
+        }, new LinkedHashMap<>(), 32, "abc", 10000, AsyncResult.incomplete());
     conn.sendHello();
     conn
         .messageReceived(
@@ -108,7 +109,7 @@ class DefaultWireConnectionTest {
     DefaultWireConnection conn =
         new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
-        }, new LinkedHashMap<>(), 32, "abc", 10000);
+        }, new LinkedHashMap<>(), 32, "abc", 10000, AsyncResult.incomplete());
     conn.sendHello();
     conn
         .messageReceived(
@@ -128,7 +129,7 @@ class DefaultWireConnectionTest {
     DefaultWireConnection conn =
         new DefaultWireConnection("abc", nodeId, nodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
-        }, new LinkedHashMap<>(), 33, "abc", 10000);
+        }, new LinkedHashMap<>(), 33, "abc", 10000, AsyncResult.incomplete());
     conn.sendHello();
     conn
         .messageReceived(
@@ -146,7 +147,7 @@ class DefaultWireConnectionTest {
     DefaultWireConnection conn =
         new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
-        }, new LinkedHashMap<>(), 5, "abc", 10000);
+        }, new LinkedHashMap<>(), 5, "abc", 10000, AsyncResult.incomplete());
     conn.sendHello();
     conn
         .messageReceived(

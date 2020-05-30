@@ -14,6 +14,7 @@ package org.apache.tuweni.rlpx;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.concurrent.AsyncCompletion;
+import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.rlpx.wire.DisconnectReason;
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
@@ -30,9 +31,9 @@ public interface RLPxService {
    *
    * @param peerPublicKey the peer public key
    * @param peerAddress the peer host and port
-   * @return a handle that completes if the peer connects successfully.
+   * @return a handle that completes if the peer connects successfully, providing the connection ID.
    */
-  AsyncCompletion connectTo(SECP256K1.PublicKey peerPublicKey, InetSocketAddress peerAddress);
+  AsyncResult<String> connectTo(SECP256K1.PublicKey peerPublicKey, InetSocketAddress peerAddress);
 
 
   /**
