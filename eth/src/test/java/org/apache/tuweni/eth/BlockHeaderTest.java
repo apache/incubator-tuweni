@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.junit.BouncyCastleExtension;
 import org.apache.tuweni.units.bigints.UInt256;
+import org.apache.tuweni.units.bigints.UInt64;
 import org.apache.tuweni.units.ethereum.Gas;
 
 import java.time.Instant;
@@ -44,7 +45,7 @@ class BlockHeaderTest {
         Instant.now().truncatedTo(ChronoUnit.SECONDS),
         Bytes.random(22),
         Hash.fromBytes(Bytes.random(32)),
-        Bytes.random(8));
+        UInt64.ONE);
   }
 
   @Test

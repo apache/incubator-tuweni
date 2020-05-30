@@ -15,10 +15,12 @@ package org.apache.tuweni.eth;
 import static java.util.Objects.requireNonNull;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.rlp.RLP;
 import org.apache.tuweni.rlp.RLPReader;
 import org.apache.tuweni.rlp.RLPWriter;
 import org.apache.tuweni.units.bigints.UInt256;
+import org.apache.tuweni.units.bigints.UInt64;
 import org.apache.tuweni.units.ethereum.Gas;
 
 import java.time.Instant;
@@ -66,7 +68,7 @@ public final class BlockHeader {
         Instant.ofEpochSecond(reader.readLong()),
         reader.readValue(),
         Hash.fromBytes(reader.readValue()),
-        reader.readValue());
+        UInt64.fromBytes(reader.readValue()));
   }
 
   @Nullable
@@ -84,7 +86,7 @@ public final class BlockHeader {
   private final Instant timestamp;
   private final Bytes extraData;
   private final Hash mixHash;
-  private final Bytes nonce;
+  private final UInt64 nonce;
   private Hash hash;
 
   /**
@@ -121,7 +123,7 @@ public final class BlockHeader {
       Instant timestamp,
       Bytes extraData,
       Hash mixHash,
-      Bytes nonce) {
+      UInt64 nonce) {
     requireNonNull(ommersHash);
     requireNonNull(coinbase);
     requireNonNull(stateRoot);
@@ -225,7 +227,7 @@ public final class BlockHeader {
    * @return the nonce of the block.
    */
   @JsonGetter("nonce")
-  public Bytes getNonce() {
+  public UInt64 getNonce() {
     return nonce;
   }
 
@@ -382,7 +384,7 @@ public final class BlockHeader {
    * @param writer The RLP writer.
    */
   void writeTo(RLPWriter writer) {
-    writer.writeValue((parentHash != null) ? parentHash : Bytes.EMPTY);
+    writer.writeValue((parentHash != null) ? parentHash : Bytes32.wrap(new byte[32]));
     writer.writeValue(ommersHash);
     writer.writeValue(coinbase);
     writer.writeValue(stateRoot);
@@ -396,6 +398,6 @@ public final class BlockHeader {
     writer.writeLong(timestamp.getEpochSecond());
     writer.writeValue(extraData);
     writer.writeValue(mixHash);
-    writer.writeValue(nonce);
+    writer.writeValue(nonce.toBytes());
   }
 }
