@@ -45,6 +45,7 @@ import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
 import org.apache.lucene.index.IndexWriter
 import org.apache.tuweni.concurrent.AsyncResult
+import org.apache.tuweni.units.bigints.UInt64
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -75,7 +76,7 @@ constructor() {
     Instant.now().truncatedTo(ChronoUnit.SECONDS),
     Bytes.of(2, 3, 4),
     Hash.fromBytes(Bytes32.random()),
-    Bytes32.random()
+    UInt64.random()
   )
   private val body = BlockBody(
     listOf(
@@ -369,7 +370,7 @@ constructor() {
         Instant.now().truncatedTo(ChronoUnit.SECONDS),
         Bytes.of(2, 3, 4),
         Hash.fromBytes(Bytes32.random()),
-        Bytes32.random()
+        UInt64.random()
       )
 
       handler.handleNewPeerConnection("abc").await()

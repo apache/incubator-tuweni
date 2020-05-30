@@ -26,6 +26,7 @@ import org.apache.tuweni.eth.Transaction;
 import org.apache.tuweni.io.Resources;
 import org.apache.tuweni.junit.BouncyCastleExtension;
 import org.apache.tuweni.units.bigints.UInt256;
+import org.apache.tuweni.units.bigints.UInt64;
 import org.apache.tuweni.units.ethereum.Gas;
 import org.apache.tuweni.units.ethereum.Wei;
 
@@ -106,7 +107,7 @@ class BlockRLPTestSuite {
         Instant.ofEpochSecond(Bytes.fromHexString((String) headerData.get("timestamp")).toLong()),
         Bytes.fromHexString((String) headerData.get("extraData")),
         Hash.fromHexString((String) headerData.get("mixHash")),
-        Bytes.fromHexString((String) headerData.get("nonce")));
+        UInt64.fromHexString((String) headerData.get("nonce")));
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})

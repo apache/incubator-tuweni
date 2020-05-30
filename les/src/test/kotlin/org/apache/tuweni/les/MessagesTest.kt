@@ -29,6 +29,7 @@ import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.units.bigints.UInt256
+import org.apache.tuweni.units.bigints.UInt64
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -125,7 +126,7 @@ internal class BlockHeadersMessageTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     val message = BlockHeadersMessage(3L, 2L, listOf(header))
     val bytes = message.toBytes()

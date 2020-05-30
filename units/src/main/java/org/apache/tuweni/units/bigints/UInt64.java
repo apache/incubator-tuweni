@@ -60,6 +60,14 @@ public final class UInt64 implements UInt64Value<UInt64> {
   }
 
   /**
+   * Return a {@link UInt64} containing a random value.
+   * @return a {@link UInt64} containing a random value
+   */
+  public static UInt64 random() {
+    return UInt64.fromBytes(Bytes.random(8));
+  }
+
+  /**
    * Return a {@link UInt64} containing the specified value.
    *
    * @param value the value to create a {@link UInt64} for
@@ -556,4 +564,5 @@ public final class UInt64 implements UInt64Value<UInt64> {
     assert v > 0;
     return 63 - Long.numberOfLeadingZeros(v);
   }
+
 }

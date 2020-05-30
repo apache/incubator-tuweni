@@ -37,6 +37,7 @@ import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
 import org.apache.lucene.index.IndexWriter
+import org.apache.tuweni.units.bigints.UInt64
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -64,7 +65,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     val genesisBlock = Block(genesisHeader, BlockBody(emptyList(), emptyList()))
     val repo = BlockchainRepository
@@ -91,7 +92,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     val body = BlockBody(
       listOf(
@@ -132,7 +133,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     val genesisBlock = Block(genesisHeader, BlockBody(emptyList(), emptyList()))
     val repo = BlockchainRepository
@@ -160,7 +161,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     val biggerNumber = BlockHeader(
       header.getHash(),
@@ -177,7 +178,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     val biggerNumber2 = BlockHeader(
       biggerNumber.getHash(),
@@ -194,7 +195,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     val biggerNumber3 = BlockHeader(
       biggerNumber2.getHash(),
@@ -211,7 +212,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
 
     repo.storeBlockHeader(header)
@@ -240,7 +241,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     val genesisBlock = Block(genesisHeader, BlockBody(emptyList(), emptyList()))
     val repo = BlockchainRepository.init(
@@ -267,7 +268,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     val biggerNumber = BlockHeader(
       header.getHash(),
@@ -284,7 +285,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     val biggerNumber2 = BlockHeader(
       biggerNumber.getHash(),
@@ -301,7 +302,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     val biggerNumber3 = BlockHeader(
       biggerNumber2.getHash(),
@@ -318,7 +319,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
 
     repo.storeBlock(Block(header, BlockBody(emptyList(), emptyList())))
@@ -346,7 +347,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     val genesisBlock = Block(genesisHeader, BlockBody(emptyList(), emptyList()))
     val repo = BlockchainRepository.init(
@@ -373,7 +374,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     val biggerNumber = BlockHeader(
       header.getHash(),
@@ -390,7 +391,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     val biggerNumber2 = BlockHeader(
       biggerNumber.getHash(),
@@ -407,7 +408,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     val biggerNumber3 = BlockHeader(
       biggerNumber2.getHash(),
@@ -424,7 +425,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
 
     repo.storeBlock(Block(biggerNumber3, BlockBody(emptyList(), emptyList())))
@@ -452,7 +453,7 @@ internal class BlockchainRepositoryTest {
       Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     val genesisBlock = Block(genesisHeader, BlockBody(emptyList(), emptyList()))
     val repo = BlockchainRepository.init(

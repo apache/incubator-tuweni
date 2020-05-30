@@ -39,6 +39,7 @@ import org.apache.lucene.search.TermQuery
 import org.apache.lucene.search.TopScoreDocCollector
 import org.apache.lucene.store.Directory
 import org.apache.lucene.util.BytesRef
+import org.apache.tuweni.units.bigints.UInt64
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -69,7 +70,7 @@ internal class BlockchainIndexTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     blockchainIndex.index { it.indexBlockHeader(header) }
 
@@ -101,7 +102,7 @@ internal class BlockchainIndexTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     blockchainIndex.index { w -> w.indexBlockHeader(header) }
 
@@ -132,7 +133,7 @@ internal class BlockchainIndexTest {
       Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     blockchainIndex.index { it.indexBlockHeader(header) }
 
@@ -230,7 +231,7 @@ internal class BlockchainIndexTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
     blockchainIndex.index { w -> w.indexBlockHeader(header) }
     assertEquals(UInt256.valueOf(1), blockchainIndex.totalDifficulty(header.hash))
@@ -250,7 +251,7 @@ internal class BlockchainIndexTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      Bytes32.random()
+      UInt64.random()
     )
 
     blockchainIndex.index { w -> w.indexBlockHeader(childHeader) }
