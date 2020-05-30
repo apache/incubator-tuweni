@@ -48,7 +48,7 @@ class MessagesTest {
         UInt256.ONE,
         Hash.fromBytes(Bytes32.random()),
         Hash.fromBytes(Bytes32.random()),
-        Bytes.random(12),
+        Bytes.fromHexString("0xe029e991"),
         12L
       )
     val read = StatusMessage.read(msg.toBytes())
