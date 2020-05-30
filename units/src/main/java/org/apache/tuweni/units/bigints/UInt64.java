@@ -61,6 +61,7 @@ public final class UInt64 implements UInt64Value<UInt64> {
 
   /**
    * Return a {@link UInt64} containing a random value.
+   * 
    * @return a {@link UInt64} containing a random value
    */
   public static UInt64 random() {
