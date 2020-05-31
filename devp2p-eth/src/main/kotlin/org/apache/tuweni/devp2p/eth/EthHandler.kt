@@ -120,7 +120,6 @@ internal class EthHandler(
   private suspend fun handleHeaders(connectionId: String, headers: BlockHeaders) {
     connectionId.toString()
     headers.headers.forEach {
-      println(it.number)
       repository.storeBlockHeader(it)
 //      if (blockHeaderRequests.remove(it.hash)) {
 //
