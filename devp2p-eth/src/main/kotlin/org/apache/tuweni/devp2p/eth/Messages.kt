@@ -25,6 +25,24 @@ import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.units.bigints.UInt256
 
+/**
+ * ETH subprotocol message types.
+ */
+enum class MessageType(val code: Int) {
+  Status(0x00),
+  NewBlockHashes(0x01),
+  Transactions(0x02),
+  GetBlockHeaders(0x03),
+  BlockHeaders(0x04),
+  GetBlockBodies(0x05),
+  BlockBodies(0x06),
+  NewBlock(0x07),
+  GetNodeData(0x0d),
+  NodeData(0x0e),
+  GetReceipts(0x0f),
+  Receipts(0x10)
+}
+
 data class StatusMessage(
   val protocolVersion: Int,
   val networkID: UInt256,
@@ -39,17 +57,19 @@ data class StatusMessage(
 
     fun read(payload: Bytes): StatusMessage = RLP.decode(payload) {
       it.readList { reader ->
-          val protocolVersion = reader.readInt()
-          val networkID = UInt256.fromBytes(reader.readValue())
-          val totalDifficulty = UInt256.fromBytes(reader.readValue())
-          val bestHash = Hash.fromBytes(reader.readValue())
-          val genesisHash = Hash.fromBytes(reader.readValue())
-          val forkInfo = reader.readList { fork ->
-            Pair(fork.readValue(), fork.readValue())
-          }
+        val protocolVersion = reader.readInt()
+        val networkID = UInt256.fromBytes(reader.readValue())
+        val totalDifficulty = UInt256.fromBytes(reader.readValue())
+        val bestHash = Hash.fromBytes(reader.readValue())
+        val genesisHash = Hash.fromBytes(reader.readValue())
+        val forkInfo = reader.readList { fork ->
+          Pair(fork.readValue(), fork.readValue())
+        }
 
-          StatusMessage(protocolVersion, networkID, totalDifficulty, bestHash,
-            genesisHash, forkInfo.first, forkInfo.second.toLong())
+        StatusMessage(
+          protocolVersion, networkID, totalDifficulty, bestHash,
+          genesisHash, forkInfo.first, forkInfo.second.toLong()
+        )
       }
     }
   }

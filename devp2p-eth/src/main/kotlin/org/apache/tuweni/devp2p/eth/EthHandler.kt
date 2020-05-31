@@ -41,7 +41,7 @@ internal class EthHandler(
 ) : SubProtocolHandler, CoroutineScope {
 
   companion object {
-    val logger = LoggerFactory.getLogger(EthHandler::class.java)
+    val logger = LoggerFactory.getLogger(EthHandler::class.java)!!
   }
 
   val peersMap: MutableMap<String, PeerInfo> = mutableMapOf()
@@ -51,18 +51,18 @@ internal class EthHandler(
   override fun handle(connectionId: String, messageType: Int, message: Bytes) = asyncCompletion {
     logger.debug("Receiving message of type {}", messageType)
     when (messageType) {
-      0 -> handleStatus(connectionId, StatusMessage.read(message))
-      1 -> handleNewBlockHashes(NewBlockHashes.read(message))
-//      2 -> // do nothing.
-      3 -> handleGetBlockHeaders(connectionId, GetBlockHeaders.read(message))
-      4 -> handleHeaders(connectionId, BlockHeaders.read(message))
-      5 -> handleGetBlockBodies(connectionId, GetBlockBodies.read(message))
-      6 -> handleBlockBodies(BlockBodies.read(message))
-      7 -> handleNewBlock(NewBlock.read(message))
-      0x0d -> handleGetNodeData(connectionId, GetNodeData.read(message))
-//      0x0e -> // not implemented yet.
-      0x0f -> handleGetReceipts(connectionId, GetReceipts.read(message))
-      // 0x10 -> handleReceipts(Receipts.read(message)) // not implemented yet
+      MessageType.Status.code -> handleStatus(connectionId, StatusMessage.read(message))
+      MessageType.NewBlockHashes.code -> handleNewBlockHashes(NewBlockHashes.read(message))
+//    Transactions.code -> // do nothing.
+      MessageType.GetBlockHeaders.code -> handleGetBlockHeaders(connectionId, GetBlockHeaders.read(message))
+      MessageType.BlockHeaders.code -> handleHeaders(connectionId, BlockHeaders.read(message))
+      MessageType.GetBlockBodies.code -> handleGetBlockBodies(connectionId, GetBlockBodies.read(message))
+      MessageType.BlockBodies.code -> handleBlockBodies(BlockBodies.read(message))
+      MessageType.NewBlock.code -> handleNewBlock(NewBlock.read(message))
+      MessageType.GetNodeData.code -> handleGetNodeData(connectionId, GetNodeData.read(message))
+//    MessageType.NodeData.code-> // not implemented yet.
+      MessageType.GetReceipts.code -> handleGetReceipts(connectionId, GetReceipts.read(message))
+      // MessageType.Receipts.code -> handleReceipts(Receipts.read(message)) // not implemented yet
     }
   }
 
@@ -83,16 +83,18 @@ internal class EthHandler(
     getReceipts.hashes.forEach {
       receipts.add(repository.retrieveTransactionReceipts(it))
     }
-    service.send(EthSubprotocol.ETH64, 0x10, connectionId, Receipts(receipts).toBytes())
+    service.send(EthSubprotocol.ETH64, MessageType.Receipts.code, connectionId, Receipts(receipts).toBytes())
   }
 
   private fun handleGetNodeData(connectionId: String, nodeData: GetNodeData) {
+    // TODO implement
     nodeData.toBytes()
-    service.send(EthSubprotocol.ETH64, 0x0e, connectionId, NodeData(emptyList()).toBytes())
+    service.send(EthSubprotocol.ETH64, MessageType.NodeData.code, connectionId, NodeData(emptyList()).toBytes())
   }
 
   private suspend fun handleNewBlock(read: NewBlock) {
     repository.storeBlock(read.block)
+    // TODO more to do there
   }
 
   private fun handleBlockBodies(message: BlockBodies) {
@@ -151,7 +153,7 @@ internal class EthHandler(
         val nextHeader = repository.retrieveBlockHeader(nextMatches[0]) ?: break
         headers.add(nextHeader)
       }
-      service.send(EthSubprotocol.ETH64, 4, connectionId, BlockHeaders(headers).toBytes())
+      service.send(EthSubprotocol.ETH64, MessageType.BlockHeaders.code, connectionId, BlockHeaders(headers).toBytes())
     }
   }
 
