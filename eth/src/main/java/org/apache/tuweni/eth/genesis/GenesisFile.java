@@ -13,6 +13,7 @@
 package org.apache.tuweni.eth.genesis;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.concurrent.AsyncCompletion;
 import org.apache.tuweni.eth.AccountState;
 import org.apache.tuweni.eth.Address;
 import org.apache.tuweni.eth.Block;
@@ -33,6 +34,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -205,13 +208,15 @@ public class GenesisFile {
     Hash empty = Hash.hash(Bytes.EMPTY);
     MerklePatriciaTrie<AccountState> stateTree = new MerklePatriciaTrie<>(AccountState::toBytes);
 
+    List<AsyncCompletion> futures = new ArrayList<>();
+    for (Map.Entry<Address, Wei> entry : allocs.entrySet()) {
+      AccountState accountState = new AccountState(UInt256.ZERO, entry.getValue(), emptyHash, empty);
+      futures.add(stateTree.putAsync(Hash.hash(entry.getKey()), accountState));
+    }
     try {
-      for (Map.Entry<Address, Wei> entry : allocs.entrySet()) {
-        AccountState accountState = new AccountState(UInt256.ZERO, entry.getValue(), emptyHash, empty);
-        stateTree.putAsync(Hash.hash(entry.getKey()), accountState).join();
-      }
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
+      AsyncCompletion.allOf(futures).join(10, TimeUnit.SECONDS);
+    } catch (InterruptedException | TimeoutException e) {
+      throw new RuntimeException("Creating the account states took more than 10 seconds.");
     }
     return new Block(
         new BlockHeader(
