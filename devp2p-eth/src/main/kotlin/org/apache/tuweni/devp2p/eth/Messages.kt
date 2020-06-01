@@ -112,20 +112,20 @@ data class NewBlockHashes(val hashes: List<Pair<Hash, Long>>) {
   }
 }
 
-data class GetBlockHeaders(val hash: Hash, val maxHeaders: Long, val skip: Long, val reverse: Boolean) {
+data class GetBlockHeaders(val block: Bytes, val maxHeaders: Long, val skip: Long, val reverse: Boolean) {
   companion object {
 
     fun read(payload: Bytes): GetBlockHeaders = RLP.decodeList(payload) {
-      val hash = Hash.fromBytes(it.readValue())
+      val block = it.readValue()
       val maxHeaders = it.readLong()
       val skip = it.readLong()
       val reverse = it.readInt() == 1
-      GetBlockHeaders(hash, maxHeaders, skip, reverse)
+      GetBlockHeaders(block, maxHeaders, skip, reverse)
     }
   }
 
   fun toBytes(): Bytes = RLP.encodeList { writer ->
-    writer.writeValue(hash)
+    writer.writeValue(block)
     writer.writeLong(maxHeaders)
     writer.writeLong(skip)
     writer.writeInt(if (reverse) 1 else 0)

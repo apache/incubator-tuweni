@@ -16,31 +16,151 @@
  */
 package org.apache.tuweni.devp2p.eth
 
-import io.vertx.core.Vertx
 import kotlinx.coroutines.runBlocking
 import org.apache.lucene.index.IndexWriter
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
-import org.apache.tuweni.eth.genesis.GenesisFile
+import org.apache.tuweni.devp2p.eth.EthSubprotocol.Companion.ETH64
+import org.apache.tuweni.eth.Address
+import org.apache.tuweni.eth.Block
+import org.apache.tuweni.eth.BlockBody
+import org.apache.tuweni.eth.BlockHeader
+import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
 import org.apache.tuweni.junit.VertxExtension
-import org.apache.tuweni.junit.VertxInstance
 import org.apache.tuweni.kv.MapKeyValueStore
-import org.apache.tuweni.rlpx.vertx.VertxRLPxService
+import org.apache.tuweni.rlp.RLP
+import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.units.bigints.UInt256
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
+import org.apache.tuweni.units.bigints.UInt64
+import org.apache.tuweni.units.ethereum.Gas
+import org.apache.tuweni.units.ethereum.Wei
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.net.InetSocketAddress
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.eq
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @ExtendWith(LuceneIndexWriterExtension::class, VertxExtension::class, BouncyCastleExtension::class)
 class EthHandlerTest {
 
+  private lateinit var genesisBlock: Block
+  private lateinit var handler: EthHandler
+  private lateinit var repository: BlockchainRepository
+  private lateinit var service: RLPxService
+
+  @BeforeEach
+  fun setup(@LuceneIndexWriter writer: IndexWriter) = runBlocking {
+    val header = BlockHeader(
+      Hash.fromBytes(Bytes32.random()),
+      Hash.fromBytes(Bytes32.random()),
+      Address.fromBytes(Bytes.random(20)),
+      Hash.fromBytes(Bytes32.random()),
+      Hash.fromBytes(Bytes32.random()),
+      Hash.fromBytes(Bytes32.random()),
+      Bytes32.random(),
+      UInt256.fromBytes(Bytes32.random()),
+      UInt256.ZERO,
+      Gas.valueOf(3000),
+      Gas.valueOf(2000),
+      Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
+      Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
+      Hash.fromBytes(Bytes32.random()),
+      UInt64.ZERO
+    )
+    val body = BlockBody(
+      listOf(
+        Transaction(
+          UInt256.valueOf(1),
+          Wei.valueOf(2),
+          Gas.valueOf(2),
+          Address.fromBytes(Bytes.random(20)),
+          Wei.valueOf(2),
+          Bytes.random(12),
+          SECP256K1.KeyPair.random()
+        )
+      ),
+      listOf(header)
+    )
+    genesisBlock = Block(header, body)
+    repository = BlockchainRepository.init(
+      MapKeyValueStore(),
+      MapKeyValueStore(),
+      MapKeyValueStore(),
+      MapKeyValueStore(),
+      BlockchainIndex(writer),
+      genesisBlock
+    )
+    service = mock(RLPxService::class.java)
+    handler = EthHandler(
+      blockchainInfo = SimpleBlockchainInformation(
+        UInt256.valueOf(42L),
+        UInt256.ONE,
+        genesisBlock.header.hash,
+        genesisBlock.header.hash,
+        emptyList()
+      ),
+      service = service,
+      repository = repository
+    )
+  }
+
+  private fun createChildBlockHeader(parentBlock: BlockHeader): BlockHeader {
+    val emptyListHash = Hash.hash(RLP.encodeList { })
+    val emptyHash = Hash.hash(RLP.encode { writer -> writer.writeValue(Bytes.EMPTY) })
+    return BlockHeader(
+      parentBlock.hash,
+      emptyListHash,
+      Address.fromBytes(Bytes.random(20)),
+      parentBlock.stateRoot,
+      emptyHash,
+      emptyHash,
+      Bytes.wrap(ByteArray(256)),
+      parentBlock.difficulty,
+      parentBlock.number.add(1),
+      parentBlock.gasLimit,
+      Gas.valueOf(0),
+      Instant.now(),
+      Bytes.random(45),
+      Hash.fromBytes(Bytes32.random()),
+      UInt64.ZERO
+    )
+  }
+
+  @Test
+  fun testGetHeaders() = runBlocking {
+    var header = repository.retrieveGenesisBlock().header
+    for (i in 1..10) {
+      val newHeader = createChildBlockHeader(header)
+      repository.storeBlockHeader(newHeader)
+      header = newHeader
+    }
+
+    handler.handle(
+      "foo",
+      MessageType.GetBlockHeaders.code,
+      GetBlockHeaders(genesisBlock.header.hash, 3, 1, false).toBytes()
+    ).await()
+
+    val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
+    verify(service).send(eq(ETH64), eq(MessageType.BlockHeaders.code), eq("foo"), messageCapture.capture())
+
+    val messageRead = BlockHeaders.read(messageCapture.value)
+    assertEquals(3, messageRead.headers.size)
+    assertEquals(UInt256.ZERO, messageRead.headers[0].number)
+    assertEquals(UInt256.valueOf(2), messageRead.headers[1].number)
+    assertEquals(UInt256.valueOf(4), messageRead.headers[2].number)
+  }
 }

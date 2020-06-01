@@ -143,7 +143,7 @@ interface BlockchainIndexReader {
    * @param hashOrNumber the hash of a block header, or its number as a 32-byte word
    * @return the matching block header hashes.
    */
-  fun findByHashOrNumber(hashOrNumber: Bytes32): List<Hash>
+  fun findByHashOrNumber(hashOrNumber: Bytes): List<Hash>
 
   /**
    * Find a value in a range.
@@ -582,7 +582,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     ).firstOrNull()
   }
 
-  override fun findByHashOrNumber(hashOrNumber: Bytes32): List<Hash> {
+  override fun findByHashOrNumber(hashOrNumber: Bytes): List<Hash> {
     val query = BooleanQuery.Builder()
       .setMinimumNumberShouldMatch(1)
       .add(BooleanClause(TermQuery(Term("_id", toBytesRef(hashOrNumber))), BooleanClause.Occur.SHOULD))

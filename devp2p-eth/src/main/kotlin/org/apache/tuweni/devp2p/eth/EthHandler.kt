@@ -130,30 +130,29 @@ internal class EthHandler(
   }
 
   private suspend fun handleGetBlockHeaders(connectionId: String, blockHeaderRequest: GetBlockHeaders) {
-    val matches = repository.findBlockByHashOrNumber(blockHeaderRequest.hash)
-    if (matches.isEmpty()) {
-      return
-    }
+    val matches = repository.findBlockByHashOrNumber(blockHeaderRequest.block)
     val headers = ArrayList<BlockHeader>()
-    val header = repository.retrieveBlockHeader(matches[0])
-    header?.let {
-      headers.add(it)
-      var blockNumber = it.number
-      for (i in 1..blockHeaderRequest.maxHeaders) {
-        blockNumber = if (blockHeaderRequest.reverse) {
-          blockNumber.subtract(blockHeaderRequest.skip)
-        } else {
-          blockNumber.add(blockHeaderRequest.skip)
+    if (matches.isNotEmpty()) {
+      val header = repository.retrieveBlockHeader(matches[0])
+      header?.let {
+        headers.add(it)
+        var blockNumber = it.number
+        for (i in 2..blockHeaderRequest.maxHeaders) {
+          blockNumber = if (blockHeaderRequest.reverse) {
+            blockNumber.subtract(blockHeaderRequest.skip + 1)
+          } else {
+            blockNumber.add(blockHeaderRequest.skip + 1)
+          }
+          val nextMatches = repository.findBlockByHashOrNumber(blockNumber.toBytes())
+          if (nextMatches.isEmpty()) {
+            break
+          }
+          val nextHeader = repository.retrieveBlockHeader(nextMatches[0]) ?: break
+          headers.add(nextHeader)
         }
-        val nextMatches = repository.findBlockByHashOrNumber(blockNumber.toBytes())
-        if (nextMatches.isEmpty()) {
-          break
-        }
-        val nextHeader = repository.retrieveBlockHeader(nextMatches[0]) ?: break
-        headers.add(nextHeader)
       }
-      service.send(EthSubprotocol.ETH64, MessageType.BlockHeaders.code, connectionId, BlockHeaders(headers).toBytes())
     }
+    service.send(EthSubprotocol.ETH64, MessageType.BlockHeaders.code, connectionId, BlockHeaders(headers).toBytes())
   }
 
   private suspend fun handleNewBlockHashes(message: NewBlockHashes) {

@@ -17,7 +17,6 @@
 package org.apache.tuweni.eth.repository
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.Block
 import org.apache.tuweni.eth.BlockBody
 import org.apache.tuweni.eth.BlockHeader
@@ -235,7 +234,7 @@ class BlockchainRepository
    */
   suspend fun retrieveChainHeadHeader(): BlockHeader? {
     return blockchainIndex.findByLargest(BlockHeaderFields.TOTAL_DIFFICULTY)
-      ?.let { retrieveBlockHeader(it) } ?: retrieveGenesisBlock()?.getHeader()
+      ?.let { retrieveBlockHeader(it) } ?: retrieveGenesisBlock().getHeader()
   }
 
   /**
@@ -243,8 +242,8 @@ class BlockchainRepository
    *
    * @return the genesis block
    */
-  suspend fun retrieveGenesisBlock(): Block? {
-    return chainMetadata.get(GENESIS_BLOCK)?.let { retrieveBlock(it) }
+  suspend fun retrieveGenesisBlock(): Block {
+    return chainMetadata.get(GENESIS_BLOCK).let { retrieveBlock(it!!)!! }
   }
 
   /**
@@ -284,7 +283,7 @@ class BlockchainRepository
    * @param blockNumberOrBlockHash the number or hash of the block
    * @return the matching blocks
    */
-  fun findBlockByHashOrNumber(blockNumberOrBlockHash: Bytes32): List<Hash> {
+  fun findBlockByHashOrNumber(blockNumberOrBlockHash: Bytes): List<Hash> {
     return blockchainIndex.findByHashOrNumber(blockNumberOrBlockHash)
   }
 
