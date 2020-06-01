@@ -43,7 +43,7 @@ import org.apache.tuweni.units.bigints.UInt64
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
@@ -56,98 +56,101 @@ import java.time.temporal.ChronoUnit
 @ExtendWith(LuceneIndexWriterExtension::class, VertxExtension::class, BouncyCastleExtension::class)
 class EthHandlerTest {
 
-  private lateinit var genesisBlock: Block
-  private lateinit var handler: EthHandler
-  private lateinit var repository: BlockchainRepository
-  private lateinit var service: RLPxService
+  companion object {
 
-  @BeforeEach
-  fun setup(@LuceneIndexWriter writer: IndexWriter) = runBlocking {
-    val header = BlockHeader(
-      Hash.fromBytes(Bytes32.random()),
-      Hash.fromBytes(Bytes32.random()),
-      Address.fromBytes(Bytes.random(20)),
-      Hash.fromBytes(Bytes32.random()),
-      Hash.fromBytes(Bytes32.random()),
-      Hash.fromBytes(Bytes32.random()),
-      Bytes32.random(),
-      UInt256.fromBytes(Bytes32.random()),
-      UInt256.ZERO,
-      Gas.valueOf(3000),
-      Gas.valueOf(2000),
-      Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
-      Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
-      Hash.fromBytes(Bytes32.random()),
-      UInt64.ZERO
-    )
-    val body = BlockBody(
-      listOf(
-        Transaction(
-          UInt256.valueOf(1),
-          Wei.valueOf(2),
-          Gas.valueOf(2),
-          Address.fromBytes(Bytes.random(20)),
-          Wei.valueOf(2),
-          Bytes.random(12),
-          SECP256K1.KeyPair.random()
-        )
-      ),
-      listOf(header)
-    )
-    genesisBlock = Block(header, body)
-    repository = BlockchainRepository.init(
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      BlockchainIndex(writer),
-      genesisBlock
-    )
-    service = mock(RLPxService::class.java)
-    handler = EthHandler(
-      blockchainInfo = SimpleBlockchainInformation(
-        UInt256.valueOf(42L),
-        UInt256.ONE,
-        genesisBlock.header.hash,
-        genesisBlock.header.hash,
-        emptyList()
-      ),
-      service = service,
-      repository = repository
-    )
-  }
+    private lateinit var genesisBlock: Block
+    private lateinit var handler: EthHandler
+    private lateinit var repository: BlockchainRepository
+    private lateinit var service: RLPxService
 
-  private fun createChildBlockHeader(parentBlock: BlockHeader): BlockHeader {
-    val emptyListHash = Hash.hash(RLP.encodeList { })
-    val emptyHash = Hash.hash(RLP.encode { writer -> writer.writeValue(Bytes.EMPTY) })
-    return BlockHeader(
-      parentBlock.hash,
-      emptyListHash,
-      Address.fromBytes(Bytes.random(20)),
-      parentBlock.stateRoot,
-      emptyHash,
-      emptyHash,
-      Bytes.wrap(ByteArray(256)),
-      parentBlock.difficulty,
-      parentBlock.number.add(1),
-      parentBlock.gasLimit,
-      Gas.valueOf(0),
-      Instant.now(),
-      Bytes.random(45),
-      Hash.fromBytes(Bytes32.random()),
-      UInt64.ZERO
-    )
+    @BeforeAll
+    @JvmStatic
+    fun setup(@LuceneIndexWriter writer: IndexWriter) = runBlocking {
+      var header = BlockHeader(
+        Hash.fromBytes(Bytes32.random()),
+        Hash.fromBytes(Bytes32.random()),
+        Address.fromBytes(Bytes.random(20)),
+        Hash.fromBytes(Bytes32.random()),
+        Hash.fromBytes(Bytes32.random()),
+        Hash.fromBytes(Bytes32.random()),
+        Bytes32.random(),
+        UInt256.fromBytes(Bytes32.random()),
+        UInt256.ZERO,
+        Gas.valueOf(3000),
+        Gas.valueOf(2000),
+        Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
+        Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
+        Hash.fromBytes(Bytes32.random()),
+        UInt64.ZERO
+      )
+      val body = BlockBody(
+        listOf(
+          Transaction(
+            UInt256.valueOf(1),
+            Wei.valueOf(2),
+            Gas.valueOf(2),
+            Address.fromBytes(Bytes.random(20)),
+            Wei.valueOf(2),
+            Bytes.random(12),
+            SECP256K1.KeyPair.random()
+          )
+        ),
+        listOf(header)
+      )
+      genesisBlock = Block(header, body)
+      repository = BlockchainRepository.init(
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        BlockchainIndex(writer),
+        genesisBlock
+      )
+      service = mock(RLPxService::class.java)
+      handler = EthHandler(
+        blockchainInfo = SimpleBlockchainInformation(
+          UInt256.valueOf(42L),
+          UInt256.ONE,
+          genesisBlock.header.hash,
+          genesisBlock.header.hash,
+          emptyList()
+        ),
+        service = service,
+        repository = repository
+      )
+
+      for (i in 1..10) {
+        val newHeader = createChildBlockHeader(header)
+        repository.storeBlockHeader(newHeader)
+        header = newHeader
+      }
+    }
+
+    private fun createChildBlockHeader(parentBlock: BlockHeader): BlockHeader {
+      val emptyListHash = Hash.hash(RLP.encodeList { })
+      val emptyHash = Hash.hash(RLP.encode { writer -> writer.writeValue(Bytes.EMPTY) })
+      return BlockHeader(
+        parentBlock.hash,
+        emptyListHash,
+        Address.fromBytes(Bytes.random(20)),
+        parentBlock.stateRoot,
+        emptyHash,
+        emptyHash,
+        Bytes.wrap(ByteArray(256)),
+        parentBlock.difficulty,
+        parentBlock.number.add(1),
+        parentBlock.gasLimit,
+        Gas.valueOf(0),
+        Instant.now(),
+        Bytes.random(45),
+        Hash.fromBytes(Bytes32.random()),
+        UInt64.ZERO
+      )
+    }
   }
 
   @Test
   fun testGetHeaders() = runBlocking {
-    var header = repository.retrieveGenesisBlock().header
-    for (i in 1..10) {
-      val newHeader = createChildBlockHeader(header)
-      repository.storeBlockHeader(newHeader)
-      header = newHeader
-    }
-
     handler.handle(
       "foo",
       MessageType.GetBlockHeaders.code,
@@ -162,5 +165,55 @@ class EthHandlerTest {
     assertEquals(UInt256.ZERO, messageRead.headers[0].number)
     assertEquals(UInt256.valueOf(2), messageRead.headers[1].number)
     assertEquals(UInt256.valueOf(4), messageRead.headers[2].number)
+  }
+
+  @Test
+  fun testGetHeadersTooMany() = runBlocking {
+    handler.handle(
+      "foo2",
+      MessageType.GetBlockHeaders.code,
+      GetBlockHeaders(genesisBlock.header.hash, 100, 1, false).toBytes()
+    ).await()
+
+    val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
+    verify(service).send(eq(ETH64), eq(MessageType.BlockHeaders.code), eq("foo2"), messageCapture.capture())
+
+    val messageRead = BlockHeaders.read(messageCapture.value)
+    assertEquals(6, messageRead.headers.size)
+  }
+
+  @Test
+  fun testGetHeadersDifferentSkip() = runBlocking {
+    handler.handle(
+      "foo3",
+      MessageType.GetBlockHeaders.code,
+      GetBlockHeaders(genesisBlock.header.hash, 100, 2, false).toBytes()
+    ).await()
+
+    val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
+    verify(service).send(eq(ETH64), eq(MessageType.BlockHeaders.code), eq("foo3"), messageCapture.capture())
+
+    val messageRead = BlockHeaders.read(messageCapture.value)
+    assertEquals(4, messageRead.headers.size)
+    assertEquals(UInt256.valueOf(3), messageRead.headers[1].number)
+    assertEquals(UInt256.valueOf(6), messageRead.headers[2].number)
+    assertEquals(UInt256.valueOf(9), messageRead.headers[3].number)
+  }
+
+  @Test
+  fun testGetBodies() = runBlocking {
+
+    handler.handle(
+      "foo234",
+      MessageType.GetBlockBodies.code,
+      GetBlockBodies(listOf(genesisBlock.header.hash)).toBytes()
+    ).await()
+
+    val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
+    verify(service).send(eq(ETH64), eq(MessageType.BlockBodies.code), eq("foo234"), messageCapture.capture())
+
+    val messageRead = BlockBodies.read(messageCapture.value)
+    assertEquals(1, messageRead.bodies.size)
+    assertEquals(genesisBlock.body, messageRead.bodies[0])
   }
 }
