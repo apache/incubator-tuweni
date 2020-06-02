@@ -166,7 +166,7 @@ internal class LESSubProtocolHandler(
   override fun handleNewPeerConnection(connectionId: String): AsyncCompletion {
     return asyncCompletion {
         val head = repo.retrieveChainHead()!!
-        val genesis = repo.retrieveGenesisBlock()!!
+        val genesis = repo.retrieveGenesisBlock()
         val headTd = head.getHeader().getDifficulty()
         val headHash = head.getHeader().getHash()
         val state = peerStateMap.computeIfAbsent(connectionId) { LESPeerState() }
