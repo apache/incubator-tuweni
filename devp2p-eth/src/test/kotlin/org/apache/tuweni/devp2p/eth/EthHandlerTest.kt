@@ -28,7 +28,9 @@ import org.apache.tuweni.eth.Block
 import org.apache.tuweni.eth.BlockBody
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.LogsBloomFilter
 import org.apache.tuweni.eth.Transaction
+import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.junit.BouncyCastleExtension
@@ -120,16 +122,22 @@ class EthHandlerTest {
       )
 
       for (i in 1..10) {
-        val newHeader = createChildBlockHeader(header)
-        repository.storeBlockHeader(newHeader)
-        header = newHeader
+        val newBlock = createChildBlock(header)
+        repository.storeBlock(newBlock)
+        var txIndex = 0
+        for (tx in newBlock.body.transactions) {
+          repository.storeTransactionReceipt(TransactionReceipt(Bytes32.random(),
+            32L, LogsBloomFilter(), emptyList()), txIndex, tx.hash, newBlock.header.hash)
+          txIndex++
+        }
+        header = newBlock.header
       }
     }
 
-    private fun createChildBlockHeader(parentBlock: BlockHeader): BlockHeader {
+    private fun createChildBlock(parentBlock: BlockHeader): Block {
       val emptyListHash = Hash.hash(RLP.encodeList { })
       val emptyHash = Hash.hash(RLP.encode { writer -> writer.writeValue(Bytes.EMPTY) })
-      return BlockHeader(
+      val header = BlockHeader(
         parentBlock.hash,
         emptyListHash,
         Address.fromBytes(Bytes.random(20)),
@@ -146,6 +154,17 @@ class EthHandlerTest {
         Hash.fromBytes(Bytes32.random()),
         UInt64.ZERO
       )
+      val block = Block(
+        header, BlockBody(
+          listOf(
+            Transaction(
+              UInt256.ONE, Wei.valueOf(20L), Gas.valueOf(3000),
+              Address.fromBytes(Bytes.random(20)), Wei.valueOf(1000), Bytes.EMPTY, SECP256K1.KeyPair.random()
+            )
+          ), emptyList()
+        )
+      )
+      return block
     }
   }
 
@@ -215,5 +234,25 @@ class EthHandlerTest {
     val messageRead = BlockBodies.read(messageCapture.value)
     assertEquals(1, messageRead.bodies.size)
     assertEquals(genesisBlock.body, messageRead.bodies[0])
+  }
+
+  @Test
+  fun testGetReceipts() = runBlocking {
+
+    val hashes = repository.findBlockByHashOrNumber(UInt256.valueOf(7).toBytes())
+    val block7 = repository.retrieveBlock(hashes[0])
+    val txReceipt = repository.retrieveTransactionReceipt(hashes[0], 0)
+    handler.handle(
+      "foo234",
+      MessageType.GetReceipts.code,
+      GetReceipts(listOf(block7!!.header.hash)).toBytes()
+    ).await()
+
+    val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
+    verify(service).send(eq(ETH64), eq(MessageType.Receipts.code), eq("foo234"), messageCapture.capture())
+
+    val messageRead = Receipts.read(messageCapture.value)
+    assertEquals(1, messageRead.transactionReceipts.size)
+    assertEquals(txReceipt, messageRead.transactionReceipts[0][0])
   }
 }
