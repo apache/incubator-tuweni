@@ -22,11 +22,6 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion
 import org.apache.tuweni.concurrent.coroutines.asyncCompletion
-import org.apache.tuweni.eth.BlockBody
-import org.apache.tuweni.eth.BlockHeader
-import org.apache.tuweni.eth.Hash
-import org.apache.tuweni.eth.TransactionReceipt
-import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.wire.DisconnectReason
 import org.apache.tuweni.rlpx.wire.SubProtocolHandler
@@ -37,7 +32,7 @@ internal class EthHandler(
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
   private val blockchainInfo: BlockchainInformation,
   private val service: RLPxService,
-  private val repository: BlockchainRepository
+  private val controller: EthController
 ) : SubProtocolHandler, CoroutineScope {
 
   companion object {
@@ -45,8 +40,6 @@ internal class EthHandler(
   }
 
   val peersMap: MutableMap<String, PeerInfo> = mutableMapOf()
-  val blockHeaderRequests = ArrayList<Hash>()
-  val blockBodyRequests = ArrayList<Hash>()
 
   override fun handle(connectionId: String, messageType: Int, message: Bytes) = asyncCompletion {
     logger.debug("Receiving message of type {}", messageType)
@@ -72,6 +65,7 @@ internal class EthHandler(
       service.disconnect(connectionId, DisconnectReason.SUBPROTOCOL_REASON)
     }
     peersMap[connectionId]?.connect()
+    // TODO send to controller.
   }
 
 //  private fun handleReceipts(receipts: Receipts) {
@@ -79,11 +73,13 @@ internal class EthHandler(
 //  }
 
   private suspend fun handleGetReceipts(connectionId: String, getReceipts: GetReceipts) {
-    val receipts = ArrayList<List<TransactionReceipt>>()
-    getReceipts.hashes.forEach {
-      receipts.add(repository.retrieveTransactionReceipts(it))
-    }
-    service.send(EthSubprotocol.ETH64, MessageType.Receipts.code, connectionId, Receipts(receipts).toBytes())
+
+    service.send(
+      EthSubprotocol.ETH64,
+      MessageType.Receipts.code,
+      connectionId,
+      Receipts(controller.findTransactionReceipts(getReceipts.hashes)).toBytes()
+    )
   }
 
   private fun handleGetNodeData(connectionId: String, nodeData: GetNodeData) {
@@ -93,8 +89,7 @@ internal class EthHandler(
   }
 
   private suspend fun handleNewBlock(read: NewBlock) {
-    repository.storeBlock(read.block)
-    // TODO more to do there
+    controller.addNewBlock(read.block)
   }
 
   private fun handleBlockBodies(message: BlockBodies) {
@@ -108,70 +103,30 @@ internal class EthHandler(
   }
 
   private suspend fun handleGetBlockBodies(connectionId: String, message: GetBlockBodies) {
-    val bodies = ArrayList<BlockBody>()
-    message.hashes.forEach { hash ->
-      repository.retrieveBlockBody(hash)?.let {
-        bodies.add(it)
-      }
-    }
-    service.send(EthSubprotocol.ETH64, 6, connectionId, BlockBodies(bodies).toBytes())
+    service.send(
+      EthSubprotocol.ETH64,
+      6,
+      connectionId,
+      BlockBodies(controller.findBlockBodies(message.hashes)).toBytes()
+    )
   }
 
   private suspend fun handleHeaders(connectionId: String, headers: BlockHeaders) {
-    connectionId.toString()
-    headers.headers.forEach {
-      repository.storeBlockHeader(it)
-//      if (blockHeaderRequests.remove(it.hash)) {
-//
-//      } else {
-//        service.disconnect(connectionId, DisconnectReason.PROTOCOL_BREACH)
-//      }
-    }
+    controller.addNewBlockHeaders(connectionId, headers.headers)
   }
 
   private suspend fun handleGetBlockHeaders(connectionId: String, blockHeaderRequest: GetBlockHeaders) {
-    val matches = repository.findBlockByHashOrNumber(blockHeaderRequest.block)
-    val headers = ArrayList<BlockHeader>()
-    if (matches.isNotEmpty()) {
-      val header = repository.retrieveBlockHeader(matches[0])
-      header?.let {
-        headers.add(it)
-        var blockNumber = it.number
-        for (i in 2..blockHeaderRequest.maxHeaders) {
-          blockNumber = if (blockHeaderRequest.reverse) {
-            blockNumber.subtract(blockHeaderRequest.skip + 1)
-          } else {
-            blockNumber.add(blockHeaderRequest.skip + 1)
-          }
-          val nextMatches = repository.findBlockByHashOrNumber(blockNumber.toBytes())
-          if (nextMatches.isEmpty()) {
-            break
-          }
-          val nextHeader = repository.retrieveBlockHeader(nextMatches[0]) ?: break
-          headers.add(nextHeader)
-        }
-      }
-    }
+    val headers = controller.findHeaders(
+      blockHeaderRequest.block,
+      blockHeaderRequest.maxHeaders,
+      blockHeaderRequest.skip,
+      blockHeaderRequest.reverse
+    )
     service.send(EthSubprotocol.ETH64, MessageType.BlockHeaders.code, connectionId, BlockHeaders(headers).toBytes())
   }
 
   private suspend fun handleNewBlockHashes(message: NewBlockHashes) {
-    message.hashes.forEach { pair ->
-      repository.retrieveBlockHeader(pair.first).takeIf { null == it }.apply {
-        requestBlockHeader(pair.first)
-      }
-      repository.retrieveBlockBody(pair.first).takeIf { null == it }.apply {
-        requestBlockBody(pair.first)
-      }
-    }
-  }
-
-  private fun requestBlockHeader(blockHash: Hash) {
-    blockHeaderRequests.add(blockHash)
-  }
-
-  private fun requestBlockBody(blockHash: Hash) {
-    blockBodyRequests.add(blockHash)
+    controller.addNewBlockHashes(message.hashes)
   }
 
   override fun handleNewPeerConnection(connectionId: String): AsyncCompletion {
@@ -196,6 +151,7 @@ internal class EthHandler(
 class PeerInfo() {
 
   val ready: CompletableAsyncCompletion = AsyncCompletion.incomplete()
+  // TODO disconnect if not responding after timeout.
 
   fun connect() {
     ready.complete()

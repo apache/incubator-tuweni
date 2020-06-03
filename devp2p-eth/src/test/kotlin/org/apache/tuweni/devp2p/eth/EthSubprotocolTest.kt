@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mockito.mock
 
 @ExtendWith(BouncyCastleExtension::class, VertxExtension::class, LuceneIndexWriterExtension::class)
 class EthSubprotocolTest {
@@ -54,7 +55,11 @@ class EthSubprotocolTest {
       MapKeyValueStore(),
       BlockchainIndex(writer)
     )
-    val eth = EthSubprotocol(blockchainInfo = blockchainInfo, repository = repository)
+    val eth = EthSubprotocol(
+      blockchainInfo = blockchainInfo,
+      repository = repository,
+      requestsManager = mock(EthRequestsManager::class.java)
+    )
     assertEquals(SubProtocolIdentifier.of("eth", 64), eth.id())
   }
 
@@ -67,7 +72,11 @@ class EthSubprotocolTest {
       MapKeyValueStore(),
       BlockchainIndex(writer)
     )
-    val eth = EthSubprotocol(blockchainInfo = blockchainInfo, repository = repository)
+    val eth = EthSubprotocol(
+      blockchainInfo = blockchainInfo,
+      repository = repository,
+      requestsManager = mock(EthRequestsManager::class.java)
+    )
     assertTrue(eth.supports(SubProtocolIdentifier.of("eth", 64)))
     assertTrue(eth.supports(SubProtocolIdentifier.of("eth", 63)))
     assertTrue(eth.supports(SubProtocolIdentifier.of("eth", 62)))
@@ -84,7 +93,11 @@ class EthSubprotocolTest {
       MapKeyValueStore(),
       BlockchainIndex(writer)
     )
-    val eth = EthSubprotocol(blockchainInfo = blockchainInfo, repository = repository)
+    val eth = EthSubprotocol(
+      blockchainInfo = blockchainInfo,
+      repository = repository,
+      requestsManager = mock(EthRequestsManager::class.java)
+    )
     assertEquals(8, eth.versionRange(62))
     assertEquals(17, eth.versionRange(63))
     assertEquals(17, eth.versionRange(64))

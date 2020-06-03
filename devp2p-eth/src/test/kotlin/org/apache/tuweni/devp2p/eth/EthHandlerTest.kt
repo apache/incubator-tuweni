@@ -109,6 +109,7 @@ class EthHandlerTest {
         genesisBlock
       )
       service = mock(RLPxService::class.java)
+      val requestsManager = mock(EthRequestsManager::class.java)
       handler = EthHandler(
         blockchainInfo = SimpleBlockchainInformation(
           UInt256.valueOf(42L),
@@ -118,7 +119,7 @@ class EthHandlerTest {
           emptyList()
         ),
         service = service,
-        repository = repository
+        controller = EthController(repository, requestsManager)
       )
 
       for (i in 1..10) {

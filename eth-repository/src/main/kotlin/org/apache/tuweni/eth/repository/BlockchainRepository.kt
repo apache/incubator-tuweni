@@ -97,25 +97,6 @@ class BlockchainRepository
   }
 
   /**
-   * Store all the transaction receipts of a block in the repository.
-   *
-   * Transaction receipts should be ordered by the transactions order of the block.
-   *
-   * @param transactionReceipts the transaction receipts to store
-   * @param txHash the hash of the transaction
-   * @param blockHash the hash of the block that this transaction belongs to
-   */
-  suspend fun storeTransactionReceipts(
-    vararg transactionReceipts: TransactionReceipt,
-    txHash: Bytes,
-    blockHash: Bytes
-  ) {
-    for (i in 0 until transactionReceipts.size) {
-      storeTransactionReceipt(transactionReceipts[i], i, txHash, blockHash)
-    }
-  }
-
-  /**
    * Stores a transaction receipt in the repository.
    *
    * @param transactionReceipt the transaction receipt to store
@@ -140,7 +121,7 @@ class BlockchainRepository
    * @return handle to the storage operation completion
    */
   suspend fun storeBlockHeader(header: BlockHeader) {
-    blockHeaderStore.put(header.getHash(), header.toBytes())
+    blockHeaderStore.put(header.hash, header.toBytes())
     indexBlockHeader(header)
   }
 

@@ -27,7 +27,8 @@ import kotlin.coroutines.CoroutineContext
 class EthSubprotocol(
   private val coroutineContext: CoroutineContext = Dispatchers.Default,
   private val blockchainInfo: BlockchainInformation,
-  private val repository: BlockchainRepository
+  private val repository: BlockchainRepository,
+  private val requestsManager: EthRequestsManager
 ) : SubProtocol {
   companion object {
     val ETH62 = SubProtocolIdentifier.of("eth", 62)
@@ -49,8 +50,10 @@ class EthSubprotocol(
     }
   }
 
-  override fun createHandler(service: RLPxService): SubProtocolHandler =
-    EthHandler(coroutineContext, blockchainInfo, service, repository)
+  override fun createHandler(service: RLPxService): SubProtocolHandler {
+    val controller = EthController(repository, requestsManager)
+    return EthHandler(coroutineContext, blockchainInfo, service, controller)
+  }
 
   override fun getCapabilities() = mutableListOf(ETH62, ETH63, ETH64)
 }
