@@ -17,6 +17,7 @@ import org.apache.tuweni.concurrent.AsyncCompletion;
 import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.rlpx.wire.DisconnectReason;
+import org.apache.tuweni.rlpx.wire.SubProtocolClient;
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
 
 import java.net.InetSocketAddress;
@@ -83,4 +84,12 @@ public interface RLPxService {
    * @return the repository of wire connections associated with this service.
    */
   WireConnectionRepository repository();
+
+  /**
+   * Gets a subprotocol client associated with the given subprotocol.
+   * 
+   * @param subProtocolIdentifier the subprotocol identifier
+   * @return the client of the subprotocol.
+   */
+  SubProtocolClient getClient(SubProtocolIdentifier subProtocolIdentifier);
 }

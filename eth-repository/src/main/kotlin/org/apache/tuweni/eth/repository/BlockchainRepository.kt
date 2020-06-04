@@ -23,6 +23,7 @@ import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.kv.KeyValueStore
+import org.slf4j.LoggerFactory
 
 /**
  * Repository housing blockchain information.
@@ -48,6 +49,7 @@ class BlockchainRepository
 
   companion object {
 
+    val logger = LoggerFactory.getLogger(BlockchainRepository::class.java)
     val GENESIS_BLOCK = Bytes.wrap("genesisBlock".toByteArray())
 
     /**
@@ -123,6 +125,7 @@ class BlockchainRepository
   suspend fun storeBlockHeader(header: BlockHeader) {
     blockHeaderStore.put(header.hash, header.toBytes())
     indexBlockHeader(header)
+    logger.debug("Stored header {}", header.hash)
   }
 
   private suspend fun indexBlockHeader(header: BlockHeader) {

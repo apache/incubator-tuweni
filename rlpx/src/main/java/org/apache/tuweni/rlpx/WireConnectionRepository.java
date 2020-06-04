@@ -12,6 +12,7 @@
  */
 package org.apache.tuweni.rlpx;
 
+import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
 import org.apache.tuweni.rlpx.wire.WireConnection;
 
 /**
@@ -42,6 +43,13 @@ public interface WireConnectionRepository {
    * @return an Iterable object allowing to traverse all wire connections held by this repository
    */
   Iterable<WireConnection> asIterable();
+
+  /**
+   * Provides a subset of wire connections with a particular capabilities.
+   *
+   * @return an Iterable object allowing to traverse all wire connections held by this repository
+   */
+  Iterable<WireConnection> asIterable(SubProtocolIdentifier identifier);
 
   /**
    * Closes the repository. After it has been closed, the repository should no longer be able to add or retrieve

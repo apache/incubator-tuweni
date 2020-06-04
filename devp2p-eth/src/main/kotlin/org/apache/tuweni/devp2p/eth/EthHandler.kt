@@ -50,7 +50,7 @@ internal class EthHandler(
       MessageType.GetBlockHeaders.code -> handleGetBlockHeaders(connectionId, GetBlockHeaders.read(message))
       MessageType.BlockHeaders.code -> handleHeaders(connectionId, BlockHeaders.read(message))
       MessageType.GetBlockBodies.code -> handleGetBlockBodies(connectionId, GetBlockBodies.read(message))
-      MessageType.BlockBodies.code -> handleBlockBodies(BlockBodies.read(message))
+      MessageType.BlockBodies.code -> handleBlockBodies(connectionId, BlockBodies.read(message))
       MessageType.NewBlock.code -> handleNewBlock(NewBlock.read(message))
       MessageType.GetNodeData.code -> handleGetNodeData(connectionId, GetNodeData.read(message))
 //    MessageType.NodeData.code-> // not implemented yet.
@@ -92,14 +92,8 @@ internal class EthHandler(
     controller.addNewBlock(read.block)
   }
 
-  private fun handleBlockBodies(message: BlockBodies) {
-    message.bodies.forEach {
-      //      if (blockBodyRequests.remove(it)) {
-//        repository.
-//      } else {
-//        service.disconnect(connectionId, DisconnectReason.PROTOCOL_BREACH)
-//      }
-    }
+  private suspend fun handleBlockBodies(connectionId: String, message: BlockBodies) {
+    controller.addNewBlockBodies(connectionId, message.bodies)
   }
 
   private suspend fun handleGetBlockBodies(connectionId: String, message: GetBlockBodies) {
@@ -144,14 +138,12 @@ internal class EthHandler(
   }
 
   override fun stop() = asyncCompletion {
-    TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
   }
 }
 
 class PeerInfo() {
 
   val ready: CompletableAsyncCompletion = AsyncCompletion.incomplete()
-  // TODO disconnect if not responding after timeout.
 
   fun connect() {
     ready.complete()

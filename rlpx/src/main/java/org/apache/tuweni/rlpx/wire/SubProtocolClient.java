@@ -12,23 +12,8 @@
  */
 package org.apache.tuweni.rlpx.wire;
 
-
 /**
- * A stateful connection between two peers under the Devp2p wire protocol.
+ * Subprotocol client allowing outside users to call functions associated with the subprotocol.
  */
-public interface WireConnection {
-
-  /**
-   *
-   * @return the identifier of this wire connection
-   */
-  public String id();
-
-  /**
-   * Returns true if the connection supports the subprotocol
-   * 
-   * @param subProtocolIdentifier the subprotocol identifier
-   * @return true if the subprotocol is supported
-   */
-  public boolean supports(SubProtocolIdentifier subProtocolIdentifier);
+public interface SubProtocolClient {
 }

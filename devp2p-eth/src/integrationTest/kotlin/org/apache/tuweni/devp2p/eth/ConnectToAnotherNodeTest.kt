@@ -19,6 +19,7 @@ package org.apache.tuweni.devp2p.eth
 import io.vertx.core.Vertx
 import kotlinx.coroutines.runBlocking
 import org.apache.lucene.index.IndexWriter
+import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.eth.genesis.GenesisFile
@@ -78,7 +79,7 @@ class EthHandlerTest {
       "Tuweni Experiment 0.1"
     )
     service.start().await()
-    val id = service.connectTo(
+    service.connectTo(
       SECP256K1.PublicKey.fromHexString(
         "b1c9e33ebfd9446151688f0abaf171dac6df31ea5205a200f2cbaf5f8be" +
           "d241c9f93732f25109e16badea1aa657a6078240657688cbbddb91a50aa8c7c34a9cc"
@@ -86,14 +87,9 @@ class EthHandlerTest {
       InetSocketAddress("192.168.88.46", 30303)
     ).await()
 
-    service.send(
-      EthSubprotocol.ETH64,
-      MessageType.GetBlockHeaders.code,
-      id,
-      GetBlockHeaders(genesisBlock.header.hash, 100, 0, false).toBytes()
-    )
+    val client = service.getClient(EthSubprotocol.ETH62) as EthRequestsManager
+    client.requestBlockHeaders(genesisBlock.header.hash, 100, 0, false).await()
 
-    Thread.sleep(3000)
     val header = repository.findBlockByHashOrNumber(UInt256.valueOf(99L).toBytes())
     Assertions.assertFalse(header.isEmpty())
 
@@ -101,8 +97,7 @@ class EthHandlerTest {
     Assertions.assertTrue(header3.isEmpty())
     val header2 = repository.findBlockByHashOrNumber(UInt256.valueOf(100L).toBytes())
     Assertions.assertTrue(header2.isEmpty())
-    service.send(EthSubprotocol.ETH64, 3, id, GetBlockHeaders(header[0], 100, 0, false).toBytes())
-    Thread.sleep(3000)
+    service.stop().await()
   }
 
   @Test
@@ -172,5 +167,6 @@ class EthHandlerTest {
     val value = service.connectTo(service2kp.publicKey(), InetSocketAddress("127.0.0.1", service2.actualPort()))
       .await()
     Assertions.assertNotNull(value)
+    AsyncCompletion.allOf(service.stop(), service2.stop()).await()
   }
 }

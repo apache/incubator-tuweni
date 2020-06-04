@@ -90,16 +90,23 @@ class EthController(val repository: BlockchainRepository, val requestsManager: E
   }
 
   private fun requestBlockBody(blockHash: Hash) {
-    requestsManager.requestBlockBody(blockHash)
+    requestsManager.requestBlockBodies(listOf(blockHash))
   }
 
   suspend fun addNewBlockHeaders(connectionId: String, headers: List<BlockHeader>) {
+    val handle = requestsManager.wasRequested(connectionId, headers.first()) ?: return
     headers.forEach { header ->
-      if (!requestsManager.wasRequested(connectionId, header)) {
-        return
-      }
-
       repository.storeBlockHeader(header)
+    }
+    handle.complete()
+  }
+
+  suspend fun addNewBlockBodies(connectionId: String, bodies: List<BlockBody>) {
+    val hashes = requestsManager.wasRequested(connectionId, bodies)
+    if (hashes != null) {
+      for (i in 0..hashes.size) {
+        repository.storeBlockBody(hashes[i], bodies[i])
+      }
     }
   }
 }

@@ -12,10 +12,12 @@
  */
 package org.apache.tuweni.rlpx;
 
+import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
 import org.apache.tuweni.rlpx.wire.WireConnection;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * In-memory implementation of the wire connections repository.
@@ -38,6 +40,11 @@ public class MemoryWireConnectionsRepository implements WireConnectionRepository
   @Override
   public Iterable<WireConnection> asIterable() {
     return connections.values();
+  }
+
+  @Override
+  public Iterable<WireConnection> asIterable(SubProtocolIdentifier identifier) {
+    return connections.values().stream().filter(conn -> conn.supports(identifier)).collect(Collectors.toList());
   }
 
   @Override

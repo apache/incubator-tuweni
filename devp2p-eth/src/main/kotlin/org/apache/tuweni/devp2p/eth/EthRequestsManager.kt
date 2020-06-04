@@ -16,17 +16,21 @@
  */
 package org.apache.tuweni.devp2p.eth
 
+import org.apache.tuweni.concurrent.AsyncCompletion
+import org.apache.tuweni.concurrent.CompletableAsyncCompletion
 import org.apache.tuweni.eth.BlockBody
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
 
 interface EthRequestsManager {
-  fun requestBlockHeader(blockHash: Hash)
+  fun requestBlockHeader(blockHash: Hash): AsyncCompletion
+  fun requestBlockHeaders(blockHash: Hash, maxHeaders: Long, skip: Long, reverse: Boolean): AsyncCompletion
+  fun requestBlockHeaders(blockNumber: Long, maxHeaders: Long, skip: Long, reverse: Boolean): AsyncCompletion
 
-  fun requestBlockBody(blockHash: Hash)
+  fun requestBlockBodies(blockHashes: List<Hash>)
 
   fun requestBlock(blockHash: Hash)
 
-  fun wasRequested(connectionId: String, header: BlockHeader): Boolean
-  fun wasRequested(connectionId: String, header: BlockBody): Boolean
+  fun wasRequested(connectionId: String, header: BlockHeader): CompletableAsyncCompletion?
+  fun wasRequested(connectionId: String, bodies: List<BlockBody>): List<Hash>?
 }

@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.wire.SubProtocol
+import org.apache.tuweni.rlpx.wire.SubProtocolClient
 import org.apache.tuweni.rlpx.wire.SubProtocolHandler
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
 import org.apache.tuweni.units.bigints.UInt256
@@ -50,6 +51,10 @@ class LESSubprotocol
    private val flowControlMinimumRateOfRecharge: UInt256,
    private val repo: BlockchainRepository
  ) : SubProtocol {
+
+  override fun createClient(service: RLPxService): SubProtocolClient {
+    TODO("not implemented")
+  }
 
   override fun getCapabilities(): MutableList<SubProtocolIdentifier> = mutableListOf(SubProtocolIdentifier.of("les", 2))
 

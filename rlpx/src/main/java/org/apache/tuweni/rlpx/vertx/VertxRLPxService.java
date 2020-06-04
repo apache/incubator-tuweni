@@ -29,6 +29,7 @@ import org.apache.tuweni.rlpx.WireConnectionRepository;
 import org.apache.tuweni.rlpx.wire.DefaultWireConnection;
 import org.apache.tuweni.rlpx.wire.DisconnectReason;
 import org.apache.tuweni.rlpx.wire.SubProtocol;
+import org.apache.tuweni.rlpx.wire.SubProtocolClient;
 import org.apache.tuweni.rlpx.wire.SubProtocolHandler;
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
 import org.apache.tuweni.rlpx.wire.WireConnection;
@@ -281,6 +282,16 @@ public final class VertxRLPxService implements RLPxService {
   @Override
   public WireConnectionRepository repository() {
     return repository;
+  }
+
+  @Override
+  public SubProtocolClient getClient(SubProtocolIdentifier subProtocolIdentifier) {
+    for (SubProtocol subProtocol : subProtocols) {
+      if (subProtocol.supports(subProtocolIdentifier)) {
+        return subProtocol.createClient(this);
+      }
+    }
+    return null;
   }
 
   @Override

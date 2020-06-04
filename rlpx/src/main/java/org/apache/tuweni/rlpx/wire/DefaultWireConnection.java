@@ -260,6 +260,16 @@ public final class DefaultWireConnection implements WireConnection {
     return id;
   }
 
+  @Override
+  public boolean supports(SubProtocolIdentifier subProtocolIdentifier) {
+    for (SubProtocol sp : subprotocolRangeMap.asMapOfRanges().values()) {
+      if (sp.supports(subProtocolIdentifier)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   @SuppressWarnings("CatchAndPrintStackTrace")
   public void sendMessage(SubProtocolIdentifier subProtocolIdentifier, int messageType, Bytes message) {
     logger.debug("Sending sub-protocol message {} {}", messageType, message);
