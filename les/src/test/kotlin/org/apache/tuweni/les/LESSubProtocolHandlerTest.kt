@@ -45,6 +45,7 @@ import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
 import org.apache.lucene.index.IndexWriter
 import org.apache.tuweni.concurrent.AsyncResult
+import org.apache.tuweni.rlpx.wire.SubProtocolClient
 import org.apache.tuweni.units.bigints.UInt64
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -95,6 +96,9 @@ constructor() {
   private val block = Block(header, body)
 
   private class MyRLPxService : RLPxService {
+    override fun getClient(subProtocolIdentifier: SubProtocolIdentifier): SubProtocolClient {
+      TODO("not implemented")
+    }
 
     var message: Bytes? = null
     var disconnectReason: DisconnectReason? = null
