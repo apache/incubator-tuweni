@@ -42,7 +42,7 @@ interface KeyValueStore<K, V> : Closeable, CoroutineScope {
    * @param key The key for the content.
    * @return An [AsyncResult] that will complete with a boolean result.
    */
-  suspend fun containsKeyAsync(key: K): AsyncResult<Boolean> = asyncResult { containsKey(key) }
+  fun containsKeyAsync(key: K): AsyncResult<Boolean> = asyncResult { containsKey(key) }
 
   /**
    * Retrieves data from the store.

@@ -64,6 +64,14 @@ object KeyValueStoreSpec : Spek({
       }
     }
 
+    it("should allow to see if a key is present") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.containsKey(foobar).should.be.`true`
+        kv.containsKey(bar).should.be.`false`
+      }
+    }
+
     it("should return null when no value is present") {
       runBlocking {
         kv.get(Bytes.wrap("foofoobar".toByteArray())).should.be.`null`
@@ -110,6 +118,14 @@ object InfinispanKeyValueStoreSpec : Spek({
       }
     }
 
+    it("should allow to see if a key is present") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.containsKey(foobar).should.be.`true`
+        kv.containsKey(bar).should.be.`false`
+      }
+    }
+
     it("should return null when no value is present") {
       runBlocking {
         kv.get(Bytes.wrap("foofoobar".toByteArray())).should.be.`null`
@@ -151,6 +167,14 @@ object MapDBKeyValueStoreSpec : Spek({
       runBlocking {
         kv.put(foobar, foo)
         kv.get(foobar).should.equal(foo)
+      }
+    }
+
+    it("should allow to see if a key is present") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.containsKey(foobar).should.be.`true`
+        kv.containsKey(bar).should.be.`false`
       }
     }
 
@@ -225,6 +249,14 @@ object LevelDBKeyValueStoreSpec : Spek({
       }
     }
 
+    it("should allow to see if a key is present") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.containsKey(foobar).should.be.`true`
+        kv.containsKey(bar).should.be.`false`
+      }
+    }
+
     it("should return null when no value is present") {
       runBlocking {
         kv.get(Bytes.wrap("foofoobar".toByteArray())).should.be.`null`
@@ -286,6 +318,14 @@ object RocksDBKeyValueStoreSpec : Spek({
       runBlocking {
         kv.put(foobar, foo)
         kv.get(foobar).should.equal(foo)
+      }
+    }
+
+    it("should allow to see if a key is present") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.containsKey(foobar).should.be.`true`
+        kv.containsKey(bar).should.be.`false`
       }
     }
 
@@ -371,6 +411,14 @@ object SQLKeyValueStoreSpec : Spek({
       }
     }
 
+    it("should allow to see if a key is present") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.containsKey(foobar).should.be.`true`
+        kv.containsKey(bar).should.be.`false`
+      }
+    }
+
     it("should allow to update values") {
       runBlocking {
         kv.put(foobar, foo)
@@ -446,6 +494,14 @@ object EntityManagerKeyValueStoreSpec : Spek({
       }
     }
 
+    it("should allow to see if a key is present") {
+      runBlocking {
+        kv.put("foo", Store("foo", "bar"))
+        kv.containsKey("foo").should.be.`true`
+        kv.containsKey("foobar").should.be.`false`
+      }
+    }
+
     it("should allow to update values") {
       runBlocking {
         kv.put("foo", Store("foo", "bar"))
@@ -507,6 +563,14 @@ object ProxyKeyValueStoreSpec : Spek({
         proxy.put(foo, bar)
         proxy.get(foo).should.equal(bar)
         kv.get(Base64.encode(foo)).should.equal(Base64.encode(bar))
+      }
+    }
+
+    it("should allow to see if a key is present") {
+      runBlocking {
+        proxy.put(foo, bar)
+        proxy.containsKey(foo).should.be.`true`
+        proxy.containsKey(foobar).should.be.`false`
       }
     }
 

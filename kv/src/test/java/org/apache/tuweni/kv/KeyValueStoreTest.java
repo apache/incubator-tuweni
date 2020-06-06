@@ -12,6 +12,8 @@
  */
 package org.apache.tuweni.kv;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -44,6 +46,7 @@ class KeyValueStoreTest {
     KeyValueStore<Bytes, Bytes> store = MapKeyValueStore.open(map);
     AsyncCompletion completion = store.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
     completion.join();
+    assertTrue(store.containsKeyAsync(Bytes.of(123)).get());
     Bytes value = store.getAsync(Bytes.of(123)).get();
     assertNotNull(value);
     assertEquals(Bytes.of(10, 12, 13), value);
@@ -56,6 +59,7 @@ class KeyValueStoreTest {
         .open(tmpDir.resolve("mapdb"), bytesIdentityFn, bytesIdentityFn, bytesIdentityFn, bytesIdentityFn)) {
       AsyncCompletion completion = store.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
       completion.join();
+      assertTrue(store.containsKeyAsync(Bytes.of(123)).get());
       Bytes value = store.getAsync(Bytes.of(123)).get();
       assertNotNull(value);
       assertEquals(Bytes.of(10, 12, 13), value);
@@ -70,6 +74,7 @@ class KeyValueStoreTest {
         .open(store, Base64::encode, Base64::decode, Base64::encode, (key, value) -> Base64.decode(value))) {
       AsyncCompletion completion = proxy.putAsync(Base64.encode(Bytes.of(123)), Base64.encode(Bytes.of(10, 12, 13)));
       completion.join();
+      assertTrue(store.containsKeyAsync(Bytes.of(123)).get());
       String value = proxy.getAsync(Base64.encode(Bytes.of(123))).get();
       assertNotNull(value);
       assertEquals(Base64.encode(Bytes.of(10, 12, 13)), value);
@@ -83,6 +88,7 @@ class KeyValueStoreTest {
     try (KeyValueStore<Bytes, Bytes> store = MapDBKeyValueStore.open(tmpDir.resolve("mapdbdirect"))) {
       AsyncCompletion completion = store.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
       completion.join();
+      assertTrue(store.containsKeyAsync(Bytes.of(123)).get());
       Bytes value = store.getAsync(Bytes.of(123)).get();
       assertNotNull(value);
       assertEquals(Bytes.of(10, 12, 13), value);
@@ -94,6 +100,7 @@ class KeyValueStoreTest {
     Map<Bytes, Bytes> map = new HashMap<>();
     KeyValueStore<Bytes, Bytes> store = MapKeyValueStore.open(map);
     assertNull(store.getAsync(Bytes.of(123)).get());
+    assertFalse(store.containsKeyAsync(Bytes.of(123)).get());
   }
 
   @Test
