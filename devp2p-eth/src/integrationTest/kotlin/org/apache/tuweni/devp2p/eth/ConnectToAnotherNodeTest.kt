@@ -40,7 +40,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetSocketAddress
 
 @ExtendWith(LuceneIndexWriterExtension::class, VertxExtension::class, BouncyCastleExtension::class)
-class EthHandlerTest {
+class ConnectToAnotherNodeTest {
 
   /**
    * To run this test, run an Ethereum mainnet node at home and point this test to it.
@@ -87,16 +87,17 @@ class EthHandlerTest {
       InetSocketAddress("192.168.88.46", 30303)
     ).await()
 
-    val client = service.getClient(EthSubprotocol.ETH62) as EthRequestsManager
-    client.requestBlockHeaders(genesisBlock.header.hash, 100, 0, false).await()
-
-    val header = repository.findBlockByHashOrNumber(UInt256.valueOf(99L).toBytes())
-    Assertions.assertFalse(header.isEmpty())
-
-    val header3 = repository.findBlockByHashOrNumber(UInt256.valueOf(101L).toBytes())
-    Assertions.assertTrue(header3.isEmpty())
-    val header2 = repository.findBlockByHashOrNumber(UInt256.valueOf(100L).toBytes())
-    Assertions.assertTrue(header2.isEmpty())
+//    val client = service.getClient(EthSubprotocol.ETH62) as EthRequestsManager
+//    client.requestBlockHeaders(genesisBlock.header.hash, 100, 0, false).await()
+//
+//    val header = repository.findBlockByHashOrNumber(UInt256.valueOf(99L).toBytes())
+//    Assertions.assertFalse(header.isEmpty())
+//
+//    val header3 = repository.findBlockByHashOrNumber(UInt256.valueOf(101L).toBytes())
+//    Assertions.assertTrue(header3.isEmpty())
+//    val header2 = repository.findBlockByHashOrNumber(UInt256.valueOf(100L).toBytes())
+//    Assertions.assertTrue(header2.isEmpty())
+    Thread.sleep(100000)
     service.stop().await()
   }
 

@@ -120,6 +120,8 @@ constructor(
     return RocksDB.open(options, dbPath.toAbsolutePath().toString())
   }
 
+  override suspend fun containsKey(key: K) = db[keySerializer(key).toArrayUnsafe()] != null
+
   override suspend fun get(key: K): V? {
     if (closed.get()) {
       throw IllegalStateException("Closed DB")

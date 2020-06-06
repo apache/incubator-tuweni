@@ -59,13 +59,14 @@ internal class EthHandler(
     }
   }
 
-  private fun handleStatus(connectionId: String, status: StatusMessage) {
-    if (!status.networkID.equals(blockchainInfo.networkID())) {
+  private suspend fun handleStatus(connectionId: String, status: StatusMessage) {
+    if (!status.networkID.equals(blockchainInfo.networkID()) ||
+      !status.genesisHash.equals(blockchainInfo.genesisHash())) {
       peersMap[connectionId]?.cancel()
       service.disconnect(connectionId, DisconnectReason.SUBPROTOCOL_REASON)
     }
     peersMap[connectionId]?.connect()
-    // TODO send to controller.
+    controller.receiveStatus(connectionId, status)
   }
 
 //  private fun handleReceipts(receipts: Receipts) {
@@ -99,7 +100,7 @@ internal class EthHandler(
   private suspend fun handleGetBlockBodies(connectionId: String, message: GetBlockBodies) {
     service.send(
       EthSubprotocol.ETH64,
-      6,
+      MessageType.BlockBodies.code,
       connectionId,
       BlockBodies(controller.findBlockBodies(message.hashes)).toBytes()
     )
@@ -125,7 +126,7 @@ internal class EthHandler(
 
   override fun handleNewPeerConnection(connectionId: String): AsyncCompletion {
     service.send(
-      EthSubprotocol.ETH64, 0, connectionId, StatusMessage(
+      EthSubprotocol.ETH64, MessageType.Status.code, connectionId, StatusMessage(
         EthSubprotocol.ETH64.version(),
         blockchainInfo.networkID(), blockchainInfo.totalDifficulty(),
         blockchainInfo.bestHash(), blockchainInfo.genesisHash(), blockchainInfo.getLatestForkHash(),

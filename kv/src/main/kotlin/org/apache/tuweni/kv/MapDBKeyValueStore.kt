@@ -110,6 +110,8 @@ constructor(
     ).createOrOpen()
   }
 
+  override suspend fun containsKey(key: K): Boolean = storageData.containsKey(keySerializer(key))
+
   override suspend fun get(key: K): V? {
     val value = storageData[keySerializer(key)]
     return if (value == null) {

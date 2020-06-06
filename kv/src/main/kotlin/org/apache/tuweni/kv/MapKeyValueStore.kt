@@ -53,6 +53,8 @@ constructor(
     fun <K, V> open(map: MutableMap<K, V>) = MapKeyValueStore(map)
   }
 
+  override suspend fun containsKey(key: K) = map.containsKey(key)
+
   override suspend fun get(key: K): V? = map[key]
 
   override suspend fun put(key: K, value: V) {

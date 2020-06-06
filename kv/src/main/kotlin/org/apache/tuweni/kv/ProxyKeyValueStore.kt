@@ -57,6 +57,8 @@ class ProxyKeyValueStore<K, V, E, R>(
       ProxyKeyValueStore(store, unproxyKey::apply, proxyKey::apply, unproxyValue::apply, proxyValue::apply)
   }
 
+  override suspend fun containsKey(key: K) = store.containsKey(proxyKey(key))
+
   override suspend fun get(key: K): V? {
     val value = store.get(proxyKey(key))
     return if (value == null) {

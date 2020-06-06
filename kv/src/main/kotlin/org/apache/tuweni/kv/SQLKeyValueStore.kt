@@ -123,6 +123,17 @@ constructor(
     connectionPool = BoneCP(config)
   }
 
+  override suspend fun containsKey(key: K): Boolean {
+    connectionPool.asyncConnection.await().use {
+      val stmt = it.prepareStatement("SELECT $valueColumn FROM $tableName WHERE $keyColumn = ?")
+      stmt.setBytes(1, keySerializer(key).toArrayUnsafe())
+      stmt.execute()
+
+      val rs = stmt.resultSet
+      return rs.next()
+    }
+  }
+
   override suspend fun get(key: K): V? {
       connectionPool.asyncConnection.await().use {
         val stmt = it.prepareStatement("SELECT $valueColumn FROM $tableName WHERE $keyColumn = ?")

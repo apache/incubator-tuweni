@@ -142,6 +142,8 @@ constructor(
     return JniDBFactory.factory.open(dbPath.toFile(), options)
   }
 
+  override suspend fun containsKey(key: K): Boolean = db[keySerializer(key).toArrayUnsafe()] != null
+
   override suspend fun get(key: K): V? {
     val rawValue = db[keySerializer(key).toArrayUnsafe()]
     return if (rawValue == null) {

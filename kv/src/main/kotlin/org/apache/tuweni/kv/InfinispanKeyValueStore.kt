@@ -43,6 +43,8 @@ class InfinispanKeyValueStore<K, V> constructor(
     fun <K, V> open(cache: Cache<K, V>) = InfinispanKeyValueStore(cache)
   }
 
+  override suspend fun containsKey(key: K): Boolean = cache.containsKeyAsync(key).await()
+
   override suspend fun get(key: K): V? = cache.getAsync(key).await()
 
   override suspend fun put(key: K, value: V) {

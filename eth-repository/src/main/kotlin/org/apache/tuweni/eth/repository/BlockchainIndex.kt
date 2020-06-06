@@ -16,25 +16,6 @@
  */
 package org.apache.tuweni.eth.repository
 
-import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.bytes.Bytes32
-import org.apache.tuweni.eth.Address
-import org.apache.tuweni.eth.BlockHeader
-import org.apache.tuweni.eth.Hash
-import org.apache.tuweni.eth.TransactionReceipt
-import org.apache.tuweni.eth.repository.BlockHeaderFields.COINBASE
-import org.apache.tuweni.eth.repository.BlockHeaderFields.DIFFICULTY
-import org.apache.tuweni.eth.repository.BlockHeaderFields.EXTRA_DATA
-import org.apache.tuweni.eth.repository.BlockHeaderFields.GAS_LIMIT
-import org.apache.tuweni.eth.repository.BlockHeaderFields.GAS_USED
-import org.apache.tuweni.eth.repository.BlockHeaderFields.NUMBER
-import org.apache.tuweni.eth.repository.BlockHeaderFields.OMMERS_HASH
-import org.apache.tuweni.eth.repository.BlockHeaderFields.PARENT_HASH
-import org.apache.tuweni.eth.repository.BlockHeaderFields.STATE_ROOT
-import org.apache.tuweni.eth.repository.BlockHeaderFields.TIMESTAMP
-import org.apache.tuweni.eth.repository.BlockHeaderFields.TOTAL_DIFFICULTY
-import org.apache.tuweni.units.bigints.UInt256
-import org.apache.tuweni.units.ethereum.Gas
 import org.apache.lucene.document.Document
 import org.apache.lucene.document.Field
 import org.apache.lucene.document.NumericDocValuesField
@@ -54,6 +35,25 @@ import org.apache.lucene.search.SortField
 import org.apache.lucene.search.TermQuery
 import org.apache.lucene.search.TermRangeQuery
 import org.apache.lucene.util.BytesRef
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.eth.Address
+import org.apache.tuweni.eth.BlockHeader
+import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.TransactionReceipt
+import org.apache.tuweni.eth.repository.BlockHeaderFields.COINBASE
+import org.apache.tuweni.eth.repository.BlockHeaderFields.DIFFICULTY
+import org.apache.tuweni.eth.repository.BlockHeaderFields.EXTRA_DATA
+import org.apache.tuweni.eth.repository.BlockHeaderFields.GAS_LIMIT
+import org.apache.tuweni.eth.repository.BlockHeaderFields.GAS_USED
+import org.apache.tuweni.eth.repository.BlockHeaderFields.NUMBER
+import org.apache.tuweni.eth.repository.BlockHeaderFields.OMMERS_HASH
+import org.apache.tuweni.eth.repository.BlockHeaderFields.PARENT_HASH
+import org.apache.tuweni.eth.repository.BlockHeaderFields.STATE_ROOT
+import org.apache.tuweni.eth.repository.BlockHeaderFields.TIMESTAMP
+import org.apache.tuweni.eth.repository.BlockHeaderFields.TOTAL_DIFFICULTY
+import org.apache.tuweni.units.bigints.UInt256
+import org.apache.tuweni.units.ethereum.Gas
 import java.io.IOException
 import java.io.UncheckedIOException
 
@@ -242,6 +242,12 @@ interface BlockchainIndexReader {
    * @return the total difficulty of the header if it could be computed.
    */
   fun totalDifficulty(hash: Bytes): UInt256?
+
+  /**
+   * Retrieves the largest total difficulty value of the chain, if it has been computed.
+   *
+   */
+  fun chainHeadTotalDifficulty(): UInt256?
 }
 
 /**
@@ -370,8 +376,10 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
 
     document += NumericDocValuesField(TransactionReceiptFields.INDEX.fieldName, txIndex.toLong())
     document += StringField(TransactionReceiptFields.TRANSACTION_HASH.fieldName, id, Field.Store.NO)
-    document += StringField(TransactionReceiptFields.BLOCK_HASH.fieldName, toBytesRef(blockHash),
-      Field.Store.NO)
+    document += StringField(
+      TransactionReceiptFields.BLOCK_HASH.fieldName, toBytesRef(blockHash),
+      Field.Store.NO
+    )
     for (log in txReceipt.getLogs()) {
       document += StringField(TransactionReceiptFields.LOGGER.fieldName, toBytesRef(log.getLogger()), Field.Store.NO)
       for (logTopic in log.getTopics()) {
@@ -381,10 +389,14 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     txReceipt.getStateRoot()?.let {
       document += StringField(TransactionReceiptFields.STATE_ROOT.fieldName, toBytesRef(it), Field.Store.NO)
     }
-    document += StringField(TransactionReceiptFields.BLOOM_FILTER.fieldName,
-      toBytesRef(txReceipt.getBloomFilter().toBytes()), Field.Store.NO)
-    document += NumericDocValuesField(TransactionReceiptFields.CUMULATIVE_GAS_USED.fieldName,
-      txReceipt.getCumulativeGasUsed())
+    document += StringField(
+      TransactionReceiptFields.BLOOM_FILTER.fieldName,
+      toBytesRef(txReceipt.getBloomFilter().toBytes()), Field.Store.NO
+    )
+    document += NumericDocValuesField(
+      TransactionReceiptFields.CUMULATIVE_GAS_USED.fieldName,
+      txReceipt.getCumulativeGasUsed()
+    )
     txReceipt.getStatus()?.let {
       document += NumericDocValuesField(TransactionReceiptFields.STATUS.fieldName, it.toLong())
     }
@@ -402,7 +414,8 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
 
   private fun queryTxReceiptDocs(query: Query, fields: List<BlockHeaderFields>): List<Document> {
     val txQuery = BooleanQuery.Builder().add(
-      query, BooleanClause.Occur.MUST)
+      query, BooleanClause.Occur.MUST
+    )
       .add(TermQuery(Term("_type", "txReceipt")), BooleanClause.Occur.MUST).build()
 
     return search(txQuery, fields.map { it.fieldName })
@@ -432,7 +445,8 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
 
   private fun queryBlockDocs(query: Query, fields: List<BlockHeaderFields>): List<Document> {
     val blockQuery = BooleanQuery.Builder().add(
-      query, BooleanClause.Occur.MUST)
+      query, BooleanClause.Occur.MUST
+    )
       .add(TermQuery(Term("_type", "block")), BooleanClause.Occur.MUST).build()
 
     return search(blockQuery, fields.map { it.fieldName })
@@ -485,6 +499,34 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
         return Hash.fromBytes(Bytes32.wrap(bytes.bytes))
       }
       return null
+    } catch (e: IOException) {
+      throw IndexReadException(e)
+    } finally {
+      try {
+        searcherManager.release(searcher)
+      } catch (e: IOException) {
+      }
+    }
+  }
+
+  override fun chainHeadTotalDifficulty(): UInt256 {
+    var searcher: IndexSearcher? = null
+    try {
+      searcher = searcherManager.acquire()
+      val topDocs = searcher!!.search(
+        TermQuery(Term("_type", "block")),
+        1,
+        Sort(SortField.FIELD_SCORE, SortField(TOTAL_DIFFICULTY.fieldName, SortField.Type.DOC, true))
+      )
+
+      if (topDocs.scoreDocs.isEmpty()) {
+        return UInt256.ZERO
+      }
+
+      val doc = searcher.doc(topDocs.scoreDocs[0].doc, setOf(TOTAL_DIFFICULTY.fieldName))
+      val fieldValue = doc.getBinaryValue(TOTAL_DIFFICULTY.fieldName)
+
+      return UInt256.fromBytes(Bytes32.wrap(fieldValue.bytes))
     } catch (e: IOException) {
       throw IndexReadException(e)
     } finally {
@@ -575,10 +617,12 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
       BooleanQuery.Builder()
         .add(
           TermQuery(Term(TransactionReceiptFields.BLOCK_HASH.fieldName, toBytesRef(blockHash))),
-          BooleanClause.Occur.MUST)
+          BooleanClause.Occur.MUST
+        )
         .add(
           NumericDocValuesField.newSlowExactQuery(TransactionReceiptFields.INDEX.fieldName, index.toLong()),
-          BooleanClause.Occur.MUST).build()
+          BooleanClause.Occur.MUST
+        ).build()
     ).firstOrNull()
   }
 

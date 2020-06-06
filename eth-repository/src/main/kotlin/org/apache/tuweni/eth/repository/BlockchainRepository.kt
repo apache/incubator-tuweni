@@ -23,6 +23,7 @@ import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.kv.KeyValueStore
+import org.apache.tuweni.units.bigints.UInt256
 import org.slf4j.LoggerFactory
 
 /**
@@ -125,7 +126,7 @@ class BlockchainRepository
   suspend fun storeBlockHeader(header: BlockHeader) {
     blockHeaderStore.put(header.hash, header.toBytes())
     indexBlockHeader(header)
-    logger.debug("Stored header {}", header.hash)
+    logger.debug("Stored header {} {}", header.number, header.hash)
   }
 
   private suspend fun indexBlockHeader(header: BlockHeader) {
@@ -169,6 +170,16 @@ class BlockchainRepository
   }
 
   /**
+   * Returns true if the store contains the block body.
+   *
+   * @param blockHash the hash of the block stored
+   * @return a future with a boolean result
+   */
+  suspend fun hasBlockBody(blockHash: Bytes): Boolean {
+    return blockBodyStore.containsKey(blockHash)
+  }
+
+  /**
    * Retrieves a block into the repository.
    *
    * @param blockHash the hash of the block stored
@@ -191,6 +202,16 @@ class BlockchainRepository
   }
 
   /**
+   * Returns true if the store contains the block header.
+   *
+   * @param blockHash the hash of the block stored
+   * @return a future with a boolean result
+   */
+  suspend fun hasBlockHeader(blockHash: Bytes): Boolean {
+    return blockHeaderStore.containsKey(blockHash)
+  }
+
+  /**
    * Retrieves a block header into the repository.
    *
    * @param blockHash the hash of the block stored
@@ -206,7 +227,7 @@ class BlockchainRepository
    *
    * @return the current chain head, or the genesis block if no chain head is present.
    */
-  suspend fun retrieveChainHead(): Block? {
+  suspend fun retrieveChainHead(): Block {
     return blockchainIndex.findByLargest(BlockHeaderFields.TOTAL_DIFFICULTY)
       ?.let { retrieveBlock(it) } ?: retrieveGenesisBlock()
   }
@@ -285,4 +306,6 @@ class BlockchainRepository
     return chainMetadata
       .put(GENESIS_BLOCK, block.getHeader().getHash())
   }
+
+  fun retrieveChainHeadTotalDifficulty(): UInt256 = blockchainIndex.chainHeadTotalDifficulty()
 }

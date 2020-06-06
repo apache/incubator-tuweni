@@ -23,8 +23,11 @@ import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.units.bigints.UInt256
 
 class EthController(val repository: BlockchainRepository, val requestsManager: EthRequestsManager) {
+
+  var highestTotalDifficulty: UInt256 = repository.retrieveChainHeadTotalDifficulty()
 
   suspend fun findTransactionReceipts(hashes: List<Hash>): List<List<TransactionReceipt>> {
     val receipts = ArrayList<List<TransactionReceipt>>()
@@ -95,9 +98,21 @@ class EthController(val repository: BlockchainRepository, val requestsManager: E
 
   suspend fun addNewBlockHeaders(connectionId: String, headers: List<BlockHeader>) {
     val handle = requestsManager.wasRequested(connectionId, headers.first()) ?: return
+    val bodiesToRequest = mutableListOf<Hash>()
+    val headersToRequest = mutableListOf<Hash>()
     headers.forEach { header ->
       repository.storeBlockHeader(header)
+      if (!repository.hasBlockBody(header.hash)) {
+        bodiesToRequest.add(header.hash)
+      }
+      header.parentHash?.let {
+        if (!repository.hasBlockHeader(it)) {
+          headersToRequest.add(it)
+        }
+      }
     }
+    requestsManager.requestBlockHeaders(headersToRequest)
+    requestsManager.requestBlockBodies(bodiesToRequest)
     handle.complete()
   }
 
@@ -107,6 +122,13 @@ class EthController(val repository: BlockchainRepository, val requestsManager: E
       for (i in 0..hashes.size) {
         repository.storeBlockBody(hashes[i], bodies[i])
       }
+    }
+  }
+
+  suspend fun receiveStatus(connectionId: String, status: StatusMessage) {
+    println(connectionId)
+    if (!repository.hasBlockHeader(status.bestHash)) {
+      requestsManager.requestBlockHeaders(status.bestHash, 100, 5, true)
     }
   }
 }

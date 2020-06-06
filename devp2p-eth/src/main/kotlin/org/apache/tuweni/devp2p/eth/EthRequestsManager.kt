@@ -24,6 +24,7 @@ import org.apache.tuweni.eth.Hash
 
 interface EthRequestsManager {
   fun requestBlockHeader(blockHash: Hash): AsyncCompletion
+  fun requestBlockHeaders(blockHashes: List<Hash>): AsyncCompletion
   fun requestBlockHeaders(blockHash: Hash, maxHeaders: Long, skip: Long, reverse: Boolean): AsyncCompletion
   fun requestBlockHeaders(blockNumber: Long, maxHeaders: Long, skip: Long, reverse: Boolean): AsyncCompletion
 

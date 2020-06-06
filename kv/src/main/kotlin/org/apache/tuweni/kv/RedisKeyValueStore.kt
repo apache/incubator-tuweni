@@ -212,6 +212,8 @@ class RedisKeyValueStore<K, V>(
     asyncCommands = conn.async()
   }
 
+  override suspend fun containsKey(key: K) = asyncCommands.get(keySerializer(key)) != null
+
   override suspend fun get(key: K): V? = asyncCommands.get(keySerializer(key)).thenApply {
     if (it == null) {
       null

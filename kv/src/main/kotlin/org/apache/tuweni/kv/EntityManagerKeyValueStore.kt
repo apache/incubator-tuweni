@@ -50,6 +50,17 @@ class EntityManagerKeyValueStore<K, V>
     ) = EntityManagerKeyValueStore(entityManagerProvider::get, entityClass, idAccessor::apply)
   }
 
+  override suspend fun containsKey(key: K): Boolean {
+    val em = entityManagerProvider()
+    em.transaction.begin()
+    try {
+      return em.contains(key)
+    } finally {
+      em.transaction.commit()
+      em.close()
+    }
+  }
+
   override suspend fun get(key: K): V? {
     val em = entityManagerProvider()
     em.transaction.begin()

@@ -29,6 +29,22 @@ import java.io.Closeable
 interface KeyValueStore<K, V> : Closeable, CoroutineScope {
 
   /**
+   * Returns true if the store contains the key.
+   *
+   * @param key The key for the content.
+   * @return true if an entry with the key exists in the store.
+   */
+  suspend fun containsKey(key: K): Boolean
+
+  /**
+   * Returns true if the store contains the key.
+   *
+   * @param key The key for the content.
+   * @return An [AsyncResult] that will complete with a boolean result.
+   */
+  suspend fun containsKeyAsync(key: K): AsyncResult<Boolean> = asyncResult { containsKey(key) }
+
+  /**
    * Retrieves data from the store.
    *
    * @param key The key for the content.
