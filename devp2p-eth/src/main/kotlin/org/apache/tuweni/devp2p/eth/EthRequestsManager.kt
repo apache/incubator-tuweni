@@ -16,22 +16,28 @@
  */
 package org.apache.tuweni.devp2p.eth
 
+import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion
 import org.apache.tuweni.eth.BlockBody
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.TransactionReceipt
 
 interface EthRequestsManager {
   fun requestBlockHeader(blockHash: Hash): AsyncCompletion
   fun requestBlockHeaders(blockHashes: List<Hash>): AsyncCompletion
   fun requestBlockHeaders(blockHash: Hash, maxHeaders: Long, skip: Long, reverse: Boolean): AsyncCompletion
   fun requestBlockHeaders(blockNumber: Long, maxHeaders: Long, skip: Long, reverse: Boolean): AsyncCompletion
-
-  fun requestBlockBodies(blockHashes: List<Hash>)
-
-  fun requestBlock(blockHash: Hash)
+  fun requestBlockBodies(blockHashes: List<Hash>): AsyncCompletion
+  fun requestBlock(blockHash: Hash): AsyncCompletion
+  fun requestTransactionReceipts(blockHashes: List<Hash>): AsyncCompletion
 
   fun wasRequested(connectionId: String, header: BlockHeader): CompletableAsyncCompletion?
-  fun wasRequested(connectionId: String, bodies: List<BlockBody>): List<Hash>?
+  fun wasRequested(connectionId: String, bodies: List<BlockBody>): Request?
+  fun nodeDataWasRequested(connectionId: String, elements: List<Bytes?>): Request?
+  fun transactionRequestsWasRequested(
+    connectionId: String,
+    transactionReceipts: List<List<TransactionReceipt>>
+  ): Request?
 }

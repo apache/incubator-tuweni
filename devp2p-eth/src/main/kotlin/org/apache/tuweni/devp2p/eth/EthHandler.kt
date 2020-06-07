@@ -46,17 +46,25 @@ internal class EthHandler(
     when (messageType) {
       MessageType.Status.code -> handleStatus(connectionId, StatusMessage.read(message))
       MessageType.NewBlockHashes.code -> handleNewBlockHashes(NewBlockHashes.read(message))
-//    Transactions.code -> // do nothing.
+      MessageType.Transactions.code -> handleTransactions(Transactions.read(message))
       MessageType.GetBlockHeaders.code -> handleGetBlockHeaders(connectionId, GetBlockHeaders.read(message))
       MessageType.BlockHeaders.code -> handleHeaders(connectionId, BlockHeaders.read(message))
       MessageType.GetBlockBodies.code -> handleGetBlockBodies(connectionId, GetBlockBodies.read(message))
       MessageType.BlockBodies.code -> handleBlockBodies(connectionId, BlockBodies.read(message))
       MessageType.NewBlock.code -> handleNewBlock(NewBlock.read(message))
       MessageType.GetNodeData.code -> handleGetNodeData(connectionId, GetNodeData.read(message))
-//    MessageType.NodeData.code-> // not implemented yet.
+      MessageType.NodeData.code -> handleNodeData(connectionId, NodeData.read(message))
       MessageType.GetReceipts.code -> handleGetReceipts(connectionId, GetReceipts.read(message))
-      // MessageType.Receipts.code -> handleReceipts(Receipts.read(message)) // not implemented yet
+      MessageType.Receipts.code -> handleReceipts(connectionId, Receipts.read(message))
     }
+  }
+
+  private suspend fun handleTransactions(transactions: Transactions) {
+    controller.addNewTransactions(transactions.transactions)
+  }
+
+  private suspend fun handleNodeData(connectionId: String, read: NodeData) {
+    controller.addNewNodeData(connectionId, read.elements)
   }
 
   private suspend fun handleStatus(connectionId: String, status: StatusMessage) {
@@ -69,9 +77,9 @@ internal class EthHandler(
     controller.receiveStatus(connectionId, status)
   }
 
-//  private fun handleReceipts(receipts: Receipts) {
-//    repository.storeTransactionReceipts()
-//  }
+  private suspend fun handleReceipts(connectionId: String, receipts: Receipts) {
+    controller.addNewTransactionReceipts(connectionId, receipts.transactionReceipts)
+  }
 
   private suspend fun handleGetReceipts(connectionId: String, getReceipts: GetReceipts) {
 
@@ -83,10 +91,13 @@ internal class EthHandler(
     )
   }
 
-  private fun handleGetNodeData(connectionId: String, nodeData: GetNodeData) {
-    // TODO implement
-    nodeData.toBytes()
-    service.send(EthSubprotocol.ETH64, MessageType.NodeData.code, connectionId, NodeData(emptyList()).toBytes())
+  private suspend fun handleGetNodeData(connectionId: String, nodeData: GetNodeData) {
+    service.send(
+      EthSubprotocol.ETH64,
+      MessageType.NodeData.code,
+      connectionId,
+      NodeData(controller.findNodeData(nodeData.hashes)).toBytes()
+    )
   }
 
   private suspend fun handleNewBlock(read: NewBlock) {

@@ -16,17 +16,44 @@
  */
 package org.apache.tuweni.devp2p.eth
 
+import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion
 import org.apache.tuweni.eth.BlockBody
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.wire.SubProtocolClient
 import org.apache.tuweni.units.bigints.UInt256
 
 class EthClient(private val service: RLPxService) : EthRequestsManager, SubProtocolClient {
+
+  private val headerRequests = HashMap<Bytes32, Request>()
+  private val bodiesRequests = HashMap<String, Request>()
+  private val nodeDataRequests = HashMap<String, Request>()
+  private val transactionReceiptRequests = HashMap<String, Request>()
+
+  override fun requestTransactionReceipts(blockHashes: List<Hash>): AsyncCompletion {
+    val conns = service.repository().asIterable(EthSubprotocol.ETH62)
+    val handle = AsyncCompletion.incomplete()
+    conns.forEach { conn ->
+      var done = false
+      transactionReceiptRequests.computeIfAbsent(conn.id()) {
+        service.send(
+          EthSubprotocol.ETH62,
+          MessageType.GetReceipts.code,
+          conn.id(),
+          GetReceipts(blockHashes).toBytes()
+        )
+        done = true
+        Request(conn.id(), handle, blockHashes)
+      }
+      return handle
+    }
+    throw RuntimeException("No connection available")
+  }
 
   override fun requestBlockHeaders(blockHash: Hash, maxHeaders: Long, skip: Long, reverse: Boolean): AsyncCompletion {
     val conn = service.repository().asIterable(EthSubprotocol.ETH62).firstOrNull()
@@ -38,13 +65,10 @@ class EthClient(private val service: RLPxService) : EthRequestsManager, SubProto
         conn!!.id(),
         GetBlockHeaders(blockHash, maxHeaders, skip, reverse).toBytes()
       )
-      BlockHeaderRequest(connectionId = conn.id(), handle = completion)
+      Request(connectionId = conn.id(), handle = completion, data = blockHash)
     }
     return completion
   }
-
-  private val headerRequests = HashMap<Bytes32, BlockHeaderRequest>()
-  private val bodiesRequests = HashMap<String, List<Hash>>()
 
   override fun requestBlockHeaders(blockNumber: Long, maxHeaders: Long, skip: Long, reverse: Boolean): AsyncCompletion {
     val conn = service.repository().asIterable(EthSubprotocol.ETH62).firstOrNull()
@@ -57,7 +81,7 @@ class EthClient(private val service: RLPxService) : EthRequestsManager, SubProto
         conn!!.id(),
         GetBlockHeaders(blockNumberBytes, maxHeaders, skip, reverse).toBytes()
       )
-      BlockHeaderRequest(connectionId = conn.id(), handle = completion)
+      Request(connectionId = conn.id(), handle = completion, data = blockNumber)
     }
     return completion
   }
@@ -76,32 +100,37 @@ class EthClient(private val service: RLPxService) : EthRequestsManager, SubProto
         conn!!.id(),
         GetBlockHeaders(blockHash, 1, 0, false).toBytes()
       )
-      BlockHeaderRequest(connectionId = conn.id(), handle = completion)
+      Request(connectionId = conn.id(), handle = completion, data = blockHash)
     }
     return completion
   }
 
-  override fun requestBlockBodies(blockHashes: List<Hash>) {
+  override fun requestBlockBodies(blockHashes: List<Hash>): AsyncCompletion {
     val conns = service.repository().asIterable(EthSubprotocol.ETH62)
+    val handle = AsyncCompletion.incomplete()
     conns.forEach { conn ->
-      if (bodiesRequests.computeIfAbsent(conn.id()) {
+      var done = false
+      bodiesRequests.computeIfAbsent(conn.id()) {
         service.send(
           EthSubprotocol.ETH62,
           MessageType.GetBlockBodies.code,
           conn.id(),
           GetBlockBodies(blockHashes).toBytes()
         )
-        blockHashes
-      } == blockHashes) {
-        return
+        done = true
+        Request(conn.id(), handle, blockHashes)
+      }
+      if (done) {
+        return handle
       }
     }
+    throw RuntimeException("No connection available")
   }
 
-  override fun requestBlock(blockHash: Hash) {
-    requestBlockHeader(blockHash)
+  override fun requestBlock(blockHash: Hash): AsyncCompletion = AsyncCompletion.allOf(
+    requestBlockHeader(blockHash),
     requestBlockBodies(listOf(blockHash))
-  }
+  )
 
   override fun wasRequested(connectionId: String, header: BlockHeader): CompletableAsyncCompletion? {
     val request = headerRequests.remove(header.hash) ?: return null
@@ -112,8 +141,16 @@ class EthClient(private val service: RLPxService) : EthRequestsManager, SubProto
     }
   }
 
-  override fun wasRequested(connectionId: String, bodies: List<BlockBody>): List<Hash>? =
-    bodiesRequests.get(connectionId)
+  override fun wasRequested(connectionId: String, bodies: List<BlockBody>): Request? =
+    bodiesRequests[connectionId]
+
+  override fun nodeDataWasRequested(connectionId: String, elements: List<Bytes?>): Request? =
+    nodeDataRequests[connectionId]
+
+  override fun transactionRequestsWasRequested(
+    connectionId: String,
+    transactionReceipts: List<List<TransactionReceipt>>
+  ): Request? = transactionReceiptRequests[connectionId]
 }
 
-internal data class BlockHeaderRequest(val connectionId: String, val handle: CompletableAsyncCompletion)
+data class Request(val connectionId: String, val handle: CompletableAsyncCompletion, val data: Any)

@@ -40,6 +40,7 @@ import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.eth.repository.BlockHeaderFields.COINBASE
 import org.apache.tuweni.eth.repository.BlockHeaderFields.DIFFICULTY
@@ -271,6 +272,13 @@ interface BlockchainIndexWriter {
    * @param blockHash the hash of the block
    */
   fun indexTransactionReceipt(txReceipt: TransactionReceipt, txIndex: Int, txHash: Bytes, blockHash: Bytes)
+
+  /**
+   * Indexes a transaction.
+   *
+   * @param transaction the transaction to index
+   */
+  fun indexTransaction(transaction: Transaction)
 }
 
 /**
@@ -287,6 +295,7 @@ internal class IndexWriteException(e: Exception) : RuntimeException(e)
  * A Lucene-backed indexer capable of indexing blocks and block headers.
  */
 class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWriter, BlockchainIndexReader {
+
   private val searcherManager: SearcherManager
 
   init {
@@ -366,6 +375,10 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     } catch (e: IOException) {
       throw IndexWriteException(e)
     }
+  }
+
+  override fun indexTransaction(transaction: Transaction) {
+    // TODO
   }
 
   override fun indexTransactionReceipt(txReceipt: TransactionReceipt, txIndex: Int, txHash: Bytes, blockHash: Bytes) {

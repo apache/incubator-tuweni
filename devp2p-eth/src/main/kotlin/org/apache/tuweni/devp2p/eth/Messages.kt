@@ -21,6 +21,7 @@ import org.apache.tuweni.eth.Block
 import org.apache.tuweni.eth.BlockBody
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.units.bigints.UInt256
@@ -228,8 +229,31 @@ data class GetNodeData(val hashes: List<Hash>) {
   }
 }
 
-data class NodeData(val elements: List<Any>) {
-  fun toBytes(): Bytes = RLP.encodeList { _ ->
+data class NodeData(val elements: List<Bytes?>) {
+  companion object {
+
+    fun read(payload: Bytes): NodeData = RLP.decodeList(payload) {
+      val elements = ArrayList<Bytes?>()
+      while (!it.isComplete) {
+        val value = it.readValue()
+        if (value == Bytes.EMPTY) {
+          elements.add(null)
+        } else {
+          elements.add(value)
+        }
+      }
+      NodeData(elements)
+    }
+  }
+
+  fun toBytes(): Bytes = RLP.encodeList { writer ->
+    elements.forEach {
+      if (it == null) {
+        writer.writeValue(Bytes.EMPTY)
+      } else {
+        writer.writeValue(it)
+      }
+    }
   }
 }
 
@@ -277,6 +301,26 @@ data class Receipts(val transactionReceipts: List<List<TransactionReceipt>>) {
           listWriter.writeRLP(it.toBytes())
         }
       }
+    }
+  }
+}
+
+data class Transactions(val transactions: List<Transaction>) {
+  companion object {
+
+    fun read(payload: Bytes): Transactions = RLP.decodeList(payload) {
+      val transactions = ArrayList<Transaction>()
+      while (!it.isComplete) {
+        val tx = Transaction.readFrom(it)
+        transactions.add(tx)
+      }
+      Transactions(transactions)
+    }
+  }
+
+  fun toBytes(): Bytes = RLP.encodeList { writer ->
+    transactions.forEach {
+      it.writeTo(writer)
     }
   }
 }

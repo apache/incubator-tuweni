@@ -21,6 +21,7 @@ import org.apache.tuweni.eth.Block
 import org.apache.tuweni.eth.BlockBody
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.kv.KeyValueStore
 import org.apache.tuweni.units.bigints.UInt256
@@ -39,12 +40,17 @@ class BlockchainRepository
  * @param chainMetadata the key-value store to store chain metadata
  * @param blockBodyStore the key-value store to store block bodies
  * @param blockHeaderStore the key-value store to store block headers
+ * @param transactionReceiptStore the key-value store to store transaction receipts
+ * @param transactionStore the key-value store to store transactions
+ * @param stateStore the key-value store to store state
  * @param blockchainIndex the blockchain index to index values
  */(
    private val chainMetadata: KeyValueStore<Bytes, Bytes>,
    private val blockBodyStore: KeyValueStore<Bytes, Bytes>,
    private val blockHeaderStore: KeyValueStore<Bytes, Bytes>,
-   private val transactionReceiptsStore: KeyValueStore<Bytes, Bytes>,
+   private val transactionReceiptStore: KeyValueStore<Bytes, Bytes>,
+   private val transactionStore: KeyValueStore<Bytes, Bytes>,
+   private val stateStore: KeyValueStore<Bytes, Bytes>,
    private val blockchainIndex: BlockchainIndex
  ) {
 
@@ -63,6 +69,8 @@ class BlockchainRepository
       blockHeaderStore: KeyValueStore<Bytes, Bytes>,
       chainMetadata: KeyValueStore<Bytes, Bytes>,
       transactionReceiptsStore: KeyValueStore<Bytes, Bytes>,
+      transactionStore: KeyValueStore<Bytes, Bytes>,
+      stateStore: KeyValueStore<Bytes, Bytes>,
       blockchainIndex: BlockchainIndex,
       genesisBlock: Block
     ): BlockchainRepository {
@@ -70,6 +78,8 @@ class BlockchainRepository
         blockBodyStore,
         blockHeaderStore,
         transactionReceiptsStore,
+        transactionStore,
+        stateStore,
         blockchainIndex)
       repo.setGenesisBlock(genesisBlock)
       repo.storeBlock(genesisBlock)
@@ -81,10 +91,19 @@ class BlockchainRepository
    * Stores a block body into the repository.
    *
    * @param blockBody the block body to store
-   * @return a handle to the storage operation completion
    */
   suspend fun storeBlockBody(blockHash: Hash, blockBody: BlockBody) {
     blockBodyStore.put(blockHash, blockBody.toBytes())
+  }
+
+  /**
+   * Stores state node data into the repository.
+   *
+   * @param bytes the node data to store
+   * @return a handle to the storage operation completion
+   */
+  suspend fun storeNodeData(hash: Hash, bytes: Bytes) {
+    stateStore.put(hash, bytes)
   }
 
   /**
@@ -113,7 +132,7 @@ class BlockchainRepository
     txHash: Bytes,
     blockHash: Bytes
   ) {
-    transactionReceiptsStore.put(txHash, transactionReceipt.toBytes())
+    transactionReceiptStore.put(txHash, transactionReceipt.toBytes())
     indexTransactionReceipt(transactionReceipt, txIndex, txHash, blockHash)
   }
 
@@ -259,7 +278,7 @@ class BlockchainRepository
    */
   suspend fun retrieveTransactionReceipts(blockHash: Bytes): List<TransactionReceipt> {
     return blockchainIndex.findBy(TransactionReceiptFields.BLOCK_HASH, blockHash).mapNotNull {
-      transactionReceiptsStore.get(it)?.let { TransactionReceipt.fromBytes(it) }
+      transactionReceiptStore.get(it)?.let { TransactionReceipt.fromBytes(it) }
     }
   }
 
@@ -270,7 +289,7 @@ class BlockchainRepository
    */
   suspend fun retrieveTransactionReceipt(blockHash: Bytes, index: Int): TransactionReceipt? {
     return blockchainIndex.findByBlockHashAndIndex(blockHash, index)?.let {
-      transactionReceiptsStore.get(it)?.let { TransactionReceipt.fromBytes(it) }
+      transactionReceiptStore.get(it)?.let { TransactionReceipt.fromBytes(it) }
     }
   }
 
@@ -279,7 +298,7 @@ class BlockchainRepository
    * @param txHash the hash of the transaction
    */
   suspend fun retrieveTransactionReceipt(txHash: Hash): TransactionReceipt? {
-    return transactionReceiptsStore.get(txHash)?.let { TransactionReceipt.fromBytes(it) }
+    return transactionReceiptStore.get(txHash)?.let { TransactionReceipt.fromBytes(it) }
   }
 
   /**
@@ -308,4 +327,15 @@ class BlockchainRepository
   }
 
   fun retrieveChainHeadTotalDifficulty(): UInt256 = blockchainIndex.chainHeadTotalDifficulty()
+
+  suspend fun retrieveNodeData(hashes: List<Hash>): List<Bytes?> {
+    return hashes.map {
+      stateStore.get(it)
+    }
+  }
+
+  suspend fun storeTransaction(transaction: Transaction) {
+    transactionStore.put(transaction.hash, transaction.toBytes())
+    blockchainIndex.indexTransaction(transaction)
+  }
 }
