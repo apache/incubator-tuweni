@@ -38,8 +38,9 @@ class EthClient(private val service: RLPxService) : EthRequestsManager, SubProto
   override fun requestTransactionReceipts(blockHashes: List<Hash>): AsyncCompletion {
     val conns = service.repository().asIterable(EthSubprotocol.ETH62)
     val handle = AsyncCompletion.incomplete()
+    var done = false
     conns.forEach { conn ->
-      var done = false
+
       transactionReceiptRequests.computeIfAbsent(conn.id()) {
         service.send(
           EthSubprotocol.ETH62,
@@ -50,7 +51,9 @@ class EthClient(private val service: RLPxService) : EthRequestsManager, SubProto
         done = true
         Request(conn.id(), handle, blockHashes)
       }
-      return handle
+      if (done) {
+        return handle
+      }
     }
     throw RuntimeException("No connection available")
   }

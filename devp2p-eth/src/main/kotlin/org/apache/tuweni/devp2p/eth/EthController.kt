@@ -24,11 +24,8 @@ import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.eth.repository.BlockchainRepository
-import org.apache.tuweni.units.bigints.UInt256
 
 class EthController(val repository: BlockchainRepository, val requestsManager: EthRequestsManager) {
-
-  var highestTotalDifficulty: UInt256 = repository.retrieveChainHeadTotalDifficulty()
 
   suspend fun findTransactionReceipts(hashes: List<Hash>): List<List<TransactionReceipt>> {
     val receipts = ArrayList<List<TransactionReceipt>>()
@@ -120,9 +117,9 @@ class EthController(val repository: BlockchainRepository, val requestsManager: E
   suspend fun addNewBlockBodies(connectionId: String, bodies: List<BlockBody>) {
     val request = requestsManager.wasRequested(connectionId, bodies)
     if (request != null) {
-      val hashes = request.data as List<Hash>
+      val hashes = request.data as List<*>
       for (i in 0..hashes.size) {
-        repository.storeBlockBody(hashes[i], bodies[i])
+        repository.storeBlockBody(hashes[i] as Hash, bodies[i])
       }
     }
   }
@@ -139,11 +136,11 @@ class EthController(val repository: BlockchainRepository, val requestsManager: E
   suspend fun addNewNodeData(connectionId: String, elements: List<Bytes?>) {
     val request = requestsManager.nodeDataWasRequested(connectionId, elements)
     if (request != null) {
-      val hashes = request.data as List<Hash>
+      val hashes = request.data as List<*>
       for (i in 0..hashes.size) {
         val elt = elements[i]
         if (elt != null) {
-          repository.storeNodeData(hashes[i], elt)
+          repository.storeNodeData(hashes[i] as Hash, elt)
         }
       }
     }
@@ -152,16 +149,16 @@ class EthController(val repository: BlockchainRepository, val requestsManager: E
   suspend fun addNewTransactionReceipts(connectionId: String, transactionReceipts: List<List<TransactionReceipt>>) {
     val request = requestsManager.transactionRequestsWasRequested(connectionId, transactionReceipts)
     if (request != null) {
-      val hashes = request.data as List<Hash>
+      val hashes = request.data as List<*>
       for (i in 0..hashes.size) {
-        val blockBody = repository.retrieveBlockBody(hashes[i])
+        val blockBody = repository.retrieveBlockBody(hashes[i] as Hash)
         val blockReceipts = transactionReceipts[i]
         for (j in 0..blockReceipts.size) {
           repository.storeTransactionReceipt(
             blockReceipts[j],
             j,
             blockBody?.transactions?.get(j)?.hash ?: Bytes.EMPTY,
-            hashes[i]
+            hashes[i] as Hash
           )
         }
       }
