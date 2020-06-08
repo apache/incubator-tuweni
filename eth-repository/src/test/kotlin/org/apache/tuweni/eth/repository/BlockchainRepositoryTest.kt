@@ -74,6 +74,8 @@ internal class BlockchainRepositoryTest {
         MapKeyValueStore(),
         MapKeyValueStore(),
         MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
         BlockchainIndex(writer),
         genesisBlock
       )
@@ -138,6 +140,8 @@ internal class BlockchainRepositoryTest {
     val genesisBlock = Block(genesisHeader, BlockBody(emptyList(), emptyList()))
     val repo = BlockchainRepository
       .init(
+        MapKeyValueStore(),
+        MapKeyValueStore(),
         MapKeyValueStore(),
         MapKeyValueStore(),
         MapKeyValueStore(),
@@ -249,6 +253,8 @@ internal class BlockchainRepositoryTest {
         MapKeyValueStore(),
         MapKeyValueStore(),
         MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
         BlockchainIndex(writer),
         genesisBlock
       )
@@ -355,6 +361,8 @@ internal class BlockchainRepositoryTest {
       MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
+      MapKeyValueStore(),
+      MapKeyValueStore(),
       BlockchainIndex(writer),
       genesisBlock
     )
@@ -457,6 +465,8 @@ internal class BlockchainRepositoryTest {
     )
     val genesisBlock = Block(genesisHeader, BlockBody(emptyList(), emptyList()))
     val repo = BlockchainRepository.init(
+      MapKeyValueStore(),
+      MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),

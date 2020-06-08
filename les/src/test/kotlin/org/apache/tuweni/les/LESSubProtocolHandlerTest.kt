@@ -148,6 +148,8 @@ constructor() {
           MapKeyValueStore(),
           MapKeyValueStore(),
           MapKeyValueStore(),
+          MapKeyValueStore(),
+          MapKeyValueStore(),
           BlockchainIndex(writer),
           block
         )
@@ -199,6 +201,8 @@ constructor() {
           MapKeyValueStore(),
           MapKeyValueStore(),
           MapKeyValueStore(),
+          MapKeyValueStore(),
+          MapKeyValueStore(),
           BlockchainIndex(writer),
           block
         )
@@ -233,6 +237,8 @@ constructor() {
       MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
+      MapKeyValueStore(),
+      MapKeyValueStore(),
       BlockchainIndex(writer)
     )
     val handler = LESSubProtocolHandler(
@@ -261,6 +267,8 @@ constructor() {
       val service = MyRLPxService()
       val repo = BlockchainRepository
         .init(
+          MapKeyValueStore(),
+          MapKeyValueStore(),
           MapKeyValueStore(),
           MapKeyValueStore(),
           MapKeyValueStore(),
@@ -324,6 +332,8 @@ constructor() {
       val service = MyRLPxService()
       val repo = BlockchainRepository
         .init(
+          MapKeyValueStore(),
+          MapKeyValueStore(),
           MapKeyValueStore(),
           MapKeyValueStore(),
           MapKeyValueStore(),
@@ -395,6 +405,8 @@ constructor() {
           MapKeyValueStore(),
           MapKeyValueStore(),
           MapKeyValueStore(),
+          MapKeyValueStore(),
+          MapKeyValueStore(),
           BlockchainIndex(writer),
           block
         )
@@ -442,6 +454,8 @@ constructor() {
       val service = MyRLPxService()
       val repo = BlockchainRepository
         .init(
+          MapKeyValueStore(),
+          MapKeyValueStore(),
           MapKeyValueStore(),
           MapKeyValueStore(),
           MapKeyValueStore(),

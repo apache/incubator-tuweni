@@ -105,6 +105,8 @@ class EthHandlerTest {
         MapKeyValueStore(),
         MapKeyValueStore(),
         MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
         BlockchainIndex(writer),
         genesisBlock
       )

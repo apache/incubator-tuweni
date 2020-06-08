@@ -52,6 +52,8 @@ class EthSubprotocolTest {
       MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
+      MapKeyValueStore(),
+      MapKeyValueStore(),
       BlockchainIndex(writer)
     )
     val eth = EthSubprotocol(
@@ -64,6 +66,8 @@ class EthSubprotocolTest {
   @Test
   fun testSupports(@LuceneIndexWriter writer: IndexWriter) {
     val repository = BlockchainRepository(
+      MapKeyValueStore(),
+      MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
@@ -84,6 +88,8 @@ class EthSubprotocolTest {
   @Test
   fun rangeCheck(@LuceneIndexWriter writer: IndexWriter) {
     val repository = BlockchainRepository(
+      MapKeyValueStore(),
+      MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),

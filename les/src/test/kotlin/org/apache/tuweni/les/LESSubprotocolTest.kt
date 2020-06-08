@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.les
 
+import org.apache.lucene.index.IndexWriter
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.junit.LuceneIndexWriter
@@ -24,7 +25,6 @@ import org.apache.tuweni.junit.TempDirectoryExtension
 import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
 import org.apache.tuweni.units.bigints.UInt256
-import org.apache.lucene.index.IndexWriter
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -48,11 +48,13 @@ internal class LESSubprotocolTest {
       UInt256.ZERO,
       UInt256.ZERO,
       BlockchainRepository(
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
         MapKeyValueStore(),
-      BlockchainIndex(writer)
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        BlockchainIndex(writer)
       )
     )
     assertTrue(sp.supports(SubProtocolIdentifier.of("les", 2)))
@@ -75,7 +77,9 @@ internal class LESSubprotocolTest {
         MapKeyValueStore(),
         MapKeyValueStore(),
         MapKeyValueStore(),
-      BlockchainIndex(writer)
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        BlockchainIndex(writer)
       )
     )
     assertFalse(sp.supports(SubProtocolIdentifier.of("les", 3)))
@@ -93,6 +97,8 @@ internal class LESSubprotocolTest {
       UInt256.ZERO,
       UInt256.ZERO,
       BlockchainRepository(
+        MapKeyValueStore(),
+        MapKeyValueStore(),
         MapKeyValueStore(),
         MapKeyValueStore(),
         MapKeyValueStore(),

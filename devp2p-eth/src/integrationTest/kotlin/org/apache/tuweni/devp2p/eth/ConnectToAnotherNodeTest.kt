@@ -59,6 +59,7 @@ class ConnectToAnotherNodeTest {
       MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
+      MapKeyValueStore(),
       BlockchainIndex(writer),
       genesisBlock
     )
@@ -113,6 +114,7 @@ class ConnectToAnotherNodeTest {
       MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
+      MapKeyValueStore(),
       BlockchainIndex(writer),
       genesisBlock
     )
@@ -138,6 +140,7 @@ class ConnectToAnotherNodeTest {
     )
     service.start().await()
     val repository2 = BlockchainRepository.init(
+      MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
