@@ -26,27 +26,22 @@ import java.util.concurrent.atomic.AtomicReference
 /**
  * Resolves DNS records over time, refreshing records.
  *
+ * @param enrLink the ENR link to start with, of the form enrtree://PUBKEY@domain
+ * @param listeners  Listeners notified when records are read and whenever they are updated.
  * @param dnsServer the DNS server to use for DNS query. If null, the default DNS server will be used.
  * @param seq the sequence number of the root record. If the root record seq is higher, proceed with visit.
- * @param enrLink the ENR link to start with, of the form enrtree://PUBKEY@domain
  * @param period the period at which to poll DNS records
  * @param resolver
  */
 public class DNSDaemon @JvmOverloads constructor(
-  private val dnsServer: String? = null,
-  private val seq: Long = 0,
   private val enrLink: String,
+  val listeners : Set<(List<EthereumNodeRecord>) -> Unit> = HashSet(),
+  private val seq: Long = 0,
   private val period: Long = 60000L,
+  private val dnsServer: String? = null,
   private val resolver: Resolver = SimpleResolver(dnsServer)
 ) {
-
-  /**
-   * Listeners notified when records are read and whenever they are updated.
-   */
-  val listeners = HashSet<(List<EthereumNodeRecord>) -> Unit>()
-
   private val timer: Timer = Timer(false)
-  private val records = AtomicReference<EthereumNodeRecord>()
 
   init {
     timer.scheduleAtFixedRate(DNSTimerTask(resolver, seq, enrLink, this::updateRecords), 0, period)
