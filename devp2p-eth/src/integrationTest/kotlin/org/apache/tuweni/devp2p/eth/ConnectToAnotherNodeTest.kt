@@ -49,7 +49,7 @@ class ConnectToAnotherNodeTest {
   @Disabled
   @Test
   fun testCollectHeaders(@LuceneIndexWriter writer: IndexWriter, @VertxInstance vertx: Vertx) = runBlocking {
-    val contents = EthHandlerTest::class.java.getResourceAsStream("/mainnet.json").readAllBytes()
+    val contents = ConnectToAnotherNodeTest::class.java.getResourceAsStream("/mainnet.json").readAllBytes()
     val genesisFile = GenesisFile.read(contents)
     val genesisBlock = genesisFile.toBlock()
 
