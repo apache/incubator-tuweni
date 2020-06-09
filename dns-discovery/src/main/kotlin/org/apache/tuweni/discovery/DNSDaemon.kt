@@ -21,13 +21,12 @@ import org.xbill.DNS.Resolver
 import org.xbill.DNS.SimpleResolver
 import java.util.Timer
 import java.util.TimerTask
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Resolves DNS records over time, refreshing records.
  *
  * @param enrLink the ENR link to start with, of the form enrtree://PUBKEY@domain
- * @param listeners  Listeners notified when records are read and whenever they are updated.
+ * @param listeners Listeners notified when records are read and whenever they are updated.
  * @param dnsServer the DNS server to use for DNS query. If null, the default DNS server will be used.
  * @param seq the sequence number of the root record. If the root record seq is higher, proceed with visit.
  * @param period the period at which to poll DNS records
@@ -35,7 +34,7 @@ import java.util.concurrent.atomic.AtomicReference
  */
 public class DNSDaemon @JvmOverloads constructor(
   private val enrLink: String,
-  val listeners : Set<(List<EthereumNodeRecord>) -> Unit> = HashSet(),
+  val listeners: Set<(List<EthereumNodeRecord>) -> Unit> = HashSet(),
   private val seq: Long = 0,
   private val period: Long = 60000L,
   private val dnsServer: String? = null,
