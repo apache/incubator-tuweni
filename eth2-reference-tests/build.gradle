@@ -23,3 +23,13 @@ dependencies {
 
   testRuntime 'org.junit.jupiter:junit-jupiter-engine'
 }
+
+def submodulePresent = file("${projectDir}/src/test/resources/README.md").exists()
+def testsPresent = file("${projectDir}/src/test/java/").exists()
+if (!submodulePresent && testsPresent) {
+  println """${projectDir}/src/test/resources missing: please clone submodules (git submodule update --init --recursive)
+Reference test validations will not be performed.
+"""
+}
+
+test.enabled = submodulePresent

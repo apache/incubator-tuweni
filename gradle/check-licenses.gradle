@@ -135,13 +135,16 @@ downloadLicenses {
   ]
 
   licenses = [
-    (group('tuweni')): apache2,
-    (group('org.jboss.spec.javax.transaction')): cddl1,
-    (group('org.rocksdb')): apache2,
+    // Logback is dual licensed under EPL v1.0 or LGPL v2.1
+    // Explicitly declare that we are using the EPL v1.0 license
+    (group('ch.qos.logback'))   : epl1,
     // https://checkerframework.org/manual/#license
     // The more permissive MIT License applies to code that you might want
     // to include in your own program, such as the annotations and run-time utility classes.
-    (group('org.checkerframework')): mit
+    (group('org.checkerframework')): mit,
+    (group('org.jboss.spec.javax.transaction')): cddl1,
+    (group('org.rocksdb')): apache2,
+    (group('tuweni')): apache2
   ]
 }
 
