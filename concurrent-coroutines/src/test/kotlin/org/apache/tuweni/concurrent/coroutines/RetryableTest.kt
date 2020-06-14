@@ -21,6 +21,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.lang.RuntimeException
@@ -61,7 +62,7 @@ internal class RetryableTest {
       "done $i"
     }
     assertEquals("done 4", result)
-    assertEquals(6, attempts)
+    assertTrue(attempts > 4)
   }
 
   @Test

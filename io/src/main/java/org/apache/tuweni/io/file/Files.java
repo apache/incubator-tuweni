@@ -72,13 +72,21 @@ public final class Files {
     walkFileTree(directory, new SimpleFileVisitor<>() {
       @Override
       public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        delete(file);
+        try {
+          delete(file);
+        } catch (IOException ioe) {
+          file.toFile().deleteOnExit();
+        }
         return FileVisitResult.CONTINUE;
       }
 
       @Override
       public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-        delete(dir);
+        try {
+          delete(dir);
+        } catch (IOException ioe) {
+          dir.toFile().deleteOnExit();
+        }
         return FileVisitResult.CONTINUE;
       }
     });
