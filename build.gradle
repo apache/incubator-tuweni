@@ -28,7 +28,7 @@ buildscript {
 
 plugins {
   id 'com.diffplug.gradle.spotless' version '3.28.1'
-  id 'net.ltgt.errorprone' version '0.6'
+  id 'net.ltgt.errorprone' version '1.2.1'
   id 'io.spring.dependency-management' version '1.0.6.RELEASE'
   id 'com.github.hierynomus.license' version '0.15.0'
   id 'org.gradle.crypto.checksum' version '1.1.0'
@@ -39,17 +39,6 @@ plugins {
 }
 
 description = 'A set of libraries and other tools to aid development of blockchain and other decentralized software in Java and other JVM languages'
-
-//////
-// Sanity checks
-if (!file("${rootDir}/eth-reference-tests/src/test/resources/eth2.0-tests/README.md").exists()) {
-  throw new GradleException("eth-reference-tests/src/test/resources/eth2.0-tests/README.md missing: please clone submodules (git submodule update --init --recursive)")
-}
-
-if (!file("${rootDir}/eth2-reference-tests/src/test/resources").exists()) {
-  throw new GradleException("${rootDir}/eth2-reference-tests/src/test/resources missing: please clone submodules (git submodule update --init --recursive)")
-}
-
 
 //////
 // Version numbering
@@ -124,6 +113,7 @@ if (file('.git').exists()) {
         '.github/pull_request_template.md',
         'devp2p-eth/src/test/resources/mainnet.json',
         'eth/src/test/resources/mainnet.json',
+        'eth-client/src/main/resources/mainnet.json',
         'eth/src/test/resources/missing-difficulty.json',
         'eth/src/test/resources/missing-nonce.json',
         'eth/src/test/resources/valid-genesis.json'
@@ -250,7 +240,7 @@ allprojects {
   sourceCompatibility = '1.11'
   targetCompatibility = '1.11'
 
-  jacoco { toolVersion = '0.8.2' }
+  jacoco { toolVersion = '0.8.5' }
 
   dependencies {
     errorprone 'com.google.errorprone:error_prone_core'
@@ -277,9 +267,20 @@ allprojects {
     ]
 
     options.errorprone {
-      excludedPaths '.*/generated-src/.*'
+      excludedPaths = '.*/generated-src/.*'
       check('FutureReturnValueIgnored', CheckSeverity.OFF)
       check('UnnecessaryParentheses', CheckSeverity.OFF)
+
+      // This check is broken in Java 12.  See https://github.com/google/error-prone/issues/1257
+      if (JavaVersion.current() == JavaVersion.VERSION_12) {
+        check('Finally', CheckSeverity.OFF)
+      }
+
+      // This check is broken after Java 12.  See https://github.com/google/error-prone/issues/1352
+      if (JavaVersion.current() > JavaVersion.VERSION_12) {
+        check('TypeParameterUnusedInFormals', CheckSeverity.OFF)
+      }
+
       disableWarningsInGeneratedCode = true
     }
   }
