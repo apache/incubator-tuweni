@@ -22,6 +22,7 @@ import com.winterbe.expekt.should
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.io.Base64
+import org.apache.tuweni.io.file.Files as TwFiles
 import org.apache.tuweni.kv.Vars.bar
 import org.apache.tuweni.kv.Vars.foo
 import org.apache.tuweni.kv.Vars.foobar
@@ -223,7 +224,7 @@ object MapDBKeyValueStoreSpec : Spek({
 
     afterGroup {
       kv.close()
-      MoreFiles.deleteRecursively(testDir, RecursiveDeleteOption.ALLOW_INSECURE)
+      TwFiles.deleteRecursively(testDir)
     }
   }
 })
