@@ -86,12 +86,10 @@ distributions {
       }
       rootProject.subprojects.each { s ->
         into(s.name) {
-          if (project != s) {
-            from s.sourcesJar.outputs.files.collect {
-              zipTree(it)
-            }
-          }
           from s.projectDir.toPath().resolve("build.gradle")
+        }
+        into("${s.name}/src/main") {
+          from s.projectDir.toPath().resolve("src/main")
         }
       }
     }
