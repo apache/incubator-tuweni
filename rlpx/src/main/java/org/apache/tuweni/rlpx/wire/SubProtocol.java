@@ -15,6 +15,7 @@ package org.apache.tuweni.rlpx.wire;
 
 import org.apache.tuweni.rlpx.RLPxService;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -62,5 +63,7 @@ public interface SubProtocol {
    * 
    * @return the capabilities for this protocol, ordered.
    */
-  List<SubProtocolIdentifier> getCapabilities();
+  default List<SubProtocolIdentifier> getCapabilities() {
+    return Collections.singletonList(id());
+  }
 }

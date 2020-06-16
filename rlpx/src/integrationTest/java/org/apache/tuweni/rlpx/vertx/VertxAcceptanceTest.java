@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.concurrent.AsyncCompletion;
+import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
 import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.junit.BouncyCastleExtension;
@@ -27,6 +28,7 @@ import org.apache.tuweni.rlpx.MemoryWireConnectionsRepository;
 import org.apache.tuweni.rlpx.RLPxService;
 import org.apache.tuweni.rlpx.wire.DefaultWireConnection;
 import org.apache.tuweni.rlpx.wire.SubProtocol;
+import org.apache.tuweni.rlpx.wire.SubProtocolClient;
 import org.apache.tuweni.rlpx.wire.SubProtocolHandler;
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
 
@@ -105,6 +107,11 @@ class VertxAcceptanceTest {
     public SubProtocolHandler createHandler(RLPxService service) {
       handler = new MyCustomSubProtocolHandler(service, id());
       return handler;
+    }
+
+    @Override
+    public SubProtocolClient createClient(RLPxService service) {
+      return null;
     }
   }
 
@@ -253,16 +260,21 @@ class VertxAcceptanceTest {
           public SubProtocolHandler createHandler(RLPxService service) {
             return null;
           }
+
+          @Override
+          public SubProtocolClient createClient(RLPxService service) {
+            return null;
+          }
         }), "Client 1", repository);
     service.start().join();
 
-    AsyncCompletion completion = service
+    AsyncResult<String> completion = service
         .connectTo(
             SECP256K1.PublicKey
                 .fromHexString(
                     "7a8fbb31bff7c48179f8504b047313ebb7446a0233175ffda6eb4c27aaa5d2aedcef4dd9501b4f17b4f16588f0fd037f9b9416b8caca655bee3b14b4ef67441a"),
             new InetSocketAddress("localhost", 30303));
-    completion.join();
+    completion.get();
     Thread.sleep(10000);
 
     service.stop().join();
