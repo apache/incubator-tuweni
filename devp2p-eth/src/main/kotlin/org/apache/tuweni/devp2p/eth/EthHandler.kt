@@ -25,6 +25,7 @@ import org.apache.tuweni.concurrent.coroutines.asyncCompletion
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.wire.DisconnectReason
 import org.apache.tuweni.rlpx.wire.SubProtocolHandler
+import org.apache.tuweni.rlpx.wire.WireConnection
 import org.slf4j.LoggerFactory
 import kotlin.coroutines.CoroutineContext
 
@@ -41,21 +42,22 @@ internal class EthHandler(
 
   val peersMap: MutableMap<String, PeerInfo> = mutableMapOf()
 
-  override fun handle(connectionId: String, messageType: Int, message: Bytes) = asyncCompletion {
-    logger.debug("Receiving message of type {}", messageType)
+  override fun handle(connection: WireConnection, messageType: Int, message: Bytes) = asyncCompletion {
+    logger.trace("Receiving message of type {}", messageType)
     when (messageType) {
-      MessageType.Status.code -> handleStatus(connectionId, StatusMessage.read(message))
+      MessageType.Status.code -> handleStatus(connection, StatusMessage.read(message))
       MessageType.NewBlockHashes.code -> handleNewBlockHashes(NewBlockHashes.read(message))
       MessageType.Transactions.code -> handleTransactions(Transactions.read(message))
-      MessageType.GetBlockHeaders.code -> handleGetBlockHeaders(connectionId, GetBlockHeaders.read(message))
-      MessageType.BlockHeaders.code -> handleHeaders(connectionId, BlockHeaders.read(message))
-      MessageType.GetBlockBodies.code -> handleGetBlockBodies(connectionId, GetBlockBodies.read(message))
-      MessageType.BlockBodies.code -> handleBlockBodies(connectionId, BlockBodies.read(message))
+      MessageType.GetBlockHeaders.code -> handleGetBlockHeaders(connection.id(), GetBlockHeaders.read(message))
+      MessageType.BlockHeaders.code -> handleHeaders(connection.id(), BlockHeaders.read(message))
+      MessageType.GetBlockBodies.code -> handleGetBlockBodies(connection.id(), GetBlockBodies.read(message))
+      MessageType.BlockBodies.code -> handleBlockBodies(connection.id(), BlockBodies.read(message))
       MessageType.NewBlock.code -> handleNewBlock(NewBlock.read(message))
-      MessageType.GetNodeData.code -> handleGetNodeData(connectionId, GetNodeData.read(message))
-      MessageType.NodeData.code -> handleNodeData(connectionId, NodeData.read(message))
-      MessageType.GetReceipts.code -> handleGetReceipts(connectionId, GetReceipts.read(message))
-      MessageType.Receipts.code -> handleReceipts(connectionId, Receipts.read(message))
+      MessageType.GetNodeData.code -> handleGetNodeData(connection.id(), GetNodeData.read(message))
+      MessageType.NodeData.code -> handleNodeData(connection.id(), NodeData.read(message))
+      MessageType.GetReceipts.code -> handleGetReceipts(connection.id(), GetReceipts.read(message))
+      MessageType.Receipts.code -> handleReceipts(connection.id(), Receipts.read(message))
+      else -> logger.warn("Unknown message type {}", messageType) // TODO disconnect
     }
   }
 
@@ -67,14 +69,14 @@ internal class EthHandler(
     controller.addNewNodeData(connectionId, read.elements)
   }
 
-  private suspend fun handleStatus(connectionId: String, status: StatusMessage) {
+  private suspend fun handleStatus(connection: WireConnection, status: StatusMessage) {
     if (!status.networkID.equals(blockchainInfo.networkID()) ||
       !status.genesisHash.equals(blockchainInfo.genesisHash())) {
-      peersMap[connectionId]?.cancel()
-      service.disconnect(connectionId, DisconnectReason.SUBPROTOCOL_REASON)
+      peersMap[connection.id()]?.cancel()
+      service.disconnect(connection.id(), DisconnectReason.SUBPROTOCOL_REASON)
     }
-    peersMap[connectionId]?.connect()
-    controller.receiveStatus(connectionId, status)
+    peersMap[connection.id()]?.connect()
+    controller.receiveStatus(connection, status)
   }
 
   private suspend fun handleReceipts(connectionId: String, receipts: Receipts) {

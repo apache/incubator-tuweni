@@ -24,8 +24,13 @@ import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.rlpx.wire.WireConnection
 
-class EthController(val repository: BlockchainRepository, val requestsManager: EthRequestsManager) {
+class EthController(
+  val repository: BlockchainRepository,
+  val requestsManager: EthRequestsManager,
+  val connectionsListener: (WireConnection, StatusMessage) -> Unit = { _, _ -> }
+) {
 
   suspend fun findTransactionReceipts(hashes: List<Hash>): List<List<TransactionReceipt>> {
     val receipts = ArrayList<List<TransactionReceipt>>()
@@ -124,11 +129,8 @@ class EthController(val repository: BlockchainRepository, val requestsManager: E
     }
   }
 
-  suspend fun receiveStatus(connectionId: String, status: StatusMessage) {
-    println(connectionId)
-    if (!repository.hasBlockHeader(status.bestHash)) {
-      requestsManager.requestBlockHeaders(status.bestHash, 100, 5, true)
-    }
+  fun receiveStatus(connection: WireConnection, status: StatusMessage) {
+    connectionsListener(connection, status)
   }
 
   suspend fun findNodeData(hashes: List<Hash>) = repository.retrieveNodeData(hashes)

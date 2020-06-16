@@ -22,7 +22,7 @@ public interface WireConnection {
    *
    * @return the identifier of this wire connection
    */
-  public String id();
+  String id();
 
   /**
    * Returns true if the connection supports the subprotocol
@@ -30,5 +30,26 @@ public interface WireConnection {
    * @param subProtocolIdentifier the subprotocol identifier
    * @return true if the subprotocol is supported
    */
-  public boolean supports(SubProtocolIdentifier subProtocolIdentifier);
+  boolean supports(SubProtocolIdentifier subProtocolIdentifier);
+
+  /**
+   * Whether the peer asked to disconnect
+   * 
+   * @return true if the peer asked to disconnect
+   */
+  boolean isDisconnectReceived();
+
+  /**
+   * Whether this service asked to disconnect
+   * 
+   * @return true if this service asked to disconnect
+   */
+  boolean isDisconnectRequested();
+
+  /**
+   * If the connection is disconnected, the reason for which the connection is disconnected.
+   * 
+   * @return the disconnect reason if it happened.
+   */
+  DisconnectReason getDisconnectReason();
 }

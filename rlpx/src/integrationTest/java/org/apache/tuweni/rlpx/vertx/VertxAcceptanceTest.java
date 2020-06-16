@@ -41,6 +41,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import io.vertx.core.Vertx;
+import org.apache.tuweni.rlpx.wire.WireConnection;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,7 +62,7 @@ class VertxAcceptanceTest {
     }
 
     @Override
-    public AsyncCompletion handle(String connectionId, int messageType, Bytes message) {
+    public AsyncCompletion handle(WireConnection connection, int messageType, Bytes message) {
       messages.add(message);
       return AsyncCompletion.completed();
     }
@@ -268,7 +269,7 @@ class VertxAcceptanceTest {
         }), "Client 1", repository);
     service.start().join();
 
-    AsyncResult<String> completion = service
+    AsyncResult<WireConnection> completion = service
         .connectTo(
             SECP256K1.PublicKey
                 .fromHexString(

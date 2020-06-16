@@ -23,12 +23,14 @@ import org.apache.tuweni.rlpx.wire.SubProtocol
 import org.apache.tuweni.rlpx.wire.SubProtocolClient
 import org.apache.tuweni.rlpx.wire.SubProtocolHandler
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
+import org.apache.tuweni.rlpx.wire.WireConnection
 import kotlin.coroutines.CoroutineContext
 
 class EthSubprotocol(
   private val coroutineContext: CoroutineContext = Dispatchers.Default,
   private val blockchainInfo: BlockchainInformation,
-  private val repository: BlockchainRepository
+  private val repository: BlockchainRepository,
+  private val listener: (WireConnection, StatusMessage) -> Unit = { _, _ -> }
 ) : SubProtocol {
 
   private var client: EthClient? = null
@@ -54,7 +56,7 @@ class EthSubprotocol(
   }
 
   override fun createHandler(service: RLPxService): SubProtocolHandler {
-    val controller = EthController(repository, createClient(service) as EthRequestsManager)
+    val controller = EthController(repository, createClient(service) as EthRequestsManager, listener)
     return EthHandler(coroutineContext, blockchainInfo, service, controller)
   }
 

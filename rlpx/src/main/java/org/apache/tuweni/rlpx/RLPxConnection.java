@@ -137,14 +137,14 @@ public final class RLPxConnection {
   }
 
   public synchronized void stream(Bytes newBytes, Consumer<RLPxMessage> messageConsumer) {
-    logger.debug("Adding new bytes to buffer {}", newBytes);
+    logger.trace("Adding new bytes to buffer {}", newBytes);
     buffer = Bytes.concatenate(buffer, newBytes);
     RLPxMessage message = null;
     do {
       message = readFrame(buffer);
       if (message != null) {
         buffer = buffer.slice(message.bytesLength());
-        logger.debug("Read message of type {}", message.messageId());
+        logger.trace("Read message of type {}", message.messageId());
         messageConsumer.accept(message);
       }
     } while (buffer.size() != 0 && message != null);

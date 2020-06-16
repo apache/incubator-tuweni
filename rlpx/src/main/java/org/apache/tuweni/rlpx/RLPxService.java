@@ -19,6 +19,7 @@ import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.rlpx.wire.DisconnectReason;
 import org.apache.tuweni.rlpx.wire.SubProtocolClient;
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
+import org.apache.tuweni.rlpx.wire.WireConnection;
 
 import java.net.InetSocketAddress;
 
@@ -32,9 +33,9 @@ public interface RLPxService {
    *
    * @param peerPublicKey the peer public key
    * @param peerAddress the peer host and port
-   * @return a handle that completes if the peer connects successfully, providing the connection ID.
+   * @return a handle that completes if the peer connects successfully, providing the connection.
    */
-  AsyncResult<String> connectTo(SECP256K1.PublicKey peerPublicKey, InetSocketAddress peerAddress);
+  AsyncResult<WireConnection> connectTo(SECP256K1.PublicKey peerPublicKey, InetSocketAddress peerAddress);
 
 
   /**

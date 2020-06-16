@@ -295,11 +295,11 @@ public final class VertxRLPxService implements RLPxService {
   }
 
   @Override
-  public AsyncResult<String> connectTo(PublicKey peerPublicKey, InetSocketAddress peerAddress) {
+  public AsyncResult<WireConnection> connectTo(PublicKey peerPublicKey, InetSocketAddress peerAddress) {
     if (!started.get()) {
       throw new IllegalStateException("The RLPx service is not active");
     }
-    CompletableAsyncResult<String> connected = AsyncResult.incomplete();
+    CompletableAsyncResult<WireConnection> connected = AsyncResult.incomplete();
     logger.debug("Connecting to {} with public key {}", peerAddress, peerPublicKey);
     client
         .connect(
@@ -373,7 +373,7 @@ public final class VertxRLPxService implements RLPxService {
   private DefaultWireConnection createConnection(
       RLPxConnection conn,
       NetSocket netSocket,
-      CompletableAsyncResult<String> ready) {
+      CompletableAsyncResult<WireConnection> ready) {
     String id = UUID.randomUUID().toString();
     DefaultWireConnection wireConnection =
         new DefaultWireConnection(id, conn.publicKey().bytes(), conn.peerPublicKey().bytes(), message -> {

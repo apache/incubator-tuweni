@@ -29,6 +29,7 @@ import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.wire.DisconnectReason
 import org.apache.tuweni.rlpx.wire.SubProtocolHandler
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
+import org.apache.tuweni.rlpx.wire.WireConnection
 import org.apache.tuweni.units.bigints.UInt256
 import java.util.TreeSet
 import java.util.concurrent.ConcurrentHashMap
@@ -51,37 +52,37 @@ internal class LESSubProtocolHandler(
 
   private val peerStateMap = ConcurrentHashMap<String, LESPeerState>()
 
-  override fun handle(connectionId: String, messageType: Int, message: Bytes): AsyncCompletion {
+  override fun handle(connection: WireConnection, messageType: Int, message: Bytes): AsyncCompletion {
     return asyncCompletion {
-      val state = peerStateMap.computeIfAbsent(connectionId) { LESPeerState() }
+      val state = peerStateMap.computeIfAbsent(connection.id()) { LESPeerState() }
       if (messageType == 0) {
         if (state.handshakeComplete()) {
-          service.disconnect(connectionId, DisconnectReason.PROTOCOL_BREACH)
+          service.disconnect(connection.id(), DisconnectReason.PROTOCOL_BREACH)
           throw IllegalStateException("Handshake message sent after handshake completed")
         }
         state.peerStatusMessage = StatusMessage.read(message)
       } else {
         if (!state.handshakeComplete()) {
-          service.disconnect(connectionId, DisconnectReason.PROTOCOL_BREACH)
+          service.disconnect(connection.id(), DisconnectReason.PROTOCOL_BREACH)
           throw IllegalStateException("Message sent before handshake completed")
         }
         if (messageType == 1) {
           throw UnsupportedOperationException()
         } else if (messageType == 2) {
           val getBlockHeadersMessage = GetBlockHeadersMessage.read(message)
-          handleGetBlockHeaders(connectionId, getBlockHeadersMessage)
+          handleGetBlockHeaders(connection.id(), getBlockHeadersMessage)
         } else if (messageType == 3) {
           val blockHeadersMessage = BlockHeadersMessage.read(message)
           handleBlockHeadersMessage(blockHeadersMessage)
         } else if (messageType == 4) {
           val blockBodiesMessage = GetBlockBodiesMessage.read(message)
-          handleGetBlockBodiesMessage(connectionId, blockBodiesMessage)
+          handleGetBlockBodiesMessage(connection.id(), blockBodiesMessage)
         } else if (messageType == 5) {
           val blockBodiesMessage = BlockBodiesMessage.read(message)
           handleBlockBodiesMessage(state, blockBodiesMessage)
         } else if (messageType == 6) {
           val getReceiptsMessage = GetReceiptsMessage.read(message)
-          handleGetReceiptsMessage(connectionId, getReceiptsMessage)
+          handleGetReceiptsMessage(connection.id(), getReceiptsMessage)
         } else {
           throw UnsupportedOperationException()
         }
