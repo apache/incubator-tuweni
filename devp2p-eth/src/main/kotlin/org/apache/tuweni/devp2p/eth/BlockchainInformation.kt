@@ -37,7 +37,9 @@ interface BlockchainInformation {
     val crc = CRC32()
     crc.update(genesisHash().toArrayUnsafe())
     val forkHashes = ArrayList<Bytes>(listOf(Bytes.ofUnsignedInt(crc.value)))
-    for (fork in forks()) {
+    val forks = mutableListOf<Long>()
+    forks.addAll(forks())
+    for (fork in forks) {
       val byteRepresentationFork = UInt64.valueOf(fork).toBytes()
       crc.update(byteRepresentationFork.toArrayUnsafe(), 0, byteRepresentationFork.size())
       forkHashes.add(Bytes.ofUnsignedInt(crc.value))
@@ -61,12 +63,6 @@ data class SimpleBlockchainInformation(
   val forks: List<Long>
 ) : BlockchainInformation {
 
-  private val forksWithUpperBound: MutableList<Long> = mutableListOf()
-  init {
-    forksWithUpperBound.addAll(forks)
-    forksWithUpperBound.add(0L)
-  }
-
   override fun networkID(): UInt256 = networkID
 
   override fun totalDifficulty(): UInt256 = totalDifficulty
@@ -75,5 +71,5 @@ data class SimpleBlockchainInformation(
 
   override fun genesisHash(): Hash = genesisHash
 
-  override fun forks(): List<Long> = forksWithUpperBound
+  override fun forks(): List<Long> = forks
 }

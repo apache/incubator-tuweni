@@ -81,9 +81,11 @@ data class StatusMessage(
     it.writeUInt256(totalDifficulty)
     it.writeValue(bestHash)
     it.writeValue(genesisHash)
-    it.writeList { forkWriter ->
-      forkWriter.writeValue(Bytes.fromHexString("0xe029e991"))
-      forkWriter.writeValue(Bytes.ofUnsignedLong(forkBlock!!).trimLeadingZeros())
+    if (forkHash != null) {
+      it.writeList { forkWriter ->
+        forkWriter.writeValue(forkHash)
+        forkWriter.writeValue(Bytes.ofUnsignedLong(forkBlock!!).trimLeadingZeros())
+      }
     }
   }
 }

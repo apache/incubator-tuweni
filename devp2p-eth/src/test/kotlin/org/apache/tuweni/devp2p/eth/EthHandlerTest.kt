@@ -40,6 +40,7 @@ import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.rlpx.RLPxService
+import org.apache.tuweni.rlpx.wire.WireConnection
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.bigints.UInt64
 import org.apache.tuweni.units.ethereum.Gas
@@ -174,7 +175,7 @@ class EthHandlerTest {
   @Test
   fun testGetHeaders() = runBlocking {
     handler.handle(
-      "foo",
+      mock(WireConnection::class.java),
       MessageType.GetBlockHeaders.code,
       GetBlockHeaders(genesisBlock.header.hash, 3, 1, false).toBytes()
     ).await()
@@ -192,7 +193,7 @@ class EthHandlerTest {
   @Test
   fun testGetHeadersTooMany() = runBlocking {
     handler.handle(
-      "foo2",
+      mock(WireConnection::class.java),
       MessageType.GetBlockHeaders.code,
       GetBlockHeaders(genesisBlock.header.hash, 100, 1, false).toBytes()
     ).await()
@@ -207,7 +208,7 @@ class EthHandlerTest {
   @Test
   fun testGetHeadersDifferentSkip() = runBlocking {
     handler.handle(
-      "foo3",
+      mock(WireConnection::class.java),
       MessageType.GetBlockHeaders.code,
       GetBlockHeaders(genesisBlock.header.hash, 100, 2, false).toBytes()
     ).await()
@@ -226,7 +227,7 @@ class EthHandlerTest {
   fun testGetBodies() = runBlocking {
 
     handler.handle(
-      "foo234",
+      mock(WireConnection::class.java),
       MessageType.GetBlockBodies.code,
       GetBlockBodies(listOf(genesisBlock.header.hash)).toBytes()
     ).await()
@@ -246,7 +247,7 @@ class EthHandlerTest {
     val block7 = repository.retrieveBlock(hashes[0])
     val txReceipt = repository.retrieveTransactionReceipt(hashes[0], 0)
     handler.handle(
-      "foo234",
+      mock(WireConnection::class.java),
       MessageType.GetReceipts.code,
       GetReceipts(listOf(block7!!.header.hash)).toBytes()
     ).await()
