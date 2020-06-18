@@ -73,6 +73,7 @@ class EthClient(override val coroutineContext: CoroutineContext = Dispatchers.Un
     val logger = LoggerFactory.getLogger(EthClient::class.java)
   }
 
+  private val connectionsToENRs: MutableMap<String, EthereumNodeRecord> = ConcurrentHashMap()
   private val enrs: MutableMap<EthereumNodeRecord, PeerStatus> = ConcurrentHashMap()
   private val services = ArrayList<RLPxService>()
 
@@ -120,7 +121,7 @@ class EthClient(override val coroutineContext: CoroutineContext = Dispatchers.Un
       period = 30000,
       listeners = setOf { enrs ->
 
-        enrs.forEach { this.enrs[it] = PeerStatus(null, null, null) }
+        enrs.forEach { this.enrs[it] = PeerStatus(null, null, null, null) }
       }
     )
 
@@ -152,6 +153,7 @@ class EthClient(override val coroutineContext: CoroutineContext = Dispatchers.Un
             service.connectTo(enr.key.publicKey(), InetSocketAddress(enr.key.ip(), enr.key.tcp())).thenApply {
               enr.value.connectionId = it.id()
               enr.value.service = service
+              connectionsToENRs[it.id()] = enr.key
               it
             }
           completions.add(connectAwait)
@@ -171,6 +173,11 @@ class EthClient(override val coroutineContext: CoroutineContext = Dispatchers.Un
   }
 
   private fun handleStatusUpdate(conn: WireConnection, status: StatusMessage) {
+    connectionsToENRs[conn.id()]?.let {
+      enrs[it]?.let {
+        it.status = status
+      }
+    }
   }
 
   private fun printServices() {

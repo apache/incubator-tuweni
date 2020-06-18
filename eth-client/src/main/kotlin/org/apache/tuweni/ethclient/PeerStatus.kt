@@ -16,11 +16,13 @@
  */
 package org.apache.tuweni.ethclient
 
+import org.apache.tuweni.devp2p.eth.StatusMessage
 import org.apache.tuweni.rlpx.RLPxService
 import java.time.Instant
 
-data class PeerStatus(var lastContacted: Instant?, var connectionId: String?, var service: RLPxService?) {
-
-  fun toBytes() {
-  }
-}
+data class PeerStatus(
+  var lastContacted: Instant?,
+  var connectionId: String?,
+  var service: RLPxService?,
+  var status: StatusMessage?
+)
