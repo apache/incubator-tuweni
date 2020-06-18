@@ -51,6 +51,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.eq
+import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import java.time.Instant
@@ -174,8 +175,10 @@ class EthHandlerTest {
 
   @Test
   fun testGetHeaders() = runBlocking {
+    val conn = mock(WireConnection::class.java)
+    doReturn("foo").`when`(conn).id()
     handler.handle(
-      mock(WireConnection::class.java),
+      conn,
       MessageType.GetBlockHeaders.code,
       GetBlockHeaders(genesisBlock.header.hash, 3, 1, false).toBytes()
     ).await()
@@ -192,8 +195,10 @@ class EthHandlerTest {
 
   @Test
   fun testGetHeadersTooMany() = runBlocking {
+    val conn = mock(WireConnection::class.java)
+    doReturn("foo2").`when`(conn).id()
     handler.handle(
-      mock(WireConnection::class.java),
+      conn,
       MessageType.GetBlockHeaders.code,
       GetBlockHeaders(genesisBlock.header.hash, 100, 1, false).toBytes()
     ).await()
@@ -207,8 +212,9 @@ class EthHandlerTest {
 
   @Test
   fun testGetHeadersDifferentSkip() = runBlocking {
-    handler.handle(
-      mock(WireConnection::class.java),
+    val conn = mock(WireConnection::class.java)
+    doReturn("foo3").`when`(conn).id()
+    handler.handle(conn,
       MessageType.GetBlockHeaders.code,
       GetBlockHeaders(genesisBlock.header.hash, 100, 2, false).toBytes()
     ).await()
@@ -225,9 +231,9 @@ class EthHandlerTest {
 
   @Test
   fun testGetBodies() = runBlocking {
-
-    handler.handle(
-      mock(WireConnection::class.java),
+    val conn = mock(WireConnection::class.java)
+    doReturn("foo234").`when`(conn).id()
+    handler.handle(conn,
       MessageType.GetBlockBodies.code,
       GetBlockBodies(listOf(genesisBlock.header.hash)).toBytes()
     ).await()
@@ -242,12 +248,13 @@ class EthHandlerTest {
 
   @Test
   fun testGetReceipts() = runBlocking {
-
+    val conn = mock(WireConnection::class.java)
+    doReturn("foo234").`when`(conn).id()
     val hashes = repository.findBlockByHashOrNumber(UInt256.valueOf(7).toBytes())
     val block7 = repository.retrieveBlock(hashes[0])
     val txReceipt = repository.retrieveTransactionReceipt(hashes[0], 0)
     handler.handle(
-      mock(WireConnection::class.java),
+      conn,
       MessageType.GetReceipts.code,
       GetReceipts(listOf(block7!!.header.hash)).toBytes()
     ).await()
