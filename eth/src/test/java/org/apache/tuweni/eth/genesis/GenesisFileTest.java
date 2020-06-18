@@ -53,7 +53,7 @@ class GenesisFileTest {
         Hash.fromHexString("0xd7f8974fb5ac78d9ac099b9ad5018bedc2ce0a72dad1827a1709da30580f0544"),
         file.toBlock().getHeader().getStateRoot());
     Hash expectedHash = Hash.fromHexString("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3");
-    assertEquals(10, file.getForks().size());
+    assertEquals(8, file.getForks().size());
     assertEquals((Long) 1150000L, file.getForks().get(0));
     assertEquals(expectedHash, file.toBlock().getHeader().getHash());
   }
