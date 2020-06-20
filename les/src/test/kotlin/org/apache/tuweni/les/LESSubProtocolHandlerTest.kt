@@ -17,9 +17,11 @@
 package org.apache.tuweni.les
 
 import kotlinx.coroutines.runBlocking
+import org.apache.lucene.index.IndexWriter
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.concurrent.AsyncCompletion
+import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.eth.Address
@@ -39,20 +41,21 @@ import org.apache.tuweni.les.LESSubprotocol.Companion.LES_ID
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.WireConnectionRepository
 import org.apache.tuweni.rlpx.wire.DisconnectReason
+import org.apache.tuweni.rlpx.wire.SubProtocolClient
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
+import org.apache.tuweni.rlpx.wire.WireConnection
 import org.apache.tuweni.units.bigints.UInt256
+import org.apache.tuweni.units.bigints.UInt64
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
-import org.apache.lucene.index.IndexWriter
-import org.apache.tuweni.concurrent.AsyncResult
-import org.apache.tuweni.rlpx.wire.SubProtocolClient
-import org.apache.tuweni.units.bigints.UInt64
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.mock
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.time.Instant
@@ -103,7 +106,10 @@ constructor() {
     var message: Bytes? = null
     var disconnectReason: DisconnectReason? = null
 
-    override fun connectTo(peerPublicKey: SECP256K1.PublicKey, peerAddress: InetSocketAddress): AsyncResult<String>? {
+    override fun connectTo(
+      peerPublicKey: SECP256K1.PublicKey,
+      peerAddress: InetSocketAddress
+    ): AsyncResult<WireConnection>? {
       return null
     }
 
@@ -219,14 +225,18 @@ constructor() {
         UInt256.ZERO,
         repo
       )
+      val conn = mock(WireConnection::class.java)
+      doReturn("abc").`when`(conn).id()
       handler.handleNewPeerConnection("abc").await()
-      handler.handle("abc", 0, status).await()
-      assertThrows(IllegalStateException::class.java) { runBlocking {
-        handler.handle("abc", 0, status).await()
-      } }
+      handler.handle(conn, 0, status).await()
+      assertThrows(IllegalStateException::class.java) {
+        runBlocking {
+          handler.handle(conn, 0, status).await()
+        }
+      }
 
       assertEquals(DisconnectReason.PROTOCOL_BREACH, service.disconnectReason)
-  }
+    }
 
   @Test
   @Throws(Exception::class)
@@ -253,9 +263,13 @@ constructor() {
       UInt256.ZERO,
       repo
     )
-    assertThrows(IllegalStateException::class.java) { runBlocking {
-      handler.handle("abc", 2, Bytes.random(2)).await()
-    } }
+    assertThrows(IllegalStateException::class.java) {
+      runBlocking {
+        val conn = mock(WireConnection::class.java)
+        doReturn("abc").`when`(conn).id()
+        handler.handle(conn, 2, Bytes.random(2)).await()
+      }
+    }
 
     assertEquals(DisconnectReason.PROTOCOL_BREACH, service.disconnectReason)
   }
@@ -303,11 +317,13 @@ constructor() {
         UInt256.valueOf(5),
         0
       ).toBytes()
+      val conn = mock(WireConnection::class.java)
+      doReturn("abc").`when`(conn).id()
       handler.handleNewPeerConnection("abc").await()
-      handler.handle("abc", 0, status).await()
+      handler.handle(conn, 0, status).await()
 
       handler.handle(
-        "abc",
+        conn,
         2,
         GetBlockHeadersMessage(
           1,
@@ -323,7 +339,7 @@ constructor() {
       ).await()
       val blockHeaders = BlockHeadersMessage.read(service.message!!)
       assertTrue(blockHeaders.blockHeaders.isEmpty())
-  }
+    }
 
   @Test
   @Throws(Exception::class)
@@ -387,12 +403,14 @@ constructor() {
         UInt64.random()
       )
 
+      val conn = mock(WireConnection::class.java)
+      doReturn("abc").`when`(conn).id()
       handler.handleNewPeerConnection("abc").await()
-      handler.handle("abc", 0, status).await()
-      handler.handle("abc", 3, BlockHeadersMessage(1, 2, listOf(header)).toBytes()).await()
+      handler.handle(conn, 0, status).await()
+      handler.handle(conn, 3, BlockHeadersMessage(1, 2, listOf(header)).toBytes()).await()
       val retrieved = repo.retrieveBlockHeader(header.getHash())
       assertEquals(header, retrieved)
-  }
+    }
 
   @Test
   @Throws(Exception::class)
@@ -438,14 +456,16 @@ constructor() {
         0
       ).toBytes()
       handler.handleNewPeerConnection("abc").await()
-      handler.handle("abc", 0, status).await()
+      val conn = mock(WireConnection::class.java)
+      doReturn("abc").`when`(conn).id()
+      handler.handle(conn, 0, status).await()
 
       handler
-        .handle("abc", 4, GetBlockBodiesMessage(1, listOf(Hash.fromBytes(Bytes32.random()))).toBytes()).await()
+        .handle(conn, 4, GetBlockBodiesMessage(1, listOf(Hash.fromBytes(Bytes32.random()))).toBytes()).await()
       val received = service.message
       val blockBodies = BlockBodiesMessage.read(received!!)
       assertTrue(blockBodies.blockBodies.isEmpty())
-  }
+    }
 
   @Test
   @Throws(Exception::class)
@@ -490,11 +510,13 @@ constructor() {
         UInt256.valueOf(5),
         0
       ).toBytes()
+      val conn = mock(WireConnection::class.java)
+      doReturn("abc").`when`(conn).id()
       handler.handleNewPeerConnection("abc").await()
-      handler.handle("abc", 0, status).await()
+      handler.handle(conn, 0, status).await()
 
       handler
-        .handle("abc", 4, GetReceiptsMessage(1, listOf(Hash.fromBytes(Bytes32.random()))).toBytes()).await()
+        .handle(conn, 4, GetReceiptsMessage(1, listOf(Hash.fromBytes(Bytes32.random()))).toBytes()).await()
       val received = service.message
       val receipts = ReceiptsMessage.read(received!!)
       assertTrue(receipts.receipts.isEmpty())
