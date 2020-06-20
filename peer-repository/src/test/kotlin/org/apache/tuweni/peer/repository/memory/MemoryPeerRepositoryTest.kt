@@ -20,9 +20,11 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @ExtendWith(BouncyCastleExtension::class)
 class MemoryPeerRepositoryTest {
@@ -46,5 +48,15 @@ class MemoryPeerRepositoryTest {
 
     repo.markConnectionInactive(peer, identity)
     assertEquals(0, identity.activePeers().size)
+  }
+
+  @Test
+  fun testLastContacted() {
+    val repo = MemoryPeerRepository()
+    val identity = repo.storeIdentity("0.0.0.0", 12345, SECP256K1.KeyPair.random())
+    val fiveSecondsAgo = Instant.now().minus(5, ChronoUnit.SECONDS)
+    val peer = repo.storePeer("abc", fiveSecondsAgo, Instant.now())
+    repo.addConnection(peer, identity)
+    assertTrue(peer.lastContacted()!!.isAfter(fiveSecondsAgo))
   }
 }

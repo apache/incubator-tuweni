@@ -50,9 +50,11 @@ class MemoryPeerRepository : PeerRepository {
   }
 
   override fun addConnection(peer: Peer, identity: Identity) {
+    val now = Instant.now()
     val conn = MemoryConnection(true, peer, identity)
     connections[createConnectionKey(peer, identity)] = conn
     (peer as MemoryPeer).connections.add(conn)
+    peer.lastContacted = now
     (identity as MemoryIdentity).connections.add(conn)
   }
 
@@ -66,7 +68,7 @@ class MemoryPeerRepository : PeerRepository {
 
 internal data class MemoryPeer(
   private val id: String,
-  internal val lastContacted: Instant?,
+  internal var lastContacted: Instant?,
   internal val lastDiscovered: Instant?,
   internal val connections: MutableList<Connection> = mutableListOf()
 ) : Peer {
