@@ -40,6 +40,14 @@ pipeline {
                 }
             }
         }
+        stage('Check source build') {
+            steps {
+                timeout(time: 60, unit: 'MINUTES') {
+                    sh "unzip build/distributions/tuweni-src-*.zip -d distsrc"
+                    sh "cd distsrc && ./build.sh"
+                }
+            }
+        }
         stage('Publish') {
             steps {
                 timeout(time: 30, unit: 'MINUTES') {
