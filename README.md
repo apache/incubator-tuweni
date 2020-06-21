@@ -25,8 +25,21 @@ Install [Docker](https://docs.docker.com/get-docker/).
     git submodule update --init --recursive
 
 ### Build the project ###
+#### One step build ####
+Requires Docker:
     ./build.sh
+#### With Gradle and Java ####
+Install Gradle >6 and JDK 11.
 
+Run:
+
+`$>gradle setup`
+
+It will install the Gradle wrapper with the correct version.
+
+Then build:
+
+`$>./gradlew build`
 
 After a successful build, libraries will be available in `build/libs`.
 
