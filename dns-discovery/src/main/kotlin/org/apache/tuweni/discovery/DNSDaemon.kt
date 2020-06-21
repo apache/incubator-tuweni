@@ -34,7 +34,7 @@ import java.util.TimerTask
  */
 public class DNSDaemon @JvmOverloads constructor(
   private val enrLink: String,
-  val listeners: Set<(List<EthereumNodeRecord>) -> Unit> = HashSet(),
+  val listeners: Set<(Long, List<EthereumNodeRecord>) -> Unit> = HashSet(),
   private val seq: Long = 0,
   private val period: Long = 60000L,
   private val dnsServer: String? = null,
@@ -47,7 +47,7 @@ public class DNSDaemon @JvmOverloads constructor(
   }
 
   private fun updateRecords(records: List<EthereumNodeRecord>) {
-    listeners.forEach { it(records) }
+    listeners.forEach { it(seq, records) }
   }
 
   /**

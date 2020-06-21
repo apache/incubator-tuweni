@@ -34,7 +34,6 @@ import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.eth.EthSubprotocol
 import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
 import org.apache.tuweni.devp2p.eth.StatusMessage
-import org.apache.tuweni.discovery.DNSDaemon
 import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
@@ -115,15 +114,6 @@ class EthClient(override val coroutineContext: CoroutineContext = Dispatchers.Un
       services.add(service)
       service.start()
     }).await()
-
-    val dnsDaemon = DNSDaemon(
-      enrLink = "enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@all.mainnet.ethdisco.net",
-      period = 30000,
-      listeners = setOf { enrs ->
-
-        enrs.forEach { this.enrs[it] = PeerStatus(null, null, null, null) }
-      }
-    )
 
     vertx.setPeriodic(10000) {
       printServices()
