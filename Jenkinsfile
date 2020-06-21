@@ -43,8 +43,8 @@ pipeline {
         stage('Check source build') {
             steps {
                 timeout(time: 60, unit: 'MINUTES') {
-                    sh "unzip build/distributions/tuweni-src-*.zip -d distsrc"
-                    sh "cd distsrc && ./build.sh"
+                    sh "unzip dist/build/distributions/tuweni-src-*.zip -d distsrc"
+                    sh "cd distsrc/$(ls distsrc) && ./build.sh"
                 }
             }
         }
