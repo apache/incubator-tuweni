@@ -33,27 +33,29 @@ pipeline {
                 }
             }
         }
-        stage('Build') {
+        stage('Integration tests') {
             steps {
                 timeout(time: 60, unit: 'MINUTES') {
-                    sh "./gradlew clean allDependencies checkLicenses spotlessCheck assemble test integrationTest"
+                    sh "./gradlew clean integrationTest sourcesDistZip distZip"
                 }
             }
         }
         stage('Check source build') {
             steps {
                 timeout(time: 60, unit: 'MINUTES') {
-                    sh "unzip build/distributions/tuweni-src-*.zip -d distsrc"
-                    sh "cd distsrc && ./build.sh"
+                    sh "unzip dist/build/distributions/tuweni-src-*.zip -d distsrc"
+                    sh "cd distsrc/$(ls distsrc) && ./build.sh"
                 }
             }
         }
+        if(env.BRANCH_NAME == 'master'){
         stage('Publish') {
             steps {
                 timeout(time: 30, unit: 'MINUTES') {
                     sh "./gradlew publish"
                 }
             }
+        }
         }
     }
     post {
