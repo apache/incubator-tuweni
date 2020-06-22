@@ -48,12 +48,14 @@ pipeline {
                 }
             }
         }
+        if(env.BRANCH_NAME == 'master'){
         stage('Publish') {
             steps {
                 timeout(time: 30, unit: 'MINUTES') {
                     sh "./gradlew publish"
                 }
             }
+        }
         }
     }
     post {
