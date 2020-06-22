@@ -43,7 +43,7 @@ pipeline {
         stage('Check source build') {
             steps {
                 timeout(time: 60, unit: 'MINUTES') {
-                    sh "./gradlew distZip"
+                    sh "./gradlew sourcesDistZip"
                     sh "unzip dist/build/distributions/tuweni-src-*.zip -d distsrc"
                     sh "cd distsrc/$(ls distsrc) && ./build.sh"
                 }
