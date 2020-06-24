@@ -57,7 +57,7 @@ jobs:
       - name: Set up GPG key
         run: gpg --import gradle/tuweni-test.asc
       - name: Add GPG key to gradle.properties
-        run: echo "signing.keyId=38F6C7215DD49C32" >> gradle.properties
+        run: echo "signatory.keyId=38F6C7215DD49C32" >> gradle.properties
       - name: Cache Maven Repository
         uses: actions/cache@v1
         with:

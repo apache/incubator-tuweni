@@ -94,6 +94,7 @@ if (file('.git').exists()) {
       // And some of the files that we have checked in should also be excluded from this check
       list.addAll([
         '.*\\.asc',
+        'gradle/.*\\.asc',
         '\\w+/out/.*',
         'eth-reference-tests/**',
         'build',
