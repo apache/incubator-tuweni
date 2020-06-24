@@ -557,7 +557,7 @@ allprojects {
     signing {
       useGpgCmd()
       sign configurations.archives
-      sign publishing.publications.MavenPublication
+      sign publishing.publications.MavenDeployment
     }
 
     tasks.withType(Sign) {
