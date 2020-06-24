@@ -383,11 +383,6 @@ allprojects {
       archives dokkaJar
     }
 
-    signing {
-      useGpgCmd()
-      sign configurations.archives
-    }
-
     publishing {
       repositories {
         maven {
@@ -557,6 +552,12 @@ allprojects {
           }
         }
       }
+    }
+
+    signing {
+      useGpgCmd()
+      sign configurations.archives
+      sign publishing.publications.MavenPublication
     }
 
     tasks.withType(Sign) {
