@@ -56,8 +56,6 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
       - name: Set up GPG key
         run: gpg --import gradle/tuweni-test.asc
-      - name: Add GPG key to gradle.properties
-        run: echo "signatory.keyId=38F6C7215DD49C32" >> gradle.properties
       - name: Cache Maven Repository
         uses: actions/cache@v1
         with:
@@ -70,7 +68,7 @@ jobs:
           ENABLE_SIGNING: true
         with:
           gradle-version: 6.3
-          arguments: assemble -x test
+          arguments: assemble -x test -Psignatory.keyId=38F6C7215DD49C32
       - name: Upload build
         uses: actions/upload-artifact@v1
         with:
