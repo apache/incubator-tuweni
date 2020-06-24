@@ -55,9 +55,9 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
       - name: Set up GPG key
-        run: gpg --import gradle/tuweni-test.asc && \
-             echo "signing.keyId=38F6C7215DD49C32" >> gradle.properties && \
-             echo "signing.gnupg.keyName=38F6C7215DD49C32" >> gradle.properties
+        run: gpg --import gradle/tuweni-test.asc
+      - name: Add GPG key to gradle.properties
+        run: echo "signing.keyId=38F6C7215DD49C32" >> gradle.properties
       - name: Cache Maven Repository
         uses: actions/cache@v1
         with:
