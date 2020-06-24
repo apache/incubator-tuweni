@@ -68,7 +68,7 @@ jobs:
           ENABLE_SIGNING: true
         with:
           gradle-version: 6.3
-          arguments: assemble -x test -Psignatory.keyId=38F6C7215DD49C32 -Psigning.gnupg.keyName=38F6C7215DD49C32
+          arguments: assemble -x test -Psignatory.keyId=38F6C7215DD49C32 -Psigning.gnupg.keyName=38F6C7215DD49C32 -Psigning.gnupg.executable=gpg
       - name: Upload build
         uses: actions/upload-artifact@v1
         with:
