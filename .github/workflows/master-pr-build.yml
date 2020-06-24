@@ -27,7 +27,7 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     container:
-      image: tmio/tuweni-build:1.0
+      image: tmio/tuweni-build:1.1
     steps:
       - uses: actions/checkout@v1
         with:
@@ -43,7 +43,7 @@ jobs:
   assemble:
     runs-on: ubuntu-latest
     container:
-      image: tmio/tuweni-build:1.0
+      image: tmio/tuweni-build:1.1
     steps:
       - uses: actions/checkout@v1
         with:
@@ -79,7 +79,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container:
-      image: tmio/tuweni-build:1.0
+      image: tmio/tuweni-build:1.1
     steps:
       - uses: actions/checkout@v1
         with:
