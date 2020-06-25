@@ -96,7 +96,7 @@ jobs:
       - name: Unzip source
         run: unzip -o dist/build/distributions/tuweni-src-*.zip -d distsrc
       - name: Build from source
-        run: cd distsrc/$(ls distsrc) && gradle setup
+        run: cd distsrc/$(ls distsrc) && gradle setup && ./gradlew assemble
   test:
     runs-on: ubuntu-latest
     container:
@@ -128,7 +128,7 @@ jobs:
           name: Reports
           path: "**/build/reports"
       - name: Upload to Codecov
-        run: bash <(curl -s https://codecov.io/bash)
+        uses: codecov/codecov-action@v1
   integration-tests:
     runs-on: ubuntu-latest
     container:
