@@ -13,5 +13,4 @@
 pushd gradle/docker
 docker build -t tuweni_test -f test.Dockerfile ../..
 popd
-docker run tuweni_test bash -c 'gradle --version >> /dev/null && gradle -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m" test'
-docker run -v `pwd`/build/libs:/home/gradle/build/libs tuweni_test bash -c 'gradle --version >> /dev/null && gradle -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetcaspaceSize=512m" assemble integrationTest -x test'
+docker run -v `pwd`/build/libs:/home/gradle/build/libs tuweni_test bash -c 'gradle -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m" assemble'

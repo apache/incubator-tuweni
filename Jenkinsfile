@@ -33,22 +33,6 @@ pipeline {
                 }
             }
         }
-        stage('Integration tests') {
-            steps {
-                timeout(time: 60, unit: 'MINUTES') {
-                    sh "./gradlew clean integrationTest sourcesDistZip distZip"
-                }
-            }
-        }
-        stage('Check source build') {
-            steps {
-                timeout(time: 60, unit: 'MINUTES') {
-                    sh "rm -Rf distsrc"
-                    sh "unzip -o dist/build/distributions/tuweni-src-*.zip -d distsrc"
-                    sh 'cd distsrc/$(ls distsrc) && ./build.sh'
-                }
-            }
-        }
         stage('Publish') {
             when {
                 branch 'master'
