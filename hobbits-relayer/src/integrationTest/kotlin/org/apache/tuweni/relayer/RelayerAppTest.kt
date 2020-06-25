@@ -40,7 +40,7 @@ class RelayerAppTest {
     val client2 = HobbitsTransport(vertx)
     RelayerApp.main(arrayOf("-b", "tcp://localhost:21000", "-t", "tcp://0.0.0.0:22000"))
     runBlocking {
-      client1.createTCPEndpoint("foo", port = 22000, handler = ref::set)
+      client1.createTCPEndpoint("foo", networkInterface = "127.0.0.1", port = 22000, handler = ref::set)
       client1.start()
       client2.start()
       client2.sendMessage(

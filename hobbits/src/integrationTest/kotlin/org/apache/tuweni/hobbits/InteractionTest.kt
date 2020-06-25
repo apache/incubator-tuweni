@@ -38,7 +38,7 @@ class TCPPersistentTest {
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
     runBlocking {
-      client1.createTCPEndpoint("foo", port = 0, handler = ref::set, portUpdateListener = newPort::set)
+      client1.createTCPEndpoint("foo", networkInterface = "127.0.0.1", port = 0, handler = ref::set, portUpdateListener = newPort::set)
       client1.start()
       client2.start()
       client2.sendMessage(
@@ -62,7 +62,7 @@ class TCPPersistentTest {
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
     runBlocking {
-      client1.createTCPEndpoint("foo", port = 0, handler = ref::set, tls = true, portUpdateListener = newPort::set)
+      client1.createTCPEndpoint("foo", networkInterface = "127.0.0.1", port = 0, handler = ref::set, tls = true, portUpdateListener = newPort::set)
       client1.start()
       client2.start()
       client2.sendMessage(
@@ -87,8 +87,8 @@ class TCPPersistentTest {
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
     runBlocking {
-      client1.createTCPEndpoint("foo", port = 0, handler = ref::set, portUpdateListener = newPort::set)
-      client1.createTCPEndpoint("bar", port = 0, handler = ref2::set, portUpdateListener = newPort2::set)
+      client1.createTCPEndpoint("foo", networkInterface = "127.0.0.1", port = 0, handler = ref::set, portUpdateListener = newPort::set)
+      client1.createTCPEndpoint("bar", networkInterface = "127.0.0.1", port = 0, handler = ref2::set, portUpdateListener = newPort2::set)
       client1.start()
       client2.start()
       client2.sendMessage(
@@ -122,7 +122,7 @@ class HTTPTest {
     val newPort = AtomicInteger()
 
     runBlocking {
-      client1.createHTTPEndpoint("foo", port = 0, handler = ref::set, portUpdateListener = newPort::set)
+      client1.createHTTPEndpoint("foo", networkInterface = "127.0.0.1", port = 0, handler = ref::set, portUpdateListener = newPort::set)
       client1.start()
       client2.start()
       client2.sendMessage(Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"),
@@ -143,8 +143,8 @@ class HTTPTest {
     val newPort = AtomicInteger()
     val newPort2 = AtomicInteger()
     runBlocking {
-      client1.createHTTPEndpoint("foo", port = 0, handler = ref::set, portUpdateListener = newPort::set)
-      client1.createHTTPEndpoint("bar", port = 0, handler = ref2::set, portUpdateListener = newPort2::set)
+      client1.createHTTPEndpoint("foo", networkInterface = "127.0.0.1", port = 0, handler = ref::set, portUpdateListener = newPort::set)
+      client1.createHTTPEndpoint("bar", networkInterface = "127.0.0.1", port = 0, handler = ref2::set, portUpdateListener = newPort2::set)
       client1.start()
       client2.start()
       client2.sendMessage(
@@ -232,7 +232,7 @@ class WebSocketTest {
     val newPort = AtomicInteger()
 
     runBlocking {
-      client1.createWSEndpoint("foo", port = 0, handler = ref::set, portUpdateListener = newPort::set)
+      client1.createWSEndpoint("foo", networkInterface = "127.0.0.1", port = 0, handler = ref::set, portUpdateListener = newPort::set)
       client1.start()
       client2.start()
       client2.sendMessage(Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"),
@@ -255,8 +255,8 @@ class WebSocketTest {
     runBlocking {
       client1.exceptionHandler { it.printStackTrace() }
       client2.exceptionHandler { it.printStackTrace() }
-      client1.createWSEndpoint("foo", port = 0, handler = ref::set, portUpdateListener = newPort::set)
-      client1.createWSEndpoint("bar", port = 0, handler = ref2::set, portUpdateListener = newPort2::set)
+      client1.createWSEndpoint("foo", networkInterface = "127.0.0.1", port = 0, handler = ref::set, portUpdateListener = newPort::set)
+      client1.createWSEndpoint("bar", networkInterface = "127.0.0.1", port = 0, handler = ref2::set, portUpdateListener = newPort2::set)
       client1.start()
       client2.start()
       client2.sendMessage(

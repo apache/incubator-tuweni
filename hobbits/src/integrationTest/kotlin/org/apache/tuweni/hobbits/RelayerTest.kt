@@ -36,7 +36,7 @@ class RelayerTest {
     val client2 = HobbitsTransport(vertx)
     val relayer = Relayer(vertx, "tcp://localhost:22000", "tcp://0.0.0.0:20000", { })
     runBlocking {
-      client1.createTCPEndpoint("foo", port = 20000, handler = ref::set)
+      client1.createTCPEndpoint("foo", networkInterface = "127.0.0.1", port = 20000, handler = ref::set)
       client1.start()
       client2.start()
       relayer.start()
@@ -61,7 +61,7 @@ class RelayerTest {
     val client2 = HobbitsTransport(vertx)
     val relayer = Relayer(vertx, "http://localhost:13000", "http://0.0.0.0:11000", { })
     runBlocking {
-      client1.createHTTPEndpoint("foo", port = 11000, handler = ref::set)
+      client1.createHTTPEndpoint("foo", networkInterface = "127.0.0.1", port = 11000, handler = ref::set)
       client1.start()
       client2.start()
       relayer.start()
