@@ -44,7 +44,7 @@ class TCPPersistentTest {
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
-        "0.0.0.0",
+        "127.0.0.1",
         newPort.get()
       )
     }
@@ -68,7 +68,7 @@ class TCPPersistentTest {
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
-        "0.0.0.0",
+        "127.0.0.1",
         newPort.get()
       )
     }
@@ -94,13 +94,13 @@ class TCPPersistentTest {
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
-        "0.0.0.0",
+        "127.0.0.1",
         newPort.get()
       )
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
-        "0.0.0.0",
+        "127.0.0.1",
         newPort2.get()
       )
     }
@@ -126,7 +126,7 @@ class HTTPTest {
       client1.start()
       client2.start()
       client2.sendMessage(Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"),
-        headers = Bytes.random(16)), Transport.HTTP, "0.0.0.0", newPort.get())
+        headers = Bytes.random(16)), Transport.HTTP, "127.0.0.1", newPort.get())
     }
     Thread.sleep(200)
     assertEquals(Bytes.fromHexString("deadbeef"), ref.get().body)
@@ -150,13 +150,13 @@ class HTTPTest {
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.HTTP,
-        "0.0.0.0",
+        "127.0.0.1",
         newPort.get()
       )
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.HTTP,
-        "0.0.0.0",
+        "127.0.0.1",
         newPort2.get()
       )
     }
@@ -236,7 +236,7 @@ class WebSocketTest {
       client1.start()
       client2.start()
       client2.sendMessage(Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"),
-        headers = Bytes.random(16)), Transport.WS, "0.0.0.0", newPort.get())
+        headers = Bytes.random(16)), Transport.WS, "127.0.0.1", newPort.get())
     }
     Thread.sleep(200)
     assertEquals(Bytes.fromHexString("deadbeef"), ref.get().body)
@@ -262,13 +262,13 @@ class WebSocketTest {
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.WS,
-        "0.0.0.0",
+        "127.0.0.1",
         newPort.get()
       )
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.WS,
-        "0.0.0.0",
+        "127.0.0.1",
         newPort2.get()
       )
     }
