@@ -121,12 +121,14 @@ jobs:
         uses: eskatos/gradle-command-action@v1
         with:
           gradle-version: 6.3
-          arguments: test
+          arguments: test jacocoTestReport
       - name: Upload test reports
         uses: actions/upload-artifact@v2
         with:
           name: Reports
           path: "**/build/reports"
+      - name: Upload to Codecov
+        run: bash <(curl -s https://codecov.io/bash)
   integration-tests:
     runs-on: ubuntu-latest
     container:

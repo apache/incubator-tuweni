@@ -241,8 +241,6 @@ allprojects {
   sourceCompatibility = '1.11'
   targetCompatibility = '1.11'
 
-  jacoco { toolVersion = '0.8.5' }
-
   dependencies {
     errorprone 'com.google.errorprone:error_prone_core'
     if (JavaVersion.current().isJava8()) {
@@ -284,6 +282,13 @@ allprojects {
 
       disableWarningsInGeneratedCode = true
     }
+
+    jacocoTestReport {
+      reports {
+        xml.enabled true
+        html.enabled true
+      }
+    }
   }
 
   tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
@@ -295,6 +300,13 @@ allprojects {
         '-Xjvm-default=enable',
         '-Xuse-experimental=kotlin.Experimental'
       ]
+    }
+
+    jacocoTestReport {
+      reports {
+        xml.enabled true
+        html.enabled true
+      }
     }
   }
 
