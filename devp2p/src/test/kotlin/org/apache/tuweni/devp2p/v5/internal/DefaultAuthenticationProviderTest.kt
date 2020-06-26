@@ -31,7 +31,7 @@ import java.net.InetAddress
 class DefaultAuthenticationProviderTest {
 
   private val providerKeyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
-  private val providerEnr: Bytes = EthereumNodeRecord.toRLP(providerKeyPair, ip = InetAddress.getLocalHost())
+  private val providerEnr: Bytes = EthereumNodeRecord.toRLP(providerKeyPair, ip = InetAddress.getLoopbackAddress())
   private val routingTable: RoutingTable = RoutingTable(providerEnr)
   private val authenticationProvider = DefaultAuthenticationProvider(providerKeyPair, routingTable)
 
@@ -40,7 +40,7 @@ class DefaultAuthenticationProviderTest {
     val keyPair = SECP256K1.KeyPair.random()
     val nonce = Bytes.fromHexString("0x012715E4EFA2464F51BE49BBC40836E5816B3552249F8AC00AD1BBDB559E44E9")
     val authTag = Bytes.fromHexString("0x39BBC27C8CFA3735DF436AC6")
-    val destEnr = EthereumNodeRecord.toRLP(keyPair, ip = InetAddress.getLocalHost())
+    val destEnr = EthereumNodeRecord.toRLP(keyPair, ip = InetAddress.getLoopbackAddress())
     val params = HandshakeInitParameters(nonce, authTag, destEnr)
 
     val result = authenticationProvider.authenticate(params)
@@ -60,7 +60,7 @@ class DefaultAuthenticationProviderTest {
     val keyPair = SECP256K1.KeyPair.random()
     val nonce = Bytes.fromHexString("0x012715E4EFA2464F51BE49BBC40836E5816B3552249F8AC00AD1BBDB559E44E9")
     val authTag = Bytes.fromHexString("0x39BBC27C8CFA3735DF436AC6")
-    val destEnr = EthereumNodeRecord.toRLP(keyPair, ip = InetAddress.getLocalHost())
+    val destEnr = EthereumNodeRecord.toRLP(keyPair, ip = InetAddress.getLoopbackAddress())
     val clientRoutingTable = RoutingTable(destEnr)
     val params = HandshakeInitParameters(nonce, authTag, providerEnr)
     val destNodeId = Hash.sha2_256(destEnr)

@@ -12,4 +12,4 @@
 # Build image used for github actions
 FROM gradle:6.3-jdk11
 
-RUN apt-get update && apt-get install -y libsodium-dev && apt-get clean
+RUN apt-get update && apt-get install -y libsodium-dev gpg && apt-get clean

@@ -66,7 +66,10 @@ class TopicIntegrationTest : AbstractIntegrationTest() {
 
     val topic = Topic("0x41")
     node2.topicTable.put(topic, node2.enr)
-    node2.topicTable.put(topic, EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLocalHost()))
+    node2.topicTable.put(
+      topic,
+      EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress())
+    )
     val requestId = UdpMessage.requestId()
     val message = RegTopicMessage(requestId, node1.enr, topic.toBytes(), Bytes.EMPTY)
     val ticketMessage = sendAndAwait<TicketMessage>(node1, node2, message)

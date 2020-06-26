@@ -25,7 +25,7 @@ class PongMessageTest {
   @Test
   fun encodeCreatesValidBytesSequence() {
     val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
-    val message = PongMessage(requestId, 0, InetAddress.getLocalHost(), 9090)
+    val message = PongMessage(requestId, 0, InetAddress.getLoopbackAddress(), 9090)
 
     val encodingResult = message.encode()
 
@@ -39,7 +39,7 @@ class PongMessageTest {
 
   @Test
   fun getMessageTypeHasValidIndex() {
-    val message = PongMessage(recipientIp = InetAddress.getLocalHost(), recipientPort = 9090)
+    val message = PongMessage(recipientIp = InetAddress.getLoopbackAddress(), recipientPort = 9090)
 
     assert(2 == message.getMessageType().toInt())
   }

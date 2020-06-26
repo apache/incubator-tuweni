@@ -40,14 +40,16 @@ class ScuttlebuttLocalDiscoveryServiceTest {
 
   @Test
   void startStop(@VertxInstance Vertx vertx) throws Exception {
-    ScuttlebuttLocalDiscoveryService service = new ScuttlebuttLocalDiscoveryService(vertx, 0, "0.0.0.0", "233.0.10.0");
+    ScuttlebuttLocalDiscoveryService service =
+        new ScuttlebuttLocalDiscoveryService(vertx, 0, "127.0.0.1", "233.0.10.0");
     service.start().join();
     service.stop().join();
   }
 
   @Test
   void startStart(@VertxInstance Vertx vertx) throws Exception {
-    ScuttlebuttLocalDiscoveryService service = new ScuttlebuttLocalDiscoveryService(vertx, 0, "0.0.0.0", "233.0.10.0");
+    ScuttlebuttLocalDiscoveryService service =
+        new ScuttlebuttLocalDiscoveryService(vertx, 0, "127.0.0.1", "233.0.10.0");
     service.start().join();
     service.start().join();
     service.stop().join();
@@ -57,12 +59,13 @@ class ScuttlebuttLocalDiscoveryServiceTest {
   void invalidMulticastAddress(@VertxInstance Vertx vertx) throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new ScuttlebuttLocalDiscoveryService(vertx, 8008, "0.0.0.0", "10.0.0.0"));
+        () -> new ScuttlebuttLocalDiscoveryService(vertx, 8008, "127.0.0.1", "10.0.0.0"));
   }
 
   @Test
   void stopFirst(@VertxInstance Vertx vertx) throws Exception {
-    ScuttlebuttLocalDiscoveryService service = new ScuttlebuttLocalDiscoveryService(vertx, 0, "0.0.0.0", "233.0.10.0");
+    ScuttlebuttLocalDiscoveryService service =
+        new ScuttlebuttLocalDiscoveryService(vertx, 0, "127.0.0.1", "233.0.10.0");
     service.stop().join();
     service.start().join();
     service.stop().join();

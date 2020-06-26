@@ -53,7 +53,7 @@ public final class RedisServerExtension implements ParameterResolver, AfterAllCa
     int port = range;
     while (port < range + 100) {
       try {
-        ServerSocket socket = new ServerSocket(port, 0, InetAddress.getLocalHost());
+        ServerSocket socket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
         socket.setReuseAddress(false);
         socket.close();
         return port;

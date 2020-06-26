@@ -52,7 +52,7 @@ internal class CoroutineDatagramChannelTest {
     didBlock = true
 
     val socket = DatagramSocket()
-    socket.connect(InetAddress.getLocalHost(), (channel.localAddress as InetSocketAddress).port)
+    socket.connect(InetAddress.getLoopbackAddress(), (channel.localAddress as InetSocketAddress).port)
 
     val testData = byteArrayOf(1, 2, 3, 4, 5)
     socket.send(DatagramPacket(testData, 5))
@@ -72,7 +72,7 @@ internal class CoroutineDatagramChannelTest {
     val socket = DatagramSocket()
 
     val channel = CoroutineDatagramChannel.open()
-    val address = InetSocketAddress(InetAddress.getLocalHost(), socket.localPort)
+    val address = InetSocketAddress(InetAddress.getLoopbackAddress(), socket.localPort)
 
     val testData = byteArrayOf(1, 2, 3, 4, 5)
     val src = ByteBuffer.wrap(testData)

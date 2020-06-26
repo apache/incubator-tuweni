@@ -55,7 +55,7 @@ class DefaultUdpConnectorTest {
 
   @BeforeEach
   fun setUp() {
-    val address = InetSocketAddress(9090 + counter)
+    val address = InetSocketAddress(InetAddress.getLoopbackAddress(), 9090 + counter)
     val keyPair = SECP256K1.KeyPair.random()
     val selfEnr = EthereumNodeRecord.toRLP(keyPair, ip = address.address)
     connector = DefaultUdpConnector(address, keyPair, selfEnr)
@@ -97,7 +97,7 @@ class DefaultUdpConnectorTest {
 
     val destNodeId = Bytes.random(32)
 
-    val receiverAddress = InetSocketAddress(InetAddress.getLocalHost(), 5000)
+    val receiverAddress = InetSocketAddress(InetAddress.getLoopbackAddress(), 5000)
     val socketChannel = CoroutineDatagramChannel.open()
     socketChannel.bind(receiverAddress)
 
@@ -119,6 +119,7 @@ class DefaultUdpConnectorTest {
   @ExperimentalCoroutinesApi
   @Test
   fun attachObserverRegistersListener() = runBlocking {
+    println("yup")
     val observer = object : MessageObserver {
       var result: Channel<RandomMessage> = Channel()
       override fun observe(message: UdpMessage) {
@@ -127,19 +128,27 @@ class DefaultUdpConnectorTest {
         }
       }
     }
+    println("yup1")
     connector!!.attachObserver(observer)
+    println("yup2")
     connector!!.start()
+    println("yup3")
     assertTrue(observer.result.isEmpty)
     val codec = DefaultPacketCodec(
       SECP256K1.KeyPair.random(),
       RoutingTable(Bytes.random(32))
     )
+    println("yup4")
     val socketChannel = CoroutineDatagramChannel.open()
+    println("yup5")
     val message = RandomMessage()
+    println("yup6")
     val encodedRandomMessage = codec.encode(message, Hash.sha2_256(connector!!.getEnrBytes()))
     val buffer = ByteBuffer.wrap(encodedRandomMessage.content.toArray())
-    socketChannel.send(buffer, InetSocketAddress(InetAddress.getLocalHost(), 9090))
+    socketChannel.send(buffer, InetSocketAddress(InetAddress.getLoopbackAddress(), 9090))
+    println("yup7")
     val expectedResult = observer.result.receive()
+    println("yup8")
     assertEquals(expectedResult.data, message.data)
   }
 
@@ -166,7 +175,7 @@ class DefaultUdpConnectorTest {
     val message = RandomMessage()
     val encodedRandomMessage = codec.encode(message, Hash.sha2_256(connector!!.getEnrBytes()))
     val buffer = ByteBuffer.wrap(encodedRandomMessage.content.toArray())
-    socketChannel.send(buffer, InetSocketAddress(InetAddress.getLocalHost(), 9090))
+    socketChannel.send(buffer, InetSocketAddress(InetAddress.getLoopbackAddress(), 9090 + counter))
     assertTrue(observer.result.isEmpty)
   }
 }
