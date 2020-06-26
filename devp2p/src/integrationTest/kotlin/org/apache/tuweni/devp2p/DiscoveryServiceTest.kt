@@ -170,7 +170,7 @@ internal class DiscoveryServiceTest {
   @Test
   fun shouldPingBootstrapNodeWithAdvertisedAddress() = runBlocking {
     val bootstrapKeyPair = SECP256K1.KeyPair.random()
-    val boostrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress(0))
+    val boostrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress("localhost", 0))
 
     val discoveryService = DiscoveryService.open(
       keyPair = SECP256K1.KeyPair.random(),
@@ -193,7 +193,7 @@ internal class DiscoveryServiceTest {
   @Test
   fun shouldRetryPingsToBootstrapNodes() = runBlocking {
     val bootstrapKeyPair = SECP256K1.KeyPair.random()
-    val boostrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress(0))
+    val boostrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress("localhost", 0))
 
     val discoveryService = DiscoveryService.open(
       keyPair = SECP256K1.KeyPair.random(),
