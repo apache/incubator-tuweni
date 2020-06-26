@@ -75,7 +75,7 @@ internal class DiscoveryServiceTest {
       keyPair = SECP256K1.KeyPair.random(),
       peerRepository = peerRepository
     )
-    val address = InetSocketAddress(InetAddress.getLocalHost(), discoveryService.localPort)
+    val address = InetSocketAddress(InetAddress.getLoopbackAddress(), discoveryService.localPort)
 
     val clientKeyPair = SECP256K1.KeyPair.random()
     val client = CoroutineDatagramChannel.open()
@@ -97,7 +97,7 @@ internal class DiscoveryServiceTest {
   @Test
   fun shouldPingBootstrapNodeAndValidate() = runBlocking {
     val bootstrapKeyPair = SECP256K1.KeyPair.random()
-    val bootstrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress(0))
+    val bootstrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress("127.0.0.1", 0))
 
     val serviceKeyPair = SECP256K1.KeyPair.random()
     val peerRepository = EphemeralPeerRepository()
@@ -111,7 +111,7 @@ internal class DiscoveryServiceTest {
       peerRepository = peerRepository,
       routingTable = routingTable
     )
-    val address = InetSocketAddress(InetAddress.getLocalHost(), discoveryService.localPort)
+    val address = InetSocketAddress(InetAddress.getLoopbackAddress(), discoveryService.localPort)
 
     val ping = bootstrapClient.receivePacket() as PingPacket
     assertEquals(discoveryService.nodeId, ping.nodeId)
@@ -139,7 +139,7 @@ internal class DiscoveryServiceTest {
   @Test
   fun shouldIgnoreBootstrapNodeRespondingWithDifferentNodeId() = runBlocking {
     val bootstrapKeyPair = SECP256K1.KeyPair.random()
-    val bootstrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress(0))
+    val bootstrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress("127.0.0.1", 0))
 
     val serviceKeyPair = SECP256K1.KeyPair.random()
     val peerRepository = EphemeralPeerRepository()
@@ -153,7 +153,7 @@ internal class DiscoveryServiceTest {
       peerRepository = peerRepository,
       routingTable = routingTable
     )
-    val address = InetSocketAddress(InetAddress.getLocalHost(), discoveryService.localPort)
+    val address = InetSocketAddress(InetAddress.getLoopbackAddress(), discoveryService.localPort)
 
     val ping = bootstrapClient.receivePacket() as PingPacket
     assertEquals(discoveryService.nodeId, ping.nodeId)
@@ -232,7 +232,7 @@ internal class DiscoveryServiceTest {
       keyPair = SECP256K1.KeyPair.random(),
       peerRepository = peerRepository
     )
-    val address = InetSocketAddress(InetAddress.getLocalHost(), discoveryService.localPort)
+    val address = InetSocketAddress(InetAddress.getLoopbackAddress(), discoveryService.localPort)
 
     val clientKeyPair = SECP256K1.KeyPair.random()
     val client = CoroutineDatagramChannel.open()

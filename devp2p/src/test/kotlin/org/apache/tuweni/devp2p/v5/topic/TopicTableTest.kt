@@ -28,7 +28,7 @@ import java.net.InetAddress
 @ExtendWith(BouncyCastleExtension::class)
 class TopicTableTest {
   private val keyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
-  private val enr: Bytes = EthereumNodeRecord.toRLP(keyPair, ip = InetAddress.getLocalHost())
+  private val enr: Bytes = EthereumNodeRecord.toRLP(keyPair, ip = InetAddress.getLoopbackAddress())
 
   private val topicTable = TopicTable(TABLE_CAPACITY, QUEUE_CAPACITY)
 
@@ -43,8 +43,8 @@ class TopicTableTest {
   @Test
   fun putAddNodeToNotEmptyQueueShouldReturnWaitingTime() {
     val topic = Topic("A")
-    topicTable.put(topic, EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLocalHost()))
-    topicTable.put(topic, EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLocalHost()))
+    topicTable.put(topic, EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress()))
+    topicTable.put(topic, EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress()))
 
     val waitTime = topicTable.put(topic, enr)
 
@@ -64,8 +64,8 @@ class TopicTableTest {
   @Test
   fun getNodesReturnNodesThatProvidesTopic() {
     val topic = Topic("A")
-    topicTable.put(topic, EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLocalHost()))
-    topicTable.put(topic, EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLocalHost()))
+    topicTable.put(topic, EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress()))
+    topicTable.put(topic, EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress()))
 
     val nodes = topicTable.getNodes(topic)
 

@@ -39,7 +39,7 @@ class DefaultNodeDiscoveryServiceTest {
 
   private val recipientKeyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
   private val recipientEnr: Bytes =
-    EthereumNodeRecord.toRLP(recipientKeyPair, ip = InetAddress.getLocalHost(), udp = 9001)
+    EthereumNodeRecord.toRLP(recipientKeyPair, ip = InetAddress.getLoopbackAddress(), udp = 9001)
   private val encodedEnr: String = "enr:${Base64URLSafe.encode(recipientEnr)}"
   private val keyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
   private val localPort: Int = 9000
