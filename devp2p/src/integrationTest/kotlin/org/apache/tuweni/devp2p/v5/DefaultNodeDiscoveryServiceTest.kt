@@ -39,11 +39,11 @@ class DefaultNodeDiscoveryServiceTest {
 
   private val recipientKeyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
   private val recipientEnr: Bytes =
-    EthereumNodeRecord.toRLP(recipientKeyPair, ip = InetAddress.getLocalHost(), udp = 9001)
+    EthereumNodeRecord.toRLP(recipientKeyPair, ip = InetAddress.getLoopbackAddress(), udp = 9001)
   private val encodedEnr: String = "enr:${Base64URLSafe.encode(recipientEnr)}"
   private val keyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
   private val localPort: Int = 9000
-  private val bindAddress: InetSocketAddress = InetSocketAddress(localPort)
+  private val bindAddress: InetSocketAddress = InetSocketAddress("localhost", localPort)
   private val bootstrapENRList: List<String> = listOf(encodedEnr)
   private val enrSeq: Long = Instant.now().toEpochMilli()
   private val selfENR: Bytes = EthereumNodeRecord.toRLP(
@@ -66,7 +66,7 @@ class DefaultNodeDiscoveryServiceTest {
   @Test
   fun startInitializesConnectorAndBootstraps() = runBlocking {
     val recipientSocket = CoroutineDatagramChannel.open()
-    recipientSocket.bind(InetSocketAddress(9001))
+    recipientSocket.bind(InetSocketAddress("localhost", 9001))
 
     nodeDiscoveryService.start()
 

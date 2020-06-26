@@ -39,7 +39,7 @@ internal class CoroutineSocketChannelTest {
     listenChannel.bind(null)
     assertNotNull(listenChannel.localAddress)
     assertTrue(listenChannel.localPort > 0)
-    val addr = InetSocketAddress(InetAddress.getLocalHost(), listenChannel.localPort)
+    val addr = InetSocketAddress(InetAddress.getLoopbackAddress(), listenChannel.localPort)
 
     var didBlock = false
     val job = async {
@@ -60,7 +60,8 @@ internal class CoroutineSocketChannelTest {
   fun shouldBlockSocketChannelWhileReading() = runBlocking {
     val listenChannel = CoroutineServerSocketChannel.open()
     listenChannel.bind(null)
-    val addr = InetSocketAddress(InetAddress.getLocalHost(), (listenChannel.localAddress as InetSocketAddress).port)
+    val addr =
+      InetSocketAddress(InetAddress.getLoopbackAddress(), (listenChannel.localAddress as InetSocketAddress).port)
 
     val serverJob = async {
       val serverChannel = listenChannel.accept()
@@ -105,7 +106,8 @@ internal class CoroutineSocketChannelTest {
   fun shouldCloseSocketChannelWhenRemoteClosed() = runBlocking {
     val listenChannel = CoroutineServerSocketChannel.open()
     listenChannel.bind(null)
-    val addr = InetSocketAddress(InetAddress.getLocalHost(), (listenChannel.localAddress as InetSocketAddress).port)
+    val addr =
+      InetSocketAddress(InetAddress.getLoopbackAddress(), (listenChannel.localAddress as InetSocketAddress).port)
 
     val serverJob = async {
       val serverChannel = listenChannel.accept()

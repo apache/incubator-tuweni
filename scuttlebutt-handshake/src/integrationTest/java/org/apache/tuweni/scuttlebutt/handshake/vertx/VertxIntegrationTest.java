@@ -97,7 +97,7 @@ class VertxIntegrationTest {
     AtomicReference<MyServerHandler> serverHandlerRef = new AtomicReference<>();
     SecureScuttlebuttVertxServer server = new SecureScuttlebuttVertxServer(
         vertx,
-        new InetSocketAddress("0.0.0.0", 20000),
+        new InetSocketAddress("localhost", 20000),
         serverKeyPair,
         networkIdentifier,
         (streamServer, fn) -> {
@@ -109,7 +109,8 @@ class VertxIntegrationTest {
 
     SecureScuttlebuttVertxClient client =
         new SecureScuttlebuttVertxClient(vertx, Signature.KeyPair.random(), networkIdentifier);
-    MyClientHandler handler = client.connectTo(20000, "0.0.0.0", serverKeyPair.publicKey(), MyClientHandler::new).get();
+    MyClientHandler handler =
+        client.connectTo(20000, "localhost", serverKeyPair.publicKey(), MyClientHandler::new).get();
 
     Thread.sleep(1000);
     assertNotNull(handler);

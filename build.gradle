@@ -94,6 +94,7 @@ if (file('.git').exists()) {
       // And some of the files that we have checked in should also be excluded from this check
       list.addAll([
         '.*\\.asc',
+        'gradle/tuweni-test.asc',
         '\\w+/out/.*',
         'eth-reference-tests/**',
         'build',
@@ -240,8 +241,6 @@ allprojects {
   sourceCompatibility = '1.11'
   targetCompatibility = '1.11'
 
-  jacoco { toolVersion = '0.8.5' }
-
   dependencies {
     errorprone 'com.google.errorprone:error_prone_core'
     if (JavaVersion.current().isJava8()) {
@@ -283,6 +282,13 @@ allprojects {
 
       disableWarningsInGeneratedCode = true
     }
+
+    jacocoTestReport {
+      reports {
+        xml.enabled true
+        html.enabled true
+      }
+    }
   }
 
   tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
@@ -294,6 +300,13 @@ allprojects {
         '-Xjvm-default=enable',
         '-Xuse-experimental=kotlin.Experimental'
       ]
+    }
+
+    jacocoTestReport {
+      reports {
+        xml.enabled true
+        html.enabled true
+      }
     }
   }
 
@@ -563,6 +576,10 @@ allprojects {
       onlyIf {
         System.getenv('ENABLE_SIGNING') == 'true'
       }
+    }
+
+    tasks.withType(GenerateModuleMetadata) {
+      enabled = false
     }
 
     model {

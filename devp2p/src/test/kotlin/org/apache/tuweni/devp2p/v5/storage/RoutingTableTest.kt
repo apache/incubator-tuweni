@@ -29,11 +29,11 @@ import java.net.InetAddress
 class RoutingTableTest {
 
   private val keyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
-  private val enr: Bytes = EthereumNodeRecord.toRLP(keyPair, ip = InetAddress.getLocalHost())
+  private val enr: Bytes = EthereumNodeRecord.toRLP(keyPair, ip = InetAddress.getLoopbackAddress())
   private val routingTable: RoutingTable = RoutingTable(enr)
 
   private val newKeyPair = SECP256K1.KeyPair.random()
-  private val newEnr = EthereumNodeRecord.toRLP(newKeyPair, ip = InetAddress.getLocalHost())
+  private val newEnr = EthereumNodeRecord.toRLP(newKeyPair, ip = InetAddress.getLoopbackAddress())
 
   @Test
   fun addCreatesRecordInBucket() {

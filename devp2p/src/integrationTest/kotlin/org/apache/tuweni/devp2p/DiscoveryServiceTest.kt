@@ -53,7 +53,9 @@ internal class DiscoveryServiceTest {
 
   @Test
   fun shouldStartAndShutdownService() {
-    val discoveryService = DiscoveryService.open(SECP256K1.KeyPair.random())
+    val discoveryService = DiscoveryService.open(
+      host = "127.0.0.1",
+      keyPair = SECP256K1.KeyPair.random())
     assertFalse(discoveryService.isShutdown)
     assertFalse(discoveryService.isTerminated)
     discoveryService.shutdown()
@@ -69,10 +71,11 @@ internal class DiscoveryServiceTest {
   fun shouldRespondToPingAndRecordEndpoint() = runBlocking {
     val peerRepository = EphemeralPeerRepository()
     val discoveryService = DiscoveryService.open(
+      host = "127.0.0.1",
       keyPair = SECP256K1.KeyPair.random(),
       peerRepository = peerRepository
     )
-    val address = InetSocketAddress(InetAddress.getLocalHost(), discoveryService.localPort)
+    val address = InetSocketAddress(InetAddress.getLoopbackAddress(), discoveryService.localPort)
 
     val clientKeyPair = SECP256K1.KeyPair.random()
     val client = CoroutineDatagramChannel.open()
@@ -94,12 +97,13 @@ internal class DiscoveryServiceTest {
   @Test
   fun shouldPingBootstrapNodeAndValidate() = runBlocking {
     val bootstrapKeyPair = SECP256K1.KeyPair.random()
-    val bootstrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress(0))
+    val bootstrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress("127.0.0.1", 0))
 
     val serviceKeyPair = SECP256K1.KeyPair.random()
     val peerRepository = EphemeralPeerRepository()
     val routingTable = DevP2PPeerRoutingTable(serviceKeyPair.publicKey())
     val discoveryService = DiscoveryService.open(
+      host = "127.0.0.1",
       keyPair = serviceKeyPair,
       bootstrapURIs = listOf(
         URI("enode://" + bootstrapKeyPair.publicKey().toHexString() + "@127.0.0.1:" + bootstrapClient.localPort)
@@ -107,7 +111,7 @@ internal class DiscoveryServiceTest {
       peerRepository = peerRepository,
       routingTable = routingTable
     )
-    val address = InetSocketAddress(InetAddress.getLocalHost(), discoveryService.localPort)
+    val address = InetSocketAddress(InetAddress.getLoopbackAddress(), discoveryService.localPort)
 
     val ping = bootstrapClient.receivePacket() as PingPacket
     assertEquals(discoveryService.nodeId, ping.nodeId)
@@ -135,12 +139,13 @@ internal class DiscoveryServiceTest {
   @Test
   fun shouldIgnoreBootstrapNodeRespondingWithDifferentNodeId() = runBlocking {
     val bootstrapKeyPair = SECP256K1.KeyPair.random()
-    val bootstrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress(0))
+    val bootstrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress("127.0.0.1", 0))
 
     val serviceKeyPair = SECP256K1.KeyPair.random()
     val peerRepository = EphemeralPeerRepository()
     val routingTable = DevP2PPeerRoutingTable(serviceKeyPair.publicKey())
     val discoveryService = DiscoveryService.open(
+      host = "127.0.0.1",
       keyPair = serviceKeyPair,
       bootstrapURIs = listOf(
         URI("enode://" + bootstrapKeyPair.publicKey().toHexString() + "@127.0.0.1:" + bootstrapClient.localPort)
@@ -148,7 +153,7 @@ internal class DiscoveryServiceTest {
       peerRepository = peerRepository,
       routingTable = routingTable
     )
-    val address = InetSocketAddress(InetAddress.getLocalHost(), discoveryService.localPort)
+    val address = InetSocketAddress(InetAddress.getLoopbackAddress(), discoveryService.localPort)
 
     val ping = bootstrapClient.receivePacket() as PingPacket
     assertEquals(discoveryService.nodeId, ping.nodeId)
@@ -170,9 +175,10 @@ internal class DiscoveryServiceTest {
   @Test
   fun shouldPingBootstrapNodeWithAdvertisedAddress() = runBlocking {
     val bootstrapKeyPair = SECP256K1.KeyPair.random()
-    val boostrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress(0))
+    val boostrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress("localhost", 0))
 
     val discoveryService = DiscoveryService.open(
+      host = "127.0.0.1",
       keyPair = SECP256K1.KeyPair.random(),
       bootstrapURIs = listOf(
         URI("enode://" + bootstrapKeyPair.publicKey().bytes().toHexString() + "@127.0.0.1:" + boostrapClient.localPort)
@@ -193,9 +199,10 @@ internal class DiscoveryServiceTest {
   @Test
   fun shouldRetryPingsToBootstrapNodes() = runBlocking {
     val bootstrapKeyPair = SECP256K1.KeyPair.random()
-    val boostrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress(0))
+    val boostrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress("localhost", 0))
 
     val discoveryService = DiscoveryService.open(
+      host = "127.0.0.1",
       keyPair = SECP256K1.KeyPair.random(),
       bootstrapURIs = listOf(
         URI("enode://" + bootstrapKeyPair.publicKey().bytes().toHexString() + "@127.0.0.1:" + boostrapClient.localPort)
@@ -221,10 +228,11 @@ internal class DiscoveryServiceTest {
   fun shouldRequirePingPongBeforeRespondingToFindNodesFromUnverifiedPeer() = runBlocking {
     val peerRepository = EphemeralPeerRepository()
     val discoveryService = DiscoveryService.open(
+      host = "127.0.0.1",
       keyPair = SECP256K1.KeyPair.random(),
       peerRepository = peerRepository
     )
-    val address = InetSocketAddress(InetAddress.getLocalHost(), discoveryService.localPort)
+    val address = InetSocketAddress(InetAddress.getLoopbackAddress(), discoveryService.localPort)
 
     val clientKeyPair = SECP256K1.KeyPair.random()
     val client = CoroutineDatagramChannel.open()
@@ -262,7 +270,8 @@ internal class DiscoveryServiceTest {
     ).map { s -> URI.create(s) }
     /* ktlint-enable */
     val discoveryService = DiscoveryService.open(
-      SECP256K1.KeyPair.random(),
+      host = "127.0.0.1",
+      keyPair = SECP256K1.KeyPair.random(),
       bootstrapURIs = boostrapNodes
     )
 

@@ -282,10 +282,10 @@ class HobbitsTransport(
           if (it.failed()) {
             completion.completeExceptionally(it.cause())
           } else {
-            completion.complete()
             if (endpoint.port == 0) {
               endpoint.updatePort(it.result().actualPort())
             }
+            completion.complete()
           }
         }
         completions.add(completion)
@@ -307,10 +307,10 @@ class HobbitsTransport(
           if (it.failed()) {
             completion.completeExceptionally(it.cause())
           } else {
-            completion.complete()
             if (endpoint.port == 0) {
               endpoint.updatePort(it.result().actualPort())
             }
+            completion.complete()
           }
         }
         completions.add(completion)
@@ -367,10 +367,10 @@ class HobbitsTransport(
           if (it.failed()) {
             completion.completeExceptionally(it.cause())
           } else {
-            completion.complete()
             if (endpoint.port == 0) {
               endpoint.updatePort(it.result().actualPort())
             }
+            completion.complete()
           }
         }
         completions.add(completion)

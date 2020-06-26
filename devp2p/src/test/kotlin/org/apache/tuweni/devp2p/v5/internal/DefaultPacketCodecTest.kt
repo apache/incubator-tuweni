@@ -38,7 +38,7 @@ import java.net.InetAddress
 class DefaultPacketCodecTest {
 
   private val keyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
-  private val enr: Bytes = EthereumNodeRecord.toRLP(keyPair, ip = InetAddress.getLocalHost())
+  private val enr: Bytes = EthereumNodeRecord.toRLP(keyPair, ip = InetAddress.getLoopbackAddress())
   private val nodeId: Bytes = Hash.sha2_256(enr)
   private val routingTable: RoutingTable = RoutingTable(enr)
   private val authenticationProvider: AuthenticationProvider = DefaultAuthenticationProvider(keyPair, routingTable)

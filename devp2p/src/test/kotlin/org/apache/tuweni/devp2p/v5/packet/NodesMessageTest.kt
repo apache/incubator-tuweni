@@ -32,9 +32,9 @@ class NodesMessageTest {
     val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
     val total = 10
     val nodeRecords = listOf(
-      EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLocalHost(), udp = 9090),
-      EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLocalHost(), udp = 9091),
-      EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLocalHost(), udp = 9092)
+      EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress(), udp = 9090),
+      EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress(), udp = 9091),
+      EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress(), udp = 9092)
     )
     val message = NodesMessage(requestId, total, nodeRecords)
 

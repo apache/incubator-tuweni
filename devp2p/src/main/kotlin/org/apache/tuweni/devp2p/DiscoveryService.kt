@@ -16,7 +16,6 @@
  */
 package org.apache.tuweni.devp2p
 
-import org.slf4j.LoggerFactory
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import kotlinx.coroutines.CancellationException
@@ -54,6 +53,7 @@ import org.apache.tuweni.kademlia.xorDistCmp
 import org.apache.tuweni.net.coroutines.CommonCoroutineGroup
 import org.apache.tuweni.net.coroutines.CoroutineChannelGroup
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
+import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -348,8 +348,10 @@ internal class CoroutineDiscoveryService(
       advertiseTcpPort
     )
 
-    enr = EthereumNodeRecord.toRLP(keyPair, seq, enrData, selfEndpoint.address, selfEndpoint.tcpPort,
-      selfEndpoint.udpPort)
+    enr = EthereumNodeRecord.toRLP(
+      keyPair, seq, enrData, selfEndpoint.address, selfEndpoint.tcpPort,
+      selfEndpoint.udpPort
+    )
 
     val bootstrapping = bootstrapURIs.map { uri ->
       activityLatch.countUp()
