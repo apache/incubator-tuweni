@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.apache.tuweni.config.Configuration;
 
 import java.net.URI;
-import java.net.UnknownHostException;
 
 import org.junit.jupiter.api.Test;
 
@@ -55,7 +54,7 @@ class GossipCommandLineOptionsTest {
   }
 
   @Test
-  void operateFromConfig() throws UnknownHostException {
+  void operateFromConfig() {
     Configuration config = Configuration
         .fromToml(
             ""
@@ -74,7 +73,7 @@ class GossipCommandLineOptionsTest {
   }
 
   @Test
-  void invalidConfigFilePort() throws UnknownHostException {
+  void invalidConfigFilePort() {
     Configuration config = Configuration
         .fromToml(
             ""
@@ -99,7 +98,7 @@ class GossipCommandLineOptionsTest {
   }
 
   @Test
-  void cliConfigOverConfigFile() throws UnknownHostException {
+  void cliConfigOverConfigFile() {
     Configuration config = Configuration
         .fromToml(
             ""

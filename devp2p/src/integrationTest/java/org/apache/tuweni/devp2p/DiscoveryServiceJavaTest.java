@@ -33,7 +33,7 @@ class DiscoveryServiceJavaTest {
 
   @Test
   void setUpAndShutDownAsync() throws Exception {
-    DiscoveryService service = DiscoveryService.Companion.open(SECP256K1.KeyPair.random());
+    DiscoveryService service = DiscoveryService.Companion.open(SECP256K1.KeyPair.random(), 0, "127.0.0.1");
     service.shutdown();
     AsyncCompletion completion = service.awaitTerminationAsync();
     completion.join();
@@ -42,7 +42,7 @@ class DiscoveryServiceJavaTest {
 
   @Test
   void lookupAsync() throws Exception {
-    DiscoveryService service = DiscoveryService.Companion.open(SECP256K1.KeyPair.random());
+    DiscoveryService service = DiscoveryService.Companion.open(SECP256K1.KeyPair.random(), 0, "127.0.0.1");
     AsyncResult<List<Peer>> result = service.lookupAsync(SECP256K1.KeyPair.random().publicKey());
     List<Peer> peers = result.get();
     service.shutdown();

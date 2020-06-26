@@ -55,7 +55,7 @@ class DefaultUdpConnectorTest {
 
   @BeforeEach
   fun setUp() {
-    val address = InetSocketAddress(9090 + counter)
+    val address = InetSocketAddress("localhost", 9090 + counter)
     val keyPair = SECP256K1.KeyPair.random()
     val selfEnr = EthereumNodeRecord.toRLP(keyPair, ip = address.address)
     connector = DefaultUdpConnector(address, keyPair, selfEnr)
