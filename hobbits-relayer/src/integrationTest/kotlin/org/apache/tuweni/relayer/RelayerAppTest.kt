@@ -38,7 +38,7 @@ class RelayerAppTest {
     val ref = AtomicReference<Message>()
     val client1 = HobbitsTransport(vertx)
     val client2 = HobbitsTransport(vertx)
-    RelayerApp.main(arrayOf("-b", "tcp://localhost:21000", "-t", "tcp://0.0.0.0:22000"))
+    RelayerApp.main(arrayOf("-b", "tcp://localhost:21000", "-t", "tcp://localhost:22000"))
     runBlocking {
       client1.createTCPEndpoint("foo", networkInterface = "127.0.0.1", port = 22000, handler = ref::set)
       client1.start()
