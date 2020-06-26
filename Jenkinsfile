@@ -10,6 +10,9 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+
+// This pipeline runs on master and pushes builds to repository.apache.org.
+
 pipeline {
     agent { label 'ubuntu' }
 
@@ -34,19 +37,11 @@ pipeline {
             }
         }
         stage('Publish') {
-            when {
-                branch 'master'
-            }
             steps {
                 timeout(time: 30, unit: 'MINUTES') {
                     sh "./gradlew publish"
                 }
             }
-        }
-    }
-    post {
-        always {
-           junit '**/build/test-results/test/*.xml'
         }
     }
 }
