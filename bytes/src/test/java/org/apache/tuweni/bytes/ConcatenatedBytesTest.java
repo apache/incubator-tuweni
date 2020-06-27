@@ -107,7 +107,7 @@ class ConcatenatedBytesTest {
 
   @Test
   void testCopyTo() {
-    Bytes bytes = wrap(fromHexString("0x01234567"));
+    Bytes bytes = wrap(fromHexString("0x0123"), fromHexString("0x4567"));
     MutableBytes dest = MutableBytes.create(32);
     bytes.copyTo(dest, 10);
     assertEquals(Bytes.fromHexString("0x0000000000000000000001234567000000000000000000000000000000000000"), dest);
