@@ -42,6 +42,15 @@ class DefaultCompletableAsyncResultTest {
   }
 
   @Test
+  void shouldThenAccept() {
+    AtomicReference<String> result = new AtomicReference<String>();
+    CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
+    asyncResult.thenAccept(result::set);
+    asyncResult.complete("foo");
+    assertThat(result.get()).isEqualTo("foo");
+  }
+
+  @Test
   void shouldReturnExceptionFromExceptionallyCompletedResult() throws Exception {
     Exception exception = new RuntimeException();
     AsyncResult<String> asyncResult = AsyncResult.exceptional(exception);
