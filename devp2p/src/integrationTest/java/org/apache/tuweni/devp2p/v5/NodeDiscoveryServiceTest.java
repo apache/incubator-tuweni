@@ -18,8 +18,10 @@ import org.apache.tuweni.junit.BouncyCastleExtension;
 import java.net.InetSocketAddress;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+@Timeout(10)
 @ExtendWith(BouncyCastleExtension.class)
 public class NodeDiscoveryServiceTest {
 

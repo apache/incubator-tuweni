@@ -31,8 +31,10 @@ import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
 import java.net.InetAddress
 
+@Timeout(10)
 class TopicIntegrationTest : AbstractIntegrationTest() {
 
   @Disabled("Blocks testing")

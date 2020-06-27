@@ -26,8 +26,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+@Timeout(10)
 @ExtendWith(BouncyCastleExtension.class)
 class DiscoveryServiceJavaTest {
 
