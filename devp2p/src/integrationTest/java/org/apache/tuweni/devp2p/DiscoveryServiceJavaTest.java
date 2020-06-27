@@ -25,11 +25,9 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-@Disabled
 @ExtendWith(BouncyCastleExtension.class)
 class DiscoveryServiceJavaTest {
 
