@@ -35,4 +35,28 @@ class DiffieHelmanTest {
 
     assertEquals(scalar1, scalar2);
   }
+
+  @Test
+  void testEquals() {
+    DiffieHelman.KeyPair keyPair = DiffieHelman.KeyPair.random();
+    DiffieHelman.KeyPair keyPair2 = DiffieHelman.KeyPair.forSecretKey(keyPair.secretKey());
+    assertEquals(keyPair, keyPair2);
+    assertEquals(keyPair.hashCode(), keyPair2.hashCode());
+  }
+
+  @Test
+  void testEqualsSecretKey() {
+    DiffieHelman.KeyPair keyPair = DiffieHelman.KeyPair.random();
+    DiffieHelman.KeyPair keyPair2 = DiffieHelman.KeyPair.forSecretKey(keyPair.secretKey());
+    assertEquals(keyPair.secretKey(), keyPair2.secretKey());
+    assertEquals(keyPair.hashCode(), keyPair2.hashCode());
+  }
+
+  @Test
+  void testEqualsPublicKey() {
+    DiffieHelman.KeyPair keyPair = DiffieHelman.KeyPair.random();
+    DiffieHelman.KeyPair keyPair2 = DiffieHelman.KeyPair.forSecretKey(keyPair.secretKey());
+    assertEquals(keyPair.publicKey(), keyPair2.publicKey());
+    assertEquals(keyPair.hashCode(), keyPair2.hashCode());
+  }
 }
