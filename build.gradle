@@ -283,14 +283,6 @@ allprojects {
 
       disableWarningsInGeneratedCode = true
     }
-
-    jacocoTestReport {
-      reports {
-        xml.enabled true
-        html.enabled true
-      }
-      executionData { tasks.withType(Test).findAll { it.jacoco.destinationFile.exists() }*.jacoco.destinationFile }
-    }
   }
 
   tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
@@ -303,14 +295,6 @@ allprojects {
         '-Xuse-experimental=kotlin.Experimental'
       ]
     }
-
-    jacocoTestReport {
-      reports {
-        xml.enabled true
-        html.enabled true
-      }
-      executionData { tasks.withType(Test).findAll { it.jacoco.destinationFile.exists() }*.jacoco.destinationFile }
-    }
   }
 
 
@@ -320,6 +304,14 @@ allprojects {
   test {
     useJUnitPlatform() { includeEngines 'spek', 'junit-jupiter' }
     timeout = Duration.ofMinutes(30)
+  }
+
+  jacocoTestReport {
+    reports {
+      xml.enabled true
+      html.enabled true
+    }
+    getExecutionData().setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
   }
 
 
