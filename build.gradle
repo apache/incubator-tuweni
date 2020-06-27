@@ -289,7 +289,7 @@ allprojects {
         xml.enabled true
         html.enabled true
       }
-      executionData tasks.withType(Test).findAll { it.state.executed }
+      executionData tasks.withType(Test)
     }
   }
 
