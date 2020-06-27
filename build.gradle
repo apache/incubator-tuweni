@@ -191,6 +191,10 @@ subprojects {
 
       useJUnitPlatform() { includeEngines 'spek', 'junit-jupiter' }
       timeout = Duration.ofMinutes(30)
+
+      jacoco {
+        include '**'
+      }
     }
 
     rootProject.integrationTest.dependsOn integrationTest
