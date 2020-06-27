@@ -17,6 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.units.bigints.UInt256;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +41,12 @@ class GasTest {
     assertThrows(IllegalArgumentException.class, () -> {
       Gas.valueOf(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE));
     });
+  }
+
+  @Test
+  void testToLong() {
+    Gas gas = Gas.valueOf(32L);
+    assertEquals(32L, gas.toLong());
   }
 
   @Test
@@ -81,6 +90,35 @@ class GasTest {
     assertThrows(IllegalArgumentException.class, () -> {
       Gas.valueOf(BigInteger.valueOf(-123L));
     });
+  }
+
+  @Test
+  void testConstantReuse() {
+    Gas gas = Gas.valueOf(UInt256.valueOf(1L));
+    Gas otherGas = Gas.valueOf(UInt256.valueOf(1L));
+    assertSame(gas, otherGas);
+  }
+
+  @Test
+  void testOverflowUInt256() {
+    assertThrows(IllegalArgumentException.class, () -> {
+      Gas.valueOf(UInt256.MAX_VALUE);
+    });
+  }
+
+  @Test
+  void testToBytes() {
+    assertEquals(Bytes.fromHexString("0x0000000000000001"), Gas.valueOf(1L).toBytes());
+  }
+
+  @Test
+  void testToMinimalBytes() {
+    assertEquals(Bytes.fromHexString("0x01"), Gas.valueOf(1L).toMinimalBytes());
+  }
+
+  @Test
+  void testCompareTo() {
+    assertEquals(-1, (Gas.valueOf(1L)).compareTo(2L));
   }
 
 }
