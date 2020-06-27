@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.net.InetAddress
 
-@Disabled
 class TopicIntegrationTest : AbstractIntegrationTest() {
 
   @Disabled("Blocks testing")
