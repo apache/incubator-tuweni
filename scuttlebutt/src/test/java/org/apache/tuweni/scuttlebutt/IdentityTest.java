@@ -166,5 +166,22 @@ class IdentityTest {
     assertThrows(UnsupportedOperationException.class, () -> Identity.randomSECP256K1().ed25519PublicKey());
   }
 
+  @Test
+  void testRandomEd25519() {
+    Identity random1 = Identity.randomEd25519();
+    Identity random2 = Identity.randomEd25519();
+    assertNotEquals(random1, random2);
+    assertNotEquals(random1.hashCode(), random2.hashCode());
+  }
 
+  @Test
+  void testPublicKeyHashCodeAndEquals() {
+    Signature.KeyPair kp = Signature.KeyPair.random();
+    Identity id1 = Identity.fromKeyPair(kp);
+    Identity id2 = Identity.fromKeyPair(kp);
+    assertEquals(Identity.fromPublicKey(id1.ed25519PublicKey()), Identity.fromPublicKey(id2.ed25519PublicKey()));
+    assertEquals(
+        Identity.fromPublicKey(id1.ed25519PublicKey()).hashCode(),
+        Identity.fromPublicKey(id2.ed25519PublicKey()).hashCode());
+  }
 }
