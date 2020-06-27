@@ -289,7 +289,6 @@ allprojects {
         xml.enabled true
         html.enabled true
       }
-      println(tasks.withType(Test))
       executionData { tasks.withType(Test).findAll { it.jacoco.destinationFile.exists() }*.jacoco.destinationFile }
     }
   }
