@@ -152,12 +152,7 @@ final class ConcatenatedBytes extends AbstractBytes {
 
   @Override
   public Bytes copy() {
-    if (size == 0) {
-      return Bytes.EMPTY;
-    }
-    MutableBytes result = MutableBytes.create(size);
-    copyToUnchecked(result, 0);
-    return result;
+    return mutableCopy();
   }
 
   @Override

@@ -97,4 +97,19 @@ class ConcatenatedBytesTest {
     assertEquals(24, bytes.size());
     assertEquals("0x0123456789abcdef0123456789abcdef0123456789abcdef", bytes.toHexString());
   }
+
+  @Test
+  void testCopy() {
+    Bytes bytes = wrap(fromHexString("0x01234567"), fromHexString("0x89ABCDEF"));
+    assertEquals(bytes, bytes.copy());
+    assertEquals(bytes, bytes.mutableCopy());
+  }
+
+  @Test
+  void testCopyTo() {
+    Bytes bytes = wrap(fromHexString("0x0123"), fromHexString("0x4567"));
+    MutableBytes dest = MutableBytes.create(32);
+    bytes.copyTo(dest, 10);
+    assertEquals(Bytes.fromHexString("0x0000000000000000000001234567000000000000000000000000000000000000"), dest);
+  }
 }
