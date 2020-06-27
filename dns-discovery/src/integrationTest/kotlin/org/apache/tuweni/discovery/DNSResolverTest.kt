@@ -20,6 +20,7 @@ import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -50,6 +51,7 @@ class DNSResolverTest {
     println(nodes.size)
   }
 
+  @Disabled("too expensive for CI")
   @Test
   fun resolveAllMainnetNodes() {
     val resolver = DNSResolver()
