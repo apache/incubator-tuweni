@@ -48,6 +48,7 @@ private suspend fun CoroutineDatagramChannel.receivePacket(): Packet {
   return Packet.decodeFrom(buffer)
 }
 
+@Disabled
 @ExtendWith(BouncyCastleExtension::class)
 internal class DiscoveryServiceTest {
 
