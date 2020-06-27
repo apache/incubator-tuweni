@@ -17,11 +17,9 @@ import org.apache.tuweni.junit.BouncyCastleExtension;
 
 import java.net.InetSocketAddress;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-@Disabled
 @ExtendWith(BouncyCastleExtension.class)
 public class NodeDiscoveryServiceTest {
 
