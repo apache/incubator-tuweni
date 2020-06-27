@@ -10,22 +10,24 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-description = 'Plumtree - Push-Lazy-pUsh Multicast TREE, an implementation of Epidemic Broadcast Tree'
+package org.apache.tuweni.plumtree.vertx;
 
-dependencies {
-  compile project(':bytes')
-  compile project(':concurrent')
-  compile project(':crypto')
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-  compileOnly 'io.vertx:vertx-core'
+import io.vertx.core.net.NetSocket;
+import io.vertx.core.net.SocketAddress;
+import org.junit.jupiter.api.Test;
 
-  testCompile project(':junit')
-  testCompile 'org.bouncycastle:bcprov-jdk15on'
-  testCompile 'io.vertx:vertx-core'
-  testCompile 'org.junit.jupiter:junit-jupiter-api'
-  testCompile 'org.junit.jupiter:junit-jupiter-params'
-  testCompile 'org.mockito:mockito-junit-jupiter'
-  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+class SocketPeerTest {
 
-  integrationTestCompile 'io.vertx:vertx-core'
+  @Test
+  void testLocalSocket() {
+    NetSocket socket = mock(NetSocket.class);
+    when(socket.localAddress()).thenReturn(SocketAddress.inetSocketAddress(23, "localhost"));
+    SocketPeer peer = new SocketPeer(socket);
+    assertEquals(socket, peer.socket());
+    assertEquals("localhost:23", peer.toString());
+  }
 }
