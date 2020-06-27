@@ -16,9 +16,11 @@ dependencies {
   compile 'com.google.guava:guava'
   compileOnly 'io.vertx:vertx-core'
 
+  testCompile project(':junit')
   testCompile 'org.junit.jupiter:junit-jupiter-api'
   testCompile 'org.junit.jupiter:junit-jupiter-params'
   testCompile 'org.assertj:assertj-core'
+  testCompile 'io.vertx:vertx-core'
 
   testRuntime 'org.junit.jupiter:junit-jupiter-engine'
 }

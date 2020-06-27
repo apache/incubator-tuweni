@@ -14,16 +14,26 @@ package org.apache.tuweni.concurrent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.apache.tuweni.junit.VertxExtension;
+import org.apache.tuweni.junit.VertxInstance;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.vertx.core.Vertx;
+import io.vertx.core.WorkerExecutor;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(VertxExtension.class)
 class DefaultCompletableAsyncCompletionTest {
 
   @Test
@@ -236,6 +246,21 @@ class DefaultCompletableAsyncCompletionTest {
   }
 
   @Test
+  void completesWhenAllInStreamComplete() {
+    CompletableAsyncCompletion completion1 = AsyncCompletion.incomplete();
+    CompletableAsyncCompletion completion2 = AsyncCompletion.incomplete();
+    Collection<AsyncCompletion> list = Arrays.asList(completion1, completion2);
+
+    AsyncCompletion completion = AsyncCompletion.allOf(list.stream());
+    assertThat(completion.isDone()).isFalse();
+
+    completion1.complete();
+    assertThat(completion.isDone()).isFalse();
+    completion2.complete();
+    assertThat(completion.isDone()).isTrue();
+  }
+
+  @Test
   void completesWithExceptionWhenAnyInCollectionFail() throws Exception {
     CompletableAsyncCompletion completion1 = AsyncCompletion.incomplete();
     CompletableAsyncCompletion completion2 = AsyncCompletion.incomplete();
@@ -269,6 +294,66 @@ class DefaultCompletableAsyncCompletionTest {
     assertThat(downstreamCompletion.isCompletedExceptionally()).isTrue();
 
     assertThat(completedThrowable.get()).isInstanceOf(CancellationException.class);
+  }
+
+  @Test
+  void testExecutingBlocking() throws InterruptedException {
+    AtomicReference<Boolean> executed = new AtomicReference<>();
+    AsyncCompletion completion = AsyncCompletion.executeBlocking(() -> executed.set(true));
+    completion.join();
+    assertTrue(executed.get());
+  }
+
+  @Test
+  void testExecutingBlocking(@VertxInstance Vertx vertx) throws InterruptedException {
+    AtomicReference<Boolean> executed = new AtomicReference<>();
+    AsyncCompletion completion = AsyncCompletion.executeBlocking(vertx, () -> executed.set(true));
+    completion.join();
+    assertTrue(executed.get());
+  }
+
+  @Test
+  void testRunOnContextSupplier(@VertxInstance Vertx vertx) throws InterruptedException {
+    AsyncCompletion completion = AsyncCompletion.runOnContext(vertx, AsyncCompletion::completed);
+    completion.join();
+  }
+
+  @Test
+  void testRunOnContext(@VertxInstance Vertx vertx) throws InterruptedException {
+    AtomicReference<Boolean> executed = new AtomicReference<>();
+    AsyncCompletion completion = AsyncCompletion.runOnContext(vertx, () -> executed.set(true));
+    completion.join();
+    assertTrue(executed.get());
+  }
+
+  @Test
+  void testRunOnWorker(@VertxInstance Vertx vertx) throws InterruptedException {
+    AtomicReference<Boolean> executed = new AtomicReference<>();
+    WorkerExecutor executor = vertx.createSharedWorkerExecutor("foo");
+    AsyncCompletion completion = AsyncCompletion.executeBlocking(executor, () -> executed.set(true));
+    completion.join();
+    assertTrue(executed.get());
+  }
+
+  @Test
+  void testRunOnContextWithCompletion(@VertxInstance Vertx vertx) throws InterruptedException {
+    AtomicReference<Boolean> executed = new AtomicReference<>();
+    AsyncCompletion completion = AsyncCompletion.runOnContext(vertx, () -> {
+      executed.set(true);
+      return AsyncCompletion.completed();
+    });
+    completion.join();
+    assertTrue(executed.get());
+  }
+
+  @Test
+  void testRunOnExecutor() throws InterruptedException {
+    AtomicReference<Boolean> executed = new AtomicReference<>();
+    ExecutorService service = Executors.newSingleThreadExecutor();
+    AsyncCompletion completion = AsyncCompletion.executeBlocking(service, () -> executed.set(true));
+    completion.join();
+    assertTrue(executed.get());
+    service.shutdown();
   }
 
   private void assertCompletedWithException(AsyncCompletion completion, Exception exception) throws Exception {

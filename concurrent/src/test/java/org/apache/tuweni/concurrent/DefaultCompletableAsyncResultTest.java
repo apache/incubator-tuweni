@@ -14,17 +14,27 @@ package org.apache.tuweni.concurrent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+
+import org.apache.tuweni.junit.VertxExtension;
+import org.apache.tuweni.junit.VertxInstance;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.vertx.core.Vertx;
+import io.vertx.core.WorkerExecutor;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(VertxExtension.class)
 class DefaultCompletableAsyncResultTest {
 
   @Test
@@ -186,6 +196,48 @@ class DefaultCompletableAsyncResultTest {
     assertThat(downstreamAsyncResult.isCompletedExceptionally()).isTrue();
 
     assertThat(completedThrowable.get()).isInstanceOf(CancellationException.class);
+  }
+
+
+  @Test
+  void testExecutingBlocking() throws InterruptedException {
+    AsyncResult<String> result = AsyncResult.executeBlocking(() -> "foo");
+    assertEquals("foo", result.get());
+  }
+
+  @Test
+  void testExecutingBlocking(@VertxInstance Vertx vertx) throws InterruptedException {
+    AsyncResult<String> result = AsyncResult.executeBlocking(vertx, () -> "foo");
+    assertEquals("foo", result.get());
+  }
+
+  @Test
+  void testRunOnContext(@VertxInstance Vertx vertx) throws InterruptedException {
+    AsyncResult<String> result = AsyncResult.runOnContext(vertx, () -> AsyncResult.completed("foo"));
+    assertEquals("foo", result.get());
+  }
+
+  @Test
+  void testRunOnExecutor() throws InterruptedException {
+    AtomicReference<Boolean> executed = new AtomicReference<>();
+    ExecutorService service = Executors.newSingleThreadExecutor();
+    AsyncResult<String> result = AsyncResult.executeBlocking(service, () -> "foo");
+    assertEquals("foo", result.get());
+    service.shutdown();
+  }
+
+  @Test
+  void testRunOnWorker(@VertxInstance Vertx vertx) throws InterruptedException {
+    AtomicReference<Boolean> executed = new AtomicReference<>();
+    WorkerExecutor executor = vertx.createSharedWorkerExecutor("foo");
+    AsyncResult<String> result = AsyncResult.executeBlocking(executor, () -> "foo");
+    assertEquals("foo", result.get());
+  }
+
+  @Test
+  void testRunOnContextWithCompletion(@VertxInstance Vertx vertx) throws InterruptedException {
+    AsyncResult<String> result = AsyncResult.runOnContext(vertx, () -> AsyncResult.completed("foo"));
+    assertEquals("foo", result.get());
   }
 
   private void assertCompletedWithException(AsyncResult<?> asyncResult, Exception exception) throws Exception {
