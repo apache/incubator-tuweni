@@ -24,10 +24,10 @@ import org.junit.jupiter.api.Test;
 
 class AllocatedTest {
 
-  @BeforeAll
-  static void checkAvailable() {
-    assumeTrue(Sodium.isAvailable(), "Sodium native library is not available");
-  }
+//  @BeforeAll
+//  static void checkAvailable() {
+//    assumeTrue(Sodium.isAvailable(), "Sodium native library is not available");
+//  }
 
   @Test
   void destroyedValue() {
