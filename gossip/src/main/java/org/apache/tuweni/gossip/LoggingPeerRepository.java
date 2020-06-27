@@ -15,22 +15,23 @@ package org.apache.tuweni.gossip;
 import org.apache.tuweni.plumtree.Peer;
 import org.apache.tuweni.plumtree.PeerRepository;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.ParametersAreNonnullByDefault;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@ParametersAreNonnullByDefault
 final class LoggingPeerRepository implements PeerRepository {
+
+  private static final Logger logger = LoggerFactory.getLogger(LoggingPeerRepository.class.getName());
 
   private final Set<Peer> eagerPushPeers = ConcurrentHashMap.newKeySet();
   private final Set<Peer> lazyPushPeers = ConcurrentHashMap.newKeySet();
-  private final PrintStream logger;
-
-  public LoggingPeerRepository(PrintStream logger) {
-    this.logger = logger;
-  }
 
   @Override
   public void addEager(Peer peer) {
@@ -56,14 +57,14 @@ final class LoggingPeerRepository implements PeerRepository {
 
   @Override
   public void removePeer(Peer peer) {
-    logger.println("Removing peer " + peer);
+    logger.info("Removing peer {}", peer);
     lazyPushPeers.remove(peer);
     eagerPushPeers.remove(peer);
   }
 
   @Override
   public boolean moveToLazy(Peer peer) {
-    logger.println("Move peer to lazy " + peer);
+    logger.info("Move peer to lazy {}", peer);
     eagerPushPeers.remove(peer);
     lazyPushPeers.add(peer);
     return true;
@@ -71,7 +72,7 @@ final class LoggingPeerRepository implements PeerRepository {
 
   @Override
   public void moveToEager(Peer peer) {
-    logger.println("Move peer to eager " + peer);
+    logger.info("Move peer to eager {}", peer);
     lazyPushPeers.remove(peer);
     eagerPushPeers.add(peer);
   }
@@ -80,7 +81,7 @@ final class LoggingPeerRepository implements PeerRepository {
   public void considerNewPeer(Peer peer) {
     if (!lazyPushPeers.contains(peer)) {
       if (eagerPushPeers.add(peer)) {
-        logger.println("Added new peer " + peer);
+        logger.info("Added new peer {}", peer);
       }
     }
 

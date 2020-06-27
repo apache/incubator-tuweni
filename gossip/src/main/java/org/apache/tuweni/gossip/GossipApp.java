@@ -32,7 +32,6 @@ import java.util.Collections;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -43,6 +42,8 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerRequest;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
 /**
@@ -51,13 +52,15 @@ import picocli.CommandLine;
  */
 public final class GossipApp {
 
+  private static final Logger logger = LoggerFactory.getLogger(GossipApp.class.getName());
+
   public static void main(String[] args) {
     Security.addProvider(new BouncyCastleProvider());
     GossipCommandLineOptions opts = CommandLine.populateCommand(new GossipCommandLineOptions(), args);
     try {
       opts.validate();
     } catch (IllegalArgumentException e) {
-      System.err.println("Invalid configuration detected.\n\n" + e.getMessage());
+      logger.error("Invalid configuration detected.\n\n{}", e.getMessage());
       new CommandLine(opts).usage(System.out);
       System.exit(1);
     }
@@ -70,13 +73,10 @@ public final class GossipApp {
     gossipApp.start();
   }
 
-  private final ExecutorService senderThreadPool = Executors.newSingleThreadExecutor(new ThreadFactory() {
-    @Override
-    public Thread newThread(Runnable r) {
-      Thread t = new Thread(r, "sender");
-      t.setDaemon(false);
-      return t;
-    }
+  private final ExecutorService senderThreadPool = Executors.newSingleThreadExecutor(r -> {
+    Thread t = new Thread(r, "sender");
+    t.setDaemon(false);
+    return t;
   });
   private final GossipCommandLineOptions opts;
   private final Runnable terminateFunction;
@@ -92,8 +92,8 @@ public final class GossipApp {
       PrintStream errStream,
       PrintStream outStream,
       Runnable terminateFunction) {
-    LoggingPeerRepository repository = new LoggingPeerRepository(outStream);
-    outStream.println("Setting up server on " + opts.networkInterface() + ":" + opts.listenPort());
+    LoggingPeerRepository repository = new LoggingPeerRepository();
+    logger.info("Setting up server on {}:{}", opts.networkInterface(), opts.listenPort());
     server = new VertxGossipServer(
         vertx,
         opts.networkInterface(),
@@ -113,15 +113,15 @@ public final class GossipApp {
   }
 
   void start() {
-    outStream.println("Starting gossip");
+    logger.info("Starting gossip");
     AsyncCompletion completion = server.start();
     try {
       completion.join();
     } catch (CompletionException | InterruptedException e) {
-      errStream.println("Server could not start: " + e.getMessage());
+      logger.error("Server could not start: {}", e.getMessage());
       terminateFunction.run();
     }
-    outStream.println("TCP server started");
+    logger.info("TCP server started");
 
     CompletableAsyncCompletion rpcCompletion = AsyncCompletion.incomplete();
     rpcServer.requestHandler(this::handleRPCRequest).listen(opts.rpcPort(), opts.networkInterface(), res -> {
@@ -134,10 +134,10 @@ public final class GossipApp {
     try {
       rpcCompletion.join();
     } catch (CompletionException | InterruptedException e) {
-      errStream.println("RPC server could not start: " + e.getMessage());
+      logger.error("RPC server could not start: " + e.getMessage());
       terminateFunction.run();
     }
-    outStream.println("RPC server started");
+    logger.info("RPC server started");
 
     try {
       AsyncCompletion
@@ -146,10 +146,10 @@ public final class GossipApp {
     } catch (TimeoutException | InterruptedException e) {
       errStream.println("Server could not connect to other peers: " + e.getMessage());
     }
-    outStream.println("Gossip started");
+    logger.info("Gossip started");
 
     if (opts.sending()) {
-      outStream.println("Start sending messages");
+      logger.info("Start sending messages");
       senderThreadPool.submit(() -> {
         for (int i = 0; i < opts.numberOfMessages(); i++) {
           if (Thread.currentThread().isInterrupted()) {
@@ -185,13 +185,13 @@ public final class GossipApp {
   }
 
   void stop() {
-    outStream.println("Stopping sending");
+    logger.info("Stopping sending");
     senderThreadPool.shutdown();
-    outStream.println("Stopping gossip");
+    logger.info("Stopping gossip");
     try {
       server.stop().join();
     } catch (InterruptedException e) {
-      errStream.println("Server could not stop: " + e.getMessage());
+      logger.error("Server could not stop: {}", e.getMessage());
       terminateFunction.run();
     }
 
@@ -206,8 +206,8 @@ public final class GossipApp {
     try {
       rpcCompletion.join();
     } catch (CompletionException | InterruptedException e) {
-      outStream.println("Stopped gossip");
-      errStream.println("RPC server could not stop: " + e.getMessage());
+      logger.info("Stopped gossip");
+      logger.error("RPC server could not stop: {}", e.getMessage());
       terminateFunction.run();
     }
 
