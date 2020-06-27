@@ -28,12 +28,14 @@ import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.time.Instant
 
+@Timeout(10)
 @ExtendWith(BouncyCastleExtension::class)
 class DefaultNodeDiscoveryServiceTest {
 

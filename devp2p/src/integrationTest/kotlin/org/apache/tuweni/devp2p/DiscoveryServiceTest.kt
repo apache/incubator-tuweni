@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -48,6 +49,7 @@ private suspend fun CoroutineDatagramChannel.receivePacket(): Packet {
   return Packet.decodeFrom(buffer)
 }
 
+@Timeout(10)
 @ExtendWith(BouncyCastleExtension::class)
 internal class DiscoveryServiceTest {
 

@@ -23,7 +23,9 @@ import org.apache.tuweni.devp2p.v5.packet.PongMessage
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
 
+@Timeout(10)
 class IntegrationTest : AbstractIntegrationTest() {
 
   @Test
