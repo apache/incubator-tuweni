@@ -12,8 +12,6 @@
  */
 package org.apache.tuweni.rlpx;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.math.BigInteger;
 
 import org.bouncycastle.crypto.*;
@@ -45,24 +43,6 @@ public class EthereumIESEncryptionEngine {
   private EphemeralKeyPairGenerator keyPairGenerator;
   private KeyParser keyParser;
   private byte[] IV;
-
-  /**
-   * Set up for use with stream mode, where the key derivation function is used to provide a stream of bytes to xor with
-   * the message.
-   *
-   * @param agree the key agreement used as the basis for the encryption
-   * @param kdf the key derivation function used for byte generation
-   * @param mac the message authentication code generator for the message
-   * @param commonMac the common MAC bytes to append to the mac
-   */
-  public EthereumIESEncryptionEngine(BasicAgreement agree, DerivationFunction kdf, Mac mac, byte[] commonMac) {
-    this.agree = agree;
-    this.kdf = kdf;
-    this.mac = mac;
-    this.macBuf = new byte[mac.getMacSize()];
-    this.commonMac = commonMac;
-    this.cipher = null;
-  }
 
 
   /**
@@ -110,39 +90,6 @@ public class EthereumIESEncryptionEngine {
     extractParams(params);
   }
 
-  /**
-   * Initialise the decryptor.
-   *
-   * @param publicKey the recipient's/sender's public key parameters
-   * @param params encoding and derivation parameters, may be wrapped to include an IV for an underlying block cipher.
-   * @param ephemeralKeyPairGenerator the ephemeral key pair generator to use.
-   */
-  public void init(
-      AsymmetricKeyParameter publicKey,
-      CipherParameters params,
-      EphemeralKeyPairGenerator ephemeralKeyPairGenerator) {
-    this.forEncryption = true;
-    this.pubParam = publicKey;
-    this.keyPairGenerator = ephemeralKeyPairGenerator;
-
-    extractParams(params);
-  }
-
-  /**
-   * Initialise the encryptor.
-   *
-   * @param privateKey the recipient's private key.
-   * @param params encoding and derivation parameters, may be wrapped to include an IV for an underlying block cipher.
-   * @param publicKeyParser the parser for reading the ephemeral public key.
-   */
-  public void init(AsymmetricKeyParameter privateKey, CipherParameters params, KeyParser publicKeyParser) {
-    this.forEncryption = false;
-    this.privParam = privateKey;
-    this.keyParser = publicKeyParser;
-
-    extractParams(params);
-  }
-
   private void extractParams(CipherParameters params) {
     if (params instanceof ParametersWithIV) {
       this.IV = ((ParametersWithIV) params).getIV();
@@ -153,61 +100,31 @@ public class EthereumIESEncryptionEngine {
     }
   }
 
-  public BufferedBlockCipher getCipher() {
-    return cipher;
-  }
-
-  public Mac getMac() {
-    return mac;
-  }
-
   private byte[] encryptBlock(byte[] in, int inOff, int inLen) throws InvalidCipherTextException {
     byte[] C = null, K = null, K1 = null, K2 = null;
     int len;
 
-    if (cipher == null) {
-      // Streaming mode.
-      K1 = new byte[inLen];
-      K2 = new byte[param.getMacKeySize() / 8];
-      K = new byte[K1.length + K2.length];
 
-      kdf.generateBytes(K, 0, K.length);
+    // Block cipher mode.
+    K1 = new byte[((IESWithCipherParameters) param).getCipherKeySize() / 8];
+    K2 = new byte[param.getMacKeySize() / 8];
+    K = new byte[K1.length + K2.length];
 
-      if (V.length != 0) {
-        System.arraycopy(K, 0, K2, 0, K2.length);
-        System.arraycopy(K, K2.length, K1, 0, K1.length);
-      } else {
-        System.arraycopy(K, 0, K1, 0, K1.length);
-        System.arraycopy(K, inLen, K2, 0, K2.length);
-      }
+    kdf.generateBytes(K, 0, K.length);
+    System.arraycopy(K, 0, K1, 0, K1.length);
+    System.arraycopy(K, K1.length, K2, 0, K2.length);
 
-      C = new byte[inLen];
-
-      for (int i = 0; i != inLen; i++) {
-        C[i] = (byte) (in[inOff + i] ^ K1[i]);
-      }
-      len = inLen;
+    // If iv provided use it to initialise the cipher
+    if (IV != null) {
+      cipher.init(true, new ParametersWithIV(new KeyParameter(K1), IV));
     } else {
-      // Block cipher mode.
-      K1 = new byte[((IESWithCipherParameters) param).getCipherKeySize() / 8];
-      K2 = new byte[param.getMacKeySize() / 8];
-      K = new byte[K1.length + K2.length];
-
-      kdf.generateBytes(K, 0, K.length);
-      System.arraycopy(K, 0, K1, 0, K1.length);
-      System.arraycopy(K, K1.length, K2, 0, K2.length);
-
-      // If iv provided use it to initialise the cipher
-      if (IV != null) {
-        cipher.init(true, new ParametersWithIV(new KeyParameter(K1), IV));
-      } else {
-        cipher.init(true, new KeyParameter(K1));
-      }
-
-      C = new byte[cipher.getOutputSize(inLen)];
-      len = cipher.processBytes(in, inOff, inLen, C, 0);
-      len += cipher.doFinal(C, len);
+      cipher.init(true, new KeyParameter(K1));
     }
+
+    C = new byte[cipher.getOutputSize(inLen)];
+    len = cipher.processBytes(in, inOff, inLen, C, 0);
+    len += cipher.doFinal(C, len);
+
 
 
     // Convert the length of the encoding vector into a byte array.
@@ -262,52 +179,30 @@ public class EthereumIESEncryptionEngine {
     }
 
     // note order is important: set up keys, do simple encryptions, check mac, do final encryption.
-    if (cipher == null) {
-      // Streaming mode.
-      K1 = new byte[inLen - V.length - mac.getMacSize()];
-      K2 = new byte[param.getMacKeySize() / 8];
-      K = new byte[K1.length + K2.length];
 
-      kdf.generateBytes(K, 0, K.length);
+    // Block cipher mode.
+    K1 = new byte[((IESWithCipherParameters) param).getCipherKeySize() / 8];
+    K2 = new byte[param.getMacKeySize() / 8];
+    K = new byte[K1.length + K2.length];
 
-      if (V.length != 0) {
-        System.arraycopy(K, 0, K2, 0, K2.length);
-        System.arraycopy(K, K2.length, K1, 0, K1.length);
-      } else {
-        System.arraycopy(K, 0, K1, 0, K1.length);
-        System.arraycopy(K, K1.length, K2, 0, K2.length);
-      }
+    kdf.generateBytes(K, 0, K.length);
+    System.arraycopy(K, 0, K1, 0, K1.length);
+    System.arraycopy(K, K1.length, K2, 0, K2.length);
 
-      // process the message
-      M = new byte[K1.length];
+    CipherParameters cp = new KeyParameter(K1);
 
-      for (int i = 0; i != K1.length; i++) {
-        M[i] = (byte) (in_enc[inOff + V.length + i] ^ K1[i]);
-      }
-    } else {
-      // Block cipher mode.
-      K1 = new byte[((IESWithCipherParameters) param).getCipherKeySize() / 8];
-      K2 = new byte[param.getMacKeySize() / 8];
-      K = new byte[K1.length + K2.length];
-
-      kdf.generateBytes(K, 0, K.length);
-      System.arraycopy(K, 0, K1, 0, K1.length);
-      System.arraycopy(K, K1.length, K2, 0, K2.length);
-
-      CipherParameters cp = new KeyParameter(K1);
-
-      // If IV provide use it to initialize the cipher
-      if (IV != null) {
-        cp = new ParametersWithIV(cp, IV);
-      }
-
-      cipher.init(false, cp);
-
-      M = new byte[cipher.getOutputSize(inLen - V.length - mac.getMacSize())];
-
-      // do initial processing
-      len = cipher.processBytes(in_enc, inOff + V.length, inLen - V.length - mac.getMacSize(), M, 0);
+    // If IV provide use it to initialize the cipher
+    if (IV != null) {
+      cp = new ParametersWithIV(cp, IV);
     }
+
+    cipher.init(false, cp);
+
+    M = new byte[cipher.getOutputSize(inLen - V.length - mac.getMacSize())];
+
+    // do initial processing
+    len = cipher.processBytes(in_enc, inOff + V.length, inLen - V.length - mac.getMacSize(), M, 0);
+
 
     // Convert the length of the encoding vector into a byte array.
     byte[] P2 = param.getEncodingV();
@@ -360,29 +255,6 @@ public class EthereumIESEncryptionEngine {
 
 
   public byte[] processBlock(byte[] in, int inOff, int inLen) throws InvalidCipherTextException {
-    if (forEncryption) {
-      if (keyPairGenerator != null) {
-        EphemeralKeyPair ephKeyPair = keyPairGenerator.generate();
-
-        this.privParam = ephKeyPair.getKeyPair().getPrivate();
-        this.V = ephKeyPair.getEncodedPublicKey();
-      }
-    } else {
-      if (keyParser != null) {
-        ByteArrayInputStream bIn = new ByteArrayInputStream(in, inOff, inLen);
-
-        try {
-          this.pubParam = keyParser.readKey(bIn);
-        } catch (IOException e) {
-          throw new InvalidCipherTextException("unable to recover ephemeral public key: " + e.getMessage(), e);
-        } catch (IllegalArgumentException e) {
-          throw new InvalidCipherTextException("unable to recover ephemeral public key: " + e.getMessage(), e);
-        }
-
-        int encLength = (inLen - bIn.available());
-        this.V = Arrays.copyOfRange(in, inOff, inOff + encLength);
-      }
-    }
 
     // Compute the common value and convert to byte array.
     agree.init(privParam);
