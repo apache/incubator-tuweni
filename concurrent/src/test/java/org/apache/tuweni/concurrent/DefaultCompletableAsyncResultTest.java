@@ -91,6 +91,123 @@ class DefaultCompletableAsyncResultTest {
   }
 
   @Test
+  void suppliesAsyncResultWhenCompletedSchedule(@VertxInstance Vertx vertx) throws Exception {
+    CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
+    AsyncResult<String> asyncResult2 = asyncResult.thenSchedule(vertx, value -> {
+      assertThat(value).isEqualTo("Completed1");
+      return AsyncResult.completed("Completed2");
+    });
+    assertThat(asyncResult2.isDone()).isFalse();
+    asyncResult.complete("Completed1");
+    assertThat(asyncResult2.get()).isEqualTo("Completed2");
+  }
+
+  @Test
+  void suppliesAsyncCompletionWhenCompletedCompose() throws Exception {
+    CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
+    AsyncCompletion completion = asyncResult.thenCompose(value -> {
+      assertThat(value).isEqualTo("Completed1");
+      return AsyncCompletion.completed();
+    });
+    asyncResult.complete("Completed1");
+    assertThat(completion.isDone()).isTrue();
+  }
+
+  @Test
+  void thenAcceptBoth() throws Exception {
+    CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
+    CompletableAsyncResult<String> asyncResult2 = AsyncResult.incomplete();
+
+    AtomicReference<String> ref = new AtomicReference<>();
+
+    AsyncCompletion completion = asyncResult.thenAcceptBoth(asyncResult2, (value, value2) -> {
+      ref.set(value + value2);
+    });
+    asyncResult.complete("Completed1");
+    asyncResult2.complete("Completed2");
+    assertThat(completion.isDone()).isTrue();
+    assertThat(ref.get()).isEqualTo("Completed1Completed2");
+  }
+
+  @Test
+  void accept() throws Exception {
+    CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
+    AtomicReference<Boolean> ref = new AtomicReference<>();
+    AsyncCompletion completion = asyncResult.accept((value, e) -> {
+      ref.set(true);
+    });
+    asyncResult.complete("Completed1");
+    assertThat(completion.isDone()).isTrue();
+    assertThat(ref.get()).isTrue();
+  }
+
+  @Test
+  void thenRun() throws Exception {
+    CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
+    AtomicReference<Boolean> ref = new AtomicReference<>();
+    AsyncCompletion completion = asyncResult.thenRun(() -> ref.set(true));
+    asyncResult.complete("Completed1");
+    assertThat(completion.isDone()).isTrue();
+    assertThat(ref.get()).isTrue();
+  }
+
+  @Test
+  void thenScheduleRun(@VertxInstance Vertx vertx) throws Exception {
+    CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
+    AtomicReference<Boolean> ref = new AtomicReference<>();
+    AsyncCompletion completion = asyncResult.thenScheduleRun(vertx, () -> ref.set(true));
+    asyncResult.complete("Completed1");
+    completion.join();
+    assertThat(ref.get()).isTrue();
+  }
+
+  @Test
+  void thenScheduleBlockingRun(@VertxInstance Vertx vertx) throws Exception {
+    CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
+    AtomicReference<Boolean> ref = new AtomicReference<>();
+    AsyncCompletion completion = asyncResult.thenScheduleBlockingRun(vertx, () -> ref.set(true));
+    asyncResult.complete("Completed1");
+    completion.join();
+    assertThat(ref.get()).isTrue();
+  }
+
+  @Test
+  void thenScheduleBlockingRunWithWorker(@VertxInstance Vertx vertx) throws Exception {
+    CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
+    AtomicReference<Boolean> ref = new AtomicReference<>();
+    WorkerExecutor executor = vertx.createSharedWorkerExecutor("foo");
+    AsyncCompletion completion = asyncResult.thenScheduleBlockingRun(executor, () -> ref.set(true));
+    asyncResult.complete("Completed1");
+    completion.join();
+    assertThat(ref.get()).isTrue();
+  }
+
+  @Test
+  void thenScheduleApply(@VertxInstance Vertx vertx) throws Exception {
+    CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
+    AsyncResult<String> completion = asyncResult.thenScheduleApply(vertx, (value) -> value + "foo");
+    asyncResult.complete("Completed1");
+    assertThat(completion.get()).isEqualTo("Completed1foo");
+  }
+
+  @Test
+  void thenScheduleBlockingApply(@VertxInstance Vertx vertx) throws Exception {
+    CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
+    AsyncResult<String> completion = asyncResult.thenScheduleBlockingApply(vertx, (value) -> value + "foo");
+    asyncResult.complete("Completed1");
+    assertThat(completion.get()).isEqualTo("Completed1foo");
+  }
+
+  @Test
+  void thenScheduleBlockingApplyWorker(@VertxInstance Vertx vertx) throws Exception {
+    CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
+    WorkerExecutor executor = vertx.createSharedWorkerExecutor("foo");
+    AsyncResult<String> completion = asyncResult.thenScheduleBlockingApply(executor, (value) -> value + "foo");
+    asyncResult.complete("Completed1");
+    assertThat(completion.get()).isEqualTo("Completed1foo");
+  }
+
+  @Test
   void completesExceptionallyWhenSuppliedResultCompletesExceptionally() throws Exception {
     Exception exception = new RuntimeException();
     CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
