@@ -35,6 +35,11 @@ class UInt64Test {
     return UInt64.fromHexString(s);
   }
 
+
+  private static Bytes b(String s) {
+    return Bytes.fromHexString(s);
+  }
+
   @Test
   void valueOfLong() {
     assertThrows(IllegalArgumentException.class, () -> UInt64.valueOf(-1));
@@ -496,21 +501,34 @@ class UInt64Test {
 
   @ParameterizedTest
   @MethodSource("andProvider")
-  void and(UInt64 v1, UInt64 v2, UInt64 expected) {
-    assertValueEquals(expected, v1.and(v2));
+  void and(UInt64 v1, Object v2, UInt64 expected) {
+    if (v2 instanceof UInt64) {
+      assertValueEquals(expected, v1.and((UInt64) v2));
+    } else if (v2 instanceof Bytes) {
+      assertValueEquals(expected, v1.and((Bytes) v2));
+    } else {
+      throw new IllegalArgumentException(v2.getClass().getName());
+    }
   }
 
   private static Stream<Arguments> andProvider() {
     return Stream
         .of(
             Arguments.of(hv("0x00000000FFFFFFFF"), hv("0xFFFFFFFF00000000"), hv("0x0000000000000000")),
-            Arguments.of(hv("0x00000000FFFFFFFF"), hv("0xFFFFFFFFFF000000"), hv("0x00000000FF000000")));
+            Arguments.of(hv("0x00000000FFFFFFFF"), hv("0xFFFFFFFFFF000000"), hv("0x00000000FF000000")),
+            Arguments.of(hv("0x00000000FFFFFFFF"), b("0xFFFFFFFFFF000000"), hv("0x00000000FF000000")));
   }
 
   @ParameterizedTest
   @MethodSource("orProvider")
-  void or(UInt64 v1, UInt64 v2, UInt64 expected) {
-    assertValueEquals(expected, v1.or(v2));
+  void or(UInt64 v1, Object v2, UInt64 expected) {
+    if (v2 instanceof UInt64) {
+      assertValueEquals(expected, v1.or((UInt64) v2));
+    } else if (v2 instanceof Bytes) {
+      assertValueEquals(expected, v1.or((Bytes) v2));
+    } else {
+      throw new IllegalArgumentException(v2.getClass().getName());
+    }
   }
 
   private static Stream<Arguments> orProvider() {
@@ -518,13 +536,20 @@ class UInt64Test {
         .of(
             Arguments.of(hv("0x00000000FFFFFFFF"), hv("0xFFFFFFFF00000000"), hv("0xFFFFFFFFFFFFFFFF")),
             Arguments.of(hv("0x00000000FFFFFFFF"), hv("0xFFFFFFFF00000000"), hv("0xFFFFFFFFFFFFFFFF")),
-            Arguments.of(hv("0x00000000000000FF"), hv("0xFFFFFFFF00000000"), hv("0xFFFFFFFF000000FF")));
+            Arguments.of(hv("0x00000000000000FF"), hv("0xFFFFFFFF00000000"), hv("0xFFFFFFFF000000FF")),
+            Arguments.of(hv("0x00000000000000FF"), b("0xFFFFFFFF00000000"), hv("0xFFFFFFFF000000FF")));
   }
 
   @ParameterizedTest
   @MethodSource("xorProvider")
-  void xor(UInt64 v1, UInt64 v2, UInt64 expected) {
-    assertValueEquals(expected, v1.xor(v2));
+  void xor(UInt64 v1, Object v2, UInt64 expected) {
+    if (v2 instanceof UInt64) {
+      assertValueEquals(expected, v1.xor((UInt64) v2));
+    } else if (v2 instanceof Bytes) {
+      assertValueEquals(expected, v1.xor((Bytes) v2));
+    } else {
+      throw new IllegalArgumentException(v2.getClass().getName());
+    }
   }
 
   private static Stream<Arguments> xorProvider() {
@@ -532,7 +557,8 @@ class UInt64Test {
         .of(
             Arguments.of(hv("0xFFFFFFFFFFFFFFFF"), hv("0xFFFFFFFFFFFFFFFF"), hv("0x0000000000000000")),
             Arguments.of(hv("0x00000000FFFFFFFF"), hv("0xFFFFFFFF00000000"), hv("0xFFFFFFFFFFFFFFFF")),
-            Arguments.of(hv("0x00000000FFFFFFFF"), hv("0xFFFFFFFFFF000000"), hv("0xFFFFFFFF00FFFFFF")));
+            Arguments.of(hv("0x00000000FFFFFFFF"), hv("0xFFFFFFFFFF000000"), hv("0xFFFFFFFF00FFFFFF")),
+            Arguments.of(hv("0x00000000FFFFFFFF"), b("0xFFFFFFFFFF000000"), hv("0xFFFFFFFF00FFFFFF")));
   }
 
   @ParameterizedTest
