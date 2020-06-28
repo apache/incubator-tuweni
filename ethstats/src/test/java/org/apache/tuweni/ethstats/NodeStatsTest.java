@@ -10,28 +10,25 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.tuweni.bytes;
+package org.apache.tuweni.ethstats;
 
-class DelegateBytesTest extends CommonBytesTests {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-  @Override
-  Bytes h(String hex) {
-    return new DelegatingBytes(Bytes.fromHexString(hex));
-  }
+import org.apache.tuweni.eth.EthJsonModule;
 
-  @Override
-  MutableBytes m(int size) {
-    // no-op
-    return MutableBytes.create(size);
-  }
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
 
-  @Override
-  Bytes w(byte[] bytes) {
-    return new DelegatingBytes(Bytes.wrap(bytes));
-  }
+class NodeStatsTest {
 
-  @Override
-  Bytes of(int... bytes) {
-    return new DelegatingBytes(Bytes.of(bytes));
+  @Test
+  void toJson() throws JsonProcessingException {
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.registerModule(new EthJsonModule());
+    NodeStats stats = new NodeStats(true, true, true, 42, 23, 5000, 1234567);
+    assertEquals(
+        "{\"active\":true,\"syncing\":true,\"mining\":true,\"hashrate\":42,\"peers\":23,\"gasPrice\":5000,\"uptime\":1234567}",
+        mapper.writeValueAsString(stats));
   }
 }

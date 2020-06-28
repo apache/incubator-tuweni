@@ -18,6 +18,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+
 import org.junit.jupiter.api.Test;
 
 class MutableTomlArrayTest {
@@ -86,5 +91,57 @@ class MutableTomlArrayTest {
     assertEquals(positionAt(4, 3), array.inputPositionOf(0));
     assertEquals(positionAt(9, 5), array.inputPositionOf(1));
     assertThrows(IndexOutOfBoundsException.class, () -> array.get(2));
+  }
+
+  @Test
+  void shouldGetDouble() {
+    MutableTomlArray array = new MutableTomlArray().append(23.5d, positionAt(1, 1));
+    assertEquals(23.5d, array.getDouble(0));
+  }
+
+  @Test
+  void shouldGetLong() {
+    MutableTomlArray array = new MutableTomlArray().append(23L, positionAt(1, 1));
+    assertEquals(23L, array.getLong(0));
+  }
+
+  @Test
+  void shouldGetBoolean() {
+    MutableTomlArray array = new MutableTomlArray().append(false, positionAt(1, 1));
+    assertEquals(false, array.getBoolean(0));
+  }
+
+  @Test
+  void shouldGetOffSetDateTime() {
+    OffsetDateTime time = OffsetDateTime.now();
+    MutableTomlArray array = new MutableTomlArray().append(time, positionAt(1, 1));
+    assertEquals(time, array.getOffsetDateTime(0));
+  }
+
+  @Test
+  void shouldGetLocalDateTime() {
+    LocalDateTime time = LocalDateTime.now();
+    MutableTomlArray array = new MutableTomlArray().append(time, positionAt(1, 1));
+    assertEquals(time, array.getLocalDateTime(0));
+  }
+
+  @Test
+  void shouldGetLocalDate() {
+    LocalDate time = LocalDate.now();
+    MutableTomlArray array = new MutableTomlArray().append(time, positionAt(1, 1));
+    assertEquals(time, array.getLocalDate(0));
+  }
+
+  @Test
+  void shouldGetLocalTime() {
+    LocalTime time = LocalTime.now();
+    MutableTomlArray array = new MutableTomlArray().append(time, positionAt(1, 1));
+    assertEquals(time, array.getLocalTime(0));
+  }
+
+  @Test
+  void toJson() {
+    MutableTomlArray array = new MutableTomlArray().append("foo", positionAt(1, 1)).append("bar", positionAt(10, 1));
+    assertEquals("[\n  \"foo\",\n  \"bar\"\n]\n", array.toJson());
   }
 }

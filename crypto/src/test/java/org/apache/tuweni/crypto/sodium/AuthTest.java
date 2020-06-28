@@ -13,6 +13,7 @@
 package org.apache.tuweni.crypto.sodium;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -38,5 +39,19 @@ class AuthTest {
     assertFalse(Auth.verify(new byte[tag.length], input, key));
     assertFalse(Auth.verify(tag, "An invalid input".getBytes(UTF_8), key));
     assertFalse(Auth.verify(tag, input, Auth.Key.random()));
+  }
+
+  @Test
+  void testEquals() {
+    Auth.Key key = Auth.Key.random();
+    Auth.Key copy = Auth.Key.fromBytes(key.bytes());
+    assertEquals(key, copy);
+  }
+
+  @Test
+  void testDestroy() {
+    Auth.Key key = Auth.Key.random();
+    key.destroy();
+    assertTrue(key.isDestroyed());
   }
 }
