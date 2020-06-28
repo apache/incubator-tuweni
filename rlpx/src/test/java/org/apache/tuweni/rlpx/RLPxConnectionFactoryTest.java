@@ -27,6 +27,8 @@ import org.apache.tuweni.crypto.SECP256K1.SecretKey;
 import org.apache.tuweni.junit.BouncyCastleExtension;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -258,6 +260,30 @@ class RLPxConnectionFactoryTest {
     assertNull(messageRef.get());
     conn.stream(message3, messageRef::set);
     assertNotNull(messageRef.get());
+  }
+
+  @Test
+  void twoMessagesCollated() throws TimeoutException, InterruptedException {
+    KeyPair keyPair = KeyPair.random();
+    KeyPair peerKeyPair = KeyPair.random();
+
+    AtomicReference<RLPxConnection> peerConnectionReference = new AtomicReference<>();
+    Function<Bytes, AsyncResult<Bytes>> wireBytes = (bytes) -> {
+      AtomicReference<Bytes> responseReference = new AtomicReference<>();
+      peerConnectionReference.set(RLPxConnectionFactory.respondToHandshake(bytes, peerKeyPair, responseReference::set));
+      return AsyncResult.completed(responseReference.get());
+    };
+    AsyncResult<RLPxConnection> futureConn =
+        RLPxConnectionFactory.createHandshake(keyPair, peerKeyPair.publicKey(), wireBytes);
+
+    RLPxConnection conn = futureConn.get(1, TimeUnit.SECONDS);
+    RLPxConnection conn2 = peerConnectionReference.get();
+
+    List<RLPxMessage> messages = new ArrayList<>();
+    Bytes message = conn.write(new RLPxMessage(1, Bytes.fromHexString("deadbeef")));
+    Bytes message2 = conn.write(new RLPxMessage(1, Bytes.fromHexString("deadbeef")));
+    conn2.stream(Bytes.concatenate(message, message2), messages::add);
+    assertEquals(2, messages.size());
   }
 
   @Test
