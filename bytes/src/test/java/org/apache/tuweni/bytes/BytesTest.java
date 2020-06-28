@@ -604,7 +604,7 @@ class BytesTest extends CommonBytesTests {
   @Test
   void shiftRightResult() {
     MutableBytes result = MutableBytes.create(4);
-    Bytes value = Bytes.fromHexString("0x01000001").shiftRight(2);
+    Bytes.fromHexString("0x01000001").shiftRight(2, result);
     assertEquals(Bytes.fromHexString("0x00400000"), result);
   }
 
@@ -617,7 +617,7 @@ class BytesTest extends CommonBytesTests {
   @Test
   void shiftLeftResult() {
     MutableBytes result = MutableBytes.create(4);
-    Bytes value = Bytes.fromHexString("0x01000001").shiftLeft(2);
+    Bytes.fromHexString("0x01000001").shiftLeft(2, result);
     assertEquals(Bytes.fromHexString("0x04000004"), result);
   }
 
