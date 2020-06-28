@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-class DiffieHelmanTest {
+class KeyExchangeTest {
 
   @BeforeAll
   static void checkAvailable() {
@@ -27,43 +27,43 @@ class DiffieHelmanTest {
   }
 
   @Test
-  void testScalarMultiplication() {
-    DiffieHelman.KeyPair keyPair = DiffieHelman.KeyPair.random();
-    DiffieHelman.KeyPair secondKeyPair = DiffieHelman.KeyPair.random();
+  void testMatchingSession() {
+    KeyExchange.KeyPair clientKeyPair = KeyExchange.KeyPair.random();
+    KeyExchange.KeyPair serverKeyPair = KeyExchange.KeyPair.random();
+    KeyExchange.SessionKeyPair clientSessionKeyPair = KeyExchange.client(clientKeyPair, serverKeyPair.publicKey());
+    KeyExchange.SessionKeyPair serverSessionKeyPair = KeyExchange.server(serverKeyPair, clientKeyPair.publicKey());
 
-    DiffieHelman.Secret scalar1 = DiffieHelman.Secret.forKeys(keyPair.secretKey(), secondKeyPair.publicKey());
-    DiffieHelman.Secret scalar2 = DiffieHelman.Secret.forKeys(secondKeyPair.secretKey(), keyPair.publicKey());
-
-    assertEquals(scalar1, scalar2);
+    assertEquals(clientSessionKeyPair.rx().bytes(), serverSessionKeyPair.tx().bytes());
+    assertEquals(clientSessionKeyPair.tx().bytes(), serverSessionKeyPair.rx().bytes());
   }
 
   @Test
   void testEquals() {
-    DiffieHelman.KeyPair keyPair = DiffieHelman.KeyPair.random();
-    DiffieHelman.KeyPair keyPair2 = DiffieHelman.KeyPair.forSecretKey(keyPair.secretKey());
+    KeyExchange.KeyPair keyPair = KeyExchange.KeyPair.random();
+    KeyExchange.KeyPair keyPair2 = KeyExchange.KeyPair.forSecretKey(keyPair.secretKey());
     assertEquals(keyPair, keyPair2);
     assertEquals(keyPair.hashCode(), keyPair2.hashCode());
   }
 
   @Test
   void testEqualsSecretKey() {
-    DiffieHelman.KeyPair keyPair = DiffieHelman.KeyPair.random();
-    DiffieHelman.KeyPair keyPair2 = DiffieHelman.KeyPair.forSecretKey(keyPair.secretKey());
+    KeyExchange.KeyPair keyPair = KeyExchange.KeyPair.random();
+    KeyExchange.KeyPair keyPair2 = KeyExchange.KeyPair.forSecretKey(keyPair.secretKey());
     assertEquals(keyPair.secretKey(), keyPair2.secretKey());
     assertEquals(keyPair.hashCode(), keyPair2.hashCode());
   }
 
   @Test
   void testEqualsPublicKey() {
-    DiffieHelman.KeyPair keyPair = DiffieHelman.KeyPair.random();
-    DiffieHelman.KeyPair keyPair2 = DiffieHelman.KeyPair.forSecretKey(keyPair.secretKey());
+    KeyExchange.KeyPair keyPair = KeyExchange.KeyPair.random();
+    KeyExchange.KeyPair keyPair2 = KeyExchange.KeyPair.forSecretKey(keyPair.secretKey());
     assertEquals(keyPair.publicKey(), keyPair2.publicKey());
     assertEquals(keyPair.hashCode(), keyPair2.hashCode());
   }
 
   @Test
   void testDestroy() {
-    DiffieHelman.KeyPair keyPair = DiffieHelman.KeyPair.random();
+    KeyExchange.KeyPair keyPair = KeyExchange.KeyPair.random();
     keyPair.secretKey().destroy();
     assertTrue(keyPair.secretKey().isDestroyed());
   }
