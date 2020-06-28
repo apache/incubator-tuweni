@@ -19,6 +19,7 @@ import static java.lang.String.format;
 import static java.nio.ByteOrder.BIG_ENDIAN;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -1314,16 +1315,19 @@ public interface Bytes extends Comparable<Bytes> {
    * @param appendable The appendable
    * @param <T> The appendable type.
    * @return The appendable.
-   * @throws IOException If an IO error occurs.
    */
-  default <T extends Appendable> T appendHexTo(T appendable) throws IOException {
-    int size = size();
-    for (int i = 0; i < size; i++) {
-      byte b = get(i);
-      appendable.append(AbstractBytes.HEX_CODE[b >> 4 & 15]);
-      appendable.append(AbstractBytes.HEX_CODE[b & 15]);
+  default <T extends Appendable> T appendHexTo(T appendable) {
+    try {
+      int size = size();
+      for (int i = 0; i < size; i++) {
+        byte b = get(i);
+        appendable.append(AbstractBytes.HEX_CODE[b >> 4 & 15]);
+        appendable.append(AbstractBytes.HEX_CODE[b & 15]);
+      }
+      return appendable;
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
     }
-    return appendable;
   }
 
   /**
@@ -1432,24 +1436,14 @@ public interface Bytes extends Comparable<Bytes> {
    * @return This value represented as hexadecimal, starting with "0x".
    */
   default String toHexString() {
-    try {
-      return appendHexTo(new StringBuilder("0x")).toString();
-    } catch (IOException e) {
-      // not thrown
-      throw new RuntimeException(e);
-    }
+    return appendHexTo(new StringBuilder("0x")).toString();
   }
 
   /**
    * @return This value represented as hexadecimal, with no prefix.
    */
   default String toUnprefixedHexString() {
-    try {
-      return appendHexTo(new StringBuilder()).toString();
-    } catch (IOException e) {
-      // not thrown
-      throw new RuntimeException(e);
-    }
+    return appendHexTo(new StringBuilder()).toString();
   }
 
   default String toEllipsisHexString() {
@@ -1474,13 +1468,7 @@ public interface Bytes extends Comparable<Bytes> {
 
   /** @return This value represented as a minimal hexadecimal string (without any leading zero). */
   default String toShortHexString() {
-    StringBuilder hex;
-    try {
-      hex = appendHexTo(new StringBuilder());
-    } catch (IOException e) {
-      // not thrown
-      throw new RuntimeException(e);
-    }
+    StringBuilder hex = appendHexTo(new StringBuilder());
 
     int i = 0;
     while (i < hex.length() && hex.charAt(i) == '0') {
@@ -1497,13 +1485,7 @@ public interface Bytes extends Comparable<Bytes> {
     if (Bytes.EMPTY.equals(this)) {
       return "0x0";
     }
-    StringBuilder hex;
-    try {
-      hex = appendHexTo(new StringBuilder());
-    } catch (IOException e) {
-      // not thrown
-      throw new RuntimeException(e);
-    }
+    StringBuilder hex = appendHexTo(new StringBuilder());
 
     int i = 0;
     while (i < hex.length() - 1 && hex.charAt(i) == '0') {
