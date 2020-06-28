@@ -10,23 +10,20 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-description = 'Utilities for better junit testing.'
+package org.apache.tuweni.junit;
 
-dependencies {
-  compile project(':io')
-  compileOnly 'com.github.kstyrc:embedded-redis'
-  compileOnly 'io.vertx:vertx-core'
-  compileOnly 'org.bouncycastle:bcprov-jdk15on'
-  compileOnly 'org.junit.jupiter:junit-jupiter-api'
-  compileOnly 'org.apache.lucene:lucene-core'
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-  testCompile 'com.github.kstyrc:embedded-redis'
-  testCompile 'io.lettuce:lettuce-core'
-  testCompile 'io.vertx:vertx-core'
-  testCompile 'org.apache.lucene:lucene-core'
-  testCompile 'org.junit.jupiter:junit-jupiter-api'
-  testCompile 'org.junit.jupiter:junit-jupiter-params'
-  testCompile 'org.bouncycastle:bcprov-jdk15on'
+import io.vertx.core.Vertx;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+@ExtendWith(VertxExtension.class)
+class VertxExtensionTest {
+
+  @Test
+  void test(@VertxInstance Vertx vertx) {
+    assertNotNull(vertx);
+  }
+
 }

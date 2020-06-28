@@ -230,6 +230,14 @@ class BytesTest extends CommonBytesTests {
   }
 
   @Test
+  void ofUnsignedShortLittleEndian() {
+    assertEquals(h("0x0000"), Bytes.ofUnsignedShort(0, LITTLE_ENDIAN));
+    assertEquals(h("0x0100"), Bytes.ofUnsignedShort(1, LITTLE_ENDIAN));
+    assertEquals(h("0x0001"), Bytes.ofUnsignedShort(256, LITTLE_ENDIAN));
+    assertEquals(h("0xFFFF"), Bytes.ofUnsignedShort(65535, LITTLE_ENDIAN));
+  }
+
+  @Test
   void ofUnsignedShortNegative() {
     Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes.ofUnsignedShort(-1));
     assertEquals(
@@ -484,5 +492,140 @@ class BytesTest extends CommonBytesTests {
     MutableBytes maxed = MutableBytes.of(0x00, 0x00, 0x00);
     maxed.decrement();
     assertEquals(Bytes.of(0xFF, 0xFF, 0xFF), maxed);
+  }
+
+  @Test
+  void concatenation() {
+    MutableBytes value1 = MutableBytes.wrap(Bytes.fromHexString("deadbeef").toArrayUnsafe());
+    Bytes result = Bytes.concatenate(value1, value1);
+    assertEquals(Bytes.fromHexString("deadbeefdeadbeef"), result);
+    value1.set(0, (byte) 0);
+    assertEquals(Bytes.fromHexString("deadbeefdeadbeef"), result);
+  }
+
+  @Test
+  void wrap() {
+    MutableBytes value1 = MutableBytes.wrap(Bytes.fromHexString("deadbeef").toArrayUnsafe());
+    Bytes result = Bytes.wrap(value1, value1);
+    assertEquals(Bytes.fromHexString("deadbeefdeadbeef"), result);
+    value1.set(0, (byte) 0);
+    assertEquals(Bytes.fromHexString("0x00adbeef00adbeef"), result);
+  }
+
+  @Test
+  void random() {
+    Bytes value = Bytes.random(20);
+    assertNotEquals(value, Bytes.random(20));
+    assertEquals(20, value.size());
+  }
+
+  @Test
+  void getInt() {
+    Bytes value = Bytes.fromHexString("0x00000001");
+    assertEquals(1, value.getInt(0));
+    assertEquals(16777216, value.getInt(0, LITTLE_ENDIAN));
+    assertEquals(1, value.toInt());
+    assertEquals(16777216, value.toInt(LITTLE_ENDIAN));
+  }
+
+  @Test
+  void getLong() {
+    Bytes value = Bytes.fromHexString("0x0000000000000001");
+    assertEquals(1, value.getLong(0));
+    assertEquals(72057594037927936L, value.getLong(0, LITTLE_ENDIAN));
+    assertEquals(1, value.toLong());
+    assertEquals(72057594037927936L, value.toLong(LITTLE_ENDIAN));
+  }
+
+  @Test
+  void numberOfLeadingZeros() {
+    Bytes value = Bytes.fromHexString("0x00000001");
+    assertEquals(31, value.numberOfLeadingZeros());
+  }
+
+  @Test
+  void and() {
+    Bytes value = Bytes.fromHexString("0x01000001").and(Bytes.fromHexString("0x01000000"));
+    assertEquals(Bytes.fromHexString("0x01000000"), value);
+  }
+
+  @Test
+  void andResult() {
+    MutableBytes result = MutableBytes.create(4);
+    Bytes value = Bytes.fromHexString("0x01000001").and(Bytes.fromHexString("0x01000000"), result);
+    assertEquals(Bytes.fromHexString("0x01000000"), result);
+  }
+
+  @Test
+  void or() {
+    Bytes value = Bytes.fromHexString("0x01000001").or(Bytes.fromHexString("0x01000000"));
+    assertEquals(Bytes.fromHexString("0x01000001"), value);
+  }
+
+  @Test
+  void orResult() {
+    MutableBytes result = MutableBytes.create(4);
+    Bytes value = Bytes.fromHexString("0x01000001").or(Bytes.fromHexString("0x01000000"), result);
+    assertEquals(Bytes.fromHexString("0x01000001"), result);
+  }
+
+  @Test
+  void xor() {
+    Bytes value = Bytes.fromHexString("0x01000001").xor(Bytes.fromHexString("0x01000000"));
+    assertEquals(Bytes.fromHexString("0x00000001"), value);
+  }
+
+  @Test
+  void xorResult() {
+    MutableBytes result = MutableBytes.create(4);
+    Bytes value = Bytes.fromHexString("0x01000001").xor(Bytes.fromHexString("0x01000000"), result);
+    assertEquals(Bytes.fromHexString("0x00000001"), result);
+  }
+
+  @Test
+  void not() {
+    Bytes value = Bytes.fromHexString("0x01000001").not();
+    assertEquals(Bytes.fromHexString("0xfefffffe"), value);
+  }
+
+  @Test
+  void notResult() {
+    MutableBytes result = MutableBytes.create(4);
+    Bytes value = Bytes.fromHexString("0x01000001").not(result);
+    assertEquals(Bytes.fromHexString("0xfefffffe"), result);
+  }
+
+  @Test
+  void shiftRight() {
+    Bytes value = Bytes.fromHexString("0x01000001").shiftRight(2);
+    assertEquals(Bytes.fromHexString("0x00400000"), value);
+  }
+
+  @Test
+  void shiftRightResult() {
+    MutableBytes result = MutableBytes.create(4);
+    Bytes.fromHexString("0x01000001").shiftRight(2, result);
+    assertEquals(Bytes.fromHexString("0x00400000"), result);
+  }
+
+  @Test
+  void shiftLeft() {
+    Bytes value = Bytes.fromHexString("0x01000001").shiftLeft(2);
+    assertEquals(Bytes.fromHexString("0x04000004"), value);
+  }
+
+  @Test
+  void shiftLeftResult() {
+    MutableBytes result = MutableBytes.create(4);
+    Bytes.fromHexString("0x01000001").shiftLeft(2, result);
+    assertEquals(Bytes.fromHexString("0x04000004"), result);
+  }
+
+  @Test
+  void commonPrefix() {
+    Bytes value = Bytes.fromHexString("0x01234567");
+    Bytes value2 = Bytes.fromHexString("0x01236789");
+    assertEquals(2, value.commonPrefixLength(value2));
+    assertEquals(Bytes.fromHexString("0x0123"), value.commonPrefix(value2));
   }
 }
