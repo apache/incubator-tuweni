@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -140,5 +141,31 @@ class ExpiringMapTest {
     currentTime = futureTime;
     map.purgeExpired();
     assertTrue(removed2.get());
+  }
+
+  @Test
+  void behavesLikeAMap() {
+    map.putAll(Collections.singletonMap(1, "foo"));
+    assertEquals("foo", map.getOrDefault(1, "bar"));
+    assertEquals("bar", map.getOrDefault(2, "bar"));
+    assertEquals("foobar", map.compute(1, (v, oldValue) -> oldValue + "bar"));
+    assertEquals("foobar", map.getOrDefault(1, "bar"));
+    assertEquals("foobar", map.putIfAbsent(1, "foo"));
+    assertEquals("foo", map.computeIfAbsent(3, (k) -> "foo"));
+    assertEquals("bar", map.computeIfPresent(3, (k, v) -> "bar"));
+    assertEquals("bar", map.replace(3, "foo"));
+    map.replaceAll((k, v) -> "noes");
+    assertEquals("noes", map.get(1));
+    map.clear();
+    assertEquals(0, map.size());
+    assertTrue(map.isEmpty());
+    map.putIfAbsent(1, "foo");
+    assertEquals(Collections.singleton(1), map.keySet());
+    assertEquals(Collections.singletonList("foo"), map.values());
+    assertEquals(1, map.entrySet().size());
+    AtomicBoolean called = new AtomicBoolean();
+    map.forEach((k, v) -> called.set(true));
+    assertTrue(called.get());
+    assertEquals(new ExpiringMap<Integer, String>(), new ExpiringMap<Integer, String>());
   }
 }
