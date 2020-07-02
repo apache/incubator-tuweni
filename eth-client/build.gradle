@@ -13,12 +13,14 @@
 description = 'Ethereum client'
 
 dependencies {
-  compile 'com.fasterxml.jackson.core:jackson-databind'
-  compile 'org.fusesource.leveldbjni:leveldbjni-all'
-  compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+    compile 'info.picocli:picocli'
+    compile 'com.fasterxml.jackson.core:jackson-databind'
+    compile 'org.fusesource.leveldbjni:leveldbjni-all'
+    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
 
   compile project(':devp2p-eth')
   compile project(':concurrent')
+  compile project(':config')
   compile project(':concurrent-coroutines')
   compile project(':dns-discovery')
   compile project(':crypto')

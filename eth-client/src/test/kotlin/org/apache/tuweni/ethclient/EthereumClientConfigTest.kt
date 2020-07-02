@@ -16,16 +16,32 @@
  */
 package org.apache.tuweni.ethclient
 
-import java.nio.file.Path
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.lang.IllegalArgumentException
+import java.nio.file.Paths
 
-/**
- * Configuration of EthClient. Can be provided via file or over the wire.
- */
-class EthClientConfig {
+class EthereumClientConfigTest {
 
-  companion object {
-    fun fromFile(path: Path): EthClientConfig {
-      return EthClientConfig()
+  @Test
+  fun testFileConfig() {
+    val config = EthereumClientConfig.fromFile(Paths.get(EthereumClientConfigTest::class.java.getResource("/minimal.conf").path))
+    assertNotNull(config)
+  }
+
+  @Test
+  fun testInvalidFileConfig() {
+    val exception : IllegalArgumentException = assertThrows() {
+      EthereumClientConfig.fromFile(Paths.get("foo"))
     }
+    assertEquals("Missing config file: 'foo'", exception.message)
+  }
+
+  @Test
+  fun testEmptyConfig() {
+    val config = EthereumClientConfig.fromString("")
+    assertNotNull(config)
   }
 }

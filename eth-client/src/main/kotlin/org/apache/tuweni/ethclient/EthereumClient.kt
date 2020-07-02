@@ -38,6 +38,7 @@ import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.kv.LevelDBKeyValueStore
+import org.apache.tuweni.peer.repository.PeerRepository
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.vertx.VertxRLPxService
 import org.apache.tuweni.rlpx.wire.WireConnection
@@ -54,86 +55,93 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Main method run by the Ethereum client application.
- */
-fun main(args: Array<String>) = runBlocking {
-  Security.addProvider(BouncyCastleProvider())
-  val client = EthClient()
-  client.run(Vertx.vertx(), Paths.get("data"))
-}
-
-/**
  * Top-level class to run an Ethereum client.
  */
 @UseExperimental(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-class EthClient(override val coroutineContext: CoroutineContext = Dispatchers.Unconfined) : CoroutineScope {
+class EthereumClient(val vertx: Vertx, val config: EthereumClientConfig, override val coroutineContext: CoroutineContext = Dispatchers.Unconfined) : CoroutineScope {
 
   companion object {
-    val logger = LoggerFactory.getLogger(EthClient::class.java)
+    val logger = LoggerFactory.getLogger(EthereumClient::class.java)
   }
 
   private val connectionsToENRs: MutableMap<String, EthereumNodeRecord> = ConcurrentHashMap()
-  private val enrs: MutableMap<EthereumNodeRecord, PeerStatus> = ConcurrentHashMap()
-  private val services = ArrayList<RLPxService>()
+  private val genesisFiles = HashMap<String, GenesisFile>()
+  private val services = HashMap<String, RLPxService>()
+  private val repositories = HashMap<String, BlockchainRepository>()
+  private val peerRepositories = HashMap<String, PeerRepository>()
 
-  internal suspend fun run(vertx: Vertx, dataStorage: Path) {
-    val contents = EthClient::class.java.getResourceAsStream("/mainnet.json").readAllBytes()
-    val genesisFile = GenesisFile.read(contents)
-    val genesisBlock = genesisFile.toBlock()
-    val index = NIOFSDirectory(dataStorage.resolve("index"))
+  internal suspend fun start() {
+    config.peerRepositories().forEach {
+      peerRepositories[it.getName()] = it.peerRepository()
+    }
 
-    val analyzer = StandardAnalyzer()
-    val config = IndexWriterConfig(analyzer)
-    val writer = IndexWriter(index, config)
+    config.genesisFiles().forEach {
+      genesisFiles[it.getName()] = it.genesisFile()
+    }
 
-    val repository = BlockchainRepository.init(
-      LevelDBKeyValueStore.open(dataStorage.resolve("bodies")),
-      LevelDBKeyValueStore.open(dataStorage.resolve("headers")),
-      LevelDBKeyValueStore.open(dataStorage.resolve("metadata")),
-      LevelDBKeyValueStore.open(dataStorage.resolve("transactionReceipts")),
-      LevelDBKeyValueStore.open(dataStorage.resolve("transactions")),
-      LevelDBKeyValueStore.open(dataStorage.resolve("state")),
-      BlockchainIndex(writer),
-      genesisBlock
-    )
-    AsyncCompletion.allOf((0..4).map {
+    val repoToGenesisFile = HashMap<BlockchainRepository, GenesisFile>()
+
+    config.dataStores().forEach() { dataStore ->
+      val genesisFile = genesisFiles[dataStore.getGenesisFile()]
+      val genesisBlock = genesisFile!!.toBlock()
+      val dataStorage = dataStore.getStoragePath()
+      val index = NIOFSDirectory(dataStorage.resolve("index"))
+      val analyzer = StandardAnalyzer()
+      val config = IndexWriterConfig(analyzer)
+      val writer = IndexWriter(index, config)
+      val repository = BlockchainRepository.init(
+        LevelDBKeyValueStore.open(dataStorage.resolve("bodies")),
+        LevelDBKeyValueStore.open(dataStorage.resolve("headers")),
+        LevelDBKeyValueStore.open(dataStorage.resolve("metadata")),
+        LevelDBKeyValueStore.open(dataStorage.resolve("transactionReceipts")),
+        LevelDBKeyValueStore.open(dataStorage.resolve("transactions")),
+        LevelDBKeyValueStore.open(dataStorage.resolve("state")),
+        BlockchainIndex(writer),
+        genesisBlock
+      )
+      repositories[dataStore.getName()] = repository
+      repoToGenesisFile[repository] = genesisFile
+    }
+
+    AsyncCompletion.allOf(config.rlpxServices().map { rlpxConfig ->
+      val peerRepository = peerRepositories[rlpxConfig.peerRepository()]
+      val repository = repositories[rlpxConfig.repository()]
+      val genesisFile = repoToGenesisFile[repository]
+      val genesisBlock = repository!!.retrieveGenesisBlock()
       val service = VertxRLPxService(
-        vertx, 0, "0.0.0.0", 30303, SECP256K1.KeyPair.random(),
+        vertx, rlpxConfig.port(), rlpxConfig.networkInterface(), rlpxConfig.advertisedPort(), SECP256K1.KeyPair.random(),
         listOf(
           EthSubprotocol(
             repository = repository,
             blockchainInfo = SimpleBlockchainInformation(
-              UInt256.valueOf(genesisFile.chainId.toLong()), genesisBlock.header.difficulty,
+              UInt256.valueOf(genesisFile!!.chainId.toLong()), genesisBlock.header.difficulty,
               genesisBlock.header.hash, genesisBlock.header.hash, genesisFile.forks
             ),
             listener = this::handleStatusUpdate
           )
         ),
-        "Apache Tuweni"
+        rlpxConfig.clientName(), WireConnectionPeerRepositoryAdapter(peerRepository!!)
       )
-      services.add(service)
+      services[rlpxConfig.getName()] = service
       service.start()
     }).await()
 
-    vertx.setPeriodic(10000) {
-      printServices()
-    }
-
     Runtime.getRuntime().addShutdownHook(object : Thread() {
-      override fun run() = runBlocking {
-        vertx.close()
-        dnsDaemon.close()
-        AsyncCompletion.allOf(services.map(RLPxService::stop)).await()
-        repository.close()
-      }
+      override fun run() = this@EthereumClient.stop()
     })
+  }
+
+  fun stop()  = runBlocking {
+    vertx.close()
+    AsyncCompletion.allOf(services.values.map(RLPxService::stop)).await()
+    repositories.values.forEach(BlockchainRepository::close)
   }
 
   private suspend fun requestPeerConnections() {
     logger.info("Adding new peers, {} known peers", this.enrs.size)
     val timeout = Instant.now().minus(5, ChronoUnit.MINUTES)
     val completions = mutableListOf<AsyncResult<WireConnection>>()
-    for (service in services) {
+    for (service in services.values) {
       var peerRequests = 0
       for (enr in enrs.entries.stream().unordered()) {
         if (enr.value.lastContacted == null || enr.value.lastContacted!!.isBefore(timeout)) {
@@ -166,33 +174,6 @@ class EthClient(override val coroutineContext: CoroutineContext = Dispatchers.Un
     connectionsToENRs[conn.id()]?.let {
       enrs[it]?.let {
         it.status = status
-      }
-    }
-  }
-
-  private fun printServices() {
-    var counter = 0
-    enrs.forEach { record, status ->
-      if (status.lastContacted != null && status.connectionId != null) {
-        val conn = status.service!!.repository()[status.connectionId!!]
-        conn?.let {
-          if (it.disconnectReason == null) {
-            counter++
-          }
-          logger.debug(
-            "Connected with {}, lastContacted: {}, disconnectReason: {}",
-            record.ip(),
-            status.lastContacted,
-            it.disconnectReason?.text
-          )
-        }
-      }
-    }
-    logger.info("{} active peers", counter)
-    if (counter < 50) {
-      logger.info("Missing {} peers, requesting more", 50 - counter)
-      async {
-        requestPeerConnections()
       }
     }
   }
