@@ -22,6 +22,7 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.hobbits.HobbitsTransport
 import org.apache.tuweni.hobbits.Message
 import org.apache.tuweni.hobbits.Protocol
+import org.apache.tuweni.hobbits.Relayer
 import org.apache.tuweni.hobbits.Transport
 import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.junit.VertxInstance
@@ -54,5 +55,11 @@ class RelayerAppTest {
     Assertions.assertEquals(Bytes.fromHexString("deadbeef"), ref.get().body)
     client1.stop()
     client2.stop()
+  }
+
+  @Test
+  fun testClose(@VertxInstance vertx: Vertx) {
+    val relayer = Relayer(vertx, "tcp://localhost:21000", "tcp://localhost:21001", {})
+    RelayerApp(vertx, relayer)
   }
 }
