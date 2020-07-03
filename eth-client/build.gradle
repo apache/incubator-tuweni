@@ -13,10 +13,10 @@
 description = 'Ethereum client'
 
 dependencies {
-    compile 'info.picocli:picocli'
-    compile 'com.fasterxml.jackson.core:jackson-databind'
-    compile 'org.fusesource.leveldbjni:leveldbjni-all'
-    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+  compile 'info.picocli:picocli'
+  compile 'com.fasterxml.jackson.core:jackson-databind'
+  compile 'org.fusesource.leveldbjni:leveldbjni-all'
+  compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
 
   compile project(':devp2p-eth')
   compile project(':concurrent')
@@ -33,6 +33,8 @@ dependencies {
   testCompile 'org.bouncycastle:bcprov-jdk15on'
   testCompile 'org.junit.jupiter:junit-jupiter-api'
   testCompile 'org.junit.jupiter:junit-jupiter-params'
+  testCompile 'com.nhaarman.mockitokotlin2:mockito-kotlin'
+  testCompile 'org.mockito:mockito-junit-jupiter'
 
   testRuntime 'org.junit.jupiter:junit-jupiter-engine'
 

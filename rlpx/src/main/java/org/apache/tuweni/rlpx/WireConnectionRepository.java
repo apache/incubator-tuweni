@@ -25,8 +25,9 @@ public interface WireConnectionRepository {
    * Adds a new wire connection to the repository.
    * 
    * @param wireConnection the new wire connection
+   * @return the id of the connection
    */
-  void add(WireConnection wireConnection);
+  String add(WireConnection wireConnection);
 
   /**
    * Gets a wire connection by its identifier, as provided by

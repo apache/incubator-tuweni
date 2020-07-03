@@ -27,13 +27,14 @@ class EthereumClientConfigTest {
 
   @Test
   fun testFileConfig() {
-    val config = EthereumClientConfig.fromFile(Paths.get(EthereumClientConfigTest::class.java.getResource("/minimal.conf").path))
+    val config =
+      EthereumClientConfig.fromFile(Paths.get(EthereumClientConfigTest::class.java.getResource("/minimal.conf").path))
     assertNotNull(config)
   }
 
   @Test
   fun testInvalidFileConfig() {
-    val exception : IllegalArgumentException = assertThrows() {
+    val exception: IllegalArgumentException = assertThrows {
       EthereumClientConfig.fromFile(Paths.get("foo"))
     }
     assertEquals("Missing config file: 'foo'", exception.message)

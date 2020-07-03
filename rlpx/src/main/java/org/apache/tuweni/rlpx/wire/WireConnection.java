@@ -13,16 +13,12 @@
 package org.apache.tuweni.rlpx.wire;
 
 
+import org.apache.tuweni.crypto.SECP256K1;
+
 /**
  * A stateful connection between two peers under the Devp2p wire protocol.
  */
 public interface WireConnection {
-
-  /**
-   *
-   * @return the identifier of this wire connection
-   */
-  String id();
 
   /**
    * Returns true if the connection supports the subprotocol
@@ -52,4 +48,28 @@ public interface WireConnection {
    * @return the disconnect reason if it happened.
    */
   DisconnectReason getDisconnectReason();
+
+  /**
+   * Network interface associated with the wire connection
+   */
+  String peerHost();
+
+  /**
+   * Port associated with the wire connection
+   */
+  int peerPort();
+
+  /**
+   * Public key of the peer associated with the wire connection
+   */
+  SECP256K1.PublicKey peerPublicKey();
+
+  /**
+   * Provides the identity of the connection
+   * 
+   * @return the connection identity as an enode address.
+   */
+  default String uri() {
+    return "enode://" + peerPublicKey().toHexString() + "@" + peerHost() + ":" + peerPort();
+  }
 }

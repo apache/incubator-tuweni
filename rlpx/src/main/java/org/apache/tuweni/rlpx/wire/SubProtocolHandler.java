@@ -33,10 +33,10 @@ public interface SubProtocolHandler {
   /**
    * Handle a new peer connection
    * 
-   * @param connectionId the new peer connection identifier
+   * @param connection the new peer connection
    * @return a handle to the completion of the addition of the new peer.
    */
-  AsyncCompletion handleNewPeerConnection(String connectionId);
+  AsyncCompletion handleNewPeerConnection(WireConnection connection);
 
   /**
    * Stops a subprotocol operations.

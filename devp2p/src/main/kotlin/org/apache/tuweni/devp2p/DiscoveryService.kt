@@ -399,13 +399,10 @@ internal class CoroutineDiscoveryService(
   }
 
   private suspend fun bootstrapFrom(uri: URI): Boolean {
-    val (bootstrapNodeId, endpoint) = parseEnodeUri(uri)
-    val peer = peerRepository.get(bootstrapNodeId)
-    val now = timeSupplier()
-    peer.updateEndpoint(endpoint, now)
+    val peer = peerRepository.get(uri)
     try {
       val result = withTimeout(BOOTSTRAP_PEER_VERIFICATION_TIMEOUT_MS) {
-        endpointVerification(endpoint, peer).verifyWithRetries()
+        endpointVerification(peer.endpoint, peer).verifyWithRetries()
       } ?: return false
       if (result.peer != peer) {
         logger.warn(
@@ -487,7 +484,7 @@ internal class CoroutineDiscoveryService(
     val results = neighbors(target).toMutableList()
 
     // maybe add ourselves to the set
-    val selfPeer = peerRepository.get(nodeId)
+    val selfPeer = peerRepository.get(selfEndpoint.address.hostAddress, selfEndpoint.udpPort, nodeId)
     results.orderedInsert(selfPeer) { a, _ -> targetId.xorDistCmp(a.nodeId.bytesArray(), nodeId.bytesArray()) }
     results.removeAt(results.lastIndex)
 
@@ -503,7 +500,7 @@ internal class CoroutineDiscoveryService(
       while (true) {
         // stop if no more responses are received after the given time
         val node = withTimeoutOrNull(LOOKUP_RESPONSE_TIMEOUT_MS) { nodes.receiveOrNull() } ?: break
-        val peer = peerRepository.get(node.nodeId)
+        val peer = peerRepository.get(selfEndpoint.address.hostAddress, selfEndpoint.udpPort, node.nodeId)
         if (!results.contains(peer)) {
           results.orderedInsert(peer) { a, _ -> targetId.xorDistCmp(a.nodeId.bytesArray(), node.nodeId.bytesArray()) }
           results.removeAt(results.lastIndex)
@@ -569,7 +566,7 @@ internal class CoroutineDiscoveryService(
     // be incorrect (using private-subnet addresses, wildcard addresses, etc). So instead, respond to the source
     // address of the packet itself.
     val fromEndpoint = Endpoint(from, packet.from.tcpPort)
-    val peer = peerRepository.get(packet.nodeId)
+    val peer = peerRepository.get(from.hostString, from.port, packet.nodeId)
     // update the endpoint if the peer does not have one that's been proven
     var currentEndpoint = peer.updateEndpoint(fromEndpoint, arrivalTime, arrivalTime - ENDPOINT_PROOF_LONGEVITY_MS)
     if (currentEndpoint.tcpPort != packet.from.tcpPort) {
@@ -598,11 +595,12 @@ internal class CoroutineDiscoveryService(
     // peer is listening at the same address, it will respond to the ping with its node-id. Instead of rejecting,
     // accept the pong and update the new peer record with the proven endpoint, preferring to keep its current
     // tcpPort and otherwise keeping the tcpPort of the original peer.
-    val peer = if (sender.nodeId == packet.nodeId) sender else peerRepository.get(packet.nodeId)
+    val peer =
+      if (sender.nodeId == packet.nodeId) sender else peerRepository.get(from.hostName, from.port, packet.nodeId)
     val endpoint = if (peer.verifyEndpoint(pending.endpoint, arrivalTime)) {
       pending.endpoint
     } else {
-      val endpoint = peer.endpoint?.tcpPort?.let { port ->
+      val endpoint = peer.endpoint.tcpPort?.let { port ->
         Endpoint(pending.endpoint.address, pending.endpoint.udpPort, port)
       } ?: pending.endpoint
       peer.updateEndpoint(endpoint, arrivalTime)
@@ -631,7 +629,7 @@ internal class CoroutineDiscoveryService(
 
   private suspend fun handleFindNode(packet: FindNodePacket, from: InetSocketAddress, arrivalTime: Long) {
     // if the peer has not been validated, delay sending neighbors until it is
-    val peer = peerRepository.get(packet.nodeId)
+    val peer = peerRepository.get(from.hostString, from.port, packet.nodeId)
     val (_, endpoint) = ensurePeerIsValid(peer, from, arrivalTime) ?: run {
       logger.debug("{}: received findNode from {} which cannot be validated", serviceDescriptor, from)
       ++unvalidatedPeerPackets
@@ -653,7 +651,7 @@ internal class CoroutineDiscoveryService(
       for (node in packet.nodes) {
         launch {
           logger.debug("{}: received neighbour {} from {}", serviceDescriptor, node.endpoint.address, from)
-          val neighbor = peerRepository.get(node.nodeId)
+          val neighbor = peerRepository.get(from.hostName, from.port, node.nodeId)
           val now = timeSupplier()
           neighbor.updateEndpoint(node.endpoint, now, now - ENDPOINT_PROOF_LONGEVITY_MS)
 
@@ -676,7 +674,7 @@ internal class CoroutineDiscoveryService(
   }
 
   private suspend fun handleENRRequest(packet: ENRRequestPacket, from: InetSocketAddress, arrivalTime: Long) {
-    val peer = peerRepository.get(packet.nodeId)
+    val peer = peerRepository.get(from.hostName, from.port, packet.nodeId)
     val (_, endpoint) = ensurePeerIsValid(peer, from, arrivalTime) ?: run {
       logger.debug("{}: received enrRequest from {} which cannot be validated", serviceDescriptor, from)
       ++unvalidatedPeerPackets
@@ -701,7 +699,8 @@ internal class CoroutineDiscoveryService(
     // peer is listening at the same address, it will respond to the ping with its node-id. Instead of rejecting,
     // accept the pong and update the new peer record with the proven endpoint, preferring to keep its current
     // tcpPort and otherwise keeping the tcpPort of the original peer.
-    val peer = if (sender.nodeId == packet.nodeId) sender else peerRepository.get(packet.nodeId)
+    val peer =
+      if (sender.nodeId == packet.nodeId) sender else peerRepository.get(from.hostName, from.port, packet.nodeId)
 
     val enr = EthereumNodeRecord.fromRLP(packet.enr)
     try {
@@ -719,7 +718,7 @@ internal class CoroutineDiscoveryService(
   private fun addToRoutingTable(peer: Peer) {
     routingTable.add(peer)?.let { contested ->
       launch {
-        contested.endpoint?.let { endpoint ->
+        contested.endpoint.let { endpoint ->
           withTimeoutOrNull(PEER_VERIFICATION_TIMEOUT_MS) { endpointVerification(endpoint, contested).verify() }
         } ?: routingTable.evict(contested)
       }
@@ -738,7 +737,7 @@ internal class CoroutineDiscoveryService(
     }
 
     val endpoint = peer.updateEndpoint(
-      Endpoint(address, peer.endpoint?.tcpPort),
+      Endpoint(address, peer.endpoint.tcpPort),
       arrivalTime, now - ENDPOINT_PROOF_LONGEVITY_MS
     )
     return withTimeoutOrNull(PEER_VERIFICATION_TIMEOUT_MS) { endpointVerification(endpoint, peer).verify(now) }
@@ -925,10 +924,6 @@ internal class CoroutineDiscoveryService(
             continue
           }
           val endpoint = peer.endpoint
-          if (endpoint == null) {
-            request.results.close()
-            continue
-          }
           var now = timeSupplier()
           results = request.results
           lastReceive = now

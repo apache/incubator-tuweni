@@ -40,14 +40,6 @@ internal class EphemeralPeerRepositoryTest {
   }
 
   @Test
-  fun shouldReturnPeerWithNoEndpointForUnknownId() = runBlocking {
-    val peer = peerRepository.get(SECP256K1.KeyPair.random().publicKey())
-    assertNull(peer.endpoint)
-    assertNull(peer.lastSeen)
-    assertNull(peer.lastVerified)
-  }
-
-  @Test
   fun shouldReturnPeerBasedOnURIWithEndpoint() = runBlocking {
     val peer = peerRepository.get(
       "enode://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
@@ -62,9 +54,9 @@ internal class EphemeralPeerRepositoryTest {
         "b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b"
     )
     assertEquals(expectedId, peer.nodeId)
-    assertEquals(InetAddress.getByName("172.20.0.4"), peer.endpoint?.address)
-    assertEquals(7654, peer.endpoint?.udpPort)
-    assertEquals(7654, peer.endpoint?.tcpPort)
+    assertEquals(InetAddress.getByName("172.20.0.4"), peer.endpoint.address)
+    assertEquals(7654, peer.endpoint.udpPort)
+    assertEquals(7654, peer.endpoint.tcpPort)
   }
 
   @Test
@@ -82,9 +74,9 @@ internal class EphemeralPeerRepositoryTest {
         "b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b"
     )
     assertEquals(expectedId, peer.nodeId)
-    assertEquals(InetAddress.getByName("172.20.0.4"), peer.endpoint?.address)
-    assertEquals(30303, peer.endpoint?.udpPort)
-    assertEquals(30303, peer.endpoint?.tcpPort)
+    assertEquals(InetAddress.getByName("172.20.0.4"), peer.endpoint.address)
+    assertEquals(30303, peer.endpoint.udpPort)
+    assertEquals(30303, peer.endpoint.tcpPort)
   }
 
   @Test
@@ -102,9 +94,9 @@ internal class EphemeralPeerRepositoryTest {
         "b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b"
     )
     assertEquals(expectedId, peer.nodeId)
-    assertEquals(InetAddress.getByName("172.20.0.4"), peer.endpoint?.address)
-    assertEquals(23456, peer.endpoint?.udpPort)
-    assertEquals(54789, peer.endpoint?.tcpPort)
+    assertEquals(InetAddress.getByName("172.20.0.4"), peer.endpoint.address)
+    assertEquals(23456, peer.endpoint.udpPort)
+    assertEquals(54789, peer.endpoint.tcpPort)
   }
 
   @Test
@@ -180,9 +172,9 @@ internal class EphemeralPeerRepositoryTest {
         "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b"
     )
     assertEquals(expectedId, peer.nodeId)
-    assertEquals(InetAddress.getByName("172.20.0.4"), peer.endpoint?.address)
-    assertEquals(23456, peer.endpoint?.udpPort)
-    assertEquals(54789, peer.endpoint?.tcpPort)
+    assertEquals(InetAddress.getByName("172.20.0.4"), peer.endpoint.address)
+    assertEquals(23456, peer.endpoint.udpPort)
+    assertEquals(54789, peer.endpoint.tcpPort)
   }
 
   @Test
@@ -191,7 +183,7 @@ internal class EphemeralPeerRepositoryTest {
       "enode://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
         "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789"
     )
-    peer.verifyEndpoint(peer.endpoint!!, currentTime)
+    peer.verifyEndpoint(peer.endpoint, currentTime)
     assertEquals(currentTime, peer.lastSeen)
     assertEquals(currentTime, peer.lastVerified)
 
@@ -208,7 +200,7 @@ internal class EphemeralPeerRepositoryTest {
       "enode://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
         "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789"
     )
-    peer.verifyEndpoint(peer.endpoint!!, currentTime)
+    peer.verifyEndpoint(peer.endpoint, currentTime)
     assertEquals(currentTime, peer.lastSeen)
     assertEquals(currentTime, peer.lastVerified)
 
@@ -226,7 +218,7 @@ internal class EphemeralPeerRepositoryTest {
       "enode://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
         "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789"
     )
-    peer.verifyEndpoint(peer.endpoint!!, currentTime)
+    peer.verifyEndpoint(peer.endpoint, currentTime)
     assertEquals(currentTime, peer.lastSeen)
     assertEquals(currentTime, peer.lastVerified)
 
@@ -243,12 +235,12 @@ internal class EphemeralPeerRepositoryTest {
       "enode://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
         "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789"
     )
-    peer.verifyEndpoint(peer.endpoint!!, currentTime)
+    peer.verifyEndpoint(peer.endpoint, currentTime)
     assertEquals(currentTime, peer.lastSeen)
     assertEquals(currentTime, peer.lastVerified)
 
-    peer.verifyEndpoint(peer.endpoint!!, currentTime)
-    peer.updateEndpoint(peer.endpoint!!, currentTime + 10, currentTime)
+    peer.verifyEndpoint(peer.endpoint, currentTime)
+    peer.updateEndpoint(peer.endpoint, currentTime + 10, currentTime)
     assertEquals(currentTime + 10, peer.lastSeen)
     assertEquals(currentTime, peer.lastVerified)
   }

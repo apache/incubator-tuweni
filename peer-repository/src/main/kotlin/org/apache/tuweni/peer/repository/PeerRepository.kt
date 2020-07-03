@@ -24,15 +24,16 @@ import java.time.Instant
  */
 interface PeerRepository {
 
-  fun storePeer(id: String, lastContacted: Instant?, lastDiscovered: Instant?): Peer
+  fun storePeer(id: Identity, lastContacted: Instant?, lastDiscovered: Instant?): Peer
 
   fun randomPeer(): Peer?
 
-  fun storeIdentity(networkInterface: String, port: Int, keyPair: SECP256K1.KeyPair): Identity
+  fun storeIdentity(networkInterface: String, port: Int, publicKey: SECP256K1.PublicKey): Identity
 
   fun addConnection(peer: Peer, identity: Identity)
 
   fun markConnectionInactive(peer: Peer, identity: Identity)
+  fun peerDiscoveredAt(peer: Peer, time: Long)
 }
 
 /**
@@ -41,7 +42,7 @@ interface PeerRepository {
 interface Peer {
   fun connections(): List<Connection>
 
-  fun id(): String
+  fun id(): Identity
 
   fun lastContacted(): Instant?
 
@@ -57,7 +58,8 @@ interface Connection {
 interface Identity {
   fun networkInterface(): String
   fun port(): Int
-  fun keyPair(): SECP256K1.KeyPair
+  fun publicKey(): SECP256K1.PublicKey
+  fun id(): String
   fun connections(): List<Connection>
   fun activePeers(): List<Peer>
 }

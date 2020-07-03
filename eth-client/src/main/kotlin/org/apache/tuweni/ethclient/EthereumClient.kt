@@ -17,23 +17,18 @@
 package org.apache.tuweni.ethclient
 
 import io.vertx.core.Vertx
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.index.IndexWriter
 import org.apache.lucene.index.IndexWriterConfig
 import org.apache.lucene.store.NIOFSDirectory
 import org.apache.tuweni.concurrent.AsyncCompletion
-import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
-import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.eth.EthSubprotocol
 import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
-import org.apache.tuweni.devp2p.eth.StatusMessage
 import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
@@ -41,36 +36,25 @@ import org.apache.tuweni.kv.LevelDBKeyValueStore
 import org.apache.tuweni.peer.repository.PeerRepository
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.vertx.VertxRLPxService
-import org.apache.tuweni.rlpx.wire.WireConnection
 import org.apache.tuweni.units.bigints.UInt256
-import org.bouncycastle.jce.provider.BouncyCastleProvider
-import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.security.Security
-import java.time.Instant
-import java.time.temporal.ChronoUnit
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.CoroutineContext
 
 /**
  * Top-level class to run an Ethereum client.
  */
 @UseExperimental(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-class EthereumClient(val vertx: Vertx, val config: EthereumClientConfig, override val coroutineContext: CoroutineContext = Dispatchers.Unconfined) : CoroutineScope {
+class EthereumClient(
+  val vertx: Vertx,
+  val config: EthereumClientConfig,
+  override val coroutineContext: CoroutineContext = Dispatchers.Unconfined
+) : CoroutineScope {
 
-  companion object {
-    val logger = LoggerFactory.getLogger(EthereumClient::class.java)
-  }
-
-  private val connectionsToENRs: MutableMap<String, EthereumNodeRecord> = ConcurrentHashMap()
   private val genesisFiles = HashMap<String, GenesisFile>()
   private val services = HashMap<String, RLPxService>()
   private val repositories = HashMap<String, BlockchainRepository>()
   private val peerRepositories = HashMap<String, PeerRepository>()
 
-  internal suspend fun start() {
+  suspend fun start() {
     config.peerRepositories().forEach {
       peerRepositories[it.getName()] = it.peerRepository()
     }
@@ -109,18 +93,22 @@ class EthereumClient(val vertx: Vertx, val config: EthereumClientConfig, overrid
       val genesisFile = repoToGenesisFile[repository]
       val genesisBlock = repository!!.retrieveGenesisBlock()
       val service = VertxRLPxService(
-        vertx, rlpxConfig.port(), rlpxConfig.networkInterface(), rlpxConfig.advertisedPort(), SECP256K1.KeyPair.random(),
+        vertx,
+        rlpxConfig.port(),
+        rlpxConfig.networkInterface(),
+        rlpxConfig.advertisedPort(),
+        SECP256K1.KeyPair.random(),
         listOf(
           EthSubprotocol(
             repository = repository,
             blockchainInfo = SimpleBlockchainInformation(
               UInt256.valueOf(genesisFile!!.chainId.toLong()), genesisBlock.header.difficulty,
               genesisBlock.header.hash, genesisBlock.header.hash, genesisFile.forks
-            ),
-            listener = this::handleStatusUpdate
+            )
           )
         ),
-        rlpxConfig.clientName(), WireConnectionPeerRepositoryAdapter(peerRepository!!)
+        rlpxConfig.clientName(),
+        WireConnectionPeerRepositoryAdapter(peerRepository!!)
       )
       services[rlpxConfig.getName()] = service
       service.start()
@@ -131,50 +119,50 @@ class EthereumClient(val vertx: Vertx, val config: EthereumClientConfig, overrid
     })
   }
 
-  fun stop()  = runBlocking {
+  fun stop() = runBlocking {
     vertx.close()
     AsyncCompletion.allOf(services.values.map(RLPxService::stop)).await()
     repositories.values.forEach(BlockchainRepository::close)
   }
 
-  private suspend fun requestPeerConnections() {
-    logger.info("Adding new peers, {} known peers", this.enrs.size)
-    val timeout = Instant.now().minus(5, ChronoUnit.MINUTES)
-    val completions = mutableListOf<AsyncResult<WireConnection>>()
-    for (service in services.values) {
-      var peerRequests = 0
-      for (enr in enrs.entries.stream().unordered()) {
-        if (enr.value.lastContacted == null || enr.value.lastContacted!!.isBefore(timeout)) {
-          peerRequests++
-          enr.value.lastContacted = Instant.now()
-          val connectAwait =
-            service.connectTo(enr.key.publicKey(), InetSocketAddress(enr.key.ip(), enr.key.tcp())).thenApply {
-              enr.value.connectionId = it.id()
-              enr.value.service = service
-              connectionsToENRs[it.id()] = enr.key
-              it
-            }
-          completions.add(connectAwait)
-          if (peerRequests >= 30) {
-            logger.info("Made over 30 peer requests, moving to next service")
-            break
-          }
-        }
-      }
-    }
-    try {
-      logger.info("Making a total of {} peer connections", completions.size)
-      AsyncResult.allOf(completions).await()
-    } catch (e: CancellationException) {
-      logger.error("Cancellation exception reported", e)
-    }
-  }
-
-  private fun handleStatusUpdate(conn: WireConnection, status: StatusMessage) {
-    connectionsToENRs[conn.id()]?.let {
-      enrs[it]?.let {
-        it.status = status
-      }
-    }
-  }
+//  private suspend fun requestPeerConnections() {
+//    logger.info("Adding new peers, {} known peers", this.enrs.size)
+//    val timeout = Instant.now().minus(5, ChronoUnit.MINUTES)
+//    val completions = mutableListOf<AsyncResult<WireConnection>>()
+//    for (service in services.values) {
+//      var peerRequests = 0
+//      for (enr in enrs.entries.stream().unordered()) {
+//        if (enr.value.lastContacted == null || enr.value.lastContacted!!.isBefore(timeout)) {
+//          peerRequests++
+//          enr.value.lastContacted = Instant.now()
+//          val connectAwait =
+//            service.connectTo(enr.key.publicKey(), InetSocketAddress(enr.key.ip(), enr.key.tcp())).thenApply {
+//              enr.value.connectionId = it.id()
+//              enr.value.service = service
+//              connectionsToENRs[it.id()] = enr.key
+//              it
+//            }
+//          completions.add(connectAwait)
+//          if (peerRequests >= 30) {
+//            logger.info("Made over 30 peer requests, moving to next service")
+//            break
+//          }
+//        }
+//      }
+//    }
+//    try {
+//      logger.info("Making a total of {} peer connections", completions.size)
+//      AsyncResult.allOf(completions).await()
+//    } catch (e: CancellationException) {
+//      logger.error("Cancellation exception reported", e)
+//    }
+//  }
+//
+//  private fun handleStatusUpdate(conn: WireConnection, status: StatusMessage) {
+//    connectionsToENRs[conn.id()]?.let {
+//      enrs[it]?.let {
+//        it.status = status
+//      }
+//    }
+//  }
 }

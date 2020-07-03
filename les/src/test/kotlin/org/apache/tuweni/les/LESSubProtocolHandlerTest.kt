@@ -16,6 +16,8 @@
  */
 package org.apache.tuweni.les
 
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.mock
 import kotlinx.coroutines.runBlocking
 import org.apache.lucene.index.IndexWriter
 import org.apache.tuweni.bytes.Bytes
@@ -54,12 +56,11 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mockito.doReturn
-import org.mockito.Mockito.mock
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.UUID
 
 @ExtendWith(BouncyCastleExtension::class, VertxExtension::class, LuceneIndexWriterExtension::class)
 internal class LESSubProtocolHandlerTest @Throws(IOException::class)
@@ -124,7 +125,7 @@ constructor() {
     override fun send(
       subProtocolIdentifier: SubProtocolIdentifier,
       messageType: Int,
-      connectionId: String,
+      connection: WireConnection,
       message: Bytes
     ) {
       this.message = message
@@ -133,12 +134,25 @@ constructor() {
     override fun broadcast(subProtocolIdentifier: SubProtocolIdentifier, messageType: Int, message: Bytes) {
     }
 
-    override fun disconnect(connectionId: String, reason: DisconnectReason) {
+    override fun disconnect(
+      connection: WireConnection,
+      reason: DisconnectReason
+    ) {
       this.disconnectReason = reason
     }
 
     override fun repository(): WireConnectionRepository? {
       return null
+    }
+  }
+
+  private fun makeConnection(): WireConnection {
+    val key = SECP256K1.KeyPair.random().publicKey()
+    return mock {
+      on { peerHost() } doReturn UUID.randomUUID().toString()
+      on { peerPort() } doReturn 1
+      on { peerPublicKey() } doReturn key
+      on { uri() }.thenCallRealMethod()
     }
   }
 
@@ -172,7 +186,8 @@ constructor() {
         UInt256.ZERO,
         repo
       )
-      handler.handleNewPeerConnection("abc").await()
+      val conn = makeConnection()
+      handler.handleNewPeerConnection(conn).await()
       val message = StatusMessage.read(service.message!!)
       assertNotNull(message)
       assertEquals(2, message.protocolVersion)
@@ -225,9 +240,8 @@ constructor() {
         UInt256.ZERO,
         repo
       )
-      val conn = mock(WireConnection::class.java)
-      doReturn("abc").`when`(conn).id()
-      handler.handleNewPeerConnection("abc").await()
+      val conn = makeConnection()
+      handler.handleNewPeerConnection(conn).await()
       handler.handle(conn, 0, status).await()
       assertThrows(IllegalStateException::class.java) {
         runBlocking {
@@ -265,8 +279,7 @@ constructor() {
     )
     assertThrows(IllegalStateException::class.java) {
       runBlocking {
-        val conn = mock(WireConnection::class.java)
-        doReturn("abc").`when`(conn).id()
+        val conn = makeConnection()
         handler.handle(conn, 2, Bytes.random(2)).await()
       }
     }
@@ -317,9 +330,8 @@ constructor() {
         UInt256.valueOf(5),
         0
       ).toBytes()
-      val conn = mock(WireConnection::class.java)
-      doReturn("abc").`when`(conn).id()
-      handler.handleNewPeerConnection("abc").await()
+      val conn = makeConnection()
+      handler.handleNewPeerConnection(conn).await()
       handler.handle(conn, 0, status).await()
 
       handler.handle(
@@ -403,9 +415,8 @@ constructor() {
         UInt64.random()
       )
 
-      val conn = mock(WireConnection::class.java)
-      doReturn("abc").`when`(conn).id()
-      handler.handleNewPeerConnection("abc").await()
+      val conn = makeConnection()
+      handler.handleNewPeerConnection(conn).await()
       handler.handle(conn, 0, status).await()
       handler.handle(conn, 3, BlockHeadersMessage(1, 2, listOf(header)).toBytes()).await()
       val retrieved = repo.retrieveBlockHeader(header.getHash())
@@ -455,9 +466,8 @@ constructor() {
         UInt256.valueOf(5),
         0
       ).toBytes()
-      handler.handleNewPeerConnection("abc").await()
-      val conn = mock(WireConnection::class.java)
-      doReturn("abc").`when`(conn).id()
+      val conn = makeConnection()
+      handler.handleNewPeerConnection(conn).await()
       handler.handle(conn, 0, status).await()
 
       handler
@@ -510,9 +520,8 @@ constructor() {
         UInt256.valueOf(5),
         0
       ).toBytes()
-      val conn = mock(WireConnection::class.java)
-      doReturn("abc").`when`(conn).id()
-      handler.handleNewPeerConnection("abc").await()
+      val conn = makeConnection()
+      handler.handleNewPeerConnection(conn).await()
       handler.handle(conn, 0, status).await()
 
       handler

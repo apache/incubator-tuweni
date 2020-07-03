@@ -30,24 +30,15 @@ import java.time.Instant
 
 class DiscoveryPeerRepository(private val repository: org.apache.tuweni.peer.repository.PeerRepository) :
   PeerRepository {
-
-  override suspend fun get(nodeId: SECP256K1.PublicKey): Peer {
-    return DelegatePeer(repository, repository.storePeer(nodeId.toHexString(), null, Instant.now()))
+  override suspend fun get(host: String, port: Int, nodeId: SECP256K1.PublicKey): Peer {
+    val identity = repository.storeIdentity(host, port, nodeId)
+    val peer = repository.storePeer(identity, null, Instant.now())
+    return DelegatePeer(repository, peer)
   }
-
-  override fun getAsync(nodeId: SECP256K1.PublicKey): AsyncResult<Peer> = GlobalScope.asyncResult { get(nodeId) }
 
   override suspend fun get(uri: URI): Peer {
     val (nodeId, endpoint) = parseEnodeUri(uri)
-    val peer = get(nodeId)
-    if (peer.endpoint == null) {
-      synchronized(peer) {
-        if (peer.endpoint == null) {
-          peer.updateEndpoint(endpoint, Instant.now().toEpochMilli())
-        }
-      }
-    }
-    return peer
+    return get(endpoint.address.hostName, endpoint.udpPort, nodeId)
   }
 
   override fun getAsync(uri: URI): AsyncResult<Peer> = GlobalScope.asyncResult { get(uri) }
@@ -60,9 +51,9 @@ class DelegatePeer(
   val peer: org.apache.tuweni.peer.repository.Peer
 ) : Peer {
   override val nodeId: SECP256K1.PublicKey
-    get() = SECP256K1.PublicKey.fromHexString(peer.id())
-  override val endpoint: Endpoint?
-    get() = TODO("not implemented") // To change initializer of created properties use File | Settings | File Templates.
+    get() = peer.id().publicKey()
+  override val endpoint: Endpoint
+    get() = Endpoint(peer.id().networkInterface(), peer.id().port())
   override val enr: EthereumNodeRecord?
     get() = TODO("not implemented") // To change initializer of created properties use File | Settings | File Templates.
   override val lastVerified: Long?
@@ -83,8 +74,7 @@ class DelegatePeer(
   }
 
   override fun seenAt(time: Long) {
-
-    TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+    repository.peerDiscoveredAt(peer, time)
   }
 
   override fun updateENR(record: EthereumNodeRecord, time: Long) {

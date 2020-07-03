@@ -16,6 +16,7 @@ import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
 import org.apache.tuweni.rlpx.wire.WireConnection;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -28,8 +29,10 @@ public class MemoryWireConnectionsRepository implements WireConnectionRepository
   private final Map<String, WireConnection> connections = new ConcurrentHashMap<>();
 
   @Override
-  public void add(WireConnection wireConnection) {
-    connections.put(wireConnection.id(), wireConnection);
+  public String add(WireConnection wireConnection) {
+    String id = UUID.randomUUID().toString();
+    connections.put(UUID.randomUUID().toString(), wireConnection);
+    return id;
   }
 
   @Override

@@ -42,4 +42,4 @@ data class Node(
 }
 
 internal fun Peer.toNode(): Node =
-  endpoint?.let { endpoint -> Node(endpoint, nodeId) } ?: throw IllegalArgumentException("Peer has no endpoint")
+  Node(endpoint, nodeId)

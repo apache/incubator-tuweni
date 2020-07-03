@@ -27,6 +27,7 @@ import org.apache.tuweni.rlpx.wire.DisconnectReason
 import org.apache.tuweni.rlpx.wire.SubProtocolHandler
 import org.apache.tuweni.rlpx.wire.WireConnection
 import org.slf4j.LoggerFactory
+import java.util.WeakHashMap
 import kotlin.coroutines.CoroutineContext
 
 internal class EthHandler(
@@ -36,28 +37,31 @@ internal class EthHandler(
   private val controller: EthController
 ) : SubProtocolHandler, CoroutineScope {
 
+  private val pendingStatus = WeakHashMap<String, PeerInfo>()
+
   companion object {
     val logger = LoggerFactory.getLogger(EthHandler::class.java)!!
   }
 
-  val peersMap: MutableMap<String, PeerInfo> = mutableMapOf()
-
   override fun handle(connection: WireConnection, messageType: Int, message: Bytes) = asyncCompletion {
-    logger.trace("Receiving message of type {}", messageType)
+    logger.debug("Receiving message of type {}", messageType)
     when (messageType) {
       MessageType.Status.code -> handleStatus(connection, StatusMessage.read(message))
       MessageType.NewBlockHashes.code -> handleNewBlockHashes(NewBlockHashes.read(message))
       MessageType.Transactions.code -> handleTransactions(Transactions.read(message))
-      MessageType.GetBlockHeaders.code -> handleGetBlockHeaders(connection.id(), GetBlockHeaders.read(message))
-      MessageType.BlockHeaders.code -> handleHeaders(connection.id(), BlockHeaders.read(message))
-      MessageType.GetBlockBodies.code -> handleGetBlockBodies(connection.id(), GetBlockBodies.read(message))
-      MessageType.BlockBodies.code -> handleBlockBodies(connection.id(), BlockBodies.read(message))
+      MessageType.GetBlockHeaders.code -> handleGetBlockHeaders(connection, GetBlockHeaders.read(message))
+      MessageType.BlockHeaders.code -> handleHeaders(connection, BlockHeaders.read(message))
+      MessageType.GetBlockBodies.code -> handleGetBlockBodies(connection, GetBlockBodies.read(message))
+      MessageType.BlockBodies.code -> handleBlockBodies(connection, BlockBodies.read(message))
       MessageType.NewBlock.code -> handleNewBlock(NewBlock.read(message))
-      MessageType.GetNodeData.code -> handleGetNodeData(connection.id(), GetNodeData.read(message))
-      MessageType.NodeData.code -> handleNodeData(connection.id(), NodeData.read(message))
-      MessageType.GetReceipts.code -> handleGetReceipts(connection.id(), GetReceipts.read(message))
-      MessageType.Receipts.code -> handleReceipts(connection.id(), Receipts.read(message))
-      else -> logger.warn("Unknown message type {}", messageType) // TODO disconnect
+      MessageType.GetNodeData.code -> handleGetNodeData(connection, GetNodeData.read(message))
+      MessageType.NodeData.code -> handleNodeData(connection, NodeData.read(message))
+      MessageType.GetReceipts.code -> handleGetReceipts(connection, GetReceipts.read(message))
+      MessageType.Receipts.code -> handleReceipts(connection, Receipts.read(message))
+      else -> {
+        logger.warn("Unknown message type {}", messageType)
+        service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
+      }
     }
   }
 
@@ -65,39 +69,44 @@ internal class EthHandler(
     controller.addNewTransactions(transactions.transactions)
   }
 
-  private suspend fun handleNodeData(connectionId: String, read: NodeData) {
-    controller.addNewNodeData(connectionId, read.elements)
+  private suspend fun handleNodeData(connection: WireConnection, read: NodeData) {
+    controller.addNewNodeData(connection, read.elements)
   }
 
   private suspend fun handleStatus(connection: WireConnection, status: StatusMessage) {
+    logger.debug("Received status message {}", status)
+    val peerInfo = pendingStatus.remove(connection.uri())
     if (!status.networkID.equals(blockchainInfo.networkID()) ||
-      !status.genesisHash.equals(blockchainInfo.genesisHash())) {
-      peersMap[connection.id()]?.cancel()
-      service.disconnect(connection.id(), DisconnectReason.SUBPROTOCOL_REASON)
+      !status.genesisHash.equals(blockchainInfo.genesisHash()) ||
+      peerInfo == null
+    ) {
+      peerInfo?.cancel()
+      service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
+    } else {
+      peerInfo.connect()
+      controller.receiveStatus(connection, status)
     }
-    peersMap[connection.id()]?.connect()
-    controller.receiveStatus(connection, status)
   }
 
-  private suspend fun handleReceipts(connectionId: String, receipts: Receipts) {
-    controller.addNewTransactionReceipts(connectionId, receipts.transactionReceipts)
+  private suspend fun handleReceipts(connection: WireConnection, receipts: Receipts) {
+    controller.addNewTransactionReceipts(connection, receipts.transactionReceipts)
   }
 
-  private suspend fun handleGetReceipts(connectionId: String, getReceipts: GetReceipts) {
+  private suspend fun handleGetReceipts(connection: WireConnection, getReceipts: GetReceipts) {
 
     service.send(
       EthSubprotocol.ETH64,
       MessageType.Receipts.code,
-      connectionId,
+      connection,
       Receipts(controller.findTransactionReceipts(getReceipts.hashes)).toBytes()
     )
   }
 
-  private suspend fun handleGetNodeData(connectionId: String, nodeData: GetNodeData) {
+  private suspend fun handleGetNodeData(connection: WireConnection, nodeData: GetNodeData) {
     service.send(
       EthSubprotocol.ETH64,
       MessageType.NodeData.code,
-      connectionId,
+      connection,
       NodeData(controller.findNodeData(nodeData.hashes)).toBytes()
     )
   }
@@ -106,48 +115,49 @@ internal class EthHandler(
     controller.addNewBlock(read.block)
   }
 
-  private suspend fun handleBlockBodies(connectionId: String, message: BlockBodies) {
-    controller.addNewBlockBodies(connectionId, message.bodies)
+  private suspend fun handleBlockBodies(connection: WireConnection, message: BlockBodies) {
+    controller.addNewBlockBodies(connection, message.bodies)
   }
 
-  private suspend fun handleGetBlockBodies(connectionId: String, message: GetBlockBodies) {
+  private suspend fun handleGetBlockBodies(connection: WireConnection, message: GetBlockBodies) {
     service.send(
       EthSubprotocol.ETH64,
       MessageType.BlockBodies.code,
-      connectionId,
+      connection,
       BlockBodies(controller.findBlockBodies(message.hashes)).toBytes()
     )
   }
 
-  private suspend fun handleHeaders(connectionId: String, headers: BlockHeaders) {
-    controller.addNewBlockHeaders(connectionId, headers.headers)
+  private suspend fun handleHeaders(connection: WireConnection, headers: BlockHeaders) {
+    controller.addNewBlockHeaders(connection, headers.headers)
   }
 
-  private suspend fun handleGetBlockHeaders(connectionId: String, blockHeaderRequest: GetBlockHeaders) {
+  private suspend fun handleGetBlockHeaders(connection: WireConnection, blockHeaderRequest: GetBlockHeaders) {
     val headers = controller.findHeaders(
       blockHeaderRequest.block,
       blockHeaderRequest.maxHeaders,
       blockHeaderRequest.skip,
       blockHeaderRequest.reverse
     )
-    service.send(EthSubprotocol.ETH64, MessageType.BlockHeaders.code, connectionId, BlockHeaders(headers).toBytes())
+    service.send(EthSubprotocol.ETH64, MessageType.BlockHeaders.code, connection, BlockHeaders(headers).toBytes())
   }
 
   private suspend fun handleNewBlockHashes(message: NewBlockHashes) {
     controller.addNewBlockHashes(message.hashes)
   }
 
-  override fun handleNewPeerConnection(connectionId: String): AsyncCompletion {
+  override fun handleNewPeerConnection(connection: WireConnection): AsyncCompletion {
+    val newPeer = PeerInfo()
+    pendingStatus[connection.uri()] = newPeer
     service.send(
-      EthSubprotocol.ETH64, MessageType.Status.code, connectionId, StatusMessage(
+      EthSubprotocol.ETH64, MessageType.Status.code, connection, StatusMessage(
         EthSubprotocol.ETH64.version(),
         blockchainInfo.networkID(), blockchainInfo.totalDifficulty(),
         blockchainInfo.bestHash(), blockchainInfo.genesisHash(), blockchainInfo.getLatestForkHash(),
         blockchainInfo.getLatestFork()
       ).toBytes()
     )
-    val newPeer = PeerInfo()
-    peersMap[connectionId] = newPeer
+
     return newPeer.ready
   }
 

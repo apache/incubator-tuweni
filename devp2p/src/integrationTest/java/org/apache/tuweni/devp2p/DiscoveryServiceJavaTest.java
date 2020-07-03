@@ -65,7 +65,8 @@ class DiscoveryServiceJavaTest {
             Collections
                 .singletonList(URI.create("enode://" + peerKeyPair.publicKey().toHexString() + "@127.0.0.1:10000")),
             repository);
-    AsyncResult<Peer> result = repository.getAsync(peerKeyPair.publicKey());
+    AsyncResult<Peer> result =
+        repository.getAsync(URI.create("enode://" + peerKeyPair.publicKey().toHexString() + "@127.0.0.1:10000"));
     assertEquals(peerKeyPair.publicKey(), result.get().getNodeId());
     AsyncResult<Peer> byURI =
         repository.getAsync(URI.create("enode://" + peerKeyPair.publicKey().toHexString() + "@127.0.0.1:10000"));

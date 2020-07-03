@@ -99,8 +99,8 @@ class EthController(
     requestsManager.requestBlockBodies(listOf(blockHash))
   }
 
-  suspend fun addNewBlockHeaders(connectionId: String, headers: List<BlockHeader>) {
-    val handle = requestsManager.wasRequested(connectionId, headers.first()) ?: return
+  suspend fun addNewBlockHeaders(connection: WireConnection, headers: List<BlockHeader>) {
+    val handle = requestsManager.wasRequested(connection, headers.first()) ?: return
     val bodiesToRequest = mutableListOf<Hash>()
     val headersToRequest = mutableListOf<Hash>()
     headers.forEach { header ->
@@ -119,8 +119,8 @@ class EthController(
     handle.complete()
   }
 
-  suspend fun addNewBlockBodies(connectionId: String, bodies: List<BlockBody>) {
-    val request = requestsManager.wasRequested(connectionId, bodies)
+  suspend fun addNewBlockBodies(connection: WireConnection, bodies: List<BlockBody>) {
+    val request = requestsManager.wasRequested(connection, bodies)
     if (request != null) {
       val hashes = request.data as List<*>
       for (i in 0..hashes.size) {
@@ -135,8 +135,8 @@ class EthController(
 
   suspend fun findNodeData(hashes: List<Hash>) = repository.retrieveNodeData(hashes)
 
-  suspend fun addNewNodeData(connectionId: String, elements: List<Bytes?>) {
-    val request = requestsManager.nodeDataWasRequested(connectionId, elements)
+  suspend fun addNewNodeData(connection: WireConnection, elements: List<Bytes?>) {
+    val request = requestsManager.nodeDataWasRequested(connection, elements)
     if (request != null) {
       val hashes = request.data as List<*>
       for (i in 0..hashes.size) {
@@ -148,8 +148,11 @@ class EthController(
     }
   }
 
-  suspend fun addNewTransactionReceipts(connectionId: String, transactionReceipts: List<List<TransactionReceipt>>) {
-    val request = requestsManager.transactionRequestsWasRequested(connectionId, transactionReceipts)
+  suspend fun addNewTransactionReceipts(
+    connection: WireConnection,
+    transactionReceipts: List<List<TransactionReceipt>>
+  ) {
+    val request = requestsManager.transactionRequestsWasRequested(connection, transactionReceipts)
     if (request != null) {
       val hashes = request.data as List<*>
       for (i in 0..hashes.size) {

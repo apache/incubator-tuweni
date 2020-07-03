@@ -51,7 +51,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import java.time.Instant
@@ -176,7 +175,6 @@ class EthHandlerTest {
   @Test
   fun testGetHeaders() = runBlocking {
     val conn = mock(WireConnection::class.java)
-    doReturn("foo").`when`(conn).id()
     handler.handle(
       conn,
       MessageType.GetBlockHeaders.code,
@@ -184,7 +182,7 @@ class EthHandlerTest {
     ).await()
 
     val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
-    verify(service).send(eq(ETH64), eq(MessageType.BlockHeaders.code), eq("foo"), messageCapture.capture())
+    verify(service).send(eq(ETH64), eq(MessageType.BlockHeaders.code), eq(conn), messageCapture.capture())
 
     val messageRead = BlockHeaders.read(messageCapture.value)
     assertEquals(3, messageRead.headers.size)
@@ -196,7 +194,6 @@ class EthHandlerTest {
   @Test
   fun testGetHeadersTooMany() = runBlocking {
     val conn = mock(WireConnection::class.java)
-    doReturn("foo2").`when`(conn).id()
     handler.handle(
       conn,
       MessageType.GetBlockHeaders.code,
@@ -204,7 +201,7 @@ class EthHandlerTest {
     ).await()
 
     val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
-    verify(service).send(eq(ETH64), eq(MessageType.BlockHeaders.code), eq("foo2"), messageCapture.capture())
+    verify(service).send(eq(ETH64), eq(MessageType.BlockHeaders.code), eq(conn), messageCapture.capture())
 
     val messageRead = BlockHeaders.read(messageCapture.value)
     assertEquals(6, messageRead.headers.size)
@@ -213,14 +210,13 @@ class EthHandlerTest {
   @Test
   fun testGetHeadersDifferentSkip() = runBlocking {
     val conn = mock(WireConnection::class.java)
-    doReturn("foo3").`when`(conn).id()
     handler.handle(conn,
       MessageType.GetBlockHeaders.code,
       GetBlockHeaders(genesisBlock.header.hash, 100, 2, false).toBytes()
     ).await()
 
     val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
-    verify(service).send(eq(ETH64), eq(MessageType.BlockHeaders.code), eq("foo3"), messageCapture.capture())
+    verify(service).send(eq(ETH64), eq(MessageType.BlockHeaders.code), eq(conn), messageCapture.capture())
 
     val messageRead = BlockHeaders.read(messageCapture.value)
     assertEquals(4, messageRead.headers.size)
@@ -232,14 +228,13 @@ class EthHandlerTest {
   @Test
   fun testGetBodies() = runBlocking {
     val conn = mock(WireConnection::class.java)
-    doReturn("foo234").`when`(conn).id()
     handler.handle(conn,
       MessageType.GetBlockBodies.code,
       GetBlockBodies(listOf(genesisBlock.header.hash)).toBytes()
     ).await()
 
     val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
-    verify(service).send(eq(ETH64), eq(MessageType.BlockBodies.code), eq("foo234"), messageCapture.capture())
+    verify(service).send(eq(ETH64), eq(MessageType.BlockBodies.code), eq(conn), messageCapture.capture())
 
     val messageRead = BlockBodies.read(messageCapture.value)
     assertEquals(1, messageRead.bodies.size)
@@ -249,7 +244,6 @@ class EthHandlerTest {
   @Test
   fun testGetReceipts() = runBlocking {
     val conn = mock(WireConnection::class.java)
-    doReturn("foo234").`when`(conn).id()
     val hashes = repository.findBlockByHashOrNumber(UInt256.valueOf(7).toBytes())
     val block7 = repository.retrieveBlock(hashes[0])
     val txReceipt = repository.retrieveTransactionReceipt(hashes[0], 0)
@@ -260,7 +254,7 @@ class EthHandlerTest {
     ).await()
 
     val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
-    verify(service).send(eq(ETH64), eq(MessageType.Receipts.code), eq("foo234"), messageCapture.capture())
+    verify(service).send(eq(ETH64), eq(MessageType.Receipts.code), eq(conn), messageCapture.capture())
 
     val messageRead = Receipts.read(messageCapture.value)
     assertEquals(1, messageRead.transactionReceipts.size)

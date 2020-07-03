@@ -26,9 +26,14 @@ import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.wire.SubProtocolClient
+import org.apache.tuweni.rlpx.wire.WireConnection
 import org.apache.tuweni.units.bigints.UInt256
 
 class EthClient(private val service: RLPxService) : EthRequestsManager, SubProtocolClient {
+
+  fun id(conn: WireConnection): String {
+    return conn.peerPublicKey().toHexString() + "@" + conn.peerHost() + ":" + conn.peerPort()
+  }
 
   private val headerRequests = HashMap<Bytes32, Request>()
   private val bodiesRequests = HashMap<String, Request>()
@@ -41,15 +46,15 @@ class EthClient(private val service: RLPxService) : EthRequestsManager, SubProto
     var done = false
     conns.forEach { conn ->
 
-      transactionReceiptRequests.computeIfAbsent(conn.id()) {
+      transactionReceiptRequests.computeIfAbsent(id(conn)) {
         service.send(
           EthSubprotocol.ETH62,
           MessageType.GetReceipts.code,
-          conn.id(),
+          conn,
           GetReceipts(blockHashes).toBytes()
         )
         done = true
-        Request(conn.id(), handle, blockHashes)
+        Request(id(conn), handle, blockHashes)
       }
       if (done) {
         return handle
@@ -65,10 +70,10 @@ class EthClient(private val service: RLPxService) : EthRequestsManager, SubProto
       service.send(
         EthSubprotocol.ETH62,
         MessageType.GetBlockHeaders.code,
-        conn!!.id(),
+        conn!!,
         GetBlockHeaders(blockHash, maxHeaders, skip, reverse).toBytes()
       )
-      Request(connectionId = conn.id(), handle = completion, data = blockHash)
+      Request(connectionId = id(conn), handle = completion, data = blockHash)
     }
     return completion
   }
@@ -81,10 +86,10 @@ class EthClient(private val service: RLPxService) : EthRequestsManager, SubProto
       service.send(
         EthSubprotocol.ETH62,
         MessageType.GetBlockHeaders.code,
-        conn!!.id(),
+        conn!!,
         GetBlockHeaders(blockNumberBytes, maxHeaders, skip, reverse).toBytes()
       )
-      Request(connectionId = conn.id(), handle = completion, data = blockNumber)
+      Request(connectionId = id(conn), handle = completion, data = blockNumber)
     }
     return completion
   }
@@ -100,10 +105,10 @@ class EthClient(private val service: RLPxService) : EthRequestsManager, SubProto
       service.send(
         EthSubprotocol.ETH62,
         MessageType.GetBlockHeaders.code,
-        conn!!.id(),
+        conn!!,
         GetBlockHeaders(blockHash, 1, 0, false).toBytes()
       )
-      Request(connectionId = conn.id(), handle = completion, data = blockHash)
+      Request(connectionId = id(conn), handle = completion, data = blockHash)
     }
     return completion
   }
@@ -113,15 +118,15 @@ class EthClient(private val service: RLPxService) : EthRequestsManager, SubProto
     val handle = AsyncCompletion.incomplete()
     conns.forEach { conn ->
       var done = false
-      bodiesRequests.computeIfAbsent(conn.id()) {
+      bodiesRequests.computeIfAbsent(id(conn)) {
         service.send(
           EthSubprotocol.ETH62,
           MessageType.GetBlockBodies.code,
-          conn.id(),
+          conn,
           GetBlockBodies(blockHashes).toBytes()
         )
         done = true
-        Request(conn.id(), handle, blockHashes)
+        Request(id(conn), handle, blockHashes)
       }
       if (done) {
         return handle
@@ -135,25 +140,25 @@ class EthClient(private val service: RLPxService) : EthRequestsManager, SubProto
     requestBlockBodies(listOf(blockHash))
   )
 
-  override fun wasRequested(connectionId: String, header: BlockHeader): CompletableAsyncCompletion? {
+  override fun wasRequested(connection: WireConnection, header: BlockHeader): CompletableAsyncCompletion? {
     val request = headerRequests.remove(header.hash) ?: return null
-    if (request.connectionId == connectionId) {
+    if (request.connectionId == id(connection)) {
       return request.handle
     } else {
       return null
     }
   }
 
-  override fun wasRequested(connectionId: String, bodies: List<BlockBody>): Request? =
-    bodiesRequests[connectionId]
+  override fun wasRequested(connection: WireConnection, bodies: List<BlockBody>): Request? =
+    bodiesRequests[id(connection)]
 
-  override fun nodeDataWasRequested(connectionId: String, elements: List<Bytes?>): Request? =
-    nodeDataRequests[connectionId]
+  override fun nodeDataWasRequested(connection: WireConnection, elements: List<Bytes?>): Request? =
+    nodeDataRequests[id(connection)]
 
   override fun transactionRequestsWasRequested(
-    connectionId: String,
+    connection: WireConnection,
     transactionReceipts: List<List<TransactionReceipt>>
-  ): Request? = transactionReceiptRequests[connectionId]
+  ): Request? = transactionReceiptRequests[id(connection)]
 }
 
 data class Request(val connectionId: String, val handle: CompletableAsyncCompletion, val data: Any)

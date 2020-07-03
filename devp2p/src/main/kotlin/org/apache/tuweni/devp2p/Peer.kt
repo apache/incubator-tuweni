@@ -31,7 +31,7 @@ interface Peer {
   /**
    * The endpoint for communicating with this peer, if known.
    */
-  val endpoint: Endpoint?
+  val endpoint: Endpoint
 
   /**
    * The Ethereum Node Record associated with the peer, if known.

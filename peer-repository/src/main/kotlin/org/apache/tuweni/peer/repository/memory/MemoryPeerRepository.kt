@@ -31,11 +31,11 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class MemoryPeerRepository : PeerRepository {
 
-  private val peerMap = ConcurrentHashMap<String, Peer>()
-  private val identities = HashSet<Identity>()
-  private val connections = ConcurrentHashMap<String, Connection>()
+  val peerMap = ConcurrentHashMap<Identity, Peer>()
+  val identities = HashSet<Identity>()
+  val connections = ConcurrentHashMap<String, Connection>()
 
-  override fun storePeer(id: String, lastContacted: Instant?, lastDiscovered: Instant?): Peer {
+  override fun storePeer(id: Identity, lastContacted: Instant?, lastDiscovered: Instant?): Peer {
     val peer = MemoryPeer(id, lastContacted, lastDiscovered)
     peerMap[peer.id()] = peer
     return peer
@@ -43,8 +43,8 @@ class MemoryPeerRepository : PeerRepository {
 
   override fun randomPeer(): Peer? = peerMap.values.firstOrNull()
 
-  override fun storeIdentity(networkInterface: String, port: Int, keyPair: SECP256K1.KeyPair): Identity {
-    val identity = MemoryIdentity(networkInterface, port, keyPair)
+  override fun storeIdentity(networkInterface: String, port: Int, publicKey: SECP256K1.PublicKey): Identity {
+    val identity = MemoryIdentity(networkInterface, port, publicKey)
     identities.add(identity)
     return identity
   }
@@ -62,19 +62,28 @@ class MemoryPeerRepository : PeerRepository {
     (connections[createConnectionKey(peer, identity)] as MemoryConnection).active = false
   }
 
+  override fun peerDiscoveredAt(peer: Peer, time: Long) {
+    val timestamp = Instant.ofEpochMilli(time)
+    val lastDiscovered = peer.lastDiscovered()
+    if (lastDiscovered == null || lastDiscovered.isBefore(timestamp)) {
+      (peer as MemoryPeer).lastDiscovered = timestamp
+    }
+  }
+
   private fun createConnectionKey(peer: Peer, identity: Identity): String =
-    """${peer.id()}-${identity.keyPair().publicKey().toHexString()}"""
+    """${peer.id()}-${identity.publicKey().toHexString()}"""
 }
 
 internal data class MemoryPeer(
-  private val id: String,
+  private val id: Identity,
   internal var lastContacted: Instant?,
-  internal val lastDiscovered: Instant?,
-  internal val connections: MutableList<Connection> = mutableListOf()
+  internal var lastDiscovered: Instant?
 ) : Peer {
+  val connections: MutableList<Connection> = mutableListOf()
+
   override fun connections(): List<Connection> = connections
 
-  override fun id(): String = id
+  override fun id(): Identity = id
 
   override fun lastContacted(): Instant? = lastContacted
 
@@ -92,14 +101,18 @@ internal data class MemoryConnection(var active: Boolean, val peer: Peer, val id
 internal data class MemoryIdentity(
   private val networkInterface: String,
   private val port: Int,
-  private val keyPair: SECP256K1.KeyPair,
-  internal val connections: MutableList<Connection> = mutableListOf()
+  private val publicKey: SECP256K1.PublicKey
 ) : Identity {
+
+  internal val connections: MutableList<Connection> = mutableListOf()
+
   override fun networkInterface(): String = networkInterface
 
   override fun port(): Int = port
 
-  override fun keyPair(): SECP256K1.KeyPair = keyPair
+  override fun publicKey(): SECP256K1.PublicKey = publicKey
+
+  override fun id(): String = publicKey.toHexString() + "@" + networkInterface + ":" + port
 
   override fun connections(): List<Connection> = connections
 

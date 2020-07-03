@@ -37,7 +37,6 @@ import org.apache.tuweni.rlpx.wire.WireConnection;
 import java.net.InetSocketAddress;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -173,25 +172,23 @@ public final class VertxRLPxService implements RLPxService {
   }
 
   @Override
-  public void send(SubProtocolIdentifier subProtocolIdentifier, int messageType, String connectionId, Bytes message) {
+  public void send(
+      SubProtocolIdentifier subProtocolIdentifier,
+      int messageType,
+      WireConnection connection,
+      Bytes message) {
     if (!started.get()) {
       throw new IllegalStateException("The RLPx service is not active");
     }
-    DefaultWireConnection conn = wireConnection(connectionId);
-    if (conn != null) {
-      conn.sendMessage(subProtocolIdentifier, messageType, message);
-    }
+    ((DefaultWireConnection) connection).sendMessage(subProtocolIdentifier, messageType, message);
   }
 
   @Override
-  public void disconnect(String connectionId, DisconnectReason disconnectReason) {
+  public void disconnect(WireConnection connection, DisconnectReason disconnectReason) {
     if (!started.get()) {
       throw new IllegalStateException("The RLPx service is not active");
     }
-    DefaultWireConnection conn = wireConnection(connectionId);
-    if (conn != null) {
-      conn.disconnect(disconnectReason);
-    }
+    ((DefaultWireConnection) connection).disconnect(disconnectReason);
   }
 
   @Override
@@ -374,14 +371,26 @@ public final class VertxRLPxService implements RLPxService {
       RLPxConnection conn,
       NetSocket netSocket,
       CompletableAsyncResult<WireConnection> ready) {
-    String id = UUID.randomUUID().toString();
+
+    String host = netSocket.remoteAddress().host();
+    int port = netSocket.remoteAddress().port();
+
     DefaultWireConnection wireConnection =
-        new DefaultWireConnection(id, conn.publicKey().bytes(), conn.peerPublicKey().bytes(), message -> {
+        new DefaultWireConnection(conn.publicKey().bytes(), conn.peerPublicKey().bytes(), message -> {
           synchronized (conn) {
             Bytes bytes = conn.write(message);
             vertx.eventBus().send(netSocket.writeHandlerID(), Buffer.buffer(bytes.toArrayUnsafe()));
           }
-        }, conn::configureAfterHandshake, netSocket::end, handlers, DEVP2P_VERSION, clientId, advertisedPort(), ready);
+        },
+            conn::configureAfterHandshake,
+            netSocket::end,
+            handlers,
+            DEVP2P_VERSION,
+            clientId,
+            advertisedPort(),
+            ready,
+            host,
+            port);
     repository.add(wireConnection);
     wireConnection.handleConnectionStart();
     return wireConnection;
