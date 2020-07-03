@@ -18,18 +18,19 @@ package org.apache.tuweni.ethclient
 
 import io.vertx.core.Vertx
 import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.junit.VertxInstance
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(VertxExtension::class)
+@ExtendWith(VertxExtension::class, BouncyCastleExtension::class)
 class EthereumClientRunTest {
 
   @Test
   fun startTwoClientsAndConnectThem(@VertxInstance vertx: Vertx) = runBlocking {
     val config1 = EthereumClientConfig()
-    val config2 = EthereumClientConfig()
+    val config2 = EthereumClientConfig.fromString("[storage.default]\npath=\"data2\"\ngenesis=\"default\"")
     val client1 = EthereumClient(vertx, config1)
     val client2 = EthereumClient(vertx, config2)
     client1.start()

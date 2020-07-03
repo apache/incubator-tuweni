@@ -49,6 +49,7 @@ class WireConnectionPeerRepositoryAdapterTest {
       on { peerHost() } doReturn("example.com")
       on { peerPort() } doReturn(1234)
       on { peerPublicKey() } doReturn(pubKey)
+      on { uri() }.thenCallRealMethod()
     }
 
     connRepo.add(conn)
@@ -59,5 +60,20 @@ class WireConnectionPeerRepositoryAdapterTest {
 
     assertEquals(1, repository.connections.size)
     assertEquals(1, repository.peerMap.size)
+  }
+
+  @Test
+  fun addAndGet() {
+    val repository = MemoryPeerRepository()
+    val connRepo = WireConnectionPeerRepositoryAdapter(repository)
+    val pubKey = SECP256K1.KeyPair.random().publicKey()
+    val conn = mock<WireConnection> {
+      on { peerHost() } doReturn("example.com")
+      on { peerPort() } doReturn(1234)
+      on { peerPublicKey() } doReturn(pubKey)
+      on { uri() }.thenCallRealMethod()
+    }
+    val id = connRepo.add(conn)
+    assertEquals(conn, connRepo[id])
   }
 }

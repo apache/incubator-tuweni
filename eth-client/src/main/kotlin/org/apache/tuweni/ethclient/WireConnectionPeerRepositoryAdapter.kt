@@ -21,30 +21,29 @@ import org.apache.tuweni.rlpx.WireConnectionRepository
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
 import org.apache.tuweni.rlpx.wire.WireConnection
 import java.time.Instant
+import java.util.concurrent.ConcurrentHashMap
 
 class WireConnectionPeerRepositoryAdapter(val peerRepository: PeerRepository) : WireConnectionRepository {
+
+  private val connections = ConcurrentHashMap<String, WireConnection>()
+
   override fun add(wireConnection: WireConnection): String {
     val id =
       peerRepository.storeIdentity(wireConnection.peerHost(), wireConnection.peerPort(), wireConnection.peerPublicKey())
     val peer = peerRepository.storePeer(id, Instant.now(), Instant.now())
     peerRepository.addConnection(peer, id)
-
+    connections[id.id()] = wireConnection
     return id.id()
   }
 
-  override fun get(id: String): WireConnection {
-    TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
-  }
+  override fun get(id: String): WireConnection? = connections[id]
 
-  override fun asIterable(): MutableIterable<WireConnection> {
-    TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
-  }
+  override fun asIterable(): Iterable<WireConnection> = connections.values
 
-  override fun asIterable(identifier: SubProtocolIdentifier): MutableIterable<WireConnection> {
-    TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
-  }
+  override fun asIterable(identifier: SubProtocolIdentifier): Iterable<WireConnection> =
+    connections.values.filter { conn -> conn.supports(identifier) }
 
   override fun close() {
-    // NO-OP
+    connections.clear()
   }
 }

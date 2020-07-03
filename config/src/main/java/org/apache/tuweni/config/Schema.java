@@ -60,6 +60,15 @@ public final class Schema {
   }
 
   /**
+   * The keys of all defaults provided by this schema.
+   *
+   * @return The keys for all defaults provided by this schema.
+   */
+  public Set<String> defaultsKeySet(String prefix) {
+    return propertyDefaults.keySet().stream().filter((key) -> key.startsWith(prefix)).collect(Collectors.toSet());
+  }
+
+  /**
    * Get the description for a key.
    *
    * @param key A configuration key (e.g. {@code "server.address.hostname"}).

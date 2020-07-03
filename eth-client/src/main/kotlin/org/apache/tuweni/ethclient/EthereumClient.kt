@@ -34,6 +34,7 @@ import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.kv.LevelDBKeyValueStore
 import org.apache.tuweni.peer.repository.PeerRepository
+import org.apache.tuweni.peer.repository.memory.MemoryPeerRepository
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.vertx.VertxRLPxService
 import org.apache.tuweni.units.bigints.UInt256
@@ -51,12 +52,12 @@ class EthereumClient(
 
   private val genesisFiles = HashMap<String, GenesisFile>()
   private val services = HashMap<String, RLPxService>()
-  private val repositories = HashMap<String, BlockchainRepository>()
+  private val storageRepositories = HashMap<String, BlockchainRepository>()
   private val peerRepositories = HashMap<String, PeerRepository>()
 
   suspend fun start() {
     config.peerRepositories().forEach {
-      peerRepositories[it.getName()] = it.peerRepository()
+      peerRepositories[it.getName()] = MemoryPeerRepository()
     }
 
     config.genesisFiles().forEach {
@@ -83,15 +84,22 @@ class EthereumClient(
         BlockchainIndex(writer),
         genesisBlock
       )
-      repositories[dataStore.getName()] = repository
+      storageRepositories[dataStore.getName()] = repository
       repoToGenesisFile[repository] = genesisFile
     }
 
     AsyncCompletion.allOf(config.rlpxServices().map { rlpxConfig ->
       val peerRepository = peerRepositories[rlpxConfig.peerRepository()]
-      val repository = repositories[rlpxConfig.repository()]
+      val repository = storageRepositories[rlpxConfig.repository()]
+      if (repository == null) {
+        throw IllegalArgumentException(
+          "Repository ${rlpxConfig.repository()} not found, ${storageRepositories.keys.joinToString(
+            ","
+          )} defined"
+        )
+      }
       val genesisFile = repoToGenesisFile[repository]
-      val genesisBlock = repository!!.retrieveGenesisBlock()
+      val genesisBlock = repository.retrieveGenesisBlock()
       val service = VertxRLPxService(
         vertx,
         rlpxConfig.port(),
@@ -122,7 +130,7 @@ class EthereumClient(
   fun stop() = runBlocking {
     vertx.close()
     AsyncCompletion.allOf(services.values.map(RLPxService::stop)).await()
-    repositories.values.forEach(BlockchainRepository::close)
+    storageRepositories.values.forEach(BlockchainRepository::close)
   }
 
 //  private suspend fun requestPeerConnections() {

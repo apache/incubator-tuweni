@@ -15,6 +15,8 @@ package org.apache.tuweni.rlpx;
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
 import org.apache.tuweni.rlpx.wire.WireConnection;
 
+import javax.annotation.Nullable;
+
 /**
  * A repository managing wire connections.
  *
@@ -36,6 +38,7 @@ public interface WireConnectionRepository {
    * @param id the identifier of the wire connection
    * @return the wire connection associated with the identifier, or <code>null</code> if no such wire connection exists.
    */
+  @Nullable
   WireConnection get(String id);
 
   /**

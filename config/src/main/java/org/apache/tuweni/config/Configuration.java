@@ -187,6 +187,28 @@ public interface Configuration {
   Set<String> keySet();
 
   /**
+   * The keys of all entries present in this configuration under a given prefix.
+   *
+   * @return The keys of all entries in this configuration under a given prefix.
+   */
+  Set<String> keySet(String prefix);
+
+  /**
+   * The names of the sections defined under a given prefix.
+   *
+   * @return The names of the sections defined under a given prefix.
+   */
+  Set<String> sections(String prefix);
+
+  /**
+   * Provides a section of the configuration
+   *
+   * @return the section of the configuration.
+   */
+  Configuration getConfigurationSection(String name);
+
+
+  /**
    * Check if a key is set in this configuration.
    *
    * @param key A configuration key (e.g. {@code "server.address.hostname"}).

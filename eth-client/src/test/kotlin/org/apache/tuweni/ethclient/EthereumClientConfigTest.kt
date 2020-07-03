@@ -45,4 +45,38 @@ class EthereumClientConfigTest {
     val config = EthereumClientConfig.fromString("")
     assertNotNull(config)
   }
+
+  @Test
+  fun testEmptyConfigHasOnePeerRepository() {
+    val config = EthereumClientConfig.fromString("")
+    assertEquals(1, config.peerRepositories().size)
+    val peerRepo = config.peerRepositories()[0]
+    assertEquals("default", peerRepo.getName())
+  }
+
+  @Test
+  fun testEmptyConfigHasOneWireRepository() {
+    val config = EthereumClientConfig.fromString("")
+    assertEquals(1, config.rlpxServices().size)
+    val rlpx = config.rlpxServices()[0]
+    assertEquals("default", rlpx.getName())
+  }
+
+  @Test
+  fun testEmptyConfigHasOneDataStorage() {
+    val config = EthereumClientConfig.fromString("")
+    assertEquals(1, config.dataStores().size)
+    val store = config.dataStores()[0]
+    assertEquals("default", store.getName())
+    assertEquals(Paths.get("data"), store.getStoragePath())
+  }
+
+  @Test
+  fun testDefinedStorageTakesTheDefaultSpot() {
+    val config = EthereumClientConfig.fromString("[storage.mine]\npath=\"data2\"\ngenesis=\"default\"")
+    assertEquals(1, config.dataStores().size)
+    val store = config.dataStores()[0]
+    assertEquals("mine", store.getName())
+    assertEquals(Paths.get("data2"), store.getStoragePath())
+  }
 }

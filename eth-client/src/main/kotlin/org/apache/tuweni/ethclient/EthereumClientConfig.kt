@@ -21,16 +21,15 @@ import org.apache.tuweni.config.ConfigurationError
 import org.apache.tuweni.config.Schema
 import org.apache.tuweni.config.SchemaBuilder
 import org.apache.tuweni.eth.genesis.GenesisFile
-import org.apache.tuweni.peer.repository.PeerRepository
 import picocli.CommandLine
 import java.io.FileNotFoundException
-import java.lang.IllegalArgumentException
 import java.nio.file.Path
+import java.nio.file.Paths
 
 /**
  * Configuration of EthereumClient. Can be provided via file or over the wire.
  */
-class EthereumClientConfig(private var config: Configuration? = null) {
+class EthereumClientConfig(private var config: Configuration = Configuration.empty(createSchema())) {
   @CommandLine.Option(names = ["-c", "--config"], description = ["Configuration file."], defaultValue = "config.toml")
   var configPath: Path? = null
 
@@ -38,37 +37,42 @@ class EthereumClientConfig(private var config: Configuration? = null) {
   var help: Boolean = false
 
   fun validate(): List<ConfigurationError> {
-    if (config == null) {
+    if (configPath != null) {
       config = if (configPath != null) {
         Configuration.fromToml(configPath!!, createSchema())
       } else {
         Configuration.empty(createSchema())
       }
     }
-    return config!!.errors()
+    return config.errors()
   }
 
   fun dataStores(): List<DataStoreConfiguration> {
-    TODO()
+    val storageSections = config.sections("storage")
+    if (storageSections == null || storageSections.isEmpty()) {
+      return listOf(DataStoreConfigurationImpl())
+    }
+    return storageSections.map { section ->
+      val sectionConfig = config.getConfigurationSection("storage.$section")
+      DataStoreConfigurationImpl(section,
+        Paths.get(sectionConfig.getString("path")),
+        sectionConfig.getString("genesis"))
+    }
   }
 
   fun getGenesisFile(): GenesisFile {
     val contents = EthereumClient::class.java.getResourceAsStream("/mainnet.json").readAllBytes()
     val genesisFile = GenesisFile.read(contents)
-return genesisFile
+    return genesisFile
   }
 
-  fun rlpxServices(): List<RLPxServiceConfiguration> {
-    TODO()
-  }
+  fun rlpxServices(): List<RLPxServiceConfiguration> =
+    listOf(RLPxServiceConfigurationImpl())
 
-  fun genesisFiles(): List<GenesisFileConfiguration> {
-    TODO()
-  }
+  fun genesisFiles(): List<GenesisFileConfiguration> = listOf(GenesisFileConfigurationImpl())
 
-  fun peerRepositories(): List<PeerRepositoryConfiguration> {
-    TODO()
-  }
+  fun peerRepositories(): List<PeerRepositoryConfiguration> =
+    listOf(PeerRepositoryConfigurationImpl("default"))
 
   companion object {
     fun createSchema(): Schema {
@@ -119,5 +123,43 @@ interface RLPxServiceConfiguration {
 
 interface PeerRepositoryConfiguration {
   abstract fun getName(): String
-  abstract fun peerRepository(): PeerRepository
+}
+
+internal class PeerRepositoryConfigurationImpl(private val repoName: String) : PeerRepositoryConfiguration {
+  override fun getName(): String = repoName
+}
+
+internal class RLPxServiceConfigurationImpl() : RLPxServiceConfiguration {
+  override fun port(): Int = 0
+
+  override fun networkInterface(): String = "127.0.0.1"
+
+  override fun advertisedPort(): Int = 0
+
+  override fun repository(): String = "default"
+
+  override fun getName(): String = "default"
+
+  override fun clientName(): String = "Apache Tuweni 1.1"
+
+  override fun peerRepository(): String = "default"
+}
+
+internal class GenesisFileConfigurationImpl() : GenesisFileConfiguration {
+  override fun getName(): String = "default"
+
+  override fun genesisFile(): GenesisFile =
+    GenesisFile.read(GenesisFileConfigurationImpl::class.java.getResource("/default.json").readBytes())
+}
+
+internal data class DataStoreConfigurationImpl(
+  private val name: String = "default",
+  private val storagePath: Path = Paths.get("data"),
+  private val genesisFile: String = "default"
+) : DataStoreConfiguration {
+  override fun getName(): String = name
+
+  override fun getStoragePath(): Path = storagePath
+
+  override fun getGenesisFile(): String = genesisFile
 }
