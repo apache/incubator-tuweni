@@ -68,8 +68,8 @@ class VertxAcceptanceTest {
     }
 
     @Override
-    public AsyncCompletion handleNewPeerConnection(String connId) {
-      rlpxService.send(identifier, 0, connId, Bytes.fromHexString("deadbeef"));
+    public AsyncCompletion handleNewPeerConnection(WireConnection connection) {
+      rlpxService.send(identifier, 0, connection, Bytes.fromHexString("deadbeef"));
       return AsyncCompletion.completed();
     }
 
