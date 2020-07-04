@@ -32,7 +32,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
   fun dataStores(): List<DataStoreConfiguration> {
     val storageSections = config.sections("storage")
     if (storageSections == null || storageSections.isEmpty()) {
-      return listOf(DataStoreConfigurationImpl())
+      return emptyList()
     }
     return storageSections.map { section ->
       val sectionConfig = config.getConfigurationSection("storage.$section")
@@ -40,12 +40,6 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
         Paths.get(sectionConfig.getString("path")),
         sectionConfig.getString("genesis"))
     }
-  }
-
-  fun getGenesisFile(): GenesisFile {
-    val contents = EthereumClient::class.java.getResourceAsStream("/mainnet.json").readAllBytes()
-    val genesisFile = GenesisFile.read(contents)
-    return genesisFile
   }
 
   fun rlpxServices(): List<RLPxServiceConfiguration> =
@@ -60,14 +54,19 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
 
   companion object {
     fun createSchema(): Schema {
+      val storageSection = SchemaBuilder.create()
+      storageSection.addString("path", null, "File system path where data is stored", null)
+      storageSection.addString("genesis", null, "Reference to a genesis configuration", null)
+
       val builder = SchemaBuilder.create()
+      builder.addSection("storage", storageSection.toSchema())
 
       return builder.toSchema()
     }
 
     fun fromFile(path: Path?): EthereumClientConfig {
       if (path == null) {
-        return fromString("")
+        return fromString(EthereumClientConfig::class.java.getResource("/default.toml").readText())
       }
       try {
         return fromString(path.toFile().readText())
@@ -140,9 +139,9 @@ internal class GenesisFileConfigurationImpl() : GenesisFileConfiguration {
 }
 
 internal data class DataStoreConfigurationImpl(
-  private val name: String = "default",
-  private val storagePath: Path = Paths.get("data"),
-  private val genesisFile: String = "default"
+  private val name: String,
+  private val storagePath: Path,
+  private val genesisFile: String
 ) : DataStoreConfiguration {
   override fun getName(): String = name
 

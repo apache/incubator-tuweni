@@ -98,7 +98,7 @@ final class TomlBackedConfiguration implements Configuration {
   @Override
   public Configuration getConfigurationSection(String name) {
     TomlTable table = toml.getTableOrEmpty(name);
-    return new TomlBackedConfiguration(table, null);
+    return new TomlBackedConfiguration(table, schema.getSubSection(name));
   }
 
   @Override

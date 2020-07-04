@@ -31,23 +31,30 @@ import com.google.common.collect.ListMultimap;
  */
 public final class Schema {
 
-  static final Schema EMPTY =
-      new Schema(Collections.emptyMap(), Collections.emptyMap(), ArrayListMultimap.create(), Collections.emptyList());
+  static final Schema EMPTY = new Schema(
+      Collections.emptyMap(),
+      Collections.emptyMap(),
+      ArrayListMultimap.create(),
+      Collections.emptyList(),
+      Collections.emptyMap());
 
   private final Map<String, String> propertyDescriptions;
   private final Map<String, Object> propertyDefaults;
   private final ListMultimap<String, PropertyValidator<Object>> propertyValidators;
   private final List<ConfigurationValidator> configurationValidators;
+  private final Map<String, Schema> subSections;
 
   Schema(
       Map<String, String> propertyDescriptions,
       Map<String, Object> propertyDefaults,
       ListMultimap<String, PropertyValidator<Object>> propertyValidators,
-      List<ConfigurationValidator> configurationValidators) {
+      List<ConfigurationValidator> configurationValidators,
+      Map<String, Schema> subSections) {
     this.propertyDescriptions = propertyDescriptions;
     this.propertyDefaults = propertyDefaults;
     this.propertyValidators = propertyValidators;
     this.configurationValidators = configurationValidators;
+    this.subSections = subSections;
   }
 
   /**
@@ -415,5 +422,9 @@ public final class Schema {
     });
 
     return Stream.concat(propertyErrors, configErrors);
+  }
+
+  public Schema getSubSection(String name) {
+    return subSections.get(name);
   }
 }

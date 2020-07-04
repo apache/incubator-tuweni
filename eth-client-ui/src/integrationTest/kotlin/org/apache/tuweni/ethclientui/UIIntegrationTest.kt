@@ -32,13 +32,19 @@ class UIIntegrationTest {
 
   @Test
   fun testServerComesUp(@VertxInstance vertx: Vertx) {
-    val ui = UI(client = EthereumClient(vertx, EthereumClientConfig()))
+    val ui = UI(client = EthereumClient(vertx, EthereumClientConfig.fromString("[storage.forui]\npath=\"data\"")))
     ui.start()
     val url = URL("http://localhost:" + ui.actualPort)
     val con = url.openConnection() as HttpURLConnection
     con.requestMethod = "GET"
     val response = con.inputStream.readAllBytes()
     assertTrue(response.isNotEmpty())
+
+    val url2 = URL("http://localhost:" + ui.actualPort + "/rest/config")
+    val con2 = url2.openConnection() as HttpURLConnection
+    con2.requestMethod = "GET"
+    val response2 = con2.inputStream.readAllBytes()
+    assertTrue(response2.isNotEmpty())
     ui.stop()
   }
 }

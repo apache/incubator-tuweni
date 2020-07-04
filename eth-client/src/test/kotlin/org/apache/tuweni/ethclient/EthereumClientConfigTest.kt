@@ -79,4 +79,10 @@ class EthereumClientConfigTest {
     assertEquals("mine", store.getName())
     assertEquals(Paths.get("data2"), store.getStoragePath())
   }
+
+  @Test
+  fun toToml() {
+    val config = EthereumClientConfig.fromString("[storage.forui]\npath=\"data\"")
+    assertEquals("[storage.forui]\npath = \"data\"\n", config.toToml())
+  }
 }
