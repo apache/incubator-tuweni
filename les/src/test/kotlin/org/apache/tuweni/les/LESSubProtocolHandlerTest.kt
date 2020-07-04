@@ -131,9 +131,6 @@ constructor() {
       this.message = message
     }
 
-    override fun broadcast(subProtocolIdentifier: SubProtocolIdentifier, messageType: Int, message: Bytes) {
-    }
-
     override fun disconnect(
       connection: WireConnection,
       reason: DisconnectReason
