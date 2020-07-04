@@ -151,13 +151,25 @@ downloadLicenses {
     (group('org.checkerframework')): mit,
     (group('org.jboss.spec.javax.transaction')): cddl1,
     (group('org.rocksdb')): apache2,
-    (group('tuweni')): apache2
+    (group('tuweni')): apache2,
+    (group('org.glassfish.jersey.core')): epl2,
+    (group('org.glassfish.jersey.containers')): epl2,
+    (group('org.glassfish.jersey.inject')): epl2,
+    (group('org.glassfish.jersey.media')): epl2,
+    (group('javax.activation')): cddl1,
+    (group('javax.servlet')): cddl1,
+    (group('org.javassist')): apache2,
+    (group('org.glassfish.hk2.external')): epl2,
+    (group('javax.xml.bind')): cddl1,
+    (group('jakarta.ws.rs')): epl2,
+    (group('org.glassfish.hk2')): epl2,
+    (group('jakarta.annotation')): epl2,
   ]
 }
 
 
 task checkLicenses {
-  description "Verify that all dependencies use white-listed licenses."
+  description "Verify that all dependencies use accepted licenses."
   dependsOn ':downloadLicenses'
 
   def bads = ""
