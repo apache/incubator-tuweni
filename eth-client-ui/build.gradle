@@ -10,23 +10,24 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-description = 'Ethereum client'
+description = 'Ethereum client UI'
 
 dependencies {
   compile 'com.fasterxml.jackson.core:jackson-databind'
-  compile 'org.fusesource.leveldbjni:leveldbjni-all'
   compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+  compile 'org.eclipse.jetty:jetty-server'
+  compile 'org.eclipse.jetty:jetty-servlet'
+  compile 'org.eclipse.jetty:jetty-util'
+  compile 'org.glassfish.jersey.core:jersey-server'
+  compile 'org.glassfish.jersey.containers:jersey-container-servlet'
+  compile 'org.glassfish.jersey.inject:jersey-hk2'
+  compile 'javax.xml.bind:jaxb-api'
 
-  compile project(':devp2p-eth')
   compile project(':concurrent')
   compile project(':config')
   compile project(':concurrent-coroutines')
-  compile project(':dns-discovery')
   compile project(':crypto')
-  compile project(':rlp')
-  compile project(':units')
-  compile project(':merkle-trie')
-  compile project(':peer-repository')
+  compile project(':eth-client')
 
   testCompile project(':junit')
   testCompile 'org.bouncycastle:bcprov-jdk15on'
@@ -34,6 +35,7 @@ dependencies {
   testCompile 'org.junit.jupiter:junit-jupiter-params'
   testCompile 'com.nhaarman.mockitokotlin2:mockito-kotlin'
   testCompile 'org.mockito:mockito-junit-jupiter'
+  testCompile 'org.glassfish.jersey.core:jersey-client'
 
   testRuntime 'org.junit.jupiter:junit-jupiter-engine'
 

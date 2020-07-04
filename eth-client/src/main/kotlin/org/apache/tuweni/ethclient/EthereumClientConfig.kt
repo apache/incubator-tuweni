@@ -17,11 +17,9 @@
 package org.apache.tuweni.ethclient
 
 import org.apache.tuweni.config.Configuration
-import org.apache.tuweni.config.ConfigurationError
 import org.apache.tuweni.config.Schema
 import org.apache.tuweni.config.SchemaBuilder
 import org.apache.tuweni.eth.genesis.GenesisFile
-import picocli.CommandLine
 import java.io.FileNotFoundException
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -30,22 +28,6 @@ import java.nio.file.Paths
  * Configuration of EthereumClient. Can be provided via file or over the wire.
  */
 class EthereumClientConfig(private var config: Configuration = Configuration.empty(createSchema())) {
-  @CommandLine.Option(names = ["-c", "--config"], description = ["Configuration file."], defaultValue = "config.toml")
-  var configPath: Path? = null
-
-  @CommandLine.Option(names = ["-h", "--help"], description = ["Prints usage prompt"])
-  var help: Boolean = false
-
-  fun validate(): List<ConfigurationError> {
-    if (configPath != null) {
-      config = if (configPath != null) {
-        Configuration.fromToml(configPath!!, createSchema())
-      } else {
-        Configuration.empty(createSchema())
-      }
-    }
-    return config.errors()
-  }
 
   fun dataStores(): List<DataStoreConfiguration> {
     val storageSections = config.sections("storage")
@@ -74,6 +56,8 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
   fun peerRepositories(): List<PeerRepositoryConfiguration> =
     listOf(PeerRepositoryConfigurationImpl("default"))
 
+  fun toToml() = config.toToml()
+
   companion object {
     fun createSchema(): Schema {
       val builder = SchemaBuilder.create()
@@ -81,7 +65,10 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       return builder.toSchema()
     }
 
-    fun fromFile(path: Path): EthereumClientConfig {
+    fun fromFile(path: Path?): EthereumClientConfig {
+      if (path == null) {
+        return fromString("")
+      }
       try {
         return fromString(path.toFile().readText())
       } catch (e: Exception) {
