@@ -29,7 +29,7 @@ class EthereumClientRunTest {
 
   @Test
   fun startTwoClientsAndConnectThem(@VertxInstance vertx: Vertx) = runBlocking {
-    val config1 = EthereumClientConfig()
+    val config1 = EthereumClientConfig.fromString("[storage.default]\npath=\"data\"\ngenesis=\"default\"")
     val config2 = EthereumClientConfig.fromString("[storage.default]\npath=\"data2\"\ngenesis=\"default\"")
     val client1 = EthereumClient(vertx, config1)
     val client2 = EthereumClient(vertx, config2)
@@ -37,5 +37,6 @@ class EthereumClientRunTest {
     client2.start()
     client1.stop()
     client2.stop()
+    // TODO connect the rlpx servers
   }
 }
