@@ -92,10 +92,11 @@ class EthereumClient(
       val peerRepository = peerRepositories[rlpxConfig.peerRepository()]
       val repository = storageRepositories[rlpxConfig.repository()]
       if (repository == null) {
+        val message = (if (storageRepositories.isEmpty()) "none" else storageRepositories.keys.joinToString(
+          ","
+        )) + " defined"
         throw IllegalArgumentException(
-          "Repository ${rlpxConfig.repository()} not found, ${storageRepositories.keys.joinToString(
-            ","
-          )} defined"
+          "Repository ${rlpxConfig.repository()} not found, $message"
         )
       }
       val genesisFile = repoToGenesisFile[repository]
