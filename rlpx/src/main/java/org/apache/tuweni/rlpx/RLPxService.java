@@ -63,15 +63,6 @@ public interface RLPxService {
   void send(SubProtocolIdentifier subProtocolIdentifier, int messageType, WireConnection connection, Bytes message);
 
   /**
-   * Sends a wire message to all connected peers.
-   *
-   * @param subProtocolIdentifier the identifier of the subprotocol this message is part ofs
-   * @param messageType the type of the message according to the subprotocol
-   * @param message the message to broadcast.
-   */
-  void broadcast(SubProtocolIdentifier subProtocolIdentifier, int messageType, Bytes message);
-
-  /**
    * Sends a message to the peer explaining that we are about to disconnect.
    *
    * @param connection the connection to target

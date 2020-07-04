@@ -191,16 +191,6 @@ public final class VertxRLPxService implements RLPxService {
     ((DefaultWireConnection) connection).disconnect(disconnectReason);
   }
 
-  @Override
-  public void broadcast(SubProtocolIdentifier subProtocolIdentifier, int messageType, Bytes message) {
-    if (!started.get()) {
-      throw new IllegalStateException("The RLPx service is not active");
-    }
-    for (WireConnection conn : repository.asIterable()) {
-      ((DefaultWireConnection) conn).sendMessage(subProtocolIdentifier, messageType, message);
-    }
-  }
-
   private void receiveMessage(NetSocket netSocket) {
     netSocket.handler(new Handler<>() {
 
