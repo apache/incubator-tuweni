@@ -385,11 +385,4 @@ public final class VertxRLPxService implements RLPxService {
     wireConnection.handleConnectionStart();
     return wireConnection;
   }
-
-  private DefaultWireConnection wireConnection(String id) {
-    if (!started.get()) {
-      throw new IllegalStateException("The RLPx service is not active");
-    }
-    return (DefaultWireConnection) repository.get(id);
-  }
 }
