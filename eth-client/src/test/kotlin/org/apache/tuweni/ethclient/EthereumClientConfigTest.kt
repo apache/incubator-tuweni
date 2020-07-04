@@ -64,7 +64,7 @@ class EthereumClientConfigTest {
 
   @Test
   fun testEmptyConfigHasOneDataStorage() {
-    val config = EthereumClientConfig.fromString("")
+    val config = EthereumClientConfig.empty()
     assertEquals(1, config.dataStores().size)
     val store = config.dataStores()[0]
     assertEquals("default", store.getName())

@@ -66,7 +66,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
 
     fun fromFile(path: Path?): EthereumClientConfig {
       if (path == null) {
-        return fromString(EthereumClientConfig::class.java.getResource("/default.toml").readText())
+        return empty()
       }
       try {
         return fromString(path.toFile().readText())
@@ -83,6 +83,9 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
     fun fromString(config: String): EthereumClientConfig {
       return EthereumClientConfig(Configuration.fromToml(config, createSchema()))
     }
+
+    fun empty(): EthereumClientConfig =
+      fromString(EthereumClientConfig::class.java.getResource("/default.toml").readText())
   }
 }
 
