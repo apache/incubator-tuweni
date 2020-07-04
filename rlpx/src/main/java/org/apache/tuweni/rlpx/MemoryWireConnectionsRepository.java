@@ -31,7 +31,7 @@ public class MemoryWireConnectionsRepository implements WireConnectionRepository
   @Override
   public String add(WireConnection wireConnection) {
     String id = UUID.randomUUID().toString();
-    connections.put(UUID.randomUUID().toString(), wireConnection);
+    connections.put(id, wireConnection);
     return id;
   }
 
