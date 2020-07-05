@@ -12,6 +12,8 @@
  */
 package org.apache.tuweni.ethstats;
 
+import org.apache.tuweni.concurrent.AsyncCompletion;
+import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
 import org.apache.tuweni.eth.EthJsonModule;
 import org.apache.tuweni.units.bigints.UInt256;
 
@@ -24,10 +26,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -75,6 +77,7 @@ public final class EthStatsReporter {
   private final String secret;
   private final AtomicReference<Integer> newTxCount = new AtomicReference<>();
   private final Consumer<List<UInt256>> historyRequester;
+  private final Supplier<Long> timeSupplier;
 
   private WorkerExecutor executor;
   private HttpClient client;
@@ -86,6 +89,7 @@ public final class EthStatsReporter {
    * Default constructor.
    *
    * @param vertx a Vert.x instance, externally managed.
+   * @param id the id of the ethstats reporter for communications
    * @param ethstatsServerURIs the URIs to connect to eth-netstats, such as ws://www.ethnetstats.org:3000/api. URIs are
    *        tried in sequence, and the first one to work is used.
    * @param secret the secret to use when we connect to eth-netstats
@@ -97,9 +101,11 @@ public final class EthStatsReporter {
    * @param os the operating system on which the node runs
    * @param osVer the version of the OS on which the node runs
    * @param historyRequester a hook for ethstats to request block information by number.
+   * @param timeSupplier a function supplying time in milliseconds since epoch.
    */
   public EthStatsReporter(
       Vertx vertx,
+      String id,
       List<URI> ethstatsServerURIs,
       String secret,
       String name,
@@ -109,21 +115,26 @@ public final class EthStatsReporter {
       String protocol,
       String os,
       String osVer,
-      Consumer<List<UInt256>> historyRequester) {
-    this.id = UUID.randomUUID().toString();
+      Consumer<List<UInt256>> historyRequester,
+      Supplier<Long> timeSupplier) {
+    this.id = id;
     this.vertx = vertx;
     this.ethstatsServerURIs = ethstatsServerURIs;
     this.secret = secret;
     this.nodeInfo = new NodeInfo(name, node, port, network, protocol, os, osVer);
     this.historyRequester = historyRequester;
+    this.timeSupplier = timeSupplier;
   }
 
-  public void start() {
+  public AsyncCompletion start() {
     if (started.compareAndSet(false, true)) {
       executor = vertx.createSharedWorkerExecutor("ethnetstats");
       client = vertx.createHttpClient(new HttpClientOptions().setLogActivity(true));
-      startInternal();
+      CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
+      startInternal(completion);
+      return completion;
     }
+    return AsyncCompletion.COMPLETED;
   }
 
   public void stop() {
@@ -149,24 +160,25 @@ public final class EthStatsReporter {
     newHistory.set(blocks);
   }
 
-  private void startInternal() {
-    AtomicBoolean connectedOK = new AtomicBoolean(false);
+  private void startInternal(CompletableAsyncCompletion completion) {
     for (URI uri : ethstatsServerURIs) {
       executor.executeBlocking((Future<Boolean> handler) -> connect(handler, uri), result -> {
         logger.debug("Attempting to connect", result.cause());
-        connectedOK.set(!result.failed() && result.result());
+        if (result.succeeded() && result.result()) {
+          completion.complete();
+        }
       });
-      if (connectedOK.get()) {
+      if (completion.isDone()) {
         break;
       }
     }
-    if (!connectedOK.get() && started.get()) {
-      attemptConnect(null);
+    if (!completion.isDone() && started.get()) {
+      attemptConnect(completion);
     }
   }
 
-  private void attemptConnect(Void aVoid) {
-    vertx.setTimer(DELAY, handler -> this.startInternal());
+  private void attemptConnect(CompletableAsyncCompletion completion) {
+    vertx.setTimer(DELAY, handler -> this.startInternal(completion));
   }
 
   private void connect(Future<Boolean> result, URI uri) {
@@ -177,7 +189,7 @@ public final class EthStatsReporter {
             uri.toString(),
             MultiMap.caseInsensitiveMultiMap().add("origin", "http://localhost"),
             ws -> {
-              ws.closeHandler(this::attemptConnect);
+              ws.closeHandler((aVoid) -> attemptConnect(AsyncCompletion.incomplete()));
               ws.exceptionHandler(e -> {
                 logger.debug("Error while communicating with ethnetstats", e);
 
@@ -247,7 +259,7 @@ public final class EthStatsReporter {
 
   private void writePing(WebSocket ws) {
     waitingOnPong.set(true);
-    writeCommand(ws, "node-ping", "clientTime", Instant.now().toEpochMilli());
+    writeCommand(ws, "node-ping", "clientTime", timeSupplier.get());
   }
 
   private void reportPeriodically(WebSocket ws) {
