@@ -125,6 +125,8 @@ internal class CoroutineSocketChannelTest {
       serverChannel.close()
     }
 
+    serverJob.start()
+
     val clientJob = async {
       val clientChannel = CoroutineSocketChannel.open()
       clientChannel.connect(addr)
