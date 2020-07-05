@@ -48,36 +48,6 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: true
-      - name: Cache Gradle packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle
-      - name: Cache Maven Repository
-        uses: actions/cache@v1
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
-          restore-keys: ${{ runner.os }}-m2
-      - name: gradle assemble
-        uses: eskatos/gradle-command-action@v1
-        with:
-          gradle-version: 6.3
-          arguments: assemble -x test
-      - name: Upload build
-        uses: actions/upload-artifact@v1
-        with:
-          name: Libs
-          path: build/libs
-  package-checks:
-    runs-on: ubuntu-latest
-    container:
-      image: tmio/tuweni-build:1.1
-    steps:
-      - uses: actions/checkout@v1
-        with:
-          submodules: true
       - name: Set up GPG key
         run: gpg --import gradle/tuweni-test.asc
       - name: Cache Maven Repository
@@ -93,10 +63,37 @@ jobs:
         with:
           gradle-version: 6.3
           arguments: assemble -x test -Psignatory.keyId=38F6C7215DD49C32 -Psigning.gnupg.keyName=38F6C7215DD49C32 -Psigning.gnupg.executable=gpg
+      - name: Upload source distrib
+        uses: actions/upload-artifact@v2
+        with:
+          name: distsrc
+          path: dist/build/distributions/tuweni-src-*.zip
+      - name: Upload build
+        uses: actions/upload-artifact@v1
+        with:
+          name: Libs
+          path: build/libs
+  check-src:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    needs: assemble
+    steps:
+      - name: Download distsrc
+        uses: actions/download-artifact@v1
+        with:
+          name: distsrc
       - name: Unzip source
-        run: unzip -o dist/build/distributions/tuweni-src-*.zip -d distsrc
+        run: unzip -o distsrc/tuweni-src-*.zip -d distunzipped
+      - name: Rename folder
+        run: mv distunzipped/tuweni-src-* distunzipped/tuweni
       - name: Build from source
-        run: cd distsrc/$(ls distsrc) && gradle setup && ./gradlew assemble
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: cd distunzipped/tuweni && ./build.sh
+      - name: Build from source
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: cd distunzipped/tuweni && ./build.bat
   test:
     runs-on: ubuntu-latest
     container:
