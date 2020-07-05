@@ -52,6 +52,7 @@ class DefaultNodeDiscoveryServiceTest {
     keyPair,
     enrSeq,
     emptyMap(),
+    emptyMap(),
     bindAddress.address,
     null,
     bindAddress.port

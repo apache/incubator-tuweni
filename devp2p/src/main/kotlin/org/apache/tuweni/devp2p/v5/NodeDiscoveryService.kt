@@ -90,6 +90,7 @@ class DefaultNodeDiscoveryService(
         keyPair,
         enrSeq,
         emptyMap(),
+        emptyMap(),
         bindAddress.address,
         null,
         bindAddress.port
