@@ -27,6 +27,7 @@ import org.apache.tuweni.devp2p.PeerRepository
 import org.apache.tuweni.devp2p.parseEnodeUri
 import java.net.URI
 import java.time.Instant
+import java.util.Objects
 
 class DiscoveryPeerRepository(private val repository: org.apache.tuweni.peer.repository.PeerRepository) :
   PeerRepository {
@@ -79,5 +80,11 @@ class DelegatePeer(
 
   override fun updateENR(record: EthereumNodeRecord, time: Long) {
     TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun hashCode(): Int = Objects.hashCode(peer)
+
+  override fun equals(other: Any?): Boolean {
+    return other is Peer && Objects.equals(other.nodeId, nodeId) && Objects.equals(other.endpoint, endpoint)
   }
 }
