@@ -40,6 +40,7 @@ import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.rlpx.RLPxService
+import org.apache.tuweni.rlpx.wire.WireConnection
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.bigints.UInt64
 import org.apache.tuweni.units.ethereum.Gas
@@ -173,14 +174,15 @@ class EthHandlerTest {
 
   @Test
   fun testGetHeaders() = runBlocking {
+    val conn = mock(WireConnection::class.java)
     handler.handle(
-      "foo",
+      conn,
       MessageType.GetBlockHeaders.code,
       GetBlockHeaders(genesisBlock.header.hash, 3, 1, false).toBytes()
     ).await()
 
     val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
-    verify(service).send(eq(ETH64), eq(MessageType.BlockHeaders.code), eq("foo"), messageCapture.capture())
+    verify(service).send(eq(ETH64), eq(MessageType.BlockHeaders.code), eq(conn), messageCapture.capture())
 
     val messageRead = BlockHeaders.read(messageCapture.value)
     assertEquals(3, messageRead.headers.size)
@@ -191,14 +193,15 @@ class EthHandlerTest {
 
   @Test
   fun testGetHeadersTooMany() = runBlocking {
+    val conn = mock(WireConnection::class.java)
     handler.handle(
-      "foo2",
+      conn,
       MessageType.GetBlockHeaders.code,
       GetBlockHeaders(genesisBlock.header.hash, 100, 1, false).toBytes()
     ).await()
 
     val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
-    verify(service).send(eq(ETH64), eq(MessageType.BlockHeaders.code), eq("foo2"), messageCapture.capture())
+    verify(service).send(eq(ETH64), eq(MessageType.BlockHeaders.code), eq(conn), messageCapture.capture())
 
     val messageRead = BlockHeaders.read(messageCapture.value)
     assertEquals(6, messageRead.headers.size)
@@ -206,14 +209,14 @@ class EthHandlerTest {
 
   @Test
   fun testGetHeadersDifferentSkip() = runBlocking {
-    handler.handle(
-      "foo3",
+    val conn = mock(WireConnection::class.java)
+    handler.handle(conn,
       MessageType.GetBlockHeaders.code,
       GetBlockHeaders(genesisBlock.header.hash, 100, 2, false).toBytes()
     ).await()
 
     val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
-    verify(service).send(eq(ETH64), eq(MessageType.BlockHeaders.code), eq("foo3"), messageCapture.capture())
+    verify(service).send(eq(ETH64), eq(MessageType.BlockHeaders.code), eq(conn), messageCapture.capture())
 
     val messageRead = BlockHeaders.read(messageCapture.value)
     assertEquals(4, messageRead.headers.size)
@@ -224,15 +227,14 @@ class EthHandlerTest {
 
   @Test
   fun testGetBodies() = runBlocking {
-
-    handler.handle(
-      "foo234",
+    val conn = mock(WireConnection::class.java)
+    handler.handle(conn,
       MessageType.GetBlockBodies.code,
       GetBlockBodies(listOf(genesisBlock.header.hash)).toBytes()
     ).await()
 
     val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
-    verify(service).send(eq(ETH64), eq(MessageType.BlockBodies.code), eq("foo234"), messageCapture.capture())
+    verify(service).send(eq(ETH64), eq(MessageType.BlockBodies.code), eq(conn), messageCapture.capture())
 
     val messageRead = BlockBodies.read(messageCapture.value)
     assertEquals(1, messageRead.bodies.size)
@@ -241,18 +243,18 @@ class EthHandlerTest {
 
   @Test
   fun testGetReceipts() = runBlocking {
-
+    val conn = mock(WireConnection::class.java)
     val hashes = repository.findBlockByHashOrNumber(UInt256.valueOf(7).toBytes())
     val block7 = repository.retrieveBlock(hashes[0])
     val txReceipt = repository.retrieveTransactionReceipt(hashes[0], 0)
     handler.handle(
-      "foo234",
+      conn,
       MessageType.GetReceipts.code,
       GetReceipts(listOf(block7!!.header.hash)).toBytes()
     ).await()
 
     val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
-    verify(service).send(eq(ETH64), eq(MessageType.Receipts.code), eq("foo234"), messageCapture.capture())
+    verify(service).send(eq(ETH64), eq(MessageType.Receipts.code), eq(conn), messageCapture.capture())
 
     val messageRead = Receipts.read(messageCapture.value)
     assertEquals(1, messageRead.transactionReceipts.size)

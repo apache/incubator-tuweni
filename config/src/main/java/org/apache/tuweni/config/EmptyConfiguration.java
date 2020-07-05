@@ -56,6 +56,21 @@ final class EmptyConfiguration implements Configuration {
   }
 
   @Override
+  public Set<String> keySet(String prefix) {
+    return schema.defaultsKeySet(prefix);
+  }
+
+  @Override
+  public Set<String> sections(String prefix) {
+    return Collections.emptySet();
+  }
+
+  @Override
+  public Configuration getConfigurationSection(String name) {
+    return Configuration.empty();
+  }
+
+  @Override
   public boolean contains(String key) {
     return schema.hasDefault(key);
   }

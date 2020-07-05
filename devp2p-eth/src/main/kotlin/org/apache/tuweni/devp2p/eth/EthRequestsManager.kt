@@ -23,6 +23,7 @@ import org.apache.tuweni.eth.BlockBody
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.TransactionReceipt
+import org.apache.tuweni.rlpx.wire.WireConnection
 
 interface EthRequestsManager {
   fun requestBlockHeader(blockHash: Hash): AsyncCompletion
@@ -33,11 +34,11 @@ interface EthRequestsManager {
   fun requestBlock(blockHash: Hash): AsyncCompletion
   fun requestTransactionReceipts(blockHashes: List<Hash>): AsyncCompletion
 
-  fun wasRequested(connectionId: String, header: BlockHeader): CompletableAsyncCompletion?
-  fun wasRequested(connectionId: String, bodies: List<BlockBody>): Request?
-  fun nodeDataWasRequested(connectionId: String, elements: List<Bytes?>): Request?
+  fun wasRequested(connection: WireConnection, header: BlockHeader): CompletableAsyncCompletion?
+  fun wasRequested(connection: WireConnection, bodies: List<BlockBody>): Request?
+  fun nodeDataWasRequested(connection: WireConnection, elements: List<Bytes?>): Request?
   fun transactionRequestsWasRequested(
-    connectionId: String,
+    connection: WireConnection,
     transactionReceipts: List<List<TransactionReceipt>>
   ): Request?
 }

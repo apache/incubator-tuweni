@@ -19,6 +19,7 @@ import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.rlpx.wire.DisconnectReason;
 import org.apache.tuweni.rlpx.wire.SubProtocolClient;
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
+import org.apache.tuweni.rlpx.wire.WireConnection;
 
 import java.net.InetSocketAddress;
 
@@ -32,9 +33,9 @@ public interface RLPxService {
    *
    * @param peerPublicKey the peer public key
    * @param peerAddress the peer host and port
-   * @return a handle that completes if the peer connects successfully, providing the connection ID.
+   * @return a handle that completes if the peer connects successfully, providing the connection.
    */
-  AsyncResult<String> connectTo(SECP256K1.PublicKey peerPublicKey, InetSocketAddress peerAddress);
+  AsyncResult<WireConnection> connectTo(SECP256K1.PublicKey peerPublicKey, InetSocketAddress peerAddress);
 
 
   /**
@@ -56,27 +57,18 @@ public interface RLPxService {
    *
    * @param subProtocolIdentifier the identifier of the subprotocol this message is part of
    * @param messageType the type of the message according to the subprotocol
-   * @param connectionId the identifier of the connection.
+   * @param connection the connection.
    * @param message the message, addressed to a connection.
    */
-  void send(SubProtocolIdentifier subProtocolIdentifier, int messageType, String connectionId, Bytes message);
-
-  /**
-   * Sends a wire message to all connected peers.
-   *
-   * @param subProtocolIdentifier the identifier of the subprotocol this message is part ofs
-   * @param messageType the type of the message according to the subprotocol
-   * @param message the message to broadcast.
-   */
-  void broadcast(SubProtocolIdentifier subProtocolIdentifier, int messageType, Bytes message);
+  void send(SubProtocolIdentifier subProtocolIdentifier, int messageType, WireConnection connection, Bytes message);
 
   /**
    * Sends a message to the peer explaining that we are about to disconnect.
    *
-   * @param connectionId the identifier of the connection to target
+   * @param connection the connection to target
    * @param reason the reason for disconnection
    */
-  void disconnect(String connectionId, DisconnectReason reason);
+  void disconnect(WireConnection connection, DisconnectReason reason);
 
   /**
    * Gets the wire connections repository associated with this service.

@@ -34,6 +34,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -121,7 +123,7 @@ public class GenesisFile {
     String gasLimit = null;
     String parentHash = null;
     Map<String, String> allocs = null;
-    List<Long> forks = new ArrayList<>();
+    Set<Long> collectedForks = new TreeSet<>();
     while (!parser.isClosed()) {
       JsonToken jsonToken = parser.nextToken();
       if (JsonToken.FIELD_NAME.equals(jsonToken)) {
@@ -150,11 +152,11 @@ public class GenesisFile {
         } else if ("chainId".equalsIgnoreCase(fieldName)) {
           chainId = parser.getValueAsInt();
         } else if (fieldName.contains("Block")) {
-          forks.add(parser.getValueAsLong());
+          collectedForks.add(parser.getValueAsLong());
         }
       }
-
     }
+    List<Long> forks = new ArrayList<>(collectedForks);
     Collections.sort(forks);
     return new GenesisFile(
         nonce,

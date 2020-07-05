@@ -31,6 +31,7 @@ import org.apache.tuweni.rlpx.wire.SubProtocol;
 import org.apache.tuweni.rlpx.wire.SubProtocolClient;
 import org.apache.tuweni.rlpx.wire.SubProtocolHandler;
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
+import org.apache.tuweni.rlpx.wire.WireConnection;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -61,14 +62,14 @@ class VertxAcceptanceTest {
     }
 
     @Override
-    public AsyncCompletion handle(String connectionId, int messageType, Bytes message) {
+    public AsyncCompletion handle(WireConnection connection, int messageType, Bytes message) {
       messages.add(message);
       return AsyncCompletion.completed();
     }
 
     @Override
-    public AsyncCompletion handleNewPeerConnection(String connId) {
-      rlpxService.send(identifier, 0, connId, Bytes.fromHexString("deadbeef"));
+    public AsyncCompletion handleNewPeerConnection(WireConnection connection) {
+      rlpxService.send(identifier, 0, connection, Bytes.fromHexString("deadbeef"));
       return AsyncCompletion.completed();
     }
 
@@ -268,7 +269,7 @@ class VertxAcceptanceTest {
         }), "Client 1", repository);
     service.start().join();
 
-    AsyncResult<String> completion = service
+    AsyncResult<WireConnection> completion = service
         .connectTo(
             SECP256K1.PublicKey
                 .fromHexString(

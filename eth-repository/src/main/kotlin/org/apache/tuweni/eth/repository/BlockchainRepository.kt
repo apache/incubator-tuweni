@@ -338,4 +338,13 @@ class BlockchainRepository
     transactionStore.put(transaction.hash, transaction.toBytes())
     blockchainIndex.indexTransaction(transaction)
   }
+
+  fun close() {
+    blockBodyStore.close()
+    blockHeaderStore.close()
+    chainMetadata.close()
+    stateStore.close()
+    transactionStore.close()
+    transactionReceiptStore.close()
+  }
 }

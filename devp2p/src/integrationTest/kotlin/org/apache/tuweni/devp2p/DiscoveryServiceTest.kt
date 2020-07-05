@@ -57,7 +57,8 @@ internal class DiscoveryServiceTest {
   fun shouldStartAndShutdownService() {
     val discoveryService = DiscoveryService.open(
       host = "127.0.0.1",
-      keyPair = SECP256K1.KeyPair.random())
+      keyPair = SECP256K1.KeyPair.random()
+    )
     assertFalse(discoveryService.isShutdown)
     assertFalse(discoveryService.isTerminated)
     discoveryService.shutdown()
@@ -89,9 +90,9 @@ internal class DiscoveryServiceTest {
     assertEquals(discoveryService.nodeId, pong.nodeId)
     assertEquals(ping.hash, pong.pingHash)
 
-    val peer = peerRepository.get(clientKeyPair.publicKey())
+    val peer = peerRepository.get(URI("enode://" + clientKeyPair.publicKey().toHexString() + "@127.0.0.1:5678"))
     assertNotNull(peer.endpoint)
-    assertEquals(clientEndpoint.tcpPort, peer.endpoint?.tcpPort)
+    assertEquals(clientEndpoint.tcpPort, peer.endpoint.tcpPort)
 
     discoveryService.shutdownNow()
   }
@@ -128,10 +129,16 @@ internal class DiscoveryServiceTest {
     assertEquals(discoveryService.nodeId, findNodes.nodeId)
     assertEquals(discoveryService.nodeId, findNodes.target)
 
-    val bootstrapPeer = peerRepository.get(bootstrapKeyPair.publicKey())
+    val bootstrapPeer =
+      peerRepository.get(
+        URI(
+          "enode://" + bootstrapKeyPair.publicKey().toHexString() +
+            "@127.0.0.1:" + bootstrapClient.localPort
+        )
+      )
     assertNotNull(bootstrapPeer.lastVerified)
     assertNotNull(bootstrapPeer.endpoint)
-    assertEquals(bootstrapClient.localPort, bootstrapPeer.endpoint?.tcpPort)
+    assertEquals(bootstrapClient.localPort, bootstrapPeer.endpoint.tcpPort)
 
     assertTrue(routingTable.contains(bootstrapPeer))
 
@@ -167,7 +174,13 @@ internal class DiscoveryServiceTest {
     bootstrapClient.send(pong, address)
 
     delay(1000)
-    val bootstrapPeer = peerRepository.get(bootstrapKeyPair.publicKey())
+    val bootstrapPeer =
+      peerRepository.get(
+        URI(
+          "enode://" + bootstrapKeyPair.publicKey().toHexString() +
+            "@127.0.0.1:" + bootstrapClient.localPort
+        )
+      )
     assertNull(bootstrapPeer.lastVerified)
     assertFalse(routingTable.contains(bootstrapPeer))
 
@@ -255,7 +268,9 @@ internal class DiscoveryServiceTest {
     val neighbors = client.receivePacket() as NeighborsPacket
     assertEquals(discoveryService.nodeId, neighbors.nodeId)
 
-    val peer = peerRepository.get(clientKeyPair.publicKey())
+    val peer =
+      peerRepository.get(URI("enode://" + clientKeyPair.publicKey().toHexString() +
+        "@127.0.0.1:" + discoveryService.localPort))
     assertNotNull(peer.lastVerified)
     assertNotNull(peer.endpoint)
 

@@ -56,6 +56,19 @@ final class TomlBackedConfiguration implements Configuration {
     this.errors = errors;
   }
 
+  TomlBackedConfiguration(TomlTable toml, @Nullable Schema schema) {
+    List<ConfigurationError> errors = new ArrayList<>();
+    if (schema != null) {
+      schema.validate(new TomlBackedConfiguration(toml, null)).forEach(errors::add);
+    } else {
+      schema = Schema.EMPTY;
+    }
+
+    this.toml = toml;
+    this.schema = schema;
+    this.errors = errors;
+  }
+
   @Override
   public List<ConfigurationError> errors() {
     return errors;
@@ -71,6 +84,30 @@ final class TomlBackedConfiguration implements Configuration {
     Set<String> keys = new HashSet<>();
     keys.addAll(toml.dottedKeySet());
     keys.addAll(schema.defaultsKeySet());
+    return keys;
+  }
+
+  @Override
+  public Set<String> keySet(String prefix) {
+    Set<String> keys = new HashSet<>();
+    keys.addAll(toml.dottedKeySet().stream().filter((key) -> key.startsWith(prefix)).collect(Collectors.toSet()));
+    keys.addAll(schema.defaultsKeySet(prefix));
+    return keys;
+  }
+
+  @Override
+  public Configuration getConfigurationSection(String name) {
+    TomlTable table = toml.getTableOrEmpty(name);
+    return new TomlBackedConfiguration(table, schema.getSubSection(name));
+  }
+
+  @Override
+  public Set<String> sections(String prefix) {
+    Set<String> keys = new HashSet<>();
+    TomlTable table = toml.getTable(prefix);
+    if (table != null) {
+      keys.addAll(table.keyPathSet().stream().map((key) -> key.get(0)).collect(Collectors.toSet()));
+    }
     return keys;
   }
 

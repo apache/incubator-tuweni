@@ -37,6 +37,7 @@ public final class SchemaBuilder {
   private final Map<String, Object> propertyDefaults = new HashMap<>();
   private final ListMultimap<String, PropertyValidator<Object>> propertyValidators = ArrayListMultimap.create();
   private final List<ConfigurationValidator> configurationValidators = new ArrayList<>();
+  private final Map<String, Schema> subSections = new HashMap<>();
 
   /**
    * Get a new builder for a schema.
@@ -599,7 +600,7 @@ public final class SchemaBuilder {
    * @return A {@link Schema}.
    */
   public Schema toSchema() {
-    return new Schema(propertyDescriptions, propertyDefaults, propertyValidators, configurationValidators);
+    return new Schema(propertyDescriptions, propertyDefaults, propertyValidators, configurationValidators, subSections);
   }
 
   private <T> SchemaBuilder addScalar(
@@ -685,6 +686,11 @@ public final class SchemaBuilder {
       return validator.validate(canonicalKey, position, (List<T>) value);
     });
 
+    return this;
+  }
+
+  public SchemaBuilder addSection(String key, Schema section) {
+    subSections.put(key, section);
     return this;
   }
 }

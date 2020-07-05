@@ -37,7 +37,6 @@ import org.apache.tuweni.rlpx.wire.WireConnection;
 import java.net.InetSocketAddress;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -173,35 +172,23 @@ public final class VertxRLPxService implements RLPxService {
   }
 
   @Override
-  public void send(SubProtocolIdentifier subProtocolIdentifier, int messageType, String connectionId, Bytes message) {
+  public void send(
+      SubProtocolIdentifier subProtocolIdentifier,
+      int messageType,
+      WireConnection connection,
+      Bytes message) {
     if (!started.get()) {
       throw new IllegalStateException("The RLPx service is not active");
     }
-    DefaultWireConnection conn = wireConnection(connectionId);
-    if (conn != null) {
-      conn.sendMessage(subProtocolIdentifier, messageType, message);
-    }
+    ((DefaultWireConnection) connection).sendMessage(subProtocolIdentifier, messageType, message);
   }
 
   @Override
-  public void disconnect(String connectionId, DisconnectReason disconnectReason) {
+  public void disconnect(WireConnection connection, DisconnectReason disconnectReason) {
     if (!started.get()) {
       throw new IllegalStateException("The RLPx service is not active");
     }
-    DefaultWireConnection conn = wireConnection(connectionId);
-    if (conn != null) {
-      conn.disconnect(disconnectReason);
-    }
-  }
-
-  @Override
-  public void broadcast(SubProtocolIdentifier subProtocolIdentifier, int messageType, Bytes message) {
-    if (!started.get()) {
-      throw new IllegalStateException("The RLPx service is not active");
-    }
-    for (WireConnection conn : repository.asIterable()) {
-      ((DefaultWireConnection) conn).sendMessage(subProtocolIdentifier, messageType, message);
-    }
+    ((DefaultWireConnection) connection).disconnect(disconnectReason);
   }
 
   private void receiveMessage(NetSocket netSocket) {
@@ -295,11 +282,11 @@ public final class VertxRLPxService implements RLPxService {
   }
 
   @Override
-  public AsyncResult<String> connectTo(PublicKey peerPublicKey, InetSocketAddress peerAddress) {
+  public AsyncResult<WireConnection> connectTo(PublicKey peerPublicKey, InetSocketAddress peerAddress) {
     if (!started.get()) {
       throw new IllegalStateException("The RLPx service is not active");
     }
-    CompletableAsyncResult<String> connected = AsyncResult.incomplete();
+    CompletableAsyncResult<WireConnection> connected = AsyncResult.incomplete();
     logger.debug("Connecting to {} with public key {}", peerAddress, peerPublicKey);
     client
         .connect(
@@ -373,24 +360,29 @@ public final class VertxRLPxService implements RLPxService {
   private DefaultWireConnection createConnection(
       RLPxConnection conn,
       NetSocket netSocket,
-      CompletableAsyncResult<String> ready) {
-    String id = UUID.randomUUID().toString();
+      CompletableAsyncResult<WireConnection> ready) {
+
+    String host = netSocket.remoteAddress().host();
+    int port = netSocket.remoteAddress().port();
+
     DefaultWireConnection wireConnection =
-        new DefaultWireConnection(id, conn.publicKey().bytes(), conn.peerPublicKey().bytes(), message -> {
+        new DefaultWireConnection(conn.publicKey().bytes(), conn.peerPublicKey().bytes(), message -> {
           synchronized (conn) {
             Bytes bytes = conn.write(message);
             vertx.eventBus().send(netSocket.writeHandlerID(), Buffer.buffer(bytes.toArrayUnsafe()));
           }
-        }, conn::configureAfterHandshake, netSocket::end, handlers, DEVP2P_VERSION, clientId, advertisedPort(), ready);
+        },
+            conn::configureAfterHandshake,
+            netSocket::end,
+            handlers,
+            DEVP2P_VERSION,
+            clientId,
+            advertisedPort(),
+            ready,
+            host,
+            port);
     repository.add(wireConnection);
     wireConnection.handleConnectionStart();
     return wireConnection;
-  }
-
-  private DefaultWireConnection wireConnection(String id) {
-    if (!started.get()) {
-      throw new IllegalStateException("The RLPx service is not active");
-    }
-    return (DefaultWireConnection) repository.get(id);
   }
 }

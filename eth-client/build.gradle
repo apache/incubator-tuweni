@@ -14,17 +14,26 @@ description = 'Ethereum client'
 
 dependencies {
   compile 'com.fasterxml.jackson.core:jackson-databind'
+  compile 'org.fusesource.leveldbjni:leveldbjni-all'
+  compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+
   compile project(':devp2p-eth')
+  compile project(':concurrent')
+  compile project(':config')
+  compile project(':concurrent-coroutines')
   compile project(':dns-discovery')
   compile project(':crypto')
   compile project(':rlp')
   compile project(':units')
   compile project(':merkle-trie')
+  compile project(':peer-repository')
 
   testCompile project(':junit')
   testCompile 'org.bouncycastle:bcprov-jdk15on'
   testCompile 'org.junit.jupiter:junit-jupiter-api'
   testCompile 'org.junit.jupiter:junit-jupiter-params'
+  testCompile 'com.nhaarman.mockitokotlin2:mockito-kotlin'
+  testCompile 'org.mockito:mockito-junit-jupiter'
 
   testRuntime 'org.junit.jupiter:junit-jupiter-engine'
 

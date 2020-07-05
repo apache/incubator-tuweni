@@ -174,6 +174,11 @@ class ConnectToAnotherNodeTest {
     val value = service.connectTo(service2kp.publicKey(), InetSocketAddress("127.0.0.1", service2.actualPort()))
       .await()
     Assertions.assertNotNull(value)
-    AsyncCompletion.allOf(service.stop(), service2.stop()).await()
+    try {
+      AsyncCompletion.allOf(service.stop(), service2.stop()).await()
+    } catch (e: Exception) {
+      println(e)
+      throw e
+    }
   }
 }

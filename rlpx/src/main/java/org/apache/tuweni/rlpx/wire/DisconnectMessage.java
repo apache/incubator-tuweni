@@ -44,4 +44,9 @@ final class DisconnectMessage implements WireProtocolMessage {
   int reason() {
     return reason;
   }
+
+  @Override
+  public String toString() {
+    return "DisconnectMessage reason=" + DisconnectReason.valueOf(reason).text;
+  }
 }

@@ -16,6 +16,7 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.concurrent.AsyncCompletion;
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
 import org.apache.tuweni.concurrent.CompletableAsyncResult;
+import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.rlpx.RLPxMessage;
 
 import java.util.HashMap;
@@ -40,7 +41,6 @@ public final class DefaultWireConnection implements WireConnection {
 
   private final Bytes nodeId;
   private final Bytes peerNodeId;
-  private final String id;
   private final Consumer<RLPxMessage> writer;
   private final Consumer<HelloMessage> afterHandshakeListener;
   private final Runnable disconnectHandler;
@@ -48,17 +48,21 @@ public final class DefaultWireConnection implements WireConnection {
   private final int p2pVersion;
   private final String clientId;
   private final int advertisedPort;
-  private final CompletableAsyncResult<String> ready;
+  private final CompletableAsyncResult<WireConnection> ready;
+  private final String peerHost;
+  private final int peerPort;
 
   private CompletableAsyncCompletion awaitingPong;
   private HelloMessage myHelloMessage;
   private HelloMessage peerHelloMessage;
   private RangeMap<Integer, SubProtocol> subprotocolRangeMap = TreeRangeMap.create();
+  private DisconnectReason disconnectReason;
+  private boolean disconnectRequested;
+  private boolean disconnectReceived;
 
   /**
    * Default constructor.
    *
-   * @param id the id of the connection
    * @param nodeId the node id of this node
    * @param peerNodeId the node id of the peer
    * @param writer the message writer
@@ -71,7 +75,6 @@ public final class DefaultWireConnection implements WireConnection {
    * @param ready a handle to complete when the connection is ready for use.
    */
   public DefaultWireConnection(
-      String id,
       Bytes nodeId,
       Bytes peerNodeId,
       Consumer<RLPxMessage> writer,
@@ -81,8 +84,9 @@ public final class DefaultWireConnection implements WireConnection {
       int p2pVersion,
       String clientId,
       int advertisedPort,
-      CompletableAsyncResult<String> ready) {
-    this.id = id;
+      CompletableAsyncResult<WireConnection> ready,
+      String peerHost,
+      int peerPort) {
     this.nodeId = nodeId;
     this.peerNodeId = peerNodeId;
     this.writer = writer;
@@ -93,6 +97,8 @@ public final class DefaultWireConnection implements WireConnection {
     this.clientId = clientId;
     this.advertisedPort = advertisedPort;
     this.ready = ready;
+    this.peerHost = peerHost;
+    this.peerPort = peerPort;
     logger.debug("New wire connection created");
   }
 
@@ -138,12 +144,15 @@ public final class DefaultWireConnection implements WireConnection {
                   .values()
                   .stream()
                   .map(subprotocols::get)
-                  .map(handler -> handler.handleNewPeerConnection(id)));
-      allSubProtocols.thenRun(() -> ready.complete(id));
+                  .map(handler -> handler.handleNewPeerConnection(this)));
+      allSubProtocols.thenRun(() -> ready.complete(this));
       return;
     } else if (message.messageId() == 1) {
-      DisconnectMessage.read(message.content());
+      DisconnectMessage disconnect = DisconnectMessage.read(message.content());
+      logger.info("Received disconnect {}", disconnect);
       disconnectHandler.run();
+      disconnectReceived = true;
+      disconnectReason = DisconnectReason.valueOf(disconnect.reason());
       if (!ready.isDone()) {
         ready.cancel();
       }
@@ -171,8 +180,13 @@ public final class DefaultWireConnection implements WireConnection {
         }
       } else {
         int offset = subProtocolEntry.getKey().lowerEndpoint();
-        logger.debug("Received message of type {}", message.messageId() - offset);
-        subprotocols.get(subProtocolEntry.getValue()).handle(id, message.messageId() - offset, message.content());
+        logger.trace("Received message of type {}", message.messageId() - offset);
+        SubProtocolHandler handler = subprotocols.get(subProtocolEntry.getValue());
+        try {
+          handler.handle(this, message.messageId() - offset, message.content());
+        } catch (Throwable t) {
+          logger.error("Handler " + handler.toString() + " threw an exception", t);
+        }
       }
     }
   }
@@ -215,6 +229,8 @@ public final class DefaultWireConnection implements WireConnection {
     logger.debug("Sending disconnect message with reason {}", reason);
     writer.accept(new RLPxMessage(1, new DisconnectMessage(reason).toBytes()));
     disconnectHandler.run();
+    disconnectRequested = true;
+    disconnectReason = reason;
   }
 
   /**
@@ -256,11 +272,6 @@ public final class DefaultWireConnection implements WireConnection {
   }
 
   @Override
-  public String id() {
-    return id;
-  }
-
-  @Override
   public boolean supports(SubProtocolIdentifier subProtocolIdentifier) {
     for (SubProtocol sp : subprotocolRangeMap.asMapOfRanges().values()) {
       if (sp.supports(subProtocolIdentifier)) {
@@ -270,9 +281,8 @@ public final class DefaultWireConnection implements WireConnection {
     return false;
   }
 
-  @SuppressWarnings("CatchAndPrintStackTrace")
   public void sendMessage(SubProtocolIdentifier subProtocolIdentifier, int messageType, Bytes message) {
-    logger.debug("Sending sub-protocol message {} {}", messageType, message);
+    logger.trace("Sending sub-protocol message {} {}", messageType, message);
     Integer offset = null;
     for (Map.Entry<Range<Integer>, SubProtocol> entry : subprotocolRangeMap.asMapOfRanges().entrySet()) {
       if (entry.getValue().supports(subProtocolIdentifier)) {
@@ -293,5 +303,35 @@ public final class DefaultWireConnection implements WireConnection {
   @Override
   public String toString() {
     return peerNodeId.toHexString();
+  }
+
+  @Override
+  public boolean isDisconnectReceived() {
+    return disconnectReceived;
+  }
+
+  @Override
+  public boolean isDisconnectRequested() {
+    return disconnectRequested;
+  }
+
+  @Override
+  public DisconnectReason getDisconnectReason() {
+    return disconnectReason;
+  }
+
+  @Override
+  public String peerHost() {
+    return peerHost;
+  }
+
+  @Override
+  public int peerPort() {
+    return peerPort;
+  }
+
+  @Override
+  public SECP256K1.PublicKey peerPublicKey() {
+    return SECP256K1.PublicKey.fromBytes(peerNodeId);
   }
 }

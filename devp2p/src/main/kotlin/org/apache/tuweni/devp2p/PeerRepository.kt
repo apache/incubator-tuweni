@@ -33,20 +33,16 @@ import java.util.concurrent.ConcurrentHashMap
 interface PeerRepository {
 
   /**
-   * Get a peer.
+   *  Get a Peer based on a URI components.
    *
-   * @param nodeId the node id
-   * @return the peer
-   */
-  suspend fun get(nodeId: SECP256K1.PublicKey): Peer
-
-  /**
-   * Get a peer.
+   * The returned peer will use the endpoint from the URI, unless the peer is already active, in
+   * which case its endpoint will be unchanged.
    *
-   * @param nodeId the node id
-   * @return the peer
+   * @param host the peer host
+   * @param port the peer port
+   * @param nodeId the public key associated with the peer
    */
-  fun getAsync(nodeId: SECP256K1.PublicKey): AsyncResult<Peer>
+  suspend fun get(host: String, port: Int, nodeId: SECP256K1.PublicKey): Peer
 
   /**
    * Get a Peer based on a URI.
@@ -106,22 +102,16 @@ class EphemeralPeerRepository : PeerRepository {
 
   private val peers = ConcurrentHashMap<SECP256K1.PublicKey, EphemeralPeer>()
 
-  override suspend fun get(nodeId: SECP256K1.PublicKey) =
-    peers.compute(nodeId) { _, peer -> peer ?: EphemeralPeer(nodeId) } as Peer
+  suspend fun get(nodeId: SECP256K1.PublicKey, endpoint: Endpoint) =
+    peers.compute(nodeId) { _, peer -> peer ?: EphemeralPeer(nodeId, endpoint) } as Peer
 
-  override fun getAsync(nodeId: SECP256K1.PublicKey): AsyncResult<Peer> = GlobalScope.asyncResult { get(nodeId) }
+  override suspend fun get(host: String, port: Int, nodeId: SECP256K1.PublicKey): Peer {
+    return get(nodeId, Endpoint(host, port)) as EphemeralPeer
+  }
 
   override suspend fun get(uri: URI): Peer {
     val (nodeId, endpoint) = parseEnodeUri(uri)
-    val peer = get(nodeId) as EphemeralPeer
-    if (peer.endpoint == null) {
-      synchronized(peer) {
-        if (peer.endpoint == null) {
-          peer.endpoint = endpoint
-        }
-      }
-    }
-    return peer
+    return get(nodeId, endpoint)
   }
 
   override fun getAsync(uri: URI): AsyncResult<Peer> = GlobalScope.asyncResult { get(uri) }
@@ -130,10 +120,10 @@ class EphemeralPeerRepository : PeerRepository {
 
   private inner class EphemeralPeer(
     override val nodeId: SECP256K1.PublicKey,
-    knownEndpoint: Endpoint? = null
+    knownEndpoint: Endpoint
   ) : Peer {
     @Volatile
-    override var endpoint: Endpoint? = knownEndpoint
+    override var endpoint: Endpoint = knownEndpoint
 
     override var enr: EthereumNodeRecord? = null
     @Synchronized
@@ -158,8 +148,8 @@ class EphemeralPeerRepository : PeerRepository {
         return currentEndpoint
       }
 
-      if (currentEndpoint == null || ifVerifiedBefore == null || (lastVerified ?: 0) < ifVerifiedBefore) {
-        if (currentEndpoint?.address != endpoint.address || currentEndpoint.udpPort != endpoint.udpPort) {
+      if (ifVerifiedBefore == null || (lastVerified ?: 0) < ifVerifiedBefore) {
+        if (currentEndpoint.address != endpoint.address || currentEndpoint.udpPort != endpoint.udpPort) {
           lastVerified = null
         }
         this.endpoint = endpoint
@@ -184,9 +174,6 @@ class EphemeralPeerRepository : PeerRepository {
 
     @Synchronized
     override fun seenAt(time: Long) {
-      if (this.endpoint == null) {
-        throw IllegalStateException("Peer has no endpoint")
-      }
       if ((lastSeen ?: 0) < time) {
         lastSeen = time
       }

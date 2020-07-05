@@ -27,10 +27,12 @@ dependencies {
   compile 'org.bouncycastle:bcprov-jdk15on'
 
   testCompile project(':junit')
+  testCompile 'com.nhaarman.mockitokotlin2:mockito-kotlin'
   testCompile 'io.vertx:vertx-core'
   testCompile 'org.bouncycastle:bcprov-jdk15on'
   testCompile 'org.junit.jupiter:junit-jupiter-api'
   testCompile 'org.junit.jupiter:junit-jupiter-params'
+  testCompile 'org.mockito:mockito-junit-jupiter'
 
   testRuntime 'org.junit.jupiter:junit-jupiter-engine'
 }

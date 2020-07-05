@@ -37,9 +37,9 @@ class DefaultWireConnectionTest {
   void disconnectIfNoHelloExchanged() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
     DefaultWireConnection conn =
-        new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
+        new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
-        }, new LinkedHashMap<>(), 3, "abc", 10000, AsyncResult.incomplete());
+        }, new LinkedHashMap<>(), 3, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
 
     conn.messageReceived(new RLPxMessage(45, Bytes.EMPTY));
     assertEquals(1, capturedDisconnect.get().messageId());
@@ -52,9 +52,9 @@ class DefaultWireConnectionTest {
   void disconnectIfNoHelloReceived() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
     DefaultWireConnection conn =
-        new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
+        new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
-        }, new LinkedHashMap<>(), 4, "abc", 10000, AsyncResult.incomplete());
+        }, new LinkedHashMap<>(), 4, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
     conn.sendHello();
     conn.messageReceived(new RLPxMessage(45, Bytes.EMPTY));
     assertEquals(1, capturedDisconnect.get().messageId());
@@ -67,9 +67,9 @@ class DefaultWireConnectionTest {
   void disconnectIfNoMapping() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
     DefaultWireConnection conn =
-        new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
+        new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
-        }, new LinkedHashMap<>(), 28, "abc", 10000, AsyncResult.incomplete());
+        }, new LinkedHashMap<>(), 28, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
     conn.sendHello();
     conn
         .messageReceived(
@@ -89,9 +89,9 @@ class DefaultWireConnectionTest {
   void disconnectIfNoNodeID() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
     DefaultWireConnection conn =
-        new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
+        new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
-        }, new LinkedHashMap<>(), 32, "abc", 10000, AsyncResult.incomplete());
+        }, new LinkedHashMap<>(), 32, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
     conn.sendHello();
     conn
         .messageReceived(
@@ -107,9 +107,9 @@ class DefaultWireConnectionTest {
   void disconnectIfNodeIDMismatches() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
     DefaultWireConnection conn =
-        new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
+        new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
-        }, new LinkedHashMap<>(), 32, "abc", 10000, AsyncResult.incomplete());
+        }, new LinkedHashMap<>(), 32, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
     conn.sendHello();
     conn
         .messageReceived(
@@ -126,10 +126,9 @@ class DefaultWireConnectionTest {
   @Test
   void disconnectIfConnectedToSelf() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
-    DefaultWireConnection conn =
-        new DefaultWireConnection("abc", nodeId, nodeId, capturedDisconnect::set, helloMessage -> {
-        }, () -> {
-        }, new LinkedHashMap<>(), 33, "abc", 10000, AsyncResult.incomplete());
+    DefaultWireConnection conn = new DefaultWireConnection(nodeId, nodeId, capturedDisconnect::set, helloMessage -> {
+    }, () -> {
+    }, new LinkedHashMap<>(), 33, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
     conn.sendHello();
     conn
         .messageReceived(
@@ -145,9 +144,9 @@ class DefaultWireConnectionTest {
   void disconnectIfInvalidP2PConnection() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
     DefaultWireConnection conn =
-        new DefaultWireConnection("abc", nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
+        new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
-        }, new LinkedHashMap<>(), 5, "abc", 10000, AsyncResult.incomplete());
+        }, new LinkedHashMap<>(), 5, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
     conn.sendHello();
     conn
         .messageReceived(

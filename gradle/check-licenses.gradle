@@ -38,6 +38,7 @@ ext.acceptedLicenses = [
   'Eclipse Public License 2.0',
   'The MIT License',
   'Unicode/ICU License',
+  'Public Domain',
 ]*.toLowerCase()
 
 /**
@@ -82,9 +83,11 @@ downloadLicenses {
       'Apache 2.0',
       'Apache-2.0',
       'Apache License',
+      'Apache License, 2.0',
       'Apache License 2.0',
       'Apache License Version 2.0',
       'Apache License, Version 2.0',
+      'Apache Software License - Version 2.0',
       'Apache Software Licenses',
       'Apache v2',
       'ASL, Version 2',
@@ -102,7 +105,8 @@ downloadLicenses {
       'The BSD Licence',
       'The BSD License',
       'BSD 2-Clause license',
-      'BSD-2-Clause'
+      'BSD-2-Clause',
+      'BSD 2-Clause',
     ],
     (bsd3Clause): [
       'BSD 3-Clause',
@@ -115,6 +119,7 @@ downloadLicenses {
       'Common Development and Distribution License',
       'Common Development and Distribution License 1.0',
       'Dual license consisting of the CDDL v1.1 and GPL v2',
+      'CDDL 1.1',
     ],
     (edl1): [
       'Eclipse Distribution License - v 1.0',
@@ -122,11 +127,13 @@ downloadLicenses {
     (epl1): [
       'Eclipse Public License - v 1.0',
       'Eclipse Distribution License v. 1.0',
-      'Eclipse Public License v1.0'
+      'Eclipse Public License v1.0',
+      'Eclipse Public License - Version 1.0',
     ],
     (epl2): [
       'Eclipse Public License v2.0',
       'Eclipse Public License - v 2.0',
+      'EPL 2.0',
     ],
     (mit): [
       'MIT license',
@@ -144,13 +151,25 @@ downloadLicenses {
     (group('org.checkerframework')): mit,
     (group('org.jboss.spec.javax.transaction')): cddl1,
     (group('org.rocksdb')): apache2,
-    (group('tuweni')): apache2
+    (group('tuweni')): apache2,
+    (group('org.glassfish.jersey.core')): epl2,
+    (group('org.glassfish.jersey.containers')): epl2,
+    (group('org.glassfish.jersey.inject')): epl2,
+    (group('org.glassfish.jersey.media')): epl2,
+    (group('javax.activation')): cddl1,
+    (group('javax.servlet')): cddl1,
+    (group('org.javassist')): apache2,
+    (group('org.glassfish.hk2.external')): epl2,
+    (group('javax.xml.bind')): cddl1,
+    (group('jakarta.ws.rs')): epl2,
+    (group('org.glassfish.hk2')): epl2,
+    (group('jakarta.annotation')): epl2,
   ]
 }
 
 
 task checkLicenses {
-  description "Verify that all dependencies use white-listed licenses."
+  description "Verify that all dependencies use accepted licenses."
   dependsOn ':downloadLicenses'
 
   def bads = ""
@@ -173,4 +192,3 @@ task checkLicenses {
     }
   }
 }
-check.dependsOn checkLicenses

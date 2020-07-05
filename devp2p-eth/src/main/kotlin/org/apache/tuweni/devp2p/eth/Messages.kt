@@ -63,13 +63,16 @@ data class StatusMessage(
         val totalDifficulty = UInt256.fromBytes(reader.readValue())
         val bestHash = Hash.fromBytes(reader.readValue())
         val genesisHash = Hash.fromBytes(reader.readValue())
-        val forkInfo = reader.readList { fork ->
-          Pair(fork.readValue(), fork.readValue())
+        var forkInfo: Pair<Bytes, Bytes>? = null
+        if (!reader.isComplete()) {
+          forkInfo = reader.readList { fork ->
+            Pair(fork.readValue(), fork.readValue())
+          }
         }
 
         StatusMessage(
           protocolVersion, networkID, totalDifficulty, bestHash,
-          genesisHash, forkInfo.first, forkInfo.second.toLong()
+          genesisHash, forkInfo?.first, forkInfo?.second?.toLong()
         )
       }
     }
@@ -81,9 +84,11 @@ data class StatusMessage(
     it.writeUInt256(totalDifficulty)
     it.writeValue(bestHash)
     it.writeValue(genesisHash)
-    it.writeList { forkWriter ->
-      forkWriter.writeValue(Bytes.fromHexString("0xe029e991"))
-      forkWriter.writeValue(Bytes.ofUnsignedLong(forkBlock!!).trimLeadingZeros())
+    if (forkHash != null && forkBlock != null) {
+      it.writeList { forkWriter ->
+        forkWriter.writeValue(forkHash)
+        forkWriter.writeValue(Bytes.ofUnsignedLong(forkBlock).trimLeadingZeros())
+      }
     }
   }
 }

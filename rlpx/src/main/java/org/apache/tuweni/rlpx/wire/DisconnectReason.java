@@ -17,23 +17,59 @@ package org.apache.tuweni.rlpx.wire;
  *
  */
 public enum DisconnectReason {
-  REQUESTED(0),
-  TCP_ERROR(1),
-  PROTOCOL_BREACH(2),
-  USELESS_PEER(3),
-  TOO_MANY_PEERS(4),
-  ALREADY_CONNECTED(5),
-  INCOMPATIBLE_DEVP2P_VERSION(6),
-  NULL_NODE_IDENTITY_RECEIVED(7),
-  CLIENT_QUITTING(8),
-  UNEXPECTED_IDENTITY(9),
-  CONNECTED_TO_SELF(10),
-  TIMEOUT(11),
-  SUBPROTOCOL_REASON(16);
 
-  DisconnectReason(int code) {
+  REQUESTED(0, "Requested"),
+  TCP_ERROR(1, "TCP Error"),
+  PROTOCOL_BREACH(2, "Protocol breach"),
+  USELESS_PEER(3, "Useless peer"),
+  TOO_MANY_PEERS(4, "Too many peers"),
+  ALREADY_CONNECTED(5, "Already connected"),
+  INCOMPATIBLE_DEVP2P_VERSION(6, "Incompatible devp2p version"),
+  NULL_NODE_IDENTITY_RECEIVED(7, "Null node identity received"),
+  CLIENT_QUITTING(8, "Client quitting"),
+  UNEXPECTED_IDENTITY(9, "Unexpected identity"),
+  CONNECTED_TO_SELF(10, "Connected to self"),
+  TIMEOUT(11, "Timeout"),
+  SUBPROTOCOL_REASON(16, "Subprotocol reason");
+
+  public static DisconnectReason valueOf(int reason) {
+    switch (reason) {
+      case 0:
+        return REQUESTED;
+      case 1:
+        return TCP_ERROR;
+      case 2:
+        return PROTOCOL_BREACH;
+      case 3:
+        return USELESS_PEER;
+      case 4:
+        return TOO_MANY_PEERS;
+      case 5:
+        return ALREADY_CONNECTED;
+      case 6:
+        return INCOMPATIBLE_DEVP2P_VERSION;
+      case 7:
+        return NULL_NODE_IDENTITY_RECEIVED;
+      case 8:
+        return CLIENT_QUITTING;
+      case 9:
+        return UNEXPECTED_IDENTITY;
+      case 10:
+        return CONNECTED_TO_SELF;
+      case 11:
+        return TIMEOUT;
+      case 16:
+        return SUBPROTOCOL_REASON;
+      default:
+        throw new IllegalArgumentException("Invalid reason " + reason);
+    }
+  }
+
+  DisconnectReason(int code, String text) {
     this.code = code;
+    this.text = text;
   }
 
   public final int code;
+  public final String text;
 }

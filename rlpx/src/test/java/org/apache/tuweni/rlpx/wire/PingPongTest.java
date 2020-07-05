@@ -40,7 +40,6 @@ class PingPongTest {
   void pingPongRoundtrip() {
     AtomicReference<RLPxMessage> capturedPing = new AtomicReference<>();
     DefaultWireConnection conn = new DefaultWireConnection(
-        "abc",
         nodeId,
         peerNodeId,
         capturedPing::set,
@@ -53,7 +52,9 @@ class PingPongTest {
         2,
         "abc",
         10000,
-        AsyncResult.incomplete());
+        AsyncResult.incomplete(),
+        "127.0.0.1",
+        1234);
 
     AsyncCompletion completion = conn.sendPing();
     assertFalse(completion.isDone());
@@ -66,10 +67,9 @@ class PingPongTest {
   @Test
   void pongPingRoundtrip() {
     AtomicReference<RLPxMessage> capturedPong = new AtomicReference<>();
-    DefaultWireConnection conn =
-        new DefaultWireConnection("abc", nodeId, peerNodeId, capturedPong::set, helloMessage -> {
-        }, () -> {
-        }, new LinkedHashMap<>(), 1, "abc", 10000, AsyncResult.incomplete());
+    DefaultWireConnection conn = new DefaultWireConnection(nodeId, peerNodeId, capturedPong::set, helloMessage -> {
+    }, () -> {
+    }, new LinkedHashMap<>(), 1, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
 
     conn.messageReceived(new RLPxMessage(2, Bytes.EMPTY));
     assertNotNull(capturedPong.get());

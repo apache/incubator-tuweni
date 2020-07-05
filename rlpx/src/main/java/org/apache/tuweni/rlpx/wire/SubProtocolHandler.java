@@ -23,20 +23,20 @@ public interface SubProtocolHandler {
   /**
    * Handle an incoming wire protocol message
    *
-   * @param connectionId the peer connection identifier
+   * @param connection the peer connection
    * @param messageType the type of the message
    * @param message the message to be handled
    * @return a handle tracking the completion of the handling of the message.
    */
-  AsyncCompletion handle(String connectionId, int messageType, Bytes message);
+  AsyncCompletion handle(WireConnection connection, int messageType, Bytes message);
 
   /**
    * Handle a new peer connection
    * 
-   * @param connectionId the new peer connection identifier
+   * @param connection the new peer connection
    * @return a handle to the completion of the addition of the new peer.
    */
-  AsyncCompletion handleNewPeerConnection(String connectionId);
+  AsyncCompletion handleNewPeerConnection(WireConnection connection);
 
   /**
    * Stops a subprotocol operations.
