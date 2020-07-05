@@ -87,6 +87,12 @@ class PatchworkIntegrationTest {
     }
   }
 
+  /**
+   * This test tests the connection to a local patchwork installation.
+   * You need to run patchwork locally to perform that work.
+   * @param vertx
+   * @throws Exception
+   */
   @Disabled
   @Test
   void runWithPatchWork(@VertxInstance Vertx vertx) throws Exception {
@@ -140,7 +146,7 @@ class PatchworkIntegrationTest {
     Signature.KeyPair keyPair = new Signature.KeyPair(pub, secretKey);
     String networkKeyBase64 = "1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s=";
 
-    String serverPublicKey = pubKey; // TODO use your own identity public key here.
+    String serverPublicKey = pubKey;
     Signature.PublicKey publicKey = Signature.PublicKey.fromBytes(Base64.decode(serverPublicKey));
 
     Bytes32 networkKeyBytes32 = Bytes32.wrap(Base64.decode(networkKeyBase64));
