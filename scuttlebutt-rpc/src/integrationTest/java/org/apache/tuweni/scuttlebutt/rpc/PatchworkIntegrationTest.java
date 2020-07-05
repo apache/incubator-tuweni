@@ -88,8 +88,9 @@ class PatchworkIntegrationTest {
   }
 
   /**
-   * This test tests the connection to a local patchwork installation.
-   * You need to run patchwork locally to perform that work.
+   * This test tests the connection to a local patchwork installation. You need to run patchwork locally to perform that
+   * work.
+   * 
    * @param vertx
    * @throws Exception
    */
