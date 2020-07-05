@@ -53,6 +53,21 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
     listOf(PeerRepositoryConfigurationImpl("default"))
 
   fun toToml() = config.toToml()
+  fun dnsClients(): List<DNSConfiguration> {
+    val dnsSections = config.sections("dns")
+    if (dnsSections == null || dnsSections.isEmpty()) {
+      return emptyList()
+    }
+    return dnsSections.map { section ->
+      val sectionConfig = config.getConfigurationSection("dns.$section")
+      DNSConfigurationImpl(
+        section,
+        sectionConfig.getString("peerRepository"),
+        sectionConfig.getString("domain"),
+        sectionConfig.getLong("pollingPeriod")
+      )
+    }
+  }
 
   companion object {
     fun createSchema(): Schema {
@@ -115,6 +130,8 @@ interface RLPxServiceConfiguration {
 interface DNSConfiguration {
   fun domain(): String
   fun pollingPeriod(): Long
+  fun getName(): String
+  fun peerRepository(): String
 }
 
 interface PeerRepositoryConfiguration {
@@ -160,7 +177,17 @@ internal data class DataStoreConfigurationImpl(
   override fun getGenesisFile(): String = genesisFile
 }
 
-data class DNSConfigurationImpl(private val domain: String, private val pollingPeriod: Long) : DNSConfiguration {
+data class DNSConfigurationImpl(
+  private val name: String,
+  private val peerRepository: String,
+  private val domain: String,
+  private val pollingPeriod: Long
+) :
+  DNSConfiguration {
+  override fun getName() = name
+
+  override fun peerRepository() = peerRepository
+
   override fun domain(): String = domain
 
   override fun pollingPeriod(): Long = pollingPeriod
