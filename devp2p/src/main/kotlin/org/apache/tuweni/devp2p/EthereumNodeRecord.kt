@@ -31,7 +31,12 @@ import java.time.Instant
 /**
  * Ethereum Node Record (ENR) as described in [EIP-778](https://eips.ethereum.org/EIPS/eip-778).
  */
-class EthereumNodeRecord(val signature: Bytes, val seq: Long, val data: Map<String, Bytes>) {
+class EthereumNodeRecord(
+  val signature: Bytes,
+  val seq: Long,
+  val data: Map<String, Bytes>,
+  val listData: Map<String, List<Bytes>> = emptyMap()
+) {
 
   companion object {
 
@@ -52,19 +57,26 @@ class EthereumNodeRecord(val signature: Bytes, val seq: Long, val data: Map<Stri
           val seq = it.readLong()
 
           val data = mutableMapOf<String, Bytes>()
+          val listData = mutableMapOf<String, List<Bytes>>()
           while (!it.isComplete) {
             val key = it.readString()
             if (it.nextIsList()) {
-              it.skipNext()
-              // TODO("not ready yet to read list values")
-              // data[key] = it.readListContents { listreader -> listreader.readValue()}
+              listData[key] = it.readListContents { listreader ->
+                if (listreader.nextIsList()) {
+                  // TODO complex structures not supported
+                  listreader.skipNext()
+                  null
+                } else {
+                  listreader.readValue()
+                }
+              }.filterNotNull()
             } else {
               val value = it.readValue()
               data[key] = value
             }
           }
 
-          EthereumNodeRecord(sig, seq, data)
+          EthereumNodeRecord(sig, seq, data, listData)
       }
     }
 
@@ -75,6 +87,7 @@ class EthereumNodeRecord(val signature: Bytes, val seq: Long, val data: Map<Stri
       tcp: Int? = null,
       udp: Int? = null,
       data: Map<String, Bytes>? = null,
+      listData: Map<String, List<Bytes>>? = null,
       writer: RLPWriter
     ) {
       writer.writeLong(seq)
@@ -92,10 +105,17 @@ class EthereumNodeRecord(val signature: Bytes, val seq: Long, val data: Map<Stri
       udp?.let {
         mutableData["udp"] = Bytes.ofUnsignedShort(it)
       }
-      mutableData.keys.sorted().forEach { key ->
+      val keys = mutableListOf<String>()
+      keys.addAll(mutableData.keys)
+      listData?.let { keys.addAll(it.keys) }
+      keys.sorted().forEach { key ->
           mutableData[key]?.let { value ->
             writer.writeString(key)
             writer.writeValue(value)
+          }
+          listData?.get(key)?.let { value ->
+          writer.writeString(key)
+          writer.writeList(value) { writer, v -> writer.writeValue(v) }
           }
       }
     }
@@ -105,6 +125,7 @@ class EthereumNodeRecord(val signature: Bytes, val seq: Long, val data: Map<Stri
      * @param signatureKeyPair the key pair to use to sign the ENR
      * @param seq the sequence number for the ENR. It should be higher than the previous time the ENR was generated. It defaults to the current time since epoch in milliseconds.
      * @param data the key pairs to encode in the ENR
+     * @param listData the key pairs of list values to encode in the ENR
      * @param ip the IP address of the host
      * @param tcp an optional parameter to a TCP port used for the wire protocol
      * @param udp an optional parameter to a UDP port used for discovery
@@ -116,12 +137,13 @@ class EthereumNodeRecord(val signature: Bytes, val seq: Long, val data: Map<Stri
       signatureKeyPair: SECP256K1.KeyPair,
       seq: Long = Instant.now().toEpochMilli(),
       data: Map<String, Bytes>? = null,
+      listData: Map<String, List<Bytes>>? = null,
       ip: InetAddress,
       tcp: Int? = null,
       udp: Int? = null
     ): Bytes {
       val encoded = RLP.encode { writer ->
-        encode(signatureKeyPair, seq, ip, tcp, udp, data, writer)
+        encode(signatureKeyPair, seq, ip, tcp, udp, data, listData, writer)
       }
       val signature = SECP256K1.sign(Hash.keccak256(encoded), signatureKeyPair)
       val sigBytes = MutableBytes.create(64)
@@ -130,7 +152,7 @@ class EthereumNodeRecord(val signature: Bytes, val seq: Long, val data: Map<Stri
 
       val completeEncoding = RLP.encodeList { writer ->
         writer.writeValue(sigBytes)
-        encode(signatureKeyPair, seq, ip, tcp, udp, data, writer)
+        encode(signatureKeyPair, seq, ip, tcp, udp, data, listData, writer)
       }
       return completeEncoding
     }

@@ -21,6 +21,9 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetAddress
@@ -38,26 +41,30 @@ class RoutingTableTest {
   @Test
   fun addCreatesRecordInBucket() {
     routingTable.add(newEnr)
-
-    assert(!routingTable.isEmpty())
+    assertTrue(!routingTable.isEmpty())
   }
 
   @Test
   fun evictRemovesRecord() {
     routingTable.add(newEnr)
 
-    assert(!routingTable.isEmpty())
+    assertTrue(!routingTable.isEmpty())
 
     routingTable.evict(newEnr)
 
-    assert(routingTable.isEmpty())
+    assertTrue(routingTable.isEmpty())
   }
 
   @Test
   fun getSelfEnrGivesTableOwnerEnr() {
     val result = routingTable.getSelfEnr()
+    assertEquals(enr, result)
+  }
 
-    assert(result == enr)
+  @Test
+  fun distanceToSelf() {
+    assertEquals(0, routingTable.distanceToSelf(routingTable.getSelfEnr()))
+    assertNotEquals(0, routingTable.distanceToSelf(newEnr))
   }
 
   @AfterEach

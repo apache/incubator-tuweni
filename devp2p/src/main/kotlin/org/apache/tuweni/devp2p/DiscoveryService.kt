@@ -349,7 +349,7 @@ internal class CoroutineDiscoveryService(
     )
 
     enr = EthereumNodeRecord.toRLP(
-      keyPair, seq, enrData, selfEndpoint.address, selfEndpoint.tcpPort,
+      keyPair, seq, enrData, null, selfEndpoint.address, selfEndpoint.tcpPort,
       selfEndpoint.udpPort
     )
 
