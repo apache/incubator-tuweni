@@ -14,14 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.ethclient.config
+package org.apache.tuweni.ethclient
 
-import org.apache.tuweni.crypto.SECP256K1
-import java.net.URI
+import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.kv.MapKeyValueStore
+import org.apache.tuweni.peer.repository.memory.MemoryPeerRepository
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
-interface DNSConfig {
-  fun dnsDomain(): String?
-  fun dnsPollingPeriod(): Long
-  fun discKeyPair(): SECP256K1.KeyPair
-  fun discv4BootNodes(): List<URI>?
+class DNSClientRunTest {
+  @Test
+  fun testStartAndStop() {
+    val client = DNSClient(DNSConfigurationImpl("example.com", 1000),
+      MapKeyValueStore.open(), MemoryPeerRepository())
+    runBlocking {
+      client.start()
+      client.stop()
+    }
+  }
+
+  @Test
+  fun changeSeq() {
+    val client = DNSClient(DNSConfigurationImpl("example.com", 1000),
+      MapKeyValueStore.open(), MemoryPeerRepository())
+    runBlocking {
+      client.seq(42L)
+      assertEquals(42L, client.seq())
+    }
+  }
 }

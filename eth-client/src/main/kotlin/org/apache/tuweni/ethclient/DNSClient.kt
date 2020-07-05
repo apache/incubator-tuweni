@@ -14,20 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.ethclient.dns
+package org.apache.tuweni.ethclient
 
 import kotlinx.coroutines.runBlocking
-import org.apache.tuweni.devp2p.DiscoveryService
-import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.discovery.DNSDaemon
-import org.apache.tuweni.ethclient.config.DNSConfig
 import org.apache.tuweni.kv.KeyValueStore
-import java.net.URI
+import org.apache.tuweni.peer.repository.PeerRepository
 
+/**
+ * Wrapper for running a DNS daemon with configuration.
+ */
 class DNSClient(
-  private val config: DNSConfig,
+  private val config: DNSConfiguration,
   private val metadataStore: KeyValueStore<String, String>,
-  private val store: KeyValueStore<String, EthereumNodeRecord>
+  private val peerRepository: PeerRepository
 ) {
 
   companion object {
@@ -35,7 +35,6 @@ class DNSClient(
   }
 
   private var dnsDaemon: DNSDaemon? = null
-  private var discoveryService: DiscoveryService? = null
 
   suspend fun seq(): Long {
     return metadataStore.get(SEQ)?.toLong() ?: 0
@@ -46,30 +45,24 @@ class DNSClient(
   }
 
   suspend fun start() {
-    config.dnsDomain()?.let { domain ->
+    config.domain().let { domain ->
       dnsDaemon = DNSDaemon(
         seq = seq(),
         enrLink = domain,
-        period = config.dnsPollingPeriod(),
+        period = config.pollingPeriod(),
         listeners = setOf { seq, enrs ->
           runBlocking {
             seq(seq)
             enrs.map {
-              val url = URI.create("enode://${it.publicKey().toHexString()}@${it.ip()}:${it.tcp()}").toString()
-              store.put(url, it)
+              peerRepository.storeIdentity(it.ip().hostAddress, it.tcp(), it.publicKey())
             }
           }
         }
       )
     }
-    config.discv4BootNodes()?.let { bootNodes ->
-      discoveryService = DiscoveryService.open(keyPair = config.discKeyPair(), bootstrapURIs = bootNodes)
-    }
   }
 
-  suspend fun stop() {
+  fun stop() {
     dnsDaemon?.close()
-    discoveryService?.shutdown()
-    discoveryService?.awaitTermination()
   }
 }

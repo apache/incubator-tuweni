@@ -36,9 +36,11 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
     }
     return storageSections.map { section ->
       val sectionConfig = config.getConfigurationSection("storage.$section")
-      DataStoreConfigurationImpl(section,
+      DataStoreConfigurationImpl(
+        section,
         Paths.get(sectionConfig.getString("path")),
-        sectionConfig.getString("genesis"))
+        sectionConfig.getString("genesis")
+      )
     }
   }
 
@@ -101,17 +103,22 @@ interface DataStoreConfiguration {
 }
 
 interface RLPxServiceConfiguration {
-  abstract fun port(): Int
-  abstract fun networkInterface(): String
-  abstract fun advertisedPort(): Int
-  abstract fun repository(): String
-  abstract fun getName(): String
-  abstract fun clientName(): String
-  abstract fun peerRepository(): String
+  fun port(): Int
+  fun networkInterface(): String
+  fun advertisedPort(): Int
+  fun repository(): String
+  fun getName(): String
+  fun clientName(): String
+  fun peerRepository(): String
+}
+
+interface DNSConfiguration {
+  fun domain(): String
+  fun pollingPeriod(): Long
 }
 
 interface PeerRepositoryConfiguration {
-  abstract fun getName(): String
+  fun getName(): String
 }
 
 internal class PeerRepositoryConfigurationImpl(private val repoName: String) : PeerRepositoryConfiguration {
@@ -151,4 +158,10 @@ internal data class DataStoreConfigurationImpl(
   override fun getStoragePath(): Path = storagePath
 
   override fun getGenesisFile(): String = genesisFile
+}
+
+data class DNSConfigurationImpl(private val domain: String, private val pollingPeriod: Long) : DNSConfiguration {
+  override fun domain(): String = domain
+
+  override fun pollingPeriod(): Long = pollingPeriod
 }
