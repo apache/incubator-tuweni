@@ -13,4 +13,4 @@ REM specific language governing permissions and limitations under the License.
 bitsadmin /transfer myDownloadJob https://services.gradle.org/distributions/gradle-6.5.1-bin.zip d:\gradle.zip
 unzip d:\gradle.zip -d gradle_download
 gradle_download/gradle-6.5.1/bin/gradle.bat setup
-./gradlew.bat assemble
+gradlew.bat assemble
