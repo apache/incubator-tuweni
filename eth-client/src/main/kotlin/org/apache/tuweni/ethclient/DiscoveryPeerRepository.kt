@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.ethclient.dns
+package org.apache.tuweni.ethclient
 
 import kotlinx.coroutines.GlobalScope
 import org.apache.tuweni.concurrent.AsyncResult
@@ -38,7 +38,7 @@ class DiscoveryPeerRepository(private val repository: org.apache.tuweni.peer.rep
 
   override suspend fun get(uri: URI): Peer {
     val (nodeId, endpoint) = parseEnodeUri(uri)
-    return get(endpoint.address.hostName, endpoint.udpPort, nodeId)
+    return get(endpoint.address.hostAddress, endpoint.udpPort, nodeId)
   }
 
   override fun getAsync(uri: URI): AsyncResult<Peer> = GlobalScope.asyncResult { get(uri) }
