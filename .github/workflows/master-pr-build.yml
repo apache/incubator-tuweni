@@ -91,6 +91,11 @@ jobs:
       - name: Build from source
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: cd distunzipped/tuweni && ./build.sh
+      - name: Set up JDK 11
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
       - name: Build from source
         if: ${{ matrix.os == 'windows-latest' }}
         run: cd distunzipped/tuweni && ./build.bat
