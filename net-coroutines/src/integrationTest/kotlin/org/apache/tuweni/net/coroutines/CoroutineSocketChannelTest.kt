@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -102,7 +103,7 @@ internal class CoroutineSocketChannelTest {
     clientJob.await()
   }
 
-  @Test
+  @RepeatedTest(3)
   fun shouldCloseSocketChannelWhenRemoteClosed() = runBlocking {
     val listenChannel = CoroutineServerSocketChannel.open()
     listenChannel.bind(null)
