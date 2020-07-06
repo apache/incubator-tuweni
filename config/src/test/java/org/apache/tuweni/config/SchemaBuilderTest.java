@@ -75,4 +75,31 @@ class SchemaBuilderTest {
 
     assertEquals(1, config.errors().size());
   }
+
+  @Test
+  void subSection() {
+    SchemaBuilder sectionBuilder = new SchemaBuilder();
+    sectionBuilder.addString("bar", "some default", "some description", null);
+    SchemaBuilder schemaBuilder = new SchemaBuilder();
+    schemaBuilder.addSection("foo", sectionBuilder.toSchema());
+
+    Configuration config = Configuration.fromToml("", schemaBuilder.toSchema());
+    Configuration section = config.getConfigurationSection("foo");
+
+    assertEquals("some default", section.getString("bar"));
+    assertEquals("some default", config.getString("foo.bar"));
+  }
+
+  @Test
+  void subSectionRecursive() {
+    SchemaBuilder sectionBuilder = new SchemaBuilder();
+    sectionBuilder.addString("bar", "some default", "some description", null);
+    SchemaBuilder schemaBuilder = new SchemaBuilder();
+    schemaBuilder.addSection("foo", sectionBuilder.toSchema());
+
+    Configuration config = Configuration.fromToml("foo.foo.bar", schemaBuilder.toSchema());
+    Configuration section = config.getConfigurationSection("foo");
+
+    assertEquals("some default", section.getString("bar"));
+  }
 }

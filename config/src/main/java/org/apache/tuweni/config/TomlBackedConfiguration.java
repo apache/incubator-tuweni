@@ -152,62 +152,130 @@ final class TomlBackedConfiguration implements Configuration {
 
   @Override
   public String getString(String key) {
-    return getValue(key, toml::getString, schema::getDefaultString);
+    String sectionKey = schema.getSubSectionPrefix(key);
+    if (sectionKey == null) {
+      return getValue(key, toml::getString, schema::getDefaultString);
+    }
+    Schema section = schema.getSubSection(sectionKey);
+    String subSectionKey = key.substring(sectionKey.length() + 1);
+    TomlTable table = toml.getTableOrEmpty(sectionKey);
+
+    return getValue(subSectionKey, table::getString, section::getDefaultString);
   }
 
   @Override
   public int getInteger(String key) {
+    String sectionKey = schema.getSubSectionPrefix(key);
+    Schema section;
+    TomlTable table;
+    if (sectionKey != null) {
+      section = schema.getSubSection(sectionKey);
+      key = key.substring(sectionKey.length() + 1);
+      table = toml.getTableOrEmpty(sectionKey);
+    } else {
+      section = schema;
+      table = toml;
+    }
+
     return getValue(key, keyPath -> {
-      Long longValue = toml.getLong(keyPath);
-      if (longValue != null && longValue > Integer.MAX_VALUE) {
+      Long longValue = table.getLong(keyPath);
+      if (longValue != null && (longValue > Integer.MAX_VALUE || longValue < Integer.MIN_VALUE)) {
         throw new InvalidConfigurationPropertyTypeException(
             inputPositionOf(keyPath),
             "Value of property '" + joinKeyPath(keyPath) + "' is too large for an integer");
       }
       return (longValue != null) ? longValue.intValue() : null;
-    }, schema::getDefaultInteger);
+    }, section::getDefaultInteger);
   }
 
   @Override
   public long getLong(String key) {
-    return getValue(key, toml::getLong, schema::getDefaultLong);
+    String sectionKey = schema.getSubSectionPrefix(key);
+    if (sectionKey == null) {
+      return getValue(key, toml::getLong, schema::getDefaultLong);
+    }
+    Schema section = schema.getSubSection(sectionKey);
+    String subSectionKey = key.substring(sectionKey.length() + 1);
+    TomlTable table = toml.getTableOrEmpty(sectionKey);
+
+    return getValue(subSectionKey, table::getLong, section::getDefaultLong);
   }
 
   @Override
   public double getDouble(String key) {
-    return getValue(key, toml::getDouble, schema::getDefaultDouble);
+    String sectionKey = schema.getSubSectionPrefix(key);
+    if (sectionKey == null) {
+      return getValue(key, toml::getDouble, schema::getDefaultDouble);
+    }
+    Schema section = schema.getSubSection(sectionKey);
+    String subSectionKey = key.substring(sectionKey.length() + 1);
+    TomlTable table = toml.getTableOrEmpty(sectionKey);
+
+    return getValue(subSectionKey, table::getDouble, section::getDefaultDouble);
   }
 
   @Override
   public boolean getBoolean(String key) {
-    return getValue(key, toml::getBoolean, schema::getDefaultBoolean);
+    String sectionKey = schema.getSubSectionPrefix(key);
+    if (sectionKey == null) {
+      return getValue(key, toml::getBoolean, schema::getDefaultBoolean);
+    }
+    Schema section = schema.getSubSection(sectionKey);
+    String subSectionKey = key.substring(sectionKey.length() + 1);
+    TomlTable table = toml.getTableOrEmpty(sectionKey);
+
+    return getValue(subSectionKey, table::getBoolean, section::getDefaultBoolean);
   }
 
   @Override
   public Map<String, Object> getMap(String key) {
+    String sectionKey = schema.getSubSectionPrefix(key);
+    Schema section;
+    TomlTable table;
+    if (sectionKey != null) {
+      section = schema.getSubSection(sectionKey);
+      key = key.substring(sectionKey.length() + 1);
+      table = toml.getTableOrEmpty(sectionKey);
+    } else {
+      section = schema;
+      table = toml;
+    }
+
     return getValue(key, keyPath -> {
-      TomlTable table = toml.getTable(keyPath);
-      if (table == null) {
+      TomlTable map = table.getTable(keyPath);
+      if (map == null) {
         return null;
       }
-      return deepToMap(table);
-    }, schema::getDefaultMap);
+      return deepToMap(map);
+    }, section::getDefaultMap);
   }
 
   @Override
   public List<Object> getList(String key) {
+    String sectionKey = schema.getSubSectionPrefix(key);
+    Schema section;
+    TomlTable table;
+    if (sectionKey != null) {
+      section = schema.getSubSection(sectionKey);
+      key = key.substring(sectionKey.length() + 1);
+      table = toml.getTableOrEmpty(sectionKey);
+    } else {
+      section = schema;
+      table = toml;
+    }
+
     return getValue(key, keyPath -> {
-      TomlArray array = toml.getArray(keyPath);
+      TomlArray array = table.getArray(keyPath);
       if (array == null) {
         return null;
       }
       return deepToList(array);
-    }, schema::getDefaultList);
+    }, section::getDefaultList);
   }
 
   @Override
   public List<String> getListOfString(String key) {
-    return getList(key, "strings", TomlArray::containsStrings, schema::getDefaultListOfString);
+    return getList(key, "strings", TomlArray::containsStrings, (schema) -> schema::getDefaultListOfString);
   }
 
   @Override
@@ -238,23 +306,35 @@ final class TomlBackedConfiguration implements Configuration {
 
   @Override
   public List<Long> getListOfLong(String key) {
-    return getList(key, "longs", TomlArray::containsLongs, schema::getDefaultListOfLong);
+    return getList(key, "longs", TomlArray::containsLongs, schema -> schema::getDefaultListOfLong);
   }
 
   @Override
   public List<Double> getListOfDouble(String key) {
-    return getList(key, "doubles", TomlArray::containsDoubles, schema::getDefaultListOfDouble);
+    return getList(key, "doubles", TomlArray::containsDoubles, schema -> schema::getDefaultListOfDouble);
   }
 
   @Override
   public List<Boolean> getListOfBoolean(String key) {
-    return getList(key, "booleans", TomlArray::containsBooleans, schema::getDefaultListOfBoolean);
+    return getList(key, "booleans", TomlArray::containsBooleans, schema -> schema::getDefaultListOfBoolean);
   }
 
   @Override
   public List<Map<String, Object>> getListOfMap(String key) {
+    String sectionKey = schema.getSubSectionPrefix(key);
+    Schema section;
+    TomlTable table;
+    if (sectionKey != null) {
+      section = schema.getSubSection(sectionKey);
+      key = key.substring(sectionKey.length() + 1);
+      table = toml.getTableOrEmpty(sectionKey);
+    } else {
+      section = schema;
+      table = toml;
+    }
+
     return getValue(key, keyPath -> {
-      TomlArray array = toml.getArray(keyPath);
+      TomlArray array = table.getArray(keyPath);
       if (array == null) {
         return null;
       }
@@ -266,7 +346,7 @@ final class TomlBackedConfiguration implements Configuration {
       @SuppressWarnings("unchecked")
       List<Map<String, Object>> typedList = (List<Map<String, Object>>) (List) deepToList(array);
       return typedList;
-    }, schema::getDefaultListOfMap);
+    }, section::getDefaultListOfMap);
   }
 
   private DocumentPosition documentPosition(TomlPosition position) {
@@ -296,9 +376,21 @@ final class TomlBackedConfiguration implements Configuration {
       String key,
       String typeName,
       Predicate<TomlArray> tomlCheck,
-      Function<String, List<T>> defaultGet) {
+      Function<Schema, Function<String, List<T>>> defaultGet) {
+    String sectionKey = schema.getSubSectionPrefix(key);
+    Schema section;
+    TomlTable table;
+    if (sectionKey != null) {
+      section = schema.getSubSection(sectionKey);
+      key = key.substring(sectionKey.length() + 1);
+      table = toml.getTableOrEmpty(sectionKey);
+    } else {
+      section = schema;
+      table = toml;
+    }
+    Function<String, List<T>> defaultGetFn = defaultGet.apply(section);
     return getValue(key, keyPath -> {
-      TomlArray array = toml.getArray(keyPath);
+      TomlArray array = table.getArray(keyPath);
       if (array == null) {
         return null;
       }
@@ -310,7 +402,7 @@ final class TomlBackedConfiguration implements Configuration {
       @SuppressWarnings("unchecked")
       List<T> typedList = (List<T>) array.toList();
       return typedList;
-    }, defaultGet);
+    }, defaultGetFn);
   }
 
   private static List<Object> deepToList(TomlArray array) {
