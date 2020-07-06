@@ -425,6 +425,13 @@ public final class Schema {
   }
 
   public Schema getSubSection(String name) {
-    return subSections.get(name);
+    Schema schema = subSections.get(name);
+    if (schema != null) {
+      return schema;
+    }
+    if (name.contains(".")) {
+      return getSubSection(name.substring(0, name.lastIndexOf(".")));
+    }
+    return null;
   }
 }

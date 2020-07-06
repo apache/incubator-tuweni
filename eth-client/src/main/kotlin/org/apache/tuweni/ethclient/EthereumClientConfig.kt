@@ -75,9 +75,13 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       storageSection.addString("path", null, "File system path where data is stored", null)
       storageSection.addString("genesis", null, "Reference to a genesis configuration", null)
 
+      val dnsSection = SchemaBuilder.create()
+      dnsSection.addString("domain", null, "DNS domain to query for records", null)
+      dnsSection.addLong("pollingPeriod", 50000, "Polling period to refresh DNS records", null)
+      dnsSection.addString("peerRepository", "default", "Peer repository to which records should go", null)
       val builder = SchemaBuilder.create()
       builder.addSection("storage", storageSection.toSchema())
-
+      builder.addSection("dns", dnsSection.toSchema())
       return builder.toSchema()
     }
 

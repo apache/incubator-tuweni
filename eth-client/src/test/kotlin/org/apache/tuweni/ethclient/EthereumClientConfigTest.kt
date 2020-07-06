@@ -85,4 +85,14 @@ class EthereumClientConfigTest {
     val config = EthereumClientConfig.fromString("[storage.forui]\npath=\"data\"")
     assertEquals("[storage.forui]\npath = \"data\"\n", config.toToml())
   }
+
+  @Test
+  fun testDNSClient() {
+    val config = EthereumClientConfig.fromString("[dns.mine]\ndomain=\"example.com\"\npollingPeriod=1000")
+    assertEquals(1, config.dnsClients().size)
+    assertEquals("example.com", config.dnsClients()[0].domain())
+    assertEquals(1000, config.dnsClients()[0].pollingPeriod())
+    assertEquals("default", config.dnsClients()[0].peerRepository())
+    assertEquals("mine", config.dnsClients()[0].getName())
+  }
 }
