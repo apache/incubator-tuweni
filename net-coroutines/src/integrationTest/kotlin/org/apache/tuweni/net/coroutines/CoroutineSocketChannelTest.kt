@@ -106,7 +106,7 @@ internal class CoroutineSocketChannelTest {
   @RepeatedTest(3)
   fun shouldCloseSocketChannelWhenRemoteClosed() = runBlocking {
     val listenChannel = CoroutineServerSocketChannel.open()
-    listenChannel.bind(null)
+    listenChannel.bind(InetSocketAddress(InetAddress.getLoopbackAddress(), 0))
     val addr =
       InetSocketAddress(InetAddress.getLoopbackAddress(), (listenChannel.localAddress as InetSocketAddress).port)
 
