@@ -53,6 +53,21 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
     listOf(PeerRepositoryConfigurationImpl("default"))
 
   fun toToml() = config.toToml()
+  fun dnsClients(): List<DNSConfiguration> {
+    val dnsSections = config.sections("dns")
+    if (dnsSections == null || dnsSections.isEmpty()) {
+      return emptyList()
+    }
+    return dnsSections.map { section ->
+      val sectionConfig = config.getConfigurationSection("dns.$section")
+      DNSConfigurationImpl(
+        section,
+        sectionConfig.getString("peerRepository"),
+        sectionConfig.getString("domain"),
+        sectionConfig.getLong("pollingPeriod")
+      )
+    }
+  }
 
   companion object {
     fun createSchema(): Schema {
@@ -60,9 +75,13 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       storageSection.addString("path", null, "File system path where data is stored", null)
       storageSection.addString("genesis", null, "Reference to a genesis configuration", null)
 
+      val dnsSection = SchemaBuilder.create()
+      dnsSection.addString("domain", null, "DNS domain to query for records", null)
+      dnsSection.addLong("pollingPeriod", 50000, "Polling period to refresh DNS records", null)
+      dnsSection.addString("peerRepository", "default", "Peer repository to which records should go", null)
       val builder = SchemaBuilder.create()
       builder.addSection("storage", storageSection.toSchema())
-
+      builder.addSection("dns", dnsSection.toSchema())
       return builder.toSchema()
     }
 
@@ -115,6 +134,8 @@ interface RLPxServiceConfiguration {
 interface DNSConfiguration {
   fun domain(): String
   fun pollingPeriod(): Long
+  fun getName(): String
+  fun peerRepository(): String
 }
 
 interface PeerRepositoryConfiguration {
@@ -160,7 +181,17 @@ internal data class DataStoreConfigurationImpl(
   override fun getGenesisFile(): String = genesisFile
 }
 
-data class DNSConfigurationImpl(private val domain: String, private val pollingPeriod: Long) : DNSConfiguration {
+data class DNSConfigurationImpl(
+  private val name: String,
+  private val peerRepository: String,
+  private val domain: String,
+  private val pollingPeriod: Long
+) :
+  DNSConfiguration {
+  override fun getName() = name
+
+  override fun peerRepository() = peerRepository
+
   override fun domain(): String = domain
 
   override fun pollingPeriod(): Long = pollingPeriod

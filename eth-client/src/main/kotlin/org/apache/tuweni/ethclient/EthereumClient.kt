@@ -33,6 +33,7 @@ import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.kv.LevelDBKeyValueStore
+import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.peer.repository.PeerRepository
 import org.apache.tuweni.peer.repository.memory.MemoryPeerRepository
 import org.apache.tuweni.rlpx.RLPxService
@@ -54,6 +55,7 @@ class EthereumClient(
   private val services = HashMap<String, RLPxService>()
   private val storageRepositories = HashMap<String, BlockchainRepository>()
   private val peerRepositories = HashMap<String, PeerRepository>()
+  private val dnsClients = HashMap<String, DNSClient>()
 
   suspend fun start() {
     config.peerRepositories().forEach {
@@ -86,6 +88,21 @@ class EthereumClient(
       )
       storageRepositories[dataStore.getName()] = repository
       repoToGenesisFile[repository] = genesisFile
+    }
+
+    config.dnsClients().forEach {
+      val peerRepository = peerRepositories[it.peerRepository()]
+      if (peerRepository == null) {
+        val message = (if (peerRepositories.isEmpty()) "none" else peerRepositories.keys.joinToString(
+          ","
+        )) + " defined"
+        throw IllegalArgumentException(
+          "Repository $peerRepository not found, $message"
+        )
+      }
+      val dnsClient = DNSClient(it, MapKeyValueStore.open(), peerRepository)
+      dnsClients[it.getName()] = dnsClient
+      dnsClient.start()
     }
 
     AsyncCompletion.allOf(config.rlpxServices().map { rlpxConfig ->
@@ -130,6 +147,7 @@ class EthereumClient(
 
   fun stop() = runBlocking {
     vertx.close()
+    dnsClients.values.forEach(DNSClient::stop)
     AsyncCompletion.allOf(services.values.map(RLPxService::stop)).await()
     storageRepositories.values.forEach(BlockchainRepository::close)
   }

@@ -25,8 +25,10 @@ import org.junit.jupiter.api.Test
 class DNSClientRunTest {
   @Test
   fun testStartAndStop() {
-    val client = DNSClient(DNSConfigurationImpl("example.com", 1000),
-      MapKeyValueStore.open(), MemoryPeerRepository())
+    val client = DNSClient(
+      DNSConfigurationImpl("default", "foo", "example.com", 1000),
+      MapKeyValueStore.open(), MemoryPeerRepository()
+    )
     runBlocking {
       client.start()
       client.stop()
@@ -35,8 +37,10 @@ class DNSClientRunTest {
 
   @Test
   fun changeSeq() {
-    val client = DNSClient(DNSConfigurationImpl("example.com", 1000),
-      MapKeyValueStore.open(), MemoryPeerRepository())
+    val client = DNSClient(
+      DNSConfigurationImpl("default", "foo", "example.com", 1000),
+      MapKeyValueStore.open(), MemoryPeerRepository()
+    )
     runBlocking {
       client.seq(42L)
       assertEquals(42L, client.seq())

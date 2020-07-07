@@ -424,7 +424,25 @@ public final class Schema {
     return Stream.concat(propertyErrors, configErrors);
   }
 
+  public String getSubSectionPrefix(String key) {
+    Schema schema = subSections.get(key);
+    if (schema != null) {
+      return key;
+    }
+    if (key.contains(".")) {
+      return getSubSectionPrefix(key.substring(0, key.lastIndexOf(".")));
+    }
+    return null;
+  }
+
   public Schema getSubSection(String name) {
-    return subSections.get(name);
+    Schema schema = subSections.get(name);
+    if (schema != null) {
+      return schema;
+    }
+    if (name.contains(".")) {
+      return getSubSection(name.substring(0, name.lastIndexOf(".")));
+    }
+    return this;
   }
 }
