@@ -91,6 +91,62 @@ class SchemaBuilderTest {
   }
 
   @Test
+  void subSectionBoolean() {
+    SchemaBuilder sectionBuilder = new SchemaBuilder();
+    sectionBuilder.addBoolean("bar", true, "some description", null);
+    SchemaBuilder schemaBuilder = new SchemaBuilder();
+    schemaBuilder.addSection("foo", sectionBuilder.toSchema());
+
+    Configuration config = Configuration.fromToml("", schemaBuilder.toSchema());
+    Configuration section = config.getConfigurationSection("foo");
+
+    assertEquals(true, section.getBoolean("bar"));
+    assertEquals(true, config.getBoolean("foo.bar"));
+  }
+
+  @Test
+  void subSectionInt() {
+    SchemaBuilder sectionBuilder = new SchemaBuilder();
+    sectionBuilder.addInteger("bar", 42, "some description", null);
+    SchemaBuilder schemaBuilder = new SchemaBuilder();
+    schemaBuilder.addSection("foo", sectionBuilder.toSchema());
+
+    Configuration config = Configuration.fromToml("", schemaBuilder.toSchema());
+    Configuration section = config.getConfigurationSection("foo");
+
+    assertEquals(42, section.getInteger("bar"));
+    assertEquals(42, config.getInteger("foo.bar"));
+  }
+
+  @Test
+  void subSectionLong() {
+    SchemaBuilder sectionBuilder = new SchemaBuilder();
+    sectionBuilder.addLong("bar", 42L, "some description", null);
+    SchemaBuilder schemaBuilder = new SchemaBuilder();
+    schemaBuilder.addSection("foo", sectionBuilder.toSchema());
+
+    Configuration config = Configuration.fromToml("", schemaBuilder.toSchema());
+    Configuration section = config.getConfigurationSection("foo");
+
+    assertEquals(42L, section.getLong("bar"));
+    assertEquals(42L, config.getLong("foo.bar"));
+  }
+
+  @Test
+  void subSectionList() {
+    SchemaBuilder sectionBuilder = new SchemaBuilder();
+    sectionBuilder.addListOfString("bar", Collections.singletonList("foobar"), "some description", null);
+    SchemaBuilder schemaBuilder = new SchemaBuilder();
+    schemaBuilder.addSection("foo", sectionBuilder.toSchema());
+
+    Configuration config = Configuration.fromToml("", schemaBuilder.toSchema());
+    Configuration section = config.getConfigurationSection("foo");
+
+    assertEquals(Collections.singletonList("foobar"), section.getListOfString("bar"));
+    assertEquals(Collections.singletonList("foobar"), config.getListOfString("foo.bar"));
+  }
+
+  @Test
   void subSectionRecursive() {
     SchemaBuilder sectionBuilder = new SchemaBuilder();
     sectionBuilder.addString("bar", "some default", "some description", null);
