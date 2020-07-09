@@ -12,48 +12,46 @@
  */
 package org.apache.tuweni.scuttlebutt.lib;
 
-import static org.junit.jupiter.api.Assertions.fail;
 
 import org.apache.tuweni.crypto.sodium.Signature;
 
 import java.io.IOException;
 
-public class TestConfig {
+class TestConfig {
 
   private final String host;
   private final int port;
   private final Signature.KeyPair keyPair;
 
-  public TestConfig(String host, int port, Signature.KeyPair keyPair) {
+  private TestConfig(String host, int port, Signature.KeyPair keyPair) {
     this.host = host;
     this.port = port;
     this.keyPair = keyPair;
   }
 
-  public String getHost() {
+  String getHost() {
     return host;
   }
 
-  public int getPort() {
+  int getPort() {
     return port;
   }
 
-  public Signature.KeyPair getKeyPair() {
+  Signature.KeyPair getKeyPair() {
     return keyPair;
   }
 
-  public static TestConfig fromEnvironment() throws IOException {
+  static TestConfig fromEnvironment() throws IOException {
     String keyPath = System.getenv("ssb_keypath");
     String host = System.getenv("ssb_host");
     String portString = System.getenv("ssb_port");
 
-    if (keyPath == null || host == null || portString == null) {
-      fail("Expected ssb_keypath, ssb_host and ssb_port parameters.");
-      return null;
+    if (host == null || portString == null) {
+      throw new IllegalArgumentException("Expected ssb_host and ssb_port parameters.");
     } else {
       int port = Integer.parseInt(portString);
-      Signature.KeyPair keyPair = KeyFileLoader.loadKeysFromFile(keyPath);
-      return new org.apache.tuweni.scuttlebutt.lib.TestConfig(host, port, keyPair);
+      Signature.KeyPair keyPair = Signature.KeyPair.random();
+      return new TestConfig(host, port, keyPair);
     }
   }
 

@@ -13,9 +13,11 @@
 package org.apache.tuweni.scuttlebutt.lib;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.concurrent.CompletableAsyncResult;
+import org.apache.tuweni.crypto.sodium.Sodium;
 import org.apache.tuweni.scuttlebutt.Invite;
 import org.apache.tuweni.scuttlebutt.MalformedInviteCodeException;
 import org.apache.tuweni.scuttlebutt.lib.model.Peer;
@@ -26,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -34,8 +37,12 @@ import org.junit.jupiter.api.Test;
  */
 public class PeerInfoTest {
 
-  private AsyncResult<Void> peerWithNodeUsingInviteCode(ScuttlebuttClient client) throws MalformedInviteCodeException,
-      Exception {
+  @BeforeAll
+  static void checkSodium() {
+    assumeTrue(Sodium.isAvailable(), "Sodium native library is not available");
+  }
+
+  private AsyncResult<Void> peerWithNodeUsingInviteCode(ScuttlebuttClient client) throws MalformedInviteCodeException {
     String inviteCode = System.getenv("ssb_invite_code");
 
     if (inviteCode == null) {
@@ -49,7 +56,6 @@ public class PeerInfoTest {
 
 
   @Test
-  @Disabled("Requires a scuttlebutt backend")
   public void testPeerStream() throws Exception, MalformedInviteCodeException {
     TestConfig config = TestConfig.fromEnvironment();
 
@@ -60,7 +66,7 @@ public class PeerInfoTest {
 
     CompletableAsyncResult<PeerStateChange> incomplete = AsyncResult.incomplete();
 
-    scuttlebuttClient.getNetworkService().createChangesStream((closer) -> new StreamHandler<PeerStateChange>() {
+    scuttlebuttClient.getNetworkService().createChangesStream((closer) -> new StreamHandler<>() {
       @Override
       public void onMessage(PeerStateChange item) {
         if (!incomplete.isDone()) {

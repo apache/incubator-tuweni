@@ -31,21 +31,13 @@ import io.vertx.core.Vertx;
  */
 public final class ScuttlebuttClientFactory {
 
-  public static Bytes32 DEFAULT_NETWORK = defaultNetwork();
-
-  /**
-   * @return the default scuttlebutt network key.
-   */
-  public static Bytes32 defaultNetwork() {
-    // The network key for the main public network
-    String networkKeyBase64 = "1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s=";
-    return Bytes32.wrap(Base64.decode(networkKeyBase64));
-  }
+  private static final Bytes32 DEFAULT_NETWORK =
+      Bytes32.wrap(Base64.decode("1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s="));
 
   private ScuttlebuttClientFactory() {}
 
   /**
-   * Creates a scuttllebutt client by connecting with the given host, port and keypair
+   * Creates a scuttlebutt client by connecting with the given host, port and keypair
    *
    * @param mapper The ObjectMapper for serializing the content of published scuttlebutt messages
    * @param host The host to connect to as a scuttlebutt client
@@ -63,7 +55,7 @@ public final class ScuttlebuttClientFactory {
   }
 
   /**
-   * Creates a scuttllebutt client by connecting with the given host, port and keypair using the given vertx instance.
+   * Creates a scuttlebutt client by connecting with the given host, port and keypair using the given vertx instance.
    *
    * @param mapper The ObjectMapper for serializing the content of published scuttlebutt messages
    * @param vertx the vertx instance to use for network IO

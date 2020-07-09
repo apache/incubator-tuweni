@@ -14,8 +14,10 @@ package org.apache.tuweni.scuttlebutt.lib;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import org.apache.tuweni.concurrent.AsyncResult;
+import org.apache.tuweni.crypto.sodium.Sodium;
 import org.apache.tuweni.scuttlebutt.Invite;
 import org.apache.tuweni.scuttlebutt.MalformedInviteCodeException;
 
@@ -24,11 +26,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class InviteTest {
 
+  @BeforeAll
+  static void checkSodium() {
+    assumeTrue(Sodium.isAvailable(), "Sodium native library is not available");
+  }
 
   /**
    * Tests that it is possible to generate a test invite code.
@@ -37,7 +43,6 @@ public class InviteTest {
    * @throws InterruptedException
    */
   @Test
-  @Disabled("Requires a running ssb server")
   public void testGenerateInvite() throws IOException, InterruptedException {
     TestConfig config = TestConfig.fromEnvironment();
 
@@ -61,7 +66,6 @@ public class InviteTest {
    * @throws TimeoutException
    */
   @Test
-  @Disabled("Requires a running ssb server")
   public void testUseInvite() throws IOException, InterruptedException, TimeoutException {
     TestConfig config = TestConfig.fromEnvironment();
 
@@ -86,7 +90,6 @@ public class InviteTest {
       } catch (MalformedInviteCodeException e) {
         fail(e.getMessage());
       }
-
 
 
     }

@@ -15,9 +15,11 @@ package org.apache.tuweni.scuttlebutt.lib;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.concurrent.CompletableAsyncResult;
+import org.apache.tuweni.crypto.sodium.Sodium;
 import org.apache.tuweni.scuttlebutt.lib.model.FeedMessage;
 import org.apache.tuweni.scuttlebutt.lib.model.StreamHandler;
 import org.apache.tuweni.scuttlebutt.rpc.mux.exceptions.ConnectionClosedException;
@@ -30,16 +32,20 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class FeedStreamTest {
+
+  @BeforeAll
+  static void checkSodium() {
+    assumeTrue(Sodium.isAvailable(), "Sodium native library is not available");
+  }
 
   /**
    * Tests it is possible to make posts and retrieve them again using the FeedService class
    */
   @Test
-  @Disabled("Requires a running ssb server")
   public void testCreateFeedStream() throws IOException, InterruptedException, ConnectionClosedException {
     TestConfig config = TestConfig.fromEnvironment();
 
@@ -82,7 +88,6 @@ public class FeedStreamTest {
 
       @Override
       public void onStreamError(Exception ex) {
-        System.out.println(ex.getMessage());
         fail(ex.getMessage());
       }
     });

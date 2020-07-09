@@ -40,27 +40,27 @@ public class ScuttlebuttClient {
   }
 
   /**
-   * A service for operations that connect nodes together.
+   * Provides a service for operations that connect nodes together.
    *
-   * @return
+   * @return a service for operations that connect nodes together
    */
   public NetworkService getNetworkService() {
     return new NetworkService(multiplexer);
   }
 
   /**
-   * A service for operations that concern scuttlebutt feeds.
+   * Provides a service for operations that concern scuttlebutt feeds.
    *
-   * @return
+   * @return a service for operations that concern scuttlebutt feeds
    */
   public FeedService getFeedService() {
     return feedService;
   }
 
   /**
-   * A service for operations concerning social connections and updating the instance's profile
+   * Provides a service for operations concerning social connections and updating the instance's profile
    *
-   * @return
+   * @return a service for operations concerning social connections and updating the instance's profile
    */
   public SocialService getSocialService() {
     return new SocialService(multiplexer, feedService);
@@ -68,9 +68,9 @@ public class ScuttlebuttClient {
 
 
   /**
-   * A service for making lower level requests that are not supported by higher level services.
+   * Provides a service for making lower level requests that are not supported by higher level services.
    *
-   * @return
+   * @return a service for making lower level requests that are not supported by higher level services
    */
   public RawRequestService rawRequestService() {
     return new RawRequestService(multiplexer);

@@ -14,22 +14,29 @@ package org.apache.tuweni.scuttlebutt.lib;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.crypto.sodium.Signature;
+import org.apache.tuweni.crypto.sodium.Sodium;
 import org.apache.tuweni.scuttlebutt.lib.model.Profile;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class SocialServiceTest {
 
+  @BeforeAll
+  static void checkSodium() {
+    assumeTrue(Sodium.isAvailable(), "Sodium native library is not available");
+  }
+
   @Test
-  @Disabled("Requires an ssb instance")
   public void testViewFollowingWithPatchwork() throws Exception {
 
     Signature.KeyPair localKeys = KeyFileLoader.getLocalKeys();
@@ -93,7 +100,6 @@ public class SocialServiceTest {
   }
 
   @Test
-  @Disabled("Requires an ssb instance")
   public void testSetDisplayName() throws Exception {
 
     TestConfig testConfig = TestConfig.fromEnvironment();
