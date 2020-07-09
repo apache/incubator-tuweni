@@ -53,7 +53,7 @@ class LESSubprotocol
  ) : SubProtocol {
 
   override fun createClient(service: RLPxService): SubProtocolClient {
-    TODO("not implemented")
+    return LightClientImpl(service)
   }
 
   override fun getCapabilities(): MutableList<SubProtocolIdentifier> = mutableListOf(SubProtocolIdentifier.of("les", 2))

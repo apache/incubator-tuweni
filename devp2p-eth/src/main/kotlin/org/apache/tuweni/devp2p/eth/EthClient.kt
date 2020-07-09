@@ -100,17 +100,18 @@ class EthClient(private val service: RLPxService) : EthRequestsManager, SubProto
 
   override fun requestBlockHeader(blockHash: Hash): AsyncCompletion {
     val conn = service.repository().asIterable(EthSubprotocol.ETH62).firstOrNull()
-    val completion = AsyncCompletion.incomplete()
-    headerRequests.computeIfAbsent(blockHash) {
+
+    val request = headerRequests.computeIfAbsent(blockHash) {
       service.send(
         EthSubprotocol.ETH62,
         MessageType.GetBlockHeaders.code,
         conn!!,
         GetBlockHeaders(blockHash, 1, 0, false).toBytes()
       )
+      val completion = AsyncCompletion.incomplete()
       Request(connectionId = id(conn), handle = completion, data = blockHash)
     }
-    return completion
+    return request.handle
   }
 
   override fun requestBlockBodies(blockHashes: List<Hash>): AsyncCompletion {
