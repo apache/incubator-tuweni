@@ -124,7 +124,7 @@ class VertxIntegrationTest {
     MyServerHandler serverHandler = serverHandlerRef.get();
 
     Bytes receivedBytes = serverHandler.received;
-    Bytes receivedBody = receivedBytes.slice(9);
+    Bytes receivedBody = receivedBytes;
 
     Bytes requestBody = rpcRequest.slice(9);
 
