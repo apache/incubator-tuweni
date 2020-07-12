@@ -21,10 +21,9 @@ import kotlinx.coroutines.Dispatchers
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.coroutines.asyncCompletion
-import org.apache.tuweni.eth.BlockBody
+import org.apache.tuweni.devp2p.eth.BlockchainInformation
+import org.apache.tuweni.devp2p.eth.EthController
 import org.apache.tuweni.eth.BlockHeader
-import org.apache.tuweni.eth.TransactionReceipt
-import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.wire.DisconnectReason
 import org.apache.tuweni.rlpx.wire.SubProtocolHandler
@@ -39,14 +38,14 @@ import kotlin.coroutines.CoroutineContext
 internal class LESSubProtocolHandler(
   private val service: RLPxService,
   private val subProtocolIdentifier: SubProtocolIdentifier,
-  private val networkId: Int,
+  private val blockchainInfo: BlockchainInformation,
   private val serveHeaders: Boolean,
   private val serveChainSince: UInt256,
   private val serveStateSince: UInt256,
   private val flowControlBufferLimit: UInt256,
   private val flowControlMaximumRequestCostTable: UInt256,
   private val flowControlMinimumRateOfRecharge: UInt256,
-  private val repo: BlockchainRepository,
+  private val controller: EthController,
   override val coroutineContext: CoroutineContext = Dispatchers.Default
 ) : SubProtocolHandler, CoroutineScope {
 
@@ -61,7 +60,9 @@ internal class LESSubProtocolHandler(
           service.disconnect(connection, DisconnectReason.PROTOCOL_BREACH)
           throw IllegalStateException("Handshake message sent after handshake completed")
         }
-        state.peerStatusMessage = StatusMessage.read(message)
+        val peerStatus = StatusMessage.read(message)
+        state.peerStatusMessage = peerStatus
+        controller.receiveStatus(connection, peerStatus.toStatus())
       } else {
         if (!state.handshakeComplete()) {
           peerStateMap.remove(connection.uri())
@@ -75,13 +76,13 @@ internal class LESSubProtocolHandler(
           handleGetBlockHeaders(connection, getBlockHeadersMessage)
         } else if (messageType == 3) {
           val blockHeadersMessage = BlockHeadersMessage.read(message)
-          handleBlockHeadersMessage(blockHeadersMessage)
+          handleBlockHeadersMessage(connection, blockHeadersMessage)
         } else if (messageType == 4) {
           val blockBodiesMessage = GetBlockBodiesMessage.read(message)
           handleGetBlockBodiesMessage(connection, blockBodiesMessage)
         } else if (messageType == 5) {
           val blockBodiesMessage = BlockBodiesMessage.read(message)
-          handleBlockBodiesMessage(state, blockBodiesMessage)
+          handleBlockBodiesMessage(connection, blockBodiesMessage)
         } else if (messageType == 6) {
           val getReceiptsMessage = GetReceiptsMessage.read(message)
           handleGetReceiptsMessage(connection, getReceiptsMessage)
@@ -96,12 +97,7 @@ internal class LESSubProtocolHandler(
     connection: WireConnection,
     receiptsMessage: GetReceiptsMessage
   ) {
-    val receipts = ArrayList<List<TransactionReceipt>>()
-    for (blockHash in receiptsMessage.blockHashes) {
-      repo.retrieveTransactionReceipts(blockHash).let { transactionReceipts ->
-        receipts.add(transactionReceipts.filterNotNull())
-      }
-    }
+    val receipts = controller.findTransactionReceipts(receiptsMessage.blockHashes)
     return service.send(
       subProtocolIdentifier,
       5,
@@ -114,82 +110,70 @@ internal class LESSubProtocolHandler(
     connection: WireConnection,
     blockBodiesMessage: GetBlockBodiesMessage
   ) {
-    val bodies = ArrayList<BlockBody>()
-    for (blockHash in blockBodiesMessage.blockHashes) {
-      repo.retrieveBlock(blockHash)?.let { block ->
-        bodies.add(block.getBody())
-      }
-    }
+    val bodies = controller.findBlockBodies(blockBodiesMessage.blockHashes)
     return service.send(
-        subProtocolIdentifier,
-        5,
+      subProtocolIdentifier,
+      5,
       connection,
-        BlockBodiesMessage(blockBodiesMessage.reqID, 0, bodies).toBytes()
-      )
+      BlockBodiesMessage(blockBodiesMessage.reqID, 0, bodies).toBytes()
+    )
   }
 
   private suspend fun handleBlockBodiesMessage(
-    state: LESPeerState,
+    conn: WireConnection,
     blockBodiesMessage: BlockBodiesMessage
   ) {
-    for (index in 0..blockBodiesMessage.blockBodies.size) {
-      state.requestsCache[blockBodiesMessage.reqID]?.get(index)?.let {
-        repo.storeBlockBody(it, blockBodiesMessage.blockBodies[index])
-      }
-    }
+    controller.addNewBlockBodies(conn, blockBodiesMessage.blockBodies)
   }
 
-  private suspend fun handleBlockHeadersMessage(blockHeadersMessage: BlockHeadersMessage) {
-    for (header in blockHeadersMessage.blockHeaders) {
-      repo.storeBlockHeader(header)
-    }
+  private suspend fun handleBlockHeadersMessage(connection: WireConnection, blockHeadersMessage: BlockHeadersMessage) {
+    controller.addNewBlockHeaders(connection, blockHeadersMessage.blockHeaders)
   }
 
   private suspend fun handleGetBlockHeaders(
     connection: WireConnection,
     getBlockHeadersMessage: GetBlockHeadersMessage
   ) {
+
     val headersFound = TreeSet<BlockHeader>()
     for (query in getBlockHeadersMessage.queries) {
-      val hashes = repo.findBlockByHashOrNumber(query.blockNumberOrBlockHash)
-      for (h in hashes) {
-        repo.retrieveBlockHeader(h)?.let { header ->
-            headersFound.add(header)
-        }
-      }
+      headersFound.addAll(
+        controller.findHeaders(
+          query.blockNumberOrBlockHash,
+          query.maxHeaders.toLong(),
+          query.skip.toLong(),
+          query.direction == GetBlockHeadersMessage.BlockHeaderQuery.Direction.BACKWARDS
+        )
+      )
     }
     service.send(
-        subProtocolIdentifier,
-        3,
-        connection,
-        BlockHeadersMessage(getBlockHeadersMessage.reqID, 0L, ArrayList(headersFound)).toBytes()
-      )
+      subProtocolIdentifier,
+      3,
+      connection,
+      BlockHeadersMessage(getBlockHeadersMessage.reqID, 0L, ArrayList(headersFound)).toBytes()
+    )
   }
 
   override fun handleNewPeerConnection(connection: WireConnection): AsyncCompletion {
     return asyncCompletion {
-        val head = repo.retrieveChainHead()
-        val genesis = repo.retrieveGenesisBlock()
-        val headTd = head.getHeader().getDifficulty()
-        val headHash = head.getHeader().getHash()
-        val state = peerStateMap.computeIfAbsent(connection.uri()) { LESPeerState() }
-        state.ourStatusMessage = StatusMessage(
-          subProtocolIdentifier.version(),
-          networkId,
-          headTd,
-          headHash,
-          head.getHeader().getNumber(),
-          genesis.getHeader().getHash(),
-          serveHeaders,
-          serveChainSince,
-          serveStateSince,
-          false,
-          flowControlBufferLimit,
-          flowControlMaximumRequestCostTable,
-          flowControlMinimumRateOfRecharge,
-          0
-        )
-        service.send(subProtocolIdentifier, 0, connection, state.ourStatusMessage!!.toBytes())
+      val state = peerStateMap.computeIfAbsent(connection.uri()) { LESPeerState() }
+      state.ourStatusMessage = StatusMessage(
+        subProtocolIdentifier.version(),
+        blockchainInfo.networkID(),
+        blockchainInfo.totalDifficulty(),
+        blockchainInfo.bestHash(),
+        blockchainInfo.bestNumber(),
+        blockchainInfo.genesisHash(),
+        serveHeaders,
+        serveChainSince,
+        serveStateSince,
+        false,
+        flowControlBufferLimit,
+        flowControlMaximumRequestCostTable,
+        flowControlMinimumRateOfRecharge,
+        0
+      )
+      service.send(subProtocolIdentifier, 0, connection, state.ourStatusMessage!!.toBytes())
     }
   }
 

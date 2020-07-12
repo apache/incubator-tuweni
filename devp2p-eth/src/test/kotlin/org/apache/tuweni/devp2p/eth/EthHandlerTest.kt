@@ -117,7 +117,7 @@ class EthHandlerTest {
         blockchainInfo = SimpleBlockchainInformation(
           UInt256.valueOf(42L),
           UInt256.ONE,
-          genesisBlock.header.hash,
+          genesisBlock.header.hash, UInt256.valueOf(42L),
           genesisBlock.header.hash,
           emptyList()
         ),
@@ -130,8 +130,12 @@ class EthHandlerTest {
         repository.storeBlock(newBlock)
         var txIndex = 0
         for (tx in newBlock.body.transactions) {
-          repository.storeTransactionReceipt(TransactionReceipt(Bytes32.random(),
-            32L, LogsBloomFilter(), emptyList()), txIndex, tx.hash, newBlock.header.hash)
+          repository.storeTransactionReceipt(
+            TransactionReceipt(
+              Bytes32.random(),
+              32L, LogsBloomFilter(), emptyList()
+            ), txIndex, tx.hash, newBlock.header.hash
+          )
           txIndex++
         }
         header = newBlock.header
@@ -210,7 +214,8 @@ class EthHandlerTest {
   @Test
   fun testGetHeadersDifferentSkip() = runBlocking {
     val conn = mock(WireConnection::class.java)
-    handler.handle(conn,
+    handler.handle(
+      conn,
       MessageType.GetBlockHeaders.code,
       GetBlockHeaders(genesisBlock.header.hash, 100, 2, false).toBytes()
     ).await()
@@ -228,7 +233,8 @@ class EthHandlerTest {
   @Test
   fun testGetBodies() = runBlocking {
     val conn = mock(WireConnection::class.java)
-    handler.handle(conn,
+    handler.handle(
+      conn,
       MessageType.GetBlockBodies.code,
       GetBlockBodies(listOf(genesisBlock.header.hash)).toBytes()
     ).await()

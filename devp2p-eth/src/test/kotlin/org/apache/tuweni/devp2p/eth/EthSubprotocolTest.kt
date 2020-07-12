@@ -40,7 +40,7 @@ class EthSubprotocolTest {
   val blockchainInfo = SimpleBlockchainInformation(
     UInt256.ONE,
     UInt256.ONE,
-    Hash.fromBytes(Bytes32.random()),
+    Hash.fromBytes(Bytes32.random()), UInt256.valueOf(42L),
     Hash.fromBytes(Bytes32.random()),
     emptyList()
   )

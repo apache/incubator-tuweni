@@ -91,6 +91,10 @@ data class StatusMessage(
       }
     }
   }
+
+  fun toStatus(): Status {
+    return Status(protocolVersion, networkID, totalDifficulty, bestHash, genesisHash, forkHash, forkBlock)
+  }
 }
 
 data class NewBlockHashes(val hashes: List<Pair<Hash, Long>>) {

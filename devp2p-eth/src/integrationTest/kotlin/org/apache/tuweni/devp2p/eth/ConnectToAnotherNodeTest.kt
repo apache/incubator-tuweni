@@ -74,7 +74,7 @@ class ConnectToAnotherNodeTest {
           repository = repository,
           blockchainInfo = SimpleBlockchainInformation(
             UInt256.valueOf(genesisFile.chainId.toLong()), genesisBlock.header.difficulty,
-            genesisBlock.header.hash, genesisBlock.header.hash, genesisFile.forks
+            genesisBlock.header.hash, UInt256.valueOf(42L), genesisBlock.header.hash, genesisFile.forks
           )
         )
       ),
@@ -130,7 +130,7 @@ class ConnectToAnotherNodeTest {
           blockchainInfo = SimpleBlockchainInformation(
             UInt256.ZERO,
             genesisBlock.header.difficulty,
-            genesisBlock.header.hash,
+            genesisBlock.header.hash, UInt256.valueOf(42L),
             genesisBlock.header.hash,
             emptyList()
           )
@@ -162,7 +162,7 @@ class ConnectToAnotherNodeTest {
           blockchainInfo = SimpleBlockchainInformation(
             UInt256.ZERO,
             genesisBlock.header.difficulty,
-            genesisBlock.header.hash,
+            genesisBlock.header.hash, UInt256.valueOf(42L),
             genesisBlock.header.hash,
             emptyList()
           )

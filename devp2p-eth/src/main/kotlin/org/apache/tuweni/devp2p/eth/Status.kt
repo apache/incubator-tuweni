@@ -14,19 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.les
+package org.apache.tuweni.devp2p.eth
 
-internal class LESPeerState {
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.units.bigints.UInt256
 
-  var ourStatusMessage: StatusMessage? = null
-  var peerStatusMessage: StatusMessage? = null
-
-  fun handshakeComplete(): Boolean {
-    ourStatusMessage?.let {
-      peerStatusMessage?.let {
-        return true
-      }
-    }
-    return false
-  }
-}
+/**
+ * Peer status information
+ */
+data class Status(
+  val protocolVersion: Int,
+  val networkID: UInt256,
+  val totalDifficulty: UInt256,
+  val bestHash: Bytes32,
+  val genesisHash: Bytes32,
+  val forkHash: Bytes?,
+  val forkBlock: Long?
+)

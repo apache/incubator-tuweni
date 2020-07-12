@@ -211,7 +211,7 @@ internal class StatusMessageTest {
   fun testStatusMessageRoundtrip() {
     val message = StatusMessage(
       2,
-      1,
+      UInt256.valueOf(1),
       UInt256.valueOf(23),
       Bytes32.random(),
       UInt256.valueOf(3443),

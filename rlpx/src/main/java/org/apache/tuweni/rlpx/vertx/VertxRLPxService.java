@@ -69,6 +69,7 @@ public final class VertxRLPxService implements RLPxService {
   private final String clientId;
 
   private LinkedHashMap<SubProtocol, SubProtocolHandler> handlers;
+  private LinkedHashMap<SubProtocol, SubProtocolClient> clients;
   private NetClient client;
   private NetServer server;
 
@@ -149,10 +150,15 @@ public final class VertxRLPxService implements RLPxService {
   @Override
   public AsyncCompletion start() {
     if (started.compareAndSet(false, true)) {
-      handlers = new LinkedHashMap<SubProtocol, SubProtocolHandler>();
+      handlers = new LinkedHashMap<>();
+      clients = new LinkedHashMap<>();
+
       for (SubProtocol subProtocol : subProtocols) {
-        handlers.put(subProtocol, subProtocol.createHandler(this));
+        SubProtocolClient client = subProtocol.createClient(this);
+        clients.put(subProtocol, client);
+        handlers.put(subProtocol, subProtocol.createHandler(this, client));
       }
+
       client = vertx.createNetClient(new NetClientOptions());
       server = vertx
           .createNetServer(new NetServerOptions().setPort(listenPort).setHost(networkInterface).setTcpKeepAlive(true))

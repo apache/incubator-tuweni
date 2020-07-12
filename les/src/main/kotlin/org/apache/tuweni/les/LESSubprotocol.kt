@@ -17,13 +17,20 @@
 package org.apache.tuweni.les
 
 import kotlinx.coroutines.Dispatchers
+import org.apache.tuweni.devp2p.eth.BlockchainInformation
+import org.apache.tuweni.devp2p.eth.EthClient
+import org.apache.tuweni.devp2p.eth.EthController
+import org.apache.tuweni.devp2p.eth.EthRequestsManager
+import org.apache.tuweni.devp2p.eth.Status
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.wire.SubProtocol
 import org.apache.tuweni.rlpx.wire.SubProtocolClient
 import org.apache.tuweni.rlpx.wire.SubProtocolHandler
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
+import org.apache.tuweni.rlpx.wire.WireConnection
 import org.apache.tuweni.units.bigints.UInt256
+import kotlin.coroutines.CoroutineContext
 
 /**
  * The LES subprotocol entry point class, to be used in conjunction with RLPxService
@@ -36,24 +43,22 @@ import org.apache.tuweni.units.bigints.UInt256
  */
 class LESSubprotocol
 /**
- * Default constructor.
  *
- * @param networkId the identifier, as an integer of the chain to connect to. 0 for testnet, 1 for mainnet.
- * @param blockStore the key-value store for blocks
- * @param blockHeaderStore the key-value store for block headers
  */(
-   private val networkId: Int,
+   private val coroutineContext: CoroutineContext = Dispatchers.Default,
+   private val blockchainInfo: BlockchainInformation,
    private val serveHeaders: Boolean,
    private val serveChainSince: UInt256,
    private val serveStateSince: UInt256,
    private val flowControlBufferLimit: UInt256,
    private val flowControlMaximumRequestCostTable: UInt256,
    private val flowControlMinimumRateOfRecharge: UInt256,
-   private val repo: BlockchainRepository
+   private val repo: BlockchainRepository,
+   private val listener: (WireConnection, Status) -> Unit = { _, _ -> }
  ) : SubProtocol {
 
   override fun createClient(service: RLPxService): SubProtocolClient {
-    return LightClientImpl(service)
+    return EthClient(service)
   }
 
   override fun getCapabilities(): MutableList<SubProtocolIdentifier> = mutableListOf(SubProtocolIdentifier.of("les", 2))
@@ -70,24 +75,24 @@ class LESSubprotocol
     return 21
   }
 
-  override fun createHandler(service: RLPxService): SubProtocolHandler {
+  override fun createHandler(service: RLPxService, client: SubProtocolClient): SubProtocolHandler {
+    val controller = EthController(repo, client as EthRequestsManager, listener)
     return LESSubProtocolHandler(
       service,
       LES_ID,
-      networkId,
+      blockchainInfo,
       serveHeaders,
       serveChainSince,
       serveStateSince,
       flowControlBufferLimit,
       flowControlMaximumRequestCostTable,
       flowControlMinimumRateOfRecharge,
-      repo,
-      Dispatchers.Default
+      controller,
+      coroutineContext
     )
   }
 
   companion object {
-
     internal val LES_ID = SubProtocolIdentifier.of("les", 2)
   }
 }

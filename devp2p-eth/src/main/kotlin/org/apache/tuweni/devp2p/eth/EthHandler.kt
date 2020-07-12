@@ -84,7 +84,7 @@ internal class EthHandler(
       service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
     } else {
       peerInfo.connect()
-      controller.receiveStatus(connection, status)
+      controller.receiveStatus(connection, status.toStatus())
     }
   }
 

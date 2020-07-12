@@ -26,6 +26,7 @@ interface BlockchainInformation {
   fun networkID(): UInt256
   fun totalDifficulty(): UInt256
   fun bestHash(): Hash
+  fun bestNumber(): UInt256
   fun genesisHash(): Hash
   fun forks(): List<Long>
 
@@ -59,6 +60,7 @@ data class SimpleBlockchainInformation(
   val networkID: UInt256,
   val totalDifficulty: UInt256,
   val bestHash: Hash,
+  val bestNumber: UInt256,
   val genesisHash: Hash,
   val forks: List<Long>
 ) : BlockchainInformation {
@@ -68,6 +70,8 @@ data class SimpleBlockchainInformation(
   override fun totalDifficulty(): UInt256 = totalDifficulty
 
   override fun bestHash(): Hash = bestHash
+
+  override fun bestNumber(): UInt256 = bestNumber
 
   override fun genesisHash(): Hash = genesisHash
 
