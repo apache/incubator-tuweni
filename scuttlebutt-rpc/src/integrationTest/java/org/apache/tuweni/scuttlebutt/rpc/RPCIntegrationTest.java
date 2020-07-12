@@ -10,11 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.tuweni.scuttlebutt.rpc.mux;
+package org.apache.tuweni.scuttlebutt.rpc;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.tuweni.scuttlebutt.rpc.Utils.getLocalKeys;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
@@ -24,33 +27,101 @@ import org.apache.tuweni.crypto.sodium.Signature;
 import org.apache.tuweni.io.Base64;
 import org.apache.tuweni.junit.VertxExtension;
 import org.apache.tuweni.junit.VertxInstance;
+import org.apache.tuweni.scuttlebutt.handshake.vertx.ClientHandler;
 import org.apache.tuweni.scuttlebutt.handshake.vertx.SecureScuttlebuttVertxClient;
-import org.apache.tuweni.scuttlebutt.rpc.RPCAsyncRequest;
-import org.apache.tuweni.scuttlebutt.rpc.RPCFunction;
-import org.apache.tuweni.scuttlebutt.rpc.RPCResponse;
-import org.apache.tuweni.scuttlebutt.rpc.RPCStreamRequest;
+import org.apache.tuweni.scuttlebutt.rpc.mux.RPCHandler;
+import org.apache.tuweni.scuttlebutt.rpc.mux.ScuttlebuttStreamHandler;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.concurrent.CompletionException;
+import java.util.function.Consumer;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
 import io.vertx.core.Vertx;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+/**
+ * Test used against a Securescuttlebutt server.
+ *
+ * The test requires the ssb_dir, ssb_host and ssb_port to be set.
+ */
 @ExtendWith(VertxExtension.class)
-public class PatchworkIntegrationTest {
+class RPCIntegrationTest {
+
+  public static class MyClientHandler implements ClientHandler {
+
+    private final Consumer<Bytes> sender;
+    private final Runnable terminationFn;
+
+    public MyClientHandler(Consumer<Bytes> sender, Runnable terminationFn) {
+      this.sender = sender;
+      this.terminationFn = terminationFn;
+    }
+
+    @Override
+    public void receivedMessage(Bytes message) {
+      new RPCMessage(message);
+    }
+
+    @Override
+    public void streamClosed() {}
+
+    void sendMessage(Bytes bytes) {
+      sender.accept(bytes);
+    }
+  }
+
+  /**
+   * This test tests the connection to a local patchwork installation. You need to run patchwork locally to perform that
+   * work.
+   *
+   */
+  @Test
+  void runWithPatchWork(@VertxInstance Vertx vertx) throws Exception {
+    Map<String, String> env = System.getenv();
+
+    String host = env.getOrDefault("ssb_host", "localhost");
+    int port = Integer.parseInt(env.getOrDefault("ssb_port", "8008"));
+
+    Signature.KeyPair keyPair = getLocalKeys();
+
+    String networkKeyBase64 = "1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s=";
+
+    Signature.PublicKey publicKey = keyPair.publicKey();
+
+    Bytes32 networkKeyBytes32 = Bytes32.wrap(Base64.decode(networkKeyBase64));
+
+    SecureScuttlebuttVertxClient secureScuttlebuttVertxClient =
+        new SecureScuttlebuttVertxClient(vertx, keyPair, networkKeyBytes32);
+
+    AsyncResult<ClientHandler> onConnect =
+        secureScuttlebuttVertxClient.connectTo(port, host, publicKey, null, MyClientHandler::new);
+
+    MyClientHandler clientHandler = (MyClientHandler) onConnect.get();
+    assertTrue(onConnect.isDone());
+    assertFalse(onConnect.isCompletedExceptionally());
+    Thread.sleep(1000);
+    assertNotNull(clientHandler);
+    // An RPC command that just tells us our public key (like ssb-server whoami on the command line.)
+    String rpcRequestBody = "{\"name\": [\"whoami\"],\"type\": \"async\",\"args\":[]}";
+    Bytes rpcRequest = RPCCodec.encodeRequest(rpcRequestBody, RPCFlag.BodyType.JSON);
+
+    clientHandler.sendMessage(rpcRequest);
+    for (int i = 0; i < 10; i++) {
+      clientHandler.sendMessage(RPCCodec.encodeRequest(rpcRequestBody, RPCFlag.BodyType.JSON));
+    }
+
+    Thread.sleep(10000);
+
+    secureScuttlebuttVertxClient.stop().join();
+  }
 
   @Test
-  public void testWithPatchwork(@VertxInstance Vertx vertx) throws Exception {
+  void testWithPatchwork(@VertxInstance Vertx vertx) throws Exception {
 
     RPCHandler rpcHandler = makeRPCHandler(vertx);
 
@@ -71,61 +142,10 @@ public class PatchworkIntegrationTest {
     assertEquals(10, rpcMessages.size());
   }
 
-
-  // TODO: Move this to a utility class that all the scuttlebutt modules' tests can use.
-  private static Signature.KeyPair getLocalKeys() throws Exception {
-    Optional<String> ssbDir = Optional.fromNullable(System.getenv().get("ssb_dir"));
-    Optional<String> homePath =
-        Optional.fromNullable(System.getProperty("user.home")).transform(home -> home + "/.ssb");
-
-    Optional<String> path = ssbDir.or(homePath);
-
-    if (!path.isPresent()) {
-      throw new Exception("Cannot find ssb directory config value");
-    }
-
-    String secretPath = path.get() + "/secret";
-    File file = new File(secretPath);
-
-    if (!file.exists()) {
-      throw new Exception("Secret file does not exist");
-    }
-
-    Scanner s = new Scanner(file, UTF_8.name());
-    s.useDelimiter("\n");
-
-    ArrayList<String> list = new ArrayList<String>();
-    while (s.hasNext()) {
-      String next = s.next();
-
-      // Filter out the comment lines
-      if (!next.startsWith("#")) {
-        list.add(next);
-      }
-    }
-
-    String secretJSON = String.join("", list);
-
-    ObjectMapper mapper = new ObjectMapper();
-
-    HashMap<String, String> values = mapper.readValue(secretJSON, new TypeReference<Map<String, String>>() {});
-    String pubKey = values.get("public").replace(".ed25519", "");
-    String privateKey = values.get("private").replace(".ed25519", "");
-
-    Bytes pubKeyBytes = Base64.decode(pubKey);
-    Bytes privKeyBytes = Base64.decode(privateKey);
-
-    Signature.PublicKey pub = Signature.PublicKey.fromBytes(pubKeyBytes);
-    Signature.SecretKey secretKey = Signature.SecretKey.fromBytes(privKeyBytes);
-
-    return new Signature.KeyPair(pub, secretKey);
-  }
-
   @Test
   void postMessageTest(@VertxInstance Vertx vertx) throws Exception {
 
     RPCHandler rpcHandler = makeRPCHandler(vertx);
-
 
     List<AsyncResult<RPCResponse>> results = new ArrayList<>();
 
@@ -148,11 +168,12 @@ public class PatchworkIntegrationTest {
     rpcMessages.forEach(msg -> System.out.println(msg.asString()));
   }
 
-  @Test
+
   /**
    * We expect this to complete the AsyncResult with an exception.
    */
-  public void postMessageThatIsTooLong(@VertxInstance Vertx vertx) throws Exception {
+  @Test
+  void postMessageThatIsTooLong(@VertxInstance Vertx vertx) throws Exception {
 
     RPCHandler rpcHandler = makeRPCHandler(vertx);
 
@@ -185,8 +206,9 @@ public class PatchworkIntegrationTest {
     String networkKeyBase64 = "1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s=";
     Bytes32 networkKeyBytes32 = Bytes32.wrap(Base64.decode(networkKeyBase64));
 
-    String host = "localhost";
-    int port = 8008;
+    Map<String, String> env = System.getenv();
+    String host = env.getOrDefault("ssb_host", "localhost");
+    int port = Integer.parseInt(env.getOrDefault("ssb_port", "8008"));
 
     SecureScuttlebuttVertxClient secureScuttlebuttVertxClient =
         new SecureScuttlebuttVertxClient(vertx, keyPair, networkKeyBytes32);
@@ -196,6 +218,7 @@ public class PatchworkIntegrationTest {
             port,
             host,
             keyPair.publicKey(),
+            null,
             (sender, terminationFn) -> new RPCHandler(vertx, sender, terminationFn));
 
     return onConnect.get();
@@ -239,6 +262,4 @@ public class PatchworkIntegrationTest {
     streamEnded.get();
 
   }
-
-
 }

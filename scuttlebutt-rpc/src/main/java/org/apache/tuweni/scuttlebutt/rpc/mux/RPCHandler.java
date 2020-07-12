@@ -25,9 +25,9 @@ import org.apache.tuweni.scuttlebutt.rpc.RPCStreamRequest;
 import org.apache.tuweni.scuttlebutt.rpc.mux.exceptions.ConnectionClosedException;
 import org.apache.tuweni.scuttlebutt.rpc.mux.exceptions.RPCRequestFailedException;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -54,8 +54,8 @@ public class RPCHandler implements Multiplexer, ClientHandler {
    */
   private final Vertx vertx;
 
-  private Map<Integer, CompletableAsyncResult<RPCResponse>> awaitingAsyncResponse = new HashMap<>();
-  private Map<Integer, ScuttlebuttStreamHandler> streams = new HashMap<>();
+  private Map<Integer, CompletableAsyncResult<RPCResponse>> awaitingAsyncResponse = new ConcurrentHashMap<>();
+  private Map<Integer, ScuttlebuttStreamHandler> streams = new ConcurrentHashMap<>();
 
   private boolean closed;
 
