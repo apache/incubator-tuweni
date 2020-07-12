@@ -197,7 +197,7 @@ constructor() {
         controller
       )
       val conn = makeConnection()
-      handler.handleNewPeerConnection(conn).await()
+      handler.handleNewPeerConnection(conn)
       val message = StatusMessage.read(service.message!!)
       assertNotNull(message)
       assertEquals(2, message.protocolVersion)
@@ -252,7 +252,7 @@ constructor() {
         controller
       )
       val conn = makeConnection()
-      handler.handleNewPeerConnection(conn).await()
+      handler.handleNewPeerConnection(conn)
       handler.handle(conn, 0, status).await()
       assertThrows(IllegalStateException::class.java) {
         runBlocking {
@@ -345,8 +345,9 @@ constructor() {
         0
       ).toBytes()
       val conn = makeConnection()
-      handler.handleNewPeerConnection(conn).await()
+      val ready = handler.handleNewPeerConnection(conn)
       handler.handle(conn, 0, status).await()
+      ready.await()
 
       handler.handle(
         conn,
@@ -412,8 +413,9 @@ constructor() {
         0
       ).toBytes()
       val conn = makeConnection()
-      handler.handleNewPeerConnection(conn).await()
+      val ready = handler.handleNewPeerConnection(conn)
       handler.handle(conn, 0, status).await()
+      ready.await()
 
       handler
         .handle(conn, 4, GetBlockBodiesMessage(1, listOf(Hash.fromBytes(Bytes32.random()))).toBytes()).await()
@@ -468,8 +470,9 @@ constructor() {
         0
       ).toBytes()
       val conn = makeConnection()
-      handler.handleNewPeerConnection(conn).await()
+      val ready = handler.handleNewPeerConnection(conn)
       handler.handle(conn, 0, status).await()
+      ready.await()
 
       handler
         .handle(conn, 4, GetReceiptsMessage(1, listOf(Hash.fromBytes(Bytes32.random()))).toBytes()).await()
