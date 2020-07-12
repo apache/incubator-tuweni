@@ -105,8 +105,12 @@ class Utils {
   }
 
   static ScuttlebuttClient connectWithInvite(Vertx vertx, Invite invite) throws Exception {
+    Map<String, String> env = System.getenv();
+    String actualHost = env.getOrDefault("ssb_host", "localhost");
+    int port = Integer.parseInt(env.getOrDefault("ssb_port", "8008"));
+    Invite recalibratedInvite = new Invite(actualHost, port, invite.identity(), invite.seedKey());
     AsyncResult<ScuttlebuttClient> scuttlebuttClientLibAsyncResult =
-        ScuttlebuttClientFactory.withInvite(vertx, Signature.KeyPair.random(), invite, DEFAULT_NETWORK);
+        ScuttlebuttClientFactory.withInvite(vertx, Signature.KeyPair.random(), recalibratedInvite, DEFAULT_NETWORK);
 
     return scuttlebuttClientLibAsyncResult.get();
   }
