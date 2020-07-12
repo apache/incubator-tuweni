@@ -14,8 +14,6 @@ package org.apache.tuweni.scuttlebutt.lib;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.tuweni.scuttlebutt.lib.ScuttlebuttClientFactory.DEFAULT_NETWORK;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.concurrent.AsyncResult;
@@ -23,17 +21,13 @@ import org.apache.tuweni.crypto.sodium.Signature;
 import org.apache.tuweni.io.Base64;
 import org.apache.tuweni.scuttlebutt.Invite;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -115,21 +109,5 @@ class Utils {
         ScuttlebuttClientFactory.withInvite(vertx, Signature.KeyPair.random(), invite, DEFAULT_NETWORK);
 
     return scuttlebuttClientLibAsyncResult.get();
-  }
-
-  static String getInviteCode() throws Exception {
-    Process process = Runtime.getRuntime().exec("docker exec ssb ssb-server invite.create 10000");
-    boolean done = process.waitFor(2000L, TimeUnit.MILLISECONDS);
-    assertTrue(done);
-    assertEquals(0, process.exitValue());
-    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
-    String inviteCode = reader.readLine();
-    if (inviteCode.endsWith("\"")) {
-      inviteCode = inviteCode.substring(0, inviteCode.length() - 1);
-    }
-    if (inviteCode.startsWith("\"")) {
-      inviteCode = inviteCode.substring(1);
-    }
-    return inviteCode;
   }
 }

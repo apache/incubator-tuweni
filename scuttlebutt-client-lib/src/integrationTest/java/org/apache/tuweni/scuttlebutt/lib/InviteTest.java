@@ -13,7 +13,6 @@
 package org.apache.tuweni.scuttlebutt.lib;
 
 import static org.apache.tuweni.scuttlebutt.lib.Utils.connectWithInvite;
-import static org.apache.tuweni.scuttlebutt.lib.Utils.getInviteCode;
 import static org.apache.tuweni.scuttlebutt.lib.Utils.getMasterClient;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -61,10 +60,10 @@ class InviteTest {
    */
   @Test
   void testUseInvite(@VertxInstance Vertx vertx) throws Exception {
+    ScuttlebuttClient masterClient = getMasterClient(vertx);
+    AsyncResult<Invite> inviteAsyncResult = masterClient.getNetworkService().generateInviteCode(10000);
 
-    String inviteCode = getInviteCode();
-
-    ScuttlebuttClient scuttlebuttClient = connectWithInvite(vertx, Invite.fromCanonicalForm(inviteCode));
+    ScuttlebuttClient scuttlebuttClient = connectWithInvite(vertx, inviteAsyncResult.get());
     assertNotNull(scuttlebuttClient);
   }
 
