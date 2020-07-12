@@ -15,7 +15,7 @@ package org.apache.tuweni.scuttlebutt.lib;
 import org.apache.tuweni.scuttlebutt.lib.model.ScuttlebuttMessageContent;
 
 
-public class TestScuttlebuttSerializationModel implements ScuttlebuttMessageContent {
+class TestScuttlebuttSerializationModel implements ScuttlebuttMessageContent {
 
   private String value;
   private String type = "serialization-test";

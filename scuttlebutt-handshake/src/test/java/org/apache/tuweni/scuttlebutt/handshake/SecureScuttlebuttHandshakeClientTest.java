@@ -64,6 +64,35 @@ class SecureScuttlebuttHandshakeClientTest {
   }
 
   @Test
+  void identityMessageExchangedFixedParameters() {
+    Signature.KeyPair clientLongTermKeyPair = Signature.KeyPair
+        .forSecretKey(
+            Signature.SecretKey
+                .fromBytes(
+                    Bytes
+                        .fromHexString(
+                            "0x4936543930b3d7de00ecb78952b9f6579b40b73b89512c108b35815e7b35856e9464f3d5d26fa22b3f6604cac7e41c24855fd756a326d7a22995c92bbbad1049")));
+    Signature.KeyPair serverLongTermKeyPair = Signature.KeyPair
+        .forSecretKey(
+            Signature.SecretKey
+                .fromBytes(
+                    Bytes
+                        .fromHexString(
+                            "0x05b578a14b4fef8386ffd509d6241a4a3a0a1d560603dacb6f13df01ed8a63221db3ee42b856345dde400e2f32014aed1a83c7d77ac573cce9bd32412631d607")));
+    Bytes32 networkIdentifier =
+        Bytes32.fromHexString("0x346105b79c062220c598f95941ab5ea05e7e8d31af9d2f63d46a2326a1e43ac5");
+    SecureScuttlebuttHandshakeClient client = SecureScuttlebuttHandshakeClient
+        .create(clientLongTermKeyPair, networkIdentifier, serverLongTermKeyPair.publicKey());
+    SecureScuttlebuttHandshakeServer server =
+        SecureScuttlebuttHandshakeServer.create(serverLongTermKeyPair, networkIdentifier);
+    Bytes initialMessage = client.createHello();
+    server.readHello(initialMessage);
+    client.readHello(server.createHello());
+    server.readIdentityMessage(client.createIdentityMessage());
+    assertEquals(clientLongTermKeyPair.publicKey(), server.clientLongTermPublicKey());
+  }
+
+  @Test
   void identityMessageExchanged() {
     Signature.KeyPair clientLongTermKeyPair = Signature.KeyPair.random();
     Signature.KeyPair serverLongTermKeyPair = Signature.KeyPair.random();

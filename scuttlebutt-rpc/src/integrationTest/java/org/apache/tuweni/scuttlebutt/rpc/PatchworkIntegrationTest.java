@@ -31,21 +31,21 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
 import io.vertx.core.Vertx;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Test used with a local installation of Patchwork on the developer machine.
  * <p>
- * Usable as a demo or to check manually connections.
+ * Run patchwork with: docker run --rm -p 7777:7777 -p 8008:8008 -v ~/.ssb:/home/node/.ssb --name patchwork
+ * mazzolino/patchwork
  */
 @ExtendWith(VertxExtension.class)
 class PatchworkIntegrationTest {
@@ -66,13 +66,10 @@ class PatchworkIntegrationTest {
       RPCMessage rpcMessage = new RPCMessage(message);
 
       System.out.println(rpcMessage.asString());
-
-
     }
 
     @Override
     public void streamClosed() {
-
       System.out.println("Stream closed?");
 
     }
@@ -81,34 +78,22 @@ class PatchworkIntegrationTest {
       System.out.println("Sending message?");
       sender.accept(bytes);
     }
-
-    void closeStream() {
-      terminationFn.run();
-    }
   }
 
   /**
    * This test tests the connection to a local patchwork installation. You need to run patchwork locally to perform that
    * work.
-   * 
-   * @param vertx
-   * @throws Exception
+   *
    */
-  @Disabled
   @Test
   void runWithPatchWork(@VertxInstance Vertx vertx) throws Exception {
     String host = "localhost";
     int port = 8008;
 
-    Optional<String> ssbDir = Optional.fromNullable(System.getenv().get("ssb_dir"));
-    Optional<String> homePath =
-        Optional.fromNullable(System.getProperty("user.home")).transform(home -> home + "/.ssb");
+    Optional<String> ssbDir = Optional.ofNullable(System.getenv().get("ssb_dir"));
+    Optional<String> homePath = Optional.ofNullable(System.getProperty("user.home")).map(home -> home + "/.ssb");
 
-    Optional<String> path = ssbDir.or(homePath);
-
-    if (!path.isPresent()) {
-      throw new Exception("Cannot find ssb directory config value");
-    }
+    Optional<String> path = Optional.of(ssbDir.orElseGet(homePath::get));
 
     String secretPath = path.get() + "/secret";
     File file = new File(secretPath);
@@ -120,7 +105,7 @@ class PatchworkIntegrationTest {
     Scanner s = new Scanner(file, UTF_8.name());
     s.useDelimiter("\n");
 
-    ArrayList<String> list = new ArrayList<String>();
+    ArrayList<String> list = new ArrayList<>();
     while (s.hasNext()) {
       String next = s.next();
 

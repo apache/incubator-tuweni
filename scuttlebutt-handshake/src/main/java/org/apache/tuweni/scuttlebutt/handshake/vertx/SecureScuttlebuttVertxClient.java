@@ -19,11 +19,14 @@ import org.apache.tuweni.concurrent.AsyncCompletion;
 import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.concurrent.CompletableAsyncResult;
 import org.apache.tuweni.crypto.sodium.Signature;
+import org.apache.tuweni.scuttlebutt.Invite;
 import org.apache.tuweni.scuttlebutt.handshake.HandshakeException;
 import org.apache.tuweni.scuttlebutt.handshake.SecureScuttlebuttHandshakeClient;
 import org.apache.tuweni.scuttlebutt.handshake.SecureScuttlebuttStreamClient;
 import org.apache.tuweni.scuttlebutt.handshake.SecureScuttlebuttStreamServer;
 import org.apache.tuweni.scuttlebutt.handshake.StreamException;
+
+import javax.annotation.Nullable;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -40,6 +43,7 @@ import org.slf4j.LoggerFactory;
 public final class SecureScuttlebuttVertxClient {
 
   private static final Logger logger = LoggerFactory.getLogger(NetSocketClientHandler.class);
+  private Invite invite;
 
   private class NetSocketClientHandler<T extends ClientHandler> {
 
@@ -56,15 +60,23 @@ public final class SecureScuttlebuttVertxClient {
     NetSocketClientHandler(
         NetSocket socket,
         Signature.PublicKey remotePublicKey,
+        @Nullable Invite invite,
         ClientHandlerFactory<T> handlerFactory,
         CompletableAsyncResult<T> completionHandle) {
       this.socket = socket;
-      this.handshakeClient = SecureScuttlebuttHandshakeClient.create(keyPair, networkIdentifier, remotePublicKey);
+      if (invite != null) {
+        this.handshakeClient = SecureScuttlebuttHandshakeClient.fromInvite(networkIdentifier, invite);
+      } else {
+        this.handshakeClient = SecureScuttlebuttHandshakeClient.create(keyPair, networkIdentifier, remotePublicKey);
+      }
       this.handlerFactory = handlerFactory;
       this.completionHandle = completionHandle;
       socket.closeHandler(res -> {
         if (handler != null) {
           handler.streamClosed();
+        }
+        if (!completionHandle.isDone()) {
+          completionHandle.completeExceptionally(new IllegalStateException("Connection closed before handshake"));
         }
       });
       socket.exceptionHandler(e -> logger.error(e.getMessage(), e));
@@ -99,7 +111,7 @@ public final class SecureScuttlebuttVertxClient {
 
           int headerSize = 9;
 
-          // Process any whole RPC message repsonses we have, and leave any partial ones at the end in the buffer
+          // Process any whole RPC message responses we have, and leave any partial ones at the end in the buffer
           // We may have 1 or more whole messages, or 1 and a half, etc..
           while (messageBuffer.size() >= headerSize) {
 
@@ -171,14 +183,16 @@ public final class SecureScuttlebuttVertxClient {
    *
    * @param port the port of the remote host
    * @param host the host string of the remote host
-   * @param remotePublicKey the public key of the remote host
+   * @param remotePublicKey the public key of the remote host, may be null if an invite is used.
+   * @param invite the invite to the server, may be null
    * @param handlerFactory the factory of handlers for connections
    * @return a handle to a new stream handler with the remote host
    */
   public <T extends ClientHandler> AsyncResult<T> connectTo(
       int port,
       String host,
-      Signature.PublicKey remotePublicKey,
+      @Nullable Signature.PublicKey remotePublicKey,
+      @Nullable Invite invite,
       ClientHandlerFactory<T> handlerFactory) {
     client = vertx.createNetClient(new NetClientOptions().setTcpKeepAlive(true));
     CompletableAsyncResult<T> completion = AsyncResult.incomplete();
@@ -187,7 +201,7 @@ public final class SecureScuttlebuttVertxClient {
         completion.completeExceptionally(res.cause());
       } else {
         NetSocket socket = res.result();
-        new NetSocketClientHandler<T>(socket, remotePublicKey, handlerFactory, completion);
+        new NetSocketClientHandler<>(socket, remotePublicKey, invite, handlerFactory, completion);
       }
     });
 

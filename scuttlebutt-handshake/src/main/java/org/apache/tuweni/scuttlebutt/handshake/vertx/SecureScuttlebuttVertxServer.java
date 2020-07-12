@@ -29,12 +29,16 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.NetSocket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Secure Scuttlebutt server using Vert.x to manage persistent TCP connections.
  *
  */
 public final class SecureScuttlebuttVertxServer {
+
+  private static final Logger logger = LoggerFactory.getLogger(SecureScuttlebuttVertxServer.class);
 
   private final class NetSocketHandler {
 
@@ -54,6 +58,7 @@ public final class SecureScuttlebuttVertxServer {
           handler.streamClosed();
         }
       });
+      netSocket.exceptionHandler(e -> logger.error(e.getMessage(), e));
 
       netSocket.handler(this::handleMessage);
     }
@@ -85,7 +90,7 @@ public final class SecureScuttlebuttVertxServer {
 
           int headerSize = 9;
 
-          // Process any whole RPC message repsonses we have, and leave any partial ones at the end in the buffer
+          // Process any whole RPC message responses we have, and leave any partial ones at the end in the buffer
           // We may have 1 or more whole messages, or 1 and a half, etc..
           while (messageBuffer.size() >= headerSize) {
 
@@ -100,7 +105,7 @@ public final class SecureScuttlebuttVertxServer {
               if (SecureScuttlebuttStreamServer.isGoodbye(wholeMessage)) {
                 netSocket.close();
               } else {
-                handler.receivedMessage(wholeMessage);
+                handler.receivedMessage(wholeMessage.slice(9));
               }
 
               // We've removed 1 RPC message from the message buffer, leave the remaining messages / part of a message
@@ -114,6 +119,7 @@ public final class SecureScuttlebuttVertxServer {
         }
       } catch (HandshakeException | StreamException e) {
         netSocket.close();
+        logger.error(e.getMessage(), e);
         throw e;
       }
     }
@@ -190,5 +196,12 @@ public final class SecureScuttlebuttVertxServer {
       }
     });
     return completion;
+  }
+
+  public int getPort() {
+    if (server == null) {
+      return 0;
+    }
+    return server.actualPort();
   }
 }

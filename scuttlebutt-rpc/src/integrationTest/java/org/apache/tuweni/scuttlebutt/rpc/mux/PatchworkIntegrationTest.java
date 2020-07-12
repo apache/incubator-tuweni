@@ -14,6 +14,7 @@ package org.apache.tuweni.scuttlebutt.rpc.mux;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
@@ -36,12 +37,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.CompletionException;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import io.vertx.core.Vertx;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -49,7 +50,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public class PatchworkIntegrationTest {
 
   @Test
-  @Disabled
   public void testWithPatchwork(@VertxInstance Vertx vertx) throws Exception {
 
     RPCHandler rpcHandler = makeRPCHandler(vertx);
@@ -73,7 +73,7 @@ public class PatchworkIntegrationTest {
 
 
   // TODO: Move this to a utility class that all the scuttlebutt modules' tests can use.
-  private Signature.KeyPair getLocalKeys() throws Exception {
+  private static Signature.KeyPair getLocalKeys() throws Exception {
     Optional<String> ssbDir = Optional.fromNullable(System.getenv().get("ssb_dir"));
     Optional<String> homePath =
         Optional.fromNullable(System.getProperty("user.home")).transform(home -> home + "/.ssb");
@@ -122,8 +122,7 @@ public class PatchworkIntegrationTest {
   }
 
   @Test
-  @Disabled
-  public void postMessageTest(@VertxInstance Vertx vertx) throws Exception {
+  void postMessageTest(@VertxInstance Vertx vertx) throws Exception {
 
     RPCHandler rpcHandler = makeRPCHandler(vertx);
 
@@ -150,7 +149,6 @@ public class PatchworkIntegrationTest {
   }
 
   @Test
-  @Disabled
   /**
    * We expect this to complete the AsyncResult with an exception.
    */
@@ -176,9 +174,10 @@ public class PatchworkIntegrationTest {
 
     }
 
-    List<RPCResponse> rpcMessages = AsyncResult.combine(results).get();
-
-    rpcMessages.forEach(msg -> System.out.println(msg.asString()));
+    CompletionException exception = assertThrows(CompletionException.class, () -> {
+      AsyncResult.combine(results).get();
+    });
+    assertEquals("encoded message must not be larger than 8192 bytes", exception.getCause().getMessage());
   }
 
   private RPCHandler makeRPCHandler(Vertx vertx) throws Exception {
@@ -192,19 +191,19 @@ public class PatchworkIntegrationTest {
     SecureScuttlebuttVertxClient secureScuttlebuttVertxClient =
         new SecureScuttlebuttVertxClient(vertx, keyPair, networkKeyBytes32);
 
-    AsyncResult<RPCHandler> onConnect =
-        secureScuttlebuttVertxClient.connectTo(port, host, keyPair.publicKey(), (sender, terminationFn) -> {
-
-          return new RPCHandler(vertx, sender, terminationFn, new ObjectMapper());
-        });
+    AsyncResult<RPCHandler> onConnect = secureScuttlebuttVertxClient
+        .connectTo(
+            port,
+            host,
+            keyPair.publicKey(),
+            (sender, terminationFn) -> new RPCHandler(vertx, sender, terminationFn));
 
     return onConnect.get();
   }
 
 
   @Test
-  @Disabled
-  public void streamTest(@VertxInstance Vertx vertx) throws Exception {
+  void streamTest(@VertxInstance Vertx vertx) throws Exception {
 
     RPCHandler handler = makeRPCHandler(vertx);
     Signature.PublicKey publicKey = getLocalKeys().publicKey();

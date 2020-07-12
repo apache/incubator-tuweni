@@ -12,23 +12,28 @@
  */
 package org.apache.tuweni.scuttlebutt.lib;
 
+import static org.apache.tuweni.scuttlebutt.lib.Utils.getMasterClient;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import org.apache.tuweni.concurrent.AsyncResult;
-import org.apache.tuweni.crypto.sodium.Signature;
 import org.apache.tuweni.crypto.sodium.Sodium;
+import org.apache.tuweni.junit.VertxExtension;
+import org.apache.tuweni.junit.VertxInstance;
 import org.apache.tuweni.scuttlebutt.lib.model.Profile;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vertx.core.Vertx;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@Disabled("Requires a Patchwork instance")
+@ExtendWith(VertxExtension.class)
 public class SocialServiceTest {
 
   @BeforeAll
@@ -37,14 +42,8 @@ public class SocialServiceTest {
   }
 
   @Test
-  public void testViewFollowingWithPatchwork() throws Exception {
-
-    Signature.KeyPair localKeys = KeyFileLoader.getLocalKeys();
-
-    AsyncResult<ScuttlebuttClient> scuttlebuttClientLibAsyncResult =
-        ScuttlebuttClientFactory.fromNet(new ObjectMapper(), "localhost", 8008, localKeys);
-
-    ScuttlebuttClient scuttlebuttClient = scuttlebuttClientLibAsyncResult.get();
+  void testViewFollowingWithPatchwork(@VertxInstance Vertx vertx) throws Exception {
+    ScuttlebuttClient scuttlebuttClient = getMasterClient(vertx);
 
     AsyncResult<List<Profile>> following = scuttlebuttClient.getSocialService().getFollowing();
 
@@ -58,14 +57,8 @@ public class SocialServiceTest {
   }
 
   @Test
-  @Disabled("Requires an ssb instance")
-  public void testViewFollowedByPatchwork() throws Exception {
-    Signature.KeyPair localKeys = KeyFileLoader.getLocalKeys();
-
-    AsyncResult<ScuttlebuttClient> scuttlebuttClientLibAsyncResult =
-        ScuttlebuttClientFactory.fromNet(new ObjectMapper(), "localhost", 8008, localKeys);
-
-    ScuttlebuttClient scuttlebuttClient = scuttlebuttClientLibAsyncResult.get();
+  void testViewFollowedByPatchwork(@VertxInstance Vertx vertx) throws Exception {
+    ScuttlebuttClient scuttlebuttClient = getMasterClient(vertx);
 
     AsyncResult<List<Profile>> followedBy = scuttlebuttClient.getSocialService().getFollowedBy();
 
@@ -79,14 +72,9 @@ public class SocialServiceTest {
   }
 
   @Test
-  @Disabled("Requires an ssb instance")
-  public void testFriendsWithPatchwork() throws Exception {
-    Signature.KeyPair localKeys = KeyFileLoader.getLocalKeys();
+  void testFriendsWithPatchwork(@VertxInstance Vertx vertx) throws Exception {
 
-    AsyncResult<ScuttlebuttClient> scuttlebuttClientLibAsyncResult =
-        ScuttlebuttClientFactory.fromNet(new ObjectMapper(), "localhost", 8008, localKeys);
-
-    ScuttlebuttClient scuttlebuttClient = scuttlebuttClientLibAsyncResult.get();
+    ScuttlebuttClient scuttlebuttClient = getMasterClient(vertx);
 
     AsyncResult<List<Profile>> friends = scuttlebuttClient.getSocialService().getFriends();
 
@@ -100,14 +88,9 @@ public class SocialServiceTest {
   }
 
   @Test
-  public void testSetDisplayName() throws Exception {
+  void testSetDisplayName(@VertxInstance Vertx vertx) throws Exception {
 
-    TestConfig testConfig = TestConfig.fromEnvironment();
-
-    AsyncResult<ScuttlebuttClient> scuttlebuttClientLibAsyncResult = ScuttlebuttClientFactory
-        .fromNet(new ObjectMapper(), testConfig.getHost(), testConfig.getPort(), testConfig.getKeyPair());
-
-    ScuttlebuttClient scuttlebuttClient = scuttlebuttClientLibAsyncResult.get();
+    ScuttlebuttClient scuttlebuttClient = getMasterClient(vertx);
 
     SocialService socialService = scuttlebuttClient.getSocialService();
 

@@ -137,12 +137,15 @@ jobs:
     runs-on: ubuntu-latest
     services:
       ssb:
-        image: staltz/easy-ssb-pub:latest
+        image: tmio/ssb-server-docker:latest
         ports:
           - 8008:8008
+          - 7777:7777
+        options: -v ${{ github.workspace }}/scuttlebutt-client-lib/ssb-keys:/root/.ssb
     env:
       ssb_host: ssb
       ssb_port: 8008
+      ssb_dir: ssb-keys
     container:
       image: tmio/tuweni-build:1.1
     steps:

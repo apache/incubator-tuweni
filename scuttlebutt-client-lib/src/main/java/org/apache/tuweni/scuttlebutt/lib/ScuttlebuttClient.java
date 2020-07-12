@@ -14,7 +14,6 @@ package org.apache.tuweni.scuttlebutt.lib;
 
 import org.apache.tuweni.scuttlebutt.rpc.mux.Multiplexer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * A client for making requests to a scuttlebutt instance with. This is the entry point for accessing service classes
@@ -32,11 +31,10 @@ public class ScuttlebuttClient {
   /**
    *
    * @param multiplexer the multiplexer to make RPC requests with.
-   * @param mapper the object mapper to serialize posts with
    */
-  protected ScuttlebuttClient(Multiplexer multiplexer, ObjectMapper mapper) {
+  protected ScuttlebuttClient(Multiplexer multiplexer) {
     this.multiplexer = multiplexer;
-    this.feedService = new FeedService(multiplexer, mapper);
+    this.feedService = new FeedService(multiplexer);
   }
 
   /**

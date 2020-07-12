@@ -43,10 +43,10 @@ import org.slf4j.LoggerFactory;
  */
 public class RPCHandler implements Multiplexer, ClientHandler {
   private final static Logger logger = LoggerFactory.getLogger(RPCHandler.class);
+  private final static ObjectMapper objectMapper = new ObjectMapper();
 
   private final Consumer<Bytes> messageSender;
   private final Runnable connectionCloser;
-  private final ObjectMapper objectMapper;
 
   /**
    * We run each each update on the vertx event loop to update the request state synchronously, and to handle the
@@ -65,15 +65,12 @@ public class RPCHandler implements Multiplexer, ClientHandler {
    * @param vertx The vertx instance to queue requests with
    * @param messageSender sends the request to the node
    * @param terminationFn closes the connection
-   * @param objectMapper the objectMapper to serialize and deserialize message request and response bodies
    */
-  public RPCHandler(Vertx vertx, Consumer<Bytes> messageSender, Runnable terminationFn, ObjectMapper objectMapper) {
+  public RPCHandler(Vertx vertx, Consumer<Bytes> messageSender, Runnable terminationFn) {
     this.vertx = vertx;
     this.messageSender = messageSender;
     this.connectionCloser = terminationFn;
     this.closed = false;
-    this.objectMapper = objectMapper;
-
   }
 
   @Override

@@ -12,6 +12,7 @@
  */
 package org.apache.tuweni.scuttlebutt.lib;
 
+import static org.apache.tuweni.scuttlebutt.lib.Utils.getMasterClient;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -20,11 +21,12 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.concurrent.CompletableAsyncResult;
 import org.apache.tuweni.crypto.sodium.Sodium;
+import org.apache.tuweni.junit.BouncyCastleExtension;
+import org.apache.tuweni.junit.VertxExtension;
+import org.apache.tuweni.junit.VertxInstance;
 import org.apache.tuweni.scuttlebutt.lib.model.FeedMessage;
 import org.apache.tuweni.scuttlebutt.lib.model.StreamHandler;
-import org.apache.tuweni.scuttlebutt.rpc.mux.exceptions.ConnectionClosedException;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -32,10 +34,13 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vertx.core.Vertx;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-public class FeedStreamTest {
+@ExtendWith({VertxExtension.class, BouncyCastleExtension.class})
+class FeedStreamTest {
 
   @BeforeAll
   static void checkSodium() {
@@ -46,13 +51,8 @@ public class FeedStreamTest {
    * Tests it is possible to make posts and retrieve them again using the FeedService class
    */
   @Test
-  public void testCreateFeedStream() throws IOException, InterruptedException, ConnectionClosedException {
-    TestConfig config = TestConfig.fromEnvironment();
-
-    AsyncResult<ScuttlebuttClient> scuttlebuttClientLibAsyncResult =
-        ScuttlebuttClientFactory.fromNet(new ObjectMapper(), config.getHost(), config.getPort(), config.getKeyPair());
-
-    ScuttlebuttClient scuttlebuttClient = scuttlebuttClientLibAsyncResult.get();
+  void testCreateFeedStream(@VertxInstance Vertx vertx) throws Exception {
+    ScuttlebuttClient scuttlebuttClient = getMasterClient(vertx);
 
     FeedService feedService = scuttlebuttClient.getFeedService();
 
@@ -72,7 +72,7 @@ public class FeedStreamTest {
 
     CompletableAsyncResult<Optional<FeedMessage>> lastMessage = AsyncResult.incomplete();
 
-    feedService.createFeedStream((closer) -> new StreamHandler<FeedMessage>() {
+    feedService.createFeedStream((closer) -> new StreamHandler<>() {
 
       Optional<FeedMessage> currentMessage = Optional.empty();
 
