@@ -57,15 +57,18 @@ internal class LESSubProtocolHandler(
       if (messageType == 0) {
         if (state.handshakeComplete()) {
           peerStateMap.remove(connection.uri())
+          state.ready.cancel()
           service.disconnect(connection, DisconnectReason.PROTOCOL_BREACH)
           throw IllegalStateException("Handshake message sent after handshake completed")
         }
         val peerStatus = StatusMessage.read(message)
         state.peerStatusMessage = peerStatus
+        state.ready.complete()
         controller.receiveStatus(connection, peerStatus.toStatus())
       } else {
         if (!state.handshakeComplete()) {
           peerStateMap.remove(connection.uri())
+          state.ready.cancel()
           service.disconnect(connection, DisconnectReason.PROTOCOL_BREACH)
           throw IllegalStateException("Message sent before handshake completed")
         }
@@ -87,7 +90,9 @@ internal class LESSubProtocolHandler(
           val getReceiptsMessage = GetReceiptsMessage.read(message)
           handleGetReceiptsMessage(connection, getReceiptsMessage)
         } else {
-          throw UnsupportedOperationException()
+          peerStateMap.remove(connection.uri())
+          state.ready.cancel()
+          service.disconnect(connection, DisconnectReason.PROTOCOL_BREACH)
         }
       }
     }
@@ -155,26 +160,25 @@ internal class LESSubProtocolHandler(
   }
 
   override fun handleNewPeerConnection(connection: WireConnection): AsyncCompletion {
-    return asyncCompletion {
-      val state = peerStateMap.computeIfAbsent(connection.uri()) { LESPeerState() }
-      state.ourStatusMessage = StatusMessage(
-        subProtocolIdentifier.version(),
-        blockchainInfo.networkID(),
-        blockchainInfo.totalDifficulty(),
-        blockchainInfo.bestHash(),
-        blockchainInfo.bestNumber(),
-        blockchainInfo.genesisHash(),
-        serveHeaders,
-        serveChainSince,
-        serveStateSince,
-        false,
-        flowControlBufferLimit,
-        flowControlMaximumRequestCostTable,
-        flowControlMinimumRateOfRecharge,
-        0
-      )
-      service.send(subProtocolIdentifier, 0, connection, state.ourStatusMessage!!.toBytes())
-    }
+    val state = peerStateMap.computeIfAbsent(connection.uri()) { LESPeerState() }
+    state.ourStatusMessage = StatusMessage(
+      subProtocolIdentifier.version(),
+      blockchainInfo.networkID(),
+      blockchainInfo.totalDifficulty(),
+      blockchainInfo.bestHash(),
+      blockchainInfo.bestNumber(),
+      blockchainInfo.genesisHash(),
+      serveHeaders,
+      serveChainSince,
+      serveStateSince,
+      false,
+      flowControlBufferLimit,
+      flowControlMaximumRequestCostTable,
+      flowControlMinimumRateOfRecharge,
+      0
+    )
+    service.send(subProtocolIdentifier, 0, connection, state.ourStatusMessage!!.toBytes())
+    return state.ready
   }
 
   override fun stop(): AsyncCompletion {

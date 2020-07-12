@@ -43,6 +43,7 @@ import org.apache.tuweni.junit.LuceneIndexWriterExtension
 import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.les.LESSubprotocol.Companion.LES_ID
+import org.apache.tuweni.rlpx.MemoryWireConnectionsRepository
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.WireConnectionRepository
 import org.apache.tuweni.rlpx.wire.DisconnectReason
@@ -150,7 +151,7 @@ constructor() {
     }
 
     override fun repository(): WireConnectionRepository? {
-      return null
+      return MemoryWireConnectionsRepository()
     }
   }
 
@@ -364,77 +365,6 @@ constructor() {
       ).await()
       val blockHeaders = BlockHeadersMessage.read(service.message!!)
       assertTrue(blockHeaders.blockHeaders.isEmpty())
-    }
-
-  @Test
-  @Throws(Exception::class)
-  fun receivedBlockHeadersMessage(@LuceneIndexWriter writer: IndexWriter) =
-    runBlocking {
-      val service = MyRLPxService()
-      val repo = BlockchainRepository
-        .init(
-          MapKeyValueStore(),
-          MapKeyValueStore(),
-          MapKeyValueStore(),
-          MapKeyValueStore(),
-          MapKeyValueStore(),
-          MapKeyValueStore(),
-          BlockchainIndex(writer),
-          block
-        )
-      val controller = EthController(repo, EthClient(service))
-      val handler = LESSubProtocolHandler(
-        service,
-        LES_ID,
-        blockchainInformation,
-        false,
-        UInt256.ZERO,
-        UInt256.ZERO,
-        UInt256.ZERO,
-        UInt256.ZERO,
-        UInt256.ZERO,
-        controller
-      )
-      val status = StatusMessage(
-        2,
-        UInt256.ONE,
-        UInt256.valueOf(23),
-        Bytes32.random(),
-        UInt256.valueOf(3443),
-        Bytes32.random(), null,
-        UInt256.valueOf(333),
-        UInt256.valueOf(453),
-        true,
-        UInt256.valueOf(3),
-        UInt256.valueOf(4),
-        UInt256.valueOf(5),
-        0
-      ).toBytes()
-
-      val header = BlockHeader(
-        Hash.fromBytes(Bytes32.random()),
-        Hash.fromBytes(Bytes32.random()),
-        Address.fromBytes(Bytes.random(20)),
-        Hash.fromBytes(Bytes32.random()),
-        Hash.fromBytes(Bytes32.random()),
-        Hash.fromBytes(Bytes32.random()),
-        Bytes32.random(),
-        UInt256.fromBytes(Bytes32.random()),
-        UInt256.fromBytes(Bytes32.random()),
-        Gas.valueOf(3),
-        Gas.valueOf(2),
-        Instant.now().truncatedTo(ChronoUnit.SECONDS),
-        Bytes.of(2, 3, 4),
-        Hash.fromBytes(Bytes32.random()),
-        UInt64.random()
-      )
-
-      val conn = makeConnection()
-      handler.handleNewPeerConnection(conn).await()
-      handler.handle(conn, 0, status).await()
-      handler.handle(conn, 3, BlockHeadersMessage(1, 2, listOf(header)).toBytes()).await()
-      val retrieved = repo.retrieveBlockHeader(header.getHash())
-      assertEquals(header, retrieved)
     }
 
   @Test
