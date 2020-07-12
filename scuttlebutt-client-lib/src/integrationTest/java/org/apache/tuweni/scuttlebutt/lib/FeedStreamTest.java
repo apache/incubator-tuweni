@@ -14,6 +14,7 @@ package org.apache.tuweni.scuttlebutt.lib;
 
 import static org.apache.tuweni.scuttlebutt.lib.Utils.getMasterClient;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -26,10 +27,15 @@ import org.apache.tuweni.junit.VertxExtension;
 import org.apache.tuweni.junit.VertxInstance;
 import org.apache.tuweni.scuttlebutt.lib.model.FeedMessage;
 import org.apache.tuweni.scuttlebutt.lib.model.StreamHandler;
+import org.apache.tuweni.scuttlebutt.rpc.RPCAsyncRequest;
+import org.apache.tuweni.scuttlebutt.rpc.RPCFunction;
+import org.apache.tuweni.scuttlebutt.rpc.RPCResponse;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -102,6 +108,14 @@ class FeedStreamTest {
         lastStreamedMessage.get().getValue().getContentAs(new ObjectMapper(), TestScuttlebuttSerializationModel.class);
 
     assertEquals("serialization-test", content.getType());
+
+    AsyncResult<RPCResponse> result = scuttlebuttClient
+        .rawRequestService()
+        .makeAsyncRequest(new RPCAsyncRequest(new RPCFunction("whoami"), Collections.emptyList()));
+    assertNotNull(result.get());
+    @SuppressWarnings("rawtypes")
+    Map map = result.get().asJSON(new ObjectMapper(), Map.class);
+    assertTrue(map.containsKey("id"));
   }
 
   private AsyncResult<List<FeedMessage>> publishTestMessages(FeedService feedService) throws JsonProcessingException {
@@ -115,5 +129,6 @@ class FeedStreamTest {
 
     return AsyncResult.combine(results);
   }
+
 
 }
