@@ -18,8 +18,9 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.crypto.sodium.Signature;
 import org.apache.tuweni.io.Base64;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,33 +28,32 @@ import java.util.Scanner;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
 
 /**
  * Utility class for loading scuttlebutt keys from the file system.
- *
  */
 public class KeyFileLoader {
+
+  private KeyFileLoader() {}
+
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   /**
    * Attempts to load the keys from the default scuttlebutt directory (~/.ssb), and throws an exception if the keys are
    * not available at the given path
    *
    * @return the scuttlebutt key pair
-   * @throws Exception if no key is found
    */
-  public static Signature.KeyPair getLocalKeys() throws Exception {
-    Optional<String> path = Optional.fromNullable(System.getenv().get("ssb_dir"));
+  public static Signature.KeyPair getLocalKeys(Path ssbFolder) {
 
-    if (!path.isPresent()) {
-      throw new Exception("Cannot find ssb directory config value");
+    Path secretPath = ssbFolder.resolve("secret");
+
+    if (!secretPath.toFile().exists()) {
+      throw new IllegalArgumentException("Secret file does not exist");
     }
 
-    String secretPath = path.get() + "/secret";
-    File file = new File(secretPath);
-
-    if (!file.exists()) {
-      throw new Exception("Secret file does not exist");
+    if (!secretPath.toFile().canRead()) {
+      throw new IllegalArgumentException("Secret file cannot be read");
     }
 
     return loadKeysFromFile(secretPath);
@@ -64,40 +64,38 @@ public class KeyFileLoader {
    *
    * @param secretPath the filepath to the scuttlebutt secret key to load
    * @return the scuttlebutt key pair
-   * @throws IOException
    */
-  public static Signature.KeyPair loadKeysFromFile(String secretPath) throws IOException {
+  public static Signature.KeyPair loadKeysFromFile(Path secretPath) {
+    try {
+      Scanner s = new Scanner(secretPath.toFile(), UTF_8.name());
 
-    File file = new File(secretPath);
+      s.useDelimiter("\n");
 
-    Scanner s = new Scanner(file, UTF_8.name());
-    s.useDelimiter("\n");
+      ArrayList<String> list = new ArrayList<String>();
+      while (s.hasNext()) {
+        String next = s.next();
 
-    ArrayList<String> list = new ArrayList<String>();
-    while (s.hasNext()) {
-      String next = s.next();
-
-      // Filter out the comment lines
-      if (!next.startsWith("#")) {
-        list.add(next);
+        // Filter out the comment lines
+        if (!next.startsWith("#")) {
+          list.add(next);
+        }
       }
+      String secretJSON = String.join("", list);
+
+      HashMap<String, String> values = objectMapper.readValue(secretJSON, new TypeReference<Map<String, String>>() {});
+      String pubKey = values.get("public").replace(".ed25519", "");
+      String privateKey = values.get("private").replace(".ed25519", "");
+
+      Bytes pubKeyBytes = Base64.decode(pubKey);
+      Bytes privKeyBytes = Base64.decode(privateKey);
+
+      Signature.PublicKey pub = Signature.PublicKey.fromBytes(pubKeyBytes);
+      Signature.SecretKey secretKey = Signature.SecretKey.fromBytes(privKeyBytes);
+
+      return new Signature.KeyPair(pub, secretKey);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
     }
-
-    String secretJSON = String.join("", list);
-
-    ObjectMapper mapper = new ObjectMapper();
-
-    HashMap<String, String> values = mapper.readValue(secretJSON, new TypeReference<Map<String, String>>() {});
-    String pubKey = values.get("public").replace(".ed25519", "");
-    String privateKey = values.get("private").replace(".ed25519", "");
-
-    Bytes pubKeyBytes = Base64.decode(pubKey);
-    Bytes privKeyBytes = Base64.decode(privateKey);
-
-    Signature.PublicKey pub = Signature.PublicKey.fromBytes(pubKeyBytes);
-    Signature.SecretKey secretKey = Signature.SecretKey.fromBytes(privKeyBytes);
-
-    return new Signature.KeyPair(pub, secretKey);
   }
 
 }
