@@ -30,7 +30,7 @@ class EthSubprotocol(
   private val coroutineContext: CoroutineContext = Dispatchers.Default,
   private val blockchainInfo: BlockchainInformation,
   private val repository: BlockchainRepository,
-  private val listener: (WireConnection, StatusMessage) -> Unit = { _, _ -> }
+  private val listener: (WireConnection, Status) -> Unit = { _, _ -> }
 ) : SubProtocol {
 
   companion object {
