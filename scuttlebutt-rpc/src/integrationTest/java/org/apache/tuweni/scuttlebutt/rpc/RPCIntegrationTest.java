@@ -198,7 +198,9 @@ class RPCIntegrationTest {
     CompletionException exception = assertThrows(CompletionException.class, () -> {
       AsyncResult.combine(results).get();
     });
-    assertEquals("encoded message must not be larger than 8192 bytes", exception.getCause().getMessage());
+    assertEquals(
+        "Encoded message must not be larger than 8192 bytes. Current size is 40264",
+        exception.getCause().getMessage());
   }
 
   private RPCHandler makeRPCHandler(Vertx vertx) throws Exception {
