@@ -27,6 +27,7 @@ import org.apache.tuweni.scuttlebutt.rpc.mux.Multiplexer;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,12 +61,12 @@ public class SocialService {
   /**
    * Get the instance's public key (the key used for its identity.)
    *
-   * @return
+   * @return the instance's public key
    */
   public AsyncResult<String> getOwnIdentity() {
     RPCFunction function = new RPCFunction("whoami");
 
-    RPCAsyncRequest request = new RPCAsyncRequest(function, Arrays.asList());
+    RPCAsyncRequest request = new RPCAsyncRequest(function, Collections.emptyList());
 
     try {
       return multiplexer.makeAsyncRequest(request).then(response -> {
@@ -83,16 +84,16 @@ public class SocialService {
   /**
    * Get the instance's current profile
    *
-   * @return
+   * @return the instance current profile.
    */
   public AsyncResult<Profile> getOwnProfile() {
-    return getOwnIdentity().then(identity -> getProfile(identity));
+    return getOwnIdentity().then(this::getProfile);
   }
 
   /**
    * Get the profiles of all the users that the instance is following.
    *
-   * @return
+   * @return the profiles of all the users that the instance is following
    */
   public AsyncResult<List<Profile>> getFollowing() {
     return getHops().then(followHops -> {
@@ -106,7 +107,7 @@ public class SocialService {
   /**
    * Get the profiles of all the instances that are following the instance.
    *
-   * @return
+   * @return the profiles of all the instances that are following the instance
    */
   public AsyncResult<List<Profile>> getFollowedBy() {
 
@@ -122,7 +123,7 @@ public class SocialService {
           .thenApply(
               queryResults -> queryResults
                   .stream()
-                  .filter(result -> result.isFollowing())
+                  .filter(IsFollowingResponse::isFollowing)
                   .map(IsFollowingResponse::getSource)
                   .collect(Collectors.toList()));
 
@@ -133,7 +134,7 @@ public class SocialService {
   /**
    * Get the profiles of all the users that the instance is following that also follow the instance.
    *
-   * @return
+   * @return the profiles of all the users that the instance is following that also follow the instance
    */
   public AsyncResult<List<Profile>> getFriends() {
 
@@ -145,7 +146,7 @@ public class SocialService {
       return AsyncResult.combine(responses).then(response -> {
         List<AsyncResult<Profile>> profiles = response
             .stream()
-            .filter(f -> f.isFollowing())
+            .filter(IsFollowingResponse::isFollowing)
             .map(item -> getProfile(item.getSource()))
             .collect(Collectors.toList());
 
@@ -160,7 +161,7 @@ public class SocialService {
    * Gets the profile of a given user
    *
    * @param publicKey the public key of the user to get the profile of
-   * @return
+   * @return the profile of a given user
    */
   public AsyncResult<Profile> getProfile(String publicKey) {
 
@@ -205,7 +206,7 @@ public class SocialService {
   /**
    * A map of all the instance IDs to how many hops away they are in the social graph.
    *
-   * @return
+   * @return map of all the instance IDs to how many hops away they are in the social graph
    */
   private AsyncResult<Map<String, Integer>> getHops() {
     RPCFunction rpcFunction = new RPCFunction(Arrays.asList("friends"), "hops");
@@ -234,13 +235,13 @@ public class SocialService {
    *
    * @param source the node we want to check is following the destination
    * @param destination the destination node
-   * @return
+   * @return whether source follows destination
    */
   private AsyncResult<IsFollowingResponse> isFollowing(String source, String destination) {
-    RPCFunction function = new RPCFunction(Arrays.asList("friends"), "isFollowing");
+    RPCFunction function = new RPCFunction(Collections.singletonList("friends"), "isFollowing");
 
     RPCAsyncRequest rpcAsyncRequest =
-        new RPCAsyncRequest(function, Arrays.asList(new IsFollowingQuery(source, destination)));
+        new RPCAsyncRequest(function, Collections.singletonList(new IsFollowingQuery(source, destination)));
 
     try {
       return multiplexer.makeAsyncRequest(rpcAsyncRequest).then(rpcResponse -> {
@@ -260,7 +261,7 @@ public class SocialService {
    * Fetches the profiles of the given list of users.
    *
    * @param keys the users to get the profiles of
-   * @return
+   * @return the user profiles
    */
   private AsyncResult<List<Profile>> getProfiles(List<String> keys) {
 

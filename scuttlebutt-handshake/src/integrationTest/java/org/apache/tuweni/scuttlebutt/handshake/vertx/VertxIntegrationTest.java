@@ -110,7 +110,7 @@ class VertxIntegrationTest {
     SecureScuttlebuttVertxClient client =
         new SecureScuttlebuttVertxClient(vertx, Signature.KeyPair.random(), networkIdentifier);
     MyClientHandler handler =
-        client.connectTo(20000, "localhost", serverKeyPair.publicKey(), MyClientHandler::new).get();
+        client.connectTo(20000, "localhost", serverKeyPair.publicKey(), null, MyClientHandler::new).get();
 
     Thread.sleep(1000);
     assertNotNull(handler);
@@ -124,7 +124,7 @@ class VertxIntegrationTest {
     MyServerHandler serverHandler = serverHandlerRef.get();
 
     Bytes receivedBytes = serverHandler.received;
-    Bytes receivedBody = receivedBytes.slice(9);
+    Bytes receivedBody = receivedBytes;
 
     Bytes requestBody = rpcRequest.slice(9);
 

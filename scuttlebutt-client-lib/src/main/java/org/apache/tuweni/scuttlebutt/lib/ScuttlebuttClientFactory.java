@@ -18,12 +18,12 @@ import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.crypto.sodium.Signature;
 import org.apache.tuweni.io.Base64;
+import org.apache.tuweni.scuttlebutt.Invite;
 import org.apache.tuweni.scuttlebutt.handshake.vertx.SecureScuttlebuttVertxClient;
 import org.apache.tuweni.scuttlebutt.rpc.mux.RPCHandler;
 
 import java.util.function.Consumer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.Vertx;
 
 /**
@@ -31,55 +31,47 @@ import io.vertx.core.Vertx;
  */
 public final class ScuttlebuttClientFactory {
 
-  public static Bytes32 DEFAULT_NETWORK = defaultNetwork();
-
-  /**
-   * @return the default scuttlebutt network key.
-   */
-  public static Bytes32 defaultNetwork() {
-    // The network key for the main public network
-    String networkKeyBase64 = "1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s=";
-    return Bytes32.wrap(Base64.decode(networkKeyBase64));
-  }
+  public static final Bytes32 DEFAULT_NETWORK =
+      Bytes32.wrap(Base64.decode("1KHLiKZvAvjbY1ziZEHMXawbCEIM6qwjCDm3VYRan/s="));
 
   private ScuttlebuttClientFactory() {}
 
   /**
-   * Creates a scuttllebutt client by connecting with the given host, port and keypair
+   * Creates a scuttlebutt client by connecting with the given host, port and keypair
    *
-   * @param mapper The ObjectMapper for serializing the content of published scuttlebutt messages
    * @param host The host to connect to as a scuttlebutt client
    * @param port The port to connect on
    * @param keyPair The keys to use for the secret handshake
+   * @param serverPublicKey the public key of the server we connect to
    * @return the scuttlebutt client
    */
   public static AsyncResult<ScuttlebuttClient> fromNet(
-      ObjectMapper mapper,
       String host,
       int port,
-      Signature.KeyPair keyPair) {
+      Signature.KeyPair keyPair,
+      Signature.PublicKey serverPublicKey) {
     Vertx vertx = Vertx.vertx();
-    return fromNetWithVertx(mapper, vertx, host, port, keyPair);
+    return fromNetWithVertx(vertx, host, port, keyPair, serverPublicKey);
   }
 
   /**
-   * Creates a scuttllebutt client by connecting with the given host, port and keypair using the given vertx instance.
+   * Creates a scuttlebutt client by connecting with the given host, port and keypair using the given vertx instance.
    *
-   * @param mapper The ObjectMapper for serializing the content of published scuttlebutt messages
    * @param vertx the vertx instance to use for network IO
    * @param host The host to connect to as a scuttlebutt client
    * @param port The port to connect on
    * @param keyPair The keys to use for the secret handshake
+   * @param serverPublicKey the public key of the server we connect to
    * @return the scuttlebutt client
    */
   public static AsyncResult<ScuttlebuttClient> fromNetWithVertx(
-      ObjectMapper mapper,
       Vertx vertx,
       String host,
       int port,
-      Signature.KeyPair keyPair) {
+      Signature.KeyPair keyPair,
+      Signature.PublicKey serverPublicKey) {
 
-    return fromNetWithNetworkKey(vertx, host, port, keyPair, DEFAULT_NETWORK, mapper);
+    return fromNetWithNetworkKey(vertx, host, port, keyPair, serverPublicKey, DEFAULT_NETWORK);
   }
 
   /**
@@ -87,8 +79,8 @@ public final class ScuttlebuttClientFactory {
    * @param host The host to connect to as a scuttlebutt client
    * @param port The port to connect on
    * @param keyPair The keys to use for the secret handshake
+   * @param serverPublicKey the public key of the server we connect to
    * @param networkIdentifier The scuttlebutt network key to use.
-   * @param objectMapper The ObjectMapper for serializing the content of published scuttlebutt messages
    * @return the scuttlebutt client
    */
   public static AsyncResult<ScuttlebuttClient> fromNetWithNetworkKey(
@@ -96,8 +88,8 @@ public final class ScuttlebuttClientFactory {
       String host,
       int port,
       Signature.KeyPair keyPair,
-      Bytes32 networkIdentifier,
-      ObjectMapper objectMapper) {
+      Signature.PublicKey serverPublicKey,
+      Bytes32 networkIdentifier) {
 
     SecureScuttlebuttVertxClient secureScuttlebuttVertxClient =
         new SecureScuttlebuttVertxClient(vertx, keyPair, networkIdentifier);
@@ -106,11 +98,38 @@ public final class ScuttlebuttClientFactory {
         .connectTo(
             port,
             host,
-            keyPair.publicKey(),
-            (
-                Consumer<Bytes> sender,
-                Runnable terminationFn) -> new RPCHandler(vertx, sender, terminationFn, objectMapper))
-        .thenApply(handler -> new ScuttlebuttClient(handler, objectMapper));
+            serverPublicKey,
+            null,
+            (Consumer<Bytes> sender, Runnable terminationFn) -> new RPCHandler(vertx, sender, terminationFn))
+        .thenApply(ScuttlebuttClient::new);
   }
+
+  /**
+   * @param vertx the vertx instance to use for network IO
+   * @param keyPair The keys to use for the secret handshake
+   * @param invite the invitation to the remote server
+   * @param networkIdentifier The scuttlebutt network key to use.
+   * @return the scuttlebutt client
+   */
+  public static AsyncResult<ScuttlebuttClient> withInvite(
+      Vertx vertx,
+      Signature.KeyPair keyPair,
+      Invite invite,
+      Bytes32 networkIdentifier) {
+
+    SecureScuttlebuttVertxClient secureScuttlebuttVertxClient =
+        new SecureScuttlebuttVertxClient(vertx, keyPair, networkIdentifier);
+
+    return secureScuttlebuttVertxClient
+        .connectTo(
+            invite.port(),
+            invite.host(),
+            null,
+            invite,
+            (Consumer<Bytes> sender, Runnable terminationFn) -> new RPCHandler(vertx, sender, terminationFn))
+        .thenApply(ScuttlebuttClient::new);
+
+  }
+
 
 }

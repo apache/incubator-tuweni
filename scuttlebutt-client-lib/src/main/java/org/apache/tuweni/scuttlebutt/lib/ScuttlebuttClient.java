@@ -14,7 +14,6 @@ package org.apache.tuweni.scuttlebutt.lib;
 
 import org.apache.tuweni.scuttlebutt.rpc.mux.Multiplexer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * A client for making requests to a scuttlebutt instance with. This is the entry point for accessing service classes
@@ -32,35 +31,34 @@ public class ScuttlebuttClient {
   /**
    *
    * @param multiplexer the multiplexer to make RPC requests with.
-   * @param mapper the object mapper to serialize posts with
    */
-  protected ScuttlebuttClient(Multiplexer multiplexer, ObjectMapper mapper) {
+  protected ScuttlebuttClient(Multiplexer multiplexer) {
     this.multiplexer = multiplexer;
-    this.feedService = new FeedService(multiplexer, mapper);
+    this.feedService = new FeedService(multiplexer);
   }
 
   /**
-   * A service for operations that connect nodes together.
+   * Provides a service for operations that connect nodes together.
    *
-   * @return
+   * @return a service for operations that connect nodes together
    */
   public NetworkService getNetworkService() {
     return new NetworkService(multiplexer);
   }
 
   /**
-   * A service for operations that concern scuttlebutt feeds.
+   * Provides a service for operations that concern scuttlebutt feeds.
    *
-   * @return
+   * @return a service for operations that concern scuttlebutt feeds
    */
   public FeedService getFeedService() {
     return feedService;
   }
 
   /**
-   * A service for operations concerning social connections and updating the instance's profile
+   * Provides a service for operations concerning social connections and updating the instance's profile
    *
-   * @return
+   * @return a service for operations concerning social connections and updating the instance's profile
    */
   public SocialService getSocialService() {
     return new SocialService(multiplexer, feedService);
@@ -68,9 +66,9 @@ public class ScuttlebuttClient {
 
 
   /**
-   * A service for making lower level requests that are not supported by higher level services.
+   * Provides a service for making lower level requests that are not supported by higher level services.
    *
-   * @return
+   * @return a service for making lower level requests that are not supported by higher level services
    */
   public RawRequestService rawRequestService() {
     return new RawRequestService(multiplexer);

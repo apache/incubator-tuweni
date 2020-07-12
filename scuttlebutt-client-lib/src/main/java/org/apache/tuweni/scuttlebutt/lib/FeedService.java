@@ -39,19 +39,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Should be accessed via a ScuttlebuttClient instance.
  */
 public final class FeedService {
+  private final static ObjectMapper objectMapper = new ObjectMapper();
 
   private final Multiplexer multiplexer;
 
-  private final ObjectMapper objectMapper;
 
   /**
    *
    * @param multiplexer the RPC request multiplexer to make requests with.
-   * @param mapper the object mapper to serialize published messages with.
    */
-  protected FeedService(Multiplexer multiplexer, ObjectMapper mapper) {
+  protected FeedService(Multiplexer multiplexer) {
     this.multiplexer = multiplexer;
-    this.objectMapper = mapper;
   }
 
   /**

@@ -12,7 +12,7 @@
  */
 package org.apache.tuweni.scuttlebutt;
 
-public class MalformedInviteCodeException extends Throwable {
+public class MalformedInviteCodeException extends RuntimeException {
 
   public MalformedInviteCodeException(String message) {
     super(message);
