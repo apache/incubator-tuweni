@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,7 +60,7 @@ class BoxTest {
   }
 
   @Test
-  void ObjectEquality() {
+  void testObjectEquality() {
     Box.PublicKey pk = Box.PublicKey.fromBytes(Bytes32.random());
     assertEquals(pk, pk);
     Box.PublicKey pk2 = Box.PublicKey.fromBytes(Bytes32.random());
@@ -69,10 +70,10 @@ class BoxTest {
   }
 
   @Test
-  void ObjectEqualityNonce() {
-    Box.Nonce pk = Box.Nonce.fromBytes(Bytes32.random());
+  void testObjectEqualityNonce() {
+    Box.Nonce pk = Box.Nonce.fromBytes(Bytes.random(24));
     assertEquals(pk, pk);
-    Box.Nonce pk2 = Box.Nonce.fromBytes(Bytes32.random());
+    Box.Nonce pk2 = Box.Nonce.fromBytes(Bytes.random(24));
     assertNotEquals(pk, pk2);
     assertEquals(pk.hashCode(), pk.hashCode());
     assertNotEquals(pk.hashCode(), pk2.hashCode());
@@ -99,8 +100,10 @@ class BoxTest {
     Box.KeyPair sender = Box.KeyPair.random();
     Box.KeyPair receiver = Box.KeyPair.random();
     Box.Nonce nonce = Box.Nonce.zero();
-    DetachedEncryptionResult encrypted = Box.encryptDetached(Bytes.fromHexString("deadbeef"), receiver.publicKey(), sender.secretKey(), nonce);
-    Bytes decrypted = Box.decryptDetached(encrypted.cipherText(), encrypted.mac(), sender.publicKey(), receiver.secretKey(), nonce);
+    DetachedEncryptionResult encrypted =
+        Box.encryptDetached(Bytes.fromHexString("deadbeef"), receiver.publicKey(), sender.secretKey(), nonce);
+    Bytes decrypted =
+        Box.decryptDetached(encrypted.cipherText(), encrypted.mac(), sender.publicKey(), receiver.secretKey(), nonce);
     assertEquals(Bytes.fromHexString("deadbeef"), decrypted);
   }
 
