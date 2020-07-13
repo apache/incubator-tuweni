@@ -37,6 +37,7 @@ import org.apache.tuweni.rlpx.wire.WireConnection;
 import java.net.InetSocketAddress;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -279,9 +280,12 @@ public final class VertxRLPxService implements RLPxService {
 
   @Override
   public SubProtocolClient getClient(SubProtocolIdentifier subProtocolIdentifier) {
-    for (SubProtocol subProtocol : subProtocols) {
-      if (subProtocol.supports(subProtocolIdentifier)) {
-        return subProtocol.createClient(this);
+    if (!started.get()) {
+      throw new IllegalStateException("The RLPx service is not active");
+    }
+    for (Map.Entry<SubProtocol, SubProtocolClient> clientEntry : clients.entrySet()) {
+      if (clientEntry.getKey().id().equals(subProtocolIdentifier)) {
+        return clientEntry.getValue();
       }
     }
     return null;

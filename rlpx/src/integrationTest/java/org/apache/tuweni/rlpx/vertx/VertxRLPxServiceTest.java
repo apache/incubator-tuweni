@@ -13,8 +13,12 @@
 package org.apache.tuweni.rlpx.vertx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.apache.tuweni.concurrent.AsyncCompletion;
 import org.apache.tuweni.crypto.SECP256K1;
@@ -23,10 +27,14 @@ import org.apache.tuweni.junit.VertxExtension;
 import org.apache.tuweni.junit.VertxInstance;
 import org.apache.tuweni.rlpx.MemoryWireConnectionsRepository;
 import org.apache.tuweni.rlpx.wire.DisconnectReason;
+import org.apache.tuweni.rlpx.wire.SubProtocol;
+import org.apache.tuweni.rlpx.wire.SubProtocolClient;
+import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
 import org.apache.tuweni.rlpx.wire.WireConnection;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import io.vertx.core.Vertx;
 import org.junit.jupiter.api.Test;
@@ -166,5 +174,38 @@ class VertxRLPxServiceTest {
       service.stop();
       peerService.stop();
     }
+  }
+
+  @Test
+  void getClientWhenNotReady(@VertxInstance Vertx vertx) {
+    SECP256K1.KeyPair peerPair = SECP256K1.KeyPair.random();
+    MemoryWireConnectionsRepository peerRepository = new MemoryWireConnectionsRepository();
+    VertxRLPxService peerService =
+        new VertxRLPxService(vertx, 0, "localhost", 10000, peerPair, new ArrayList<>(), "abc", peerRepository);
+    assertThrows(IllegalStateException.class, () -> {
+      peerService.getClient(SubProtocolIdentifier.of("foo", 1));
+    });
+  }
+
+  @Test
+  void getClientWeCreate(@VertxInstance Vertx vertx) throws Exception {
+    SubProtocol sp = mock(SubProtocol.class);
+    SubProtocolClient client = mock(SubProtocolClient.class);
+    when(sp.id()).thenReturn(SubProtocolIdentifier.of("foo", 1));
+    when(sp.createClient(any())).thenReturn(client);
+    MemoryWireConnectionsRepository peerRepository = new MemoryWireConnectionsRepository();
+    VertxRLPxService peerService = new VertxRLPxService(
+        vertx,
+        0,
+        "localhost",
+        10000,
+        SECP256K1.KeyPair.random(),
+        Collections.singletonList(sp),
+        "abc",
+        peerRepository);
+    peerService.start().join();
+    assertNull(peerService.getClient(SubProtocolIdentifier.of("foo", 2)));
+    assertNull(peerService.getClient(SubProtocolIdentifier.of("bar", 1)));
+    assertEquals(client, peerService.getClient(SubProtocolIdentifier.of("foo", 1)));
   }
 }

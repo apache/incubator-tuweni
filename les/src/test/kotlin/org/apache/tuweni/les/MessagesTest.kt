@@ -19,6 +19,7 @@ package org.apache.tuweni.les
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.crypto.SECP256K1
+import org.apache.tuweni.devp2p.eth.Status
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.BlockBody
 import org.apache.tuweni.eth.BlockHeader
@@ -75,15 +76,18 @@ internal class ReceiptsMessageTest {
   @Test
   fun roundtripRLP() {
     val logsList = listOf(
-      Log(Address.fromBytes(Bytes.random(20)),
+      Log(
+        Address.fromBytes(Bytes.random(20)),
         Bytes.of(1, 2, 3),
         listOf(Bytes32.random(), Bytes32.random(), Bytes32.random())
       ),
-      Log(Address.fromBytes(Bytes.random(20)),
+      Log(
+        Address.fromBytes(Bytes.random(20)),
         Bytes.of(1, 2, 3),
         listOf(Bytes32.random(), Bytes32.random(), Bytes32.random())
       ),
-      Log(Address.fromBytes(Bytes.random(20)),
+      Log(
+        Address.fromBytes(Bytes.random(20)),
         Bytes.of(1, 2, 3),
         listOf(Bytes32.random(), Bytes32.random(), Bytes32.random())
       )
@@ -91,14 +95,16 @@ internal class ReceiptsMessageTest {
     val message = ReceiptsMessage(
       3,
       2,
-      listOf(listOf(
-        TransactionReceipt(
-          Bytes32.random(), 3,
-          LogsBloomFilter.compute(logsList
-          ),
-          logsList
+      listOf(
+        listOf(
+          TransactionReceipt(
+            Bytes32.random(), 3,
+            LogsBloomFilter.compute(
+              logsList
+            ),
+            logsList
+          )
         )
-      )
       )
     )
     val rlp = message.toBytes()
@@ -227,5 +233,28 @@ internal class StatusMessageTest {
     )
     val read = StatusMessage.read(message.toBytes())
     assertEquals(message, read)
+  }
+
+  @Test
+  fun testToStatus() {
+    val hash = Bytes32.random()
+    val genesisHash = Bytes32.random()
+    val message = StatusMessage(
+      2,
+      UInt256.valueOf(1),
+      UInt256.valueOf(23),
+      hash,
+      UInt256.valueOf(3443),
+      genesisHash,
+      null,
+      UInt256.valueOf(333),
+      UInt256.valueOf(453),
+      true,
+      UInt256.valueOf(3),
+      UInt256.valueOf(4),
+      UInt256.valueOf(5),
+      1
+    )
+    assertEquals(Status(2, UInt256.valueOf(1), UInt256.valueOf(23), hash, genesisHash, null, null), message.toStatus())
   }
 }
