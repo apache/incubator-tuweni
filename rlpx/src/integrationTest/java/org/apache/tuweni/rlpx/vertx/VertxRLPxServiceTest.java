@@ -22,6 +22,8 @@ import org.apache.tuweni.junit.BouncyCastleExtension;
 import org.apache.tuweni.junit.VertxExtension;
 import org.apache.tuweni.junit.VertxInstance;
 import org.apache.tuweni.rlpx.MemoryWireConnectionsRepository;
+import org.apache.tuweni.rlpx.wire.DisconnectReason;
+import org.apache.tuweni.rlpx.wire.WireConnection;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -108,11 +110,36 @@ class VertxRLPxServiceTest {
     peerService.start().join();
 
     try {
-      service.connectTo(peerPair.publicKey(), new InetSocketAddress(peerService.actualPort()));
+      service.connectTo(peerPair.publicKey(), new InetSocketAddress("127.0.0.1", peerService.actualPort())).get();
     } finally {
       service.stop();
       peerService.stop();
     }
+  }
+
+  @Test
+  void disconnectAfterStop(@VertxInstance Vertx vertx) throws Exception {
+    SECP256K1.KeyPair ourPair = SECP256K1.KeyPair.random();
+    SECP256K1.KeyPair peerPair = SECP256K1.KeyPair.random();
+    VertxRLPxService service = new VertxRLPxService(vertx, 0, "localhost", 10000, ourPair, new ArrayList<>(), "abc");
+    service.start().join();
+
+    VertxRLPxService peerService =
+        new VertxRLPxService(vertx, 0, "localhost", 10000, peerPair, new ArrayList<>(), "abc");
+    peerService.start().join();
+
+    WireConnection conn = null;
+    try {
+      conn =
+          service.connectTo(peerPair.publicKey(), new InetSocketAddress("127.0.0.1", peerService.actualPort())).get();
+    } finally {
+      service.stop();
+      peerService.stop();
+    }
+    WireConnection c = conn;
+    assertThrows(IllegalStateException.class, () -> {
+      service.disconnect(c, DisconnectReason.SUBPROTOCOL_REASON);
+    });
   }
 
   @Test

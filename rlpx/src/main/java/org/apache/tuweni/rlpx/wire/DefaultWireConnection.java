@@ -136,6 +136,9 @@ public final class DefaultWireConnection implements WireConnection {
       }
 
       afterHandshakeListener.accept(peerHelloMessage);
+      if (subprotocolRangeMap.asMapOfRanges().isEmpty()) {
+        ready.complete(this);
+      }
 
       AsyncCompletion allSubProtocols = AsyncCompletion
           .allOf(
