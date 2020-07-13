@@ -16,11 +16,14 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -627,5 +630,35 @@ class BytesTest extends CommonBytesTests {
     Bytes value2 = Bytes.fromHexString("0x01236789");
     assertEquals(2, value.commonPrefixLength(value2));
     assertEquals(Bytes.fromHexString("0x0123"), value.commonPrefix(value2));
+  }
+
+  @Test
+  void testWrapByteBufEmpty() {
+    ByteBuf buffer = Unpooled.buffer(0);
+    assertSame(Bytes.EMPTY, Bytes.wrapByteBuf(buffer));
+  }
+
+  @Test
+  void testWrapByteBufWithIndexEmpty() {
+    ByteBuf buffer = Unpooled.buffer(3);
+    assertSame(Bytes.EMPTY, Bytes.wrapByteBuf(buffer, 3, 0));
+  }
+
+  @Test
+  void testWrapByteBufSizeWithOffset() {
+    ByteBuf buffer = Unpooled.buffer(10);
+    assertEquals(1, Bytes.wrapByteBuf(buffer, 1, 1).size());
+  }
+
+  @Test
+  void testWrapByteBufSize() {
+    ByteBuf buffer = Unpooled.buffer(20);
+    assertEquals(20, Bytes.wrapByteBuf(buffer).size());
+  }
+
+  @Test
+  void testWrapByteBufReadableBytes() {
+    ByteBuf buffer = Unpooled.buffer(20).writeByte(3);
+    assertEquals(1, Bytes.wrapByteBuf(buffer, 0, buffer.readableBytes()).size());
   }
 }
