@@ -12,9 +12,14 @@
  */
 package org.apache.tuweni.crypto.sodium;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -67,4 +72,35 @@ class DiffieHelmanTest {
     keyPair.secretKey().destroy();
     assertTrue(keyPair.secretKey().isDestroyed());
   }
+
+  @Test
+  void testFromBoxPubKey() {
+    Bytes bytes = Bytes32.random();
+    Box.PublicKey pkey = Box.PublicKey.fromBytes(bytes);
+    DiffieHelman.PublicKey dpk = DiffieHelman.PublicKey.forBoxPublicKey(pkey);
+    assertEquals(bytes, dpk.bytes());
+    assertArrayEquals(bytes.toArrayUnsafe(), dpk.bytesArray());
+  }
+
+  @Test
+  void testEqualsPublicKeyFromBytes() {
+    Bytes bytes = Bytes32.random();
+    DiffieHelman.PublicKey pkey = DiffieHelman.PublicKey.fromBytes(bytes);
+    DiffieHelman.PublicKey pkey2 = DiffieHelman.PublicKey.fromBytes(bytes);
+    assertEquals(pkey, pkey2);
+    assertEquals(pkey.hashCode(), pkey2.hashCode());
+  }
+
+  @Test
+  void testInvalidBytes() {
+    Bytes bytes = Bytes.random(20);
+    assertThrows(IllegalArgumentException.class, () -> DiffieHelman.PublicKey.fromBytes(bytes));
+  }
+
+  @Test
+  void testInvalidBytesSecretKey() {
+    Bytes bytes = Bytes.random(20);
+    assertThrows(IllegalArgumentException.class, () -> DiffieHelman.SecretKey.fromBytes(bytes));
+  }
+
 }
