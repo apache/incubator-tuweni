@@ -24,7 +24,9 @@ import org.apache.tuweni.eth.Block
 import org.apache.tuweni.eth.BlockBody
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.LogsBloomFilter
 import org.apache.tuweni.eth.Transaction
+import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.bigints.UInt64
@@ -194,5 +196,39 @@ class MessagesTest {
     val read = GetReceipts.read(getReceipts.toBytes())
 
     assertEquals(getReceipts, read)
+  }
+
+  @Test
+  fun transactionsRoundtrip() {
+    val tx = Transactions(
+      listOf(
+        Transaction(
+          UInt256.ZERO,
+          Wei.valueOf(20),
+          Gas.valueOf(20),
+          Address.fromBytes(Bytes.random(20)),
+          Wei.valueOf(20),
+          Bytes.fromHexString("deadbeef"),
+          SECP256K1.KeyPair.random(),
+          1
+        )
+      )
+    )
+    val read = Transactions.read(tx.toBytes())
+    assertEquals(tx, read)
+  }
+
+  @Test
+  fun receiptsRoundtrip() {
+    val receipts = Receipts(listOf(listOf(TransactionReceipt(Bytes32.random(), 42, LogsBloomFilter(), emptyList()))))
+    val read = Receipts.read(receipts.toBytes())
+    assertEquals(receipts, read)
+  }
+
+  @Test
+  fun nodeDataRoundtrip() {
+    val nodeData = NodeData(listOf(Bytes.fromHexString("deadbeef")))
+    val read = NodeData.read(nodeData.toBytes())
+    assertEquals(nodeData, read)
   }
 }
