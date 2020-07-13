@@ -29,7 +29,7 @@ import org.apache.tuweni.rlpx.wire.WireConnection
 class EthController(
   val repository: BlockchainRepository,
   val requestsManager: EthRequestsManager,
-  val connectionsListener: (WireConnection, StatusMessage) -> Unit = { _, _ -> }
+  val connectionsListener: (WireConnection, Status) -> Unit = { _, _ -> }
 ) {
 
   suspend fun findTransactionReceipts(hashes: List<Hash>): List<List<TransactionReceipt>> {
@@ -129,7 +129,7 @@ class EthController(
     }
   }
 
-  fun receiveStatus(connection: WireConnection, status: StatusMessage) {
+  fun receiveStatus(connection: WireConnection, status: Status) {
     connectionsListener(connection, status)
   }
 

@@ -37,6 +37,7 @@ import org.apache.tuweni.rlpx.wire.WireConnection;
 import java.net.InetSocketAddress;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -69,6 +70,7 @@ public final class VertxRLPxService implements RLPxService {
   private final String clientId;
 
   private LinkedHashMap<SubProtocol, SubProtocolHandler> handlers;
+  private LinkedHashMap<SubProtocol, SubProtocolClient> clients;
   private NetClient client;
   private NetServer server;
 
@@ -149,10 +151,15 @@ public final class VertxRLPxService implements RLPxService {
   @Override
   public AsyncCompletion start() {
     if (started.compareAndSet(false, true)) {
-      handlers = new LinkedHashMap<SubProtocol, SubProtocolHandler>();
+      handlers = new LinkedHashMap<>();
+      clients = new LinkedHashMap<>();
+
       for (SubProtocol subProtocol : subProtocols) {
-        handlers.put(subProtocol, subProtocol.createHandler(this));
+        SubProtocolClient client = subProtocol.createClient(this);
+        clients.put(subProtocol, client);
+        handlers.put(subProtocol, subProtocol.createHandler(this, client));
       }
+
       client = vertx.createNetClient(new NetClientOptions());
       server = vertx
           .createNetServer(new NetServerOptions().setPort(listenPort).setHost(networkInterface).setTcpKeepAlive(true))
@@ -273,9 +280,12 @@ public final class VertxRLPxService implements RLPxService {
 
   @Override
   public SubProtocolClient getClient(SubProtocolIdentifier subProtocolIdentifier) {
-    for (SubProtocol subProtocol : subProtocols) {
-      if (subProtocol.supports(subProtocolIdentifier)) {
-        return subProtocol.createClient(this);
+    if (!started.get()) {
+      throw new IllegalStateException("The RLPx service is not active");
+    }
+    for (Map.Entry<SubProtocol, SubProtocolClient> clientEntry : clients.entrySet()) {
+      if (clientEntry.getKey().id().equals(subProtocolIdentifier)) {
+        return clientEntry.getValue();
       }
     }
     return null;

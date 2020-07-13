@@ -18,6 +18,7 @@ package org.apache.tuweni.les
 
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.devp2p.eth.Status
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.units.bigints.UInt256
 
@@ -31,7 +32,7 @@ import org.apache.tuweni.units.bigints.UInt256
  */
 internal data class StatusMessage(
   val protocolVersion: Int,
-  val networkId: Int,
+  val networkId: UInt256,
   val headTd: UInt256,
   val headHash: Bytes32,
   val headNum: UInt256,
@@ -54,7 +55,7 @@ internal data class StatusMessage(
       }
       writer.writeList { listWriter ->
         listWriter.writeString("networkId")
-        listWriter.writeInt(networkId)
+        listWriter.writeUInt256(networkId)
       }
       writer.writeList { listWriter ->
         listWriter.writeString("headTd")
@@ -109,6 +110,10 @@ internal data class StatusMessage(
     }
   }
 
+  fun toStatus(): Status {
+    return Status(protocolVersion, networkId, headTd, headHash, genesisHash, null, null)
+  }
+
   companion object {
 
     /**
@@ -124,11 +129,12 @@ internal data class StatusMessage(
           reader.readList<Any> { eltReader ->
             val key = eltReader.readString()
 
-            if ("protocolVersion" == key || "networkId" == key || "announceType" == key) {
+            if ("protocolVersion" == key || "announceType" == key) {
               parameters[key] = eltReader.readInt()
             } else if ("headHash" == key || "genesisHash" == key) {
               parameters[key] = Bytes32.wrap(eltReader.readValue())
-            } else if ("headTd" == key ||
+            } else if ("networkId" == key ||
+              "headTd" == key ||
               "headNum" == key ||
               "serveChainSince" == key ||
               "serveStateSince" == key ||
@@ -146,7 +152,7 @@ internal data class StatusMessage(
 
         StatusMessage(
           parameters["protocolVersion"] as Int,
-          parameters["networkId"] as Int,
+          parameters["networkId"] as UInt256,
           parameters["headTd"] as UInt256,
           parameters["headHash"] as Bytes32,
           parameters["headNum"] as UInt256,

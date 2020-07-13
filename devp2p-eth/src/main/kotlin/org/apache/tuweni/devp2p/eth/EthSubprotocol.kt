@@ -30,10 +30,8 @@ class EthSubprotocol(
   private val coroutineContext: CoroutineContext = Dispatchers.Default,
   private val blockchainInfo: BlockchainInformation,
   private val repository: BlockchainRepository,
-  private val listener: (WireConnection, StatusMessage) -> Unit = { _, _ -> }
+  private val listener: (WireConnection, Status) -> Unit = { _, _ -> }
 ) : SubProtocol {
-
-  private var client: EthClient? = null
 
   companion object {
     val ETH62 = SubProtocolIdentifier.of("eth", 62)
@@ -48,26 +46,21 @@ class EthSubprotocol(
   }
 
   override fun versionRange(version: Int): Int {
-    if (version == ETH62.version()) {
-      return 8
+    return if (version == ETH62.version()) {
+      8
     } else {
-      return 17
+      17
     }
   }
 
-  override fun createHandler(service: RLPxService): SubProtocolHandler {
-    val controller = EthController(repository, createClient(service) as EthRequestsManager, listener)
+  override fun createHandler(service: RLPxService, client: SubProtocolClient): SubProtocolHandler {
+    val controller = EthController(repository, client as EthRequestsManager, listener)
     return EthHandler(coroutineContext, blockchainInfo, service, controller)
   }
 
   override fun getCapabilities() = mutableListOf(ETH62, ETH63, ETH64)
 
   override fun createClient(service: RLPxService): SubProtocolClient {
-    if (client == null) {
-      val c = EthClient(service)
-      client = c
-      return c
-    }
-    return client!!
+    return EthClient(service)
   }
 }

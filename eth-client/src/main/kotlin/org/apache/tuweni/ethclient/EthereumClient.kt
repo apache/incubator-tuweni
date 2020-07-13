@@ -129,7 +129,7 @@ class EthereumClient(
             repository = repository,
             blockchainInfo = SimpleBlockchainInformation(
               UInt256.valueOf(genesisFile!!.chainId.toLong()), genesisBlock.header.difficulty,
-              genesisBlock.header.hash, genesisBlock.header.hash, genesisFile.forks
+              genesisBlock.header.hash, genesisBlock.header.number, genesisBlock.header.hash, genesisFile.forks
             )
           )
         ),

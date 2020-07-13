@@ -26,6 +26,9 @@ import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
+import org.apache.tuweni.devp2p.eth.EthClient
+import org.apache.tuweni.devp2p.eth.EthController
+import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.Block
 import org.apache.tuweni.eth.BlockBody
@@ -40,6 +43,7 @@ import org.apache.tuweni.junit.LuceneIndexWriterExtension
 import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.les.LESSubprotocol.Companion.LES_ID
+import org.apache.tuweni.rlpx.MemoryWireConnectionsRepository
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.WireConnectionRepository
 import org.apache.tuweni.rlpx.wire.DisconnectReason
@@ -99,6 +103,14 @@ constructor() {
   )
   private val block = Block(header, body)
 
+  private val blockchainInformation = SimpleBlockchainInformation(
+    UInt256.valueOf(42L),
+    UInt256.ONE,
+    block.header.hash, UInt256.valueOf(42L),
+    block.header.hash,
+    emptyList()
+  )
+
   private class MyRLPxService : RLPxService {
     override fun getClient(subProtocolIdentifier: SubProtocolIdentifier): SubProtocolClient {
       TODO("not implemented")
@@ -139,7 +151,7 @@ constructor() {
     }
 
     override fun repository(): WireConnectionRepository? {
-      return null
+      return MemoryWireConnectionsRepository()
     }
   }
 
@@ -170,21 +182,22 @@ constructor() {
           BlockchainIndex(writer),
           block
         )
+      val controller = EthController(repo, EthClient(service))
 
       val handler = LESSubProtocolHandler(
         service,
         LES_ID,
-        1,
+        blockchainInformation,
         false,
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
-        repo
+        controller
       )
       val conn = makeConnection()
-      handler.handleNewPeerConnection(conn).await()
+      handler.handleNewPeerConnection(conn)
       val message = StatusMessage.read(service.message!!)
       assertNotNull(message)
       assertEquals(2, message.protocolVersion)
@@ -198,7 +211,7 @@ constructor() {
     runBlocking {
       val status = StatusMessage(
         2,
-        1,
+        UInt256.ONE,
         UInt256.valueOf(23),
         Bytes32.random(),
         UInt256.valueOf(3443),
@@ -224,21 +237,22 @@ constructor() {
           BlockchainIndex(writer),
           block
         )
+      val controller = EthController(repo, EthClient(service))
 
       val handler = LESSubProtocolHandler(
         service,
         LES_ID,
-        1,
+        blockchainInformation,
         false,
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
-        repo
+        controller
       )
       val conn = makeConnection()
-      handler.handleNewPeerConnection(conn).await()
+      handler.handleNewPeerConnection(conn)
       handler.handle(conn, 0, status).await()
       assertThrows(IllegalStateException::class.java) {
         runBlocking {
@@ -262,17 +276,19 @@ constructor() {
       MapKeyValueStore(),
       BlockchainIndex(writer)
     )
+    val controller = EthController(repo, EthClient(service))
+
     val handler = LESSubProtocolHandler(
       service,
       LES_ID,
-      1,
+      blockchainInformation,
       false,
       UInt256.ZERO,
       UInt256.ZERO,
       UInt256.ZERO,
       UInt256.ZERO,
       UInt256.ZERO,
-      repo
+      controller
     )
     assertThrows(IllegalStateException::class.java) {
       runBlocking {
@@ -300,21 +316,22 @@ constructor() {
           BlockchainIndex(writer),
           block
         )
+      val controller = EthController(repo, EthClient(service))
       val handler = LESSubProtocolHandler(
         service,
         LES_ID,
-        1,
+        blockchainInformation,
         false,
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
-        repo
+        controller
       )
       val status = StatusMessage(
         2,
-        1,
+        UInt256.ONE,
         UInt256.valueOf(23),
         Bytes32.random(),
         UInt256.valueOf(3443),
@@ -328,8 +345,9 @@ constructor() {
         0
       ).toBytes()
       val conn = makeConnection()
-      handler.handleNewPeerConnection(conn).await()
+      val ready = handler.handleNewPeerConnection(conn)
       handler.handle(conn, 0, status).await()
+      ready.await()
 
       handler.handle(
         conn,
@@ -352,76 +370,6 @@ constructor() {
 
   @Test
   @Throws(Exception::class)
-  fun receivedBlockHeadersMessage(@LuceneIndexWriter writer: IndexWriter) =
-    runBlocking {
-      val service = MyRLPxService()
-      val repo = BlockchainRepository
-        .init(
-          MapKeyValueStore(),
-          MapKeyValueStore(),
-          MapKeyValueStore(),
-          MapKeyValueStore(),
-          MapKeyValueStore(),
-          MapKeyValueStore(),
-          BlockchainIndex(writer),
-          block
-        )
-      val handler = LESSubProtocolHandler(
-        service,
-        LES_ID,
-        1,
-        false,
-        UInt256.ZERO,
-        UInt256.ZERO,
-        UInt256.ZERO,
-        UInt256.ZERO,
-        UInt256.ZERO,
-        repo
-      )
-      val status = StatusMessage(
-        2,
-        1,
-        UInt256.valueOf(23),
-        Bytes32.random(),
-        UInt256.valueOf(3443),
-        Bytes32.random(), null,
-        UInt256.valueOf(333),
-        UInt256.valueOf(453),
-        true,
-        UInt256.valueOf(3),
-        UInt256.valueOf(4),
-        UInt256.valueOf(5),
-        0
-      ).toBytes()
-
-      val header = BlockHeader(
-        Hash.fromBytes(Bytes32.random()),
-        Hash.fromBytes(Bytes32.random()),
-        Address.fromBytes(Bytes.random(20)),
-        Hash.fromBytes(Bytes32.random()),
-        Hash.fromBytes(Bytes32.random()),
-        Hash.fromBytes(Bytes32.random()),
-        Bytes32.random(),
-        UInt256.fromBytes(Bytes32.random()),
-        UInt256.fromBytes(Bytes32.random()),
-        Gas.valueOf(3),
-        Gas.valueOf(2),
-        Instant.now().truncatedTo(ChronoUnit.SECONDS),
-        Bytes.of(2, 3, 4),
-        Hash.fromBytes(Bytes32.random()),
-        UInt64.random()
-      )
-
-      val conn = makeConnection()
-      handler.handleNewPeerConnection(conn).await()
-      handler.handle(conn, 0, status).await()
-      handler.handle(conn, 3, BlockHeadersMessage(1, 2, listOf(header)).toBytes()).await()
-      val retrieved = repo.retrieveBlockHeader(header.getHash())
-      assertEquals(header, retrieved)
-    }
-
-  @Test
-  @Throws(Exception::class)
   fun receivedGetBlockBodiesMessage(@LuceneIndexWriter writer: IndexWriter) =
     runBlocking {
       val service = MyRLPxService()
@@ -436,21 +384,22 @@ constructor() {
           BlockchainIndex(writer),
           block
         )
+      val controller = EthController(repo, EthClient(service))
       val handler = LESSubProtocolHandler(
         service,
         LES_ID,
-        1,
+        blockchainInformation,
         false,
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
-        repo
+        controller
       )
       val status = StatusMessage(
         2,
-        1,
+        UInt256.ONE,
         UInt256.valueOf(23),
         Bytes32.random(),
         UInt256.valueOf(3443),
@@ -464,8 +413,9 @@ constructor() {
         0
       ).toBytes()
       val conn = makeConnection()
-      handler.handleNewPeerConnection(conn).await()
+      val ready = handler.handleNewPeerConnection(conn)
       handler.handle(conn, 0, status).await()
+      ready.await()
 
       handler
         .handle(conn, 4, GetBlockBodiesMessage(1, listOf(Hash.fromBytes(Bytes32.random()))).toBytes()).await()
@@ -490,21 +440,23 @@ constructor() {
           BlockchainIndex(writer),
           block
         )
+      val controller = EthController(repo, EthClient(service))
+
       val handler = LESSubProtocolHandler(
         service,
         LES_ID,
-        1,
+        blockchainInformation,
         false,
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
-        repo
+        controller
       )
       val status = StatusMessage(
         2,
-        1,
+        UInt256.ONE,
         UInt256.valueOf(23),
         Bytes32.random(),
         UInt256.valueOf(3443),
@@ -518,8 +470,9 @@ constructor() {
         0
       ).toBytes()
       val conn = makeConnection()
-      handler.handleNewPeerConnection(conn).await()
+      val ready = handler.handleNewPeerConnection(conn)
       handler.handle(conn, 0, status).await()
+      ready.await()
 
       handler
         .handle(conn, 4, GetReceiptsMessage(1, listOf(Hash.fromBytes(Bytes32.random()))).toBytes()).await()

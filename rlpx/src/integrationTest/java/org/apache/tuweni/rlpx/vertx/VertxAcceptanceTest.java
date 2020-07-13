@@ -105,7 +105,7 @@ class VertxAcceptanceTest {
     }
 
     @Override
-    public SubProtocolHandler createHandler(RLPxService service) {
+    public SubProtocolHandler createHandler(RLPxService service, SubProtocolClient client) {
       handler = new MyCustomSubProtocolHandler(service, id());
       return handler;
     }
@@ -258,7 +258,7 @@ class VertxAcceptanceTest {
           }
 
           @Override
-          public SubProtocolHandler createHandler(RLPxService service) {
+          public SubProtocolHandler createHandler(RLPxService service, SubProtocolClient client) {
             return null;
           }
 

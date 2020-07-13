@@ -46,9 +46,10 @@ public interface SubProtocol {
    * Creates a new handler for the subprotocol.
    *
    * @param service the rlpx service that will use the handler
+   * @param client the subprotocol client
    * @return a new handler for the subprotocol, bound to the service.
    */
-  SubProtocolHandler createHandler(RLPxService service);
+  SubProtocolHandler createHandler(RLPxService service, SubProtocolClient client);
 
   /**
    * Creates a new client for the subprotocol.

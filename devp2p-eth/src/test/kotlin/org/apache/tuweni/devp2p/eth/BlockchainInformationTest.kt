@@ -33,7 +33,7 @@ class BlockchainInformationTest {
     val genesisBlock = genesisFile.toBlock()
     val info = SimpleBlockchainInformation(
       UInt256.valueOf(genesisFile.chainId.toLong()), genesisBlock.header.difficulty,
-      genesisBlock.header.hash, genesisBlock.header.hash, genesisFile.forks
+      genesisBlock.header.hash, UInt256.valueOf(42L), genesisBlock.header.hash, genesisFile.forks
     )
     assertEquals(Bytes.fromHexString("0xfc64ec04"), info.getForkHashes()[0])
     assertEquals(Bytes.fromHexString("0x97c2c34c"), info.getForkHashes()[1])
@@ -52,7 +52,7 @@ class BlockchainInformationTest {
     val genesisBlock = genesisFile.toBlock()
     val info = SimpleBlockchainInformation(
       UInt256.valueOf(genesisFile.chainId.toLong()), genesisBlock.header.difficulty,
-      genesisBlock.header.hash, genesisBlock.header.hash, genesisFile.forks
+      genesisBlock.header.hash, UInt256.valueOf(42L), genesisBlock.header.hash, genesisFile.forks
     )
     assertEquals(9200000L, info.getLatestFork())
   }
