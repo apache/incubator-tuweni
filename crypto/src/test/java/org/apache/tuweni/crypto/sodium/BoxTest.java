@@ -16,11 +16,15 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +51,57 @@ class BoxTest {
   @BeforeEach
   void incrementNonce() {
     nonce = nonce.increment();
+  }
+
+  @Test
+  void badBytes() {
+    assertThrows(IllegalArgumentException.class, () -> Box.PublicKey.fromBytes(Bytes.random(20)));
+  }
+
+  @Test
+  void ObjectEquality() {
+    Box.PublicKey pk = Box.PublicKey.fromBytes(Bytes32.random());
+    assertEquals(pk, pk);
+    Box.PublicKey pk2 = Box.PublicKey.fromBytes(Bytes32.random());
+    assertNotEquals(pk, pk2);
+    assertEquals(pk.hashCode(), pk.hashCode());
+    assertNotEquals(pk.hashCode(), pk2.hashCode());
+  }
+
+  @Test
+  void ObjectEqualityNonce() {
+    Box.Nonce pk = Box.Nonce.fromBytes(Bytes32.random());
+    assertEquals(pk, pk);
+    Box.Nonce pk2 = Box.Nonce.fromBytes(Bytes32.random());
+    assertNotEquals(pk, pk2);
+    assertEquals(pk.hashCode(), pk.hashCode());
+    assertNotEquals(pk.hashCode(), pk2.hashCode());
+  }
+
+  @Test
+  void toBytes() {
+    Bytes32 value = Bytes32.random();
+    Box.PublicKey pk = Box.PublicKey.fromBytes(value);
+    assertEquals(value, pk.bytes());
+    assertArrayEquals(value.toArrayUnsafe(), pk.bytesArray());
+  }
+
+  @Test
+  void encryptDecryptSealed() {
+    Box.KeyPair keyPair = Box.KeyPair.random();
+    Bytes encrypted = Box.encryptSealed(Bytes.fromHexString("deadbeef"), keyPair.publicKey());
+    Bytes decrypted = Box.decryptSealed(encrypted, keyPair.publicKey(), keyPair.secretKey());
+    assertEquals(Bytes.fromHexString("deadbeef"), decrypted);
+  }
+
+  @Test
+  void encryptDecryptDetached() {
+    Box.KeyPair sender = Box.KeyPair.random();
+    Box.KeyPair receiver = Box.KeyPair.random();
+    Box.Nonce nonce = Box.Nonce.zero();
+    DetachedEncryptionResult encrypted = Box.encryptDetached(Bytes.fromHexString("deadbeef"), receiver.publicKey(), sender.secretKey(), nonce);
+    Bytes decrypted = Box.decryptDetached(encrypted.cipherText(), encrypted.mac(), sender.publicKey(), receiver.secretKey(), nonce);
+    assertEquals(Bytes.fromHexString("deadbeef"), decrypted);
   }
 
   @Test
