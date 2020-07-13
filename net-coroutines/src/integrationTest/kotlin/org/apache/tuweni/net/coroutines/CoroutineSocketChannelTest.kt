@@ -22,11 +22,12 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
+import java.nio.channels.CancelledKeyException
+import java.nio.channels.ClosedSelectorException
 import java.nio.charset.StandardCharsets.UTF_8
 
 internal class CoroutineSocketChannelTest {
@@ -103,44 +104,62 @@ internal class CoroutineSocketChannelTest {
     clientJob.await()
   }
 
-  @RepeatedTest(3)
+  @Test
   fun shouldCloseSocketChannelWhenRemoteClosed() = runBlocking {
-    val listenChannel = CoroutineServerSocketChannel.open()
-    listenChannel.bind(InetSocketAddress(InetAddress.getLoopbackAddress(), 0))
-    val addr =
-      InetSocketAddress(InetAddress.getLoopbackAddress(), (listenChannel.localAddress as InetSocketAddress).port)
+    var counter = 0
+    while (counter < 5) {
+      try {
+        val listenChannel = CoroutineServerSocketChannel.open()
+        listenChannel.bind(InetSocketAddress(InetAddress.getLoopbackAddress(), 0))
+        val addr =
+          InetSocketAddress(InetAddress.getLoopbackAddress(), (listenChannel.localAddress as InetSocketAddress).port)
 
-    val serverJob = async {
-      val serverChannel = listenChannel.accept()
-      assertNotNull(serverChannel)
-      assertTrue(serverChannel.isConnected)
+        val serverJob = async {
+          val serverChannel = listenChannel.accept()
+          assertNotNull(serverChannel)
+          assertTrue(serverChannel.isConnected)
 
-      val dst = ByteBuffer.allocate(1024)
-      serverChannel.read(dst)
+          val dst = ByteBuffer.allocate(1024)
+          serverChannel.read(dst)
 
-      dst.flip()
-      val chars = ByteArray(dst.limit())
-      dst.get(chars, 0, dst.limit())
-      assertEquals("testing123456", String(chars, UTF_8))
+          dst.flip()
+          val chars = ByteArray(dst.limit())
+          dst.get(chars, 0, dst.limit())
+          assertEquals("testing123456", String(chars, UTF_8))
 
-      serverChannel.close()
+          serverChannel.close()
+        }
+
+        serverJob.start()
+
+        val clientJob = async {
+          val clientChannel = CoroutineSocketChannel.open()
+          clientChannel.connect(addr)
+
+          clientChannel.write(ByteBuffer.wrap("testing123456".toByteArray(UTF_8)))
+
+          val dst = ByteBuffer.allocate(1024)
+          assertTrue(clientChannel.read(dst) < 0)
+
+          clientChannel.close()
+        }
+
+        serverJob.await()
+        clientJob.await()
+        return@runBlocking
+      } catch (e: Exception) {
+        when (e) {
+          is CancelledKeyException, is ClosedSelectorException -> {
+            counter++
+            if (counter > 5) {
+              throw e
+            }
+          }
+          else -> {
+            throw e
+          }
+        }
+      }
     }
-
-    serverJob.start()
-
-    val clientJob = async {
-      val clientChannel = CoroutineSocketChannel.open()
-      clientChannel.connect(addr)
-
-      clientChannel.write(ByteBuffer.wrap("testing123456".toByteArray(UTF_8)))
-
-      val dst = ByteBuffer.allocate(1024)
-      assertTrue(clientChannel.read(dst) < 0)
-
-      clientChannel.close()
-    }
-
-    serverJob.await()
-    clientJob.await()
   }
 }
