@@ -280,7 +280,7 @@ public interface UInt32Value<T extends UInt32Value<T>> extends Comparable<T> {
    * @return True if this value fits a java {@code int} (i.e. is less or equal to {@code Integer.MAX_VALUE}).
    */
   default boolean fitsInt() {
-    return true;
+    return !UInt32.MAX_VALUE.equals(this);
   }
 
   /**
@@ -289,10 +289,7 @@ public interface UInt32Value<T extends UInt32Value<T>> extends Comparable<T> {
    *     !fitsInt()}.
    */
   default int intValue() {
-    if (!fitsInt()) {
-      throw new ArithmeticException("Value does not fit a 4 byte int");
-    }
-    return toBytes().getInt(4);
+    return toBigInteger().intValueExact();
   }
 
   /**
@@ -308,10 +305,7 @@ public interface UInt32Value<T extends UInt32Value<T>> extends Comparable<T> {
    *     !fitsLong()}.
    */
   default long toLong() {
-    if (!fitsLong()) {
-      throw new ArithmeticException("Value does not fit a 8 byte long");
-    }
-    return toBytes().getLong(0);
+    return toBigInteger().longValueExact();
   }
 
   /**
