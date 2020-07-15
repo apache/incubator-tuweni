@@ -101,7 +101,7 @@ object InfinispanKeyValueStoreSpec : Spek({
   val cacheManager = DefaultCacheManager()
   cacheManager.defineConfiguration("local", ConfigurationBuilder().build())
   val backingMap: Cache<Bytes, Bytes> = cacheManager.getCache("local")
-  val kv = MapKeyValueStore(backingMap)
+  val kv = InfinispanKeyValueStore(backingMap)
 
   describe("a map-backed key value store") {
 
