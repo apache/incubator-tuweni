@@ -13,6 +13,7 @@
 package org.apache.tuweni.units.bigints;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -33,6 +34,10 @@ class UInt32Test {
 
   private static UInt32 hv(String s) {
     return UInt32.fromHexString(s);
+  }
+
+  private static Bytes b(String s) {
+    return Bytes.fromHexString(s);
   }
 
   @Test
@@ -234,6 +239,7 @@ class UInt32Test {
   private static Stream<Arguments> multiplyProvider() {
     return Stream
         .of(
+            Arguments.of(v(1), v(1), v(1)),
             Arguments.of(v(0), v(2), v(0)),
             Arguments.of(v(1), v(2), v(2)),
             Arguments.of(v(2), v(2), v(4)),
@@ -256,6 +262,7 @@ class UInt32Test {
   private static Stream<Arguments> multiplyLongProvider() {
     return Stream
         .of(
+            Arguments.of(v(1), 1, v(1)),
             Arguments.of(v(0), 2, v(0)),
             Arguments.of(v(1), 2, v(2)),
             Arguments.of(v(2), 2, v(4)),
@@ -370,6 +377,7 @@ class UInt32Test {
   private static Stream<Arguments> divideProvider() {
     return Stream
         .of(
+            Arguments.of(v(1), v(1), v(1)),
             Arguments.of(v(0), v(2), v(0)),
             Arguments.of(v(1), v(2), v(0)),
             Arguments.of(v(2), v(2), v(1)),
@@ -399,6 +407,7 @@ class UInt32Test {
   private static Stream<Arguments> divideLongProvider() {
     return Stream
         .of(
+            Arguments.of(v(1), 1, v(1)),
             Arguments.of(v(0), 2, v(0)),
             Arguments.of(v(1), 2, v(0)),
             Arguments.of(v(2), 2, v(1)),
@@ -495,26 +504,43 @@ class UInt32Test {
 
   @ParameterizedTest
   @MethodSource("andProvider")
-  void and(UInt32 v1, UInt32 v2, UInt32 expected) {
-    assertValueEquals(expected, v1.and(v2));
+  void and(UInt32 v1, Object v2, UInt32 expected) {
+    if (v2 instanceof UInt32) {
+      assertValueEquals(expected, v1.and((UInt32) v2));
+    } else if (v2 instanceof Bytes) {
+      assertValueEquals(expected, v1.and((Bytes) v2));
+    } else {
+      throw new IllegalArgumentException();
+    }
   }
 
   private static Stream<Arguments> andProvider() {
     return Stream
         .of(
+            Arguments.of(hv("0x0000FFFF"), b("0xFFFF0000"), hv("0x00000000")),
+            Arguments.of(hv("0x0000FFFF"), b("0xFFFFFF00"), hv("0x0000FF00")),
             Arguments.of(hv("0x0000FFFF"), hv("0xFFFF0000"), hv("0x00000000")),
             Arguments.of(hv("0x0000FFFF"), hv("0xFFFFFF00"), hv("0x0000FF00")));
   }
 
   @ParameterizedTest
   @MethodSource("orProvider")
-  void or(UInt32 v1, UInt32 v2, UInt32 expected) {
-    assertValueEquals(expected, v1.or(v2));
+  void or(UInt32 v1, Object v2, UInt32 expected) {
+    if (v2 instanceof UInt32) {
+      assertValueEquals(expected, v1.or((UInt32) v2));
+    } else if (v2 instanceof Bytes) {
+      assertValueEquals(expected, v1.or((Bytes) v2));
+    } else {
+      throw new IllegalArgumentException();
+    }
   }
 
   private static Stream<Arguments> orProvider() {
     return Stream
         .of(
+            Arguments.of(hv("0x0000FFFF"), b("0xFFFF0000"), hv("0xFFFFFFFF")),
+            Arguments.of(hv("0x0000FFFF"), b("0xFFFF0000"), hv("0xFFFFFFFF")),
+            Arguments.of(hv("0x000000FF"), b("0xFFFF0000"), hv("0xFFFF00FF")),
             Arguments.of(hv("0x0000FFFF"), hv("0xFFFF0000"), hv("0xFFFFFFFF")),
             Arguments.of(hv("0x0000FFFF"), hv("0xFFFF0000"), hv("0xFFFFFFFF")),
             Arguments.of(hv("0x000000FF"), hv("0xFFFF0000"), hv("0xFFFF00FF")));
@@ -522,13 +548,22 @@ class UInt32Test {
 
   @ParameterizedTest
   @MethodSource("xorProvider")
-  void xor(UInt32 v1, UInt32 v2, UInt32 expected) {
-    assertValueEquals(expected, v1.xor(v2));
+  void xor(UInt32 v1, Object v2, UInt32 expected) {
+    if (v2 instanceof UInt32) {
+      assertValueEquals(expected, v1.xor((UInt32) v2));
+    } else if (v2 instanceof Bytes) {
+      assertValueEquals(expected, v1.xor((Bytes) v2));
+    } else {
+      throw new IllegalArgumentException();
+    }
   }
 
   private static Stream<Arguments> xorProvider() {
     return Stream
         .of(
+            Arguments.of(hv("0xFFFFFFFF"), b("0xFFFFFFFF"), hv("0x00000000")),
+            Arguments.of(hv("0x0000FFFF"), b("0xFFFF0000"), hv("0xFFFFFFFF")),
+            Arguments.of(hv("0x0000FFFF"), b("0xFFFFFF00"), hv("0xFFFF00FF")),
             Arguments.of(hv("0xFFFFFFFF"), hv("0xFFFFFFFF"), hv("0x00000000")),
             Arguments.of(hv("0x0000FFFF"), hv("0xFFFF0000"), hv("0xFFFFFFFF")),
             Arguments.of(hv("0x0000FFFF"), hv("0xFFFFFF00"), hv("0xFFFF00FF")));
@@ -557,6 +592,7 @@ class UInt32Test {
   private static Stream<Arguments> shiftLeftProvider() {
     return Stream
         .of(
+            Arguments.of(hv("0x01"), 0, hv("0x01")),
             Arguments.of(hv("0x01"), 1, hv("0x02")),
             Arguments.of(hv("0x01"), 2, hv("0x04")),
             Arguments.of(hv("0x01"), 8, hv("0x0100")),
@@ -580,6 +616,7 @@ class UInt32Test {
   private static Stream<Arguments> shiftRightProvider() {
     return Stream
         .of(
+            Arguments.of(hv("0x01"), 0, hv("0x01")),
             Arguments.of(hv("0x01"), 1, hv("0x00")),
             Arguments.of(hv("0x10"), 1, hv("0x08")),
             Arguments.of(hv("0x10"), 2, hv("0x04")),
@@ -774,4 +811,21 @@ class UInt32Test {
     String msg = String.format("Expected %s but got %s", expected.toHexString(), actual.toHexString());
     assertEquals(expected, actual, msg);
   }
+
+  @Test
+  void testToUInt32() {
+    UInt32 value = UInt32.valueOf(42);
+    assertSame(value, value.toUInt32());
+  }
+
+  @Test
+  void toIntTooLarge() {
+    assertThrows(ArithmeticException.class, UInt32.MAX_VALUE::intValue);
+  }
+
+  @Test
+  void toLongTooLarge() {
+    assertEquals(4294967295L, UInt32.MAX_VALUE.toLong());
+  }
+
 }

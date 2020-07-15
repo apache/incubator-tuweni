@@ -448,22 +448,6 @@ public final class UInt32 implements UInt32Value<UInt32> {
   }
 
   @Override
-  public int intValue() {
-    if (!fitsInt()) {
-      throw new ArithmeticException("Value does not fit a 4 byte int");
-    }
-    return this.value;
-  }
-
-  @Override
-  public long toLong() {
-    if (!fitsLong()) {
-      throw new ArithmeticException("Value does not fit a 8 byte long");
-    }
-    return toBigInteger().longValue();
-  }
-
-  @Override
   public String toString() {
     return String.valueOf(value);
   }
