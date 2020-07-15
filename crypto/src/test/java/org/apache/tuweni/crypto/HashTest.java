@@ -18,6 +18,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.junit.BouncyCastleExtension;
 
+import java.security.Provider;
+import java.security.Security;
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -115,5 +119,27 @@ class HashTest {
 
     byte[] resultCow2 = Hash.sha3_512("cow".getBytes(UTF_8));
     assertArrayEquals(Bytes.fromHexString(cowSha3).toArray(), resultCow2);
+  }
+
+  @Test
+  void testWithoutProviders() {
+    Provider[] providers = Security.getProviders();
+    Stream.of(Security.getProviders()).map(Provider::getName).forEach(Security::removeProvider);
+    try {
+      assertThrows(IllegalStateException.class, () -> Hash.sha2_256("horse".getBytes(UTF_8)));
+      assertThrows(IllegalStateException.class, () -> Hash.sha2_256(Bytes.wrap("horse".getBytes(UTF_8))));
+      assertThrows(IllegalStateException.class, () -> Hash.sha3_256("horse".getBytes(UTF_8)));
+      assertThrows(IllegalStateException.class, () -> Hash.sha3_256(Bytes.wrap("horse".getBytes(UTF_8))));
+      assertThrows(IllegalStateException.class, () -> Hash.sha3_512("horse".getBytes(UTF_8)));
+      assertThrows(IllegalStateException.class, () -> Hash.sha3_512(Bytes.wrap("horse".getBytes(UTF_8))));
+      assertThrows(IllegalStateException.class, () -> Hash.keccak256("horse".getBytes(UTF_8)));
+      assertThrows(IllegalStateException.class, () -> Hash.keccak256(Bytes.wrap("horse".getBytes(UTF_8))));
+      assertThrows(IllegalStateException.class, () -> Hash.sha2_512_256("horse".getBytes(UTF_8)));
+      assertThrows(IllegalStateException.class, () -> Hash.sha2_512_256(Bytes.wrap("horse".getBytes(UTF_8))));
+    } finally {
+      for (Provider p : providers) {
+        Security.addProvider(p);
+      }
+    }
   }
 }

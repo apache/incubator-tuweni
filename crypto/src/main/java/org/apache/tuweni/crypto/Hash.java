@@ -69,10 +69,7 @@ public final class Hash {
    */
   public static Bytes digestUsingAlgorithm(Bytes input, String alg) throws NoSuchAlgorithmException {
     requireNonNull(input);
-    requireNonNull(alg);
-    MessageDigest digest = MessageDigest.getInstance(alg);
-    input.update(digest);
-    return Bytes.wrap(digest.digest());
+    return Bytes.wrap(digestUsingAlgorithm(input.toArrayUnsafe(), alg));
   }
 
   /**
@@ -97,7 +94,7 @@ public final class Hash {
    */
   public static Bytes32 sha2_256(Bytes input) {
     try {
-      return Bytes32.wrap(digestUsingAlgorithm(input, SHA2_256).toArrayUnsafe());
+      return (Bytes32) digestUsingAlgorithm(input, SHA2_256);
     } catch (NoSuchAlgorithmException e) {
       throw new IllegalStateException("Algorithm should be available but was not", e);
     }
@@ -125,7 +122,7 @@ public final class Hash {
    */
   public static Bytes32 sha2_512_256(Bytes input) {
     try {
-      return Bytes32.wrap(digestUsingAlgorithm(input, SHA2_512_256).toArrayUnsafe());
+      return (Bytes32) digestUsingAlgorithm(input, SHA2_512_256);
     } catch (NoSuchAlgorithmException e) {
       throw new IllegalStateException("Algorithm should be available but was not", e);
     }
@@ -153,7 +150,7 @@ public final class Hash {
    */
   public static Bytes32 keccak256(Bytes input) {
     try {
-      return Bytes32.wrap(digestUsingAlgorithm(input, KECCAK_256).toArrayUnsafe());
+      return (Bytes32) digestUsingAlgorithm(input, KECCAK_256);
     } catch (NoSuchAlgorithmException e) {
       throw new IllegalStateException("Algorithm should be available but was not", e);
     }
@@ -181,7 +178,7 @@ public final class Hash {
    */
   public static Bytes keccak512(Bytes input) {
     try {
-      return Bytes.wrap(digestUsingAlgorithm(input, KECCAK_512).toArrayUnsafe());
+      return digestUsingAlgorithm(input, KECCAK_512);
     } catch (NoSuchAlgorithmException e) {
       throw new IllegalStateException("Algorithm should be available but was not", e);
     }
@@ -209,7 +206,7 @@ public final class Hash {
    */
   public static Bytes32 sha3_256(Bytes input) {
     try {
-      return Bytes32.wrap(digestUsingAlgorithm(input, SHA3_256).toArrayUnsafe());
+      return (Bytes32) digestUsingAlgorithm(input, SHA3_256);
     } catch (NoSuchAlgorithmException e) {
       throw new IllegalStateException("Algorithm should be available but was not", e);
     }
@@ -237,7 +234,7 @@ public final class Hash {
    */
   public static Bytes sha3_512(Bytes input) {
     try {
-      return Bytes.wrap(digestUsingAlgorithm(input, SHA3_512).toArrayUnsafe());
+      return digestUsingAlgorithm(input, SHA3_512);
     } catch (NoSuchAlgorithmException e) {
       throw new IllegalStateException("Algorithm should be available but was not", e);
     }

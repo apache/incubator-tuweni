@@ -54,7 +54,7 @@ public final class Streams {
    */
   public static <T> Stream<T> enumerationStream(Enumeration<T> enumeration) {
     requireNonNull(enumeration);
-    return StreamSupport.stream(new Spliterators.AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED) {
+    return StreamSupport.stream(new Spliterators.AbstractSpliterator<>(Long.MAX_VALUE, Spliterator.ORDERED) {
       @Override
       public boolean tryAdvance(Consumer<? super T> action) {
         if (enumeration.hasMoreElements()) {
@@ -62,13 +62,6 @@ public final class Streams {
           return true;
         }
         return false;
-      }
-
-      @Override
-      public void forEachRemaining(Consumer<? super T> action) {
-        while (enumeration.hasMoreElements()) {
-          action.accept(enumeration.nextElement());
-        }
       }
     }, false);
   }
