@@ -59,7 +59,7 @@ final class ProgPoWMath {
   }
 
   private static UInt32 popcount(UInt32 value) {
-    return UInt32.valueOf(Integer.bitCount(value.intValue()));
+    return UInt32.valueOf(Long.bitCount(value.toLong()));
   }
 
   static UInt32 rotl32(UInt32 var, UInt32 hops) {
