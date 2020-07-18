@@ -37,7 +37,6 @@ import java.net.InetAddress
 @Timeout(10)
 class TopicIntegrationTest : AbstractIntegrationTest() {
 
-  @Disabled("Blocks testing")
   @Test
   fun advertiseTopicAndRegistrationSuccessful() = runBlocking {
     val node1 = createNode(9070)
@@ -57,7 +56,7 @@ class TopicIntegrationTest : AbstractIntegrationTest() {
     node2.service.terminate()
   }
 
-  @Disabled("Blocks testing")
+  @Disabled
   @ExperimentalCoroutinesApi
   @Test
   fun advertiseTopicAndNeedToWaitWhenTopicQueueIsFull() = runBlocking(Dispatchers.Unconfined) {
@@ -86,7 +85,6 @@ class TopicIntegrationTest : AbstractIntegrationTest() {
     node2.service.terminate()
   }
 
-  @Disabled("Blocks testing")
   @Test
   fun searchTopicReturnListOfNodes() = runBlocking {
     val node1 = createNode(9060)

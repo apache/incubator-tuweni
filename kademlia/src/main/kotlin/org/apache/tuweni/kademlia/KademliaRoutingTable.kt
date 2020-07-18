@@ -18,6 +18,7 @@ package org.apache.tuweni.kademlia
 
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
+import java.util.Collections
 import java.util.function.Function
 
 /**
@@ -179,7 +180,8 @@ class KademliaRoutingTable<T>(
   fun nearest(targetId: ByteArray, limit: Int): List<T> {
     val results = mutableListOf<T>()
     for (bucket in buckets) {
-      for (node in bucket) {
+      val bucketView = ArrayList(bucket)
+      for (node in bucketView) {
         val nodeId = idForNode(node)
         results.orderedInsert(node) { a, _ -> targetId.xorDistCmp(idForNode(a), nodeId) }
         if (results.size > limit) {
@@ -244,7 +246,7 @@ class KademliaRoutingTable<T>(
     private val maxReplacements: Int
   ) : List<E> by entries {
 
-    constructor(k: Int, maxReplacements: Int) : this(mutableListOf(), k, maxReplacements)
+    constructor(k: Int, maxReplacements: Int) : this(Collections.synchronizedList(mutableListOf()), k, maxReplacements)
 
     // ordered with most recent last
     private val replacementCache = mutableListOf<E>()
