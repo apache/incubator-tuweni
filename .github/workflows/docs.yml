@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-name: master pr build
+name: docs
 
 on:
   push:
@@ -44,7 +44,7 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: gradle docs
+      - name: gradle setup
         uses: eskatos/gradle-command-action@v1
         with:
           gradle-version: 6.3
