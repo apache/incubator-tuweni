@@ -19,6 +19,9 @@ package org.apache.tuweni.devp2p.v5.packet
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
 
+/**
+ * Discovery message sent over UDP.
+ */
 interface UdpMessage {
 
   companion object {
