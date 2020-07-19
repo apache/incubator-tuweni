@@ -52,7 +52,7 @@ jobs:
       - name: gradle docs
         run: ./gradlew dokka | grep -i 'No documentation for' | grep -v DisconnectReason | grep -v RPCFlag | grep -v RPCRequestType | grep -v TomlVersion | grep -v PasswordHash | grep -v MessageSender | grep -v "Identity.Curve" >> docs_warning
       - name: Fail if warnings
-        run: [ -s "docs_warning" ] && cat docs_warning && exit 1
+        run: '[ -s "docs_warning" ] && cat docs_warning && exit 1'
       - name: Upload docs
         uses: actions/upload-artifact@v2
         with:
