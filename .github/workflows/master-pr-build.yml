@@ -122,9 +122,9 @@ jobs:
           gradle-version: 6.3
           arguments: test jacocoTestReport
       - name: Upload to Codecov
-          uses: codecov/codecov-action@v1
-          with:
-            flags: unit
+        uses: codecov/codecov-action@v1
+        with:
+          flags: unit
   integration-tests:
     runs-on: ubuntu-latest
     services:
@@ -165,9 +165,9 @@ jobs:
           gradle-version: 6.3
           arguments: integrationTest jacocoTestReport
       - name: Upload to Codecov
-          uses: codecov/codecov-action@v1
-          with:
-            flags: integration
+        uses: codecov/codecov-action@v1
+        with:
+          flags: integration
   docs:
     runs-on: ubuntu-latest
     container:
