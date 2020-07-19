@@ -29,7 +29,7 @@ import java.util.stream.Stream;
  * This implements the ProgPoW algorithm (https://github.com/ifdefelse/ProgPOW). This algorithm is licensed under CC0
  * 1.0 Universal (CC0 1.0) Public Domain Dedication (https://creativecommons.org/publicdomain/zero/1.0/)
  *
- * @implSpec https://github.com/ifdefelse/ProgPOW
+ * See the specification at https://github.com/ifdefelse/ProgPOW
  */
 public final class ProgPoW {
 

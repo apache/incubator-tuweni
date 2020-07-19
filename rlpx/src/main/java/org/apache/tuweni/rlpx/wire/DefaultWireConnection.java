@@ -73,6 +73,8 @@ public final class DefaultWireConnection implements WireConnection {
    * @param clientId the client ID to announce in HELLO messages
    * @param advertisedPort the port we listen to, to announce in HELLO messages
    * @param ready a handle to complete when the connection is ready for use.
+   * @param peerHost the peer's host
+   * @param peerPort the peer's port
    */
   public DefaultWireConnection(
       Bytes nodeId,

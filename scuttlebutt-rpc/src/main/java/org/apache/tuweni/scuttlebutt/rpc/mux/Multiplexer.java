@@ -16,7 +16,6 @@ import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.scuttlebutt.rpc.RPCAsyncRequest;
 import org.apache.tuweni.scuttlebutt.rpc.RPCResponse;
 import org.apache.tuweni.scuttlebutt.rpc.RPCStreamRequest;
-import org.apache.tuweni.scuttlebutt.rpc.mux.exceptions.ConnectionClosedException;
 
 import java.util.function.Function;
 
@@ -34,6 +33,7 @@ public interface Multiplexer {
    * @param request the request details
    *
    * @return an async result which will be completed with the result or an error if the request fails.
+   * @throws JsonProcessingException if JSON marshalling fails.
    */
   AsyncResult<RPCResponse> makeAsyncRequest(RPCAsyncRequest request) throws JsonProcessingException;
 
@@ -44,12 +44,10 @@ public interface Multiplexer {
    * @param streamFactory a function which takes a 'Runnable' which closes the stream when ran, and returns a stream
    *        handler to pass messages to
    *
-   * @throws JsonProcessingException
+   * @throws JsonProcessingException if JSON marshalling fails.
    */
   void openStream(RPCStreamRequest request, Function<Runnable, ScuttlebuttStreamHandler> streamFactory)
-      throws JsonProcessingException,
-      ConnectionClosedException;
-
+      throws JsonProcessingException;
 
   /**
    * Close the underlying connection

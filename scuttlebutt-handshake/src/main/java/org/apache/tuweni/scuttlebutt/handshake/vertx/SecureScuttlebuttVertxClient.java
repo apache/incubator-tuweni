@@ -181,6 +181,7 @@ public final class SecureScuttlebuttVertxClient {
   /**
    * Connects the client to a remote host.
    *
+   * @param <T> the type of client handler
    * @param port the port of the remote host
    * @param host the host string of the remote host
    * @param remotePublicKey the public key of the remote host, may be null if an invite is used.

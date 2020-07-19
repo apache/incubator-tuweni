@@ -14,6 +14,9 @@ package org.apache.tuweni.scuttlebutt.lib.model.query;
 
 import java.util.List;
 
+/**
+ * Query to request details of the server
+ */
 public class AboutQuery {
 
   private List<String> keys;

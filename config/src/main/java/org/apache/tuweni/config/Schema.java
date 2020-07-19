@@ -69,6 +69,7 @@ public final class Schema {
   /**
    * The keys of all defaults provided by this schema.
    *
+   * @param prefix the prefix the keys must match.
    * @return The keys for all defaults provided by this schema.
    */
   public Set<String> defaultsKeySet(String prefix) {
