@@ -17,6 +17,7 @@
 package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.devp2p.v5.PingMessage
 import org.junit.jupiter.api.Test
 
 class PingMessageTest {

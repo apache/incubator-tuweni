@@ -29,6 +29,9 @@ import org.apache.tuweni.rlpx.wire.SubProtocolClient
 import org.apache.tuweni.rlpx.wire.WireConnection
 import org.apache.tuweni.units.bigints.UInt256
 
+/**
+ * Client of the ETH subprotocol, allowing to request block and node data
+ */
 class EthClient(private val service: RLPxService) : EthRequestsManager, SubProtocolClient {
 
   private val headerRequests = HashMap<Bytes32, Request>()
@@ -152,10 +155,8 @@ class EthClient(private val service: RLPxService) : EthRequestsManager, SubProto
   override fun nodeDataWasRequested(connection: WireConnection, elements: List<Bytes?>): Request? =
     nodeDataRequests[connection.uri()]
 
-  override fun transactionRequestsWasRequested(
+  override fun transactionReceiptsRequested(
     connection: WireConnection,
     transactionReceipts: List<List<TransactionReceipt>>
   ): Request? = transactionReceiptRequests[connection.uri()]
 }
-
-data class Request(val connectionId: String, val handle: CompletableAsyncCompletion, val data: Any)

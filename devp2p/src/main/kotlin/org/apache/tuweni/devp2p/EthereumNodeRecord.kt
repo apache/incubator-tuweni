@@ -30,6 +30,11 @@ import java.time.Instant
 
 /**
  * Ethereum Node Record (ENR) as described in [EIP-778](https://eips.ethereum.org/EIPS/eip-778).
+ *
+ * @param signature the record signature
+ * @param seq the sequence of the record, its revision number
+ * @param data the arbitrary data of the record
+ * @param listData the arbitrary data of the record as list
  */
 class EthereumNodeRecord(
   val signature: Bytes,
@@ -158,6 +163,11 @@ class EthereumNodeRecord(
     }
   }
 
+  /**
+   * Validates an ENR to check that it conforms to a valid ENR scheme.
+   *
+   * Only the v4 scheme is supported at this time.
+   */
   fun validate() {
     if (Bytes.wrap("v4".toByteArray()) != data["id"]) {
       throw InvalidNodeRecordException("id attribute is not set to v4")
@@ -179,24 +189,43 @@ class EthereumNodeRecord(
     }
   }
 
+  /**
+   * The ENR public key entry
+   * @return the ENR public key
+   */
   fun publicKey(): SECP256K1.PublicKey {
     val keyBytes = data["secp256k1"] ?: throw InvalidNodeRecordException("Missing secp256k1 entry")
     val ecPoint = SECP256K1.Parameters.CURVE.getCurve().decodePoint(keyBytes.toArrayUnsafe())
     return SECP256K1.PublicKey.fromBytes(Bytes.wrap(ecPoint.getEncoded(false)).slice(1))
   }
 
+  /**
+   * The ip associated with the ENR
+   * @return The IP adress of the ENR
+   */
   fun ip(): InetAddress {
     return InetAddress.getByAddress(data["ip"]!!.toArrayUnsafe())
   }
 
+  /**
+   * The TCP port of the ENR
+   * @return the TCP port associated with this ENR
+   */
   fun tcp(): Int {
     return data["tcp"]!!.toInt()
   }
 
+  /**
+   * The UDP port of the ENR
+   * @return the UDP port associated with this ENR
+   */
   fun udp(): Int {
     return data["udp"]!!.toInt()
   }
 
+  /**
+   * @return the ENR as a URI
+   */
   override fun toString(): String {
     return "enr:${ip()}:${tcp()}?udp=${udp()}"
   }

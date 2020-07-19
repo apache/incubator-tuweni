@@ -18,7 +18,7 @@ package org.apache.tuweni.devp2p.v5.topic
 
 import org.apache.tuweni.bytes.Bytes
 
-class TicketHolder {
+internal class TicketHolder {
 
   private val tickets: MutableMap<Bytes, Bytes> = hashMapOf() // requestId to ticket
 

@@ -16,12 +16,10 @@
  */
 package org.apache.tuweni.devp2p.v5
 
-import org.apache.tuweni.devp2p.v5.packet.UdpMessage
-
 /**
  * Udp message listener for message observance, generally for test purposes
  */
-interface MessageObserver {
+internal interface MessageObserver {
 
   /**
    * Perform message observation

@@ -1,0 +1,85 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: assemble
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    container:
+      image: tmio/tuweni-build:1.1
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - name: Set up GPG key
+        run: gpg --import gradle/tuweni-test.asc
+      - name: Cache Maven Repository
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: gradle assemble
+        uses: eskatos/gradle-command-action@v1
+        env:
+          ENABLE_SIGNING: true
+        with:
+          gradle-version: 6.3
+          arguments: assemble -x test -Psignatory.keyId=38F6C7215DD49C32 -Psigning.gnupg.keyName=38F6C7215DD49C32 -Psigning.gnupg.executable=gpg
+      - name: Upload source distrib
+        uses: actions/upload-artifact@v2
+        with:
+          name: distsrc
+          path: dist/build/distributions/tuweni-src-*.zip
+      - name: Upload build
+        uses: actions/upload-artifact@v1
+        with:
+          name: Libs
+          path: build/libs
+  check-src:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    needs: assemble
+    steps:
+      - name: Download distsrc
+        uses: actions/download-artifact@v1
+        with:
+          name: distsrc
+      - name: Unzip source
+        run: unzip -o distsrc/tuweni-src-*.zip -d distunzipped
+      - name: Rename folder
+        run: mv distunzipped/tuweni-src-* distunzipped/tuweni
+      - name: Build from source
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: cd distunzipped/tuweni && ./build.sh
+      - name: Set up JDK 11
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Build from source
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: cd distunzipped/tuweni && ./build.bat

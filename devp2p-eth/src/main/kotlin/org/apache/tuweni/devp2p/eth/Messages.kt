@@ -29,7 +29,7 @@ import org.apache.tuweni.units.bigints.UInt256
 /**
  * ETH subprotocol message types.
  */
-enum class MessageType(val code: Int) {
+internal enum class MessageType(val code: Int) {
   Status(0x00),
   NewBlockHashes(0x01),
   Transactions(0x02),
@@ -44,7 +44,7 @@ enum class MessageType(val code: Int) {
   Receipts(0x10)
 }
 
-data class StatusMessage(
+internal data class StatusMessage(
   val protocolVersion: Int,
   val networkID: UInt256,
   val totalDifficulty: UInt256,
@@ -97,7 +97,7 @@ data class StatusMessage(
   }
 }
 
-data class NewBlockHashes(val hashes: List<Pair<Hash, Long>>) {
+internal data class NewBlockHashes(val hashes: List<Pair<Hash, Long>>) {
 
   companion object {
 
@@ -122,7 +122,7 @@ data class NewBlockHashes(val hashes: List<Pair<Hash, Long>>) {
   }
 }
 
-data class GetBlockHeaders(val block: Bytes, val maxHeaders: Long, val skip: Long, val reverse: Boolean) {
+internal data class GetBlockHeaders(val block: Bytes, val maxHeaders: Long, val skip: Long, val reverse: Boolean) {
   companion object {
 
     fun read(payload: Bytes): GetBlockHeaders = RLP.decodeList(payload) {
@@ -142,7 +142,7 @@ data class GetBlockHeaders(val block: Bytes, val maxHeaders: Long, val skip: Lon
   }
 }
 
-data class BlockHeaders(val headers: List<BlockHeader>) {
+internal data class BlockHeaders(val headers: List<BlockHeader>) {
   companion object {
 
     fun read(payload: Bytes): BlockHeaders = RLP.decodeList(payload) {
@@ -163,7 +163,7 @@ data class BlockHeaders(val headers: List<BlockHeader>) {
   }
 }
 
-data class GetBlockBodies(val hashes: List<Hash>) {
+internal data class GetBlockBodies(val hashes: List<Hash>) {
   companion object {
 
     fun read(payload: Bytes): GetBlockBodies = RLP.decodeList(payload) {
@@ -182,7 +182,7 @@ data class GetBlockBodies(val hashes: List<Hash>) {
   }
 }
 
-data class BlockBodies(val bodies: List<BlockBody>) {
+internal data class BlockBodies(val bodies: List<BlockBody>) {
   companion object {
 
     fun read(payload: Bytes): BlockBodies = RLP.decodeList(payload) {
@@ -203,7 +203,7 @@ data class BlockBodies(val bodies: List<BlockBody>) {
   }
 }
 
-data class NewBlock(val block: Block, val totalDifficulty: UInt256) {
+internal data class NewBlock(val block: Block, val totalDifficulty: UInt256) {
   companion object {
 
     fun read(payload: Bytes): NewBlock = RLP.decodeList(payload) {
@@ -219,7 +219,7 @@ data class NewBlock(val block: Block, val totalDifficulty: UInt256) {
   }
 }
 
-data class GetNodeData(val hashes: List<Hash>) {
+internal data class GetNodeData(val hashes: List<Hash>) {
   companion object {
 
     fun read(payload: Bytes): GetNodeData = RLP.decodeList(payload) {
@@ -238,7 +238,7 @@ data class GetNodeData(val hashes: List<Hash>) {
   }
 }
 
-data class NodeData(val elements: List<Bytes?>) {
+internal data class NodeData(val elements: List<Bytes?>) {
   companion object {
 
     fun read(payload: Bytes): NodeData = RLP.decodeList(payload) {
@@ -266,7 +266,7 @@ data class NodeData(val elements: List<Bytes?>) {
   }
 }
 
-data class GetReceipts(val hashes: List<Hash>) {
+internal data class GetReceipts(val hashes: List<Hash>) {
   companion object {
 
     fun read(payload: Bytes): GetReceipts = RLP.decodeList(payload) {
@@ -285,7 +285,7 @@ data class GetReceipts(val hashes: List<Hash>) {
   }
 }
 
-data class Receipts(val transactionReceipts: List<List<TransactionReceipt>>) {
+internal data class Receipts(val transactionReceipts: List<List<TransactionReceipt>>) {
   companion object {
 
     fun read(payload: Bytes): Receipts = RLP.decodeList(payload) {
@@ -314,7 +314,7 @@ data class Receipts(val transactionReceipts: List<List<TransactionReceipt>>) {
   }
 }
 
-data class Transactions(val transactions: List<Transaction>) {
+internal data class Transactions(val transactions: List<Transaction>) {
   companion object {
 
     fun read(payload: Bytes): Transactions = RLP.decodeList(payload) {

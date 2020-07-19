@@ -25,6 +25,7 @@ import kotlin.coroutines.CoroutineContext
  * @param map The backing map for this store.
  * @return A key-value store.
  * @constructor Open an in-memory key-value store.
+ * @param coroutineContext the kotlin coroutine context
  */
 class MapKeyValueStore<K, V>
 constructor(

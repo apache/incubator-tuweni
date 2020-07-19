@@ -20,7 +20,8 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
-import org.apache.tuweni.devp2p.v5.storage.RoutingTable
+import org.apache.tuweni.devp2p.v5.DefaultAuthenticationProvider
+import org.apache.tuweni.devp2p.v5.RoutingTable
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.Test
@@ -32,8 +33,10 @@ class DefaultAuthenticationProviderTest {
 
   private val providerKeyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
   private val providerEnr: Bytes = EthereumNodeRecord.toRLP(providerKeyPair, ip = InetAddress.getLoopbackAddress())
-  private val routingTable: RoutingTable = RoutingTable(providerEnr)
-  private val authenticationProvider = DefaultAuthenticationProvider(providerKeyPair, routingTable)
+  private val routingTable: RoutingTable =
+    RoutingTable(providerEnr)
+  private val authenticationProvider =
+    DefaultAuthenticationProvider(providerKeyPair, routingTable)
 
   @Test
   fun authenticateReturnsValidAuthHeader() {

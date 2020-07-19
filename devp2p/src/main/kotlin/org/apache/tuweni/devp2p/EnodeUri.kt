@@ -25,12 +25,15 @@ private val DISCPORT_QUERY_STRING_REGEX = Pattern.compile(".*discport=([^&]+).*"
 
 /**
  * The components of an enode URI.
+ * @param nodeId the public key of the node
+ * @param endpoint the ndoe endpoint
  */
 data class EnodeUriComponents(val nodeId: SECP256K1.PublicKey, val endpoint: Endpoint)
 
 /**
  * Parse an enode URI.
  *
+ * @param uri the URI to parse
  * @return the node id and the endpoint
  * @throws IllegalArgumentException if the uri is not a valid enode URI
  */

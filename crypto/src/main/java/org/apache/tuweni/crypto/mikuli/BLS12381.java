@@ -99,7 +99,7 @@ public final class BLS12381 {
    * @return True if the verification is successful.
    */
   public static boolean verify(PublicKey publicKey, Signature signature, Bytes message, int domain) {
-    return verify(publicKey, signature, message.toArray(), domain);
+    return verify(publicKey, signature, message.toArrayUnsafe(), domain);
   }
 
   /**

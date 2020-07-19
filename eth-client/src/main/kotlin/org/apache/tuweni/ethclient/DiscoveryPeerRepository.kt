@@ -47,7 +47,7 @@ class DiscoveryPeerRepository(private val repository: org.apache.tuweni.peer.rep
   override fun getAsync(uri: String): AsyncResult<Peer> = GlobalScope.asyncResult { get(uri) }
 }
 
-class DelegatePeer(
+internal class DelegatePeer(
   val repository: org.apache.tuweni.peer.repository.PeerRepository,
   val peer: org.apache.tuweni.peer.repository.Peer
 ) : Peer {

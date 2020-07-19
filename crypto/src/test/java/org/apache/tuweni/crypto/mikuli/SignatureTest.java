@@ -15,17 +15,33 @@ package org.apache.tuweni.crypto.mikuli;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.tuweni.bytes.Bytes;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 
 class SignatureTest {
+
+  @Test
+  void testNoSigs() {
+    assertThrows(IllegalArgumentException.class, () -> {
+      Signature.aggregate(Collections.emptyList());
+    });
+  }
+
+  @Test
+  void testNoSigsAndPubKeys() {
+    assertThrows(IllegalArgumentException.class, () -> {
+      SignatureAndPublicKey.aggregate(Collections.emptyList());
+    });
+  }
 
   @Test
   void testSimpleSignature() {
@@ -75,6 +91,22 @@ class SignatureTest {
   }
 
   @Test
+  void testCorruptedSignatureWithoutPubKeys() {
+    byte[] message = "Hello".getBytes(UTF_8);
+    List<Signature> sigs = getSignatures(message);
+    KeyPair keyPair = KeyPair.random();
+    byte[] notHello = "Not Hello".getBytes(UTF_8);
+
+    SignatureAndPublicKey additionalSignature = BLS12381.sign(keyPair, notHello, 48);
+    sigs.add(additionalSignature.signature());
+
+    Signature sig = Signature.aggregate(sigs);
+
+    Boolean isValid = BLS12381.verify(additionalSignature.publicKey(), sig, message, 48);
+    assertFalse(isValid);
+  }
+
+  @Test
   void testSerialization() {
     KeyPair keyPair = KeyPair.random();
     byte[] message = "Hello".getBytes(UTF_8);
@@ -92,6 +124,23 @@ class SignatureTest {
 
     assertEquals(pubKey, pubKeyFromBytes);
     assertEquals(pubKey.hashCode(), pubKeyFromBytes.hashCode());
+  }
+
+  List<Signature> getSignatures(byte[] message) {
+    KeyPair keyPair1 = KeyPair.random();
+    KeyPair keyPair2 = KeyPair.random();
+    KeyPair keyPair3 = KeyPair.random();
+
+    Signature sigAndPubKey1 = BLS12381.sign(keyPair1, message, 48).signature();
+    Signature sigAndPubKey2 = BLS12381.sign(keyPair2, message, 48).signature();
+    Signature sigAndPubKey3 = BLS12381.sign(keyPair3, message, 48).signature();
+
+    List<Signature> sigs = new ArrayList<>();
+    sigs.add(sigAndPubKey1);
+    sigs.add(sigAndPubKey2);
+    sigs.add(sigAndPubKey3);
+
+    return sigs;
   }
 
   List<SignatureAndPublicKey> getSignaturesAndPublicKeys(byte[] message) {

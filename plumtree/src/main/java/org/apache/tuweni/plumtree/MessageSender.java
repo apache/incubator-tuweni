@@ -25,7 +25,22 @@ public interface MessageSender {
    * Types of verbs supported by the dialect
    */
   enum Verb {
-    IHAVE, GRAFT, PRUNE, GOSSIP
+    /**
+     * Indicates we have a message
+     */
+    IHAVE,
+    /**
+     * Ask to be added back to eager peers
+     */
+    GRAFT,
+    /**
+     * Ask to be removed from eager peers
+     */
+    PRUNE,
+    /**
+     * Send a message
+     */
+    GOSSIP
   }
 
   /**

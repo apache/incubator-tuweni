@@ -21,8 +21,6 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.misc.HandshakeInitParameters
 import org.apache.tuweni.devp2p.v5.misc.TrackingMessage
-import org.apache.tuweni.devp2p.v5.packet.UdpMessage
-import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.devp2p.v5.topic.TicketHolder
 import org.apache.tuweni.devp2p.v5.topic.TopicRegistrar
 import org.apache.tuweni.devp2p.v5.topic.TopicTable
@@ -32,7 +30,7 @@ import java.net.InetSocketAddress
  * Module, used for network communication. It accepts and sends incoming messages and also provides peer information,
  * like node's ENR, key pair
  */
-interface UdpConnector {
+internal interface UdpConnector {
 
   /**
    * Bootstraps receive loop for incoming message handling

@@ -21,7 +21,7 @@ import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
 import org.apache.tuweni.rlp.RLP
 import java.net.InetAddress
 
-data class Ticket(
+internal data class Ticket(
   val topic: Bytes,
   val srcNodeId: Bytes,
   val srcIp: InetAddress,

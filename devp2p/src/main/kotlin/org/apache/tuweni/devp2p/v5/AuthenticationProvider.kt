@@ -25,7 +25,7 @@ import org.apache.tuweni.devp2p.v5.misc.SessionKey
  * Module for securing messages communications. It creates required parameters for peers handshake execution.
  * All session keys information is located here, which are used for message encryption/decryption
  */
-interface AuthenticationProvider {
+internal interface AuthenticationProvider {
 
   /**
    * Creates authentication header to initialize handshake process. As a result it creates an authentication

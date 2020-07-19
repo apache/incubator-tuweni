@@ -22,6 +22,7 @@ import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.util.resource.Resource
 import org.glassfish.jersey.servlet.ServletContainer
+import java.net.InetSocketAddress
 
 class UI(
   val port: Int = 0,
@@ -35,7 +36,7 @@ class UI(
   var actualPort: Int? = null
 
   fun start() {
-    val newServer = Server(port)
+    val newServer = Server(InetSocketAddress(networkInterface, port))
 
     val ctx = ServletContextHandler(ServletContextHandler.NO_SESSIONS)
 

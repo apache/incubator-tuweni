@@ -29,25 +29,16 @@ final class GTPoint {
 
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((point == null) ? 0 : point.hashCode());
-    return result;
+    return Objects.hash(point);
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (Objects.isNull(obj)) {
-      return false;
-    }
-    if (this == obj) {
+  public boolean equals(Object o) {
+    if (this == o)
       return true;
-    }
-    if (!(obj instanceof GTPoint)) {
+    if (o == null || getClass() != o.getClass())
       return false;
-    }
-    GTPoint other = (GTPoint) obj;
-    return point.equals(other.point);
+    GTPoint gtPoint = (GTPoint) o;
+    return (point != null && gtPoint.point == null) || point.equals(gtPoint.point);
   }
-
 }

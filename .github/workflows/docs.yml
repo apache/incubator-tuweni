@@ -1,0 +1,60 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: docs
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    container:
+      image: tmio/tuweni-build:1.1
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - name: Cache Gradle packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+      - name: Cache Maven Repository
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: gradle setup
+        uses: eskatos/gradle-command-action@v1
+        with:
+          gradle-version: 6.3
+          arguments: setup
+      - name: gradle docs
+        run: bash -c "./gradlew dokka | tee >( grep -i 'No documentation for' | grep -v DisconnectReason | grep -v RPCFlag | grep -v RPCRequestType | grep -v TomlVersion | grep -v PasswordHash | grep -v MessageSender | grep -v 'Identity.Curve' > docs_warning)"
+#      - name: Fail if warnings
+#        run: bash -c '[ -s docs_warning ] && cat docs_warning && exit 1'
+      - name: Upload docs
+        uses: actions/upload-artifact@v2
+        with:
+          name: Docs
+          path: "build/docs"

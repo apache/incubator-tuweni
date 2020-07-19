@@ -642,7 +642,9 @@ dokka {
     skipDeprecated = false
 
     // Emit warnings about not documented members. Applies globally, also can be overridden by packageOptions
-    reportUndocumented = false
+    reportUndocumented = true
+    // will come out in next version
+    // failOnWarning = true
 
     // Do not create index pages for empty packages
     skipEmptyPackages = true
@@ -676,5 +678,23 @@ dokka {
 
     // Disable linking to online JDK documentation
     noJdkLink = true
+
+    // Those packages are not ready yet, skipping their docs.
+    perPackageOption {
+      prefix = "org.apache.tuweni.peer.repository"
+      reportUndocumented = false
+    }
+    perPackageOption {
+      prefix = "org.apache.tuweni.ethclientui"
+      reportUndocumented = false
+    }
+    perPackageOption {
+      prefix = "org.apache.tuweni.ethclient"
+      reportUndocumented = false
+    }
+    perPackageOption {
+      prefix = "org.apache.tuweni.devp2p.eth"
+      reportUndocumented = false
+    }
   }
 }

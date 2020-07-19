@@ -24,7 +24,6 @@ import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.kv.KeyValueStore
-import org.apache.tuweni.units.bigints.UInt256
 import org.slf4j.LoggerFactory
 
 /**
@@ -56,8 +55,8 @@ class BlockchainRepository
 
   companion object {
 
-    val logger = LoggerFactory.getLogger(BlockchainRepository::class.java)
-    val GENESIS_BLOCK = Bytes.wrap("genesisBlock".toByteArray())
+    internal val logger = LoggerFactory.getLogger(BlockchainRepository::class.java)
+    internal val GENESIS_BLOCK = Bytes.wrap("genesisBlock".toByteArray())
 
     /**
      * Initializes a blockchain repository with metadata, placing it in key-value stores.
@@ -242,7 +241,7 @@ class BlockchainRepository
   }
 
   /**
-   * Retrieves the block identified as the chain head
+   * Retrieves the block identified as the chain head.
    *
    * @return the current chain head, or the genesis block if no chain head is present.
    */
@@ -252,7 +251,7 @@ class BlockchainRepository
   }
 
   /**
-   * Retrieves the block header identified as the chain head
+   * Retrieves the block header identified as the chain head.
    *
    * @return the current chain head header, or the genesis block if no chain head is present.
    */
@@ -326,19 +325,30 @@ class BlockchainRepository
       .put(GENESIS_BLOCK, block.getHeader().getHash())
   }
 
-  fun retrieveChainHeadTotalDifficulty(): UInt256 = blockchainIndex.chainHeadTotalDifficulty()
-
+  /**
+   * Retrieves data, sending back exactly the list requested. If data is missing, the list entry is null.
+   * @param hashes the hashes of data to retrieve
+   * @return the data retrieved
+   */
   suspend fun retrieveNodeData(hashes: List<Hash>): List<Bytes?> {
     return hashes.map {
       stateStore.get(it)
     }
   }
 
+  /**
+   * Stores a transaction.
+   *
+   * @param transaction the transaction to store
+   */
   suspend fun storeTransaction(transaction: Transaction) {
     transactionStore.put(transaction.hash, transaction.toBytes())
     blockchainIndex.indexTransaction(transaction)
   }
 
+  /**
+   * Closes the repository.
+   */
   fun close() {
     blockBodyStore.close()
     blockHeaderStore.close()

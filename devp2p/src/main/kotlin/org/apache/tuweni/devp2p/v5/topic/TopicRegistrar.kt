@@ -22,13 +22,13 @@ import kotlinx.coroutines.delay
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.devp2p.EthereumNodeRecord
-import org.apache.tuweni.devp2p.v5.internal.DefaultUdpConnector
-import org.apache.tuweni.devp2p.v5.packet.RegTopicMessage
-import org.apache.tuweni.devp2p.v5.packet.UdpMessage
+import org.apache.tuweni.devp2p.v5.DefaultUdpConnector
+import org.apache.tuweni.devp2p.v5.RegTopicMessage
+import org.apache.tuweni.devp2p.v5.UdpMessage
 import java.net.InetSocketAddress
 import kotlin.coroutines.CoroutineContext
 
-class TopicRegistrar(
+internal class TopicRegistrar(
   override val coroutineContext: CoroutineContext = Dispatchers.IO,
   private val connector: DefaultUdpConnector
 ) : CoroutineScope {

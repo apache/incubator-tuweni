@@ -23,12 +23,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @Timeout(10)
 @ExtendWith(BouncyCastleExtension.class)
-public class NodeDiscoveryServiceTest {
+class NodeDiscoveryServiceTest {
 
   @Test
   void testStartAndStop() throws InterruptedException {
     NodeDiscoveryService service =
-        DefaultNodeDiscoveryService.open(SECP256K1.KeyPair.random(), 10000, new InetSocketAddress("localhost", 10000));
+        DiscoveryService.open(SECP256K1.KeyPair.random(), 10000, new InetSocketAddress("localhost", 10000));
     service.startAsync().join();
     service.terminateAsync().join();
   }

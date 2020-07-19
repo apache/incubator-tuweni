@@ -57,7 +57,7 @@ interface PeerRoutingTable : Set<Peer> {
   fun evict(node: Peer): Boolean
 }
 
-const val DEVP2P_BUCKET_SIZE = 16
+internal const val DEVP2P_BUCKET_SIZE = 16
 
 /**
  * A Peer routing table for the Ethereum ÐΞVp2p network.
@@ -67,7 +67,7 @@ const val DEVP2P_BUCKET_SIZE = 16
  * @constructor Create a new ÐΞVp2p routing table.
  * @param selfId the ID of the local node
  */
-class DevP2PPeerRoutingTable(selfId: SECP256K1.PublicKey) : PeerRoutingTable {
+internal class DevP2PPeerRoutingTable(selfId: SECP256K1.PublicKey) : PeerRoutingTable {
 
   private val idHashCache: Cache<SECP256K1.PublicKey, ByteArray> =
     CacheBuilder.newBuilder().maximumSize((1L + 256) * 16).weakKeys().build()

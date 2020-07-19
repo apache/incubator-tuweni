@@ -165,7 +165,7 @@ internal class EthHandler(
   }
 }
 
-class PeerInfo() {
+internal class PeerInfo() {
 
   val ready: CompletableAsyncCompletion = AsyncCompletion.incomplete()
 

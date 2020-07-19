@@ -25,6 +25,12 @@ import java.util.function.Function
  *
  * For example, we may want to store rich objects and transform them to a lower-level form,
  * or reuse the same store across multiple usages.
+ * @param store the key/value store
+ * @param unproxyKey function to transform the key from the proxied store to the outer store
+ * @param proxyKey function to transform the key from this proxy to the proxied store
+ * @param unproxyValue function to transform the value from the proxied store to the outer store
+ * @param proxyValue function to transform the value from this proxy to the proxied store
+ * @param coroutineContext the kotlin coroutine context
  */
 class ProxyKeyValueStore<K, V, E, R>(
   private val store: KeyValueStore<E, R>,
@@ -74,5 +80,8 @@ class ProxyKeyValueStore<K, V, E, R>(
 
   override suspend fun clear() = store.clear()
 
+  /**
+   * Close the store
+   */
   override fun close() = store.close()
 }
