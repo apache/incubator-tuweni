@@ -14,31 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.packet
+package org.apache.tuweni.devp2p.v5
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.devp2p.v5.RegConfirmationMessage
-import org.junit.jupiter.api.Test
+import java.net.InetSocketAddress
 
-class RegConfirmationMessageTest {
+internal class FindNodeMessageHandler : MessageHandler<FindNodeMessage> {
 
-  @Test
-  fun encodeCreatesValidBytesSequence() {
-    val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
-    val message = RegConfirmationMessage(requestId, Bytes.random(32))
+  override suspend fun handle(
+    message: FindNodeMessage,
+    address: InetSocketAddress,
+    srcNodeId: Bytes,
+    connector: UdpConnector
+  ) {
+    if (0 == message.distance) {
+      val response = NodesMessage(message.requestId, 1, listOf(connector.getEnrBytes()))
+      connector.send(address, response, srcNodeId)
+      return
+    }
 
-    val encodingResult = message.encode()
+    val nodes = connector.getNodesTable().nodesOfDistance(message.distance)
 
-    val decodingResult = RegConfirmationMessage.create(encodingResult)
-
-    assert(decodingResult.requestId == requestId)
-    assert(decodingResult.topic == message.topic)
+    nodes.chunked(MAX_NODES_IN_RESPONSE).forEach {
+      val response = NodesMessage(message.requestId, nodes.size, it)
+      connector.send(address, response, srcNodeId)
+    }
   }
 
-  @Test
-  fun getMessageTypeHasValidIndex() {
-    val message = RegConfirmationMessage(topic = Bytes.random(32))
-
-    assert(7 == message.getMessageType().toInt())
+  companion object {
+    private const val MAX_NODES_IN_RESPONSE: Int = 4
   }
 }

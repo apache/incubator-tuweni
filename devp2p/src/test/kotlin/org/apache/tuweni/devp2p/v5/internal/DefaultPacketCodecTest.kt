@@ -21,14 +21,16 @@ import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.AuthenticationProvider
+import org.apache.tuweni.devp2p.v5.DefaultAuthenticationProvider
+import org.apache.tuweni.devp2p.v5.DefaultPacketCodec
 import org.apache.tuweni.devp2p.v5.PacketCodec
-import org.apache.tuweni.devp2p.v5.storage.RoutingTable
+import org.apache.tuweni.devp2p.v5.RoutingTable
 import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
 import org.apache.tuweni.devp2p.v5.misc.SessionKey
-import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
-import org.apache.tuweni.devp2p.v5.packet.RandomMessage
-import org.apache.tuweni.devp2p.v5.packet.UdpMessage
-import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
+import org.apache.tuweni.devp2p.v5.FindNodeMessage
+import org.apache.tuweni.devp2p.v5.RandomMessage
+import org.apache.tuweni.devp2p.v5.UdpMessage
+import org.apache.tuweni.devp2p.v5.WhoAreYouMessage
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -41,9 +43,11 @@ class DefaultPacketCodecTest {
   private val enr: Bytes = EthereumNodeRecord.toRLP(keyPair, ip = InetAddress.getLoopbackAddress())
   private val nodeId: Bytes = Hash.sha2_256(enr)
   private val routingTable: RoutingTable = RoutingTable(enr)
-  private val authenticationProvider: AuthenticationProvider = DefaultAuthenticationProvider(keyPair, routingTable)
+  private val authenticationProvider: AuthenticationProvider =
+    DefaultAuthenticationProvider(keyPair, routingTable)
 
-  private val codec: PacketCodec = DefaultPacketCodec(keyPair, routingTable, nodeId, authenticationProvider)
+  private val codec: PacketCodec =
+    DefaultPacketCodec(keyPair, routingTable, nodeId, authenticationProvider)
 
   private val destNodeId: Bytes = Bytes.random(32)
 

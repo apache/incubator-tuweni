@@ -12,33 +12,22 @@
  */
 package org.apache.tuweni.crypto.mikuli;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.apache.milagro.amcl.BLS381.FP12;
+import org.apache.tuweni.bytes.Bytes;
 
-import java.util.Objects;
+import org.junit.jupiter.api.Test;
 
-/**
- * GT is the object that holds the result of the pairing operation. Points in GT are elements of Fq12.
- */
-final class GTPoint {
+class GTPointTest {
 
-  private final FP12 point;
-
-  GTPoint(FP12 point) {
-    this.point = point;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(point);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
-    GTPoint gtPoint = (GTPoint) o;
-    return (point != null && gtPoint.point == null) || point.equals(gtPoint.point);
+  @Test
+  void equalsAndHashcode() {
+    FP12 fp12 = FP12.fromBytes(Bytes.random(576).toArrayUnsafe());
+    GTPoint point = new GTPoint(fp12);
+    assertEquals(point, point);
+    assertEquals(point.hashCode(), point.hashCode());
+    assertEquals(new GTPoint(fp12), point);
+    assertEquals(new GTPoint(fp12).hashCode(), point.hashCode());
   }
 }

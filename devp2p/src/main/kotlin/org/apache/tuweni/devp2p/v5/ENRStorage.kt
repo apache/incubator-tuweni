@@ -18,6 +18,7 @@ package org.apache.tuweni.devp2p.v5
 
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Storage of node records
@@ -47,4 +48,16 @@ interface ENRStorage {
    * @return node record, if present.
    */
   fun find(nodeId: Bytes): Bytes?
+}
+
+/**
+ * Default storage for Ethereum Node Records, backed by an in-memory hash map.
+ */
+internal class DefaultENRStorage : ENRStorage {
+
+  private val storage: MutableMap<Bytes, Bytes> = ConcurrentHashMap()
+
+  override fun find(nodeId: Bytes): Bytes? = storage[nodeId]
+
+  override fun put(nodeId: Bytes, enr: Bytes) { storage.put(nodeId, enr) }
 }

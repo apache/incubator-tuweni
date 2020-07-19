@@ -17,6 +17,7 @@
 package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.devp2p.v5.PongMessage
 import org.junit.jupiter.api.Test
 import java.net.InetAddress
 
@@ -39,7 +40,8 @@ class PongMessageTest {
 
   @Test
   fun getMessageTypeHasValidIndex() {
-    val message = PongMessage(recipientIp = InetAddress.getLoopbackAddress(), recipientPort = 9090)
+    val message =
+      PongMessage(recipientIp = InetAddress.getLoopbackAddress(), recipientPort = 9090)
 
     assert(2 == message.getMessageType().toInt())
   }

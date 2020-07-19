@@ -17,6 +17,8 @@
 package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.devp2p.v5.RandomMessage
+import org.apache.tuweni.devp2p.v5.UdpMessage
 import org.junit.jupiter.api.Test
 
 class RandomMessageTest {

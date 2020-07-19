@@ -14,31 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.packet
+package org.apache.tuweni.devp2p.v5
 
-import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.devp2p.v5.RegConfirmationMessage
+import org.apache.tuweni.crypto.Hash
+import org.apache.tuweni.crypto.SECP256K1
+import org.apache.tuweni.devp2p.EthereumNodeRecord
+import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.net.InetAddress
 
-class RegConfirmationMessageTest {
+@ExtendWith(BouncyCastleExtension::class)
+class EnrStorageTest {
 
-  @Test
-  fun encodeCreatesValidBytesSequence() {
-    val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
-    val message = RegConfirmationMessage(requestId, Bytes.random(32))
-
-    val encodingResult = message.encode()
-
-    val decodingResult = RegConfirmationMessage.create(encodingResult)
-
-    assert(decodingResult.requestId == requestId)
-    assert(decodingResult.topic == message.topic)
-  }
+  private val storage: ENRStorage = DefaultENRStorage()
 
   @Test
-  fun getMessageTypeHasValidIndex() {
-    val message = RegConfirmationMessage(topic = Bytes.random(32))
+  fun setPersistsAndFindRetrievesNodeRecord() {
+    val enr = EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress())
 
-    assert(7 == message.getMessageType().toInt())
+    storage.set(enr)
+
+    val nodeId = Hash.sha2_256(enr)
+    storage.find(nodeId)
   }
 }

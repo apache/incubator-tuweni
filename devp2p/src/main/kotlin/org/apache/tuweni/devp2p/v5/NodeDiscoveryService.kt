@@ -23,14 +23,49 @@ import org.apache.tuweni.concurrent.coroutines.asyncCompletion
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
-import org.apache.tuweni.devp2p.v5.internal.DefaultUdpConnector
-import org.apache.tuweni.devp2p.v5.packet.RandomMessage
-import org.apache.tuweni.devp2p.v5.storage.DefaultENRStorage
 import org.apache.tuweni.io.Base64URLSafe
 import java.net.InetSocketAddress
 import java.time.Instant
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * A creator of discovery service objects.
+ */
+object DiscoveryService {
+
+  /**
+   * Creates a new discovery service, generating the node ENR and configuring the UDP connector.
+   * @param keyPair the key pair identifying the node running the service.
+   * @param bindAddress the address to bind the node to.
+   * @param enrSeq the sequence of the ENR of the node
+   * @param bootstrapENRList the list of other nodes to connect to on bootstrap.
+   * @param enrStorage the permanent storage of ENRs. Defaults to an in-memory store.
+   * @param coroutineContext the coroutine context associated with the store.
+   */
+  @JvmStatic
+  @JvmOverloads
+  fun open(
+    keyPair: SECP256K1.KeyPair,
+    localPort: Int,
+    bindAddress: InetSocketAddress = InetSocketAddress(localPort),
+    enrSeq: Long = Instant.now().toEpochMilli(),
+    bootstrapENRList: List<String> = emptyList(),
+    enrStorage: ENRStorage = DefaultENRStorage(),
+    coroutineContext: CoroutineContext = Dispatchers.Default
+  ): NodeDiscoveryService {
+    val selfENR = EthereumNodeRecord.toRLP(
+      keyPair,
+      enrSeq,
+      emptyMap(),
+      emptyMap(),
+      bindAddress.address,
+      null,
+      bindAddress.port
+    )
+    val connector = DefaultUdpConnector(bindAddress, keyPair, selfENR, enrStorage)
+    return DefaultNodeDiscoveryService.open(bootstrapENRList, enrStorage, connector, coroutineContext)
+  }
+}
 /**
  * Service executes network discovery, according to discv5 specification
  * (https://github.com/ethereum/devp2p/blob/master/discv5/discv5.md)
@@ -66,39 +101,6 @@ internal class DefaultNodeDiscoveryService(
 ) : NodeDiscoveryService {
 
   companion object {
-    /**
-     * Creates a new discovery service, generating the node ENR and configuring the UDP connector.
-     * @param keyPair the key pair identifying the node running the service.
-     * @param bindAddress the address to bind the node to.
-     * @param enrSeq the sequence of the ENR of the node
-     * @param bootstrapENRList the list of other nodes to connect to on bootstrap.
-     * @param enrStorage the permanent storage of ENRs. Defaults to an in-memory store.
-     * @param coroutineContext the coroutine context associated with the store.
-     */
-    @JvmStatic
-    @JvmOverloads
-    fun open(
-      keyPair: SECP256K1.KeyPair,
-      localPort: Int,
-      bindAddress: InetSocketAddress = InetSocketAddress(localPort),
-      enrSeq: Long = Instant.now().toEpochMilli(),
-      bootstrapENRList: List<String> = emptyList(),
-      enrStorage: ENRStorage = DefaultENRStorage(),
-      coroutineContext: CoroutineContext = Dispatchers.Default
-    ): NodeDiscoveryService {
-      val selfENR = EthereumNodeRecord.toRLP(
-        keyPair,
-        enrSeq,
-        emptyMap(),
-        emptyMap(),
-        bindAddress.address,
-        null,
-        bindAddress.port
-      )
-      val connector = DefaultUdpConnector(bindAddress, keyPair, selfENR, enrStorage)
-      return open(bootstrapENRList, enrStorage, connector, coroutineContext)
-    }
-
     /**
      * Creates a new discovery service with the UDP service provided.
      * @param bootstrapENRList the list of other nodes to connect to on bootstrap.

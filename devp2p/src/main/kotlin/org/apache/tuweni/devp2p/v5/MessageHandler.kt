@@ -17,7 +17,6 @@
 package org.apache.tuweni.devp2p.v5
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.devp2p.v5.packet.UdpMessage
 import java.net.InetSocketAddress
 
 /**

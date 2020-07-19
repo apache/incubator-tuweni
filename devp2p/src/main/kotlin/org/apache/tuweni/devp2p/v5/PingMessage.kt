@@ -14,31 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.packet
+package org.apache.tuweni.devp2p.v5
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.devp2p.v5.RegConfirmationMessage
-import org.junit.jupiter.api.Test
+import org.apache.tuweni.rlp.RLP
 
-class RegConfirmationMessageTest {
+internal class PingMessage(
+  val requestId: Bytes = UdpMessage.requestId(),
+  val enrSeq: Long = 0
+) : UdpMessage {
 
-  @Test
-  fun encodeCreatesValidBytesSequence() {
-    val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
-    val message = RegConfirmationMessage(requestId, Bytes.random(32))
+  private val encodedMessageType: Bytes = Bytes.fromHexString("0x01")
 
-    val encodingResult = message.encode()
+  override fun getMessageType(): Bytes = encodedMessageType
 
-    val decodingResult = RegConfirmationMessage.create(encodingResult)
-
-    assert(decodingResult.requestId == requestId)
-    assert(decodingResult.topic == message.topic)
+  override fun encode(): Bytes {
+    return RLP.encodeList { reader ->
+      reader.writeValue(requestId)
+      reader.writeLong(enrSeq)
+    }
   }
 
-  @Test
-  fun getMessageTypeHasValidIndex() {
-    val message = RegConfirmationMessage(topic = Bytes.random(32))
-
-    assert(7 == message.getMessageType().toInt())
+  companion object {
+    fun create(content: Bytes): PingMessage {
+      return RLP.decodeList(content) { reader ->
+        val requestId = reader.readValue()
+        val enrSeq = reader.readLong()
+        return@decodeList PingMessage(requestId, enrSeq)
+      }
+    }
   }
 }
