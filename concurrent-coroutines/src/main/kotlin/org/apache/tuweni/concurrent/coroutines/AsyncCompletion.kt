@@ -96,10 +96,10 @@ fun Deferred<Unit>.asAsyncCompletion(): AsyncCompletion {
   val asyncCompletion = AsyncCompletion.incomplete()
   asyncCompletion.whenComplete { cancel() }
   invokeOnCompletion {
-    try {
+    if (it != null) {
+      asyncCompletion.completeExceptionally(it)
+    } else {
       asyncCompletion.complete()
-    } catch (exception: Exception) {
-      asyncCompletion.completeExceptionally(exception)
     }
   }
   return asyncCompletion
