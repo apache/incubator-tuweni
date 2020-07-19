@@ -189,6 +189,7 @@ public interface Configuration {
   /**
    * The keys of all entries present in this configuration under a given prefix.
    *
+   * @param prefix The prefix for all the matching keys
    * @return The keys of all entries in this configuration under a given prefix.
    */
   Set<String> keySet(String prefix);
@@ -196,6 +197,7 @@ public interface Configuration {
   /**
    * The names of the sections defined under a given prefix.
    *
+   * @param prefix the key prefix
    * @return The names of the sections defined under a given prefix.
    */
   Set<String> sections(String prefix);
@@ -203,6 +205,7 @@ public interface Configuration {
   /**
    * Provides a section of the configuration
    *
+   * @param name the name of the section
    * @return the section of the configuration.
    */
   Configuration getConfigurationSection(String name);

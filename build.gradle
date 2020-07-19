@@ -33,7 +33,7 @@ plugins {
   id 'com.github.hierynomus.license' version '0.15.0'
   id 'org.gradle.crypto.checksum' version '1.1.0'
   id 'org.jetbrains.kotlin.jvm' version '1.3.30'
-  id 'org.jetbrains.dokka' version '0.10.0'
+  id 'org.jetbrains.dokka' version "0.10.1"
   id 'maven-publish'
   id 'com.jfrog.bintray' version '1.8.3'
 }
@@ -225,10 +225,10 @@ allprojects {
   apply plugin: 'kotlin'
   apply plugin: 'io.spring.dependency-management'
   apply plugin: 'jacoco'
+  apply plugin: 'org.jetbrains.dokka'
   apply plugin: 'com.jfrog.bintray'
   apply plugin: 'net.ltgt.errorprone'
   apply plugin: 'maven-publish'
-  apply plugin: 'org.jetbrains.dokka'
   apply plugin: 'signing'
   apply from: "${rootDir}/dependency-versions.gradle"
   apply from: "${rootDir}/gradle/check-licenses.gradle"
@@ -322,7 +322,6 @@ allprojects {
 
   dokka {
     outputFormat = 'html'
-    outputDirectory = "$buildDir/docs/dokka"
     configuration {
       noStdlibLink = true
       noJdkLink = true
@@ -351,19 +350,6 @@ allprojects {
     from sourceSets.main.allSource
   }
 
-  task javadocJar(type: Jar, dependsOn: javadoc) {
-    destinationDirectory = file("${rootProject.buildDir}/docs")
-    classifier = 'javadoc'
-    from javadoc.outputDirectory
-  }
-
-  task dokkaJar(type: Jar, dependsOn: dokka) {
-    destinationDirectory = file("${rootProject.buildDir}/docs")
-    classifier = 'dokka'
-    from dokka.outputDirectory
-  }
-
-
   //////
   // Packaging and deployment
 
@@ -390,7 +376,6 @@ allprojects {
     artifacts {
       archives sourcesJar
       archives jar
-      archives dokkaJar
     }
 
     signing {
@@ -440,7 +425,6 @@ allprojects {
             from components.java
             artifact sourcesJar { classifier 'sources' }
           }
-          artifact dokkaJar { classifier 'javadoc' }
           groupId 'org.apache.tuweni'
           artifactId project.jar.baseName
           version project.version
@@ -630,42 +614,67 @@ jar {
   }
 }
 
-javadoc {
-  subprojects.each {
-    source += it.javadoc.source
-    classpath += it.javadoc.classpath
-  }
-}
+apply plugin: 'kotlin'
+apply plugin: 'org.jetbrains.dokka'
 
 dokka {
+  outputDirectory = "$rootProject.buildDir/docs"
+  // In case of a Gradle multiproject build, you can include subprojects here to get merged documentation
+  // Note however, that you have to have the Kotlin plugin available in the root project and in the subprojects
+  subProjects = project.subprojects.collect { it.name }
+
+  // Used for disabling auto extraction of sources and platforms in both multi-platform and single-platform modes
+  // When set to true, subProject and kotlinTasks are also omitted
+  disableAutoconfiguration = false
+
+  // Use default or set to custom path to cache directory
+  // to enable package-list caching
+  // When this is set to default, caches are stored in $USER_HOME/.cache/dokka
+  cacheRoot = 'default'
 
   configuration {
-    noStdlibLink = true
-    noJdkLink = true
-    moduleName = rootProject.name
-    subprojects.each {
-      dependsOn it.classes
-      it.sourceSets.main.output.each { d ->
-        if (d.exists()) {
-          classpath += d
-        }
-      }
-    }
+    moduleName = 'tuweni'
 
+    // Use to include or exclude non public members.
+    includeNonPublic = false
+
+    // Do not output deprecated members. Applies globally, can be overridden by packageOptions
+    skipDeprecated = false
+
+    // Emit warnings about not documented members. Applies globally, also can be overridden by packageOptions
+    reportUndocumented = false
+
+    // Do not create index pages for empty packages
+    skipEmptyPackages = true
+
+    // Platform used for code analysis. See the "Platforms" section of this readme
+    platform = "JVM"
+
+    // List of files with module and package documentation
+    // https://kotlinlang.org/docs/reference/kotlin-doc.html#module-and-package-documentation
+    includes = ['PACKAGES.md']
+
+    // Specifies the location of the project source code on the Web.
+    // If provided, Dokka generates "source" links for each declaration.
+    // Repeat for multiple mappings
     sourceLink {
+      // Unix based directory relative path to the root of the project (where you execute gradle respectively).
       path = rootDir.toString()
-      url = "https://github.com/apache/incubator-tuweni/blob/master"
+
+      // URL showing where the source code can be accessed through the web browser
+      url = "https://github.com/apache/incubator-tuweni" //remove src/main/kotlin if you use "./" above
+
+      // Suffix which is used to append the line number to the URL. Use #L for GitHub
       lineSuffix = "#L"
     }
 
-    includes = ['PACKAGES.md']
-  }
-}
+    // Used for linking to JDK documentation
+    jdkVersion = 11
 
-dokkaJar {
-  archiveBaseName = rootProject.name
-  manifest {
-    attributes('Implementation-Title': archiveBaseName,
-    'Implementation-Version': project.version)
+    // Disable linking to online kotlin-stdlib documentation
+    noStdlibLink = true
+
+    // Disable linking to online JDK documentation
+    noJdkLink = true
   }
 }

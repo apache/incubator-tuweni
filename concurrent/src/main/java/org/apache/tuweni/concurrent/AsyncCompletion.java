@@ -481,6 +481,8 @@ public interface AsyncCompletion {
    * Returns the underlying future associated with this instance.
    *
    * Note taking action directly on this future will impact this object.
+   * 
+   * @return the underlying future
    */
   Future<Void> toFuture();
 }

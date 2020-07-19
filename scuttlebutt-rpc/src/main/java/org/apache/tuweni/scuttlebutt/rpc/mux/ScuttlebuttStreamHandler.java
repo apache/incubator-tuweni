@@ -23,7 +23,7 @@ public interface ScuttlebuttStreamHandler {
   /**
    * Handles a new message from the result stream.
    *
-   * @param message
+   * @param message a new message appearing.
    */
   void onMessage(RPCResponse message);
 

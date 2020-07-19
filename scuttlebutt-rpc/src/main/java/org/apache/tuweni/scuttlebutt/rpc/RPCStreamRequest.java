@@ -39,6 +39,7 @@ public class RPCStreamRequest {
   }
 
   /**
+   * @param mapper the JSON mapper
    * @return The byte representation for the request after it is marshalled into a JSON string.
    * @throws JsonProcessingException if an error was thrown while marshalling to JSON
    */

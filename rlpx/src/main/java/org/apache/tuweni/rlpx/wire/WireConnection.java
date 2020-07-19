@@ -51,16 +51,22 @@ public interface WireConnection {
 
   /**
    * Network interface associated with the wire connection
+   * 
+   * @return the peer's host network interface
    */
   String peerHost();
 
   /**
    * Port associated with the wire connection
+   * 
+   * @return the peer port value
    */
   int peerPort();
 
   /**
    * Public key of the peer associated with the wire connection
+   * 
+   * @return the peer public key
    */
   SECP256K1.PublicKey peerPublicKey();
 

@@ -221,7 +221,8 @@ public final class State {
    *
    * @param peer the peer that sent the message
    * @param attributes of the message
-   * @param message the hash of the message
+   * @param message the message
+   * @param messageHash the hash of the message
    */
   public void receiveGossipMessage(Peer peer, String attributes, Bytes message, Bytes messageHash) {
     Bytes checkHash = messageHashingFunction.hash(message);

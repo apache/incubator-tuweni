@@ -42,6 +42,7 @@ public class KeyFileLoader {
    * Attempts to load the keys from the default scuttlebutt directory (~/.ssb), and throws an exception if the keys are
    * not available at the given path
    *
+   * @param ssbFolder the folder containing the secret file.
    * @return the scuttlebutt key pair
    */
   public static Signature.KeyPair getLocalKeys(Path ssbFolder) {

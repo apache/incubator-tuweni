@@ -40,17 +40,14 @@ distributions {
         from ".."
         include 'README.md'
       }
-      def docs = []
       def libs = []
       def sources = []
       rootProject.subprojects.each { s ->
         if (s.name != 'eth-reference-tests' && s.name != 'eth2-reference-tests' && s.name != 'dist') {
           libs << s.signArchives.signatureFiles[0]
           sources << s.signArchives.signatureFiles[1]
-          docs << s.signArchives.signatureFiles[2]
           libs << s.jar.outputs
           sources << s.sourcesJar.outputs
-          docs << s.dokkaJar.outputs
         }
       }
       into('lib') {
@@ -58,14 +55,8 @@ distributions {
         from rootProject.signArchives.signatureFiles[0]
         from libs
       }
-      into('docs') {
-        from rootProject.dokkaJar
-        from rootProject.signArchives.signatureFiles[2]
-        from docs
-      }
       into('site') {
         from rootProject.dokka.outputDirectory
-        from rootProject.javadoc.outputDirectory
       }
     }
   }

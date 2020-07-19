@@ -139,8 +139,9 @@ public final class RPCCodec {
   /**
    * Encodes a message with the body and headers set in the appropriate way to end a stream.
    *
+   * @param requestNumber the request number
    * @return the response encoded as an RPC request
-   * @throws JsonProcessingException
+   * @throws JsonProcessingException if the encoding fails
    */
   public static Bytes encodeStreamEndRequest(int requestNumber) throws JsonProcessingException {
     Boolean bool = Boolean.TRUE;

@@ -107,9 +107,8 @@ public final class Invite {
    * 
    * @param inviteCode the invite code in its canonical form
    * @return the invite code
-   * @throws MalformedInviteCodeException
    */
-  public static Invite fromCanonicalForm(String inviteCode) throws MalformedInviteCodeException {
+  public static Invite fromCanonicalForm(String inviteCode) {
     String exceptionMessage = "Invite code should be of format host:port:publicKey.curveName~secretKey";
 
     List<String> parts = Splitter.on(':').splitToList(inviteCode);

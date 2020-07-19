@@ -51,6 +51,7 @@ public interface WireConnectionRepository {
   /**
    * Provides a subset of wire connections with a particular capabilities.
    *
+   * @param identifier the subprotocol those connections must use
    * @return an Iterable object allowing to traverse all wire connections held by this repository
    */
   Iterable<WireConnection> asIterable(SubProtocolIdentifier identifier);

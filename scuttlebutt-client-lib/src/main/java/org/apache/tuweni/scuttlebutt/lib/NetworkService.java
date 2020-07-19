@@ -12,6 +12,7 @@
  */
 package org.apache.tuweni.scuttlebutt.lib;
 
+import org.apache.tuweni.concurrent.AsyncCompletion;
 import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.scuttlebutt.Invite;
 import org.apache.tuweni.scuttlebutt.MalformedInviteCodeException;
@@ -88,25 +89,26 @@ public class NetworkService {
    * Redeems an invite issued by another node. If successful, the node will connect to the other node and each node will
    * befriend each other.
    *
-   * @param invite
-   * @return
+   * @param invite the invite to redeem
+   * @return a completion handle
    */
-  public AsyncResult<Void> redeemInviteCode(Invite invite) {
+  public AsyncCompletion redeemInviteCode(Invite invite) {
     RPCFunction function = new RPCFunction(Arrays.asList("invite"), "accept");
 
     RPCAsyncRequest request = new RPCAsyncRequest(function, Arrays.asList(invite.toCanonicalForm()));
 
     try {
-      return multiplexer.makeAsyncRequest(request).thenApply(r -> null);
+      return multiplexer.makeAsyncRequest(request).thenAccept((r) -> {
+      });
     } catch (JsonProcessingException ex) {
-      return AsyncResult.exceptional(ex);
+      return AsyncCompletion.exceptional(ex);
     }
   }
 
   /**
    * Queries for the list of peers the instance is connected to.
    *
-   * @return
+   * @return a handle to seeing all peers
    */
   public AsyncResult<List<Peer>> getConnectedPeers() {
     return getAllKnownPeers()
@@ -117,7 +119,7 @@ public class NetworkService {
   /**
    * Queries for all the peers the instance is aware of in its gossip table.
    *
-   * @return
+   * @return a handle to the list of all known peers
    */
   public AsyncResult<List<Peer>> getAllKnownPeers() {
     RPCFunction function = new RPCFunction(Arrays.asList("gossip"), "peers");

@@ -21,6 +21,7 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.concurrent.coroutines.asyncResult
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
@@ -61,13 +62,13 @@ class DefaultUdpConnectorTest {
     val keyPair = SECP256K1.KeyPair.random()
     val selfEnr = EthereumNodeRecord.toRLP(keyPair, ip = address.address)
     connector = DefaultUdpConnector(address, keyPair, selfEnr)
-    counter += 1
   }
 
   @AfterEach
   fun tearDown() {
     runBlocking {
       connector!!.terminate()
+      counter += 1
     }
   }
 
@@ -121,7 +122,6 @@ class DefaultUdpConnectorTest {
   @ExperimentalCoroutinesApi
   @Test
   fun attachObserverRegistersListener() = runBlocking {
-    println("yup")
     val observer = object : MessageObserver {
       var result: Channel<RandomMessage> = Channel()
       override fun observe(message: UdpMessage) {
@@ -140,10 +140,11 @@ class DefaultUdpConnectorTest {
     val socketChannel = CoroutineDatagramChannel.open()
     val message = RandomMessage()
     val encodedRandomMessage = codec.encode(message, Hash.sha2_256(connector!!.getEnrBytes()))
+
+    val expectedResult = asyncResult { observer.result.receive() }
     val buffer = ByteBuffer.wrap(encodedRandomMessage.content.toArray())
-    socketChannel.send(buffer, InetSocketAddress(InetAddress.getLoopbackAddress(), 9090))
-    val expectedResult = observer.result.receive()
-    assertEquals(expectedResult.data, message.data)
+    socketChannel.send(buffer, InetSocketAddress(InetAddress.getLoopbackAddress(), 9090 + counter))
+    assertEquals(expectedResult.get()!!.data, message.data)
   }
 
   @Test

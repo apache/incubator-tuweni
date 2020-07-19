@@ -27,6 +27,9 @@ import org.apache.tuweni.devp2p.v5.topic.Ticket
 import org.apache.tuweni.devp2p.v5.topic.Topic
 import java.net.InetSocketAddress
 
+/**
+ * Handler managing topic registration messages.
+ */
 class RegTopicMessageHandler : MessageHandler<RegTopicMessage> {
 
   private val now: () -> Long = CURRENT_TIME_SUPPLIER

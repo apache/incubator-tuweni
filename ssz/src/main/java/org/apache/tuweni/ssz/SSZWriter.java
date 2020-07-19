@@ -67,7 +67,6 @@ public interface SSZWriter {
   /**
    * Encode a known fixed-length {@link Bytes} value to SSZ without the length mixin.
    *
-   * @param byteLength the number of byts to write
    * @param value the byte array to encode
    * @throws IllegalArgumentException if the byteLength is not the same size as value.
    */
@@ -308,7 +307,6 @@ public interface SSZWriter {
   /**
    * Write a list of known-size homogenous bytes. The list itself WILL have a length mixin, but the elements WILL NOT.
    *
-   * @param byteLength the number of bytes in each element
    * @param elements the known-size bytes to write as a list
    */
   default void writeFixedBytesList(List<? extends Bytes> elements) {

@@ -12,13 +12,17 @@
  */
 package org.apache.tuweni.scuttlebutt.lib.model;
 
-
+/**
+ * A handler consuming a stream.
+ * 
+ * @param <T> the type of stream
+ */
 public interface StreamHandler<T> {
 
   /**
    * Handles a new item from the result stream.
    *
-   * @param item
+   * @param item the item appearing in the stream
    */
   void onMessage(T item);
 
