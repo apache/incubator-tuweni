@@ -102,7 +102,13 @@ class EphemeralPeerRepository : PeerRepository {
 
   private val peers = ConcurrentHashMap<SECP256K1.PublicKey, EphemeralPeer>()
 
-  suspend fun get(nodeId: SECP256K1.PublicKey, endpoint: Endpoint) =
+  /**
+   * Get a peer from node ID and endpoint information
+   * @param nodeId the peer public key
+   * @param endpoint the peer endpoint
+   * @return the peer
+   */
+  fun get(nodeId: SECP256K1.PublicKey, endpoint: Endpoint) =
     peers.compute(nodeId) { _, peer -> peer ?: EphemeralPeer(nodeId, endpoint) } as Peer
 
   override suspend fun get(host: String, port: Int, nodeId: SECP256K1.PublicKey): Peer {

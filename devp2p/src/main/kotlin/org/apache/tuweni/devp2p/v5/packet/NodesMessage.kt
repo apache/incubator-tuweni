@@ -19,7 +19,7 @@ package org.apache.tuweni.devp2p.v5.packet
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.rlp.RLP
 
-class NodesMessage(
+internal class NodesMessage(
   val requestId: Bytes = UdpMessage.requestId(),
   val total: Int,
   val nodeRecords: List<Bytes>

@@ -22,7 +22,7 @@ import org.apache.tuweni.devp2p.v5.UdpConnector
 import org.apache.tuweni.devp2p.v5.packet.RegConfirmationMessage
 import java.net.InetSocketAddress
 
-class RegConfirmationMessageHandler : MessageHandler<RegConfirmationMessage> {
+internal class RegConfirmationMessageHandler : MessageHandler<RegConfirmationMessage> {
 
   override suspend fun handle(
     message: RegConfirmationMessage,

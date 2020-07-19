@@ -23,7 +23,7 @@ import org.apache.tuweni.devp2p.v5.UdpConnector
 import org.apache.tuweni.devp2p.v5.packet.NodesMessage
 import java.net.InetSocketAddress
 
-class NodesMessageHandler : MessageHandler<NodesMessage> {
+internal class NodesMessageHandler : MessageHandler<NodesMessage> {
 
   override suspend fun handle(
     message: NodesMessage,

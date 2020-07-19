@@ -26,8 +26,15 @@ public interface Identity {
   /**
    * Curves supported by those identities.
    */
-  public enum Curve {
-    Ed25519("ed25519"), SECP256K1("secp256k1");
+  enum Curve {
+    /**
+     * Edwards curve
+     */
+    Ed25519("ed25519"),
+    /**
+     * SECP256K1 curve
+     */
+    SECP256K1("secp256k1");
 
     public final String name;
 

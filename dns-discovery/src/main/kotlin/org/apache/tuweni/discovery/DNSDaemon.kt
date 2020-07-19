@@ -32,7 +32,7 @@ import java.util.TimerTask
  * @param period the period at which to poll DNS records
  * @param resolver
  */
-public class DNSDaemon @JvmOverloads constructor(
+class DNSDaemon @JvmOverloads constructor(
   private val enrLink: String,
   val listeners: Set<(Long, List<EthereumNodeRecord>) -> Unit> = HashSet(),
   private val seq: Long = 0,
@@ -58,7 +58,7 @@ public class DNSDaemon @JvmOverloads constructor(
   }
 }
 
-class DNSTimerTask(
+internal class DNSTimerTask(
   private val resolver: Resolver,
   private val seq: Long,
   private val enrLink: String,

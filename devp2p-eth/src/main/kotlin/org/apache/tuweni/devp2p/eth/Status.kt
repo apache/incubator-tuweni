@@ -22,6 +22,13 @@ import org.apache.tuweni.units.bigints.UInt256
 
 /**
  * Peer status information
+ * @param protocolVersion ETH subprotocol version
+ * @param networkID the network ID
+ * @param totalDifficulty the total difficulty known to the peer
+ * @param bestHash best block hash known to the peer
+ * @param genesisHash genesis hash used by peer
+ * @param forkHash the hash of the fork if known
+ * @param forkBlock the fork block number if known
  */
 data class Status(
   val protocolVersion: Int,

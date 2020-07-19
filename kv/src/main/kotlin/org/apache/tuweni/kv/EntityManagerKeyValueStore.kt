@@ -25,6 +25,14 @@ import java.util.stream.Stream
 import javax.persistence.EntityManager
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * JPA-backed key value store.
+ *
+ * @param entityClass the class of entity to store
+ * @param entityManagerProvider the provider of entity managers to interact with JPA
+ * @param idAccessor the ID accessor
+ * @param coroutineContext the kotlin coroutine context.
+ */
 class EntityManagerKeyValueStore<K, V>
         constructor(
           private val entityManagerProvider: () -> EntityManager,
@@ -63,6 +71,10 @@ class EntityManagerKeyValueStore<K, V>
     }
   }
 
+  /**
+   * Convenience method to put a record directly
+   * @param value the value to store
+   */
   suspend fun put(value: V) = put(idAccessor(value), value)
 
   override suspend fun put(key: K, value: V) {
@@ -104,6 +116,9 @@ class EntityManagerKeyValueStore<K, V>
     }
   }
 
+  /**
+   * Close the store
+   */
   override fun close() {
   }
 }

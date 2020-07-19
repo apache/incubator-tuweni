@@ -48,6 +48,9 @@ public interface RPCFlag {
    * Flag to set a stream message.
    */
   enum Stream implements RPCFlag {
+    /**
+     * Stream flag
+     */
     STREAM(1 << 3);
 
     private final int value;
@@ -66,6 +69,9 @@ public interface RPCFlag {
    * Flag to set an end or error message.
    */
   enum EndOrError implements RPCFlag {
+    /**
+     * End flag
+     */
     END(1 << 2);
 
     private final int value;
@@ -84,7 +90,18 @@ public interface RPCFlag {
    * Flag to set a RPC body type.
    */
   enum BodyType implements RPCFlag {
-    BINARY(0), UTF_8_STRING(1), JSON(1 << 1);
+    /**
+     * Binary content
+     */
+    BINARY(0),
+    /**
+     * String content
+     */
+    UTF_8_STRING(1),
+    /**
+     * JSON content
+     */
+    JSON(1 << 1);
 
     private final int value;
 

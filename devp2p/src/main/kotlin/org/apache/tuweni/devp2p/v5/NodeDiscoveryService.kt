@@ -58,7 +58,7 @@ interface NodeDiscoveryService : CoroutineScope {
   fun terminateAsync() = asyncCompletion { terminate() }
 }
 
-class DefaultNodeDiscoveryService(
+internal class DefaultNodeDiscoveryService(
   private val bootstrapENRList: List<String>,
   private val enrStorage: ENRStorage,
   private val connector: UdpConnector,

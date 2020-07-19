@@ -41,7 +41,7 @@ import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.rlp.RLPReader
 
-class DefaultPacketCodec(
+internal class DefaultPacketCodec(
   private val keyPair: SECP256K1.KeyPair,
   private val routingTable: RoutingTable,
   private val nodeId: Bytes = Hash.sha2_256(routingTable.getSelfEnr()),

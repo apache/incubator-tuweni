@@ -148,15 +148,33 @@ class KademliaRoutingTable<T>(
   private val distanceCache: Cache<T, Int> =
     CacheBuilder.newBuilder().maximumSize((1L + idBitSize) * k).weakKeys().build()
 
+  /**
+   * Provides the size of the table as the sum of the size of the buckets
+   * @return the size of the table
+   */
   override val size: Int
     get() = buckets.fold(0) { acc, bucket -> acc + bucket.size }
 
+  /**
+   * @return true if the table, ie all its buckets are empty
+   */
   override fun isEmpty(): Boolean = buckets.find { bucket -> !bucket.isEmpty() } == null
 
+  /**
+   * @return an iterator to traverse all bucket contents
+   */
   override fun iterator(): Iterator<T> = buckets.asSequence().flatMap { bucket -> bucket.asSequence() }.iterator()
 
+  /**
+   * @param element the element to test
+   * @return true if there is a bucket with the element in it
+   */
   override fun contains(element: T): Boolean = bucketFor(element).contains(element)
 
+  /**
+   * @param elements the elements to test
+   * @return true if there is a bucket with all elements in it
+   */
   override fun containsAll(elements: Collection<T>): Boolean {
     val peers = elements.toMutableSet()
     buckets.forEach { bucket ->
@@ -224,10 +242,19 @@ class KademliaRoutingTable<T>(
     return buckets[value].toList()
   }
 
+  /**
+   * Provides a peer at random
+   * @return a random peer from a random bucket
+   */
   fun getRandom(): T {
     return buckets.filter { !it.isEmpty() }.random().random()
   }
 
+  /**
+   * Provides the distance between our identity and the peer
+   * @param node the peer to compare to
+   * @return the distance between the peer and our identity
+   */
   fun logDistToSelf(node: T): Int = distanceCache.get(node) { distanceToSelf.invoke(node) }
 
   private fun idForNode(node: T): ByteArray {

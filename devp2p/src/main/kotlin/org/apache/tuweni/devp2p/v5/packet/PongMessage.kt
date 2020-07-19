@@ -20,7 +20,7 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.rlp.RLP
 import java.net.InetAddress
 
-class PongMessage(
+internal class PongMessage(
   val requestId: Bytes = UdpMessage.requestId(),
   val enrSeq: Long = 0,
   val recipientIp: InetAddress,

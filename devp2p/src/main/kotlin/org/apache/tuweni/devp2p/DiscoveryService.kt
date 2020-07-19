@@ -262,13 +262,37 @@ interface DiscoveryService {
    */
   fun shutdownNow()
 
+  /**
+   * Counter of invalid packets
+   */
   val invalidPackets: Long
+  /**
+   * Counter of packets sent to self
+   */
   val selfPackets: Long
+  /**
+   * Counter of expired packets
+   */
   val expiredPackets: Long
+  /**
+   * Counter of filtered packets
+   */
   val filteredPackets: Long
+  /**
+   * Counter of unvalidated peer packets
+   */
   val unvalidatedPeerPackets: Long
+  /**
+   * Counter of unexpected pongs
+   */
   val unexpectedPongs: Long
+  /**
+   * Counter of unexpected NEIGHBORS messages
+   */
   val unexpectedNeighbors: Long
+  /**
+   * Counter of unexpected ENRResponse messages
+   */
   val unexpectedENRResponses: Long
 }
 

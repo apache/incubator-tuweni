@@ -24,7 +24,7 @@ import org.apache.tuweni.devp2p.v5.packet.TopicQueryMessage
 import org.apache.tuweni.devp2p.v5.topic.Topic
 import java.net.InetSocketAddress
 
-class TopicQueryMessageHandler : MessageHandler<TopicQueryMessage> {
+internal class TopicQueryMessageHandler : MessageHandler<TopicQueryMessage> {
 
   companion object {
     private const val MAX_NODES_IN_RESPONSE: Int = 16

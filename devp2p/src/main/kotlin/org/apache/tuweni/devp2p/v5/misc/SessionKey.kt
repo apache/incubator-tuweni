@@ -18,7 +18,7 @@ package org.apache.tuweni.devp2p.v5.misc
 
 import org.apache.tuweni.bytes.Bytes
 
-class SessionKey(
+internal class SessionKey(
   val initiatorKey: Bytes,
   val recipientKey: Bytes,
   val authRespKey: Bytes

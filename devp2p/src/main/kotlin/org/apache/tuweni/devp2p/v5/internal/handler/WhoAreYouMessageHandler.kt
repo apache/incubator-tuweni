@@ -30,7 +30,7 @@ import java.net.InetSocketAddress
  *
  * WHOAREYOU is sent by the other node after the first message is sent, asking to initiate the connection.
  */
-class WhoAreYouMessageHandler : MessageHandler<WhoAreYouMessage> {
+internal class WhoAreYouMessageHandler : MessageHandler<WhoAreYouMessage> {
 
   override suspend fun handle(
     message: WhoAreYouMessage,

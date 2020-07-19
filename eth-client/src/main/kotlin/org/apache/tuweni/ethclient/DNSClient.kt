@@ -36,14 +36,23 @@ class DNSClient(
 
   private var dnsDaemon: DNSDaemon? = null
 
+  /**
+   * @return the current sequence number associated with this host
+   */
   suspend fun seq(): Long {
     return metadataStore.get(SEQ)?.toLong() ?: 0
   }
 
+  /**
+   * Sets the sequence
+   */
   suspend fun seq(seq: Long) {
     metadataStore.put(SEQ, seq.toString())
   }
 
+  /**
+   * Start the client
+   */
   suspend fun start() {
     config.domain().let { domain ->
       dnsDaemon = DNSDaemon(
@@ -62,6 +71,9 @@ class DNSClient(
     }
   }
 
+  /**
+   * Stop the client
+   */
   fun stop() {
     dnsDaemon?.close()
   }

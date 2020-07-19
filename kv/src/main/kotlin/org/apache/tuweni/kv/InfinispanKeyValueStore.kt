@@ -25,6 +25,8 @@ import kotlin.coroutines.CoroutineContext
 /**
  * A key-value store backed by [Infinispan](https://infinispan.org)
  *
+ * @param cache the cache to use for this key-value store
+ * @param coroutineContext the Kotlin coroutine context
  */
 class InfinispanKeyValueStore<K, V> constructor(
   private val cache: Cache<K, V>,

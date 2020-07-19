@@ -108,7 +108,13 @@ data class Endpoint(
     require(tcpPort == null || tcpPort in 1..65535) { "tcpPort should be between 1 and 65535, got $tcpPort" }
   }
 
+  /**
+   * UDP socket address of the endpoint
+   */
   val udpSocketAddress: InetSocketAddress = InetSocketAddress(address, udpPort)
+  /**
+   * TCP socket address of the endpoint, if set
+   */
   val tcpSocketAddress: InetSocketAddress? = if (tcpPort != null) InetSocketAddress(address, tcpPort) else null
 
   /**

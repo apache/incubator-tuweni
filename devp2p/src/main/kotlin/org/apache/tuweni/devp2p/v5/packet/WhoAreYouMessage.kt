@@ -19,7 +19,7 @@ package org.apache.tuweni.devp2p.v5.packet
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.rlp.RLP
 
-class WhoAreYouMessage(
+internal class WhoAreYouMessage(
   val authTag: Bytes = UdpMessage.authTag(),
   val idNonce: Bytes = UdpMessage.idNonce(),
   val enrSeq: Long = 0

@@ -33,7 +33,7 @@ import org.apache.tuweni.devp2p.v5.packet.UdpMessage
  *
  * It also responsible for encryption functionality, so handlers receives raw messages for processing
  */
-interface PacketCodec {
+internal interface PacketCodec {
 
   /**
    * Encodes message, encrypting its body

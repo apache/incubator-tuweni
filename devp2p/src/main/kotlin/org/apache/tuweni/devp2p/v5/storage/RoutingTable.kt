@@ -23,7 +23,7 @@ import org.apache.tuweni.kademlia.KademliaRoutingTable
 import org.apache.tuweni.kademlia.xorDist
 import java.math.RoundingMode
 
-class RoutingTable(
+internal class RoutingTable(
   private val selfEnr: Bytes
 ) {
 

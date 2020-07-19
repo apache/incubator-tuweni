@@ -32,7 +32,7 @@ import java.net.InetSocketAddress
  * Module, used for network communication. It accepts and sends incoming messages and also provides peer information,
  * like node's ENR, key pair
  */
-interface UdpConnector {
+internal interface UdpConnector {
 
   /**
    * Bootstraps receive loop for incoming message handling

@@ -20,7 +20,7 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.rlp.RLPReader
 import org.apache.tuweni.rlp.RLPWriter
 
-data class Node(
+internal data class Node(
   val endpoint: Endpoint,
   val nodeId: SECP256K1.PublicKey
 ) {

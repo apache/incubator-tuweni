@@ -21,7 +21,7 @@ import org.apache.tuweni.bytes.Bytes
 /**
  * The result of encoding a message: its authentication tag, used to track responses, and its content as bytes.
  */
-class EncodeResult(
+internal class EncodeResult(
   val authTag: Bytes,
   val content: Bytes
 )

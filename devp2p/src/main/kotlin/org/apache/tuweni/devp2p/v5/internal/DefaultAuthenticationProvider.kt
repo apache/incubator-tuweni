@@ -32,7 +32,7 @@ import org.apache.tuweni.devp2p.v5.storage.RoutingTable
 import org.apache.tuweni.rlp.RLP
 import java.util.concurrent.TimeUnit
 
-class DefaultAuthenticationProvider(
+internal class DefaultAuthenticationProvider(
   private val keyPair: SECP256K1.KeyPair,
   private val routingTable: RoutingTable
 ) : AuthenticationProvider {

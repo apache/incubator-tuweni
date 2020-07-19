@@ -40,41 +40,72 @@ import kotlin.coroutines.CoroutineContext
  * [Ethereum wiki.](https://github.com/ethereum/wiki/wiki/Light-client-protocol)
  *
  * @see org.apache.tuweni.rlpx.RLPxService
+ * @param coroutineContext the Kotlin coroutine context
+ * @param blockchainInfo blockchain information to send to peers
+ * @param serveHeaders whether to serve headers
+ * @param serveChainSince block number at which to start serving blocks
+ * @param serveStateSince block number at which to start serving state
+ * @param flowControlBufferLimit limit of bytes to send
+ * @param flowControlMaximumRequestCostTable cost table for control flow
+ * @param flowControlMinimumRateOfRecharge rate of recharge for cost
+ * @param repo the blockchain repository this subprotocol will serve data from
+ * @param listener a listener for new connections when a status message is provided
  */
-class LESSubprotocol
-/**
- *
- */(
-   private val coroutineContext: CoroutineContext = Dispatchers.Default,
-   private val blockchainInfo: BlockchainInformation,
-   private val serveHeaders: Boolean,
-   private val serveChainSince: UInt256,
-   private val serveStateSince: UInt256,
-   private val flowControlBufferLimit: UInt256,
-   private val flowControlMaximumRequestCostTable: UInt256,
-   private val flowControlMinimumRateOfRecharge: UInt256,
-   private val repo: BlockchainRepository,
-   private val listener: (WireConnection, Status) -> Unit = { _, _ -> }
- ) : SubProtocol {
+class LESSubprotocol(
+  private val coroutineContext: CoroutineContext = Dispatchers.Default,
+  private val blockchainInfo: BlockchainInformation,
+  private val serveHeaders: Boolean,
+  private val serveChainSince: UInt256,
+  private val serveStateSince: UInt256,
+  private val flowControlBufferLimit: UInt256,
+  private val flowControlMaximumRequestCostTable: UInt256,
+  private val flowControlMinimumRateOfRecharge: UInt256,
+  private val repo: BlockchainRepository,
+  private val listener: (WireConnection, Status) -> Unit = { _, _ -> }
+) : SubProtocol {
 
+  /**
+   * Creates a new client for the subprotocol.
+   *
+   * @param service the rlpx service that will use the handler
+   * @return a new client for the subprotocol, bound to the service.
+   */
   override fun createClient(service: RLPxService): SubProtocolClient {
     return EthClient(service)
   }
 
-  override fun getCapabilities(): MutableList<SubProtocolIdentifier> = mutableListOf(SubProtocolIdentifier.of("les", 2))
-
+  /**
+   * @return the identifier of the subprotocol
+   */
   override fun id(): SubProtocolIdentifier {
     return LES_ID
   }
 
+  /**
+   * @param subProtocolIdentifier the identifier of the subprotocol
+   * @return true if the subprotocol ID and version are supported, false otherwise
+   */
   override fun supports(subProtocolIdentifier: SubProtocolIdentifier): Boolean {
     return "les" == subProtocolIdentifier.name() && subProtocolIdentifier.version() == 2
   }
 
+  /**
+   * Provides the length of the range of message types supported by the subprotocol for a given version
+   *
+   * @param version the version of the subprotocol to associate with the range
+   * @return the length of the range of message types supported by the subprotocol for a given version
+   */
   override fun versionRange(version: Int): Int {
     return 21
   }
 
+  /**
+   * Creates a new handler for the subprotocol.
+   *
+   * @param service the rlpx service that will use the handler
+   * @param client the subprotocol client
+   * @return a new handler for the subprotocol, bound to the service.
+   */
   override fun createHandler(service: RLPxService, client: SubProtocolClient): SubProtocolHandler {
     val controller = EthController(repo, client as EthRequestsManager, listener)
     return LESSubProtocolHandler(

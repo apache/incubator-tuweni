@@ -30,7 +30,7 @@ import java.net.InetSocketAddress
 /**
  * Handler managing topic registration messages.
  */
-class RegTopicMessageHandler : MessageHandler<RegTopicMessage> {
+internal class RegTopicMessageHandler : MessageHandler<RegTopicMessage> {
 
   private val now: () -> Long = CURRENT_TIME_SUPPLIER
 

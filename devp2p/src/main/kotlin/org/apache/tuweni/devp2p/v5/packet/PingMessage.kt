@@ -19,7 +19,7 @@ package org.apache.tuweni.devp2p.v5.packet
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.rlp.RLP
 
-class PingMessage(
+internal class PingMessage(
   val requestId: Bytes = UdpMessage.requestId(),
   val enrSeq: Long = 0
 ) : UdpMessage {

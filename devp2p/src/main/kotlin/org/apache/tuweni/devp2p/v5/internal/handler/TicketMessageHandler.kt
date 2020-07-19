@@ -23,7 +23,7 @@ import org.apache.tuweni.devp2p.v5.packet.TicketMessage
 import org.apache.tuweni.devp2p.v5.topic.Ticket
 import java.net.InetSocketAddress
 
-class TicketMessageHandler : MessageHandler<TicketMessage> {
+internal class TicketMessageHandler : MessageHandler<TicketMessage> {
 
   override suspend fun handle(
     message: TicketMessage,

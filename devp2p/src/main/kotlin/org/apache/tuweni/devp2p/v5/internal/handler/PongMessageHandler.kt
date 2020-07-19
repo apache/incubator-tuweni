@@ -24,7 +24,7 @@ import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
 import org.apache.tuweni.devp2p.v5.packet.PongMessage
 import java.net.InetSocketAddress
 
-class PongMessageHandler : MessageHandler<PongMessage> {
+internal class PongMessageHandler : MessageHandler<PongMessage> {
 
   override suspend fun handle(
     message: PongMessage,

@@ -28,6 +28,8 @@ import kotlin.system.exitProcess
  * Relayer application, allowing to set a relay between two hobbits endpoints.
  *
  * The relayer runs as a Java application using the main method defined herein.
+ * @param vertx the Vert.x instance
+ * @param relayer the relayer to run
  */
 class RelayerApp(val vertx: Vertx, val relayer: Relayer) {
   companion object {
@@ -55,6 +57,9 @@ class RelayerApp(val vertx: Vertx, val relayer: Relayer) {
     }
   }
 
+  /**
+   * Stop the relayer.
+   */
   fun close() {
     relayer.stop()
     vertx.close()

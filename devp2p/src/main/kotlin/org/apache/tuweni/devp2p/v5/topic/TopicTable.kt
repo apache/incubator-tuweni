@@ -23,7 +23,7 @@ import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.devp2p.DiscoveryService
 import java.util.concurrent.TimeUnit
 
-class TopicTable(
+internal class TopicTable(
   private val tableCapacity: Int = MAX_TABLE_CAPACITY,
   private val queueCapacity: Int = MAX_ENTRIES_PER_TOPIC
 ) {
@@ -107,4 +107,4 @@ class TopicTable(
   }
 }
 
-class TargetAd(val regTime: Long, val enr: Bytes)
+internal class TargetAd(val regTime: Long, val enr: Bytes)

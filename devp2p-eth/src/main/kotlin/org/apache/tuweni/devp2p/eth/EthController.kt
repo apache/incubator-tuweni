@@ -26,6 +26,9 @@ import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.rlpx.wire.WireConnection
 
+/**
+ * Controller managing the state of the ETH or LES subprotocol handlers.
+ */
 class EthController(
   val repository: BlockchainRepository,
   val requestsManager: EthRequestsManager,
@@ -152,7 +155,7 @@ class EthController(
     connection: WireConnection,
     transactionReceipts: List<List<TransactionReceipt>>
   ) {
-    val request = requestsManager.transactionRequestsWasRequested(connection, transactionReceipts)
+    val request = requestsManager.transactionReceiptsRequested(connection, transactionReceipts)
     if (request != null) {
       val hashes = request.data as List<*>
       for (i in 0..hashes.size) {

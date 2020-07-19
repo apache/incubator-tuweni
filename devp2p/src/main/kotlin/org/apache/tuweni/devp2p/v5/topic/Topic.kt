@@ -18,7 +18,7 @@ package org.apache.tuweni.devp2p.v5.topic
 
 import org.apache.tuweni.bytes.Bytes
 
-data class Topic(
+internal data class Topic(
   val content: String
 ) {
 

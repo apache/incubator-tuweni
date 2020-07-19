@@ -431,8 +431,20 @@ internal data class Endpoint(
  * Transport types supported.
  */
 enum class Transport() {
+  /**
+   * HTTP transport
+   */
   HTTP,
+  /**
+   * TCP transport
+   */
   TCP,
+  /**
+   * UDP transport
+   */
   UDP,
+  /**
+   * Websocket transport
+   */
   WS
 }

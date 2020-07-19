@@ -22,18 +22,63 @@ import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.bigints.UInt64
 import java.util.zip.CRC32
 
+/**
+ * Blockchain information to be shared over the network with peers
+ */
 interface BlockchainInformation {
+  /**
+   * Our network ID. 1 for mainnet.
+   * @return our network ID
+   */
   fun networkID(): UInt256
+
+  /**
+   * Total difficulty of our canonical chain
+   * @return our best block total difficulty
+   */
   fun totalDifficulty(): UInt256
+
+  /**
+   * Best block hash we know
+   * @return our best block hash from our chain
+   */
   fun bestHash(): Hash
+
+  /**
+   * Best block number we know
+   *
+   * @return our best block number from our chain
+   */
   fun bestNumber(): UInt256
+
+  /**
+   * Genesis block hash
+   *
+   * @return the genesis block hash
+   */
   fun genesisHash(): Hash
+
+  /**
+   * Forks of our network we know
+   *
+   * @param all fork block numbers
+   */
   fun forks(): List<Long>
 
+  /**
+   * Get our latest known fork
+   *
+   * @return the latest fork number we know
+   */
   fun getLatestFork(): Long? {
     return if (forks().isEmpty()) null else forks()[forks().size - 1]
   }
 
+  /**
+   * Get all our fork hashes
+   *
+   * @param all fork hashes, sorted
+   */
   fun getForkHashes(): List<Bytes> {
     val crc = CRC32()
     crc.update(genesisHash().toArrayUnsafe())
@@ -48,6 +93,11 @@ interface BlockchainInformation {
     return forkHashes
   }
 
+  /**
+   * Get latest fork hash, if known
+   *
+   * @return the hash of the latest fork hash we know of
+   */
   fun getLatestForkHash(): Bytes? {
     val hashes = getForkHashes()
     return if (hashes.isEmpty()) {
@@ -56,6 +106,16 @@ interface BlockchainInformation {
   }
 }
 
+/**
+ * POJO - constant representation of the blockchain information
+ *
+ * @param networkID the network ID
+ * @param totalDifficulty the total difficulty of the chain
+ * @param bestHash best known hash
+ * @param bestNumber best known number
+ * @param genesisHash the genesis block hash
+ * @param forks known forks
+ */
 data class SimpleBlockchainInformation(
   val networkID: UInt256,
   val totalDifficulty: UInt256,

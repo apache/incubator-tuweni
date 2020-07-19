@@ -18,7 +18,7 @@ package org.apache.tuweni.devp2p.v5.misc
 
 import org.apache.tuweni.bytes.Bytes
 
-class HandshakeInitParameters(
+internal class HandshakeInitParameters(
   val idNonce: Bytes,
   val authTag: Bytes,
   val destEnr: Bytes

@@ -25,7 +25,7 @@ import org.bouncycastle.crypto.params.HKDFParameters
 /**
  * Generates session keys on handshake, using HKDF key derivation function
  */
-object SessionKeyGenerator {
+internal object SessionKeyGenerator {
 
   const val DERIVED_KEY_SIZE: Int = 16
 

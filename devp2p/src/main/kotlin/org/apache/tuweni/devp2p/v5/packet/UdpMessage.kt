@@ -22,7 +22,7 @@ import org.apache.tuweni.crypto.Hash
 /**
  * Discovery message sent over UDP.
  */
-interface UdpMessage {
+internal interface UdpMessage {
 
   companion object {
 

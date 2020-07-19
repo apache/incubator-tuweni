@@ -23,7 +23,7 @@ import org.apache.tuweni.devp2p.v5.packet.PingMessage
 import org.apache.tuweni.devp2p.v5.packet.PongMessage
 import java.net.InetSocketAddress
 
-class PingMessageHandler : MessageHandler<PingMessage> {
+internal class PingMessageHandler : MessageHandler<PingMessage> {
 
   override suspend fun handle(
     message: PingMessage,

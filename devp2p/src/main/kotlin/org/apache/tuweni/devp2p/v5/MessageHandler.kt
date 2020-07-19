@@ -23,7 +23,7 @@ import java.net.InetSocketAddress
 /**
  * Udp message handler, aimed to process its parameters and sending result
  */
-interface MessageHandler<T : UdpMessage> {
+internal interface MessageHandler<T : UdpMessage> {
 
   /**
    * @param message udp message containing parameters

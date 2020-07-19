@@ -23,7 +23,7 @@ import org.apache.tuweni.devp2p.v5.packet.FindNodeMessage
 import org.apache.tuweni.devp2p.v5.packet.NodesMessage
 import java.net.InetSocketAddress
 
-class FindNodeMessageHandler : MessageHandler<FindNodeMessage> {
+internal class FindNodeMessageHandler : MessageHandler<FindNodeMessage> {
 
   override suspend fun handle(
     message: FindNodeMessage,

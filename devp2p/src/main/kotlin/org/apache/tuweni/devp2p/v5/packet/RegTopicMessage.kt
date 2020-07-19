@@ -22,7 +22,7 @@ import org.apache.tuweni.rlp.RLP
 /**
  * Message to register a topic.
  */
-class RegTopicMessage(
+internal class RegTopicMessage(
   val requestId: Bytes = UdpMessage.requestId(),
   val nodeRecord: Bytes,
   val topic: Bytes,

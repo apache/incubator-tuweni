@@ -71,7 +71,7 @@ import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
 
-public class DefaultUdpConnector(
+internal class DefaultUdpConnector(
   private val bindAddress: InetSocketAddress,
   private val keyPair: SECP256K1.KeyPair,
   private val selfEnr: Bytes,

@@ -23,7 +23,7 @@ import org.apache.tuweni.devp2p.v5.packet.RandomMessage
 import org.apache.tuweni.devp2p.v5.packet.WhoAreYouMessage
 import java.net.InetSocketAddress
 
-class RandomMessageHandler : MessageHandler<RandomMessage> {
+internal class RandomMessageHandler : MessageHandler<RandomMessage> {
 
   override suspend fun handle(
     message: RandomMessage,

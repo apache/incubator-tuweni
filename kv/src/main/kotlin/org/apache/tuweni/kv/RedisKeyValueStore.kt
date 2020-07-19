@@ -233,6 +233,9 @@ class RedisKeyValueStore<K, V>(
     asyncCommands.flushdb().await()
   }
 
+  /**
+   * Close the store
+   */
   override fun close() {
     conn.close()
   }

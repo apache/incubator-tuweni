@@ -21,11 +21,15 @@ import java.lang.IllegalArgumentException
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets.UTF_8
 
-val PREAMBLE = "EWP".toByteArray(UTF_8)
-val MESSAGE_HEADER_LENGTH = PREAMBLE.size + java.lang.Integer.BYTES * 3 + 1
+internal val PREAMBLE = "EWP".toByteArray(UTF_8)
+internal val MESSAGE_HEADER_LENGTH = PREAMBLE.size + java.lang.Integer.BYTES * 3 + 1
 /**
  * Hobbits message.
  *
+ * @param version Hobbits version
+ * @param protocol message protocol
+ * @param headers headers to send
+ * @param body the body of the message
  */
 class Message(
   val version: Int = 3,
@@ -89,16 +93,39 @@ class Message(
     return MESSAGE_HEADER_LENGTH + headers.size() + body.size()
   }
 
+  /**
+   * Transforms the message into a string, with a request line following by headers and body in hex representation.
+   */
   override fun toString(): String {
     val requestLine = "EWP $version $protocol ${headers.size()} ${body.size()}\n"
     return requestLine + headers.toHexString() + "\n" + body.toHexString()
   }
 }
 
+/**
+ * Subprotocols supported by the hobbits protocol.
+ * @param code the byte identifying the subprotocol
+ */
 enum class Protocol(val code: Byte) {
-  GOSSIP(1), PING(2), RPC(0);
+  /**
+   * Gossip protocol message
+   */
+  GOSSIP(1),
+  /**
+   * Ping message
+   */
+  PING(2),
+  /**
+   * RPC message
+   */
+  RPC(0);
 
   companion object {
+    /**
+     * Finds a protocol from a byte, or throws an error if no protocol exists for that code.
+     * @param b the byte to interpret
+     * @return a Protocol
+     */
     fun fromByte(b: Byte): Protocol {
       return when (b) {
         RPC.code -> RPC

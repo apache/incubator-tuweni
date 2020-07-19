@@ -52,15 +52,14 @@ import org.xbill.DNS.WireParseException
  * @param dnsServer the DNS server to use for DNS query. If null, the default DNS server will be used.
  * @param seq the sequence number of the root record. If the root record seq is higher, proceed with visit.
  */
-
-public class DNSResolver @JvmOverloads constructor(
+class DNSResolver @JvmOverloads constructor(
   private val dnsServer: String? = null,
   var seq: Long = 0,
   private val resolver: Resolver = SimpleResolver(dnsServer)
 ) {
 
   companion object {
-    val logger = LoggerFactory.getLogger(DNSResolver::class.java)
+    internal val logger = LoggerFactory.getLogger(DNSResolver::class.java)
   }
 
   /**
@@ -111,7 +110,7 @@ public class DNSResolver @JvmOverloads constructor(
    * @param link the ENR link to start with
    * @param visitor the visitor that will look at each record
    */
-  public fun visitTree(link: ENRTreeLink, visitor: DNSVisitor) {
+  private fun visitTree(link: ENRTreeLink, visitor: DNSVisitor) {
     val entry = resolveRecord(link.domainName)
     if (entry !is ENRTreeRoot) {
       logger.debug("Root entry $entry is not an ENR tree root")

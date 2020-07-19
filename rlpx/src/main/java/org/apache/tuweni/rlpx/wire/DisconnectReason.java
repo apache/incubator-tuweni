@@ -17,21 +17,65 @@ package org.apache.tuweni.rlpx.wire;
  *
  */
 public enum DisconnectReason {
-
+  /**
+   * Explicitly requested to disconnect
+   */
   REQUESTED(0, "Requested"),
+  /**
+   * Error in the TCP transport
+   */
   TCP_ERROR(1, "TCP Error"),
+  /**
+   * Error in the protocol or subprotocol
+   */
   PROTOCOL_BREACH(2, "Protocol breach"),
+  /**
+   * Peer is useless, it has no matching subprotocols
+   */
   USELESS_PEER(3, "Useless peer"),
+  /**
+   * We already have enough peers
+   */
   TOO_MANY_PEERS(4, "Too many peers"),
+  /**
+   * We are already connected to this peer
+   */
   ALREADY_CONNECTED(5, "Already connected"),
+  /**
+   * Peer has an incompatible devp2p version
+   */
   INCOMPATIBLE_DEVP2P_VERSION(6, "Incompatible devp2p version"),
+  /**
+   * The peer sent an invalid, null identity
+   */
   NULL_NODE_IDENTITY_RECEIVED(7, "Null node identity received"),
+  /**
+   * The client is exiting
+   */
   CLIENT_QUITTING(8, "Client quitting"),
+  /**
+   * The identity the peer sends doesn't match what we expected
+   */
   UNEXPECTED_IDENTITY(9, "Unexpected identity"),
+  /**
+   * The peer is us
+   */
   CONNECTED_TO_SELF(10, "Connected to self"),
+  /**
+   * We hit a timeout
+   */
   TIMEOUT(11, "Timeout"),
+  /**
+   * A subprotocol has reason to request a disconnection
+   */
   SUBPROTOCOL_REASON(16, "Subprotocol reason");
 
+  /**
+   * Get a disconnect reason for a number code
+   * 
+   * @param reason the reason code
+   * @return a matching DisconnectReason
+   */
   public static DisconnectReason valueOf(int reason) {
     switch (reason) {
       case 0:
@@ -70,6 +114,12 @@ public enum DisconnectReason {
     this.text = text;
   }
 
+  /**
+   * Disconnect reason code
+   */
   public final int code;
+  /**
+   * Disconnect reason text
+   */
   public final String text;
 }

@@ -76,7 +76,7 @@ public interface DNSEntry {
   }
 }
 
-class ENRNode(attrs: Map<String, String>) : DNSEntry {
+internal class ENRNode(attrs: Map<String, String>) : DNSEntry {
 
   val nodeRecord: EthereumNodeRecord
 
@@ -96,7 +96,7 @@ class ENRNode(attrs: Map<String, String>) : DNSEntry {
   }
 }
 
-class ENRTreeRoot(attrs: Map<String, String>) : DNSEntry {
+internal class ENRTreeRoot(attrs: Map<String, String>) : DNSEntry {
 
   val version: String
   val seq: Long
@@ -128,7 +128,7 @@ class ENRTreeRoot(attrs: Map<String, String>) : DNSEntry {
   }
 }
 
-class ENRTree(entriesAsString: String) : DNSEntry {
+internal class ENRTree(entriesAsString: String) : DNSEntry {
 
   val entries: List<String>
   init {
@@ -140,7 +140,7 @@ class ENRTree(entriesAsString: String) : DNSEntry {
   }
 }
 
-class ENRTreeLink(url: String) : DNSEntry {
+internal class ENRTreeLink(url: String) : DNSEntry {
 
   val domainName: String
   val pubKey: String
@@ -161,4 +161,4 @@ class ENRTreeLink(url: String) : DNSEntry {
   }
 }
 
-class InvalidEntryException(message: String?) : RuntimeException(message)
+internal class InvalidEntryException(message: String?) : RuntimeException(message)
