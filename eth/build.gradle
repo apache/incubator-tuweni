@@ -13,17 +13,22 @@
 description = 'Classes and utilities for working with Ethereum.'
 
 dependencies {
-  compile 'com.fasterxml.jackson.core:jackson-databind'
-  compile project(':bytes')
-  compile project(':crypto')
-  compile project(':rlp')
-  compile project(':units')
-  compile project(':merkle-trie')
+  implementation 'com.fasterxml.jackson.core:jackson-databind'
+  implementation 'com.google.guava:guava'
+  implementation 'org.jetbrains.kotlin:kotlin-stdlib'
 
-  testCompile project(':junit')
-  testCompile 'org.bouncycastle:bcprov-jdk15on'
-  testCompile 'org.junit.jupiter:junit-jupiter-api'
-  testCompile 'org.junit.jupiter:junit-jupiter-params'
+  implementation project(':bytes')
+  implementation project(':concurrent')
 
-  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+  implementation project(':crypto')
+  implementation project(':rlp')
+  implementation project(':units')
+  implementation project(':merkle-trie')
+
+  testImplementation project(':junit')
+  testImplementation 'org.bouncycastle:bcprov-jdk15on'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testImplementation 'org.junit.jupiter:junit-jupiter-params'
+
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }

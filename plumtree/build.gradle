@@ -13,17 +13,19 @@
 description = 'Plumtree - Push-Lazy-pUsh Multicast TREE, an implementation of Epidemic Broadcast Tree'
 
 dependencies {
-  compile project(':bytes')
-  compile project(':concurrent')
-  compile project(':crypto')
+  implementation project(':bytes')
+  implementation project(':concurrent')
+  implementation project(':crypto')
+
+  implementation 'com.google.code.findbugs:jsr305'
 
   compileOnly 'io.vertx:vertx-core'
 
-  testCompile project(':junit')
-  testCompile 'org.bouncycastle:bcprov-jdk15on'
-  testCompile 'org.junit.jupiter:junit-jupiter-api'
-  testCompile 'org.junit.jupiter:junit-jupiter-params'
-  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+  testImplementation project(':junit')
+  testImplementation 'org.bouncycastle:bcprov-jdk15on'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testImplementation 'org.junit.jupiter:junit-jupiter-params'
+  testImplementation 'org.junit.jupiter:junit-jupiter-engine'
 
-  integrationTestCompile 'io.vertx:vertx-core'
+  integrationTestImplementation 'io.vertx:vertx-core'
 }

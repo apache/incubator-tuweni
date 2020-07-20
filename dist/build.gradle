@@ -33,7 +33,7 @@ static def mandatoryFiles(CopySpec spec) {
 
 distributions {
   main {
-    baseName = 'tuweni-bin'
+    distributionBaseName = 'tuweni-bin'
     contents {
       mandatoryFiles(it)
       into('') {
@@ -61,7 +61,7 @@ distributions {
     }
   }
   sources {
-    baseName = 'tuweni-src'
+    distributionBaseName = 'tuweni-src'
     contents {
       mandatoryFiles(it)
       into('') {
@@ -88,7 +88,7 @@ distributions {
     }
   }
   gossip {
-    baseName = 'tuweni-gossip'
+    distributionBaseName = 'tuweni-gossip'
     contents {
       mandatoryFiles(it)
       into('') {
@@ -108,7 +108,7 @@ distributions {
     }
   }
   relayer {
-    baseName = 'tuweni-relayer'
+    distributionBaseName = 'tuweni-relayer'
     contents {
       mandatoryFiles(it)
       into('') {
@@ -196,8 +196,8 @@ task buildRelayerImage(type: DockerBuildImage) {
 integrationTest.dependsOn build
 
 dependencies {
-  integrationTestCompile 'org.junit.jupiter:junit-jupiter-api'
-  integrationTestCompile 'org.junit.jupiter:junit-jupiter-params'
+  integrationTestImplementation 'org.junit.jupiter:junit-jupiter-api'
+  integrationTestImplementation 'org.junit.jupiter:junit-jupiter-params'
 
-  integrationTestRuntime 'org.junit.jupiter:junit-jupiter-engine'
+  integrationTestRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }

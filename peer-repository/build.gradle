@@ -13,15 +13,15 @@
 description = 'Peer repository library.'
 
 dependencies {
-  compile 'com.google.guava:guava'
-  compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
-  compile 'org.slf4j:slf4j-api'
-  compile project(':crypto')
+  implementation 'com.google.guava:guava'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+  implementation 'org.slf4j:slf4j-api'
+  implementation project(':crypto')
 
-  testCompile project(':junit')
-  testCompile 'org.bouncycastle:bcprov-jdk15on'
-  testCompile 'org.junit.jupiter:junit-jupiter-api'
-  testCompile 'org.junit.jupiter:junit-jupiter-params'
+  testImplementation project(':junit')
+  testImplementation 'org.bouncycastle:bcprov-jdk15on'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testImplementation 'org.junit.jupiter:junit-jupiter-params'
 
-  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }

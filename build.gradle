@@ -180,8 +180,8 @@ subprojects {
       integrationTestRuntime.extendsFrom testRuntime
     }
     dependencies {
-      integrationTestRuntime 'org.junit.jupiter:junit-jupiter-engine'
-      integrationTestRuntime 'ch.qos.logback:logback-classic'
+      integrationTestRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+      integrationTestRuntimeOnly 'ch.qos.logback:logback-classic'
     }
 
     task integrationTest(type: Test) {
@@ -426,7 +426,7 @@ allprojects {
             artifact sourcesJar { classifier 'sources' }
           }
           groupId 'org.apache.tuweni'
-          artifactId project.jar.baseName
+          artifactId project.name
           version project.version
 
           versionMapping {
@@ -439,7 +439,7 @@ allprojects {
           }
 
           pom {
-            name = project.jar.archiveBaseName.toString()
+            name = project.name
             afterEvaluate { description = project.description }
             url = 'https://github.com/apache/incubator-tuweni'
             licenses {
@@ -595,21 +595,13 @@ dependencies {
   }.each { p ->
     switch (p.name) {
       case 'crypto':
-        compile(p) {
+        implementation(p) {
           exclude group: 'com.github.jnr', module: 'jnr-ffi'
         }
         break
       default:
-        compile p
+        implementation p
         break
-    }
-  }
-}
-
-jar {
-  subprojects.each { subproject ->
-    if (subproject.name != 'eth-reference-tests' && subproject.name != 'eth2-reference-tests') {
-      from subproject.configurations.archives.collect { it.path.endsWith('.jar') }.files.collect { zipTree(it) }
     }
   }
 }

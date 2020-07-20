@@ -13,23 +13,26 @@
 description = 'Ethereum ÐΞVp2p implementation.'
 
 dependencies {
-  compile project(':bytes')
-  compile project(':concurrent')
-  compile project(':concurrent-coroutines')
-  compile project(':crypto')
-  compile project(':kademlia')
-  compile project(':net-coroutines')
-  compile project(':rlp')
-  compile 'io.vertx:vertx-core'
-  compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
-  compile 'org.slf4j:slf4j-api'
+  implementation project(':bytes')
+  implementation project(':concurrent')
+  implementation project(':concurrent-coroutines')
+  implementation project(':crypto')
+  implementation project(':io')
+  implementation project(':kademlia')
+  implementation project(':net-coroutines')
+  implementation project(':rlp')
+  implementation project(':units')
+  implementation 'com.google.guava:guava'
+  implementation 'io.vertx:vertx-core'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+  implementation 'org.slf4j:slf4j-api'
 
   compileOnly 'org.bouncycastle:bcprov-jdk15on'
 
-  testCompile project(':junit')
-  testCompile 'org.bouncycastle:bcprov-jdk15on'
-  testCompile 'org.junit.jupiter:junit-jupiter-api'
-  testCompile 'org.junit.jupiter:junit-jupiter-params'
+  testImplementation project(':junit')
+  testImplementation 'org.bouncycastle:bcprov-jdk15on'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testImplementation 'org.junit.jupiter:junit-jupiter-params'
 
-  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }

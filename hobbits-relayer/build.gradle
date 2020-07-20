@@ -15,19 +15,20 @@ plugins { id 'application' }
 description = 'Hobbits relayer application.'
 
 dependencies {
-  compile project(':hobbits')
+  implementation project(':hobbits')
 
-  compile 'info.picocli:picocli'
-  compile 'io.vertx:vertx-core'
-  compile 'org.bouncycastle:bcprov-jdk15on'
-  compile 'org.slf4j:slf4j-api'
+  implementation 'info.picocli:picocli'
+  implementation 'io.vertx:vertx-core'
+  implementation 'org.bouncycastle:bcprov-jdk15on'
+  implementation 'org.slf4j:slf4j-api'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
 
-  testCompile project(':junit')
-  testCompile 'org.bouncycastle:bcprov-jdk15on'
-  testCompile 'org.junit.jupiter:junit-jupiter-api'
-  testCompile 'org.junit.jupiter:junit-jupiter-params'
+  testImplementation project(':junit')
+  testImplementation 'org.bouncycastle:bcprov-jdk15on'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testImplementation 'org.junit.jupiter:junit-jupiter-params'
 
-  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 
 

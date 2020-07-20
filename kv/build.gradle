@@ -14,14 +14,15 @@ description = 'Key value store implementations.'
 
 dependencies {
 
-  compile project(':bytes')
-  compile project(':concurrent-coroutines')
-  compile project(':io')
-  compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
-  compile 'org.jetbrains.kotlinx:kotlinx-coroutines-guava'
-  compile 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8'
-  compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-  compile 'javax.persistence:javax.persistence-api'
+  implementation project(':bytes')
+  implementation project(':concurrent')
+  implementation project(':concurrent-coroutines')
+  implementation project(':io')
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-guava'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8'
+  implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+  implementation 'javax.persistence:javax.persistence-api'
   compileOnly 'com.jolbox:bonecp'
   compileOnly 'io.lettuce:lettuce-core'
   compileOnly 'org.fusesource.leveldbjni:leveldbjni-all'
@@ -29,23 +30,23 @@ dependencies {
   compileOnly 'org.mapdb:mapdb'
   compileOnly 'org.rocksdb:rocksdbjni'
 
-  testCompile project(':concurrent')
-  testCompile project(':junit')
-  testCompile 'com.jolbox:bonecp'
-  testCompile 'com.github.kstyrc:embedded-redis'
-  testCompile 'com.h2database:h2'
-  testCompile 'com.winterbe:expekt'
-  testCompile 'io.lettuce:lettuce-core'
-  testCompile 'org.fusesource.leveldbjni:leveldbjni-all'
-  testCompile  'org.infinispan:infinispan-core'
-  testCompile 'org.jetbrains.spek:spek-api'
-  testCompile 'org.junit.jupiter:junit-jupiter-api'
-  testCompile 'org.junit.jupiter:junit-jupiter-params'
-  testCompile 'org.mapdb:mapdb'
-  testCompile 'org.rocksdb:rocksdbjni'
-  testRuntime 'org.apache.openjpa:openjpa'
+  testImplementation project(':concurrent')
+  testImplementation project(':junit')
+  testImplementation 'com.jolbox:bonecp'
+  testImplementation 'com.github.kstyrc:embedded-redis'
+  testImplementation 'com.h2database:h2'
+  testImplementation 'com.winterbe:expekt'
+  testImplementation 'io.lettuce:lettuce-core'
+  testImplementation 'org.fusesource.leveldbjni:leveldbjni-all'
+  testImplementation  'org.infinispan:infinispan-core'
+  testImplementation 'org.jetbrains.spek:spek-api'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testImplementation 'org.junit.jupiter:junit-jupiter-params'
+  testImplementation 'org.mapdb:mapdb'
+  testImplementation 'org.rocksdb:rocksdbjni'
+  testImplementation 'org.apache.openjpa:openjpa'
 
 
-  testRuntime 'org.jetbrains.spek:spek-junit-platform-engine'
-  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+  testRuntimeOnly 'org.jetbrains.spek:spek-junit-platform-engine'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
