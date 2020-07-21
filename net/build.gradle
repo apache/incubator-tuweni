@@ -13,21 +13,21 @@
 description = 'Classes and utilities for working with networking.'
 
 dependencies {
-  compile project(':bytes')
-  compile project(':crypto')
-  compile project(':io')
-  compile 'com.google.guava:guava'
+  implementation project(':bytes')
+  implementation project(':crypto')
+  implementation project(':io')
+  implementation 'com.google.guava:guava'
   compileOnly 'io.vertx:vertx-core'
   compileOnly 'org.bouncycastle:bcprov-jdk15on'
   compileOnly 'org.bouncycastle:bcpkix-jdk15on'
 
-  testCompile project(':junit')
-  testCompile 'com.squareup.okhttp3:okhttp'
-  testCompile 'io.vertx:vertx-core'
-  testCompile 'org.bouncycastle:bcprov-jdk15on'
-  testCompile 'org.bouncycastle:bcpkix-jdk15on'
-  testCompile 'org.junit.jupiter:junit-jupiter-api'
-  testCompile 'org.junit.jupiter:junit-jupiter-params'
+  testImplementation project(':junit')
+  testImplementation 'com.squareup.okhttp3:okhttp'
+  testImplementation 'io.vertx:vertx-core'
+  testImplementation 'org.bouncycastle:bcprov-jdk15on'
+  testImplementation 'org.bouncycastle:bcpkix-jdk15on'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testImplementation 'org.junit.jupiter:junit-jupiter-params'
 
-  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }

@@ -13,12 +13,13 @@
 description = 'Recursive Length Prefix (RLP) encoding and decoding.'
 
 dependencies {
-  compile project(':bytes')
+  implementation 'com.google.guava:guava'
+  implementation project(':bytes')
   compileOnly project(':units')
 
-  testCompile project(':units')
-  testCompile 'org.junit.jupiter:junit-jupiter-api'
-  testCompile 'org.junit.jupiter:junit-jupiter-params'
+  testImplementation project(':units')
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testImplementation 'org.junit.jupiter:junit-jupiter-params'
 
-  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }

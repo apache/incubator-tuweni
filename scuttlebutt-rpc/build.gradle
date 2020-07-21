@@ -13,23 +13,24 @@
 description = 'Scuttlebutt RPC library'
 
 dependencies {
-  compile project(':bytes')
-  compile project(':concurrent')
-  compile project(':crypto')
+  implementation project(':bytes')
+  implementation project(':concurrent')
+  implementation project(':crypto')
   compileOnly 'io.vertx:vertx-core'
-  compile project(':scuttlebutt')
-  compile project(':scuttlebutt-handshake')
-  compile 'org.slf4j:slf4j-api'
+  implementation project(':scuttlebutt')
+  implementation project(':scuttlebutt-handshake')
+  implementation 'org.slf4j:slf4j-api'
 
-  compile 'com.fasterxml.jackson.core:jackson-databind'
+  implementation 'com.fasterxml.jackson.core:jackson-databind'
 
-  testCompile project(':junit')
-  testCompile project(':scuttlebutt-handshake')
+  testImplementation project(':io')
+  testImplementation project(':junit')
+  testImplementation project(':scuttlebutt-handshake')
 
-  testCompile 'org.bouncycastle:bcprov-jdk15on'
-  testCompile 'org.junit.jupiter:junit-jupiter-api'
-  testCompile 'org.junit.jupiter:junit-jupiter-params'
-  testCompile 'io.vertx:vertx-core'
+  testImplementation 'org.bouncycastle:bcprov-jdk15on'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testImplementation 'org.junit.jupiter:junit-jupiter-params'
+  testImplementation 'io.vertx:vertx-core'
 
-  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }

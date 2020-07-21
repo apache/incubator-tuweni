@@ -15,22 +15,23 @@ plugins { id 'application' }
 description = 'Ethereum client App'
 
 dependencies {
-  compile 'info.picocli:picocli'
-  compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+  implementation 'info.picocli:picocli'
+  implementation 'io.vertx:vertx-core'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+  implementation 'org.bouncycastle:bcprov-jdk15on'
 
-  compile project(':eth-client')
-  compile project(':eth-client-ui')
+  implementation project(':eth-client')
+  implementation project(':eth-client-ui')
 
-  testCompile project(':junit')
-  testCompile 'org.bouncycastle:bcprov-jdk15on'
-  testCompile 'org.junit.jupiter:junit-jupiter-api'
-  testCompile 'org.junit.jupiter:junit-jupiter-params'
-  testCompile 'com.nhaarman.mockitokotlin2:mockito-kotlin'
-  testCompile 'org.mockito:mockito-junit-jupiter'
+  testImplementation project(':junit')
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testImplementation 'org.junit.jupiter:junit-jupiter-params'
+  testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin'
+  testImplementation 'org.mockito:mockito-junit-jupiter'
 
-  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
-  runtime 'ch.qos.logback:logback-classic'
+  runtimeOnly 'ch.qos.logback:logback-classic'
 }
 
 application {

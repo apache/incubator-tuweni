@@ -15,17 +15,19 @@ description = 'ETHStats client library'
 
 
 dependencies {
-  compile 'com.fasterxml.jackson.core:jackson-databind'
-  compile 'com.google.guava:guava'
-  compile 'io.vertx:vertx-core'
-  compile 'org.bouncycastle:bcprov-jdk15on'
-  compile 'org.slf4j:slf4j-api'
-  compile project(':bytes')
-  compile project(':eth')
+  implementation 'com.fasterxml.jackson.core:jackson-databind'
+  implementation 'com.google.guava:guava'
+  implementation 'io.vertx:vertx-core'
+  implementation 'org.bouncycastle:bcprov-jdk15on'
+  implementation 'org.slf4j:slf4j-api'
+  implementation project(':bytes')
+  implementation project(':concurrent')
+  implementation project(':eth')
+  implementation project(':units')
 
-  testCompile project(':bytes')
-  testCompile project(':junit')
-  testCompile 'org.junit.jupiter:junit-jupiter-api'
-  testCompile 'org.junit.jupiter:junit-jupiter-params'
-  testRuntime 'org.junit.jupiter:junit-jupiter-engine'
+  testImplementation project(':bytes')
+  testImplementation project(':junit')
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testImplementation 'org.junit.jupiter:junit-jupiter-params'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
