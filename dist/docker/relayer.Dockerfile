@@ -11,9 +11,9 @@
 
 FROM openjdk:11.0.3-jre-stretch
 
-COPY build/distributions/tuweni-relayer-*.tgz /usr/relayer.tgz
+COPY build/distributions/tuweni-bin-*.tgz /usr/relayer.tgz
 RUN cd /usr \
   && tar xzf relayer.tgz \
-  && mv tuweni-relayer-* relayer
+  && mv tuweni-relayer-*/relayer relayer
 
 ENTRYPOINT ["/usr/relayer/bin/relayer"]

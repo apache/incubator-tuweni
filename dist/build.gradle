@@ -58,6 +58,12 @@ distributions {
       into('site') {
         from rootProject.dokka.outputDirectory
       }
+      into('bin') {
+        from { project(':gossip').startScripts.outputs.files }
+        from { project(':hobbits-relayer').startScripts.outputs.files }
+        from { project(':eth-client-app').startScripts.outputs.files }
+        fileMode = 0755
+      }
     }
   }
   sources {
@@ -87,46 +93,6 @@ distributions {
       }
     }
   }
-  gossip {
-    distributionBaseName = 'tuweni-gossip'
-    contents {
-      mandatoryFiles(it)
-      into('') {
-        from ".."
-        include 'gossip/README.md'
-      }
-      into('bin') {
-        from { project(':gossip').startScripts.outputs.files }
-        fileMode = 0755
-      }
-      into('lib') {
-        def libs = []
-        libs << project(':gossip').configurations.runtime
-        from libs
-        from project(':gossip').jar
-      }
-    }
-  }
-  relayer {
-    distributionBaseName = 'tuweni-relayer'
-    contents {
-      mandatoryFiles(it)
-      into('') {
-        from ".."
-        include 'hobbits-relayer/README.md'
-      }
-      into('bin') {
-        from { project(':hobbits-relayer').startScripts.outputs.files }
-        fileMode = 0755
-      }
-      into('lib') {
-        def libs = []
-        libs << project(':hobbits-relayer').configurations.runtime
-        from libs
-        from project(':hobbits-relayer').jar
-      }
-    }
-  }
 }
 
 rootProject.subprojects.each {
@@ -144,10 +110,6 @@ distTar{ compression = Compression.GZIP }
 
 sourcesDistTar{ compression = Compression.GZIP }
 
-gossipDistTar{ compression = Compression.GZIP }
-
-relayerDistTar{ compression = Compression.GZIP }
-
 if (System.getenv('ENABLE_SIGNING') == 'true') {
   signing {
     useGpgCmd()
@@ -155,10 +117,6 @@ if (System.getenv('ENABLE_SIGNING') == 'true') {
     sign distTar
     sign sourcesDistZip
     sign sourcesDistTar
-    sign gossipDistZip
-    sign gossipDistTar
-    sign relayerDistZip
-    sign relayerDistTar
   }
 }
 
@@ -167,13 +125,8 @@ task createChecksums(type: Checksum, dependsOn: [
   'distTar',
   'sourcesDistZip',
   'sourcesDistTar',
-  'gossipDistZip',
-  'gossipDistTar',
-  'relayerDistZip',
-  'relayerDistTar'
 ]) {
-  files = distZip.outputs.files + distTar.outputs.files + sourcesDistZip.outputs.files + sourcesDistTar.outputs.files \
-      + gossipDistZip.outputs.files + gossipDistTar.outputs.files + relayerDistZip.outputs.files + relayerDistTar.outputs.files
+  files = distZip.outputs.files + distTar.outputs.files + sourcesDistZip.outputs.files + sourcesDistTar.outputs.files
   outputDir = new File(project.buildDir, "distributions")
   algorithm = Checksum.Algorithm.SHA512
 }
@@ -181,14 +134,14 @@ task createChecksums(type: Checksum, dependsOn: [
 build.dependsOn('createChecksums')
 
 task buildGossipImage(type: DockerBuildImage) {
-  dependsOn gossipDistTar
+  dependsOn distTar
   inputDir = projectDir
   dockerFile = file("docker/gossip.Dockerfile")
   tag = "apache-tuweni/gossip:$project.version"
 }
 
 task buildRelayerImage(type: DockerBuildImage) {
-  dependsOn relayerDistTar
+  dependsOn distTar
   inputDir = projectDir
   dockerFile = file("docker/relayer.Dockerfile")
   tag = "apache-tuweni/relayer:$project.version"

@@ -11,9 +11,9 @@
 
 FROM openjdk:11.0.3-jre-stretch
 
-COPY build/distributions/tuweni-gossip-*.tgz /usr/gossip.tgz
+COPY build/distributions/tuweni-bin-*.tgz /usr/gossip.tgz
 RUN cd /usr \
   && tar xzf gossip.tgz \
-  && mv tuweni-gossip-* gossip
+  && mv tuweni-bin-*/gossip gossip
 
 ENTRYPOINT ["/usr/gossip/bin/gossip"]
