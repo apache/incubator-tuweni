@@ -97,6 +97,26 @@ public final class AccountState {
     });
   }
 
+  public Hash getCodeHash() {
+    return codeHash;
+  }
+
+  public Hash getStorageRoot() {
+    return storageRoot;
+  }
+
+  public int getVersion() {
+    return version;
+  }
+
+  public UInt256 getNonce() {
+    return nonce;
+  }
+
+  public Wei getBalance() {
+    return balance;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o)

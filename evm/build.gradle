@@ -18,18 +18,20 @@ dependencies {
   implementation project(':crypto')
   implementation project(':concurrent-coroutines')
   implementation project(':eth')
-  implementation project(':merkle-trie')
-  implementation project(':kv')
+  implementation project(':eth-repository')
   implementation project(':units')
   implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
   implementation 'org.apache.lucene:lucene-core'
   implementation 'org.jetbrains.kotlin:kotlin-stdlib'
   implementation 'org.slf4j:slf4j-api'
+  implementation 'org.ethereum:evmc'
 
   testImplementation project(':junit')
+  testImplementation project(':kv')
   testImplementation 'org.bouncycastle:bcprov-jdk15on'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.junit.jupiter:junit-jupiter-params'
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+  testRuntimeOnly 'ch.qos.logback:logback-classic'
 }
