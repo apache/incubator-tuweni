@@ -1401,10 +1401,26 @@ public interface Bytes extends Comparable<Bytes> {
    * @return A byte array with the same content than this value.
    */
   default byte[] toArray() {
+    return toArray(BIG_ENDIAN);
+  }
+
+  /**
+   * Extract the bytes of this value into a byte array.
+   *
+   * @param byteOrder the byte order to apply : big endian or little endian
+   * @return A byte array with the same content than this value.
+   */
+  default byte[] toArray(ByteOrder byteOrder) {
     int size = size();
     byte[] array = new byte[size];
-    for (int i = 0; i < size; i++) {
-      array[i] = get(i);
+    if (byteOrder == BIG_ENDIAN) {
+      for (int i = 0; i < size; i++) {
+        array[i] = get(i);
+      }
+    } else {
+      for (int i = 0; i < size(); i++) {
+        array[size() - i - 1] = get(i);
+      }
     }
     return array;
   }

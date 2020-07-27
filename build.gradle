@@ -235,7 +235,12 @@ allprojects {
 
   version = buildVersion
 
-  repositories { jcenter() }
+  repositories {
+    jcenter()
+    maven {
+      url "https://dl.bintray.com/tuweni/evmc"
+    }
+  }
 
 
   //////

@@ -17,6 +17,9 @@
 package org.apache.tuweni.eth.repository
 
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.eth.AccountState
+import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.Block
 import org.apache.tuweni.eth.BlockBody
 import org.apache.tuweni.eth.BlockHeader
@@ -24,6 +27,8 @@ import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.kv.KeyValueStore
+import org.apache.tuweni.trie.MerkleStorage
+import org.apache.tuweni.trie.StoredMerklePatriciaTrie
 import org.slf4j.LoggerFactory
 
 /**
@@ -41,7 +46,7 @@ class BlockchainRepository
  * @param blockHeaderStore the key-value store to store block headers
  * @param transactionReceiptStore the key-value store to store transaction receipts
  * @param transactionStore the key-value store to store transactions
- * @param stateStore the key-value store to store state
+ * @param stateStore the key-value store to store the global state
  * @param blockchainIndex the blockchain index to index values
  */(
    private val chainMetadata: KeyValueStore<Bytes, Bytes>,
@@ -344,6 +349,69 @@ class BlockchainRepository
   suspend fun storeTransaction(transaction: Transaction) {
     transactionStore.put(transaction.hash, transaction.toBytes())
     blockchainIndex.indexTransaction(transaction)
+  }
+
+  /**
+   * Stores an account state for a given account.
+   *
+   * @param address the address of the account
+   * @param account the account's state
+   */
+  suspend fun storeAccount(address: Address, account: AccountState) =
+    stateStore.put(Hash.hash(address), account.toBytes())
+
+  /**
+   * Retrieves an account state for a given account.
+   *
+   * @param address the address of the account
+   * @return the account's state, or null if not found
+   */
+  suspend fun getAccount(address: Address): AccountState? =
+    stateStore.get(Hash.hash(address))?.let { AccountState.fromBytes(it) }
+
+  /**
+   * Checks if a given account is stored in the repository.
+   *
+   * @param address the address of the account
+   * @return true if the accounts exists
+   */
+  suspend fun accountsExists(address: Address): Boolean = stateStore.containsKey(Hash.hash(address))
+
+  /**
+   * Gets a value stored in an account store, or null if the account doesn't exist.
+   *
+   * @param address the address of the account
+   * @param key the key of the value to retrieve in the account storage.
+   */
+  suspend fun getAccountStoreValue(address: Address, key: Bytes32): Bytes? {
+    logger.trace("Entering getAccountStoreValue")
+    val accountStateBytes = stateStore.get(Hash.hash(address)) ?: return null
+    val accountState = AccountState.fromBytes(accountStateBytes)
+    val tree = StoredMerklePatriciaTrie.storingBytes(object : MerkleStorage {
+      override suspend fun get(hash: Bytes32): Bytes? {
+        return stateStore.get(hash)
+      }
+
+      override suspend fun put(hash: Bytes32, content: Bytes) {
+        stateStore.put(hash, content)
+      }
+    }, accountState.storageRoot)
+    return tree.get(key)
+  }
+
+  /**
+   * Gets the code of an account
+   *
+   * @param address the address of the account
+   * @return the code or null if the address doesn't exist or the code is not present.
+   */
+  suspend fun getAccountCode(address: Address): Bytes? {
+    val accountStateBytes = stateStore.get(Hash.hash(address))
+    if (accountStateBytes == null) {
+      return null
+    }
+    val accountState = AccountState.fromBytes(accountStateBytes)
+    return stateStore.get(accountState.codeHash)
   }
 
   /**
