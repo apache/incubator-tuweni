@@ -35,7 +35,21 @@ import java.nio.charset.StandardCharsets
 @ExtendWith(LuceneIndexWriterExtension::class, BouncyCastleExtension::class)
 class EthereumVirtualMachineTest {
 
-  private val exampleVm = EthereumVirtualMachine::class.java.getResource("/libexample-vm.so").file
+  private val evmcFile: String
+  private val exampleVm: String
+
+  init {
+    val osName = System.getProperty("os.name").toLowerCase()
+    val isMacOs = osName.startsWith("mac os x")
+
+    if (isMacOs) {
+      evmcFile = EthereumVirtualMachine::class.java.getResource("/libevmc.dylib").file
+      exampleVm = EthereumVirtualMachine::class.java.getResource("/libexample-vm.dylib").file
+    } else {
+      evmcFile = EthereumVirtualMachine::class.java.getResource("/libevmc.so").file
+      exampleVm = EthereumVirtualMachine::class.java.getResource("/libexample-vm.so").file
+    }
+  }
 
   @Test
   fun testVersion(@LuceneIndexWriter writer: IndexWriter) {
@@ -48,7 +62,7 @@ class EthereumVirtualMachineTest {
       MapKeyValueStore(),
       BlockchainIndex(writer)
     )
-    val vm = EthereumVirtualMachine(repository, exampleVm)
+    val vm = EthereumVirtualMachine(repository, evmcFile, exampleVm)
     vm.start()
     assertEquals("0.0.0", vm.version())
     vm.stop()
@@ -101,7 +115,7 @@ class EthereumVirtualMachineTest {
       MapKeyValueStore(),
       BlockchainIndex(writer)
     )
-    val vm = EthereumVirtualMachine(repository, exampleVm)
+    val vm = EthereumVirtualMachine(repository, evmcFile, exampleVm)
     vm.start()
     assertTrue(vm.capabilities() > 0)
     vm.stop()
@@ -119,7 +133,7 @@ class EthereumVirtualMachineTest {
       MapKeyValueStore(),
       BlockchainIndex(writer)
     )
-    val vm = EthereumVirtualMachine(repository, exampleVm, mapOf(Pair("verbose", "1")))
+    val vm = EthereumVirtualMachine(repository, evmcFile, exampleVm, mapOf(Pair("verbose", "1")))
     vm.start()
     vm.stop()
   }
@@ -136,7 +150,7 @@ class EthereumVirtualMachineTest {
       BlockchainIndex(writer)
     )
 
-    val vm = EthereumVirtualMachine(repository, exampleVm)
+    val vm = EthereumVirtualMachine(repository, evmcFile, exampleVm)
     vm.start()
     try {
       val sender = Address.fromHexString("0x3339626637316465316237643762653362353100")
@@ -164,7 +178,7 @@ class EthereumVirtualMachineTest {
       BlockchainIndex(writer)
     )
 
-    val vm = EthereumVirtualMachine(repository, exampleVm)
+    val vm = EthereumVirtualMachine(repository, evmcFile, exampleVm)
     vm.start()
     try {
       val sender = Address.fromHexString("0x3339626637316465316237643762653362353100")

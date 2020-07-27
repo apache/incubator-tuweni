@@ -159,11 +159,13 @@ internal data class EVMMessage(
  * An Ethereum Virtual Machine.
  *
  * @param repository the blockchain repository
+ * @param evmcFile the full path of the shared library for EVMc
  * @param vmFile the full path to an EVM library compatible with EVMc, such as evmone or hera
  * @param options the options to set on the EVM, specific to the library
  */
 class EthereumVirtualMachine(
   private val repository: BlockchainRepository,
+  private val evmcFile: String,
   private val vmFile: String,
   private val options: Map<String, String> = mapOf()
 ) {
@@ -180,7 +182,7 @@ class EthereumVirtualMachine(
    * Start the EVM
    */
   fun start() {
-    vm = EvmcVm.create(vmFile)
+    vm = EvmcVm.create(evmcFile, vmFile)
     options.forEach { (k, v) ->
       vm().set_option(k, v)
     }
