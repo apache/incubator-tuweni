@@ -425,4 +425,13 @@ class BlockchainRepository
     transactionStore.close()
     transactionReceiptStore.close()
   }
+
+  /**
+   * Stores account code in world state
+   *
+   * @param code the code to store
+   */
+  suspend fun storeCode(code: Bytes) {
+    stateStore.put(Hash.hash(code), code)
+  }
 }

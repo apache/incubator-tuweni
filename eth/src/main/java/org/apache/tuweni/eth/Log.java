@@ -14,6 +14,7 @@ package org.apache.tuweni.eth;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
+import org.apache.tuweni.rlp.RLP;
 import org.apache.tuweni.rlp.RLPReader;
 import org.apache.tuweni.rlp.RLPWriter;
 
@@ -71,6 +72,15 @@ public final class Log {
       });
       out.writeValue(data);
     });
+  }
+
+  /**
+   * Encodes log to RLP.
+   *
+   * @return the log as RLP encoded
+   */
+  public Bytes toBytes() {
+    return RLP.encode(this::writeTo);
   }
 
   /**

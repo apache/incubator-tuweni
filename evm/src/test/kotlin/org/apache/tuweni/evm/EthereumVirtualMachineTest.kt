@@ -25,15 +25,29 @@ import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
 import org.apache.tuweni.kv.MapKeyValueStore
+import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
+import org.apache.tuweni.units.ethereum.Wei
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assumptions.assumeFalse
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.nio.charset.StandardCharsets
 
 @ExtendWith(LuceneIndexWriterExtension::class, BouncyCastleExtension::class)
 class EthereumVirtualMachineTest {
+
+  companion object {
+    @JvmStatic
+    @BeforeAll
+    fun checkOS() {
+      val osName = System.getProperty("os.name").toLowerCase()
+      val isWindows = osName.startsWith("windows")
+      assumeFalse(isWindows, "No Windows binaries available")
+    }
+  }
 
   private val evmcFile: String
   private val exampleVm: String
@@ -97,13 +111,6 @@ class EthereumVirtualMachineTest {
   }
 
   @Test
-  fun testExecuteCallFn(@LuceneIndexWriter writer: IndexWriter) {
-    val result = runCode(writer, Bytes.fromHexString("0x6000808080808080f1"))
-    assertEquals(EVMExecutionStatusCode.EVMC_SUCCESS, result.statusCode)
-    assertEquals(0, result.gasLeft)
-  }
-
-  @Test
   @Throws(Exception::class)
   fun testGetCapabilities(@LuceneIndexWriter writer: IndexWriter) {
     val repository = BlockchainRepository(
@@ -159,7 +166,13 @@ class EthereumVirtualMachineTest {
       val inputData = Bytes.wrap("hello w\u0000".toByteArray(StandardCharsets.UTF_8))
       val gas = Gas.valueOf(200000)
       val result =
-        vm.execute(sender, destination, value, Bytes.fromHexString("0x00"), inputData, gas, CallKind.EVMC_CREATE)
+        vm.execute(sender, destination, value, Bytes.fromHexString("0x00"), inputData, gas,
+          Wei.valueOf(0),
+          Address.fromBytes(Bytes.random(20)),
+          0,
+          0,
+          2,
+          UInt256.valueOf(1), CallKind.EVMC_CREATE)
       assertEquals(EVMExecutionStatusCode.EVMC_SUCCESS, result.statusCode)
       assertEquals(20000, result.gasLeft)
     } finally {
@@ -186,7 +199,13 @@ class EthereumVirtualMachineTest {
       val value = Bytes.fromHexString("0x3100")
       val inputData = Bytes.wrap("hello w\u0000".toByteArray(StandardCharsets.UTF_8))
       val gas = Gas.valueOf(200000)
-      val result = vm.execute(sender, destination, value, code, inputData, gas)
+      val result = vm.execute(sender, destination, value, code, inputData, gas,
+        Wei.valueOf(0),
+        Address.fromBytes(Bytes.random(20)),
+        0,
+        0,
+        2,
+        UInt256.valueOf(1))
       return result
     } finally {
       vm.stop()
