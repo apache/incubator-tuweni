@@ -19,23 +19,48 @@ package org.apache.tuweni.evm
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.eth.AccountState
 import org.apache.tuweni.eth.Address
+import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.Log
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.trie.MerklePatriciaTrie
 import org.apache.tuweni.units.bigints.UInt256
+import org.apache.tuweni.units.ethereum.Gas
+import org.apache.tuweni.units.ethereum.Wei
 import org.ethereum.evmc.HostContext
 import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /**
  * EVM context that records changes to the world state, so they can be applied atomically.
  */
-class TransactionalEVMHostContext(val repository: BlockchainRepository) : HostContext {
+class TransactionalEVMHostContext(
+  val repository: BlockchainRepository,
+  val ethereumVirtualMachine: EthereumVirtualMachine,
+  val depth: Int,
+  val sender: Address,
+  val destination: Address,
+  val value: Bytes,
+  val code: Bytes,
+  val gas: Gas,
+  val gasPrice: Wei,
+  val currentCoinbase: Address,
+  val currentNumber: Long,
+  val currentTimestamp: Long,
+  val currentGasLimit: Long,
+  val currentDifficulty: UInt256
+) : HostContext {
 
   companion object {
     private val logger = LoggerFactory.getLogger(TransactionalEVMHostContext::class.java)
   }
 
-  private val accountChanges = HashMap<Address, HashMap<Bytes, Bytes>>()
+  val accountChanges = HashMap<Address, HashMap<Bytes, Bytes>>()
+  val logs = mutableListOf<Log>()
+  val accountsToDestroy = mutableListOf<Address>()
+  val balanceChanges = HashMap<Address, Wei>()
   /**
    * Check account existence function.
    *
@@ -66,10 +91,10 @@ class TransactionalEVMHostContext(val repository: BlockchainRepository) : HostCo
     logger.trace("Entering getStorage")
     val address = Address.fromBytes(Bytes.wrap(addressBytes))
     val key = Bytes32.wrap(keyBytes)
-    val value = accountChanges[address]?.get(key) ?: repository.getAccountStoreValue(address, key)
+    val value = accountChanges[address]?.get(key)
     logger.info("Found value $value")
     return@runBlocking if (value == null) {
-      ByteBuffer.allocateDirect(64).put(ByteArray(64))
+      ByteBuffer.allocateDirect(32).put(ByteArray(32))
     } else {
       ByteBuffer.allocateDirect(value.size()).put(value.toArrayUnsafe())
     }
@@ -107,7 +132,8 @@ class TransactionalEVMHostContext(val repository: BlockchainRepository) : HostCo
     var newAccount = false
     accountChanges.computeIfAbsent(address) {
       newAccount = true
-      HashMap() }
+      HashMap()
+    }
     val map = accountChanges[address]!!
     val oldValue = map.get(key)
     val storageAdded = newAccount || oldValue == null
@@ -139,10 +165,21 @@ class TransactionalEVMHostContext(val repository: BlockchainRepository) : HostCo
    * @param address The address of the account.
    * @return The balance of the given account or 0 if the account does not exist.
    */
-  override fun getBalance(address: ByteArray): ByteBuffer = runBlocking {
+  override fun getBalance(addressBytes: ByteArray): ByteBuffer = runBlocking {
     logger.trace("Entering getBalance")
-    val account = repository.getAccount(Address.fromBytes(Bytes.wrap(address)))
-    account?.let { ByteBuffer.wrap(it.balance.toBytes().toArrayUnsafe()) } ?: ByteBuffer.wrap(ByteArray(0))
+    val response = ByteBuffer.allocateDirect(32)
+
+    val address = Address.fromBytes(Bytes.wrap(addressBytes))
+    val balance = balanceChanges[address]
+    balance?.let {
+      return@runBlocking response.put(it.toBytes().toArrayUnsafe())
+    }
+    val account = repository.getAccount(address)
+    account?.let {
+      response.put(account.balance.toBytes().toArrayUnsafe())
+    }
+
+    response
   }
 
   /**
@@ -175,7 +212,10 @@ class TransactionalEVMHostContext(val repository: BlockchainRepository) : HostCo
   override fun getCodeHash(address: ByteArray): ByteBuffer = runBlocking {
     logger.trace("Entering getCodeHash")
     val account = repository.getAccount(Address.fromBytes(Bytes.wrap(address)))
-    account?.let { ByteBuffer.wrap(it.codeHash.toArrayUnsafe()) } ?: ByteBuffer.wrap(ByteArray(0))
+    val response = ByteBuffer.allocateDirect(32).order(ByteOrder.nativeOrder())
+
+    account?.let { response.put(it.codeHash.toArrayUnsafe()) }
+    response
   }
 
   /**
@@ -193,7 +233,10 @@ class TransactionalEVMHostContext(val repository: BlockchainRepository) : HostCo
   override fun getCode(address: ByteArray): ByteBuffer = runBlocking {
     logger.trace("Entering getCode")
     val code = repository.getAccountCode(Address.fromBytes(Bytes.wrap(address)))
-    code?.let { ByteBuffer.wrap(it.toArrayUnsafe()) } ?: ByteBuffer.wrap(ByteArray(0))
+    code?.let {
+      val response = ByteBuffer.allocateDirect(code.size()).order(ByteOrder.nativeOrder())
+      response.put(it.toArrayUnsafe())
+    } ?: ByteBuffer.allocateDirect(0)
   }
 
   /**
@@ -206,9 +249,25 @@ class TransactionalEVMHostContext(val repository: BlockchainRepository) : HostCo
    * @param address The address of the contract to be selfdestructed.
    * @param beneficiary The address where the remaining ETH is going to be transferred.
    */
-  override fun selfdestruct(address: ByteArray, beneficiary: ByteArray) {
+  override fun selfdestruct(address: ByteArray, beneficiary: ByteArray): Unit = runBlocking {
     logger.trace("Entering selfdestruct")
-    TODO("Not implemented")
+    val addr = Address.fromBytes(Bytes.wrap(address))
+    accountsToDestroy.add(addr)
+    val account = repository.getAccount(addr)
+    val beneficiaryAddress = Address.fromBytes(Bytes.wrap(beneficiary))
+    val beneficiaryAccountState = repository.getAccount(beneficiaryAddress)
+    if (beneficiaryAccountState === null) {
+      repository.storeAccount(beneficiaryAddress, AccountState(UInt256.ZERO, Wei.valueOf(0), Hash.fromBytes(
+        MerklePatriciaTrie.storingBytes().rootHash()), Hash.hash(Bytes.EMPTY)))
+    }
+    account?.apply {
+      val balance = balanceChanges.putIfAbsent(beneficiaryAddress, account.balance)
+      balance?.let {
+        balanceChanges[beneficiaryAddress] = it.add(account.balance)
+      }
+    }
+    logger.trace("Done selfdestruct")
+    return@runBlocking
   }
 
   /**
@@ -219,7 +278,19 @@ class TransactionalEVMHostContext(val repository: BlockchainRepository) : HostCo
    */
   override fun call(msg: ByteBuffer): ByteBuffer {
     logger.trace("Entering call")
-    return ByteBuffer.allocateDirect(64)
+    val evmMessage = EVMMessage.fromBytes(Bytes.wrapByteBuffer(msg))
+    val result = ethereumVirtualMachine.executeInternal(
+      evmMessage.sender,
+      evmMessage.destination,
+      evmMessage.value,
+      Bytes.EMPTY,
+      evmMessage.inputData,
+      evmMessage.inputDataSize,
+      evmMessage.gas,
+      depth = depth + 1,
+      hostContext = this
+    )
+    return result
   }
 
   /**
@@ -232,7 +303,13 @@ class TransactionalEVMHostContext(val repository: BlockchainRepository) : HostCo
    */
   override fun getTxContext(): ByteBuffer {
     logger.trace("Entering getTxContext")
-    return ByteBuffer.allocateDirect(64)
+    return ByteBuffer.allocateDirect(160).put(Bytes.concatenate(gasPrice.toBytes(),
+      sender, currentCoinbase, Bytes.ofUnsignedLong(currentNumber),
+      Bytes.ofUnsignedLong(currentTimestamp),
+      Bytes.ofUnsignedLong(currentGasLimit),
+      currentDifficulty.toBytes(),
+      UInt256.ONE.toBytes()
+    ).toArrayUnsafe())
   }
 
   /**
@@ -267,6 +344,6 @@ class TransactionalEVMHostContext(val repository: BlockchainRepository) : HostCo
    */
   override fun emitLog(address: ByteArray, data: ByteArray, dataSize: Int, topics: Array<ByteArray>, topicCount: Int) {
     logger.trace("Entering emitLog")
-    TODO()
+    logs.add(Log(Address.fromBytes(Bytes.wrap(address)), Bytes.wrap(data), topics.map { Bytes32.wrap(it) }))
   }
 }
