@@ -138,7 +138,7 @@ class ConnectToAnotherNodeTest {
       ),
       "Tuweni Experiment 0.1"
     )
-    service.start().await()
+
     val repository2 = BlockchainRepository.init(
       MapKeyValueStore(),
       MapKeyValueStore(),
@@ -170,10 +170,12 @@ class ConnectToAnotherNodeTest {
       ),
       "Tuweni Experiment 0.1"
     )
-    service2.start().await()
-    val value = service.connectTo(service2kp.publicKey(), InetSocketAddress("127.0.0.1", service2.actualPort()))
-      .await()
-    Assertions.assertNotNull(value)
+    val result = AsyncCompletion.allOf(service.start(), service2.start()).then {
+      service.connectTo(service2kp.publicKey(), InetSocketAddress("127.0.0.1", service2.actualPort()))
+    }
+
+    result.await()
+    Assertions.assertNotNull(result.get())
     AsyncCompletion.allOf(service.stop(), service2.stop()).await()
   }
 }
