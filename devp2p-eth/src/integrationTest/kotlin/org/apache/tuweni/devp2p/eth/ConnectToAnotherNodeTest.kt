@@ -120,9 +120,9 @@ class ConnectToAnotherNodeTest {
     )
     val service = VertxRLPxService(
       vertx,
-      30303,
+      0,
       "127.0.0.1",
-      30303,
+      0,
       SECP256K1.KeyPair.random(),
       listOf(
         EthSubprotocol(
@@ -174,11 +174,6 @@ class ConnectToAnotherNodeTest {
     val value = service.connectTo(service2kp.publicKey(), InetSocketAddress("127.0.0.1", service2.actualPort()))
       .await()
     Assertions.assertNotNull(value)
-    try {
-      AsyncCompletion.allOf(service.stop(), service2.stop()).await()
-    } catch (e: Exception) {
-      println(e)
-      throw e
-    }
+    AsyncCompletion.allOf(service.stop(), service2.stop()).await()
   }
 }
