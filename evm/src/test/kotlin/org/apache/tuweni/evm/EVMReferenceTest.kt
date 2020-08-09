@@ -112,11 +112,11 @@ class EVMReferenceTest {
     val isMacOs = osName.startsWith("mac os x")
 
     if (isMacOs) {
-      evmcFile = EthereumVirtualMachine::class.java.getResource("/libevmc.dylib").file
-      evmOneVm = EthereumVirtualMachine::class.java.getResource("/libevmone.0.5.0.dylib").file
+      evmcFile = EVMReferenceTest::class.java.getResource("/libevmc.dylib").file
+      evmOneVm = EVMReferenceTest::class.java.getResource("/libevmone.0.5.0.dylib").file
     } else {
-      evmcFile = EthereumVirtualMachine::class.java.getResource("/libevmc.so").file
-      evmOneVm = EthereumVirtualMachine::class.java.getResource("/libevmone.so.0.5.0").file
+      evmcFile = EVMReferenceTest::class.java.getResource("/libevmc.so").file
+      evmOneVm = EVMReferenceTest::class.java.getResource("/libevmone.so.0.5.0").file
     }
   }
 
