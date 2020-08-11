@@ -47,7 +47,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
   /**
    * The maximum value of a UInt32
    */
-  public final static UInt32 MAX_VALUE = create(~0);
+  public final static UInt32 MAX_VALUE = create(new byte[] {(byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff});
   /**
    * The value 0
    */
@@ -82,7 +82,8 @@ public final class UInt32 implements UInt32Value<UInt32> {
    */
   public static UInt32 valueOf(BigInteger value) {
     checkArgument(value.bitLength() <= 32, "Argument is too large to represent a UInt32");
-    return create(value.intValue());
+    checkArgument(value.signum() > 0, "Argument must be positive");
+    return create(value.toByteArray());
   }
 
   /**
@@ -105,7 +106,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
    */
   public static UInt32 fromBytes(Bytes bytes, ByteOrder byteOrder) {
     checkArgument(bytes.size() <= 4, "Argument is greater than 4 bytes");
-    return create(bytes.toInt(byteOrder));
+    return create(byteOrder == ByteOrder.LITTLE_ENDIAN ? bytes.reverse() : bytes);
   }
 
   /**
@@ -121,9 +122,22 @@ public final class UInt32 implements UInt32Value<UInt32> {
     return fromBytes(Bytes.fromHexStringLenient(str));
   }
 
+  private static UInt32 create(Bytes value) {
+    return create(value.toArrayUnsafe());
+  }
+
   private static UInt32 create(byte[] value) {
-    if (value[0] == 0 && value[1] == 0 && value[2] == 0) {
-      return CONSTANTS[value[3]];
+    if (value.length == 4 && value[0] == 0 && value[1] == 0 && value[2] == 0) {
+      return CONSTANTS[value[3] & 0xff];
+    }
+    if (value.length == 3) {
+      value = new byte[] {0, value[0], value[1], value[2]};
+    } else if (value.length == 2) {
+      value = new byte[] {0, 0, value[0], value[1]};
+    } else if (value.length == 1) {
+      value = new byte[] {0, 0, 0, value[0]};
+    } else if (value.length == 0) {
+      value = new byte[4];
     }
     return new UInt32(value);
   }
@@ -140,8 +154,8 @@ public final class UInt32 implements UInt32Value<UInt32> {
             (byte) ((value >> 0) & 0xff)});
   }
 
-  private UInt32(byte[] value) {
-    this.value = Bytes.wrap(value);
+  private UInt32(byte[] bytes) {
+    this.value = Bytes.wrap(bytes);
   }
 
   @Override
@@ -208,12 +222,21 @@ public final class UInt32 implements UInt32Value<UInt32> {
       return this;
     }
 
-    return create(this.value.toInt() - value.value.toInt());
+    byte[] result = new byte[4];
+    int borrow = 0;
+    for (int i = 3; 0 <= i; i--) {
+      int i1 = this.value.get(i) & 0xff;
+      int i2 = value.value.get(i) & 0xff;
+      int col = i1 - i2 + borrow;
+      borrow = (col >> 8);
+      result[i] = (byte) (col & 0xff);
+    }
+    return create(result);
   }
 
   @Override
   public UInt32 subtract(int value) {
-    return create(this.value.toInt() - value);
+    return subtract(UInt32.create(value));
   }
 
   @Override
@@ -232,7 +255,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
     if (value == 1) {
       return this;
     }
-    return create(this.value.toInt() * value);
+    return multiply(UInt32.valueOf(value));
   }
 
   @Override
@@ -382,7 +405,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * @return the result of a bit-wise OR
    */
   public UInt32 or(UInt32 value) {
-    return create(this.value.toInt() | value.value.toInt());
+    return create(this.value.or(value.value));
   }
 
   /**
@@ -394,7 +417,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
    */
   public UInt32 or(Bytes bytes) {
     checkArgument(bytes.size() <= 4, "or with more than 4 bytes");
-    return create(this.value.toInt() | bytes.toInt());
+    return create(this.value.or(bytes));
   }
 
   /**
@@ -407,7 +430,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * @throws IllegalArgumentException if more than 8 bytes are supplied
    */
   public UInt32 xor(UInt32 value) {
-    return create(this.value.toInt() ^ value.value.toInt());
+    return create(this.value.xor(value.value));
   }
 
 
@@ -433,7 +456,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
    */
   public UInt32 xor(Bytes bytes) {
     checkArgument(bytes.size() <= 4, "xor with more than 4 bytes");
-    return valueOf(this.value.xor(bytes).toInt());
+    return create(this.value.xor(bytes).toArrayUnsafe());
   }
 
   /**
@@ -442,7 +465,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * @return the result of a bit-wise NOT
    */
   public UInt32 not() {
-    return create(~this.value.toInt());
+    return create(this.value.not());
   }
 
   /**
@@ -458,7 +481,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
     if (distance >= 32) {
       return ZERO;
     }
-    return create(this.value.toInt() >>> distance);
+    return create(this.value.shiftRight(distance));
   }
 
   /**
@@ -474,7 +497,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
     if (distance >= 32) {
       return ZERO;
     }
-    return create(this.value.toInt() << distance);
+    return create(this.value.shiftLeft(distance));
   }
 
   @Override
