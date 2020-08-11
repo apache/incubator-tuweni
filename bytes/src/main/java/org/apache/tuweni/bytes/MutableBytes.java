@@ -241,6 +241,19 @@ public interface MutableBytes extends Bytes {
   void set(int i, byte b);
 
   /**
+   * Set a byte in this value.
+   *
+   * @param offset The offset of the bytes to set.
+   * @param bytes The value to set bytes to.
+   * @throws IndexOutOfBoundsException if {@code i < 0} or {i &gt;= size()}.
+   */
+  default void set(int offset, Bytes bytes) {
+    for (int i = 0; i < bytes.size(); i++) {
+      set(offset + i, bytes.get(i));
+    }
+  }
+
+  /**
    * Set the 4 bytes starting at the specified index to the specified integer value.
    *
    * @param i The index, which must less than or equal to {@code size() - 4}.

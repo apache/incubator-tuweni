@@ -18,15 +18,17 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.MutableBytes;
 
 import java.math.BigInteger;
+import java.nio.ByteOrder;
 
 /**
  * An unsigned 32-bit precision number.
- *
+ * <p>
  * This is a raw {@link UInt32Value} - a 32-bit precision unsigned number of no particular unit.
  */
 public final class UInt32 implements UInt32Value<UInt32> {
   private final static int MAX_CONSTANT = 32;
   private static UInt32[] CONSTANTS = new UInt32[MAX_CONSTANT + 1];
+
   static {
     CONSTANTS[0] = new UInt32(0);
     for (int i = 1; i <= MAX_CONSTANT; ++i) {
@@ -34,13 +36,21 @@ public final class UInt32 implements UInt32Value<UInt32> {
     }
   }
 
-  /** The minimum value of a UInt32 */
+  /**
+   * The minimum value of a UInt32
+   */
   public final static UInt32 MIN_VALUE = valueOf(0);
-  /** The maximum value of a UInt32 */
+  /**
+   * The maximum value of a UInt32
+   */
   public final static UInt32 MAX_VALUE = new UInt32(~0);
-  /** The value 0 */
+  /**
+   * The value 0
+   */
   public final static UInt32 ZERO = valueOf(0);
-  /** The value 1 */
+  /**
+   * The value 1
+   */
   public final static UInt32 ONE = valueOf(1);
 
   private static final BigInteger P_2_32 = BigInteger.valueOf(2).pow(32);
@@ -67,7 +77,6 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * @throws IllegalArgumentException if the value is negative or too large to be represented as a UInt32
    */
   public static UInt32 valueOf(BigInteger value) {
-    checkArgument(value.signum() >= 0, "Argument must be positive");
     checkArgument(value.bitLength() <= 32, "Argument is too large to represent a UInt32");
     return create(value.intValue());
   }
@@ -75,13 +84,24 @@ public final class UInt32 implements UInt32Value<UInt32> {
   /**
    * Return a {@link UInt32} containing the value described by the specified bytes.
    *
-   * @param bytes The bytes containing a {@link UInt32}.
-   * @return A {@link UInt32} containing the specified value.
-   * @throws IllegalArgumentException if {@code bytes.size() &gt; 8}.
+   * @param bytes The bytes containing a {@link UInt32}. \ * @return A {@link UInt32} containing the specified value.
+   * @throws IllegalArgumentException if {@code bytes.size() &gt; 4}.
    */
   public static UInt32 fromBytes(Bytes bytes) {
-    checkArgument(bytes.size() <= 8, "Argument is greater than 8 bytes");
-    return create(bytes.toInt());
+    return fromBytes(bytes, ByteOrder.BIG_ENDIAN);
+  }
+
+  /**
+   * Return a {@link UInt32} containing the value described by the specified bytes.
+   *
+   * @param bytes The bytes containing a {@link UInt32}.
+   * @param byteOrder the byte order of the value
+   * @return A {@link UInt32} containing the specified value.
+   * @throws IllegalArgumentException if {@code bytes.size() &gt; 4}.
+   */
+  public static UInt32 fromBytes(Bytes bytes, ByteOrder byteOrder) {
+    checkArgument(bytes.size() <= 4, "Argument is greater than 4 bytes");
+    return create(bytes.toInt(byteOrder));
   }
 
   /**
@@ -174,13 +194,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
 
   @Override
   public UInt32 multiply(UInt32 value) {
-    if (this.value == 0 || value.value == 0) {
-      return ZERO;
-    }
-    if (value.value == 1) {
-      return this;
-    }
-    return create(this.value * value.value);
+    return multiply(value.value);
   }
 
   @Override
@@ -291,7 +305,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
     if (modulus.isZero()) {
       throw new ArithmeticException("mod by zero");
     }
-    return create(toBigInteger().mod(modulus.toBigInteger()).intValue());
+    return create(Integer.remainderUnsigned(this.value, modulus.value));
   }
 
   @Override
@@ -302,7 +316,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
     if (modulus < 0) {
       throw new ArithmeticException("mod by negative");
     }
-    return create(this.value % modulus);
+    return create(Integer.remainderUnsigned(this.value, modulus));
   }
 
   /**
@@ -361,7 +375,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
 
   /**
    * Return a bit-wise XOR of this value and the supplied value.
-   *
+   * <p>
    * If this value and the supplied value are different lengths, then the shorter will be zero-padded to the left.
    *
    * @param value the value to perform the operation with
@@ -370,6 +384,20 @@ public final class UInt32 implements UInt32Value<UInt32> {
    */
   public UInt32 xor(UInt32 value) {
     return create(this.value ^ value.value);
+  }
+
+
+  /**
+   * Return a bit-wise XOR of this value and the supplied value.
+   * <p>
+   * If this value and the supplied value are different lengths, then the shorter will be zero-padded to the left.
+   *
+   * @param value the value to perform the operation with
+   * @return the result of a bit-wise XOR
+   * @throws IllegalArgumentException if more than 8 bytes are supplied
+   */
+  public UInt32 xor(int value) {
+    return create(this.value ^ value);
   }
 
   /**
@@ -449,7 +477,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
 
   @Override
   public String toString() {
-    return String.valueOf(value);
+    return toHexString();
   }
 
   @Override
@@ -514,4 +542,5 @@ public final class UInt32 implements UInt32Value<UInt32> {
     assert v > 0;
     return 63 - Long.numberOfLeadingZeros(v);
   }
+
 }

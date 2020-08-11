@@ -62,7 +62,7 @@ public final class ProgPoW {
       long nonce,
       Bytes32 header,
       UInt32[] dag, // gigabyte DAG located in framebuffer - the first portion gets cached
-      Function<Integer, Bytes> dagLookupFunction) {
+      Function<UInt32, Bytes> dagLookupFunction) {
     UInt32[][] mix = new UInt32[PROGPOW_LANES][PROGPOW_REGS];
 
     // keccak(header..nonce)
@@ -105,13 +105,13 @@ public final class ProgPoW {
    * @param datasetLookup the function generating elements of the DAG
    * @return a cache of the DAG up to the block number
    */
-  public static UInt32[] createDagCache(long blockNumber, Function<Integer, Bytes> datasetLookup) {
+  public static UInt32[] createDagCache(long blockNumber, Function<UInt32, Bytes> datasetLookup) {
     // TODO size of cache should be function of blockNumber - and DAG should be stored in its own memory structure.
     // cache the first 16KB of the dag
     UInt32[] cdag = new UInt32[HASH_BYTES * DATASET_PARENTS];
     for (int i = 0; i < cdag.length; i++) {
       // this could be sped up 16x
-      Bytes lookup = datasetLookup.apply(i >> 4);
+      Bytes lookup = datasetLookup.apply(UInt32.valueOf(i >> 4));
       cdag[i] = UInt32.fromBytes(lookup.slice((i & 0xf) << 2, 4).reverse());
     }
     return cdag;
@@ -186,7 +186,7 @@ public final class ProgPoW {
       UInt32 loop,
       UInt32[][] mix,
       UInt32[] dag,
-      Function<Integer, Bytes> dagLookupFunction) {
+      Function<UInt32, Bytes> dagLookupFunction) {
 
     long dagBytes = EthHash.getFullSize(blockNumber);
 
@@ -208,7 +208,7 @@ public final class ProgPoW {
       int offset = Integer.remainderUnsigned(l ^ loop.intValue(), PROGPOW_LANES);
       for (int i = 0; i < PROGPOW_DAG_LOADS; i++) {
         UInt32 lookup = (UInt32.valueOf(dag_addr_lane).divide(UInt32.valueOf(4))).add(offset >> 4);
-        Bytes lookupHolder = dagLookupFunction.apply(lookup.intValue());
+        Bytes lookupHolder = dagLookupFunction.apply(lookup);
         int lookupOffset = (i * 4 + ((offset & 0xf) << 4)) % 64;
         dag_entry[l][i] = UInt32.fromBytes(lookupHolder.slice(lookupOffset, 4).reverse());
 
