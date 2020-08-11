@@ -139,10 +139,6 @@ class ProgPoWTest {
 
     ProgPoW.progPowLoop(blockNumber, UInt32.ZERO, mix, cDag, (ind) -> EthHash.calcDatasetItem(cache, ind));
 
-    for (int i = 0; i < mix[0].length; i++) {
-      System.out.println(mix[0][i]);
-    }
-
     assertArrayEquals(
         mix[0],
         fill(

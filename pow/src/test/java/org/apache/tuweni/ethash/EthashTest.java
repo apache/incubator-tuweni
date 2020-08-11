@@ -15,7 +15,6 @@ package org.apache.tuweni.ethash;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.ethash.EthHash;
 import org.apache.tuweni.junit.BouncyCastleExtension;
 import org.apache.tuweni.units.bigints.UInt32;
 

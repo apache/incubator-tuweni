@@ -15,7 +15,6 @@ package org.apache.tuweni.units.bigints;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.bytes.MutableBytes;
 
 import java.math.BigInteger;
 import java.nio.ByteOrder;
@@ -26,13 +25,18 @@ import java.nio.ByteOrder;
  * This is a raw {@link UInt32Value} - a 32-bit precision unsigned number of no particular unit.
  */
 public final class UInt32 implements UInt32Value<UInt32> {
-  private final static int MAX_CONSTANT = 32;
+  private final static int MAX_CONSTANT = 0xff;
   private static UInt32[] CONSTANTS = new UInt32[MAX_CONSTANT + 1];
 
   static {
-    CONSTANTS[0] = new UInt32(0);
+    CONSTANTS[0] = new UInt32(new byte[4]);
     for (int i = 1; i <= MAX_CONSTANT; ++i) {
-      CONSTANTS[i] = new UInt32(i);
+      CONSTANTS[i] = new UInt32(
+          new byte[] {
+              (byte) ((i >> 24) & 0xff),
+              (byte) ((i >> 16) & 0xff),
+              (byte) ((i >> 8) & 0xff),
+              (byte) ((i >> 0) & 0xff)});
     }
   }
 
@@ -43,7 +47,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
   /**
    * The maximum value of a UInt32
    */
-  public final static UInt32 MAX_VALUE = new UInt32(~0);
+  public final static UInt32 MAX_VALUE = create(~0);
   /**
    * The value 0
    */
@@ -55,7 +59,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
 
   private static final BigInteger P_2_32 = BigInteger.valueOf(2).pow(32);
 
-  private final int value;
+  private final Bytes value;
 
   /**
    * Return a {@code UInt32} containing the specified value.
@@ -117,31 +121,50 @@ public final class UInt32 implements UInt32Value<UInt32> {
     return fromBytes(Bytes.fromHexStringLenient(str));
   }
 
-  private static UInt32 create(int value) {
-    if (value >= 0 && value <= MAX_CONSTANT) {
-      return CONSTANTS[value];
+  private static UInt32 create(byte[] value) {
+    if (value[0] == 0 && value[1] == 0 && value[2] == 0) {
+      return CONSTANTS[value[3]];
     }
     return new UInt32(value);
   }
 
-  private UInt32(int value) {
-    this.value = value;
+  private static UInt32 create(int value) {
+    if (value >= 0 && value <= MAX_CONSTANT) {
+      return CONSTANTS[value];
+    }
+    return new UInt32(
+        new byte[] {
+            (byte) ((value >> 24) & 0xff),
+            (byte) ((value >> 16) & 0xff),
+            (byte) ((value >> 8) & 0xff),
+            (byte) ((value >> 0) & 0xff)});
+  }
+
+  private UInt32(byte[] value) {
+    this.value = Bytes.wrap(value);
   }
 
   @Override
   public boolean isZero() {
-    return this.value == 0;
+    return ZERO.equals(this);
   }
 
   @Override
   public UInt32 add(UInt32 value) {
-    if (value.value == 0) {
+    if (value.isZero()) {
       return this;
     }
-    if (this.value == 0) {
+    if (this.isZero()) {
       return value;
     }
-    return create(this.value + value.value);
+    byte[] result = new byte[4];
+    int carry = 0;
+    for (int i = 3; i >= 0; i--) {
+      int sum = (this.value.get(i) & 0xff) + (value.value.get(i) & 0xff) + carry;
+      result[i] = (byte) sum;
+      carry = sum >>> 8;
+    }
+    return create(result);
   }
 
   @Override
@@ -149,7 +172,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
     if (value == 0) {
       return this;
     }
-    return create(this.value + value);
+    return create(this.value.toInt() + value);
   }
 
   @Override
@@ -184,17 +207,18 @@ public final class UInt32 implements UInt32Value<UInt32> {
     if (value.isZero()) {
       return this;
     }
-    return create(this.value - value.value);
+
+    return create(this.value.toInt() - value.value.toInt());
   }
 
   @Override
   public UInt32 subtract(int value) {
-    return add(-value);
+    return create(this.value.toInt() - value);
   }
 
   @Override
   public UInt32 multiply(UInt32 value) {
-    return multiply(value.value);
+    return create(this.value.toInt() * value.value.toInt());
   }
 
   @Override
@@ -202,13 +226,13 @@ public final class UInt32 implements UInt32Value<UInt32> {
     if (value < 0) {
       throw new ArithmeticException("multiply unsigned by negative");
     }
-    if (value == 0 || this.value == 0) {
+    if (value == 0 || isZero()) {
       return ZERO;
     }
     if (value == 1) {
       return this;
     }
-    return create(this.value * value);
+    return create(this.value.toInt() * value);
   }
 
   @Override
@@ -216,10 +240,10 @@ public final class UInt32 implements UInt32Value<UInt32> {
     if (modulus.isZero()) {
       throw new ArithmeticException("multiplyMod with zero modulus");
     }
-    if (this.value == 0 || value.value == 0) {
+    if (isZero() || value.isZero()) {
       return ZERO;
     }
-    if (value.value == 1) {
+    if (ONE.equals(value)) {
       return mod(modulus);
     }
     return create(toBigInteger().multiply(value.toBigInteger()).mod(modulus.toBigInteger()).intValue());
@@ -230,7 +254,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
     if (modulus.isZero()) {
       throw new ArithmeticException("multiplyMod with zero modulus");
     }
-    if (value == 0 || this.value == 0) {
+    if (value == 0 || this.isZero()) {
       return ZERO;
     }
     if (value == 1) {
@@ -250,7 +274,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
     if (modulus < 0) {
       throw new ArithmeticException("multiplyMod unsigned with negative modulus");
     }
-    if (value == 0 || this.value == 0) {
+    if (value == 0 || this.isZero()) {
       return ZERO;
     }
     if (value == 1) {
@@ -264,10 +288,10 @@ public final class UInt32 implements UInt32Value<UInt32> {
 
   @Override
   public UInt32 divide(UInt32 value) {
-    if (value.value == 0) {
+    if (value.isZero()) {
       throw new ArithmeticException("divide by zero");
     }
-    if (value.value == 1) {
+    if (value == ONE) {
       return this;
     }
     return create(toBigInteger().divide(value.toBigInteger()).intValue());
@@ -305,7 +329,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
     if (modulus.isZero()) {
       throw new ArithmeticException("mod by zero");
     }
-    return create(Integer.remainderUnsigned(this.value, modulus.value));
+    return create(Integer.remainderUnsigned(this.value.toInt(), modulus.value.toInt()));
   }
 
   @Override
@@ -316,7 +340,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
     if (modulus < 0) {
       throw new ArithmeticException("mod by negative");
     }
-    return create(Integer.remainderUnsigned(this.value, modulus));
+    return create(Integer.remainderUnsigned(this.value.toInt(), modulus));
   }
 
   /**
@@ -326,10 +350,10 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * @return the result of a bit-wise AND
    */
   public UInt32 and(UInt32 value) {
-    if (this.value == 0 || value.value == 0) {
+    if (this.isZero() || value.isZero()) {
       return ZERO;
     }
-    return create(this.value & value.value);
+    return create(this.value.toInt() & value.value.toInt());
   }
 
   /**
@@ -341,14 +365,14 @@ public final class UInt32 implements UInt32Value<UInt32> {
    */
   public UInt32 and(Bytes bytes) {
     checkArgument(bytes.size() <= 4, "and with more than 4 bytes");
-    if (this.value == 0) {
+    if (this.isZero()) {
       return ZERO;
     }
     int value = bytes.toInt();
     if (value == 0) {
       return ZERO;
     }
-    return create(this.value & value);
+    return create(this.value.toInt() & value);
   }
 
   /**
@@ -358,7 +382,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * @return the result of a bit-wise OR
    */
   public UInt32 or(UInt32 value) {
-    return create(this.value | value.value);
+    return create(this.value.toInt() | value.value.toInt());
   }
 
   /**
@@ -370,7 +394,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
    */
   public UInt32 or(Bytes bytes) {
     checkArgument(bytes.size() <= 4, "or with more than 4 bytes");
-    return create(this.value | bytes.toInt());
+    return create(this.value.toInt() | bytes.toInt());
   }
 
   /**
@@ -383,7 +407,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * @throws IllegalArgumentException if more than 8 bytes are supplied
    */
   public UInt32 xor(UInt32 value) {
-    return create(this.value ^ value.value);
+    return create(this.value.toInt() ^ value.value.toInt());
   }
 
 
@@ -397,7 +421,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * @throws IllegalArgumentException if more than 8 bytes are supplied
    */
   public UInt32 xor(int value) {
-    return create(this.value ^ value);
+    return create(this.value.toInt() ^ value);
   }
 
   /**
@@ -409,7 +433,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
    */
   public UInt32 xor(Bytes bytes) {
     checkArgument(bytes.size() <= 4, "xor with more than 4 bytes");
-    return create(this.value ^ bytes.toInt());
+    return valueOf(this.value.xor(bytes).toInt());
   }
 
   /**
@@ -418,7 +442,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * @return the result of a bit-wise NOT
    */
   public UInt32 not() {
-    return create(~this.value);
+    return create(~this.value.toInt());
   }
 
   /**
@@ -434,7 +458,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
     if (distance >= 32) {
       return ZERO;
     }
-    return create(this.value >>> distance);
+    return create(this.value.toInt() >>> distance);
   }
 
   /**
@@ -450,7 +474,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
     if (distance >= 32) {
       return ZERO;
     }
-    return create(this.value << distance);
+    return create(this.value.toInt() << distance);
   }
 
   @Override
@@ -462,17 +486,17 @@ public final class UInt32 implements UInt32Value<UInt32> {
       return false;
     }
     UInt32 other = (UInt32) object;
-    return this.value == other.value;
+    return this.value.equals(other.value);
   }
 
   @Override
   public int hashCode() {
-    return Long.hashCode(this.value);
+    return Long.hashCode(this.value.toInt());
   }
 
   @Override
   public int compareTo(UInt32 other) {
-    return Long.compareUnsigned(this.value, other.value);
+    return Long.compareUnsigned(this.value.toInt(), other.value.toInt());
   }
 
   @Override
@@ -482,12 +506,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
 
   @Override
   public BigInteger toBigInteger() {
-    byte[] mag = new byte[4];
-    mag[0] = (byte) ((this.value >>> 24) & 0xFF);
-    mag[1] = (byte) ((this.value >>> 16) & 0xFF);
-    mag[2] = (byte) ((this.value >>> 8) & 0xFF);
-    mag[3] = (byte) (this.value & 0xFF);
-    return new BigInteger(1, mag);
+    return value.toUnsignedBigInteger();
   }
 
   @Override
@@ -497,40 +516,22 @@ public final class UInt32 implements UInt32Value<UInt32> {
 
   @Override
   public Bytes toBytes() {
-    MutableBytes bytes = MutableBytes.create(4);
-    bytes.setInt(0, this.value);
-    return bytes;
+    return value;
   }
 
   @Override
   public Bytes toMinimalBytes() {
-    int requiredBytes = 4 - (Integer.numberOfLeadingZeros(this.value) / 8);
-    MutableBytes bytes = MutableBytes.create(requiredBytes);
-    int j = 0;
-    switch (requiredBytes) {
-      case 4:
-        bytes.set(j++, (byte) ((this.value >>> 24) & 0xFF));
-        // fall through
-      case 3:
-        bytes.set(j++, (byte) ((this.value >>> 16) & 0xFF));
-        // fall through
-      case 2:
-        bytes.set(j++, (byte) ((this.value >>> 8) & 0xFF));
-        // fall through
-      case 1:
-        bytes.set(j, (byte) (this.value & 0xFF));
-    }
-    return bytes;
+    return value.slice(value.numberOfLeadingZeroBytes());
   }
 
   @Override
   public int numberOfLeadingZeros() {
-    return Integer.numberOfLeadingZeros(this.value);
+    return value.numberOfLeadingZeros();
   }
 
   @Override
   public int bitLength() {
-    return 32 - Integer.numberOfLeadingZeros(this.value);
+    return 32 - value.numberOfLeadingZeros();
   }
 
   private static boolean isPowerOf2(long n) {
