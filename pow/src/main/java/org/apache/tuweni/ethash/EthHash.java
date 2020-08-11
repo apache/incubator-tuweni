@@ -20,6 +20,7 @@ import org.apache.tuweni.units.bigints.UInt32;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -86,6 +87,57 @@ public class EthHash {
   public static int FNV_PRIME = 0x01000193;
 
   /**
+   * Hashimoto Light Hashing.
+   *
+   * @param size the size of the full data set
+   * @param cache EthHash Cache
+   * @param header Truncated BlockHeader hash
+   * @param nonce Nonce to use for hashing
+   * @return A byte array holding MixHash in its first 32 bytes and the EthHash result in the bytes 32 to 63
+   */
+  public static Bytes hashimotoLight(long size, UInt32[] cache, Bytes header, Bytes nonce) {
+    return hashimoto(size, header, nonce, (ind) -> calcDatasetItem(cache, ind));
+  }
+
+  private static Bytes hashimoto(long size, Bytes header, Bytes nonce, Function<UInt32, Bytes> datasetLookup) {
+    long n = Long.divideUnsigned(size, MIX_BYTES);
+    Bytes seed = Hash.keccak512(Bytes.concatenate(header, nonce.reverse()));
+    Bytes[] mixBufferElts = new Bytes[MIX_BYTES / HASH_BYTES];
+    for (int i = 0; i < MIX_BYTES / HASH_BYTES; ++i) {
+      mixBufferElts[i] = seed;
+    }
+    Bytes mixBuffer = Bytes.concatenate(mixBufferElts);
+    UInt32[] mix = new UInt32[MIX_BYTES / 4];
+    for (int i = 0; i < MIX_BYTES / 4; ++i) {
+      mix[i] = UInt32.fromBytes(mixBuffer.slice(i * 4, 4), ByteOrder.LITTLE_ENDIAN);
+    }
+
+    UInt32 firstSeed = mix[0];
+    for (int i = 0; i < ACCESSES; ++i) {
+      UInt32 fnvValue = fnv(firstSeed.xor(i), mix[i % (MIX_BYTES / WORD_BYTES)]);
+      UInt32 p = fnvValue.mod((int) n);
+      List<UInt32> cache = new ArrayList<>();
+      for (int j = 0; j < MIX_BYTES / HASH_BYTES; ++j) {
+        Bytes lookupResult = datasetLookup.apply((p.multiply(2)).add(j));
+        for (int k = 0; k < lookupResult.size() / 4; k++) {
+          cache.add(UInt32.fromBytes(lookupResult.slice(k * 4, 4), ByteOrder.LITTLE_ENDIAN));
+        }
+      }
+      for (int k = 0; k < mix.length; k++) {
+        mix[k] = fnv(mix[k], cache.get(k));
+      }
+    }
+    Stream<Bytes> part1 = IntStream.range(0, mix.length / 4).parallel().mapToObj((int i) -> {
+      int index = i * 4;
+      return fnv(fnv(fnv(mix[index], mix[index + 1]), mix[index + 2]), mix[index + 3]).toBytes().reverse();
+    });
+    Bytes resultPart1 = Bytes.concatenate(part1.toArray(Bytes[]::new));
+    Bytes resultPart2 = Hash.keccak256(Bytes.concatenate(seed, resultPart1));
+
+    return Bytes.concatenate(resultPart1, resultPart2);
+  }
+
+  /**
    * Calculates the EthHash Epoch for a given block number.
    *
    * @param block Block Number
@@ -97,7 +149,7 @@ public class EthHash {
 
   /**
    * Provides the size of the cache at a given block number
-   * 
+   *
    * @param block_number the block number
    * @return the size of the cache at the block number, in bytes
    */
@@ -112,7 +164,7 @@ public class EthHash {
 
   /**
    * Provides the size of the full dataset at a given block number
-   * 
+   *
    * @param block_number the block number
    * @return the size of the full dataset at the block number, in bytes
    */
@@ -169,16 +221,16 @@ public class EthHash {
 
   /**
    * Calculate a data set item based on the previous cache for a given index
-   * 
+   *
    * @param cache the DAG cache
    * @param index the current index
    * @return a new DAG item to append to the DAG
    */
-  public static Bytes calcDatasetItem(UInt32[] cache, int index) {
+  public static Bytes calcDatasetItem(UInt32[] cache, UInt32 index) {
     int rows = cache.length / HASH_WORDS;
     UInt32[] mixInts = new UInt32[HASH_BYTES / 4];
-    int offset = index % rows * HASH_WORDS;
-    mixInts[0] = cache[offset].xor(UInt32.valueOf(index));
+    int offset = index.mod(rows).multiply(HASH_WORDS).intValue();
+    mixInts[0] = cache[offset].xor(index);
     System.arraycopy(cache, offset + 1, mixInts, 1, HASH_WORDS - 1);
     Bytes buffer = intToByte(mixInts);
     buffer = Hash.keccak512(buffer);
@@ -189,7 +241,7 @@ public class EthHash {
       fnvHash(
           mixInts,
           cache,
-          fnv(UInt32.valueOf(index).xor(UInt32.valueOf(i)), mixInts[i % 16])
+          fnv(index.xor(UInt32.valueOf(i)), mixInts[i % 16])
               .mod(UInt32.valueOf(rows))
               .multiply(UInt32.valueOf(HASH_WORDS)));
     }

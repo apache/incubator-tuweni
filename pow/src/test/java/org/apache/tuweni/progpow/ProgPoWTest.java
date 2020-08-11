@@ -25,7 +25,6 @@ import org.apache.tuweni.units.bigints.UInt64;
 
 import java.util.stream.Stream;
 
-import com.google.common.primitives.Ints;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -115,14 +114,13 @@ class ProgPoWTest {
   @Test
   void testEthHashCalc() {
     long blockNumber = 30000;
-    long epochIndex = EthHash.epoch(30000);
 
-    UInt32[] cache = EthHash.mkCache(Ints.checkedCast(EthHash.getCacheSize(blockNumber)), blockNumber);
+    UInt32[] cache = EthHash.mkCache(EthHash.getCacheSize(blockNumber), blockNumber);
     Bytes expected = Bytes
         .fromHexString(
             "0x6754e3b3e30274ae82a722853b35d8a2bd2347ffee05bcbfde4469deb8b5d2f0d3ba4cc797f700b1be60bc050b84404f6872e43593f9d69c59460e6a6ee438b8");
 
-    assertEquals(expected, EthHash.calcDatasetItem(cache, 0));
+    assertEquals(expected, EthHash.calcDatasetItem(cache, UInt32.ZERO));
   }
 
   @Test
@@ -136,14 +134,10 @@ class ProgPoWTest {
 
     long blockNumber = 30000;
 
-    UInt32[] cache = EthHash.mkCache(Ints.checkedCast(EthHash.getCacheSize(blockNumber)), blockNumber);
+    UInt32[] cache = EthHash.mkCache(EthHash.getCacheSize(blockNumber), blockNumber);
     UInt32[] cDag = ProgPoW.createDagCache(blockNumber, (ind) -> EthHash.calcDatasetItem(cache, ind));
 
     ProgPoW.progPowLoop(blockNumber, UInt32.ZERO, mix, cDag, (ind) -> EthHash.calcDatasetItem(cache, ind));
-
-    for (int i = 0; i < mix[0].length; i++) {
-      System.out.println(mix[0][i]);
-    }
 
     assertArrayEquals(
         mix[0],
@@ -731,7 +725,7 @@ class ProgPoWTest {
   @Test
   void testProgPoWHash() {
     long blockNumber = 30000;
-    UInt32[] cache = EthHash.mkCache(Ints.checkedCast(EthHash.getCacheSize(blockNumber)), blockNumber);
+    UInt32[] cache = EthHash.mkCache(EthHash.getCacheSize(blockNumber), blockNumber);
     UInt32[] cDag = ProgPoW.createDagCache(blockNumber, (ind) -> EthHash.calcDatasetItem(cache, ind));
     Bytes32 digest = ProgPoW
         .progPowHash(
