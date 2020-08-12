@@ -103,6 +103,7 @@ class ConnectToAnotherNodeTest {
     service.stop().await()
   }
 
+  @Disabled("flaky")
   @Test
   fun twoServers(@LuceneIndexWriter writer: IndexWriter, @VertxInstance vertx: Vertx) = runBlocking {
     val contents = EthHandlerTest::class.java.getResourceAsStream("/mainnet.json").readAllBytes()
