@@ -12,8 +12,9 @@
  */
 package org.apache.tuweni.ethstats;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+@JsonPropertyOrder(alphabetic = true)
 final class AuthMessage {
 
   private final NodeInfo info;
@@ -26,17 +27,14 @@ final class AuthMessage {
     this.secret = secret;
   }
 
-  @JsonGetter("id")
   public String getID() {
     return id;
   }
 
-  @JsonGetter("info")
   public NodeInfo getInfo() {
     return info;
   }
 
-  @JsonGetter("secret")
   public String getSecret() {
     return secret;
   }

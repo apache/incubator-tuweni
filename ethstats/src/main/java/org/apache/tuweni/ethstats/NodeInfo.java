@@ -13,7 +13,9 @@
 package org.apache.tuweni.ethstats;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+@JsonPropertyOrder(alphabetic = true)
 final class NodeInfo {
 
   static final String CLIENT_VERSION = "0.1.0";

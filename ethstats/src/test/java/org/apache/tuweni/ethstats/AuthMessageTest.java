@@ -26,7 +26,7 @@ class AuthMessageTest {
     AuthMessage message = new AuthMessage(nodeInfo, "foo", "secret");
     ObjectMapper mapper = new ObjectMapper();
     assertEquals(
-        "{\"info\":{\"name\":\"foo\",\"node\":\"node\",\"port\":123,\"net\":\"eth\",\"protocol\":\"protocol\",\"api\":\"No\",\"os\":\"os\",\"client\":\"0.1.0\",\"os_v\":\"123\",\"canUpdateHistory\":true},\"secret\":\"secret\",\"id\":\"foo\"}",
+        "{\"id\":\"foo\",\"info\":{\"api\":\"No\",\"canUpdateHistory\":true,\"client\":\"0.1.0\",\"name\":\"foo\",\"net\":\"eth\",\"node\":\"node\",\"os\":\"os\",\"os_v\":\"123\",\"port\":123,\"protocol\":\"protocol\"},\"secret\":\"secret\"}",
         mapper.writeValueAsString(message));
 
   }
