@@ -61,7 +61,7 @@ public class EthStatsReporterTest {
     reporter.start().join();
     assertNotNull(server.getWebsocket());
     assertEquals(
-        "{\"emit\":[\"hello\",{\"info\":{\"name\":\"name\",\"node\":\"node\",\"port\":33030,\"net\":\"10\",\"protocol\":\"eth/63\",\"api\":\"No\",\"os\":\"Windoz\",\"client\":\"0.1.0\",\"os_v\":\"64\",\"canUpdateHistory\":true},\"secret\":\"wat\",\"id\":\"foo\"}]}",
+        "{\"emit\":[\"hello\",{\"id\":\"foo\",\"info\":{\"api\":\"No\",\"canUpdateHistory\":true,\"client\":\"0.1.0\",\"name\":\"name\",\"net\":\"10\",\"node\":\"node\",\"os\":\"Windoz\",\"os_v\":\"64\",\"port\":33030,\"protocol\":\"eth/63\"},\"secret\":\"wat\"}]}",
         nextMessage.get());
 
     nextMessage = server.captureNextMessage();
