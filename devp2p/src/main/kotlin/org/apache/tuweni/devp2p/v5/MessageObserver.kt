@@ -26,5 +26,5 @@ internal interface MessageObserver {
    *
    * @param incoming processed message
    */
-  fun observe(message: UdpMessage)
+  fun observe(message: Message)
 }

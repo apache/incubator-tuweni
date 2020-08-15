@@ -38,10 +38,10 @@ class DefaultNodeDiscoveryServiceTest {
 
   private val recipientKeyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
   private val recipientEnr: Bytes =
-    EthereumNodeRecord.toRLP(recipientKeyPair, ip = InetAddress.getLoopbackAddress(), udp = 9001)
+    EthereumNodeRecord.toRLP(recipientKeyPair, ip = InetAddress.getLoopbackAddress(), udp = 19001)
   private val encodedEnr: String = "enr:${Base64URLSafe.encode(recipientEnr)}"
   private val keyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
-  private val localPort: Int = 9000
+  private val localPort: Int = 19000
   private val bindAddress: InetSocketAddress = InetSocketAddress("localhost", localPort)
   private val bootstrapENRList: List<String> = listOf(encodedEnr)
   private val enrSeq: Long = Instant.now().toEpochMilli()
@@ -55,7 +55,7 @@ class DefaultNodeDiscoveryServiceTest {
     bindAddress.port
   )
   private val connector: UdpConnector =
-    DefaultUdpConnector(bindAddress, keyPair, selfENR)
+    UdpConnector(bindAddress, keyPair, selfENR)
 
   private val nodeDiscoveryService: NodeDiscoveryService =
     DefaultNodeDiscoveryService.open(
@@ -66,21 +66,21 @@ class DefaultNodeDiscoveryServiceTest {
   @Test
   fun startInitializesConnectorAndBootstraps() = runBlocking {
     val recipientSocket = CoroutineDatagramChannel.open()
-    recipientSocket.bind(InetSocketAddress("localhost", 9001))
+    recipientSocket.bind(InetSocketAddress("localhost", 19001))
 
     nodeDiscoveryService.start()
 
-    val buffer = ByteBuffer.allocate(UdpMessage.MAX_UDP_MESSAGE_SIZE)
+    val buffer = ByteBuffer.allocate(Message.MAX_UDP_MESSAGE_SIZE)
     recipientSocket.receive(buffer)
     buffer.flip()
     val receivedBytes = Bytes.wrapByteBuffer(buffer)
     val content = receivedBytes.slice(45)
 
     val message = RandomMessage.create(
-      UdpMessage.authTag(),
+      Message.authTag(),
       content
     )
-    assertTrue(message.data.size() == UdpMessage.RANDOM_DATA_LENGTH)
+    assertTrue(message.data.size() == Message.RANDOM_DATA_LENGTH)
 
     assertTrue(connector.started())
 

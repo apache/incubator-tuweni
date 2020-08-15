@@ -39,6 +39,6 @@ class RegConfirmationMessageTest {
   fun getMessageTypeHasValidIndex() {
     val message = RegConfirmationMessage(topic = Bytes.random(32))
 
-    assert(7 == message.getMessageType().toInt())
+    assert(7 == message.messageIdentifier().toInt())
   }
 }

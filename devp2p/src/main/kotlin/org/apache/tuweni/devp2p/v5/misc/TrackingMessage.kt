@@ -17,9 +17,9 @@
 package org.apache.tuweni.devp2p.v5.misc
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.devp2p.v5.UdpMessage
+import org.apache.tuweni.devp2p.v5.Message
 
 internal class TrackingMessage(
-  val message: UdpMessage,
+  val message: Message,
   val nodeId: Bytes
 )

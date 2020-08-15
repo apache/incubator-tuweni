@@ -18,12 +18,14 @@ package org.apache.tuweni.devp2p.v5
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.coroutines.asyncCompletion
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.io.Base64URLSafe
+import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.time.Instant
 import kotlin.coroutines.CoroutineContext
@@ -62,7 +64,7 @@ object DiscoveryService {
       null,
       bindAddress.port
     )
-    val connector = DefaultUdpConnector(bindAddress, keyPair, selfENR, enrStorage)
+    val connector = UdpConnector(bindAddress, keyPair, selfENR, enrStorage)
     return DefaultNodeDiscoveryService.open(bootstrapENRList, enrStorage, connector, coroutineContext)
   }
 }
@@ -101,6 +103,8 @@ internal class DefaultNodeDiscoveryService(
 ) : NodeDiscoveryService {
 
   companion object {
+
+    private val logger = LoggerFactory.getLogger(DefaultNodeDiscoveryService::class.java)
     /**
      * Creates a new discovery service with the UDP service provided.
      * @param bootstrapENRList the list of other nodes to connect to on bootstrap.
@@ -120,6 +124,7 @@ internal class DefaultNodeDiscoveryService(
     }
   }
 
+  @ObsoleteCoroutinesApi
   override suspend fun start() {
     connector.start()
     bootstrap()
@@ -135,6 +140,7 @@ internal class DefaultNodeDiscoveryService(
     val address = InetSocketAddress(enr.ip(), enr.udp())
 
     val destNodeId = Hash.sha2_256(rlpENR)
+    logger.trace("About to add new peer {}", address)
     enrStorage.set(rlpENR)
     connector.getNodesTable().add(rlpENR)
     connector.send(address, randomMessage, destNodeId)
@@ -142,11 +148,13 @@ internal class DefaultNodeDiscoveryService(
 
   private suspend fun bootstrap() {
     bootstrapENRList.forEach {
+      logger.trace("Connecting to bootstrap peer {}", it)
+      var encodedEnr = it
       if (it.startsWith("enr:")) {
-        val encodedEnr = it.substringAfter("enr:")
-        val rlpENR = Base64URLSafe.decode(encodedEnr)
-        addPeer(rlpENR)
+        encodedEnr = it.substringAfter("enr:")
       }
+      val rlpENR = Base64URLSafe.decode(encodedEnr)
+      addPeer(rlpENR)
     }
   }
 }

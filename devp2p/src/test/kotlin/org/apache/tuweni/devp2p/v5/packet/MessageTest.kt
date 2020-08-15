@@ -18,18 +18,18 @@ package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.devp2p.v5.RandomMessage
-import org.apache.tuweni.devp2p.v5.UdpMessage
+import org.apache.tuweni.devp2p.v5.Message
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class UdpMessageTest {
+class MessageTest {
 
   @Test
   fun magicCreatesSha256OfDestNodeIdAndConstantString() {
     val destId = Bytes.fromHexString("0xA5CFE10E0EFC543CBE023560B2900E2243D798FAFD0EA46267DDD20D283CE13C")
     val expected = Bytes.fromHexString("0x98EB6D611291FA21F6169BFF382B9369C33D997FE4DC93410987E27796360640")
 
-    val result = UdpMessage.magic(destId)
+    val result = Message.magic(destId)
 
     assert(expected == result)
   }
@@ -40,7 +40,7 @@ class UdpMessageTest {
     val destId = Bytes.fromHexString("0xA5CFE10E0EFC543CBE023560B2900E2243D798FAFD0EA46267DDD20D283CE13C")
     val expected = Bytes.fromHexString("0xB7A0D7CA8BD37611315DA0882FF479DE14B442FD30AE0EFBE6FC6344D55DC632")
 
-    val result = UdpMessage.tag(srcId, destId)
+    val result = Message.tag(srcId, destId)
 
     assert(expected == result)
   }
@@ -49,31 +49,31 @@ class UdpMessageTest {
   fun getSourceFromTagFetchesSrcNodeId() {
     val srcId = Bytes.fromHexString("0x98EB6D611291FA21F6169BFF382B9369C33D997FE4DC93410987E27796360640")
     val destId = Bytes.fromHexString("0xA5CFE10E0EFC543CBE023560B2900E2243D798FAFD0EA46267DDD20D283CE13C")
-    val tag = UdpMessage.tag(srcId, destId)
+    val tag = Message.tag(srcId, destId)
 
-    val result = UdpMessage.getSourceFromTag(tag, destId)
+    val result = Message.getSourceFromTag(tag, destId)
 
     assert(srcId == result)
   }
 
   @Test
   fun authTagGivesRandom12Bytes() {
-    val firstResult = UdpMessage.authTag()
+    val firstResult = Message.authTag()
 
-    assert(UdpMessage.AUTH_TAG_LENGTH == firstResult.size())
+    assert(Message.AUTH_TAG_LENGTH == firstResult.size())
 
-    val secondResult = UdpMessage.authTag()
+    val secondResult = Message.authTag()
 
     assert(secondResult != firstResult)
   }
 
   @Test
   fun idNonceGivesRandom32Bytes() {
-    val firstResult = UdpMessage.idNonce()
+    val firstResult = Message.idNonce()
 
-    assert(UdpMessage.ID_NONCE_LENGTH == firstResult.size())
+    assert(Message.ID_NONCE_LENGTH == firstResult.size())
 
-    val secondResult = UdpMessage.idNonce()
+    val secondResult = Message.idNonce()
 
     assert(secondResult != firstResult)
   }
@@ -81,7 +81,7 @@ class UdpMessageTest {
   @Test
   fun getMessageTypeThrowsExceptionByDefault() {
     assertThrows<UnsupportedOperationException> {
-      RandomMessage().getMessageType()
+      RandomMessage().messageIdentifier()
     }
   }
 }

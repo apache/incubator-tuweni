@@ -42,6 +42,6 @@ class FindNodeMessageTest {
   fun getMessageTypeHasValidIndex() {
     val message = FindNodeMessage()
 
-    assert(3 == message.getMessageType().toInt())
+    assert(3 == message.messageIdentifier().toInt())
   }
 }

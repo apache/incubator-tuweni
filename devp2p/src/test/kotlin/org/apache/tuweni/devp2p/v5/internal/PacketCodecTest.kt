@@ -22,14 +22,13 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.AuthenticationProvider
 import org.apache.tuweni.devp2p.v5.DefaultAuthenticationProvider
-import org.apache.tuweni.devp2p.v5.DefaultPacketCodec
 import org.apache.tuweni.devp2p.v5.PacketCodec
 import org.apache.tuweni.devp2p.v5.RoutingTable
 import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
 import org.apache.tuweni.devp2p.v5.misc.SessionKey
 import org.apache.tuweni.devp2p.v5.FindNodeMessage
 import org.apache.tuweni.devp2p.v5.RandomMessage
-import org.apache.tuweni.devp2p.v5.UdpMessage
+import org.apache.tuweni.devp2p.v5.Message
 import org.apache.tuweni.devp2p.v5.WhoAreYouMessage
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.Test
@@ -37,7 +36,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetAddress
 
 @ExtendWith(BouncyCastleExtension::class)
-class DefaultPacketCodecTest {
+class PacketCodecTest {
 
   private val keyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
   private val enr: Bytes = EthereumNodeRecord.toRLP(keyPair, ip = InetAddress.getLoopbackAddress())
@@ -47,7 +46,7 @@ class DefaultPacketCodecTest {
     DefaultAuthenticationProvider(keyPair, routingTable)
 
   private val codec: PacketCodec =
-    DefaultPacketCodec(keyPair, routingTable, nodeId, authenticationProvider)
+    PacketCodec(keyPair, routingTable, nodeId, authenticationProvider)
 
   private val destNodeId: Bytes = Bytes.random(32)
 
@@ -58,7 +57,7 @@ class DefaultPacketCodecTest {
     val encodedResult = codec.encode(message, destNodeId)
 
     val encodedContent = encodedResult.content.slice(45)
-    val result = RandomMessage.create(UdpMessage.authTag(), encodedContent)
+    val result = RandomMessage.create(Message.authTag(), encodedContent)
 
     assert(result.data == message.data)
   }
@@ -88,7 +87,7 @@ class DefaultPacketCodecTest {
 
     val encodedResult = codec.encode(message, destNodeId)
 
-    val tag = encodedResult.content.slice(0, UdpMessage.TAG_LENGTH)
+    val tag = encodedResult.content.slice(0, Message.TAG_LENGTH)
     val encryptedContent = encodedResult.content.slice(45)
     val content = AES128GCM.decrypt(encryptedContent, sessionKey.initiatorKey, tag).slice(1)
     val result = FindNodeMessage.create(content)

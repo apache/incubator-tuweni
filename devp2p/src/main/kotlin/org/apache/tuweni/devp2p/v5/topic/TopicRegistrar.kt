@@ -22,15 +22,15 @@ import kotlinx.coroutines.delay
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.devp2p.EthereumNodeRecord
-import org.apache.tuweni.devp2p.v5.DefaultUdpConnector
+import org.apache.tuweni.devp2p.v5.UdpConnector
 import org.apache.tuweni.devp2p.v5.RegTopicMessage
-import org.apache.tuweni.devp2p.v5.UdpMessage
+import org.apache.tuweni.devp2p.v5.Message
 import java.net.InetSocketAddress
 import kotlin.coroutines.CoroutineContext
 
 internal class TopicRegistrar(
   override val coroutineContext: CoroutineContext = Dispatchers.IO,
-  private val connector: DefaultUdpConnector
+  private val connector: UdpConnector
 ) : CoroutineScope {
 
   companion object {
@@ -55,7 +55,7 @@ internal class TopicRegistrar(
   private suspend fun sendRegTopic(
     topic: Bytes,
     ticket: Bytes = Bytes.EMPTY,
-    requestId: Bytes = UdpMessage.requestId()
+    requestId: Bytes = Message.requestId()
   ) {
     val nodeEnr = connector.getEnrBytes()
     val message = RegTopicMessage(requestId, nodeEnr, topic, ticket)

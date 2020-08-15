@@ -20,7 +20,7 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.NodesMessage
-import org.apache.tuweni.devp2p.v5.UdpMessage
+import org.apache.tuweni.devp2p.v5.Message
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -54,8 +54,8 @@ class NodesMessageTest {
   @Test
   fun getMessageTypeHasValidIndex() {
     val message =
-      NodesMessage(UdpMessage.requestId(), 0, emptyList())
+      NodesMessage(Message.requestId(), 0, emptyList())
 
-    assert(4 == message.getMessageType().toInt())
+    assert(4 == message.messageIdentifier().toInt())
   }
 }

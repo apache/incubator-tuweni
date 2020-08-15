@@ -27,7 +27,7 @@ import org.apache.tuweni.devp2p.v5.NodesMessage
 import org.apache.tuweni.devp2p.v5.RegTopicMessage
 import org.apache.tuweni.devp2p.v5.TicketMessage
 import org.apache.tuweni.devp2p.v5.TopicQueryMessage
-import org.apache.tuweni.devp2p.v5.UdpMessage
+import org.apache.tuweni.devp2p.v5.Message
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -43,7 +43,7 @@ internal class TopicIntegrationTest : AbstractIntegrationTest() {
     val node2 = createNode(9071)
     handshake(node1, node2)
 
-    val requestId = UdpMessage.requestId()
+    val requestId = Message.requestId()
     val topic = Topic("0x41")
     val message = RegTopicMessage(requestId, node1.enr, topic.toBytes(), Bytes.EMPTY)
     val ticketMessage = sendAndAwait<TicketMessage>(node1, node2, message)
@@ -71,7 +71,7 @@ internal class TopicIntegrationTest : AbstractIntegrationTest() {
       topic,
       EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress())
     )
-    val requestId = UdpMessage.requestId()
+    val requestId = Message.requestId()
     val message = RegTopicMessage(requestId, node1.enr, topic.toBytes(), Bytes.EMPTY)
     val ticketMessage = sendAndAwait<TicketMessage>(node1, node2, message)
 
@@ -93,7 +93,7 @@ internal class TopicIntegrationTest : AbstractIntegrationTest() {
 
     val topic = Topic("0x41")
     node2.topicTable.put(topic, node2.enr)
-    val requestId = UdpMessage.requestId()
+    val requestId = Message.requestId()
     val message = TopicQueryMessage(requestId, topic.toBytes())
     val result = sendAndAwait<NodesMessage>(node1, node2, message)
 

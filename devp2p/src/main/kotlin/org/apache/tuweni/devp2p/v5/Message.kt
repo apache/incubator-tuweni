@@ -22,7 +22,7 @@ import org.apache.tuweni.crypto.Hash
 /**
  * Discovery message sent over UDP.
  */
-internal interface UdpMessage {
+internal interface Message {
 
   companion object {
 
@@ -59,5 +59,11 @@ internal interface UdpMessage {
 
   fun encode(): Bytes
 
-  fun getMessageType(): Bytes
+  fun messageIdentifier(): Bytes
+
+  fun type(): MessageType
+}
+
+internal enum class MessageType {
+  RANDOM, WHOAREYOU, FINDNODE, NODES, PING, PONG, REGTOPIC, REGCONFIRM, TICKET, TOPICQUERY
 }

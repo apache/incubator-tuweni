@@ -49,12 +49,12 @@ internal abstract class AbstractIntegrationTest {
     ),
     topicTable: TopicTable = TopicTable(),
     ticketHolder: TicketHolder = TicketHolder(),
-    packetCodec: PacketCodec = DefaultPacketCodec(
+    packetCodec: PacketCodec = PacketCodec(
       keyPair,
       routingTable,
       authenticationProvider = authenticationProvider
     ),
-    connector: UdpConnector = DefaultUdpConnector(
+    connector: UdpConnector = UdpConnector(
       address,
       keyPair,
       enr,
@@ -100,22 +100,22 @@ internal abstract class AbstractIntegrationTest {
     return (null != recipient.authenticationProvider.findSessionKey(initiator.nodeId.toHexString()))
   }
 
-  internal suspend fun send(initiator: TestNode, recipient: TestNode, message: UdpMessage) {
+  internal suspend fun send(initiator: TestNode, recipient: TestNode, message: Message) {
     if (message is RandomMessage || message is WhoAreYouMessage) {
       throw IllegalArgumentException("Can't send handshake initiation message")
     }
     initiator.connector.send(recipient.address, message, recipient.nodeId)
   }
 
-  internal suspend inline fun <reified T : UdpMessage> sendAndAwait(
+  internal suspend inline fun <reified T : Message> sendAndAwait(
     initiator: TestNode,
     recipient: TestNode,
-    message: UdpMessage
+    message: Message
   ): T {
     val listener = object : MessageObserver {
       var result: Channel<T> = Channel()
 
-      override fun observe(message: UdpMessage) {
+      override fun observe(message: Message) {
         if (message is T) {
           result.offer(message)
         }

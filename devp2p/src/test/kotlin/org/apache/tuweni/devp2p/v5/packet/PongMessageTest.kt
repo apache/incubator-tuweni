@@ -43,6 +43,6 @@ class PongMessageTest {
     val message =
       PongMessage(recipientIp = InetAddress.getLoopbackAddress(), recipientPort = 9090)
 
-    assert(2 == message.getMessageType().toInt())
+    assert(2 == message.messageIdentifier().toInt())
   }
 }

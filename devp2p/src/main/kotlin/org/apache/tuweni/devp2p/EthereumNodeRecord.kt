@@ -204,7 +204,7 @@ class EthereumNodeRecord(
    * @return The IP adress of the ENR
    */
   fun ip(): InetAddress {
-    return InetAddress.getByAddress(data["ip"]!!.toArrayUnsafe())
+    return data["ip"]?.let { InetAddress.getByAddress(it.toArrayUnsafe()) } ?: InetAddress.getLoopbackAddress()
   }
 
   /**
@@ -220,7 +220,7 @@ class EthereumNodeRecord(
    * @return the UDP port associated with this ENR
    */
   fun udp(): Int {
-    return data["udp"]!!.toInt()
+    return data["udp"]?.let { it.toInt() }  ?: tcp()
   }
 
   /**

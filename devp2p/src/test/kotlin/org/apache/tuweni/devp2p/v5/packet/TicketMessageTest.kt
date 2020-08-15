@@ -40,6 +40,6 @@ class TicketMessageTest {
   fun getMessageTypeHasValidIndex() {
     val message = TicketMessage(ticket = Bytes.random(32), waitTime = 1000)
 
-    assert(6 == message.getMessageType().toInt())
+    assert(6 == message.messageIdentifier().toInt())
   }
 }

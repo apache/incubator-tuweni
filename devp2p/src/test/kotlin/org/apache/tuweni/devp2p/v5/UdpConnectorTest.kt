@@ -45,20 +45,20 @@ import java.nio.ByteBuffer
 @ObsoleteCoroutinesApi
 @ExtendWith(BouncyCastleExtension::class)
 @Execution(ExecutionMode.SAME_THREAD)
-class DefaultUdpConnectorTest {
+class UdpConnectorTest {
 
   companion object {
     private var counter = 0
   }
 
-  private var connector: DefaultUdpConnector? = null
+  private var connector: UdpConnector? = null
 
   @BeforeEach
   fun setUp() {
     val address = InetSocketAddress(InetAddress.getLoopbackAddress(), 9090 + counter)
     val keyPair = SECP256K1.KeyPair.random()
     val selfEnr = EthereumNodeRecord.toRLP(keyPair, ip = address.address)
-    connector = DefaultUdpConnector(address, keyPair, selfEnr)
+    connector = UdpConnector(address, keyPair, selfEnr)
   }
 
   @AfterEach
@@ -103,15 +103,15 @@ class DefaultUdpConnectorTest {
 
     val data = RandomMessage.randomData()
     val randomMessage =
-      RandomMessage(UdpMessage.authTag(), data)
+      RandomMessage(Message.authTag(), data)
     connector!!.send(receiverAddress, randomMessage, destNodeId)
-    val buffer = ByteBuffer.allocate(UdpMessage.MAX_UDP_MESSAGE_SIZE)
+    val buffer = ByteBuffer.allocate(Message.MAX_UDP_MESSAGE_SIZE)
     socketChannel.receive(buffer) as InetSocketAddress
     buffer.flip()
 
     val messageContent = Bytes.wrapByteBuffer(buffer).slice(45)
     val message = RandomMessage.create(
-      UdpMessage.authTag(),
+      Message.authTag(),
       messageContent
     )
 
@@ -126,7 +126,7 @@ class DefaultUdpConnectorTest {
   fun attachObserverRegistersListener() = runBlocking {
     val observer = object : MessageObserver {
       var result: Channel<RandomMessage> = Channel()
-      override fun observe(message: UdpMessage) {
+      override fun observe(message: Message) {
         if (message is RandomMessage) {
           result.offer(message)
         }
@@ -135,7 +135,7 @@ class DefaultUdpConnectorTest {
     connector!!.attachObserver(observer)
     connector!!.start()
     assertTrue(observer.result.isEmpty)
-    val codec = DefaultPacketCodec(
+    val codec = PacketCodec(
       SECP256K1.KeyPair.random(),
       RoutingTable(Bytes.random(32))
     )
@@ -154,7 +154,7 @@ class DefaultUdpConnectorTest {
   fun detachObserverRemovesListener() = runBlocking {
     val observer = object : MessageObserver {
       var result: Channel<RandomMessage> = Channel()
-      override fun observe(message: UdpMessage) {
+      override fun observe(message: Message) {
         if (message is RandomMessage) {
           result.offer(message)
         }
@@ -163,7 +163,7 @@ class DefaultUdpConnectorTest {
     connector!!.attachObserver(observer)
     connector!!.detachObserver(observer)
     connector!!.start()
-    val codec = DefaultPacketCodec(
+    val codec = PacketCodec(
       SECP256K1.KeyPair.random(),
       RoutingTable(Bytes.random(32))
     )

@@ -39,6 +39,6 @@ class PingMessageTest {
   fun getMessageTypeHasValidIndex() {
     val message = PingMessage()
 
-    assert(1 == message.getMessageType().toInt())
+    assert(1 == message.messageIdentifier().toInt())
   }
 }

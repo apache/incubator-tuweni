@@ -45,6 +45,6 @@ class RegTopicMessageTest {
       topic = Bytes.random(16)
     )
 
-    assert(5 == message.getMessageType().toInt())
+    assert(5 == message.messageIdentifier().toInt())
   }
 }
