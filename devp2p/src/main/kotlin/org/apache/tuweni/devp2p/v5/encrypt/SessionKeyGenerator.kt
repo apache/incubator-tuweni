@@ -27,8 +27,7 @@ import org.bouncycastle.crypto.params.HKDFParameters
  */
 internal object SessionKeyGenerator {
 
-  const val DERIVED_KEY_SIZE: Int = 16
-
+  private const val DERIVED_KEY_SIZE: Int = 16
   private val INFO_PREFIX = Bytes.wrap("discovery v5 key agreement".toByteArray())
 
   /**
@@ -43,7 +42,7 @@ internal object SessionKeyGenerator {
     val info = Bytes.wrap(INFO_PREFIX, srcNodeId, destNodeId)
 
     val hkdf = HKDFBytesGenerator(SHA256Digest())
-    val params = HKDFParameters(secret.toArray(), idNonce.toArray(), info.toArray())
+    val params = HKDFParameters(secret.toArrayUnsafe(), idNonce.toArrayUnsafe(), info.toArrayUnsafe())
     hkdf.init(params)
     return SessionKey(derive(hkdf), derive(hkdf), derive(hkdf))
   }

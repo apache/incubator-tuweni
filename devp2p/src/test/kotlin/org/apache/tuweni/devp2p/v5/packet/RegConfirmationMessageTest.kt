@@ -27,7 +27,7 @@ class RegConfirmationMessageTest {
     val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
     val message = RegConfirmationMessage(requestId, Bytes.random(32))
 
-    val encodingResult = message.encode()
+    val encodingResult = message.toRLP()
 
     val decodingResult = RegConfirmationMessage.create(encodingResult)
 

@@ -40,7 +40,7 @@ class NodesMessageTest {
     )
     val message = NodesMessage(requestId, total, nodeRecords)
 
-    val encodingResult = message.encode()
+    val encodingResult = message.toRLP()
 
     val decodingResult = NodesMessage.create(encodingResult)
 

@@ -34,7 +34,7 @@ import java.time.Instant
 
 @Timeout(10)
 @ExtendWith(BouncyCastleExtension::class)
-class DefaultNodeDiscoveryServiceTest {
+class DefaultDiscoveryV5ServiceTest {
 
   private val recipientKeyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
   private val recipientEnr: Bytes =
@@ -45,7 +45,7 @@ class DefaultNodeDiscoveryServiceTest {
   private val bindAddress: InetSocketAddress = InetSocketAddress("localhost", localPort)
   private val bootstrapENRList: List<String> = listOf(encodedEnr)
   private val enrSeq: Long = Instant.now().toEpochMilli()
-  private val selfENR: Bytes = EthereumNodeRecord.toRLP(
+  private val selfENR: EthereumNodeRecord = EthereumNodeRecord.create(
     keyPair,
     enrSeq,
     emptyMap(),
@@ -54,13 +54,12 @@ class DefaultNodeDiscoveryServiceTest {
     null,
     bindAddress.port
   )
-  private val connector: UdpConnector =
-    UdpConnector(bindAddress, keyPair, selfENR)
 
-  private val nodeDiscoveryService: NodeDiscoveryService =
-    DefaultNodeDiscoveryService.open(
-      bootstrapENRList,
-      connector = connector
+  private val discoveryV5Service: DiscoveryV5Service =
+    DiscoveryService.open(
+      keyPair,
+      localPort,
+      bootstrapENRList = bootstrapENRList
     )
 
   @Test
@@ -68,7 +67,7 @@ class DefaultNodeDiscoveryServiceTest {
     val recipientSocket = CoroutineDatagramChannel.open()
     recipientSocket.bind(InetSocketAddress("localhost", 19001))
 
-    nodeDiscoveryService.start()
+    discoveryV5Service.start()
 
     val buffer = ByteBuffer.allocate(Message.MAX_UDP_MESSAGE_SIZE)
     recipientSocket.receive(buffer)
@@ -82,11 +81,7 @@ class DefaultNodeDiscoveryServiceTest {
     )
     assertTrue(message.data.size() == Message.RANDOM_DATA_LENGTH)
 
-    assertTrue(connector.started())
-
     recipientSocket.close()
-    nodeDiscoveryService.terminate()
-
-    assertTrue(!connector.started())
+    discoveryV5Service.terminate()
   }
 }

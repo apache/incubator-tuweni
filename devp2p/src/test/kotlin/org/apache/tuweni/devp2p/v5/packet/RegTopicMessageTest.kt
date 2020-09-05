@@ -28,7 +28,7 @@ class RegTopicMessageTest {
     val message =
       RegTopicMessage(requestId, Bytes.random(32), Bytes.random(32), Bytes.random(16))
 
-    val encodingResult = message.encode()
+    val encodingResult = message.toRLP()
 
     val decodingResult = RegTopicMessage.create(encodingResult)
 

@@ -16,32 +16,49 @@
  */
 package org.apache.tuweni.devp2p.v5
 
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
+import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.junit.BouncyCastleExtension
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.net.InetSocketAddress
+import java.util.concurrent.ConcurrentHashMap
+
+internal class DefaultENRStorage : ENRStorage {
+
+  private val storage: MutableMap<Bytes, EthereumNodeRecord> = ConcurrentHashMap()
+
+  override fun find(nodeId: Bytes): EthereumNodeRecord? = storage[nodeId]
+
+  override fun put(nodeId: Bytes, enr: EthereumNodeRecord) { storage.put(nodeId, enr) }
+}
 
 @ExtendWith(BouncyCastleExtension::class)
-class LighthouseTest {
+class ConnectTwoServersTest {
 
   @Test
-  fun testConnect() = runBlocking {
-    val enrRec =
-      "-Iu4QAroHG8hI2LqSxVgkgaKPaFrtz8qjB5ODbT9Ca0ch2bzS_yZE5ermtfCS0A0LbWBYi7E6SZUE3J" +
-        "HHtwtn4tcwdcBgmlkgnY0gmlwhH8AAAGJc2VjcDI1NmsxoQMIVIz0gYvB0yDDz4E7n01YJoLlCTJj" +
-        "VCA4RiKQ54M6aYN0Y3CCIyiDdWRwgiMo"
-//    val record =
-//      EthereumNodeRecord.fromRLP(Base64URLSafe.decode(enrRec))
-
+  fun testConnectTwoServers() = runBlocking {
+    val storage = DefaultENRStorage()
     val service = DiscoveryService.open(
       SECP256K1.KeyPair.random(),
       localPort = 10000,
-      bindAddress = InetSocketAddress("0.0.0.0", 10000),
-      bootstrapENRList = listOf(enrRec)
+      bootstrapENRList = emptyList(),
+      enrStorage = storage
     )
     service.start()
-    kotlinx.coroutines.delay(50000)
+
+    val otherService = DiscoveryService.open(
+      SECP256K1.KeyPair.random(),
+      localPort = 10001,
+      bootstrapENRList = emptyList()
+    )
+    otherService.start()
+    otherService.addPeer(service.enr())
+    delay(10000)
+    assertNotNull(storage.find(Hash.sha2_256(service.enr().toRLP())))
   }
 }

@@ -31,7 +31,7 @@ class RandomMessageTest {
     val data = Bytes.fromHexString(expectedEncodingResult)
     val message = RandomMessage(Message.authTag(), data)
 
-    val encodingResult = message.encode()
+    val encodingResult = message.toRLP()
     assert(encodingResult.toHexString() == expectedEncodingResult)
 
     val decodingResult = RandomMessage.create(Message.authTag(), encodingResult)

@@ -48,7 +48,7 @@ class EthereumNodeRecordTest {
           "400f3258cd31388375647082765f"
       )
     )
-    assertEquals(1L, enr.seq)
+    assertEquals(1L, enr.seq())
     assertEquals(Bytes.wrap("v4".toByteArray()), enr.data["id"])
     assertEquals(Bytes.fromHexString("7f000001"), enr.data["ip"])
     assertEquals(
@@ -70,7 +70,7 @@ class EthereumNodeRecordTest {
       ip = InetAddress.getByName("127.0.0.1")
     )
     val record = EthereumNodeRecord.fromRLP(rlp)
-    assertEquals(1L, record.seq)
+    assertEquals(1L, record.seq())
     assertEquals(Bytes.wrap("v4".toByteArray()), record.data["id"])
     assertEquals(Bytes.fromHexString("7f000001"), record.data["ip"])
     assertEquals(keypair.publicKey(), record.publicKey())

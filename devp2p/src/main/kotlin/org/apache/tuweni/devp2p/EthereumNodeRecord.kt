@@ -40,7 +40,8 @@ class EthereumNodeRecord(
   val signature: Bytes,
   val seq: Long,
   val data: Map<String, Bytes>,
-  val listData: Map<String, List<Bytes>> = emptyMap()
+  val listData: Map<String, List<Bytes>> = emptyMap(),
+  val rlp: Bytes
 ) {
 
   companion object {
@@ -57,35 +58,35 @@ class EthereumNodeRecord(
         throw IllegalArgumentException("Record too long")
       }
       return RLP.decodeList(rlp) {
-          val sig = it.readValue()
+        val sig = it.readValue()
 
-          val seq = it.readLong()
+        val seq = it.readLong()
 
-          val data = mutableMapOf<String, Bytes>()
-          val listData = mutableMapOf<String, List<Bytes>>()
-          while (!it.isComplete) {
-            val key = it.readString()
-            if (it.nextIsList()) {
-              listData[key] = it.readListContents { listreader ->
-                if (listreader.nextIsList()) {
-                  // TODO complex structures not supported
-                  listreader.skipNext()
-                  null
-                } else {
-                  listreader.readValue()
-                }
-              }.filterNotNull()
-            } else {
-              val value = it.readValue()
-              data[key] = value
-            }
+        val data = mutableMapOf<String, Bytes>()
+        val listData = mutableMapOf<String, List<Bytes>>()
+        while (!it.isComplete) {
+          val key = it.readString()
+          if (it.nextIsList()) {
+            listData[key] = it.readListContents { listreader ->
+              if (listreader.nextIsList()) {
+                // TODO complex structures not supported
+                listreader.skipNext()
+                null
+              } else {
+                listreader.readValue()
+              }
+            }.filterNotNull()
+          } else {
+            val value = it.readValue()
+            data[key] = value
           }
+        }
 
-          EthereumNodeRecord(sig, seq, data, listData)
+        EthereumNodeRecord(sig, seq, data, listData, rlp)
       }
     }
 
-    private fun encode(
+    internal fun encode(
       signatureKeyPair: SECP256K1.KeyPair? = null,
       seq: Long = Instant.now().toEpochMilli(),
       ip: InetAddress? = null,
@@ -114,15 +115,40 @@ class EthereumNodeRecord(
       keys.addAll(mutableData.keys)
       listData?.let { keys.addAll(it.keys) }
       keys.sorted().forEach { key ->
-          mutableData[key]?.let { value ->
-            writer.writeString(key)
-            writer.writeValue(value)
-          }
-          listData?.get(key)?.let { value ->
+        mutableData[key]?.let { value ->
+          writer.writeString(key)
+          writer.writeValue(value)
+        }
+        listData?.get(key)?.let { value ->
           writer.writeString(key)
           writer.writeList(value) { writer, v -> writer.writeValue(v) }
-          }
+        }
       }
+    }
+
+    /**
+     * Creates the serialized form of a ENR
+     * @param signatureKeyPair the key pair to use to sign the ENR
+     * @param seq the sequence number for the ENR. It should be higher than the previous time the ENR was generated. It defaults to the current time since epoch in milliseconds.
+     * @param data the key pairs to encode in the ENR
+     * @param listData the key pairs of list values to encode in the ENR
+     * @param ip the IP address of the host
+     * @param tcp an optional parameter to a TCP port used for the wire protocol
+     * @param udp an optional parameter to a UDP port used for discovery
+     * @return the ENR
+     */
+    @JvmOverloads
+    @JvmStatic
+    fun create(
+      signatureKeyPair: SECP256K1.KeyPair,
+      seq: Long = Instant.now().toEpochMilli(),
+      data: Map<String, Bytes>? = null,
+      listData: Map<String, List<Bytes>>? = null,
+      ip: InetAddress,
+      tcp: Int? = null,
+      udp: Int? = null
+    ): EthereumNodeRecord {
+      return fromRLP(toRLP(signatureKeyPair, seq, data, listData, ip, tcp, udp))
     }
 
     /**
@@ -220,7 +246,11 @@ class EthereumNodeRecord(
    * @return the UDP port associated with this ENR
    */
   fun udp(): Int {
-    return data["udp"]?.let { it.toInt() }  ?: tcp()
+    return data["udp"]?.toInt() ?: tcp()
+  }
+
+  fun seq(): Long {
+    return seq
   }
 
   /**
@@ -229,6 +259,8 @@ class EthereumNodeRecord(
   override fun toString(): String {
     return "enr:${ip()}:${tcp()}?udp=${udp()}"
   }
+
+  fun toRLP(): Bytes = rlp
 }
 
 internal class InvalidNodeRecordException(message: String?) : RuntimeException(message)

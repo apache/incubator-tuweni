@@ -27,7 +27,7 @@ internal class FindNodeMessage(
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x03")
 
-  override fun encode(): Bytes {
+  override fun toRLP(): Bytes {
     return RLP.encodeList { writer ->
       writer.writeValue(requestId)
       writer.writeInt(distance)
@@ -61,7 +61,7 @@ internal class NodesMessage(
 
   override fun type(): MessageType = MessageType.NODES
 
-  override fun encode(): Bytes {
+  override fun toRLP(): Bytes {
     return RLP.encodeList { writer ->
       writer.writeValue(requestId)
       writer.writeInt(total)
@@ -96,7 +96,7 @@ internal class PingMessage(
 
   override fun type(): MessageType = MessageType.PING
 
-  override fun encode(): Bytes {
+  override fun toRLP(): Bytes {
     return RLP.encodeList { reader ->
       reader.writeValue(requestId)
       reader.writeLong(enrSeq)
@@ -133,7 +133,7 @@ internal class RandomMessage(
 
   override fun type(): MessageType = MessageType.RANDOM
 
-  override fun encode(): Bytes {
+  override fun toRLP(): Bytes {
     return data
   }
 }
@@ -150,7 +150,7 @@ internal class TicketMessage(
 
   override fun messageIdentifier(): Bytes = encodedMessageType
 
-  override fun encode(): Bytes {
+  override fun toRLP(): Bytes {
     return RLP.encodeList { writer ->
       writer.writeValue(requestId)
       writer.writeValue(ticket)
@@ -171,18 +171,19 @@ internal class TicketMessage(
 }
 
 internal class WhoAreYouMessage(
-  val authTag: Bytes = Message.authTag(),
-  val idNonce: Bytes = Message.idNonce(),
+  val magic: Bytes,
+  val token: Bytes,
+  val idNonce: Bytes,
   val enrSeq: Long = 0
 ) : Message {
 
   companion object {
-    fun create(content: Bytes): WhoAreYouMessage {
+    fun create(magic: Bytes, content: Bytes): WhoAreYouMessage {
       return RLP.decodeList(content) { r ->
-        val authTag = r.readValue()
+        val token = r.readValue()
         val idNonce = r.readValue()
-        val enrSeq = r.readLong()
-        return@decodeList WhoAreYouMessage(authTag, idNonce, enrSeq)
+        val enrSeq = r.readValue()
+        WhoAreYouMessage(magic = magic, token = token, idNonce = idNonce, enrSeq = enrSeq.toLong())
       }
     }
   }
@@ -193,12 +194,12 @@ internal class WhoAreYouMessage(
 
   override fun type(): MessageType = MessageType.WHOAREYOU
 
-  override fun encode(): Bytes {
-    return RLP.encodeList { w ->
-      w.writeValue(authTag)
+  override fun toRLP(): Bytes {
+    return Bytes.concatenate(magic, RLP.encodeList { w ->
+      w.writeValue(token)
       w.writeValue(idNonce)
       w.writeLong(enrSeq)
-    }
+    })
   }
 }
 
@@ -213,7 +214,7 @@ internal class TopicQueryMessage(
 
   override fun messageIdentifier(): Bytes = encodedMessageType
 
-  override fun encode(): Bytes {
+  override fun toRLP(): Bytes {
     return RLP.encodeList { writer ->
       writer.writeValue(requestId)
       writer.writeValue(topic)
@@ -247,7 +248,7 @@ internal class RegTopicMessage(
 
   override fun type(): MessageType = MessageType.REGTOPIC
 
-  override fun encode(): Bytes {
+  override fun toRLP(): Bytes {
     return RLP.encodeList { writer ->
       writer.writeValue(requestId)
       writer.writeValue(nodeRecord)
@@ -282,7 +283,7 @@ internal class PongMessage(
 
   override fun type(): MessageType = MessageType.PONG
 
-  override fun encode(): Bytes {
+  override fun toRLP(): Bytes {
     return RLP.encodeList { writer ->
       writer.writeValue(requestId)
       writer.writeLong(enrSeq)
@@ -317,7 +318,7 @@ internal class RegConfirmationMessage(
 
   override fun type(): MessageType = MessageType.REGCONFIRM
 
-  override fun encode(): Bytes {
+  override fun toRLP(): Bytes {
     return RLP.encodeList { writer ->
       writer.writeValue(requestId)
       writer.writeValue(topic)
@@ -334,4 +335,3 @@ internal class RegConfirmationMessage(
     }
   }
 }
-

@@ -17,6 +17,7 @@
 package org.apache.tuweni.devp2p.v5
 
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.crypto.Hash
 
 /**
@@ -36,13 +37,12 @@ internal interface Message {
     private val WHO_ARE_YOU: Bytes = Bytes.wrap("WHOAREYOU".toByteArray())
 
     fun magic(dest: Bytes): Bytes {
-      val concatView = Bytes.wrap(dest, WHO_ARE_YOU)
-      return Hash.sha2_256(concatView)
+      return Hash.sha2_256(Bytes.wrap(dest, WHO_ARE_YOU))
     }
 
-    fun tag(src: Bytes, dest: Bytes): Bytes {
+    fun tag(src: Bytes32, dest: Bytes): Bytes32 {
       val encodedDestKey = Hash.sha2_256(dest)
-      return Bytes.wrap(encodedDestKey).xor(src)
+      return encodedDestKey.xor(src)
     }
 
     fun getSourceFromTag(tag: Bytes, dest: Bytes): Bytes {
@@ -57,13 +57,35 @@ internal interface Message {
     fun idNonce(): Bytes = Bytes.random(ID_NONCE_LENGTH)
   }
 
-  fun encode(): Bytes
+  fun toRLP(): Bytes
 
   fun messageIdentifier(): Bytes
 
   fun type(): MessageType
 }
 
-internal enum class MessageType {
-  RANDOM, WHOAREYOU, FINDNODE, NODES, PING, PONG, REGTOPIC, REGCONFIRM, TICKET, TOPICQUERY
+internal enum class MessageType(val code: Int) {
+  RANDOM(0),
+  WHOAREYOU(0),
+  FINDNODE(3),
+  NODES(4),
+  PING(1),
+  PONG(2),
+  REGTOPIC(5),
+  REGCONFIRM(7),
+  TICKET(6),
+  TOPICQUERY(8);
+
+  fun byte(): Byte = code.toByte()
+
+  companion object {
+    fun valueOf(code: Int): MessageType {
+      for (messageType in MessageType.values()) {
+        if (messageType.code == code) {
+          return messageType
+        }
+      }
+      throw IllegalArgumentException("No known message with code $code")
+    }
+  }
 }

@@ -18,6 +18,7 @@ package org.apache.tuweni.devp2p.v5
 
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
+import org.apache.tuweni.devp2p.EthereumNodeRecord
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -30,15 +31,15 @@ interface ENRStorage {
    *
    * @param enr node record
    */
-  fun set(enr: Bytes) {
-    val nodeId = Hash.sha2_256(enr)
+  fun set(enr: EthereumNodeRecord) {
+    val nodeId = Hash.sha2_256(enr.toRLP())
     put(nodeId, enr)
   }
 
   /**
    * Store an ENR record associated with a nodeId in the store.
    */
-  fun put(nodeId: Bytes, enr: Bytes)
+  fun put(nodeId: Bytes, enr: EthereumNodeRecord)
 
   /**
    * Find a stored node record
@@ -47,7 +48,7 @@ interface ENRStorage {
    *
    * @return node record, if present.
    */
-  fun find(nodeId: Bytes): Bytes?
+  fun find(nodeId: Bytes): EthereumNodeRecord?
 }
 
 /**
@@ -55,9 +56,9 @@ interface ENRStorage {
  */
 internal class DefaultENRStorage : ENRStorage {
 
-  private val storage: MutableMap<Bytes, Bytes> = ConcurrentHashMap()
+  private val storage: MutableMap<Bytes, EthereumNodeRecord> = ConcurrentHashMap()
 
-  override fun find(nodeId: Bytes): Bytes? = storage[nodeId]
+  override fun find(nodeId: Bytes): EthereumNodeRecord? = storage[nodeId]
 
-  override fun put(nodeId: Bytes, enr: Bytes) { storage.put(nodeId, enr) }
+  override fun put(nodeId: Bytes, enr: EthereumNodeRecord) { storage.put(nodeId, enr) }
 }

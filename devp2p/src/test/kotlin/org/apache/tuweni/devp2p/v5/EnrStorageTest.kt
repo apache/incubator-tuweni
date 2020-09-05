@@ -31,11 +31,11 @@ class EnrStorageTest {
 
   @Test
   fun setPersistsAndFindRetrievesNodeRecord() {
-    val enr = EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress())
+    val enr = EthereumNodeRecord.create(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress())
 
     storage.set(enr)
 
-    val nodeId = Hash.sha2_256(enr)
+    val nodeId = Hash.sha2_256(enr.toRLP())
     storage.find(nodeId)
   }
 }

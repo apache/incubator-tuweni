@@ -644,7 +644,7 @@ internal class CoroutineDiscoveryService(
     pending.complete(VerificationResult(peer, endpoint))
 
     if (packet.enrSeq != null) {
-      if (peer.enr == null || peer.enr!!.seq < packet.enrSeq) {
+      if (peer.enr == null || peer.enr!!.seq() < packet.enrSeq) {
         val now = timeSupplier()
         withTimeoutOrNull(ENR_REQUEST_TIMEOUT_MS) { enrRequest(endpoint, peer).verify(now) }
       }
