@@ -19,18 +19,20 @@ package org.apache.tuweni.devp2p.v5
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.junit.BouncyCastleExtension
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.concurrent.ConcurrentHashMap
 
-internal class DefaultENRStorage : ENRStorage {
+internal class SimpleTestENRStorage : ENRStorage {
 
-  private val storage: MutableMap<Bytes, EthereumNodeRecord> = ConcurrentHashMap()
+  val storage: MutableMap<Bytes, EthereumNodeRecord> = ConcurrentHashMap()
 
   override fun find(nodeId: Bytes): EthereumNodeRecord? = storage[nodeId]
 
@@ -42,23 +44,28 @@ class ConnectTwoServersTest {
 
   @Test
   fun testConnectTwoServers() = runBlocking {
-    val storage = DefaultENRStorage()
+    val storage = SimpleTestENRStorage()
     val service = DiscoveryService.open(
       SECP256K1.KeyPair.random(),
-      localPort = 10000,
+      localPort = 40000,
       bootstrapENRList = emptyList(),
       enrStorage = storage
     )
-    service.start()
+    service.start().await()
 
+    val otherStorage = SimpleTestENRStorage()
     val otherService = DiscoveryService.open(
       SECP256K1.KeyPair.random(),
-      localPort = 10001,
-      bootstrapENRList = emptyList()
+      localPort = 40001,
+      bootstrapENRList = emptyList(),
+      enrStorage = otherStorage
     )
-    otherService.start()
-    otherService.addPeer(service.enr())
-    delay(10000)
-    assertNotNull(storage.find(Hash.sha2_256(service.enr().toRLP())))
+    otherService.start().await()
+    otherService.addPeer(service.enr()).await()
+    delay(1000)
+    assertEquals(1, storage.storage.size)
+    assertEquals(1, otherStorage.storage.size)
+    assertNotNull(otherStorage.find(Hash.sha2_256(service.enr().toRLP())))
+    assertNotNull(storage.find(Hash.sha2_256(otherService.enr().toRLP())))
   }
 }

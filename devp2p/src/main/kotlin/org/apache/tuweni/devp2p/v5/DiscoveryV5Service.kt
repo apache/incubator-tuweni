@@ -97,7 +97,7 @@ interface DiscoveryV5Service : CoroutineScope {
   /**
    * Starts the node discovery service.
    */
-  suspend fun start()
+  suspend fun start() : AsyncCompletion
 
   /**
    * Stops the node discovery service.
@@ -124,9 +124,9 @@ interface DiscoveryV5Service : CoroutineScope {
    *
    * @param rlpENR the RLP representation of the peer ENR.
    */
-  suspend fun addPeer(rlpENR: Bytes) {
+  suspend fun addPeer(rlpENR: Bytes): AsyncCompletion {
     val enr: EthereumNodeRecord = EthereumNodeRecord.fromRLP(rlpENR)
-    addPeer(enr)
+    return addPeer(enr)
   }
 
   /**
@@ -161,11 +161,11 @@ internal class DefaultDiscoveryV5Service(
   private lateinit var receiveJob: Job
 
   @ObsoleteCoroutinesApi
-  override suspend fun start() {
+  override suspend fun start(): AsyncCompletion {
     channel.bind(bindAddress)
 
     receiveJob = launch { receiveDatagram() }
-    bootstrap()
+    return bootstrap()
   }
 
   override suspend fun terminate() {
@@ -178,14 +178,18 @@ internal class DefaultDiscoveryV5Service(
   override fun enr(): EthereumNodeRecord = selfEnr
 
   override suspend fun addPeer(enr: EthereumNodeRecord): AsyncCompletion {
-    val address = InetSocketAddress(enr.ip(), enr.udp())
-    var session = sessions.get(address)
+    val address = InetSocketAddress(enr.ip(), enr.udp()!!)
+    val session = sessions[address]
     if (session == null) {
-      val handshakeSession = handshakes.computeIfAbsent(address, this::createHandshake)
+      logger.trace("Creating new session for peer {}", enr)
+      val handshakeSession = handshakes.computeIfAbsent(address) {addr -> createHandshake(addr, enr.publicKey(), enr)}
       return asyncCompletion {
+        logger.trace("Handshake connection start {}", enr)
         handshakeSession.connect().await()
+        logger.trace("Handshake connection done {}", enr)
       }
     } else {
+      logger.trace("Session found for peer {}", enr)
       return AsyncCompletion.completed()
     }
   }
@@ -199,17 +203,15 @@ internal class DefaultDiscoveryV5Service(
     }
   }
 
-  private suspend fun bootstrap() {
-    bootstrapENRList.forEach {
-      logger.trace("Connecting to bootstrap peer {}", it)
-      var encodedEnr = it
-      if (it.startsWith("enr:")) {
-        encodedEnr = it.substringAfter("enr:")
-      }
-      val rlpENR = Base64URLSafe.decode(encodedEnr)
-      addPeer(rlpENR)
+  private suspend fun bootstrap(): AsyncCompletion = AsyncCompletion.allOf(bootstrapENRList.map {
+    logger.trace("Connecting to bootstrap peer {}", it)
+    var encodedEnr = it
+    if (it.startsWith("enr:")) {
+      encodedEnr = it.substringAfter("enr:")
     }
-  }
+    val rlpENR = Base64URLSafe.decode(encodedEnr)
+    addPeer(rlpENR)
+  })
 
   private suspend fun receiveDatagram() {
     while (channel.isOpen) {
@@ -221,7 +223,7 @@ internal class DefaultDiscoveryV5Service(
       var session = sessions.get(address)
       try {
         if (session == null) {
-          val handshakeSession = handshakes.computeIfAbsent(address, this::createHandshake)
+          val handshakeSession = handshakes.computeIfAbsent(address) { createHandshake(it) }
           handshakeSession.processMessage(Bytes.wrapByteBuffer(datagram))
         } else {
           session.processMessage(Bytes.wrapByteBuffer(datagram))
@@ -232,32 +234,43 @@ internal class DefaultDiscoveryV5Service(
     }
   }
 
-  private fun createHandshake(address: InetSocketAddress): HandshakeSession {
-    val newSession = HandshakeSession(keyPair, address, null, this::send, this::enr, coroutineContext)
-    newSession.awaitConnection().thenAccept { createSession(newSession, address, it) }
+  private fun createHandshake(address: InetSocketAddress, publicKey: SECP256K1.PublicKey? = null, receivedEnr: EthereumNodeRecord? = null): HandshakeSession {
+    logger.trace("Creating new handshake with {}", address)
+    val newSession = HandshakeSession(keyPair, address, publicKey, this::send, this::enr, coroutineContext)
+    newSession.awaitConnection().thenAccept {
+      val peerEnr = receivedEnr ?: newSession.receivedEnr!!
+      logger.trace("Handshake connection done {}", peerEnr)
+      createSession(newSession, address, it, peerEnr) }
     return newSession
   }
 
   private fun createSession(
     newSession: HandshakeSession,
     address: InetSocketAddress,
-    sessionKey: SessionKey
+    sessionKey: SessionKey,
+    receivedEnr: EthereumNodeRecord
   ) {
-    val session = Session(
-      keyPair,
-      newSession.nodeId,
-      newSession.tag(),
-      sessionKey,
-      address,
-      this::send,
-      this::enr,
-      routingTable,
-      topicTable,
-      { missedPings ->
-        missedPings > 5
-      },
-      coroutineContext
-    )
-    sessions[address] = session
+    try {
+      val session = Session(
+        keyPair,
+        newSession.nodeId,
+        newSession.tag(),
+        sessionKey,
+        address,
+        this::send,
+        this::enr,
+        routingTable,
+        topicTable,
+        { missedPings ->
+          missedPings > 5
+        },
+        coroutineContext
+      )
+      enrStorage.set(receivedEnr)
+      sessions[address] = session
+    } catch(e: Exception) {
+      e.printStackTrace()
+    }
+
   }
 }

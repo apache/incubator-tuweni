@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.devp2p.v5
 
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.SECP256K1
@@ -23,6 +24,7 @@ import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.io.Base64URLSafe
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Timeout
@@ -79,8 +81,7 @@ class DefaultDiscoveryV5ServiceTest {
       Message.authTag(),
       content
     )
-    assertTrue(message.data.size() == Message.RANDOM_DATA_LENGTH)
-
+    assertEquals(message.data.size(), Message.RANDOM_DATA_LENGTH)
     recipientSocket.close()
     discoveryV5Service.terminate()
   }

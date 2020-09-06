@@ -19,13 +19,18 @@ package org.apache.tuweni.devp2p.v5
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.junit.BouncyCastleExtension
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetSocketAddress
 
+/**
+ * Test a developer can run from their machine to contact a remote server.
+ */
 @ExtendWith(BouncyCastleExtension::class)
 class LighthouseTest {
 
+  @Disabled
   @Test
   fun testConnect() = runBlocking {
     val enrRec =
@@ -37,7 +42,7 @@ class LighthouseTest {
 
     val service = DiscoveryService.open(
       SECP256K1.KeyPair.random(),
-      localPort = 10000,
+      localPort = 0,
       bindAddress = InetSocketAddress("0.0.0.0", 10000),
       bootstrapENRList = listOf(enrRec)
     )

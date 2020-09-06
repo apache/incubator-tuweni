@@ -237,15 +237,15 @@ class EthereumNodeRecord(
    * The TCP port of the ENR
    * @return the TCP port associated with this ENR
    */
-  fun tcp(): Int {
-    return data["tcp"]!!.toInt()
+  fun tcp(): Int? {
+    return data["tcp"]?.toInt()
   }
 
   /**
    * The UDP port of the ENR
    * @return the UDP port associated with this ENR
    */
-  fun udp(): Int {
+  fun udp(): Int? {
     return data["udp"]?.toInt() ?: tcp()
   }
 

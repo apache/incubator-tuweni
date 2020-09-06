@@ -44,6 +44,7 @@ internal class HandshakeSession(
 ) : CoroutineScope {
 
   private val connected: CompletableAsyncResult<SessionKey> = AsyncResult.incomplete()
+  var receivedEnr : EthereumNodeRecord? = null
   val nodeId = Hash.sha2_256(keyPair.publicKey().bytes())
   private val whoAreYouHeader = Hash.sha2_256(Bytes.concatenate(nodeId, Bytes.wrap("WHOAREYOU".toByteArray())))
 
@@ -135,7 +136,7 @@ internal class HandshakeSession(
           val ephemeralPublicKey = SECP256K1.PublicKey.fromBytes(it.readValue())
           val authResponse = it.readValue()
           val secret = SECP256K1.calculateKeyAgreement(keyPair.secretKey(), ephemeralPublicKey)
-          val senderNodeId = Hash.sha2_256(publicKey!!.bytes())
+          val senderNodeId = Message.getSourceFromTag(tag, nodeId)
           val sessionKey = SessionKeyGenerator.generate(senderNodeId, nodeId, secret, idNonce)
           val decryptedAuthResponse = AES128GCM.decrypt(authResponse, sessionKey.authRespKey, Bytes.EMPTY)
           RLP.decodeList(Bytes.wrap(decryptedAuthResponse)) { reader ->
@@ -143,8 +144,9 @@ internal class HandshakeSession(
             val signatureBytes = reader.readValue()
             val enrRLP = reader.readValue()
             val enr = EthereumNodeRecord.fromRLP(enrRLP)
-            val publicKey = enr.publicKey()
-            val signatureVerified = verifySignature(signatureBytes, idNonce, publicKey)
+            receivedEnr = enr
+            publicKey = enr.publicKey()
+            val signatureVerified = verifySignature(signatureBytes, idNonce, enr.publicKey())
             if (!signatureVerified) {
               throw IllegalArgumentException("Signature is not verified")
             }
