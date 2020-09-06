@@ -19,6 +19,8 @@ package org.apache.tuweni.devp2p.v5.packet
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.devp2p.v5.RandomMessage
 import org.apache.tuweni.devp2p.v5.Message
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 class RandomMessageTest {
@@ -32,21 +34,21 @@ class RandomMessageTest {
     val message = RandomMessage(Message.authTag(), data)
 
     val encodingResult = message.toRLP()
-    assert(encodingResult.toHexString() == expectedEncodingResult)
+    assertEquals(encodingResult.toHexString(), expectedEncodingResult)
 
     val decodingResult = RandomMessage.create(Message.authTag(), encodingResult)
 
-    assert(decodingResult.data == data)
+    assertEquals(decodingResult.data, data)
   }
 
   @Test
   fun randomDataGivesRandom44Bytes() {
     val firstResult = RandomMessage.randomData()
 
-    assert(Message.RANDOM_DATA_LENGTH == firstResult.size())
+    assertEquals(Message.RANDOM_DATA_LENGTH, firstResult.size())
 
     val secondResult = RandomMessage.randomData()
 
-    assert(secondResult != firstResult)
+    assertNotEquals(secondResult, firstResult)
   }
 }

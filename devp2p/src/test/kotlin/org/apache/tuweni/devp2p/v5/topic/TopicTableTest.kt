@@ -21,6 +21,9 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetAddress
@@ -36,8 +39,8 @@ class TopicTableTest {
   fun putAddNodeToEmptyQueueImmediately() {
     val waitTime = topicTable.put(Topic("A"), enr)
 
-    assert(!topicTable.isEmpty())
-    assert(waitTime == 0L)
+    assertFalse(topicTable.isEmpty())
+    assertEquals(waitTime, 0L)
   }
 
   @Test
@@ -48,7 +51,7 @@ class TopicTableTest {
 
     val waitTime = topicTable.put(topic, enr)
 
-    assert(waitTime > 0L)
+    assertTrue(waitTime > 0L)
   }
 
   @Test
@@ -58,7 +61,7 @@ class TopicTableTest {
 
     val waitTime = topicTable.put(Topic("C"), enr)
 
-    assert(waitTime > 0L)
+    assertTrue(waitTime > 0L)
   }
 
   @Test
@@ -69,8 +72,8 @@ class TopicTableTest {
 
     val nodes = topicTable.getNodes(topic)
 
-    assert(nodes.isNotEmpty())
-    assert(nodes.size == 2)
+    assertTrue(nodes.isNotEmpty())
+    assertEquals(nodes.size, 2)
   }
 
   @Test
@@ -79,10 +82,10 @@ class TopicTableTest {
     topicTable.put(topic, enr)
 
     val containsTrue = topicTable.contains(topic)
-    assert(containsTrue)
+    assertTrue(containsTrue)
 
     val containsFalse = topicTable.contains(Topic("B"))
-    assert(!containsFalse)
+    assertFalse(containsFalse)
   }
 
   @AfterEach

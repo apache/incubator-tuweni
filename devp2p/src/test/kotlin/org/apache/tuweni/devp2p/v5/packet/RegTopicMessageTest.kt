@@ -18,6 +18,7 @@ package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.devp2p.v5.RegTopicMessage
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class RegTopicMessageTest {
@@ -32,9 +33,9 @@ class RegTopicMessageTest {
 
     val decodingResult = RegTopicMessage.create(encodingResult)
 
-    assert(decodingResult.requestId == requestId)
-    assert(decodingResult.ticket == message.ticket)
-    assert(decodingResult.nodeRecord == message.nodeRecord)
+    assertEquals(decodingResult.requestId, requestId)
+    assertEquals(decodingResult.ticket, message.ticket)
+    assertEquals(decodingResult.nodeRecord, message.nodeRecord)
   }
 
   @Test
@@ -45,6 +46,6 @@ class RegTopicMessageTest {
       topic = Bytes.random(16)
     )
 
-    assert(5 == message.messageIdentifier().toInt())
+    assertEquals(5, message.messageIdentifier().toInt())
   }
 }

@@ -18,6 +18,7 @@ package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.devp2p.v5.FindNodeMessage
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class FindNodeMessageTest {
@@ -30,18 +31,18 @@ class FindNodeMessageTest {
     val message = FindNodeMessage(requestId)
 
     val encodingResult = message.toRLP()
-    assert(encodingResult.toHexString() == expectedEncodingResult)
+    assertEquals(encodingResult.toHexString(), expectedEncodingResult)
 
     val decodingResult = FindNodeMessage.create(encodingResult)
 
-    assert(decodingResult.requestId == requestId)
-    assert(decodingResult.distance == 0)
+    assertEquals(decodingResult.requestId, requestId)
+    assertEquals(decodingResult.distance, 0)
   }
 
   @Test
   fun getMessageTypeHasValidIndex() {
     val message = FindNodeMessage()
 
-    assert(3 == message.messageIdentifier().toInt())
+    assertEquals(3, message.messageIdentifier().toInt())
   }
 }

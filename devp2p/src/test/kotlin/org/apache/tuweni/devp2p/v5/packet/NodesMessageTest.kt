@@ -22,6 +22,7 @@ import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.NodesMessage
 import org.apache.tuweni.devp2p.v5.Message
 import org.apache.tuweni.junit.BouncyCastleExtension
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetAddress
@@ -44,11 +45,11 @@ class NodesMessageTest {
 
     val decodingResult = NodesMessage.create(encodingResult)
 
-    assert(decodingResult.requestId == requestId)
-    assert(decodingResult.total == 10)
-    assert(EthereumNodeRecord.fromRLP(decodingResult.nodeRecords[0]).udp() == 9090)
-    assert(EthereumNodeRecord.fromRLP(decodingResult.nodeRecords[1]).udp() == 9091)
-    assert(EthereumNodeRecord.fromRLP(decodingResult.nodeRecords[2]).udp() == 9092)
+    assertEquals(decodingResult.requestId, requestId)
+    assertEquals(decodingResult.total, 10)
+    assertEquals(EthereumNodeRecord.fromRLP(decodingResult.nodeRecords[0]).udp(), 9090)
+    assertEquals(EthereumNodeRecord.fromRLP(decodingResult.nodeRecords[1]).udp(), 9091)
+    assertEquals(EthereumNodeRecord.fromRLP(decodingResult.nodeRecords[2]).udp(), 9092)
   }
 
   @Test
@@ -56,6 +57,6 @@ class NodesMessageTest {
     val message =
       NodesMessage(Message.requestId(), 0, emptyList())
 
-    assert(4 == message.messageIdentifier().toInt())
+    assertEquals(4, message.messageIdentifier().toInt())
   }
 }

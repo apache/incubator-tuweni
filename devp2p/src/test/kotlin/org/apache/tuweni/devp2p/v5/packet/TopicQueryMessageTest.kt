@@ -18,6 +18,7 @@ package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.devp2p.v5.TopicQueryMessage
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class TopicQueryMessageTest {
@@ -31,14 +32,14 @@ class TopicQueryMessageTest {
 
     val decodingResult = TopicQueryMessage.create(encodingResult)
 
-    assert(decodingResult.requestId == requestId)
-    assert(decodingResult.topic == message.topic)
+    assertEquals(decodingResult.requestId, requestId)
+    assertEquals(decodingResult.topic, message.topic)
   }
 
   @Test
   fun getMessageTypeHasValidIndex() {
     val message = TopicQueryMessage(topic = Bytes.random(32))
 
-    assert(8 == message.messageIdentifier().toInt())
+    assertEquals(8, message.messageIdentifier().toInt())
   }
 }

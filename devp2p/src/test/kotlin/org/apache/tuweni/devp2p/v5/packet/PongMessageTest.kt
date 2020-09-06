@@ -18,6 +18,7 @@ package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.devp2p.v5.PongMessage
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.net.InetAddress
 
@@ -32,10 +33,10 @@ class PongMessageTest {
 
     val decodingResult = PongMessage.create(encodingResult)
 
-    assert(decodingResult.requestId == requestId)
-    assert(decodingResult.enrSeq == message.enrSeq)
-    assert(decodingResult.recipientIp == message.recipientIp)
-    assert(decodingResult.recipientPort == message.recipientPort)
+    assertEquals(decodingResult.requestId, requestId)
+    assertEquals(decodingResult.enrSeq, message.enrSeq)
+    assertEquals(decodingResult.recipientIp, message.recipientIp)
+    assertEquals(decodingResult.recipientPort, message.recipientPort)
   }
 
   @Test
@@ -43,6 +44,6 @@ class PongMessageTest {
     val message =
       PongMessage(recipientIp = InetAddress.getLoopbackAddress(), recipientPort = 9090)
 
-    assert(2 == message.messageIdentifier().toInt())
+    assertEquals(2, message.messageIdentifier().toInt())
   }
 }

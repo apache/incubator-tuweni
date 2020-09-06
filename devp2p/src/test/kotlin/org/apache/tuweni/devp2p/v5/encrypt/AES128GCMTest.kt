@@ -17,6 +17,7 @@
 package org.apache.tuweni.devp2p.v5.encrypt
 
 import org.apache.tuweni.bytes.Bytes
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class AES128GCMTest {
@@ -32,7 +33,7 @@ class AES128GCMTest {
 
     val result = AES128GCM.encrypt(key, nonce, data, Bytes.EMPTY)
 
-    assert(result == expectedResult)
+    assertEquals(result, expectedResult)
   }
 
   @Test
@@ -45,6 +46,6 @@ class AES128GCMTest {
 
     val result = AES128GCM.decrypt(encryptedData, key, Bytes.EMPTY)
 
-    assert(result == expectedResult)
+    assertEquals(result, expectedResult)
   }
 }
