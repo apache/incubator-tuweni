@@ -44,7 +44,7 @@ internal class HandshakeSession(
 ) : CoroutineScope {
 
   private val connected: CompletableAsyncResult<SessionKey> = AsyncResult.incomplete()
-  var receivedEnr : EthereumNodeRecord? = null
+  var receivedEnr: EthereumNodeRecord? = null
   val nodeId = Hash.sha2_256(keyPair.publicKey().bytes())
   private val whoAreYouHeader = Hash.sha2_256(Bytes.concatenate(nodeId, Bytes.wrap("WHOAREYOU".toByteArray())))
 
@@ -135,6 +135,7 @@ internal class HandshakeSession(
           it.skipNext()
           val ephemeralPublicKey = SECP256K1.PublicKey.fromBytes(it.readValue())
           val authResponse = it.readValue()
+
           val secret = SECP256K1.calculateKeyAgreement(keyPair.secretKey(), ephemeralPublicKey)
           val senderNodeId = Message.getSourceFromTag(tag, nodeId)
           val sessionKey = SessionKeyGenerator.generate(senderNodeId, nodeId, secret, idNonce)

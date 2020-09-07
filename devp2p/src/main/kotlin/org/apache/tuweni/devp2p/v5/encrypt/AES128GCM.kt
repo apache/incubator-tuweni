@@ -17,7 +17,6 @@
 package org.apache.tuweni.devp2p.v5.encrypt
 
 import org.apache.tuweni.bytes.Bytes
-import java.nio.ByteBuffer
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -64,21 +63,16 @@ object AES128GCM {
    * @param data encryption metadata
    */
   fun decrypt(encryptedContent: Bytes, key: Bytes, data: Bytes): Bytes {
-    val buffer = ByteBuffer.wrap(encryptedContent.toArray())
-    val nonceLength = buffer.int
-    val nonce = ByteArray(nonceLength)
-    buffer.get(nonce)
-    val encryptedText = ByteArray(buffer.remaining())
-    buffer.get(encryptedText)
+    val nonceLength = encryptedContent.getInt(0)
 
     val keySpec = SecretKeySpec(key.toArray(), ALGO_NAME)
 
-    val parameterSpec = GCMParameterSpec(KEY_SIZE, nonce)
+    val parameterSpec = GCMParameterSpec(KEY_SIZE, encryptedContent.slice(4, nonceLength).toArrayUnsafe())
     val cipher = Cipher.getInstance(CIPHER_NAME)
     cipher.init(Cipher.DECRYPT_MODE, keySpec, parameterSpec)
 
-    cipher.updateAAD(data.toArray())
+    cipher.updateAAD(data.toArrayUnsafe())
 
-    return Bytes.wrap(cipher.doFinal(encryptedText))
+    return Bytes.wrap(cipher.doFinal(encryptedContent.slice(4 + nonceLength).toArrayUnsafe()))
   }
 }

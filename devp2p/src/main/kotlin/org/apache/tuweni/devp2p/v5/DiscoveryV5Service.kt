@@ -97,7 +97,7 @@ interface DiscoveryV5Service : CoroutineScope {
   /**
    * Starts the node discovery service.
    */
-  suspend fun start() : AsyncCompletion
+  suspend fun start(): AsyncCompletion
 
   /**
    * Stops the node discovery service.
@@ -182,7 +182,7 @@ internal class DefaultDiscoveryV5Service(
     val session = sessions[address]
     if (session == null) {
       logger.trace("Creating new session for peer {}", enr)
-      val handshakeSession = handshakes.computeIfAbsent(address) {addr -> createHandshake(addr, enr.publicKey(), enr)}
+      val handshakeSession = handshakes.computeIfAbsent(address) { addr -> createHandshake(addr, enr.publicKey(), enr) }
       return asyncCompletion {
         logger.trace("Handshake connection start {}", enr)
         handshakeSession.connect().await()
@@ -234,7 +234,11 @@ internal class DefaultDiscoveryV5Service(
     }
   }
 
-  private fun createHandshake(address: InetSocketAddress, publicKey: SECP256K1.PublicKey? = null, receivedEnr: EthereumNodeRecord? = null): HandshakeSession {
+  private fun createHandshake(
+    address: InetSocketAddress,
+    publicKey: SECP256K1.PublicKey? = null,
+    receivedEnr: EthereumNodeRecord? = null
+  ): HandshakeSession {
     logger.trace("Creating new handshake with {}", address)
     val newSession = HandshakeSession(keyPair, address, publicKey, this::send, this::enr, coroutineContext)
     newSession.awaitConnection().thenAccept {
@@ -268,9 +272,8 @@ internal class DefaultDiscoveryV5Service(
       )
       enrStorage.set(receivedEnr)
       sessions[address] = session
-    } catch(e: Exception) {
+    } catch (e: Exception) {
       e.printStackTrace()
     }
-
   }
 }
