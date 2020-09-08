@@ -65,7 +65,8 @@ internal class RoutingTable(
 
   fun isEmpty(): Boolean = table.isEmpty()
 
-  fun nodesOfDistance(distance: Int): List<Bytes> = table.peersOfDistance(distance)
+  fun nodesOfDistance(distance: Int): List<EthereumNodeRecord> =
+    table.peersOfDistance(distance).map { EthereumNodeRecord.fromRLP(it) }
 
   fun clear() = table.clear()
 

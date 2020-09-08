@@ -39,24 +39,19 @@ class EthereumNodeRecordTest {
 
   @Test
   fun readFromRLP() {
-    val enr = EthereumNodeRecord.fromRLP(
-      Bytes.fromHexString(
-        "f884b8407098ad865b00a582051940cb9cf36836572411a4727878307701" +
-          "1599ed5cd16b76f2635f4e234738f30813a89eb9137e3e3df5266e3a1f11" +
-          "df72ecf1145ccb9c01826964827634826970847f00000189736563703235" +
-          "366b31a103ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1" +
-          "400f3258cd31388375647082765f"
-      )
+    val keyPair = SECP256K1.KeyPair.random()
+    val enr = EthereumNodeRecord.create(
+      keyPair,
+      1,
+      emptyMap(),
+      emptyMap(), InetAddress.getLoopbackAddress(),
+      null,
+      10000
     )
+    enr.validate()
     assertEquals(1L, enr.seq())
     assertEquals(Bytes.wrap("v4".toByteArray()), enr.data["id"])
     assertEquals(Bytes.fromHexString("7f000001"), enr.data["ip"])
-    assertEquals(
-      Bytes.fromHexString("03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138"),
-      enr.data["secp256k1"]
-    )
-    assertEquals(Bytes.fromHexString("765f"), enr.data["udp"])
-    enr.validate()
   }
 
   @Test

@@ -28,6 +28,7 @@ import org.apache.tuweni.devp2p.v5.encrypt.SessionKeyGenerator
 import org.apache.tuweni.devp2p.v5.misc.SessionKey
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.rlp.RLPReader
+import org.apache.tuweni.units.bigints.UInt256
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import kotlin.coroutines.CoroutineContext
@@ -43,9 +44,10 @@ internal class HandshakeSession(
   override val coroutineContext: CoroutineContext
 ) : CoroutineScope {
 
+  var requestId: Bytes? = null
   private val connected: CompletableAsyncResult<SessionKey> = AsyncResult.incomplete()
   var receivedEnr: EthereumNodeRecord? = null
-  val nodeId = Hash.sha2_256(keyPair.publicKey().bytes())
+  val nodeId = EthereumNodeRecord.nodeId(keyPair.publicKey())
   private val whoAreYouHeader = Hash.sha2_256(Bytes.concatenate(nodeId, Bytes.wrap("WHOAREYOU".toByteArray())))
 
   private val tokens = ArrayList<Bytes>()
@@ -91,29 +93,36 @@ internal class HandshakeSession(
       val ephemeralKeyPair = SECP256K1.KeyPair.random()
       val ephemeralKey = ephemeralKeyPair.secretKey()
 
-      val destNodeId = Hash.sha2_256(publicKey!!.bytes())
-      val secret = SECP256K1.calculateKeyAgreement(ephemeralKey, publicKey)
+      val destNodeId = EthereumNodeRecord.nodeId(publicKey!!)
+      val secret = SECP256K1.deriveECDHKeyAgreement(ephemeralKey.bytes(), publicKey!!.bytes())
 
       // Derive keys
       val newSession = SessionKeyGenerator.generate(nodeId, destNodeId, secret, message.idNonce)
-      val signValue = Bytes.wrap(DISCOVERY_ID_NONCE, message.idNonce)
-      val hashedSignValue = Hash.sha2_256(signValue)
-      val signature = SECP256K1.sign(hashedSignValue, keyPair)
+      val signValue = Bytes.concatenate(DISCOVERY_ID_NONCE, message.idNonce, ephemeralKeyPair.publicKey().bytes())
+      val signature = SECP256K1.signHashed(Hash.sha2_256(signValue), keyPair)
       val plain = RLP.encodeList { writer ->
         writer.writeInt(5)
-        writer.writeValue(signature.bytes())
-        writer.writeValue(enr().toRLP())
+        writer.writeValue(
+          Bytes.concatenate(
+            UInt256.valueOf(signature.r()).toBytes(),
+            UInt256.valueOf(signature.s()).toBytes()
+          )
+        )
+        writer.writeRLP(enr().toRLP())
       }
       val zeroNonce = Bytes.wrap(ByteArray(12))
       val authResponse = AES128GCM.encrypt(newSession.authRespKey, zeroNonce, plain, Bytes.EMPTY)
       val authTag = Message.authTag()
+      val newTag = tag()
+      val findNode = FindNodeMessage()
+      requestId = findNode.requestId
       val encryptedMessage = AES128GCM.encrypt(
         newSession.initiatorKey,
         authTag,
-        Bytes.concatenate(Bytes.of(MessageType.FINDNODE.byte()), FindNodeMessage().toRLP()),
-        message.token
+        Bytes.concatenate(Bytes.of(MessageType.FINDNODE.byte()), findNode.toRLP()),
+        newTag
       )
-      val response = Bytes.concatenate(tag(), RLP.encodeList {
+      val response = Bytes.concatenate(newTag, RLP.encodeList {
         it.writeValue(authTag)
         it.writeValue(message.idNonce)
         it.writeValue(Bytes.wrap("gcm".toByteArray()))
@@ -136,15 +145,18 @@ internal class HandshakeSession(
           val ephemeralPublicKey = SECP256K1.PublicKey.fromBytes(it.readValue())
           val authResponse = it.readValue()
 
-          val secret = SECP256K1.calculateKeyAgreement(keyPair.secretKey(), ephemeralPublicKey)
+          val secret = SECP256K1.deriveECDHKeyAgreement(keyPair.secretKey().bytes(), ephemeralPublicKey.bytes())
           val senderNodeId = Message.getSourceFromTag(tag, nodeId)
           val sessionKey = SessionKeyGenerator.generate(senderNodeId, nodeId, secret, idNonce)
-          val decryptedAuthResponse = AES128GCM.decrypt(authResponse, sessionKey.authRespKey, Bytes.EMPTY)
-          RLP.decodeList(Bytes.wrap(decryptedAuthResponse)) { reader ->
+          val decryptedAuthResponse =
+            Bytes.wrap(AES128GCM.decrypt(sessionKey.authRespKey, Bytes.wrap(ByteArray(12)), authResponse, Bytes.EMPTY))
+          RLP.decodeList(decryptedAuthResponse) { reader ->
             reader.skipNext()
             val signatureBytes = reader.readValue()
-            val enrRLP = reader.readValue()
-            val enr = EthereumNodeRecord.fromRLP(enrRLP)
+            val enr = EthereumNodeRecord.fromRLP(
+              reader,
+              decryptedAuthResponse.slice(decryptedAuthResponse.size() - reader.remaining())
+            )
             receivedEnr = enr
             publicKey = enr.publicKey()
             val signatureVerified = verifySignature(signatureBytes, idNonce, enr.publicKey())
@@ -178,5 +190,5 @@ internal class HandshakeSession(
 
   fun awaitConnection(): AsyncResult<SessionKey> = connected
 
-  fun tag() = Message.tag(nodeId, Hash.sha2_256(publicKey!!.bytes()))
+  fun tag() = Message.tag(nodeId, EthereumNodeRecord.nodeId(publicKey!!))
 }

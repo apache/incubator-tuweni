@@ -17,10 +17,12 @@
 package org.apache.tuweni.devp2p
 
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.bytes.MutableBytes
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.rlp.RLP
+import org.apache.tuweni.rlp.RLPReader
 import org.apache.tuweni.rlp.RLPWriter
 import org.apache.tuweni.units.bigints.UInt256
 import java.lang.IllegalArgumentException
@@ -47,6 +49,18 @@ class EthereumNodeRecord(
   companion object {
 
     /**
+     * Derives the public key of an ethereum node record into a unique 32 bytes hash.
+     * @param publicKey the public key to hash
+     * @return the hash of the public key
+     */
+    fun nodeId(publicKey: SECP256K1.PublicKey): Bytes32 {
+      val pt = publicKey.asEcPoint()
+      val xPart = UInt256.valueOf(pt.xCoord.toBigInteger()).toBytes()
+      val yPart = UInt256.valueOf(pt.yCoord.toBigInteger()).toBytes()
+      return Hash.keccak256(Bytes.concatenate(xPart, yPart))
+    }
+
+    /**
      * Creates an ENR from its serialized form as a RLP list
      * @param rlp the serialized form of the ENR
      * @return the ENR
@@ -57,17 +71,44 @@ class EthereumNodeRecord(
       if (rlp.size() > 300) {
         throw IllegalArgumentException("Record too long")
       }
-      return RLP.decodeList(rlp) {
-        val sig = it.readValue()
+      return RLP.decodeList(rlp) { fromRLP(it, rlp) }
+    }
 
-        val seq = it.readLong()
+    /**
+     * Creates an ENR from its serialized form as a RLP list
+     * @param reader the RLP reader
+     * @return the ENR
+     * @throws IllegalArgumentException if the rlp bytes length is longer than 300 bytes
+     */
+    @JvmStatic
+    fun fromRLP(reader: RLPReader): EthereumNodeRecord {
+      val tempRecord = fromRLP(reader, Bytes.EMPTY)
+      val encoded = RLP.encodeList {
+        it.writeValue(tempRecord.signature)
+        encode(data = tempRecord.data, seq = tempRecord.seq, writer = it)
+      }
+
+      return fromRLP(encoded)
+    }
+
+    /**
+     * Creates an ENR from its serialized form as a RLP list
+     * @param reader the RLP reader
+     * @return the ENR
+     * @throws IllegalArgumentException if the rlp bytes length is longer than 300 bytes
+     */
+    @JvmStatic
+    fun fromRLP(reader: RLPReader, rlp: Bytes): EthereumNodeRecord {
+        val sig = reader.readValue()
+
+        val seq = reader.readLong()
 
         val data = mutableMapOf<String, Bytes>()
         val listData = mutableMapOf<String, List<Bytes>>()
-        while (!it.isComplete) {
-          val key = it.readString()
-          if (it.nextIsList()) {
-            listData[key] = it.readListContents { listreader ->
+        while (!reader.isComplete) {
+          val key = reader.readString()
+          if (reader.nextIsList()) {
+            listData[key] = reader.readListContents { listreader ->
               if (listreader.nextIsList()) {
                 // TODO complex structures not supported
                 listreader.skipNext()
@@ -77,16 +118,15 @@ class EthereumNodeRecord(
               }
             }.filterNotNull()
           } else {
-            val value = it.readValue()
+            val value = reader.readValue()
             data[key] = value
           }
         }
 
-        EthereumNodeRecord(sig, seq, data, listData, rlp)
-      }
+        return EthereumNodeRecord(sig, seq, data, listData, rlp)
     }
 
-    internal fun encode(
+    fun encode(
       signatureKeyPair: SECP256K1.KeyPair? = null,
       seq: Long = Instant.now().toEpochMilli(),
       ip: InetAddress? = null,
@@ -173,10 +213,10 @@ class EthereumNodeRecord(
       tcp: Int? = null,
       udp: Int? = null
     ): Bytes {
-      val encoded = RLP.encode { writer ->
+      val encoded = RLP.encodeList { writer ->
         encode(signatureKeyPair, seq, ip, tcp, udp, data, listData, writer)
       }
-      val signature = SECP256K1.sign(Hash.keccak256(encoded), signatureKeyPair)
+      val signature = SECP256K1.sign(encoded, signatureKeyPair)
       val sigBytes = MutableBytes.create(64)
       UInt256.valueOf(signature.r()).toBytes().copyTo(sigBytes, 0)
       UInt256.valueOf(signature.s()).toBytes().copyTo(sigBytes, 32)
@@ -207,11 +247,15 @@ class EthereumNodeRecord(
       signature.slice(32).toUnsignedBigInteger())
 
     val pubKey = publicKey()
-
     val recovered = SECP256K1.PublicKey.recoverFromSignature(encoded, sig)
 
     if (pubKey != recovered) {
-      throw InvalidNodeRecordException("Public key does not match signature")
+      val sig0 = SECP256K1.Signature.create(0, signature.slice(0, 32).toUnsignedBigInteger(),
+        signature.slice(32).toUnsignedBigInteger())
+      val recovered0 = SECP256K1.PublicKey.recoverFromSignature(encoded, sig0)
+      if (pubKey != recovered0) {
+        throw InvalidNodeRecordException("Public key does not match signature")
+      }
     }
   }
 
@@ -225,6 +269,11 @@ class EthereumNodeRecord(
     return SECP256K1.PublicKey.fromBytes(Bytes.wrap(ecPoint.getEncoded(false)).slice(1))
   }
 
+  /**
+   * Derives the public key of an ethereum node record into a unique 32 bytes hash.
+   * @return the hash of the public key
+   */
+  fun nodeId() = EthereumNodeRecord.nodeId(publicKey())
   /**
    * The ip associated with the ENR
    * @return The IP adress of the ENR

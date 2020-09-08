@@ -378,6 +378,12 @@ public final class SECP256K1 {
     return UInt256.valueOf(agreement.calculateAgreement(pubKeyP)).toBytes();
   }
 
+  public static Bytes deriveECDHKeyAgreement(Bytes srcPrivKey, Bytes destPubKey) {
+    ECPoint pudDestPoint = SECP256K1.PublicKey.fromBytes(destPubKey).asEcPoint();
+    ECPoint mult = pudDestPoint.multiply(srcPrivKey.toUnsignedBigInteger());
+    return Bytes.wrap(mult.getEncoded(true));
+  }
+
   /**
    * A SECP256K1 private key.
    */

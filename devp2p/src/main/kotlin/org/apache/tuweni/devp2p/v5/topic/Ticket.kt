@@ -77,7 +77,7 @@ internal data class Ticket(
     }
 
     fun decrypt(encrypted: Bytes, key: Bytes): Ticket {
-      val decrypted = AES128GCM.decrypt(encrypted, key, Bytes.EMPTY)
+      val decrypted = AES128GCM.decryptWithNonce(encrypted, key, Bytes.EMPTY)
       return create(decrypted)
     }
   }

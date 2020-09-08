@@ -17,6 +17,7 @@
 package org.apache.tuweni.devp2p.v5
 
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.rlp.RLP
 import java.net.InetAddress
 
@@ -52,7 +53,7 @@ internal class FindNodeMessage(
 internal class NodesMessage(
   val requestId: Bytes = Message.requestId(),
   val total: Int,
-  val nodeRecords: List<Bytes>
+  val nodeRecords: List<EthereumNodeRecord>
 ) : Message {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x04")
@@ -66,7 +67,7 @@ internal class NodesMessage(
       writer.writeValue(requestId)
       writer.writeInt(total)
       writer.writeList(nodeRecords) { listWriter, it ->
-        listWriter.writeValue(it)
+        listWriter.writeRLP(it.toRLP())
       }
     }
   }
@@ -77,7 +78,9 @@ internal class NodesMessage(
         val requestId = reader.readValue()
         val total = reader.readInt()
         val nodeRecords = reader.readListContents { listReader ->
-          listReader.readValue()
+          listReader.readList { enrReader ->
+            EthereumNodeRecord.fromRLP(enrReader)
+          }
         }
         return@decodeList NodesMessage(requestId, total, nodeRecords)
       }
@@ -237,7 +240,7 @@ internal class TopicQueryMessage(
  */
 internal class RegTopicMessage(
   val requestId: Bytes = Message.requestId(),
-  val nodeRecord: Bytes,
+  val nodeRecord: EthereumNodeRecord,
   val topic: Bytes,
   val ticket: Bytes
 ) : Message {
@@ -251,7 +254,7 @@ internal class RegTopicMessage(
   override fun toRLP(): Bytes {
     return RLP.encodeList { writer ->
       writer.writeValue(requestId)
-      writer.writeValue(nodeRecord)
+      writer.writeRLP(nodeRecord.toRLP())
       writer.writeValue(topic)
       writer.writeValue(ticket)
     }
@@ -261,7 +264,9 @@ internal class RegTopicMessage(
     fun create(content: Bytes): RegTopicMessage {
       return RLP.decodeList(content) { reader ->
         val requestId = reader.readValue()
-        val nodeRecord = reader.readValue()
+        val nodeRecord = reader.readList { enrReader ->
+          EthereumNodeRecord.fromRLP(enrReader)
+        }
         val topic = reader.readValue()
         val ticket = reader.readValue()
         return@decodeList RegTopicMessage(requestId, nodeRecord, topic, ticket)

@@ -18,9 +18,8 @@ package org.apache.tuweni.devp2p.v5.topic
 
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
-import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.devp2p.DiscoveryService
+import org.apache.tuweni.devp2p.EthereumNodeRecord
 import java.util.concurrent.TimeUnit
 
 internal class TopicTable(
@@ -36,7 +35,7 @@ internal class TopicTable(
     require(queueCapacity > 0) { "Queue capacity value must be positive" }
   }
 
-  fun getNodes(topic: Topic): List<Bytes> {
+  fun getNodes(topic: Topic): List<EthereumNodeRecord> {
     val values = table[topic]
     return values?.let { values.asMap().values.map { it.enr } } ?: emptyList()
   }
@@ -47,11 +46,11 @@ internal class TopicTable(
    * @return wait time for registrant node (0 is topic was putted immediately, -1 in case of error)
    */
   @Synchronized
-  fun put(topic: Topic, enr: Bytes): Long {
+  fun put(topic: Topic, enr: EthereumNodeRecord): Long {
     gcTable()
 
     val topicQueue = table[topic]
-    val nodeId = Hash.sha2_256(enr).toHexString()
+    val nodeId = enr.nodeId().toHexString()
 
     if (null != topicQueue) {
       if (topicQueue.size() < queueCapacity) {
@@ -107,4 +106,4 @@ internal class TopicTable(
   }
 }
 
-internal class TargetAd(val regTime: Long, val enr: Bytes)
+internal class TargetAd(val regTime: Long, val enr: EthereumNodeRecord)

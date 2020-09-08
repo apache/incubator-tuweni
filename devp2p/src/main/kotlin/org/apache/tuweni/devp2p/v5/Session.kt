@@ -67,8 +67,8 @@ internal class Session(
     const val PING_REFRESH = 10000L
   }
 
+  val activeFindNodes = HashMap<Bytes, CompletableAsyncResult<List<EthereumNodeRecord>>>()
   private var activePing: CompletableAsyncCompletion? = null
-  private val activeFindNodes = HashMap<Bytes, CompletableAsyncResult<List<EthereumNodeRecord>>>()
   private val chunkedNodeResults = ExpiringMap<Bytes, MutableList<EthereumNodeRecord>>()
   private var missedPings = 0
   private val ticketHolder = HashMap<Bytes, Bytes>()
@@ -175,14 +175,11 @@ internal class Session(
       logger.trace("Received NODES message but no matching FINDNODES present. Dropping")
       return
     }
-    val enrs = message.nodeRecords.map { EthereumNodeRecord.fromRLP(it) }
-    val records = chunkedNodeResults.get(message.requestId)
-    if (records == null) {
-      chunkedNodeResults[message.requestId] = enrs.toMutableList()
-    } else {
-      records.addAll(enrs)
-    }
-    if (chunkedNodeResults[message.requestId]!!.size == message.total) {
+    val enrs = message.nodeRecords
+    val records = chunkedNodeResults.computeIfAbsent(message.requestId) { mutableListOf() }
+    records.addAll(enrs)
+
+    if (enrs.toMutableList().size == message.total) {
       activeFindNodes[message.requestId]?.let {
         it.complete(chunkedNodeResults[message.requestId])
         chunkedNodeResults.remove(message.requestId)
@@ -243,7 +240,7 @@ internal class Session(
 
   private suspend fun handleFindNode(message: FindNodeMessage) {
     if (0 == message.distance) {
-      val response = NodesMessage(message.requestId, 1, listOf(enr().toRLP()))
+      val response = NodesMessage(message.requestId, 1, listOf(enr()))
       send(response)
       return
     }
@@ -264,12 +261,11 @@ internal class Session(
   }
 
   internal fun read(tag: Bytes, contentWithHeader: Bytes, reader: RLPReader): Message {
-      val decryptMetadata = tag
+    val authTag = reader.readValue()
 
       val encryptedContent = contentWithHeader.slice(reader.position())
-      // Decrypt
-      val decryptionKey = sessionKey.initiatorKey
-      val decryptedContent = AES128GCM.decrypt(encryptedContent, decryptionKey, decryptMetadata)
+      val decryptionKey = sessionKey.recipientKey
+      val decryptedContent = AES128GCM.decrypt(decryptionKey, authTag, encryptedContent, tag)
       val type = decryptedContent.slice(0, 1)
       val message = decryptedContent.slice(1)
 

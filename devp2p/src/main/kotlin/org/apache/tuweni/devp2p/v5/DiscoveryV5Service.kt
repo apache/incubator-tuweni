@@ -23,6 +23,7 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
+import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.ExpiringMap
 import org.apache.tuweni.concurrent.coroutines.asyncCompletion
 import org.apache.tuweni.concurrent.coroutines.await
@@ -244,7 +245,7 @@ internal class DefaultDiscoveryV5Service(
     newSession.awaitConnection().thenAccept {
       val peerEnr = receivedEnr ?: newSession.receivedEnr!!
       logger.trace("Handshake connection done {}", peerEnr)
-      createSession(newSession, address, it, peerEnr) }
+      createSession(newSession, address, it, peerEnr, newSession.requestId!!) }
     return newSession
   }
 
@@ -252,9 +253,9 @@ internal class DefaultDiscoveryV5Service(
     newSession: HandshakeSession,
     address: InetSocketAddress,
     sessionKey: SessionKey,
-    receivedEnr: EthereumNodeRecord
+    receivedEnr: EthereumNodeRecord,
+    requestId: Bytes
   ) {
-    try {
       val session = Session(
         keyPair,
         newSession.nodeId,
@@ -270,10 +271,8 @@ internal class DefaultDiscoveryV5Service(
         },
         coroutineContext
       )
+      session.activeFindNodes[requestId] = AsyncResult.incomplete()
       enrStorage.set(receivedEnr)
       sessions[address] = session
-    } catch (e: Exception) {
-      e.printStackTrace()
-    }
   }
 }

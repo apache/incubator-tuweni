@@ -38,21 +38,17 @@ object AES128GCM {
    * @param message content for encryption
    * @param data encryption metadata
    */
-  fun encrypt(key: Bytes, nonce: Bytes, message: Bytes, data: Bytes): Bytes {
-    val nonceBytes = nonce.toArray()
-    val keySpec = SecretKeySpec(key.toArray(), ALGO_NAME)
-    val cipher = Cipher.getInstance(CIPHER_NAME)
-    val parameterSpec = GCMParameterSpec(KEY_SIZE, nonceBytes)
+  fun encrypt(privateKey: Bytes, nonce: Bytes, message: Bytes, additionalAuthenticatedData: Bytes): Bytes {
 
-    cipher.init(Cipher.ENCRYPT_MODE, keySpec, parameterSpec)
-
-    cipher.updateAAD(data.toArray())
-
-    val encryptedText = Bytes.wrap(cipher.doFinal(message.toArray()))
-
-    val wrappedNonce = Bytes.wrap(nonceBytes)
-    val nonceSize = Bytes.ofUnsignedInt(nonceBytes.size.toLong())
-    return Bytes.wrap(nonceSize, wrappedNonce, encryptedText)
+    val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+    cipher.init(
+      Cipher.ENCRYPT_MODE,
+      SecretKeySpec(privateKey.toArrayUnsafe(), "AES"),
+      GCMParameterSpec(128, nonce.toArrayUnsafe())
+    )
+    cipher.updateAAD(additionalAuthenticatedData.toArrayUnsafe())
+    val result = Bytes.wrap(cipher.doFinal(message.toArrayUnsafe()))
+    return result
   }
 
   /**
@@ -62,7 +58,7 @@ object AES128GCM {
    * @param key 16-byte encryption key
    * @param data encryption metadata
    */
-  fun decrypt(encryptedContent: Bytes, key: Bytes, data: Bytes): Bytes {
+  fun decryptWithNonce(encryptedContent: Bytes, key: Bytes, data: Bytes): Bytes {
     val nonceLength = encryptedContent.getInt(0)
 
     val keySpec = SecretKeySpec(key.toArray(), ALGO_NAME)
@@ -74,5 +70,25 @@ object AES128GCM {
     cipher.updateAAD(data.toArrayUnsafe())
 
     return Bytes.wrap(cipher.doFinal(encryptedContent.slice(4 + nonceLength).toArrayUnsafe()))
+  }
+
+  /**
+   * AES128GCM decryption function
+   *
+   * @param privateKey the key to use for decryption
+   * @param nonce the nonce of the encrypted data
+   * @param encoded the encrypted content
+   * @param additionalAuthenticatedData the AAD that should be decrypted alongside
+   * @return the decrypted data
+   */
+  fun decrypt(privateKey: Bytes, nonce: Bytes, encoded: Bytes, additionalAuthenticatedData: Bytes): Bytes {
+    val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+    cipher.init(
+      Cipher.DECRYPT_MODE,
+      SecretKeySpec(privateKey.toArrayUnsafe(), "AES"),
+      GCMParameterSpec(128, nonce.toArrayUnsafe())
+    )
+    cipher.updateAAD(additionalAuthenticatedData.toArrayUnsafe())
+    return Bytes.wrap(cipher.doFinal(encoded.toArrayUnsafe()))
   }
 }

@@ -35,9 +35,9 @@ class NodesMessageTest {
     val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
     val total = 10
     val nodeRecords = listOf(
-      EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress(), udp = 9090),
-      EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress(), udp = 9091),
-      EthereumNodeRecord.toRLP(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress(), udp = 9092)
+      EthereumNodeRecord.create(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress(), udp = 9090),
+      EthereumNodeRecord.create(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress(), udp = 9091),
+      EthereumNodeRecord.create(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress(), udp = 9092)
     )
     val message = NodesMessage(requestId, total, nodeRecords)
 
@@ -47,9 +47,9 @@ class NodesMessageTest {
 
     assertEquals(decodingResult.requestId, requestId)
     assertEquals(decodingResult.total, 10)
-    assertEquals(EthereumNodeRecord.fromRLP(decodingResult.nodeRecords[0]).udp(), 9090)
-    assertEquals(EthereumNodeRecord.fromRLP(decodingResult.nodeRecords[1]).udp(), 9091)
-    assertEquals(EthereumNodeRecord.fromRLP(decodingResult.nodeRecords[2]).udp(), 9092)
+    assertEquals(decodingResult.nodeRecords[0].udp(), 9090)
+    assertEquals(decodingResult.nodeRecords[1].udp(), 9091)
+    assertEquals(decodingResult.nodeRecords[2].udp(), 9092)
   }
 
   @Test

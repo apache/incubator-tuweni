@@ -44,7 +44,7 @@ class AES128GCMTest {
       "DC4EFD97AFB943DAB6B1F5A0B13E83C41964F818AB8A51D6D30550BAE8B33A952AA1B6818AB88B66DBD60F5E016FA546808D983B70D")
     val key = Bytes.fromHexString("0xA924872EAE2DA2C0057ED6DEBD8CAAB8")
 
-    val result = AES128GCM.decrypt(encryptedData, key, Bytes.EMPTY)
+    val result = AES128GCM.decryptWithNonce(encryptedData, key, Bytes.EMPTY)
 
     assertEquals(result, expectedResult)
   }

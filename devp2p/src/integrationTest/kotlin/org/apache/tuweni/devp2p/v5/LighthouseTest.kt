@@ -34,11 +34,8 @@ class LighthouseTest {
   @Test
   fun testConnect() = runBlocking {
     val enrRec =
-      "-Iu4QAroHG8hI2LqSxVgkgaKPaFrtz8qjB5ODbT9Ca0ch2bzS_yZE5ermtfCS0A0LbWBYi7E6SZUE3J" +
-        "HHtwtn4tcwdcBgmlkgnY0gmlwhH8AAAGJc2VjcDI1NmsxoQMIVIz0gYvB0yDDz4E7n01YJoLlCTJj" +
-        "VCA4RiKQ54M6aYN0Y3CCIyiDdWRwgiMo"
-//    val record =
-//      EthereumNodeRecord.fromRLP(Base64URLSafe.decode(enrRec))
+    "-Iu4QHtMAII7O9sQHpBQ-eNvZIi_f_M5f-JZWTr_PUHiLgZ3ZRd2CkGFYL_fONOVTRw0GL2dMo4yzQP2eBcu0sM5C0IB" +
+      "gmlkgnY0gmlwhH8AAAGJc2VjcDI1NmsxoQIJk7MTrqCvOqk7mysZ6A3F19HDc6ebOOzqSoxVuJbsrYN0Y3CCIyiDdWRwgiMo"
 
     val service = DiscoveryService.open(
       SECP256K1.KeyPair.random(),
@@ -46,7 +43,7 @@ class LighthouseTest {
       bindAddress = InetSocketAddress("0.0.0.0", 10000),
       bootstrapENRList = listOf(enrRec)
     )
-    service.start()
+    service.start().join()
     kotlinx.coroutines.delay(50000)
   }
 }
