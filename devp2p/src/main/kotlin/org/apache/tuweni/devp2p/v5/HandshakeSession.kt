@@ -156,7 +156,7 @@ internal class HandshakeSession(
             val enr = reader.readList { enrReader -> EthereumNodeRecord.fromRLP(enrReader) }
             receivedEnr = enr
             publicKey = enr.publicKey()
-            val signatureVerified = verifySignature(signatureBytes, idNonce, enr.publicKey())
+            val signatureVerified = verifySignature(signatureBytes, idNonce, ephemeralPublicKey, enr.publicKey())
             if (!signatureVerified) {
               throw IllegalArgumentException("Signature is not verified")
             }
@@ -178,11 +178,16 @@ internal class HandshakeSession(
     }
   }
 
-  private fun verifySignature(signatureBytes: Bytes, idNonce: Bytes, publicKey: SECP256K1.PublicKey): Boolean {
+  private fun verifySignature(
+    signatureBytes: Bytes,
+    idNonce: Bytes,
+    ephemeralPublicKey: SECP256K1.PublicKey,
+    publicKey: SECP256K1.PublicKey
+  ): Boolean {
     val signature = SECP256K1.Signature.create(1, signatureBytes.slice(0, 32).toUnsignedBigInteger(),
       signatureBytes.slice(32).toUnsignedBigInteger())
 
-    val signValue = Bytes.concatenate(DISCOVERY_ID_NONCE, idNonce)
+    val signValue = Bytes.concatenate(DISCOVERY_ID_NONCE, idNonce, ephemeralPublicKey.bytes())
     val hashedSignValue = Hash.sha2_256(signValue)
     if (!SECP256K1.verifyHashed(hashedSignValue, signature, publicKey)) {
       val signature0 = SECP256K1.Signature.create(0, signatureBytes.slice(0, 32).toUnsignedBigInteger(),

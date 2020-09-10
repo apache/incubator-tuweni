@@ -62,7 +62,7 @@ class ConnectTwoServersTest {
     )
     otherService.start().await()
     otherService.addPeer(service.enr()).await()
-    delay(1000)
+    delay(500)
     assertEquals(1, storage.storage.size)
     assertEquals(1, otherStorage.storage.size)
     assertNotNull(otherStorage.find(Hash.sha2_256(service.enr().toRLP())))

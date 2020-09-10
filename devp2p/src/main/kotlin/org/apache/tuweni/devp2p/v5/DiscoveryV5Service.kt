@@ -245,7 +245,11 @@ internal class DefaultDiscoveryV5Service(
     newSession.awaitConnection().thenAccept {
       val peerEnr = receivedEnr ?: newSession.receivedEnr!!
       logger.trace("Handshake connection done {}", peerEnr)
-      createSession(newSession, address, it, peerEnr, newSession.requestId!!) }
+      val session = createSession(newSession, address, it, peerEnr)
+      newSession.requestId?.let { requestId ->
+        session.activeFindNodes[requestId] = AsyncResult.incomplete()
+      }
+    }.exceptionally { logger.error("Error during connection", it) }
     return newSession
   }
 
@@ -253,26 +257,26 @@ internal class DefaultDiscoveryV5Service(
     newSession: HandshakeSession,
     address: InetSocketAddress,
     sessionKey: SessionKey,
-    receivedEnr: EthereumNodeRecord,
-    requestId: Bytes
-  ) {
-      val session = Session(
-        keyPair,
-        newSession.nodeId,
-        newSession.tag(),
-        sessionKey,
-        address,
-        this::send,
-        this::enr,
-        routingTable,
-        topicTable,
-        { missedPings ->
-          missedPings > 5
-        },
-        coroutineContext
-      )
-      session.activeFindNodes[requestId] = AsyncResult.incomplete()
-      enrStorage.set(receivedEnr)
-      sessions[address] = session
+    receivedEnr: EthereumNodeRecord
+  ): Session {
+    val session = Session(
+      keyPair,
+      newSession.nodeId,
+      newSession.tag(),
+      sessionKey,
+      address,
+      this::send,
+      this::enr,
+      routingTable,
+      topicTable,
+      { missedPings ->
+        missedPings > 5
+      },
+      coroutineContext
+    )
+    logger.trace("Adding ENR discovered by connecting to peer")
+    enrStorage.set(receivedEnr)
+    sessions[address] = session
+    return session
   }
 }
