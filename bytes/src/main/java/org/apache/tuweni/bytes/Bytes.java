@@ -29,6 +29,7 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.Random;
 
 import io.netty.buffer.ByteBuf;
@@ -100,6 +101,34 @@ public interface Bytes extends Comparable<Bytes> {
    */
   static Bytes wrap(Bytes... values) {
     return ConcatenatedBytes.wrap(values);
+  }
+
+  /**
+   * Create a value containing the concatenation of the values provided.
+   *
+   * @param values The values to copy and concatenate.
+   * @return A value containing the result of concatenating the value from {@code values} in their provided order.
+   * @throws IllegalArgumentException if the result overflows an int.
+   */
+  static Bytes concatenate(List<Bytes> values) {
+    if (values.size() == 0) {
+      return EMPTY;
+    }
+
+    int size;
+    try {
+      size = values.stream().mapToInt(Bytes::size).reduce(0, Math::addExact);
+    } catch (ArithmeticException e) {
+      throw new IllegalArgumentException("Combined length of values is too long (> Integer.MAX_VALUE)");
+    }
+
+    MutableBytes result = MutableBytes.create(size);
+    int offset = 0;
+    for (Bytes value : values) {
+      value.copyTo(result, offset);
+      offset += value.size();
+    }
+    return result;
   }
 
   /**

@@ -161,7 +161,7 @@ public final class SECP256K1 {
    * Given the above two points, a correct usage of this method is inside a for loop from 0 to 3, and if the output is
    * null OR a key that is not the one you expect, you try again with the next recovery id.
    *
-   * @param v Which possible key to recover.
+   * @param v Which possible key to recover - can be null if either key can be attempted.
    * @param r The R component of the signature.
    * @param s The S component of the signature.
    * @param messageHash Hash of the data that was signed.

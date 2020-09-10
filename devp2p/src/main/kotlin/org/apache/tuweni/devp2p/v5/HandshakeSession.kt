@@ -153,10 +153,7 @@ internal class HandshakeSession(
           RLP.decodeList(decryptedAuthResponse) { reader ->
             reader.skipNext()
             val signatureBytes = reader.readValue()
-            val enr = EthereumNodeRecord.fromRLP(
-              reader,
-              decryptedAuthResponse.slice(decryptedAuthResponse.size() - reader.remaining())
-            )
+            val enr = reader.readList { enrReader -> EthereumNodeRecord.fromRLP(enrReader) }
             receivedEnr = enr
             publicKey = enr.publicKey()
             val signatureVerified = verifySignature(signatureBytes, idNonce, enr.publicKey())
@@ -182,10 +179,18 @@ internal class HandshakeSession(
   }
 
   private fun verifySignature(signatureBytes: Bytes, idNonce: Bytes, publicKey: SECP256K1.PublicKey): Boolean {
-    val signature = SECP256K1.Signature.fromBytes(signatureBytes)
+    val signature = SECP256K1.Signature.create(1, signatureBytes.slice(0, 32).toUnsignedBigInteger(),
+      signatureBytes.slice(32).toUnsignedBigInteger())
+
     val signValue = Bytes.concatenate(DISCOVERY_ID_NONCE, idNonce)
     val hashedSignValue = Hash.sha2_256(signValue)
-    return SECP256K1.verify(hashedSignValue, signature, publicKey)
+    if (!SECP256K1.verifyHashed(hashedSignValue, signature, publicKey)) {
+      val signature0 = SECP256K1.Signature.create(0, signatureBytes.slice(0, 32).toUnsignedBigInteger(),
+        signatureBytes.slice(32).toUnsignedBigInteger())
+      return SECP256K1.verifyHashed(hashedSignValue, signature0, publicKey)
+    } else {
+      return true
+    }
   }
 
   fun awaitConnection(): AsyncResult<SessionKey> = connected
