@@ -30,7 +30,7 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.DiscoveryService
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
-import org.apache.tuweni.devp2p.v5.misc.SessionKey
+import org.apache.tuweni.devp2p.v5.encrypt.SessionKey
 import org.apache.tuweni.devp2p.v5.topic.Ticket
 import org.apache.tuweni.devp2p.v5.topic.Topic
 import org.apache.tuweni.devp2p.v5.topic.TopicTable

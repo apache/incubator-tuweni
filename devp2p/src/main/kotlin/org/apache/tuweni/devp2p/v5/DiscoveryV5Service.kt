@@ -29,7 +29,7 @@ import org.apache.tuweni.concurrent.coroutines.asyncCompletion
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
-import org.apache.tuweni.devp2p.v5.misc.SessionKey
+import org.apache.tuweni.devp2p.v5.encrypt.SessionKey
 import org.apache.tuweni.devp2p.v5.topic.TopicTable
 import org.apache.tuweni.io.Base64URLSafe
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel

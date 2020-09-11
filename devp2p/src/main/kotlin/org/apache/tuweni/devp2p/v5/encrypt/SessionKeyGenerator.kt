@@ -17,7 +17,6 @@
 package org.apache.tuweni.devp2p.v5.encrypt
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.devp2p.v5.misc.SessionKey
 import org.bouncycastle.crypto.digests.SHA256Digest
 import org.bouncycastle.crypto.generators.HKDFBytesGenerator
 import org.bouncycastle.crypto.params.HKDFParameters
