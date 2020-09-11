@@ -35,8 +35,6 @@ internal class FindNodeMessage(
     }
   }
 
-  override fun messageIdentifier(): Bytes = encodedMessageType
-
   override fun type(): MessageType = MessageType.FINDNODE
 
   companion object {
@@ -57,8 +55,6 @@ internal class NodesMessage(
 ) : Message {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x04")
-
-  override fun messageIdentifier(): Bytes = encodedMessageType
 
   override fun type(): MessageType = MessageType.NODES
 
@@ -95,8 +91,6 @@ internal class PingMessage(
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x01")
 
-  override fun messageIdentifier(): Bytes = encodedMessageType
-
   override fun type(): MessageType = MessageType.PING
 
   override fun toRLP(): Bytes {
@@ -130,10 +124,6 @@ internal class RandomMessage(
     }
   }
 
-  override fun messageIdentifier(): Bytes {
-    throw UnsupportedOperationException("Message type unsupported for random messages")
-  }
-
   override fun type(): MessageType = MessageType.RANDOM
 
   override fun toRLP(): Bytes {
@@ -147,11 +137,7 @@ internal class TicketMessage(
   val waitTime: Long
 ) : Message {
 
-  private val encodedMessageType: Bytes = Bytes.fromHexString("0x06")
-
   override fun type(): MessageType = MessageType.TICKET
-
-  override fun messageIdentifier(): Bytes = encodedMessageType
 
   override fun toRLP(): Bytes {
     return RLP.encodeList { writer ->
@@ -191,10 +177,6 @@ internal class WhoAreYouMessage(
     }
   }
 
-  override fun messageIdentifier(): Bytes {
-    throw UnsupportedOperationException("Message type unsupported for whoareyou messages")
-  }
-
   override fun type(): MessageType = MessageType.WHOAREYOU
 
   override fun toRLP(): Bytes {
@@ -214,8 +196,6 @@ internal class TopicQueryMessage(
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x08")
 
   override fun type(): MessageType = MessageType.TOPICQUERY
-
-  override fun messageIdentifier(): Bytes = encodedMessageType
 
   override fun toRLP(): Bytes {
     return RLP.encodeList { writer ->
@@ -246,8 +226,6 @@ internal class RegTopicMessage(
 ) : Message {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x05")
-
-  override fun messageIdentifier(): Bytes = encodedMessageType
 
   override fun type(): MessageType = MessageType.REGTOPIC
 
@@ -284,8 +262,6 @@ internal class PongMessage(
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x02")
 
-  override fun messageIdentifier(): Bytes = encodedMessageType
-
   override fun type(): MessageType = MessageType.PONG
 
   override fun toRLP(): Bytes {
@@ -318,8 +294,6 @@ internal class RegConfirmationMessage(
 ) : Message {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x07")
-
-  override fun messageIdentifier(): Bytes = encodedMessageType
 
   override fun type(): MessageType = MessageType.REGCONFIRM
 

@@ -38,11 +38,4 @@ class FindNodeMessageTest {
     assertEquals(decodingResult.requestId, requestId)
     assertEquals(decodingResult.distance, 0)
   }
-
-  @Test
-  fun getMessageTypeHasValidIndex() {
-    val message = FindNodeMessage()
-
-    assertEquals(3, message.messageIdentifier().toInt())
-  }
 }

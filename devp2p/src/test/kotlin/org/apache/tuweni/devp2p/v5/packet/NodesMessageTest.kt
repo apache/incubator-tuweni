@@ -20,7 +20,6 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.NodesMessage
-import org.apache.tuweni.devp2p.v5.Message
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -50,13 +49,5 @@ class NodesMessageTest {
     assertEquals(decodingResult.nodeRecords[0].udp(), 9090)
     assertEquals(decodingResult.nodeRecords[1].udp(), 9091)
     assertEquals(decodingResult.nodeRecords[2].udp(), 9092)
-  }
-
-  @Test
-  fun getMessageTypeHasValidIndex() {
-    val message =
-      NodesMessage(Message.requestId(), 0, emptyList())
-
-    assertEquals(4, message.messageIdentifier().toInt())
   }
 }

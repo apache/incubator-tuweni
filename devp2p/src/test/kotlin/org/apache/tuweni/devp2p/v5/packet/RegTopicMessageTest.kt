@@ -45,15 +45,4 @@ class RegTopicMessageTest {
     assertEquals(decodingResult.ticket, message.ticket)
     assertEquals(decodingResult.nodeRecord, message.nodeRecord)
   }
-
-  @Test
-  fun getMessageTypeHasValidIndex() {
-    val message = RegTopicMessage(
-      ticket = Bytes.random(32),
-      nodeRecord = EthereumNodeRecord.create(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress()),
-      topic = Bytes.random(16)
-    )
-
-    assertEquals(5, message.messageIdentifier().toInt())
-  }
 }

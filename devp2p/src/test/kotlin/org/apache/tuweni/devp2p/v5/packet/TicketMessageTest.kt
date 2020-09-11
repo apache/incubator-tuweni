@@ -36,11 +36,4 @@ class TicketMessageTest {
     assertEquals(decodingResult.ticket, message.ticket)
     assertEquals(decodingResult.waitTime, message.waitTime)
   }
-
-  @Test
-  fun getMessageTypeHasValidIndex() {
-    val message = TicketMessage(ticket = Bytes.random(32), waitTime = 1000)
-
-    assertEquals(6, message.messageIdentifier().toInt())
-  }
 }

@@ -59,8 +59,6 @@ internal interface Message {
 
   fun toRLP(): Bytes
 
-  fun messageIdentifier(): Bytes
-
   fun type(): MessageType
 }
 

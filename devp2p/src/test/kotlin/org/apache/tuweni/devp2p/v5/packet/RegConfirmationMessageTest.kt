@@ -35,11 +35,4 @@ class RegConfirmationMessageTest {
     assertEquals(decodingResult.requestId, requestId)
     assertEquals(decodingResult.topic, message.topic)
   }
-
-  @Test
-  fun getMessageTypeHasValidIndex() {
-    val message = RegConfirmationMessage(topic = Bytes.random(32))
-
-    assertEquals(7, message.messageIdentifier().toInt())
-  }
 }

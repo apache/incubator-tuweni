@@ -38,12 +38,4 @@ class PongMessageTest {
     assertEquals(decodingResult.recipientIp, message.recipientIp)
     assertEquals(decodingResult.recipientPort, message.recipientPort)
   }
-
-  @Test
-  fun getMessageTypeHasValidIndex() {
-    val message =
-      PongMessage(recipientIp = InetAddress.getLoopbackAddress(), recipientPort = 9090)
-
-    assertEquals(2, message.messageIdentifier().toInt())
-  }
 }

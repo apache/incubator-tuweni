@@ -18,12 +18,10 @@ package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
-import org.apache.tuweni.devp2p.v5.RandomMessage
 import org.apache.tuweni.devp2p.v5.Message
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class MessageTest {
 
@@ -79,12 +77,5 @@ class MessageTest {
     val secondResult = Message.idNonce()
 
     assertNotEquals(secondResult, firstResult)
-  }
-
-  @Test
-  fun getMessageTypeThrowsExceptionByDefault() {
-    assertThrows<UnsupportedOperationException> {
-      RandomMessage().messageIdentifier()
-    }
   }
 }

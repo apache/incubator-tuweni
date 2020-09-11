@@ -35,11 +35,4 @@ class TopicQueryMessageTest {
     assertEquals(decodingResult.requestId, requestId)
     assertEquals(decodingResult.topic, message.topic)
   }
-
-  @Test
-  fun getMessageTypeHasValidIndex() {
-    val message = TopicQueryMessage(topic = Bytes.random(32))
-
-    assertEquals(8, message.messageIdentifier().toInt())
-  }
 }

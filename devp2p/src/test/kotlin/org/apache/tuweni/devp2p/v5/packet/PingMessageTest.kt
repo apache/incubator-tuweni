@@ -35,11 +35,4 @@ class PingMessageTest {
     assertEquals(decodingResult.requestId, requestId)
     assertEquals(decodingResult.enrSeq, message.enrSeq)
   }
-
-  @Test
-  fun getMessageTypeHasValidIndex() {
-    val message = PingMessage()
-
-    assertEquals(1, message.messageIdentifier().toInt())
-  }
 }
