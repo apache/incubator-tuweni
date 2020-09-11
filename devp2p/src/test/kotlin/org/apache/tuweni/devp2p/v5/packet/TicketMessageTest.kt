@@ -18,6 +18,7 @@ package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.devp2p.v5.TicketMessage
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class TicketMessageTest {
@@ -27,19 +28,12 @@ class TicketMessageTest {
     val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
     val message = TicketMessage(requestId, Bytes.random(32), 1000)
 
-    val encodingResult = message.encode()
+    val encodingResult = message.toRLP()
 
     val decodingResult = TicketMessage.create(encodingResult)
 
-    assert(decodingResult.requestId == requestId)
-    assert(decodingResult.ticket == message.ticket)
-    assert(decodingResult.waitTime == message.waitTime)
-  }
-
-  @Test
-  fun getMessageTypeHasValidIndex() {
-    val message = TicketMessage(ticket = Bytes.random(32), waitTime = 1000)
-
-    assert(6 == message.getMessageType().toInt())
+    assertEquals(decodingResult.requestId, requestId)
+    assertEquals(decodingResult.ticket, message.ticket)
+    assertEquals(decodingResult.waitTime, message.waitTime)
   }
 }

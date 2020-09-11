@@ -63,7 +63,7 @@ class DNSClient(
           runBlocking {
             seq(seq)
             enrs.map {
-              peerRepository.storeIdentity(it.ip().hostAddress, it.tcp(), it.publicKey())
+              peerRepository.storeIdentity(it.ip().hostAddress, it.tcp()!!, it.publicKey())
             }
           }
         }

@@ -187,9 +187,9 @@ class EphemeralPeerRepository : PeerRepository {
 
     @Synchronized
     override fun updateENR(record: EthereumNodeRecord, time: Long) {
-      if (enr == null || enr!!.seq < record.seq) {
+      if (enr == null || enr!!.seq() < record.seq()) {
         enr = record
-        updateEndpoint(Endpoint(record.ip(), record.udp(), record.tcp()), time)
+        updateEndpoint(Endpoint(record.ip(), record.udp()!!, record.tcp()), time)
       }
     }
   }

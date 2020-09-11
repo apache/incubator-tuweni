@@ -17,7 +17,6 @@
 package org.apache.tuweni.devp2p.v5.encrypt
 
 import org.apache.tuweni.bytes.Bytes
-import java.nio.ByteBuffer
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -39,46 +38,36 @@ object AES128GCM {
    * @param message content for encryption
    * @param data encryption metadata
    */
-  fun encrypt(key: Bytes, nonce: Bytes, message: Bytes, data: Bytes): Bytes {
-    val nonceBytes = nonce.toArray()
-    val keySpec = SecretKeySpec(key.toArray(), ALGO_NAME)
-    val cipher = Cipher.getInstance(CIPHER_NAME)
-    val parameterSpec = GCMParameterSpec(KEY_SIZE, nonceBytes)
+  fun encrypt(privateKey: Bytes, nonce: Bytes, message: Bytes, additionalAuthenticatedData: Bytes): Bytes {
 
-    cipher.init(Cipher.ENCRYPT_MODE, keySpec, parameterSpec)
-
-    cipher.updateAAD(data.toArray())
-
-    val encryptedText = Bytes.wrap(cipher.doFinal(message.toArray()))
-
-    val wrappedNonce = Bytes.wrap(nonceBytes)
-    val nonceSize = Bytes.ofUnsignedInt(nonceBytes.size.toLong())
-    return Bytes.wrap(nonceSize, wrappedNonce, encryptedText)
+    val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+    cipher.init(
+      Cipher.ENCRYPT_MODE,
+      SecretKeySpec(privateKey.toArrayUnsafe(), "AES"),
+      GCMParameterSpec(128, nonce.toArrayUnsafe())
+    )
+    cipher.updateAAD(additionalAuthenticatedData.toArrayUnsafe())
+    val result = Bytes.wrap(cipher.doFinal(message.toArrayUnsafe()))
+    return result
   }
 
   /**
    * AES128GCM decryption function
    *
-   * @param encryptedContent content for decryption
-   * @param key 16-byte encryption key
-   * @param data encryption metadata
+   * @param privateKey the key to use for decryption
+   * @param nonce the nonce of the encrypted data
+   * @param encoded the encrypted content
+   * @param additionalAuthenticatedData the AAD that should be decrypted alongside
+   * @return the decrypted data
    */
-  fun decrypt(encryptedContent: Bytes, key: Bytes, data: Bytes): Bytes {
-    val buffer = ByteBuffer.wrap(encryptedContent.toArray())
-    val nonceLength = buffer.int
-    val nonce = ByteArray(nonceLength)
-    buffer.get(nonce)
-    val encryptedText = ByteArray(buffer.remaining())
-    buffer.get(encryptedText)
-
-    val keySpec = SecretKeySpec(key.toArray(), ALGO_NAME)
-
-    val parameterSpec = GCMParameterSpec(KEY_SIZE, nonce)
-    val cipher = Cipher.getInstance(CIPHER_NAME)
-    cipher.init(Cipher.DECRYPT_MODE, keySpec, parameterSpec)
-
-    cipher.updateAAD(data.toArray())
-
-    return Bytes.wrap(cipher.doFinal(encryptedText))
+  fun decrypt(privateKey: Bytes, nonce: Bytes, encoded: Bytes, additionalAuthenticatedData: Bytes): Bytes {
+    val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+    cipher.init(
+      Cipher.DECRYPT_MODE,
+      SecretKeySpec(privateKey.toArrayUnsafe(), "AES"),
+      GCMParameterSpec(128, nonce.toArrayUnsafe())
+    )
+    cipher.updateAAD(additionalAuthenticatedData.toArrayUnsafe())
+    return Bytes.wrap(cipher.doFinal(encoded.toArrayUnsafe()))
   }
 }

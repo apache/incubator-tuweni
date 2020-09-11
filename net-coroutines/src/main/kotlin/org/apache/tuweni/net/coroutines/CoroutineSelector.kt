@@ -203,7 +203,7 @@ internal class SingleThreadCoroutineSelector(
 
   private fun wakeup(isRunning: Boolean) {
     if (isRunning) {
-      logger.debug("Selector {}: Interrupting selection loop", System.identityHashCode(selector))
+      logger.trace("Selector {}: Interrupting selection loop", System.identityHashCode(selector))
       selector.wakeup()
     } else {
       executor.execute(this::selectionLoop)
@@ -211,7 +211,7 @@ internal class SingleThreadCoroutineSelector(
   }
 
   private fun selectionLoop() {
-    logger.debug("Selector {}: Starting selection loop", System.identityHashCode(selector))
+    logger.trace("Selector {}: Starting selection loop", System.identityHashCode(selector))
     try {
       // allow the selector to cleanup any outstanding cancelled keys before starting the loop
       selector.selectNow()
@@ -253,7 +253,7 @@ internal class SingleThreadCoroutineSelector(
           break
         }
       }
-      logger.debug("Selector {}: Exiting selection loop", System.identityHashCode(selector))
+      logger.trace("Selector {}: Exiting selection loop", System.identityHashCode(selector))
       processPendingCloses()
     } catch (e: Throwable) {
       selector.close()
@@ -301,7 +301,7 @@ internal class SingleThreadCoroutineSelector(
       return false
     }
     registeredKeys.add(key)
-    logger.debug("Selector {}: Registered {}@{} for interests {}", System.identityHashCode(selector),
+    logger.trace("Selector {}: Registered {}@{} for interests {}", System.identityHashCode(selector),
       interest.channel, System.identityHashCode(interest.channel), interest.ops)
     return true
   }
@@ -321,7 +321,7 @@ internal class SingleThreadCoroutineSelector(
     @Suppress("UNCHECKED_CAST")
     val interests = key.attachment() as ArrayList<SelectionInterest>
     interests.add(interest)
-    logger.debug("Selector {}: Updated registration for channel {} to interests {}",
+    logger.trace("Selector {}: Updated registration for channel {} to interests {}",
       System.identityHashCode(selector), System.identityHashCode(interest.channel), mergedInterests)
     return true
   }
@@ -333,7 +333,7 @@ internal class SingleThreadCoroutineSelector(
       processed++
       val key = cancellation.channel.keyFor(selector)
       if (key != null) {
-        logger.debug("Selector {}: Cancelling registration for channel {}", System.identityHashCode(selector),
+        logger.trace("Selector {}: Cancelling registration for channel {}", System.identityHashCode(selector),
           System.identityHashCode(cancellation.channel))
 
         @Suppress("UNCHECKED_CAST")
@@ -381,7 +381,7 @@ internal class SingleThreadCoroutineSelector(
       }
 
       val readyOps = key.readyOps()
-      logger.debug("Selector {}: Channel {} selected for interests {}", System.identityHashCode(selector),
+      logger.trace("Selector {}: Channel {} selected for interests {}", System.identityHashCode(selector),
         System.identityHashCode(key.channel()), readyOps)
       var remainingOps = 0
 

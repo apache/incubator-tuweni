@@ -17,10 +17,12 @@
 package org.apache.tuweni.devp2p
 
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.bytes.MutableBytes
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.rlp.RLP
+import org.apache.tuweni.rlp.RLPReader
 import org.apache.tuweni.rlp.RLPWriter
 import org.apache.tuweni.units.bigints.UInt256
 import java.lang.IllegalArgumentException
@@ -40,10 +42,23 @@ class EthereumNodeRecord(
   val signature: Bytes,
   val seq: Long,
   val data: Map<String, Bytes>,
-  val listData: Map<String, List<Bytes>> = emptyMap()
+  val listData: Map<String, List<Bytes>> = emptyMap(),
+  val rlp: Bytes
 ) {
 
   companion object {
+
+    /**
+     * Derives the public key of an ethereum node record into a unique 32 bytes hash.
+     * @param publicKey the public key to hash
+     * @return the hash of the public key
+     */
+    fun nodeId(publicKey: SECP256K1.PublicKey): Bytes32 {
+      val pt = publicKey.asEcPoint()
+      val xPart = UInt256.valueOf(pt.xCoord.toBigInteger()).toBytes()
+      val yPart = UInt256.valueOf(pt.yCoord.toBigInteger()).toBytes()
+      return Hash.keccak256(Bytes.concatenate(xPart, yPart))
+    }
 
     /**
      * Creates an ENR from its serialized form as a RLP list
@@ -56,36 +71,62 @@ class EthereumNodeRecord(
       if (rlp.size() > 300) {
         throw IllegalArgumentException("Record too long")
       }
-      return RLP.decodeList(rlp) {
-          val sig = it.readValue()
-
-          val seq = it.readLong()
-
-          val data = mutableMapOf<String, Bytes>()
-          val listData = mutableMapOf<String, List<Bytes>>()
-          while (!it.isComplete) {
-            val key = it.readString()
-            if (it.nextIsList()) {
-              listData[key] = it.readListContents { listreader ->
-                if (listreader.nextIsList()) {
-                  // TODO complex structures not supported
-                  listreader.skipNext()
-                  null
-                } else {
-                  listreader.readValue()
-                }
-              }.filterNotNull()
-            } else {
-              val value = it.readValue()
-              data[key] = value
-            }
-          }
-
-          EthereumNodeRecord(sig, seq, data, listData)
-      }
+      return RLP.decodeList(rlp) { fromRLP(it, rlp) }
     }
 
-    private fun encode(
+    /**
+     * Creates an ENR from its serialized form as a RLP list
+     * @param reader the RLP reader
+     * @return the ENR
+     * @throws IllegalArgumentException if the rlp bytes length is longer than 300 bytes
+     */
+    @JvmStatic
+    fun fromRLP(reader: RLPReader): EthereumNodeRecord {
+      val tempRecord = fromRLP(reader, Bytes.EMPTY)
+      val encoded = RLP.encodeList {
+        it.writeValue(tempRecord.signature)
+        encode(data = tempRecord.data, seq = tempRecord.seq, writer = it)
+      }
+
+      return fromRLP(encoded)
+    }
+
+    /**
+     * Creates an ENR from its serialized form as a RLP list
+     * @param reader the RLP reader
+     * @return the ENR
+     * @throws IllegalArgumentException if the rlp bytes length is longer than 300 bytes
+     */
+    @JvmStatic
+    fun fromRLP(reader: RLPReader, rlp: Bytes): EthereumNodeRecord {
+        val sig = reader.readValue()
+
+        val seq = reader.readLong()
+
+        val data = mutableMapOf<String, Bytes>()
+        val listData = mutableMapOf<String, List<Bytes>>()
+        while (!reader.isComplete) {
+          val key = reader.readString()
+          if (reader.nextIsList()) {
+            listData[key] = reader.readListContents { listreader ->
+              if (listreader.nextIsList()) {
+                // TODO complex structures not supported
+                listreader.skipNext()
+                null
+              } else {
+                listreader.readValue()
+              }
+            }.filterNotNull()
+          } else {
+            val value = reader.readValue()
+            data[key] = value
+          }
+        }
+
+        return EthereumNodeRecord(sig, seq, data, listData, rlp)
+    }
+
+    fun encode(
       signatureKeyPair: SECP256K1.KeyPair? = null,
       seq: Long = Instant.now().toEpochMilli(),
       ip: InetAddress? = null,
@@ -114,15 +155,40 @@ class EthereumNodeRecord(
       keys.addAll(mutableData.keys)
       listData?.let { keys.addAll(it.keys) }
       keys.sorted().forEach { key ->
-          mutableData[key]?.let { value ->
-            writer.writeString(key)
-            writer.writeValue(value)
-          }
-          listData?.get(key)?.let { value ->
+        mutableData[key]?.let { value ->
+          writer.writeString(key)
+          writer.writeValue(value)
+        }
+        listData?.get(key)?.let { value ->
           writer.writeString(key)
           writer.writeList(value) { writer, v -> writer.writeValue(v) }
-          }
+        }
       }
+    }
+
+    /**
+     * Creates the serialized form of a ENR
+     * @param signatureKeyPair the key pair to use to sign the ENR
+     * @param seq the sequence number for the ENR. It should be higher than the previous time the ENR was generated. It defaults to the current time since epoch in milliseconds.
+     * @param data the key pairs to encode in the ENR
+     * @param listData the key pairs of list values to encode in the ENR
+     * @param ip the IP address of the host
+     * @param tcp an optional parameter to a TCP port used for the wire protocol
+     * @param udp an optional parameter to a UDP port used for discovery
+     * @return the ENR
+     */
+    @JvmOverloads
+    @JvmStatic
+    fun create(
+      signatureKeyPair: SECP256K1.KeyPair,
+      seq: Long = Instant.now().toEpochMilli(),
+      data: Map<String, Bytes>? = null,
+      listData: Map<String, List<Bytes>>? = null,
+      ip: InetAddress,
+      tcp: Int? = null,
+      udp: Int? = null
+    ): EthereumNodeRecord {
+      return fromRLP(toRLP(signatureKeyPair, seq, data, listData, ip, tcp, udp))
     }
 
     /**
@@ -147,10 +213,10 @@ class EthereumNodeRecord(
       tcp: Int? = null,
       udp: Int? = null
     ): Bytes {
-      val encoded = RLP.encode { writer ->
+      val encoded = RLP.encodeList { writer ->
         encode(signatureKeyPair, seq, ip, tcp, udp, data, listData, writer)
       }
-      val signature = SECP256K1.sign(Hash.keccak256(encoded), signatureKeyPair)
+      val signature = SECP256K1.sign(encoded, signatureKeyPair)
       val sigBytes = MutableBytes.create(64)
       UInt256.valueOf(signature.r()).toBytes().copyTo(sigBytes, 0)
       UInt256.valueOf(signature.s()).toBytes().copyTo(sigBytes, 32)
@@ -181,11 +247,15 @@ class EthereumNodeRecord(
       signature.slice(32).toUnsignedBigInteger())
 
     val pubKey = publicKey()
-
     val recovered = SECP256K1.PublicKey.recoverFromSignature(encoded, sig)
 
     if (pubKey != recovered) {
-      throw InvalidNodeRecordException("Public key does not match signature")
+      val sig0 = SECP256K1.Signature.create(0, signature.slice(0, 32).toUnsignedBigInteger(),
+        signature.slice(32).toUnsignedBigInteger())
+      val recovered0 = SECP256K1.PublicKey.recoverFromSignature(encoded, sig0)
+      if (pubKey != recovered0) {
+        throw InvalidNodeRecordException("Public key does not match signature")
+      }
     }
   }
 
@@ -200,27 +270,36 @@ class EthereumNodeRecord(
   }
 
   /**
+   * Derives the public key of an ethereum node record into a unique 32 bytes hash.
+   * @return the hash of the public key
+   */
+  fun nodeId() = EthereumNodeRecord.nodeId(publicKey())
+  /**
    * The ip associated with the ENR
    * @return The IP adress of the ENR
    */
   fun ip(): InetAddress {
-    return InetAddress.getByAddress(data["ip"]!!.toArrayUnsafe())
+    return data["ip"]?.let { InetAddress.getByAddress(it.toArrayUnsafe()) } ?: InetAddress.getLoopbackAddress()
   }
 
   /**
    * The TCP port of the ENR
    * @return the TCP port associated with this ENR
    */
-  fun tcp(): Int {
-    return data["tcp"]!!.toInt()
+  fun tcp(): Int? {
+    return data["tcp"]?.toInt()
   }
 
   /**
    * The UDP port of the ENR
    * @return the UDP port associated with this ENR
    */
-  fun udp(): Int {
-    return data["udp"]!!.toInt()
+  fun udp(): Int? {
+    return data["udp"]?.toInt() ?: tcp()
+  }
+
+  fun seq(): Long {
+    return seq
   }
 
   /**
@@ -228,6 +307,23 @@ class EthereumNodeRecord(
    */
   override fun toString(): String {
     return "enr:${ip()}:${tcp()}?udp=${udp()}"
+  }
+
+  fun toRLP(): Bytes = rlp
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as EthereumNodeRecord
+
+    if (rlp != other.rlp) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    return rlp.hashCode()
   }
 }
 

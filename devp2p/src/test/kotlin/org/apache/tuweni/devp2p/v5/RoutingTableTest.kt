@@ -16,7 +16,6 @@
  */
 package org.apache.tuweni.devp2p.v5
 
-import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.junit.BouncyCastleExtension
@@ -32,7 +31,7 @@ import java.net.InetAddress
 class RoutingTableTest {
 
   private val keyPair: SECP256K1.KeyPair = SECP256K1.KeyPair.random()
-  private val enr: Bytes = EthereumNodeRecord.toRLP(keyPair, ip = InetAddress.getLoopbackAddress())
+  private val enr = EthereumNodeRecord.create(keyPair, ip = InetAddress.getLoopbackAddress())
   private val routingTable: RoutingTable = RoutingTable(enr)
 
   private val newKeyPair = SECP256K1.KeyPair.random()
@@ -63,7 +62,7 @@ class RoutingTableTest {
 
   @Test
   fun distanceToSelf() {
-    assertEquals(0, routingTable.distanceToSelf(routingTable.getSelfEnr()))
+    assertEquals(0, routingTable.distanceToSelf(routingTable.getSelfEnr().toRLP()))
     assertNotEquals(0, routingTable.distanceToSelf(newEnr))
   }
 

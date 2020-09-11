@@ -14,22 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.packet
+package org.apache.tuweni.devp2p.v5
 
-import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.devp2p.v5.WhoAreYouMessage
+import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.junit.BouncyCastleExtension
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.net.InetSocketAddress
 
+/**
+ * Test a developer can run from their machine to contact a remote server.
+ */
 @ExtendWith(BouncyCastleExtension::class)
-class WhoAreYouMessageTest {
+class LighthouseTest {
 
+  @Disabled
   @Test
-  fun decodeSelf() {
-    val bytes =
-      Bytes.fromHexString("0x282E641D415A892C05FD03F0AE716BDD92D1569116FDC7C7D3DB39AC5F79B0F7EF8C" +
-        "E56EDC7BB967899B4C48EEA6A0E838C9091B71DADB98C59508306275AE37A1916EF2517E77CFE09FA006909FE880")
-    WhoAreYouMessage.create(magic = bytes.slice(0, 32), content = bytes.slice(32))
+  fun testConnect() = runBlocking {
+    val enrRec =
+    "-Iu4QHtMAII7O9sQHpBQ-eNvZIi_f_M5f-JZWTr_PUHiLgZ3ZRd2CkGFYL_fONOVTRw0GL2dMo4yzQP2eBcu0sM5C0IB" +
+      "gmlkgnY0gmlwhH8AAAGJc2VjcDI1NmsxoQIJk7MTrqCvOqk7mysZ6A3F19HDc6ebOOzqSoxVuJbsrYN0Y3CCIyiDdWRwgiMo"
+
+    val service = DiscoveryService.open(
+      SECP256K1.KeyPair.random(),
+      localPort = 0,
+      bindAddress = InetSocketAddress("0.0.0.0", 10000),
+      bootstrapENRList = listOf(enrRec)
+    )
+    service.start().join()
+    kotlinx.coroutines.delay(50000)
   }
 }

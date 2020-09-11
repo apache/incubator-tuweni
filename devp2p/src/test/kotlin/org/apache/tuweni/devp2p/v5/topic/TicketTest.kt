@@ -14,28 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.devp2p.v5.packet
+package org.apache.tuweni.devp2p.v5.topic
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.devp2p.v5.PongMessage
+import org.apache.tuweni.bytes.Bytes32
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.net.InetAddress
 
-class PongMessageTest {
+class TicketTest {
 
   @Test
-  fun encodeCreatesValidBytesSequence() {
-    val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
-    val message = PongMessage(requestId, 0, InetAddress.getLoopbackAddress(), 9090)
-
-    val encodingResult = message.toRLP()
-
-    val decodingResult = PongMessage.create(encodingResult)
-
-    assertEquals(decodingResult.requestId, requestId)
-    assertEquals(decodingResult.enrSeq, message.enrSeq)
-    assertEquals(decodingResult.recipientIp, message.recipientIp)
-    assertEquals(decodingResult.recipientPort, message.recipientPort)
+  fun roundtrip() {
+    val ticket =
+      Ticket(Bytes.wrap("hello world".toByteArray()), Bytes32.random(), InetAddress.getLoopbackAddress(), 0L, 0L, 0L)
+    val key = Bytes.random(16)
+    val encrypted = ticket.encrypt(key)
+    assertEquals(Ticket.decrypt(encrypted, key), ticket)
   }
 }

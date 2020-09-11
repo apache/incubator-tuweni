@@ -19,15 +19,16 @@ package org.apache.tuweni.devp2p.v5
 import com.google.common.math.IntMath
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.Hash
+import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.kademlia.KademliaRoutingTable
 import org.apache.tuweni.kademlia.xorDist
 import java.math.RoundingMode
 
 internal class RoutingTable(
-  private val selfEnr: Bytes
+  private val selfEnr: EthereumNodeRecord
 ) {
 
-  private val selfNodeId = key(selfEnr)
+  private val selfNodeId = key(selfEnr.toRLP())
   private val nodeIdCalculation: (Bytes) -> ByteArray = { enr -> key(enr) }
 
   private val table = KademliaRoutingTable(
@@ -42,10 +43,14 @@ internal class RoutingTable(
   val size: Int
     get() = table.size
 
-  fun getSelfEnr(): Bytes = selfEnr
+  fun getSelfEnr(): EthereumNodeRecord = selfEnr
+
+  fun add(enr: EthereumNodeRecord) {
+    add(enr.toRLP())
+  }
 
   fun add(enr: Bytes) {
-    if (enr != selfEnr) {
+    if (enr != selfEnr.toRLP()) {
       table.add(enr)
     }
   }
@@ -60,7 +65,8 @@ internal class RoutingTable(
 
   fun isEmpty(): Boolean = table.isEmpty()
 
-  fun nodesOfDistance(distance: Int): List<Bytes> = table.peersOfDistance(distance)
+  fun nodesOfDistance(distance: Int): List<EthereumNodeRecord> =
+    table.peersOfDistance(distance).map { EthereumNodeRecord.fromRLP(it) }
 
   fun clear() = table.clear()
 

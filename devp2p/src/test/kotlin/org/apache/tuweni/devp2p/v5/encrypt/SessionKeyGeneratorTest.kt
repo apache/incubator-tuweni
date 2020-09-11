@@ -17,6 +17,7 @@
 package org.apache.tuweni.devp2p.v5.encrypt
 
 import org.apache.tuweni.bytes.Bytes
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class SessionKeyGeneratorTest {
@@ -34,8 +35,8 @@ class SessionKeyGeneratorTest {
 
     val result = SessionKeyGenerator.generate(srcNodeId, destNodeId, secret, idNonce)
 
-    assert(result.authRespKey == expectedAuthRespKey)
-    assert(result.initiatorKey == expectedInitiatorKey)
-    assert(result.recipientKey == expectedRecipientKey)
+    assertEquals(result.authRespKey, expectedAuthRespKey)
+    assertEquals(result.initiatorKey, expectedInitiatorKey)
+    assertEquals(result.recipientKey, expectedRecipientKey)
   }
 }
