@@ -30,6 +30,29 @@ internal data class Ticket(
   val cumTime: Long
 ) {
 
+  companion object {
+    private const val ZERO_NONCE_SIZE: Int = 12
+    internal const val TIME_WINDOW_MS: Int = 10000 // 10 seconds
+    internal const val TICKET_INVALID_MSG = "Ticket is invalid"
+
+    fun create(content: Bytes): Ticket {
+      return RLP.decodeList(content) { reader ->
+        val topic = reader.readValue()
+        val srcNodeId = reader.readValue()
+        val srcIp = InetAddress.getByAddress(reader.readValue().toArray())
+        val requestTime = reader.readLong()
+        val waitTime = reader.readLong()
+        val cumTime = reader.readLong()
+        return@decodeList Ticket(topic, srcNodeId, srcIp, requestTime, waitTime, cumTime)
+      }
+    }
+
+    fun decrypt(encrypted: Bytes, key: Bytes): Ticket {
+      val decrypted = AES128GCM.decrypt(key, Bytes.wrap(ByteArray(ZERO_NONCE_SIZE)), encrypted, Bytes.EMPTY)
+      return create(decrypted)
+    }
+  }
+
   fun encode(): Bytes {
     return RLP.encodeList { writer ->
       writer.writeValue(topic)
@@ -57,28 +80,5 @@ internal data class Ticket(
     require(this.topic == topic) { TICKET_INVALID_MSG }
     val windowStart = this.requestTime + this.waitTime
     require(now >= windowStart && now <= windowStart + TIME_WINDOW_MS) { TICKET_INVALID_MSG }
-  }
-
-  companion object {
-    private const val ZERO_NONCE_SIZE: Int = 12
-    internal const val TIME_WINDOW_MS: Int = 10000 // 10 seconds
-    internal const val TICKET_INVALID_MSG = "Ticket is invalid"
-
-    fun create(content: Bytes): Ticket {
-      return RLP.decodeList(content) { reader ->
-        val topic = reader.readValue()
-        val srcNodeId = reader.readValue()
-        val srcIp = InetAddress.getByAddress(reader.readValue().toArray())
-        val requestTime = reader.readLong()
-        val waitTime = reader.readLong()
-        val cumTime = reader.readLong()
-        return@decodeList Ticket(topic, srcNodeId, srcIp, requestTime, waitTime, cumTime)
-      }
-    }
-
-    fun decrypt(encrypted: Bytes, key: Bytes): Ticket {
-      val decrypted = AES128GCM.decryptWithNonce(encrypted, key, Bytes.EMPTY)
-      return create(decrypted)
-    }
   }
 }

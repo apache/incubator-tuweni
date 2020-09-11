@@ -54,27 +54,6 @@ object AES128GCM {
   /**
    * AES128GCM decryption function
    *
-   * @param encryptedContent content for decryption
-   * @param key 16-byte encryption key
-   * @param data encryption metadata
-   */
-  fun decryptWithNonce(encryptedContent: Bytes, key: Bytes, data: Bytes): Bytes {
-    val nonceLength = encryptedContent.getInt(0)
-
-    val keySpec = SecretKeySpec(key.toArray(), ALGO_NAME)
-
-    val parameterSpec = GCMParameterSpec(KEY_SIZE, encryptedContent.slice(4, nonceLength).toArrayUnsafe())
-    val cipher = Cipher.getInstance(CIPHER_NAME)
-    cipher.init(Cipher.DECRYPT_MODE, keySpec, parameterSpec)
-
-    cipher.updateAAD(data.toArrayUnsafe())
-
-    return Bytes.wrap(cipher.doFinal(encryptedContent.slice(4 + nonceLength).toArrayUnsafe()))
-  }
-
-  /**
-   * AES128GCM decryption function
-   *
    * @param privateKey the key to use for decryption
    * @param nonce the nonce of the encrypted data
    * @param encoded the encrypted content
