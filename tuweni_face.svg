@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
+file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
+to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+-->
+<svg version="1.1" id="Capa_1"
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" preserveAspectRatio="xMinYMin meet" xml:space="preserve">
+  <defs>
+    <linearGradient id="feather" x1="30%" y1="5%" x2="30%" y2="100%">
+        <stop offset="5%" stop-color="#F79A25" />
+        <stop offset="10%" stop-color="#EA7826"/>
+        <stop offset="40%" stop-color="#CB2138"/>
+        <stop offset="60%" stop-color="#9E2165"/>
+        <stop offset="80%" stop-color="#662F8F" />
+        <stop offset="95%" stop-color="#282661" />
+    </linearGradient>
+      <pattern id="never" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="5" height="5" fill="#cccccc">
+        <animate attributeName="fill" values="#ccc;#fff;#ccc" dur="60s" repeatCount="indefinite" />
+      </rect>
+          <rect x="0" y="5" width="5" height="5" fill="#FFFFFF">
+        <animate attributeName="fill" values="#fff;#ccc;#fff" dur="60s" repeatCount="indefinite" />
+      </rect>
+          <rect x="5" y="0" width="5" height="5" fill="#FFFFFF">
+        <animate attributeName="fill" values="#fff;#ccc;#fff" dur="60s" repeatCount="indefinite" />
+      </rect>
+          <rect x="5" y="5" width="5" height="5" fill="#cccccc">
+        <animate attributeName="fill" values="#ccc;#fff;#ccc" dur="60s" repeatCount="indefinite" />
+      </rect>
+    </pattern>
+      <pattern id="neverever" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="4" height="4" fill="#FFFFFF" />
+          <rect x="0" y="0" width="2" height="2" fill="#FFFFFF" />
+          <rect x="0" y="2" width="2" height="2" fill="#6D6E71">
+        <animate attributeName="fill" values="#6D6E71;#fff;#6D6E71" dur="10s" repeatCount="indefinite" />
+      </rect>
+          <rect x="2" y="0" width="2" height="2" fill="#6D6E71">
+        <animate attributeName="fill" values="#6D6E71;#fff;#6D6E71" dur="10s" repeatCount="indefinite" />
+      </rect>
+          <rect x="2" y="2" width="2" height="2" fill="#FFFFFF" />
+    </pattern>
+  </defs>
+    <g>
+  <g transform="translate(0 0)">
+    <circle cx="50" cy="50" r="48" style="fill: url(#feather);"/>
+      <circle cx="50" cy="50" r="44" style="fill: white;"/>
+      <circle cx="50" cy="50" r="44" style="fill: url(#never);" fill-opacity="0.5"/>
+
+      <!-- <rect x="16.829" y="47" width="20" height="4" fill="#F79A25"/> -->
+      <circle cx="20" cy="50" r="8.364" fill="#9E2165"/>
+      <circle cx="20" cy="50" r="5" style="fill: url(#neverever);"/>
+
+      <!-- <rect x="84.842" y="47" width="20" height="4" fill="#F79A25"/> -->
+      <circle cx="80" cy="50" r="8.364" fill="#EA7826"/>
+      <circle cx="80" cy="50" r="5" style="fill: url(#neverever);"/>
+
+      <rect x="63" y="66" width="4" height="10" fill="#D22128"/>
+      <rect x="34" y="75" width="33" height="4" fill="#D22128"/>
+  </g>
+  </g>
+</svg>
