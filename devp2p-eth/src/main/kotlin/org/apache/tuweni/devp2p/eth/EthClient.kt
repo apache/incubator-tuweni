@@ -23,6 +23,7 @@ import org.apache.tuweni.concurrent.CompletableAsyncCompletion
 import org.apache.tuweni.eth.BlockBody
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.wire.SubProtocolClient
@@ -159,4 +160,17 @@ class EthClient(private val service: RLPxService) : EthRequestsManager, SubProto
     connection: WireConnection,
     transactionReceipts: List<List<TransactionReceipt>>
   ): Request? = transactionReceiptRequests[connection.uri()]
+
+  override fun submitPooledTransaction(vararg tx: Transaction) {
+    val hashes = tx.map { it.hash }
+    val conns = service.repository().asIterable(EthSubprotocol.ETH65)
+    conns.forEach { conn ->
+      service.send(
+        EthSubprotocol.ETH65,
+        MessageType.NewPooledTransactionHashes.code,
+        conn,
+        GetBlockBodies(hashes).toBytes()
+      )
+    }
+  }
 }

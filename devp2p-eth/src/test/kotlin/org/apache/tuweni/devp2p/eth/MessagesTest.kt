@@ -231,4 +231,37 @@ class MessagesTest {
     val read = NodeData.read(nodeData.toBytes())
     assertEquals(nodeData, read)
   }
+
+  @Test
+  fun newPooledTransactionHashesRoundTrip() {
+    val newPooledTransactionHashes = NewPooledTransactionHashes(listOf(Hash.fromBytes(Bytes32.random())))
+    val read = NewPooledTransactionHashes.read(newPooledTransactionHashes.toBytes())
+    assertEquals(newPooledTransactionHashes, read)
+  }
+
+  @Test
+  fun getPooledTransactionsRoundTrip() {
+    val getPooledTransactions = GetPooledTransactions(listOf(Hash.fromBytes(Bytes32.random())))
+    val read = GetPooledTransactions.read(getPooledTransactions.toBytes())
+    assertEquals(getPooledTransactions, read)
+  }
+
+  @Test
+  fun pooledTransactionsRoundTrip() {
+    val pooledTransactions = PooledTransactions(
+      listOf(
+        Transaction(
+          UInt256.ZERO,
+          Wei.valueOf(20),
+          Gas.valueOf(20),
+          Address.fromBytes(Bytes.random(20)),
+          Wei.valueOf(20),
+          Bytes.fromHexString("deadbeef"),
+          SECP256K1.KeyPair.random(),
+          1
+        )
+      ))
+    val read = PooledTransactions.read(pooledTransactions.toBytes())
+    assertEquals(pooledTransactions, read)
+  }
 }

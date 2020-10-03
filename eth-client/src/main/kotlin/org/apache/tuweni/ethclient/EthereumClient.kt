@@ -32,6 +32,7 @@ import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
 import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.eth.repository.MemoryTransactionPool
 import org.apache.tuweni.kv.LevelDBKeyValueStore
 import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.peer.repository.PeerRepository
@@ -130,7 +131,8 @@ class EthereumClient(
             blockchainInfo = SimpleBlockchainInformation(
               UInt256.valueOf(genesisFile!!.chainId.toLong()), genesisBlock.header.difficulty,
               genesisBlock.header.hash, genesisBlock.header.number, genesisBlock.header.hash, genesisFile.forks
-            )
+            ),
+            pendingTransactionsPool = MemoryTransactionPool()
           )
         ),
         rlpxConfig.clientName(),

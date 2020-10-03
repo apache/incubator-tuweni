@@ -23,6 +23,7 @@ import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.eth.repository.MemoryTransactionPool
 import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
 import org.apache.tuweni.junit.TempDirectoryExtension
@@ -68,7 +69,8 @@ internal class LESSubprotocolTest {
         MapKeyValueStore(),
         MapKeyValueStore(),
         BlockchainIndex(writer)
-      )
+      ),
+      MemoryTransactionPool()
     )
     assertTrue(sp.supports(SubProtocolIdentifier.of("les", 2)))
   }
@@ -94,7 +96,8 @@ internal class LESSubprotocolTest {
         MapKeyValueStore(),
         MapKeyValueStore(),
         BlockchainIndex(writer)
-      )
+      ),
+      MemoryTransactionPool()
     )
     assertFalse(sp.supports(SubProtocolIdentifier.of("les", 3)))
   }
@@ -119,7 +122,8 @@ internal class LESSubprotocolTest {
         MapKeyValueStore(),
         MapKeyValueStore(),
         BlockchainIndex(writer)
-      )
+      ),
+      MemoryTransactionPool()
     )
     assertFalse(sp.supports(SubProtocolIdentifier.of("eth", 2)))
   }

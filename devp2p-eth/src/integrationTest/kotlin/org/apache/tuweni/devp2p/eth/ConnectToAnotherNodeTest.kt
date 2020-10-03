@@ -25,6 +25,7 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.eth.repository.MemoryTransactionPool
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
@@ -75,7 +76,8 @@ class ConnectToAnotherNodeTest {
           blockchainInfo = SimpleBlockchainInformation(
             UInt256.valueOf(genesisFile.chainId.toLong()), genesisBlock.header.difficulty,
             genesisBlock.header.hash, UInt256.valueOf(42L), genesisBlock.header.hash, genesisFile.forks
-          )
+          ),
+          pendingTransactionsPool = MemoryTransactionPool()
         )
       ),
       "Tuweni Experiment 0.1"
@@ -134,7 +136,8 @@ class ConnectToAnotherNodeTest {
             genesisBlock.header.hash, UInt256.valueOf(42L),
             genesisBlock.header.hash,
             emptyList()
-          )
+          ),
+          pendingTransactionsPool = MemoryTransactionPool()
         )
       ),
       "Tuweni Experiment 0.1"
@@ -166,7 +169,8 @@ class ConnectToAnotherNodeTest {
             genesisBlock.header.hash, UInt256.valueOf(42L),
             genesisBlock.header.hash,
             emptyList()
-          )
+          ),
+          pendingTransactionsPool = MemoryTransactionPool()
         )
       ),
       "Tuweni Experiment 0.1"

@@ -22,12 +22,15 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion
 import org.apache.tuweni.concurrent.coroutines.asyncCompletion
+import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.wire.DisconnectReason
 import org.apache.tuweni.rlpx.wire.SubProtocolHandler
 import org.apache.tuweni.rlpx.wire.WireConnection
 import org.slf4j.LoggerFactory
 import java.util.WeakHashMap
+import kotlin.collections.ArrayList
+import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
 
 internal class EthHandler(
@@ -41,6 +44,8 @@ internal class EthHandler(
 
   companion object {
     val logger = LoggerFactory.getLogger(EthHandler::class.java)!!
+    val MAX_NEW_POOLED_TX_HASHES = 4096
+    val MAX_POOLED_TX = 256
   }
 
   override fun handle(connection: WireConnection, messageType: Int, message: Bytes) = asyncCompletion {
@@ -58,11 +63,33 @@ internal class EthHandler(
       MessageType.NodeData.code -> handleNodeData(connection, NodeData.read(message))
       MessageType.GetReceipts.code -> handleGetReceipts(connection, GetReceipts.read(message))
       MessageType.Receipts.code -> handleReceipts(connection, Receipts.read(message))
+      MessageType.NewPooledTransactionHashes.code -> handleNewPooledTransactionHashes(
+        connection,
+        NewPooledTransactionHashes.read(message)
+      )
+      MessageType.GetPooledTransactions.code -> handleGetPooledTransactions(
+        connection,
+        GetPooledTransactions.read(message)
+      )
+      MessageType.PooledTransactions.code -> handlePooledTransactions(PooledTransactions.read(message))
       else -> {
         logger.warn("Unknown message type {}", messageType)
         service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
       }
     }
+  }
+
+  private suspend fun handlePooledTransactions(read: PooledTransactions) {
+    controller.addNewPooledTransactions(read.transactions)
+  }
+
+  private suspend fun handleGetPooledTransactions(connection: WireConnection, read: GetPooledTransactions) {
+    service.send(
+      EthSubprotocol.ETH65,
+      MessageType.PooledTransactions.code,
+      connection,
+      PooledTransactions(controller.findPooledTransactions(read.hashes)).toBytes()
+    )
   }
 
   private suspend fun handleTransactions(transactions: Transactions) {
@@ -85,6 +112,41 @@ internal class EthHandler(
     } else {
       peerInfo.connect()
       controller.receiveStatus(connection, status.toStatus())
+    }
+  }
+
+  private suspend fun handleNewPooledTransactionHashes(
+    connection: WireConnection,
+    newPooledTransactionHashes: NewPooledTransactionHashes
+  ) {
+    if (newPooledTransactionHashes.hashes.size > MAX_NEW_POOLED_TX_HASHES) {
+      service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
+      return
+    }
+    var missingTx = ArrayList<Hash>()
+    var message = GetPooledTransactions(missingTx)
+    for (hash in newPooledTransactionHashes.hashes) {
+      if (!controller.pendingTransactionsPool.contains(hash)) {
+        missingTx.add(hash)
+      }
+      if (missingTx.size == MAX_POOLED_TX) {
+        service.send(
+          EthSubprotocol.ETH65,
+          MessageType.GetPooledTransactions.code,
+          connection,
+          message.toBytes()
+        )
+        missingTx = ArrayList()
+        message = GetPooledTransactions(missingTx)
+      }
+    }
+    if (!missingTx.isEmpty()) {
+      service.send(
+        EthSubprotocol.ETH65,
+        MessageType.GetPooledTransactions.code,
+        connection,
+        message.toBytes()
+      )
     }
   }
 
