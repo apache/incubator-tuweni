@@ -183,7 +183,8 @@ constructor() {
           BlockchainIndex(writer),
           block
         )
-      val controller = EthController(repo, MemoryTransactionPool(), EthClient(service))
+      val pool = MemoryTransactionPool()
+      val controller = EthController(repo, pool, EthClient(service, pool))
 
       val handler = LESSubProtocolHandler(
         service,
@@ -238,7 +239,8 @@ constructor() {
           BlockchainIndex(writer),
           block
         )
-      val controller = EthController(repo, MemoryTransactionPool(), EthClient(service))
+      val pool = MemoryTransactionPool()
+      val controller = EthController(repo, pool, EthClient(service, pool))
 
       val handler = LESSubProtocolHandler(
         service,
@@ -277,7 +279,8 @@ constructor() {
       MapKeyValueStore(),
       BlockchainIndex(writer)
     )
-    val controller = EthController(repo, MemoryTransactionPool(), EthClient(service))
+    val pool = MemoryTransactionPool()
+    val controller = EthController(repo, pool, EthClient(service, pool))
 
     val handler = LESSubProtocolHandler(
       service,
@@ -317,7 +320,8 @@ constructor() {
           BlockchainIndex(writer),
           block
         )
-      val controller = EthController(repo, MemoryTransactionPool(), EthClient(service))
+      val pool = MemoryTransactionPool()
+      val controller = EthController(repo, pool, EthClient(service, pool))
       val handler = LESSubProtocolHandler(
         service,
         LES_ID,
@@ -385,7 +389,8 @@ constructor() {
           BlockchainIndex(writer),
           block
         )
-      val controller = EthController(repo, MemoryTransactionPool(), EthClient(service))
+      val pool = MemoryTransactionPool()
+      val controller = EthController(repo, pool, EthClient(service, pool))
       val handler = LESSubProtocolHandler(
         service,
         LES_ID,
@@ -441,7 +446,8 @@ constructor() {
           BlockchainIndex(writer),
           block
         )
-      val controller = EthController(repo, MemoryTransactionPool(), EthClient(service))
+      val pool = MemoryTransactionPool()
+      val controller = EthController(repo, pool, EthClient(service, pool))
 
       val handler = LESSubProtocolHandler(
         service,
