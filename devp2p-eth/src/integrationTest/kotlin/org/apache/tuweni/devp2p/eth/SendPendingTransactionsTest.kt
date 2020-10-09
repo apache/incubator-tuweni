@@ -114,7 +114,7 @@ class SendPendingTransactionsTest {
         SECP256K1.KeyPair.random()
       )
       client.submitPooledTransaction(tx)
-      delay(1000)
+      delay(100)
     }
   }
 }

@@ -114,7 +114,7 @@ interface EthRequestsManager {
    * Submits a new pending transaction to the transaction pool to be gossiped to peers.
    * @param tx a new transaction
    */
-  fun submitPooledTransaction(vararg tx: Transaction)
+  suspend fun submitPooledTransaction(vararg tx: Transaction)
 }
 
 /**

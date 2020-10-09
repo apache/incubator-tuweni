@@ -25,6 +25,7 @@ import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
+import org.apache.tuweni.eth.repository.TransactionPool
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.wire.SubProtocolClient
 import org.apache.tuweni.rlpx.wire.WireConnection
@@ -33,7 +34,8 @@ import org.apache.tuweni.units.bigints.UInt256
 /**
  * Client of the ETH subprotocol, allowing to request block and node data
  */
-class EthClient(private val service: RLPxService) : EthRequestsManager, SubProtocolClient {
+class EthClient(private val service: RLPxService, private val pendingTransactionsPool: TransactionPool) :
+  EthRequestsManager, SubProtocolClient {
 
   private val headerRequests = HashMap<Bytes32, Request>()
   private val bodiesRequests = HashMap<String, Request>()
@@ -161,7 +163,8 @@ class EthClient(private val service: RLPxService) : EthRequestsManager, SubProto
     transactionReceipts: List<List<TransactionReceipt>>
   ): Request? = transactionReceiptRequests[connection.uri()]
 
-  override fun submitPooledTransaction(vararg tx: Transaction) {
+  override suspend fun submitPooledTransaction(vararg tx: Transaction) {
+    for (t in tx) { pendingTransactionsPool.add(t) }
     val hashes = tx.map { it.hash }
     val conns = service.repository().asIterable(EthSubprotocol.ETH65)
     conns.forEach { conn ->

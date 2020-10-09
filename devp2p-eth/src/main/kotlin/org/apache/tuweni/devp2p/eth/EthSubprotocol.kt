@@ -65,6 +65,6 @@ class EthSubprotocol(
   override fun getCapabilities() = mutableListOf(ETH62, ETH63, ETH64, ETH65)
 
   override fun createClient(service: RLPxService): SubProtocolClient {
-    return EthClient(service)
+    return EthClient(service, pendingTransactionsPool)
   }
 }

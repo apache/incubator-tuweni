@@ -73,7 +73,7 @@ class LESSubprotocol(
    * @return a new client for the subprotocol, bound to the service.
    */
   override fun createClient(service: RLPxService): SubProtocolClient {
-    return EthClient(service)
+    return EthClient(service, pendingTransactionsPool)
   }
 
   /**

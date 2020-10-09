@@ -382,7 +382,7 @@ internal data class PooledTransactions(val transactions: List<Transaction>) {
     fun read(payload: Bytes): PooledTransactions = RLP.decodeList(payload) {
       val transactions = ArrayList<Transaction>()
       while (!it.isComplete) {
-        val tx = Transaction.readFrom(it)
+        val tx = it.readList(Transaction::readFrom)
         transactions.add(tx)
       }
       PooledTransactions(transactions)
@@ -391,7 +391,7 @@ internal data class PooledTransactions(val transactions: List<Transaction>) {
 
   fun toBytes(): Bytes = RLP.encodeList { writer ->
     transactions.forEach {
-      it.writeTo(writer)
+      writer.writeList(it::writeTo)
     }
   }
 }

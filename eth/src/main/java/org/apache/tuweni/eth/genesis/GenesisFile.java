@@ -28,6 +28,7 @@ import org.apache.tuweni.units.ethereum.Gas;
 import org.apache.tuweni.units.ethereum.Wei;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -103,7 +104,27 @@ public class GenesisFile {
     this.gasLimit = Gas.valueOf(Bytes.fromHexString(gasLimit).toLong());
     this.allocs = new HashMap<>();
     for (Map.Entry<String, String> entry : allocs.entrySet()) {
-      this.allocs.put(Address.fromHexString(entry.getKey()), Wei.valueOf(UInt256.fromHexString(entry.getValue())));
+      Address addr = null;
+      try {
+        addr = Address.fromHexString(entry.getKey());
+      } catch (IllegalArgumentException e) {
+        throw new IllegalArgumentException("Invalid address " + entry.getKey(), e);
+      }
+      Wei value = null;
+      if (entry.getValue().startsWith("0x")) {
+        try {
+          value = Wei.valueOf(UInt256.fromHexString(entry.getValue()));
+        } catch (IllegalArgumentException e) {
+          throw new IllegalArgumentException("Invalid balance " + entry.getValue(), e);
+        }
+      } else {
+        try {
+          value = Wei.valueOf(UInt256.valueOf(new BigInteger(entry.getValue())));
+        } catch (IllegalArgumentException e) {
+          throw new IllegalArgumentException("Invalid balance " + entry.getValue(), e);
+        }
+      }
+      this.allocs.put(addr, value);
     }
     this.chainId = chainId;
     this.forks = forks;
@@ -176,25 +197,28 @@ public class GenesisFile {
     Map<String, String> allocs = new HashMap<>();
     String name = null;
     String value = null;
-    boolean closed = false;
+    int depth = 1;
     while (!parser.isClosed()) {
       JsonToken jsonToken = parser.nextToken();
       if (JsonToken.FIELD_NAME.equals(jsonToken)) {
-        closed = false;
         String fieldName = parser.getCurrentName();
         if ("balance".equals(fieldName)) {
           parser.nextToken();
           value = parser.getValueAsString();
           allocs.put(name, value);
+          name = null;
         } else {
-          name = parser.getValueAsString();
+          if (depth == 1) {
+            name = parser.getValueAsString();
+          }
         }
       } else if (JsonToken.END_OBJECT.equals(jsonToken)) {
-        if (closed) {
+        depth--;
+        if (depth == 0) {
           return allocs;
-        } else {
-          closed = true;
         }
+      } else if (JsonToken.START_OBJECT.equals(jsonToken)) {
+        depth++;
       }
     }
     return allocs;

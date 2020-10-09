@@ -84,11 +84,13 @@ internal class EthHandler(
   }
 
   private suspend fun handleGetPooledTransactions(connection: WireConnection, read: GetPooledTransactions) {
+    val tx = controller.findPooledTransactions(read.hashes)
+    logger.debug("Responding to GetPooledTransactions with {} transactions", tx.size)
     service.send(
       EthSubprotocol.ETH65,
       MessageType.PooledTransactions.code,
       connection,
-      PooledTransactions(controller.findPooledTransactions(read.hashes)).toBytes()
+      PooledTransactions(tx).toBytes()
     )
   }
 
