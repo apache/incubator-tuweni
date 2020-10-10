@@ -16,9 +16,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.eth.Address;
 import org.apache.tuweni.eth.Hash;
 import org.apache.tuweni.junit.BouncyCastleExtension;
+import org.apache.tuweni.units.bigints.UInt256;
+import org.apache.tuweni.units.bigints.UInt64;
+import org.apache.tuweni.units.ethereum.Gas;
 import org.apache.tuweni.units.ethereum.Wei;
 
 import java.io.IOException;
@@ -70,6 +74,41 @@ class GenesisFileTest {
     InputStream input = GenesisFileTest.class.getResourceAsStream("/missing-difficulty.json");
     byte[] contents = input.readAllBytes();
     assertThrows(IllegalArgumentException.class, () -> GenesisFile.read(contents));
+  }
+
+  @Test
+  void testBesuDev() throws IOException {
+    InputStream input = GenesisFileTest.class.getResourceAsStream("/besu-dev.json");
+    byte[] contents = input.readAllBytes();
+    GenesisFile file = GenesisFile.read(contents);
+    assertEquals(3, file.getAllocations().size());
+    assertEquals(UInt64.valueOf(66L), file.toBlock().getHeader().getNonce());
+    assertEquals(
+        Address.fromHexString("0x0000000000000000000000000000000000000000"),
+        file.toBlock().getHeader().getCoinbase());
+    assertEquals(
+        Hash.fromHexString("0x0000000000000000000000000000000000000000000000000000000000000000"),
+        file.toBlock().getHeader().getMixHash());
+    assertEquals(Gas.valueOf(UInt256.fromHexString("0x1fffffffffffff")), file.toBlock().getHeader().getGasLimit());
+    assertEquals(UInt256.fromHexString("0x10000"), file.toBlock().getHeader().getDifficulty());
+    assertEquals(
+        Bytes.fromHexString("0x11bbe8db4e347b4e8c937c1c8370e4b5ed33adb3db69cbdb7a38e1e50b1b82fa"),
+        file.toBlock().getHeader().getExtraData());
+    assertEquals(
+        file.getAllocations().get(Address.fromHexString("fe3b557e8fb62b89f4916b721be55ceb828dbd73")),
+        Wei.valueOf(UInt256.fromHexString("0xad78ebc5ac6200000")));
+    assertEquals(
+        file.getAllocations().get(Address.fromHexString("627306090abaB3A6e1400e9345bC60c78a8BEf57")),
+        Wei.valueOf(new BigInteger("90000000000000000000000")));
+    assertEquals(
+        file.getAllocations().get(Address.fromHexString("f17f52151EbEF6C7334FAD080c5704D77216b732")),
+        Wei.valueOf(new BigInteger("90000000000000000000000")));
+    assertEquals(
+        Hash.fromHexString("0x166ed98eea93ab2b6f6b1a425526994adc2d675bf9a0d77d600ed1e02d8f77df"),
+        file.toBlock().getHeader().getStateRoot());
+    assertEquals(
+        Hash.fromHexString("0xa08d1edb37ba1c62db764ef7c2566cbe368b850f5b3762c6c24114a3fd97b87f"),
+        file.toBlock().getHeader().getHash());
   }
 
 }

@@ -33,6 +33,7 @@ import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.eth.repository.MemoryTransactionPool
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
@@ -122,7 +123,7 @@ class EthHandlerTest {
           emptyList()
         ),
         service = service,
-        controller = EthController(repository, requestsManager)
+        controller = EthController(repository, MemoryTransactionPool(), requestsManager)
       )
 
       for (i in 1..10) {

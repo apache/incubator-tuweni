@@ -24,6 +24,7 @@ import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.eth.repository.TransactionPool
 import org.apache.tuweni.rlpx.wire.WireConnection
 
 /**
@@ -31,6 +32,7 @@ import org.apache.tuweni.rlpx.wire.WireConnection
  */
 class EthController(
   val repository: BlockchainRepository,
+  val pendingTransactionsPool: TransactionPool,
   val requestsManager: EthRequestsManager,
   val connectionsListener: (WireConnection, Status) -> Unit = { _, _ -> }
 ) {
@@ -177,5 +179,21 @@ class EthController(
     transactions.forEach {
       repository.storeTransaction(it)
     }
+  }
+
+  suspend fun addNewPooledTransactions(transactions: List<Transaction>) {
+    for (tx in transactions) {
+      pendingTransactionsPool.add(tx)
+    }
+  }
+
+  suspend fun findPooledTransactions(hashes: List<Hash>): List<Transaction> {
+    val result = ArrayList<Transaction>()
+    for (hash in hashes) {
+      pendingTransactionsPool.get(hash)?.let {
+        result.add(it)
+      }
+    }
+    return result
   }
 }

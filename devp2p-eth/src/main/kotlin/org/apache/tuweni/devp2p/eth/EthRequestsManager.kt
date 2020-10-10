@@ -22,6 +22,7 @@ import org.apache.tuweni.concurrent.CompletableAsyncCompletion
 import org.apache.tuweni.eth.BlockBody
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.rlpx.wire.WireConnection
 
@@ -108,6 +109,12 @@ interface EthRequestsManager {
     connection: WireConnection,
     transactionReceipts: List<List<TransactionReceipt>>
   ): Request?
+
+  /**
+   * Submits a new pending transaction to the transaction pool to be gossiped to peers.
+   * @param tx a new transaction
+   */
+  suspend fun submitPooledTransaction(vararg tx: Transaction)
 }
 
 /**

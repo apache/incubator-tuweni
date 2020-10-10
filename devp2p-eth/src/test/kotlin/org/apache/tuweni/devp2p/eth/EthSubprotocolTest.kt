@@ -21,6 +21,7 @@ import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.eth.repository.MemoryTransactionPool
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
@@ -58,9 +59,10 @@ class EthSubprotocolTest {
     )
     val eth = EthSubprotocol(
       blockchainInfo = blockchainInfo,
-      repository = repository
+      repository = repository,
+      pendingTransactionsPool = MemoryTransactionPool()
     )
-    assertEquals(SubProtocolIdentifier.of("eth", 64), eth.id())
+    assertEquals(SubProtocolIdentifier.of("eth", 65), eth.id())
   }
 
   @Test
@@ -76,8 +78,10 @@ class EthSubprotocolTest {
     )
     val eth = EthSubprotocol(
       blockchainInfo = blockchainInfo,
-      repository = repository
+      repository = repository,
+      pendingTransactionsPool = MemoryTransactionPool()
     )
+    assertTrue(eth.supports(SubProtocolIdentifier.of("eth", 65)))
     assertTrue(eth.supports(SubProtocolIdentifier.of("eth", 64)))
     assertTrue(eth.supports(SubProtocolIdentifier.of("eth", 63)))
     assertTrue(eth.supports(SubProtocolIdentifier.of("eth", 62)))
@@ -98,10 +102,12 @@ class EthSubprotocolTest {
     )
     val eth = EthSubprotocol(
       blockchainInfo = blockchainInfo,
-      repository = repository
+      repository = repository,
+      pendingTransactionsPool = MemoryTransactionPool()
     )
     assertEquals(8, eth.versionRange(62))
     assertEquals(17, eth.versionRange(63))
     assertEquals(17, eth.versionRange(64))
+    assertEquals(17, eth.versionRange(65))
   }
 }

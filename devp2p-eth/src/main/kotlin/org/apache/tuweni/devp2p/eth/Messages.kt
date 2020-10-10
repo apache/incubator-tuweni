@@ -41,7 +41,10 @@ internal enum class MessageType(val code: Int) {
   GetNodeData(0x0d),
   NodeData(0x0e),
   GetReceipts(0x0f),
-  Receipts(0x10)
+  Receipts(0x10),
+  NewPooledTransactionHashes(0x08),
+  GetPooledTransactions(0x09),
+  PooledTransactions(0x0a)
 }
 
 internal data class StatusMessage(
@@ -330,6 +333,65 @@ internal data class Transactions(val transactions: List<Transaction>) {
   fun toBytes(): Bytes = RLP.encodeList { writer ->
     transactions.forEach {
       it.writeTo(writer)
+    }
+  }
+}
+
+internal data class NewPooledTransactionHashes(val hashes: List<Hash>) {
+  companion object {
+
+    fun read(payload: Bytes): NewPooledTransactionHashes = RLP.decodeList(payload) {
+      val hashes = ArrayList<Hash>()
+      while (!it.isComplete) {
+        val tx = Hash.fromBytes(it.readValue())
+        hashes.add(tx)
+      }
+      NewPooledTransactionHashes(hashes)
+    }
+  }
+
+  fun toBytes(): Bytes = RLP.encodeList { writer ->
+    hashes.forEach {
+      writer.writeValue(it)
+    }
+  }
+}
+internal data class GetPooledTransactions(val hashes: List<Hash>) {
+  companion object {
+
+    fun read(payload: Bytes): GetPooledTransactions = RLP.decodeList(payload) {
+      val hashes = ArrayList<Hash>()
+      while (!it.isComplete) {
+        val tx = Hash.fromBytes(it.readValue())
+        hashes.add(tx)
+      }
+      GetPooledTransactions(hashes)
+    }
+  }
+
+  fun toBytes(): Bytes = RLP.encodeList { writer ->
+    hashes.forEach {
+      writer.writeValue(it)
+    }
+  }
+}
+
+internal data class PooledTransactions(val transactions: List<Transaction>) {
+  companion object {
+
+    fun read(payload: Bytes): PooledTransactions = RLP.decodeList(payload) {
+      val transactions = ArrayList<Transaction>()
+      while (!it.isComplete) {
+        val tx = it.readList(Transaction::readFrom)
+        transactions.add(tx)
+      }
+      PooledTransactions(transactions)
+    }
+  }
+
+  fun toBytes(): Bytes = RLP.encodeList { writer ->
+    transactions.forEach {
+      writer.writeList(it::writeTo)
     }
   }
 }

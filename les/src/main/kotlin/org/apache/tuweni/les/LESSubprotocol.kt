@@ -23,6 +23,7 @@ import org.apache.tuweni.devp2p.eth.EthController
 import org.apache.tuweni.devp2p.eth.EthRequestsManager
 import org.apache.tuweni.devp2p.eth.Status
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.eth.repository.TransactionPool
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.wire.SubProtocol
 import org.apache.tuweni.rlpx.wire.SubProtocolClient
@@ -61,6 +62,7 @@ class LESSubprotocol(
   private val flowControlMaximumRequestCostTable: UInt256,
   private val flowControlMinimumRateOfRecharge: UInt256,
   private val repo: BlockchainRepository,
+  private val pendingTransactionsPool: TransactionPool,
   private val listener: (WireConnection, Status) -> Unit = { _, _ -> }
 ) : SubProtocol {
 
@@ -71,7 +73,7 @@ class LESSubprotocol(
    * @return a new client for the subprotocol, bound to the service.
    */
   override fun createClient(service: RLPxService): SubProtocolClient {
-    return EthClient(service)
+    return EthClient(service, pendingTransactionsPool)
   }
 
   /**
@@ -107,7 +109,7 @@ class LESSubprotocol(
    * @return a new handler for the subprotocol, bound to the service.
    */
   override fun createHandler(service: RLPxService, client: SubProtocolClient): SubProtocolHandler {
-    val controller = EthController(repo, client as EthRequestsManager, listener)
+    val controller = EthController(repo, pendingTransactionsPool, client as EthRequestsManager, listener)
     return LESSubProtocolHandler(
       service,
       LES_ID,
