@@ -17,11 +17,35 @@ import static java.util.Objects.requireNonNull;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.DelegatingBytes;
+import org.apache.tuweni.crypto.SECP256K1;
 
 /**
  * An Ethereum account address.
  */
 public final class Address extends DelegatingBytes {
+
+  /**
+   * Transform a public key into an Ethereum address.
+   * 
+   * @param publicKey the public key
+   * @return the address
+   */
+  public static Address fromPublicKey(SECP256K1.PublicKey publicKey) {
+    requireNonNull(publicKey);
+    return fromPublicKeyBytes(publicKey.bytes());
+  }
+
+  /**
+   * Transform a public key into an Ethereum address.
+   * 
+   * @param bytes the bytes of the public key
+   * @return the address
+   */
+  public static Address fromPublicKeyBytes(Bytes bytes) {
+    requireNonNull(bytes);
+    Bytes value = org.apache.tuweni.crypto.Hash.keccak256(bytes);
+    return new Address(value.slice(12));
+  }
 
   /**
    * Create an address from Bytes.
