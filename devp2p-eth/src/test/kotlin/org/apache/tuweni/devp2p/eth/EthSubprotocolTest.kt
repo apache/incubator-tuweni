@@ -16,17 +16,12 @@
  */
 package org.apache.tuweni.devp2p.eth
 
-import org.apache.lucene.index.IndexWriter
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.Hash
-import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.MemoryTransactionPool
 import org.apache.tuweni.junit.BouncyCastleExtension
-import org.apache.tuweni.junit.LuceneIndexWriter
-import org.apache.tuweni.junit.LuceneIndexWriterExtension
 import org.apache.tuweni.junit.VertxExtension
-import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
 import org.apache.tuweni.units.bigints.UInt256
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -35,7 +30,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(BouncyCastleExtension::class, VertxExtension::class, LuceneIndexWriterExtension::class)
+@ExtendWith(BouncyCastleExtension::class, VertxExtension::class)
 class EthSubprotocolTest {
 
   val blockchainInfo = SimpleBlockchainInformation(
@@ -47,16 +42,8 @@ class EthSubprotocolTest {
   )
 
   @Test
-  fun testVersion(@LuceneIndexWriter writer: IndexWriter) {
-    val repository = BlockchainRepository(
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      BlockchainIndex(writer)
-    )
+  fun testVersion() {
+    val repository = BlockchainRepository.inMemory()
     val eth = EthSubprotocol(
       blockchainInfo = blockchainInfo,
       repository = repository,
@@ -66,16 +53,8 @@ class EthSubprotocolTest {
   }
 
   @Test
-  fun testSupports(@LuceneIndexWriter writer: IndexWriter) {
-    val repository = BlockchainRepository(
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      BlockchainIndex(writer)
-    )
+  fun testSupports() {
+    val repository = BlockchainRepository.inMemory()
     val eth = EthSubprotocol(
       blockchainInfo = blockchainInfo,
       repository = repository,
@@ -90,16 +69,8 @@ class EthSubprotocolTest {
   }
 
   @Test
-  fun rangeCheck(@LuceneIndexWriter writer: IndexWriter) {
-    val repository = BlockchainRepository(
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      BlockchainIndex(writer)
-    )
+  fun rangeCheck() {
+    val repository = BlockchainRepository.inMemory()
     val eth = EthSubprotocol(
       blockchainInfo = blockchainInfo,
       repository = repository,

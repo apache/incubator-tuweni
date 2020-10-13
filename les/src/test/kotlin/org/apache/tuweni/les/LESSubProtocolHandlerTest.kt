@@ -61,15 +61,13 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.io.IOException
 import java.net.InetSocketAddress
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @ExtendWith(BouncyCastleExtension::class, VertxExtension::class, LuceneIndexWriterExtension::class)
-internal class LESSubProtocolHandlerTest @Throws(IOException::class)
-constructor() {
+internal class LESSubProtocolHandlerTest {
 
   private val header = BlockHeader(
     Hash.fromBytes(Bytes32.random()),
@@ -268,17 +266,9 @@ constructor() {
 
   @Test
   @Throws(Exception::class)
-  fun receiveOtherMessageBeforeStatus(@LuceneIndexWriter writer: IndexWriter) = runBlocking {
+  fun receiveOtherMessageBeforeStatus() = runBlocking {
     val service = MyRLPxService()
-    val repo = BlockchainRepository(
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      BlockchainIndex(writer)
-    )
+    val repo = BlockchainRepository.inMemory()
     val pool = MemoryTransactionPool()
     val controller = EthController(repo, pool, EthClient(service, pool))
 
