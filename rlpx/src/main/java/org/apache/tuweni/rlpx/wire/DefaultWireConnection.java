@@ -339,4 +339,9 @@ public final class DefaultWireConnection implements WireConnection {
   public SECP256K1.PublicKey peerPublicKey() {
     return SECP256K1.PublicKey.fromBytes(peerNodeId);
   }
+
+  @Override
+  public HelloMessage getPeerHello() {
+    return peerHelloMessage;
+  }
 }
