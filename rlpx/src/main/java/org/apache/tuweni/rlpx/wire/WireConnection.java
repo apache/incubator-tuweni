@@ -78,4 +78,11 @@ public interface WireConnection {
   default String uri() {
     return "enode://" + peerPublicKey().toHexString() + "@" + peerHost() + ":" + peerPort();
   }
+
+  /**
+   * Peer hello message sent during the handshake.
+   *
+   * @return the hello message the remote peer sent.
+   */
+  HelloMessage getPeerHello();
 }
