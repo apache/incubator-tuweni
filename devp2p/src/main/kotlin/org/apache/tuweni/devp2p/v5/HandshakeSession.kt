@@ -173,6 +173,7 @@ internal class HandshakeSession(
         val whoAreYouTag = Hash.sha2_256(Bytes.concatenate(peerNodeId, Bytes.wrap("WHOAREYOU".toByteArray())))
         val response = WhoAreYouMessage(whoAreYouTag, token, Message.idNonce(), enr().seq())
         this.tokens.add(token)
+        logger.trace("Sending WHOAREYOU to {}", address)
         sendFn(address, response.toRLP())
       }
     }

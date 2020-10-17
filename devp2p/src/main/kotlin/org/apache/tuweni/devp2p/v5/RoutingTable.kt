@@ -28,7 +28,7 @@ internal class RoutingTable(
   private val selfEnr: EthereumNodeRecord
 ) {
 
-  private val selfNodeId = key(selfEnr.toRLP())
+  private val selfNodeId = EthereumNodeRecord.nodeId(selfEnr.publicKey()).toArrayUnsafe()
   private val nodeIdCalculation: (Bytes) -> ByteArray = { enr -> key(enr) }
 
   private val table = KademliaRoutingTable(
@@ -70,7 +70,7 @@ internal class RoutingTable(
 
   fun clear() = table.clear()
 
-  private fun key(enr: Bytes): ByteArray = Hash.sha2_256(enr).toArray()
+  private fun key(enr: Bytes): ByteArray = Hash.keccak256(enr).toArray()
 
   companion object {
     private const val BUCKET_SIZE: Int = 16
