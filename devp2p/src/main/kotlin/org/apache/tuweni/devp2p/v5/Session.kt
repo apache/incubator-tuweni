@@ -119,10 +119,10 @@ internal class Session(
     }
     logger.trace("Received message from {}", address)
 
-    var message : Message
+    var message: Message
     try {
       message = decode(messageBytes)
-    } catch(e: InvalidRLPTypeException) {
+    } catch (e: InvalidRLPTypeException) {
       logger.trace("Bad message content, dropping from {}: {}", address, messageBytes)
       return
     }
@@ -273,7 +273,6 @@ internal class Session(
   internal fun read(tag: Bytes, contentWithHeader: Bytes, reader: RLPReader): Message {
     if (reader.nextIsList()) {
       // this looks like a WHOAREYOU.
-
     }
     val authTag = reader.readValue()
 

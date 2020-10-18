@@ -303,20 +303,18 @@ internal class DefaultDiscoveryV5Service(
   override suspend fun requestNodes(distance: Int): AsyncResult<List<EthereumNodeRecord>> =
     asyncResult {
       val results = ArrayList<EthereumNodeRecord>()
-      logger.debug("Requesting from ${sessions.size} sessions with distance ${distance}")
+      logger.debug("Requesting from ${sessions.size} sessions with distance $distance")
       sessions.values.map { session ->
         async {
           try {
             val oneResult = session.sendFindNodes(distance).get(10, TimeUnit.SECONDS)
             logger.debug("Received ${oneResult!!.size} results")
             results.addAll(oneResult)
-          } catch(e: Exception) {
+          } catch (e: Exception) {
             logger.debug("Timeout waiting for nodes")
           }
-
         }
       }.awaitAll()
       results
     }
-
 }

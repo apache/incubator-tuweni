@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetSocketAddress
 import java.nio.file.Files
-import java.nio.file.OpenOption
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.util.concurrent.Executors
@@ -44,8 +43,11 @@ class LighthouseTest {
     //    val enrRec =
 //    "-Iu4QBpvavRrxplH2BS-XHJuMadzLfSItBRiw6kn5oc0eKkXAP1-4INi6waV1VEdludig-dr1Kh8o8eD6Hv0TWFD3goBgmlkgnY0gmlwhMCoWOyJc2VjcDI1NmsxoQMumeQTiLkWJyhFVxrPNhShEIdo8SukU-bIC0MLC185DIN0Y3CCIyiDdWRwgiMo"
 
-    //val enrPrysm = "-Ku4QLglCMIYAgHd51uFUqejD9DWGovHOseHQy7Od1SeZnHnQ3fSpE4_nbfVs8lsy8uF07ae7IgrOOUFU0NFvZp5D4wBh2F0dG5ldHOIAAAAAAAAAACEZXRoMpAYrkzLAAAAAf__________gmlkgnY0gmlwhBLf22SJc2VjcDI1NmsxoQJxCnE6v_x2ekgY_uoE1rtwzvGy40mq9eD66XfHPBWgIIN1ZHCCD6A"
-    val enr = "-KG4QFuKQ9eeXDTf8J4tBxFvs3QeMrr72mvS7qJgL9ieO6k9Rq5QuGqtGK4VlXMNHfe34Khhw427r7peSoIbGcN91fUDhGV0aDKQD8XYjwAAAAH__________4JpZIJ2NIJpcIQDhMExiXNlY3AyNTZrMaEDESplmV9c2k73v0DjxVXJ6__2bWyP-tK28_80lf7dUhqDdGNwgiMog3VkcIIjKA"
+    // val enrPrysm = "-Ku4QLglCMIYAgHd51uFUqejD9DWGovHOseHQy7Od1SeZnHnQ3fSpE4_nbfVs8lsy8uF07ae7IgrOOUFU0NFvZp5D4wBh2F0dG5ldHOIAAAAAAAAAACEZXRoMpAYrkzLAAAAAf__________gmlkgnY0gmlwhBLf22SJc2VjcDI1NmsxoQJxCnE6v_x2ekgY_uoE1rtwzvGy40mq9eD66XfHPBWgIIN1ZHCCD6A"
+    val enr =
+      "-KG4QFuKQ9eeXDTf8J4tBxFvs3QeMrr72mvS7qJgL9ieO6k9Rq5QuGqtGK4VlXMNHfe34Khhw427r7" +
+        "peSoIbGcN91fUDhGV0aDKQD8XYjwAAAAH__________4JpZIJ2NIJpcIQDhMExiXNlY3AyNTZrMa" +
+        "EDESplmV9c2k73v0DjxVXJ6__2bWyP-tK28_80lf7dUhqDdGNwgiMog3VkcIIjKA"
     val coroutineContext = Executors.newFixedThreadPool(100).asCoroutineDispatcher()
     val service = DiscoveryService.open(
       coroutineContext = coroutineContext,
@@ -55,13 +57,13 @@ class LighthouseTest {
       bootstrapENRList = emptyList()
     )
     service.start().join()
-    //service.addPeer(EthereumNodeRecord.fromRLP(Base64URLSafe.decode(enrPrysm))).join()
+    // service.addPeer(EthereumNodeRecord.fromRLP(Base64URLSafe.decode(enrPrysm))).join()
     service.addPeer(EthereumNodeRecord.fromRLP(Base64URLSafe.decode(enr))).join()
     // now go over the csv file:
     val path = Paths.get(System.getProperty("user.home")).resolve("medalla3.csv")
     val lines = Files.readAllLines(Paths.get(System.getProperty("user.home")).resolve("medalla3.csv"))
     var notBreak = true
-    while(notBreak) {
+    while (notBreak) {
 
       for (i in 0..10) {
         val line = lines.toSet().iterator().next()
@@ -71,8 +73,7 @@ class LighthouseTest {
         }
       }
 
-
-      //delay(10000)
+      // delay(10000)
 
       var newPeersDetected = true
       val nodes = HashSet<EthereumNodeRecord>()
@@ -86,7 +87,10 @@ class LighthouseTest {
             }
             for (node in it) {
               if (nodes.add(node)) {
-                val str = node.ip().hostAddress + "," + node.udp() + "," + node.data["attnets"] + "," + Base64URLSafe.encode(node.toRLP()) + "\n"
+                val str =
+                  node.ip().hostAddress + "," + node.udp() + "," + node.data["attnets"] + "," + Base64URLSafe.encode(
+                    node.toRLP()
+                  ) + "\n"
                 Files.writeString(path, str, StandardOpenOption.APPEND)
                 newPeersDetected = true
                 launch {
@@ -100,7 +104,8 @@ class LighthouseTest {
       }
 
       nodes.forEach { node ->
-        println(node.ip().hostAddress + "," + node.udp() + "," + node.data["attnets"] + "," + Base64URLSafe.encode(node.toRLP()))
+        println(node.ip().hostAddress + "," + node.udp() + "," + node.data["attnets"] + "," +
+          Base64URLSafe.encode(node.toRLP()))
       }
     }
     service.terminate()

@@ -21,7 +21,6 @@ import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.io.Base64URLSafe
 import org.apache.tuweni.junit.BouncyCastleExtension
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetSocketAddress
@@ -34,7 +33,7 @@ class MedallaTest {
 
   @Test
   fun testConnect() = runBlocking {
-    
+
     val enrRec =
     "enr:-LK4QC3FCb7-JTNRiWAezECk_QUJc9c2IkJA1-EAmqAA5wmdbPWsAeRpnMXKRJqOYG0TE99ycB1nOb9y26mjb" +
       "_UoHS4Bh2F0dG5ldHOIAAAAAAAAAACEZXRoMpDnp11aAAAAAf__________gmlkgnY0gmlwhDMPYfCJc2VjcDI1N" +
