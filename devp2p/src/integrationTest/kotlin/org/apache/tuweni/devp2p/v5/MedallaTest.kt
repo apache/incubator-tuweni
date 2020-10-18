@@ -28,6 +28,7 @@ import java.net.InetSocketAddress
 /**
  * Test a developer can run from their machine to contact a remote server.
  */
+@Disabled
 @ExtendWith(BouncyCastleExtension::class)
 class MedallaTest {
 

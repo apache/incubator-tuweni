@@ -49,13 +49,14 @@ private const val SEND_REGTOPIC_DELAY_MS = 15 * 60 * 1000L // 15 min
  * Tracks a session with another peer.
  */
 internal class Session(
+  val enr: EthereumNodeRecord,
   private val keyPair: SECP256K1.KeyPair,
   private val nodeId: Bytes32,
   private val tag: Bytes32,
   private val sessionKey: SessionKey,
   private val address: InetSocketAddress,
   private val sendFn: (address: InetSocketAddress, message: Bytes) -> Unit,
-  private val enr: () -> EthereumNodeRecord,
+  private val ourENR: () -> EthereumNodeRecord,
   private val routingTable: RoutingTable,
   private val topicTable: TopicTable,
   private val failedPingsListener: (missedPings: Int) -> Boolean,
@@ -172,7 +173,7 @@ internal class Session(
   ) {
     activePing = AsyncCompletion.incomplete()
     val response =
-      PongMessage(message.requestId, enr().seq(), address.address, address.port)
+      PongMessage(message.requestId, ourENR().seq(), address.address, address.port)
     send(response)
   }
 
@@ -250,7 +251,7 @@ internal class Session(
 
   private suspend fun handleFindNode(message: FindNodeMessage) {
     if (0 == message.distance) {
-      val response = NodesMessage(message.requestId, 1, listOf(enr()))
+      val response = NodesMessage(message.requestId, 1, listOf(ourENR()))
       send(response)
       return
     }

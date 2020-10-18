@@ -148,8 +148,14 @@ interface DiscoveryV5Service : CoroutineScope {
 
   /**
    * Requests nodes from all connected peers.
+   *
+   * @param distance the distance between the node and the peer. Helps pick a Kademlia bucket.
+   * @param maxSecondsToWait number of seconds to wait for a response.
    */
-  suspend fun requestNodes(distance: Int = 1): AsyncResult<List<EthereumNodeRecord>>
+  suspend fun requestNodes(
+    distance: Int = 1,
+    maxSecondsToWait: Long = 10
+  ): AsyncResult<Map<EthereumNodeRecord, List<EthereumNodeRecord>>>
 }
 
 internal class DefaultDiscoveryV5Service(
@@ -280,6 +286,7 @@ internal class DefaultDiscoveryV5Service(
     receivedEnr: EthereumNodeRecord
   ): Session {
     val session = Session(
+      receivedEnr,
       keyPair,
       newSession.nodeId,
       newSession.tag(),
@@ -300,16 +307,19 @@ internal class DefaultDiscoveryV5Service(
     return session
   }
 
-  override suspend fun requestNodes(distance: Int): AsyncResult<List<EthereumNodeRecord>> =
+  override suspend fun requestNodes(
+    distance: Int,
+    maxSecondsToWait: Long
+  ): AsyncResult<Map<EthereumNodeRecord, List<EthereumNodeRecord>>> =
     asyncResult {
-      val results = ArrayList<EthereumNodeRecord>()
+      val results = ConcurrentHashMap<EthereumNodeRecord, List<EthereumNodeRecord>>()
       logger.debug("Requesting from ${sessions.size} sessions with distance $distance")
       sessions.values.map { session ->
         async {
           try {
-            val oneResult = session.sendFindNodes(distance).get(10, TimeUnit.SECONDS)
+            val oneResult = session.sendFindNodes(distance).get(maxSecondsToWait, TimeUnit.SECONDS)
             logger.debug("Received ${oneResult!!.size} results")
-            results.addAll(oneResult)
+            results.put(session.enr, oneResult)
           } catch (e: Exception) {
             logger.debug("Timeout waiting for nodes")
           }
