@@ -21,6 +21,7 @@ import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.io.Base64URLSafe
 import org.apache.tuweni.junit.BouncyCastleExtension
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetSocketAddress
