@@ -111,13 +111,7 @@ Go to the repository here and perform this change:
 
 https://github.com/apache/incubator-tuweni-website/commit/77066736df2997991e3a1954f41ced1c7a52999d
 
-Go to builds.apache.org, and run this build:
-
-https://builds.apache.org/job/Apache%20Tuweni/job/website/
-
-It takes an hour for the changes to be pushed out.
-
-Test the downloads page (wait 24h for mirrors to update).
+Run ./publish.sh in the repository to publish the changes.
 
 ### Send an [ANNOUNCE] email
 
@@ -135,7 +129,7 @@ blockchain and other decentralized software in Java and other JVM
 languages. It includes a low-level bytes library, serialization and 
 deserialization codecs (e.g. RLP), various cryptography functions 
 and primatives, and lots of other helpful utilities. Tuweni is 
-developed for JDK 1.11 or higher, and depends on various other FOSS libraries.
+developed for JDK 11 or higher, and depends on various other FOSS libraries.
 
 Source and binary distributions can be downloaded from:
 https://tuweni.apache.org/download
