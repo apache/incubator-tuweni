@@ -18,7 +18,6 @@ package org.apache.tuweni.devp2p.v5
 
 import com.google.common.math.IntMath
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.kademlia.KademliaRoutingTable
 import org.apache.tuweni.kademlia.xorDist
