@@ -10,8 +10,9 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-import org.gradle.crypto.checksum.Checksum
+
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import org.gradle.crypto.checksum.Checksum
 
 plugins { id 'com.bmuschko.docker-remote-api' version '3.2.3' }
 
@@ -96,6 +97,28 @@ distributions {
   }
 }
 
+task addDependencies() {
+  doLast {
+    def deps = []
+    rootProject.subprojects.each { s ->
+      s.configurations.runtimeClasspath.each {
+        if (!it.toString().contains("libs/tuweni")) {
+          deps << it
+        }
+      }
+    }
+    deps = deps.unique()
+
+    distributions.main.contents.into('lib') {
+      from(deps)
+    }
+  }
+}
+
+distZip.dependsOn addDependencies
+distTar.dependsOn addDependencies
+
+
 rootProject.subprojects.each {
   if (it != project) {
     project.distZip.dependsOn it.assemble
@@ -107,9 +130,9 @@ rootProject.subprojects.each {
 
 sourcesDistZip { zip64 = true }
 
-distTar{ compression = Compression.GZIP }
+distTar { compression = Compression.GZIP }
 
-sourcesDistTar{ compression = Compression.GZIP }
+sourcesDistTar { compression = Compression.GZIP }
 
 if (System.getenv('ENABLE_SIGNING') == 'true') {
   signing {

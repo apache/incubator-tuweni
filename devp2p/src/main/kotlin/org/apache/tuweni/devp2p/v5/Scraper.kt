@@ -27,7 +27,9 @@ import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.io.Base64URLSafe
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.net.InetSocketAddress
+import java.security.Security
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -38,11 +40,13 @@ import kotlin.coroutines.CoroutineContext
  */
 object ScraperApp {
 
-  fun main(args: List<String>) {
+  @JvmStatic
+  fun main(args: Array<String>) {
+    Security.addProvider(BouncyCastleProvider())
     run(args)
   }
 
-  fun run(args: List<String>) {
+  fun run(args: Array<String>) {
     val enrs = args.map { EthereumNodeRecord.fromRLP(Base64URLSafe.decode(it)) }
     val addr = InetSocketAddress("0.0.0.0", 10000)
     val seen = ConcurrentHashMap.newKeySet<EthereumNodeRecord>()
