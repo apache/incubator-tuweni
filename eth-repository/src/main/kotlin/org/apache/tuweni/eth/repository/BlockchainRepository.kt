@@ -16,6 +16,10 @@
  */
 package org.apache.tuweni.eth.repository
 
+import org.apache.lucene.analysis.standard.StandardAnalyzer
+import org.apache.lucene.index.IndexWriter
+import org.apache.lucene.index.IndexWriterConfig
+import org.apache.lucene.store.ByteBuffersDirectory
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.AccountState
@@ -27,6 +31,7 @@ import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.kv.KeyValueStore
+import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.trie.MerkleStorage
 import org.apache.tuweni.trie.StoredMerklePatriciaTrie
 import org.slf4j.LoggerFactory
@@ -64,6 +69,26 @@ class BlockchainRepository
     internal val GENESIS_BLOCK = Bytes.wrap("genesisBlock".toByteArray())
 
     /**
+     * Constructs a blockchain repository that resides entirely in heap.
+     *
+     * @return an in-memory repository
+     */
+    fun inMemory(): BlockchainRepository {
+      val analyzer = StandardAnalyzer()
+      val config = IndexWriterConfig(analyzer)
+      val writer = IndexWriter(ByteBuffersDirectory(), config)
+      return BlockchainRepository(
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        BlockchainIndex(writer)
+      )
+    }
+
+    /**
      * Initializes a blockchain repository with metadata, placing it in key-value stores.
      *
      * @return a new blockchain repository made from the metadata passed in parameter.
@@ -78,13 +103,15 @@ class BlockchainRepository
       blockchainIndex: BlockchainIndex,
       genesisBlock: Block
     ): BlockchainRepository {
-      val repo = BlockchainRepository(chainMetadata,
+      val repo = BlockchainRepository(
+        chainMetadata,
         blockBodyStore,
         blockHeaderStore,
         transactionReceiptsStore,
         transactionStore,
         stateStore,
-        blockchainIndex)
+        blockchainIndex
+      )
       repo.setGenesisBlock(genesisBlock)
       repo.storeBlock(genesisBlock)
       return repo
@@ -209,8 +236,8 @@ class BlockchainRepository
    * @return a future with the block if found
    */
   suspend fun retrieveBlock(blockHash: Bytes): Block? {
-    return retrieveBlockBody(blockHash)?.let {
-        body -> this.retrieveBlockHeader(blockHash)?.let { Block(it, body) }
+    return retrieveBlockBody(blockHash)?.let { body ->
+      this.retrieveBlockHeader(blockHash)?.let { Block(it, body) }
     } ?: return null
   }
 

@@ -17,17 +17,12 @@
 package org.apache.tuweni.les
 
 import kotlinx.coroutines.Dispatchers
-import org.apache.lucene.index.IndexWriter
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
 import org.apache.tuweni.eth.Hash
-import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.MemoryTransactionPool
-import org.apache.tuweni.junit.LuceneIndexWriter
-import org.apache.tuweni.junit.LuceneIndexWriterExtension
 import org.apache.tuweni.junit.TempDirectoryExtension
-import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
 import org.apache.tuweni.units.bigints.UInt256
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -36,7 +31,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(TempDirectoryExtension::class, LuceneIndexWriterExtension::class)
+@ExtendWith(TempDirectoryExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class LESSubprotocolTest {
 
@@ -50,7 +45,7 @@ internal class LESSubprotocolTest {
 
   @Test
   @Throws(Exception::class)
-  fun supportsLESv2(@LuceneIndexWriter writer: IndexWriter) {
+  fun supportsLESv2() {
 
     val sp = LESSubprotocol(
       Dispatchers.Default,
@@ -61,15 +56,7 @@ internal class LESSubprotocolTest {
       UInt256.ZERO,
       UInt256.ZERO,
       UInt256.ZERO,
-      BlockchainRepository(
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        BlockchainIndex(writer)
-      ),
+      BlockchainRepository.inMemory(),
       MemoryTransactionPool()
     )
     assertTrue(sp.supports(SubProtocolIdentifier.of("les", 2)))
@@ -77,7 +64,7 @@ internal class LESSubprotocolTest {
 
   @Test
   @Throws(Exception::class)
-  fun noSupportForv3(@LuceneIndexWriter writer: IndexWriter) {
+  fun noSupportForv3() {
 
     val sp = LESSubprotocol(
       Dispatchers.Default,
@@ -88,15 +75,7 @@ internal class LESSubprotocolTest {
       UInt256.ZERO,
       UInt256.ZERO,
       UInt256.ZERO,
-      BlockchainRepository(
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        BlockchainIndex(writer)
-      ),
+      BlockchainRepository.inMemory(),
       MemoryTransactionPool()
     )
     assertFalse(sp.supports(SubProtocolIdentifier.of("les", 3)))
@@ -104,7 +83,7 @@ internal class LESSubprotocolTest {
 
   @Test
   @Throws(Exception::class)
-  fun noSupportForETH(@LuceneIndexWriter writer: IndexWriter) {
+  fun noSupportForETH() {
     val sp = LESSubprotocol(
       Dispatchers.Default,
       blockchainInformation,
@@ -114,15 +93,7 @@ internal class LESSubprotocolTest {
       UInt256.ZERO,
       UInt256.ZERO,
       UInt256.ZERO,
-      BlockchainRepository(
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        BlockchainIndex(writer)
-      ),
+      BlockchainRepository.inMemory(),
       MemoryTransactionPool()
     )
     assertFalse(sp.supports(SubProtocolIdentifier.of("eth", 2)))
