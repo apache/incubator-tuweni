@@ -95,5 +95,5 @@ internal class DevP2PPeerRoutingTable(selfId: SECP256K1.PublicKey) : PeerRouting
 
   override fun evict(node: Peer): Boolean = table.evict(node)
 
-  private fun hashForId(id: SECP256K1.PublicKey): ByteArray = idHashCache.get(id) { keccak256(id.bytesArray()) }
+  private fun hashForId(id: SECP256K1.PublicKey): ByteArray = idHashCache.get(id) { EthereumNodeRecord.nodeId(id).toArrayUnsafe() }
 }

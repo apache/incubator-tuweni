@@ -55,8 +55,6 @@ internal class RoutingTable(
     }
   }
 
-  fun nearest(targetId: Bytes, limit: Int = BUCKET_SIZE): List<Bytes> = table.nearest(key(targetId), limit)
-
   fun distanceToSelf(targetId: Bytes): Int = table.logDistToSelf(targetId)
 
   fun evict(enr: Bytes): Boolean = table.evict(enr)
@@ -70,7 +68,7 @@ internal class RoutingTable(
 
   fun clear() = table.clear()
 
-  private fun key(enr: Bytes): ByteArray = Hash.keccak256(enr).toArray()
+  private fun key(enr: Bytes): ByteArray = EthereumNodeRecord.fromRLP(enr).nodeId().toArrayUnsafe()
 
   companion object {
     private const val BUCKET_SIZE: Int = 16
