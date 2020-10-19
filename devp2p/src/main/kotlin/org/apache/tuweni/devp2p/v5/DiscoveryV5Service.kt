@@ -20,13 +20,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.ExpiringMap
 import org.apache.tuweni.concurrent.coroutines.asyncCompletion
+import org.apache.tuweni.concurrent.coroutines.asyncResult
 import org.apache.tuweni.concurrent.coroutines.await
+import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.encrypt.SessionKey
@@ -40,6 +44,7 @@ import java.nio.ByteBuffer
 import java.nio.channels.ClosedChannelException
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
 
@@ -74,7 +79,7 @@ object DiscoveryService {
       emptyMap(),
       emptyMap(),
       bindAddress.address,
-      null,
+      bindAddress.port, // TODO allow override
       bindAddress.port
     )
     // val connector = UdpConnector(bindAddress, keyPair, selfENR, enrStorage)
@@ -134,8 +139,23 @@ interface DiscoveryV5Service : CoroutineScope {
    * Adds a peer to the routing table.
    *
    * @param enr the peer Ethereum Node Record
+   * @param address optionally, the UDP address to call for this peer.
    */
-  suspend fun addPeer(enr: EthereumNodeRecord): AsyncCompletion
+  suspend fun addPeer(
+    enr: EthereumNodeRecord,
+    address: InetSocketAddress = InetSocketAddress(enr.ip(), enr.udp()!!)
+  ): AsyncCompletion
+
+  /**
+   * Requests nodes from all connected peers.
+   *
+   * @param distance the distance between the node and the peer. Helps pick a Kademlia bucket.
+   * @param maxSecondsToWait number of seconds to wait for a response.
+   */
+  suspend fun requestNodes(
+    distance: Int = 1,
+    maxSecondsToWait: Long = 10
+  ): AsyncResult<Map<EthereumNodeRecord, List<EthereumNodeRecord>>>
 }
 
 internal class DefaultDiscoveryV5Service(
@@ -158,6 +178,8 @@ internal class DefaultDiscoveryV5Service(
   private val handshakes = ExpiringMap<InetSocketAddress, HandshakeSession>()
   private val sessions = ConcurrentHashMap<InetSocketAddress, Session>()
   private val started = AtomicBoolean(false)
+  private val nodeId = EthereumNodeRecord.nodeId(keyPair.publicKey())
+  private val whoAreYouHeader = Hash.sha2_256(Bytes.concatenate(nodeId, Bytes.wrap("WHOAREYOU".toByteArray())))
 
   private lateinit var receiveJob: Job
 
@@ -178,8 +200,7 @@ internal class DefaultDiscoveryV5Service(
 
   override fun enr(): EthereumNodeRecord = selfEnr
 
-  override suspend fun addPeer(enr: EthereumNodeRecord): AsyncCompletion {
-    val address = InetSocketAddress(enr.ip(), enr.udp()!!)
+  override suspend fun addPeer(enr: EthereumNodeRecord, address: InetSocketAddress): AsyncCompletion {
     val session = sessions[address]
     if (session == null) {
       logger.trace("Creating new session for peer {}", enr)
@@ -223,9 +244,14 @@ internal class DefaultDiscoveryV5Service(
 
       var session = sessions.get(address)
       try {
+        val message = Bytes.wrapByteBuffer(datagram)
+        if (message.slice(0, 32) == whoAreYouHeader && session != null) {
+          sessions.remove(address)
+          session = null
+        }
         if (session == null) {
           val handshakeSession = handshakes.computeIfAbsent(address) { createHandshake(it) }
-          handshakeSession.processMessage(Bytes.wrapByteBuffer(datagram))
+          handshakeSession.processMessage(message)
         } else {
           session.processMessage(Bytes.wrapByteBuffer(datagram))
         }
@@ -260,6 +286,7 @@ internal class DefaultDiscoveryV5Service(
     receivedEnr: EthereumNodeRecord
   ): Session {
     val session = Session(
+      receivedEnr,
       keyPair,
       newSession.nodeId,
       newSession.tag(),
@@ -279,4 +306,25 @@ internal class DefaultDiscoveryV5Service(
     sessions[address] = session
     return session
   }
+
+  override suspend fun requestNodes(
+    distance: Int,
+    maxSecondsToWait: Long
+  ): AsyncResult<Map<EthereumNodeRecord, List<EthereumNodeRecord>>> =
+    asyncResult {
+      val results = ConcurrentHashMap<EthereumNodeRecord, List<EthereumNodeRecord>>()
+      logger.debug("Requesting from ${sessions.size} sessions with distance $distance")
+      sessions.values.map { session ->
+        async {
+          try {
+            val oneResult = session.sendFindNodes(distance).get(maxSecondsToWait, TimeUnit.SECONDS)
+            logger.debug("Received ${oneResult!!.size} results")
+            results.put(session.enr, oneResult)
+          } catch (e: Exception) {
+            logger.debug("Timeout waiting for nodes")
+          }
+        }
+      }.awaitAll()
+      results
+    }
 }

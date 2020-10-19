@@ -16,8 +16,10 @@
  */
 package org.apache.tuweni.devp2p.v5
 
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.crypto.SECP256K1
+import org.apache.tuweni.io.Base64URLSafe
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -27,15 +29,17 @@ import java.net.InetSocketAddress
 /**
  * Test a developer can run from their machine to contact a remote server.
  */
+@Disabled
 @ExtendWith(BouncyCastleExtension::class)
-class LighthouseTest {
+class MedallaTest {
 
-  @Disabled
   @Test
   fun testConnect() = runBlocking {
+
     val enrRec =
-    "-Iu4QHtMAII7O9sQHpBQ-eNvZIi_f_M5f-JZWTr_PUHiLgZ3ZRd2CkGFYL_fONOVTRw0GL2dMo4yzQP2eBcu0sM5C0IB" +
-      "gmlkgnY0gmlwhH8AAAGJc2VjcDI1NmsxoQIJk7MTrqCvOqk7mysZ6A3F19HDc6ebOOzqSoxVuJbsrYN0Y3CCIyiDdWRwgiMo"
+    "enr:-LK4QC3FCb7-JTNRiWAezECk_QUJc9c2IkJA1-EAmqAA5wmdbPWsAeRpnMXKRJqOYG0TE99ycB1nOb9y26mjb" +
+      "_UoHS4Bh2F0dG5ldHOIAAAAAAAAAACEZXRoMpDnp11aAAAAAf__________gmlkgnY0gmlwhDMPYfCJc2VjcDI1N" +
+      "msxoQOmDQryZJApMwIT-dQAbxjvxLbPzyKn9GFk5dqam4MDTYN0Y3CCIyiDdWRwgiMo"
 
     val service = DiscoveryService.open(
       SECP256K1.KeyPair.random(),
@@ -44,6 +48,24 @@ class LighthouseTest {
       bootstrapENRList = listOf(enrRec)
     )
     service.start().join()
-    kotlinx.coroutines.delay(50000)
+
+    kotlinx.coroutines.delay(10000)
+    (1..8).forEach {
+      service.requestNodes(it)
+    }
+  }
+
+  @Test
+  fun testServer() = runBlocking {
+    val keyPair = SECP256K1.KeyPair.random()
+    val service = DiscoveryService.open(
+      keyPair,
+      localPort = 10000,
+      bindAddress = InetSocketAddress("192.168.88.236", 10000),
+      bootstrapENRList = emptyList()
+    )
+    service.start().join()
+    println(Base64URLSafe.encode(service.enr().toRLP()))
+    delay(500000)
   }
 }

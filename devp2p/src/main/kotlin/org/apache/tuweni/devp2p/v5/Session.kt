@@ -34,6 +34,7 @@ import org.apache.tuweni.devp2p.v5.encrypt.SessionKey
 import org.apache.tuweni.devp2p.v5.topic.Ticket
 import org.apache.tuweni.devp2p.v5.topic.Topic
 import org.apache.tuweni.devp2p.v5.topic.TopicTable
+import org.apache.tuweni.rlp.InvalidRLPTypeException
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.rlp.RLPReader
 import org.slf4j.LoggerFactory
@@ -48,13 +49,14 @@ private const val SEND_REGTOPIC_DELAY_MS = 15 * 60 * 1000L // 15 min
  * Tracks a session with another peer.
  */
 internal class Session(
+  val enr: EthereumNodeRecord,
   private val keyPair: SECP256K1.KeyPair,
   private val nodeId: Bytes32,
   private val tag: Bytes32,
   private val sessionKey: SessionKey,
   private val address: InetSocketAddress,
   private val sendFn: (address: InetSocketAddress, message: Bytes) -> Unit,
-  private val enr: () -> EthereumNodeRecord,
+  private val ourENR: () -> EthereumNodeRecord,
   private val routingTable: RoutingTable,
   private val topicTable: TopicTable,
   private val failedPingsListener: (missedPings: Int) -> Boolean,
@@ -117,7 +119,14 @@ internal class Session(
       return
     }
     logger.trace("Received message from {}", address)
-    val message = decode(messageBytes)
+
+    var message: Message
+    try {
+      message = decode(messageBytes)
+    } catch (e: InvalidRLPTypeException) {
+      logger.trace("Bad message content, dropping from {}: {}", address, messageBytes)
+      return
+    }
     logger.trace("Received message of type {}", message.type())
     when (message.type()) {
       MessageType.FINDNODE -> handleFindNode(message as FindNodeMessage)
@@ -164,7 +173,7 @@ internal class Session(
   ) {
     activePing = AsyncCompletion.incomplete()
     val response =
-      PongMessage(message.requestId, enr().seq(), address.address, address.port)
+      PongMessage(message.requestId, ourENR().seq(), address.address, address.port)
     send(response)
   }
 
@@ -178,8 +187,10 @@ internal class Session(
     val enrs = message.nodeRecords
     val records = chunkedNodeResults.computeIfAbsent(message.requestId) { mutableListOf() }
     records.addAll(enrs)
+    logger.debug("Received ${enrs.size} for ${records.size}/${message.total}")
 
-    if (enrs.toMutableList().size == message.total) {
+    // there seems to be a bug where no nodes are sent yet the total is above 0.
+    if ((records.size == 0 && message.total != 0) || records.size >= message.total) {
       activeFindNodes[message.requestId]?.let {
         it.complete(chunkedNodeResults[message.requestId])
         chunkedNodeResults.remove(message.requestId)
@@ -240,7 +251,7 @@ internal class Session(
 
   private suspend fun handleFindNode(message: FindNodeMessage) {
     if (0 == message.distance) {
-      val response = NodesMessage(message.requestId, 1, listOf(enr()))
+      val response = NodesMessage(message.requestId, 1, listOf(ourENR()))
       send(response)
       return
     }
@@ -261,27 +272,30 @@ internal class Session(
   }
 
   internal fun read(tag: Bytes, contentWithHeader: Bytes, reader: RLPReader): Message {
+    if (reader.nextIsList()) {
+      // this looks like a WHOAREYOU.
+    }
     val authTag = reader.readValue()
 
-      val encryptedContent = contentWithHeader.slice(reader.position())
-      val decryptionKey = sessionKey.recipientKey
-      val decryptedContent = AES128GCM.decrypt(decryptionKey, authTag, encryptedContent, tag)
-      val type = decryptedContent.slice(0, 1)
-      val message = decryptedContent.slice(1)
+    val encryptedContent = contentWithHeader.slice(reader.position())
+    val decryptionKey = sessionKey.recipientKey
+    val decryptedContent = AES128GCM.decrypt(decryptionKey, authTag, encryptedContent, tag)
+    val type = decryptedContent.slice(0, 1)
+    val message = decryptedContent.slice(1)
 
-      // Retrieve result
-      val messageType = MessageType.valueOf(type.toInt())
-      return when (messageType) {
-        MessageType.PING -> PingMessage.create(message)
-        MessageType.PONG -> PongMessage.create(message)
-        MessageType.FINDNODE -> FindNodeMessage.create(message)
-        MessageType.NODES -> NodesMessage.create(message)
-        MessageType.REGTOPIC -> RegTopicMessage.create(message)
-        MessageType.TICKET -> TicketMessage.create(message)
-        MessageType.REGCONFIRM -> RegConfirmationMessage.create(message)
-        MessageType.TOPICQUERY -> TopicQueryMessage.create(message)
-        else -> throw IllegalArgumentException("Unsupported message type $messageType")
-      }
+    // Retrieve result
+    val messageType = MessageType.valueOf(type.toInt())
+    return when (messageType) {
+      MessageType.PING -> PingMessage.create(message)
+      MessageType.PONG -> PongMessage.create(message)
+      MessageType.FINDNODE -> FindNodeMessage.create(message)
+      MessageType.NODES -> NodesMessage.create(message)
+      MessageType.REGTOPIC -> RegTopicMessage.create(message)
+      MessageType.TICKET -> TicketMessage.create(message)
+      MessageType.REGCONFIRM -> RegConfirmationMessage.create(message)
+      MessageType.TOPICQUERY -> TopicQueryMessage.create(message)
+      else -> throw IllegalArgumentException("Unsupported message type $messageType")
+    }
   }
 
   suspend fun delayRegTopic(requestId: Bytes, topic: Bytes, waitTime: Long) {

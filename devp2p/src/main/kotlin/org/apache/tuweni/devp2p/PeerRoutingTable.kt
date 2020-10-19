@@ -18,7 +18,6 @@ package org.apache.tuweni.devp2p
 
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
-import org.apache.tuweni.crypto.Hash.keccak256
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.kademlia.KademliaRoutingTable
 
@@ -95,5 +94,6 @@ internal class DevP2PPeerRoutingTable(selfId: SECP256K1.PublicKey) : PeerRouting
 
   override fun evict(node: Peer): Boolean = table.evict(node)
 
-  private fun hashForId(id: SECP256K1.PublicKey): ByteArray = idHashCache.get(id) { keccak256(id.bytesArray()) }
+  private fun hashForId(id: SECP256K1.PublicKey): ByteArray =
+    idHashCache.get(id) { EthereumNodeRecord.nodeId(id).toArrayUnsafe() }
 }

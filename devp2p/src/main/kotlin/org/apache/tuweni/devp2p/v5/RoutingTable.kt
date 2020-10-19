@@ -18,7 +18,6 @@ package org.apache.tuweni.devp2p.v5
 
 import com.google.common.math.IntMath
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.kademlia.KademliaRoutingTable
 import org.apache.tuweni.kademlia.xorDist
@@ -28,7 +27,7 @@ internal class RoutingTable(
   private val selfEnr: EthereumNodeRecord
 ) {
 
-  private val selfNodeId = key(selfEnr.toRLP())
+  private val selfNodeId = EthereumNodeRecord.nodeId(selfEnr.publicKey()).toArrayUnsafe()
   private val nodeIdCalculation: (Bytes) -> ByteArray = { enr -> key(enr) }
 
   private val table = KademliaRoutingTable(
@@ -55,8 +54,6 @@ internal class RoutingTable(
     }
   }
 
-  fun nearest(targetId: Bytes, limit: Int = BUCKET_SIZE): List<Bytes> = table.nearest(key(targetId), limit)
-
   fun distanceToSelf(targetId: Bytes): Int = table.logDistToSelf(targetId)
 
   fun evict(enr: Bytes): Boolean = table.evict(enr)
@@ -70,7 +67,7 @@ internal class RoutingTable(
 
   fun clear() = table.clear()
 
-  private fun key(enr: Bytes): ByteArray = Hash.sha2_256(enr).toArray()
+  private fun key(enr: Bytes): ByteArray = EthereumNodeRecord.fromRLP(enr).nodeId().toArrayUnsafe()
 
   companion object {
     private const val BUCKET_SIZE: Int = 16

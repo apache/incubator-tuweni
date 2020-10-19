@@ -29,7 +29,7 @@ class ExpiringSetTest {
   @BeforeEach
   void setup() {
     currentTime = Instant.now();
-    set = new ExpiringSet<>(() -> currentTime.toEpochMilli());
+    set = new ExpiringSet<>(Long.MAX_VALUE, () -> currentTime.toEpochMilli());
   }
 
   @Test

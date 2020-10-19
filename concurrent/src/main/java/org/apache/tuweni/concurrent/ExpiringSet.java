@@ -58,16 +58,30 @@ public final class ExpiringSet<E> implements Set<E> {
   private final ConcurrentHashMap<E, ExpiringEntry<E>> storage = new ConcurrentHashMap<>();
   private final PriorityBlockingQueue<ExpiringEntry<E>> expiryQueue = new PriorityBlockingQueue<>();
   private final LongSupplier currentTimeSupplier;
+  private final long evictionTimeout;
 
   /**
-   * Construct an empty map.
+   * Construct an empty expiring set.
+   * 
+   * @param evictionTimeout the default eviction timeout for entries in milliseconds.
+   */
+  public ExpiringSet(long evictionTimeout) {
+    this(evictionTimeout, System::currentTimeMillis);
+  }
+
+  /**
+   * Construct an empty set.
    */
   public ExpiringSet() {
-    this(System::currentTimeMillis);
+    this(Long.MAX_VALUE, System::currentTimeMillis);
   }
 
   @VisibleForTesting
-  ExpiringSet(LongSupplier currentTimeSupplier) {
+  ExpiringSet(long evictionTimeout, LongSupplier currentTimeSupplier) {
+    if (evictionTimeout <= 0) {
+      throw new IllegalArgumentException("Invalid eviction timeout " + evictionTimeout);
+    }
+    this.evictionTimeout = evictionTimeout;
     this.currentTimeSupplier = currentTimeSupplier;
   }
 
@@ -123,7 +137,8 @@ public final class ExpiringSet<E> implements Set<E> {
   public boolean add(E e) {
     requireNonNull(e);
     purgeExpired();
-    ExpiringEntry<E> oldEntry = storage.put(e, new ExpiringEntry<>(e, Long.MAX_VALUE, null));
+    ExpiringEntry<E> oldEntry =
+        storage.put(e, new ExpiringEntry<>(e, currentTimeSupplier.getAsLong() + evictionTimeout, null));
     return oldEntry != null;
   }
 
@@ -150,9 +165,6 @@ public final class ExpiringSet<E> implements Set<E> {
    */
   public boolean add(E element, long expiry, @Nullable Consumer<E> expiryListener) {
     requireNonNull(element);
-    if (expiry >= Long.MAX_VALUE) {
-      return add(element);
-    }
 
     long now = currentTimeSupplier.getAsLong();
     purgeExpired(now);

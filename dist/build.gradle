@@ -62,6 +62,7 @@ distributions {
         from { project(':gossip').startScripts.outputs.files }
         from { project(':hobbits-relayer').startScripts.outputs.files }
         from { project(':eth-client-app').startScripts.outputs.files }
+        from { project(':devp2p').startScripts.outputs.files }
         fileMode = 0755
       }
     }
