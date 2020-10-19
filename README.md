@@ -8,6 +8,8 @@
 [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/repository.apache.org/org.apache.tuweni/tuweni.svg)](https://repository.apache.org/content/repositories/snapshots/org/apache/tuweni/tuweni/)
 [![codecov](https://codecov.io/gh/apache/incubator-tuweni/branch/master/graph/badge.svg)](https://codecov.io/gh/apache/incubator-tuweni)
 
+![logo](tuweni.png)
+
 See our [web site](https://tuweni.apache.org) for details on the project.
 
 Tuweni is a set of libraries and other tools to aid development of blockchain and other decentralized software in Java and other JVM languages.
