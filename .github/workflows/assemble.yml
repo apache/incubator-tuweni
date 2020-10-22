@@ -52,11 +52,11 @@ jobs:
         with:
           name: distsrc
           path: dist/build/distributions/tuweni-src-*.zip
-      - name: Upload build
-        uses: actions/upload-artifact@v1
+      - name: Upload binary distrib
+        uses: actions/upload-artifact@v2
         with:
-          name: Libs
-          path: build/libs
+          name: snapshot.zip
+          path: dist/build/distributions/tuweni-bin-*.zip
   check-src:
     runs-on: ${{ matrix.os }}
     strategy:
