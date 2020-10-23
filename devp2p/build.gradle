@@ -46,3 +46,15 @@ application {
   mainClassName = 'org.apache.tuweni.devp2p.v5.ScraperApp'
   applicationName = 'scraper'
 }
+
+task v4ScraperApp(type: CreateStartScripts) {
+  mainClassName = "org.apache.tuweni.devp2p.ScraperApp"
+  applicationName = "v4scraper"
+  outputDir = new File(project.buildDir, 'scripts')
+  classpath = project.startScripts.classpath
+}
+
+applicationDistribution.into("bin") {
+  from(v4ScraperApp)
+  fileMode = 0755
+}
