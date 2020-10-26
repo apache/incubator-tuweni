@@ -44,10 +44,10 @@ description = 'A set of libraries and other tools to aid development of blockcha
 // Version numbering
 
 def versionNumber = '1.3.0'
-def buildVersion = versionNumber + buildTag()
+def buildVersion = versionNumber + buildTag(buildRelease)
 
-static String buildTag() {
-  if (System.getenv('BUILD_RELEASE') == 'true') {
+static String buildTag(releaseBuild) {
+  if (releaseBuild == 'true' || System.getenv('BUILD_RELEASE') == 'true') {
     return ''
   }
   if (System.getenv('BUILD_TIMESTAMP') != null) {
