@@ -91,6 +91,10 @@ If less than 3 votes were collected, this email is a new vote asking for more IP
 
 If a vote was called on the IPMC list, close it in the same fashion with a recap.
 
+## Release on github
+
+Go to github and mark the release as released. Change the tag name to drop the `-rc` at the end.
+
 ### Push the release to the dist final location
 
 Move the files from `https://dist.apache.org/repos/dist/dev/incubator/tuweni/${RELEASE VERSION}/` to 

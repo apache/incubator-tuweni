@@ -154,7 +154,7 @@ class GitStageTask extends DefaultTask {
     def branch = branchOutput.toString().trim()
     // tag the repo
     project.exec {
-      commandLine 'git', 'tag', '-m', "Release $project.version-incubating", "v$project.version-incubating"
+      commandLine 'git', 'tag', '-m', "Release $project.version-incubating", "v$project.version-incubating-rc"
     }
     project.exec {
       commandLine 'git', 'push', 'origin', branch, '--tags'
