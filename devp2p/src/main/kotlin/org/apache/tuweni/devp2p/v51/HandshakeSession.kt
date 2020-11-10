@@ -23,9 +23,10 @@ import org.apache.tuweni.concurrent.CompletableAsyncResult
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
-import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
-import org.apache.tuweni.devp2p.v5.encrypt.SessionKeyGenerator
-import org.apache.tuweni.devp2p.v5.encrypt.SessionKey
+import org.apache.tuweni.devp2p.v51.encrypt.AES128CTR
+import org.apache.tuweni.devp2p.v51.encrypt.AES128GCM
+import org.apache.tuweni.devp2p.v51.encrypt.SessionKey
+import org.apache.tuweni.devp2p.v51.encrypt.SessionKeyGenerator
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.rlp.RLPReader
 import org.apache.tuweni.units.bigints.UInt256
@@ -74,26 +75,74 @@ internal class HandshakeSession(
     }
     if (messageBytes.size() < 32) {
       logger.trace("Message too short, dropping from {}", address)
+      return
     }
 
     logger.trace("Received message from {}", address)
+    val maskingIV = messageBytes.slice(0, 16)
+    val header = AES128CTR.decrypt(nodeId.slice(0, 16), maskingIV, messageBytes.slice(16), Bytes.EMPTY)
+    val discv5Protocol = header.slice(0, 6) == Bytes.wrap("discv5".toByteArray())
+    if (!discv5Protocol) {
+      logger.trace("Message is not a discv5 protocol message, dropping from {}", address)
+      return
+    }
+    val version = header.slice(6, 2) == Bytes.fromHexString("0x0001")
+    if (!version) {
+      logger.trace("Message does not use the same protocol version, dropping from {}", address)
+      return
+    }
+    val flag = header.slice(8, 1)
+    val nonce = header.slice(9, 12)
+    val authdataSizeBytes = header.slice(21, 2)
+    val authdataSize = authdataSizeBytes.get(1).toInt().shl(8) + authdataSizeBytes.get(0).toInt()
+    val authdata = header.slice(23, authdataSize)
+    val message = messageBytes.slice(23 + authdataSize)
+
     val tag = messageBytes.slice(0, 32)
     val content = messageBytes.slice(32)
     // it's either a WHOAREYOU or a RANDOM message.
-    if (whoAreYouHeader == tag) {
+    if (flag.get(0) == 1.toByte()) {
       logger.trace("Identified a WHOAREYOU message")
-      val message = WhoAreYouMessage.create(tag, content)
-      if (!this.tokens.contains(message.token)) {
-        // We were not expecting this WHOAREYOU.
-        logger.trace("Unexpected WHOAREYOU packet {}", message.token)
+      if (message.size() > 0) {
+        logger.trace(
+          "WHOAREYOU packet with {} bytes in message, should be 0, dropping from {}",
+          message.size(),
+          address
+        )
         return
       }
+      if (authdataSize != 24) {
+        logger.trace(
+          "WHOAREYOU packet with {} bytes in authdata, should be 24, dropping from {}",
+          authdataSize,
+          address
+        )
+        return
+      }
+      val idNonce = authdata.slice(0, 16)
+      val enrSeq = authdata.slice(16, 8)
+
       // Use the WHOAREYOU info to send handshake.
       // Generate ephemeral key pair
       val ephemeralKeyPair = SECP256K1.KeyPair.random()
       val ephemeralKey = ephemeralKeyPair.secretKey()
-
+      val authDataHead = Bytes.wrap(nodeId, Bytes.of(64.toByte(), 33.toByte()))
+      val challengeData = Bytes.wrap(maskingIV, header.slice(0, 23 + authdataSize), authdata)
       val destNodeId = EthereumNodeRecord.nodeId(publicKey!!)
+
+      val idSignatureContents = Bytes.concatenate(
+        Bytes.wrap("discovery v5 identity proof".toByteArray()),
+        challengeData,
+        Bytes.wrap(ephemeralKeyPair.publicKey().asEcPoint().getEncoded(true)),
+        destNodeId
+      )
+      val idSignature = SECP256K1.signHashed(Hash.sha2_256(idSignatureContents), keyPair)
+      val sigBytes = Bytes.concatenate(
+        UInt256.valueOf(idSignature.r()).toBytes(),
+        UInt256.valueOf(idSignature.s()).toBytes()
+      )
+      val authDataToSend = Bytes.wrap(authDataHead, sigBytes, enr().toRLP())
+
       val secret = SECP256K1.deriveECDHKeyAgreement(ephemeralKey.bytes(), publicKey!!.bytes())
 
       // Derive keys
@@ -103,10 +152,7 @@ internal class HandshakeSession(
       val plain = RLP.encodeList { writer ->
         writer.writeInt(5)
         writer.writeValue(
-          Bytes.concatenate(
-            UInt256.valueOf(signature.r()).toBytes(),
-            UInt256.valueOf(signature.s()).toBytes()
-          )
+
         )
         writer.writeRLP(enr().toRLP())
       }
@@ -185,14 +231,18 @@ internal class HandshakeSession(
     ephemeralPublicKey: SECP256K1.PublicKey,
     publicKey: SECP256K1.PublicKey
   ): Boolean {
-    val signature = SECP256K1.Signature.create(1, signatureBytes.slice(0, 32).toUnsignedBigInteger(),
-      signatureBytes.slice(32).toUnsignedBigInteger())
+    val signature = SECP256K1.Signature.create(
+      1, signatureBytes.slice(0, 32).toUnsignedBigInteger(),
+      signatureBytes.slice(32).toUnsignedBigInteger()
+    )
 
     val signValue = Bytes.concatenate(DISCOVERY_ID_NONCE, idNonce, ephemeralPublicKey.bytes())
     val hashedSignValue = Hash.sha2_256(signValue)
     if (!SECP256K1.verifyHashed(hashedSignValue, signature, publicKey)) {
-      val signature0 = SECP256K1.Signature.create(0, signatureBytes.slice(0, 32).toUnsignedBigInteger(),
-        signatureBytes.slice(32).toUnsignedBigInteger())
+      val signature0 = SECP256K1.Signature.create(
+        0, signatureBytes.slice(0, 32).toUnsignedBigInteger(),
+        signatureBytes.slice(32).toUnsignedBigInteger()
+      )
       return SECP256K1.verifyHashed(hashedSignValue, signature0, publicKey)
     } else {
       return true

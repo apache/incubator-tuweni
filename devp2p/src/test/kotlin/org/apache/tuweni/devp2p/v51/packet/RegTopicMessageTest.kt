@@ -19,7 +19,7 @@ package org.apache.tuweni.devp2p.v51.packet
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
-import org.apache.tuweni.devp2p.v51.RegTopicMessage
+import org.apache.tuweni.devp2p.v51.TalkReqMessage
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.net.InetAddress
@@ -30,7 +30,7 @@ class RegTopicMessageTest {
   fun encodeCreatesValidBytesSequence() {
     val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
     val message =
-      RegTopicMessage(
+      TalkReqMessage(
         requestId,
         EthereumNodeRecord.create(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress()),
         Bytes.random(32),
@@ -39,7 +39,7 @@ class RegTopicMessageTest {
 
     val encodingResult = message.toRLP()
 
-    val decodingResult = RegTopicMessage.create(encodingResult)
+    val decodingResult = TalkReqMessage.create(encodingResult)
 
     assertEquals(decodingResult.requestId, requestId)
     assertEquals(decodingResult.ticket, message.ticket)

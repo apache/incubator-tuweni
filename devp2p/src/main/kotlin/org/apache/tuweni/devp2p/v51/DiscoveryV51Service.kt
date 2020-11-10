@@ -33,8 +33,8 @@ import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
-import org.apache.tuweni.devp2p.v5.encrypt.SessionKey
-import org.apache.tuweni.devp2p.v5.topic.TopicTable
+import org.apache.tuweni.devp2p.v51.encrypt.SessionKey
+import org.apache.tuweni.devp2p.v51.topic.TopicTable
 import org.apache.tuweni.io.Base64URLSafe
 import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import org.slf4j.LoggerFactory
@@ -241,6 +241,10 @@ internal class DefaultDiscoveryV51Service(
       val address = channel.receive(datagram) as InetSocketAddress
 
       datagram.flip()
+      if (datagram.remaining() < Message.MIN_UDP_MESSAGE_SIZE) {
+        logger.debug("Packet with {} bytes, less than minimum {} bytes", datagram.remaining(), Message.MIN_UDP_MESSAGE_SIZE)
+        break
+      }
 
       var session = sessions.get(address)
       try {

@@ -223,7 +223,7 @@ internal class RegTopicMessage(
   val nodeRecord: EthereumNodeRecord,
   val topic: Bytes,
   val ticket: Bytes
-) : Message {
+) : Message, org.apache.tuweni.devp2p.v51.Message {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x05")
 
