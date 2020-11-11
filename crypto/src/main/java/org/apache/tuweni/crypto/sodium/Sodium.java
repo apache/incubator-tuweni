@@ -40,6 +40,8 @@ public final class Sodium {
   static final SodiumVersion VERSION_10_0_14 = new SodiumVersion(9, 6, "10.0.14");
   static final SodiumVersion VERSION_10_0_15 = new SodiumVersion(10, 0, "10.0.15");
   static final SodiumVersion VERSION_10_0_16 = new SodiumVersion(10, 1, "10.0.16");
+  static final SodiumVersion VERSION_10_0_17 = new SodiumVersion(10, 1, "10.0.17");
+  static final SodiumVersion VERSION_10_0_18 = new SodiumVersion(10, 1, "10.0.18");
 
   /**
    * The minimum version of the sodium native library that this binding supports.
