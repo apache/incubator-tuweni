@@ -2533,6 +2533,10 @@ public final class Sodium {
     return libSodium().sodium_runtime_has_rdrand();
   }
 
+  static int _sodium_runtime_get_cpu_features() {
+    return libSodium()._sodium_runtime_get_cpu_features();
+  }
+
   static void sodium_memzero(Pointer pnt, long len) {
     libSodium().sodium_memzero(pnt, len);
   }
@@ -2806,6 +2810,18 @@ public final class Sodium {
     return libSodium().crypto_core_ed25519_uniformbytes();
   }
 
+  static long crypto_core_ed25519_hashbytes() {
+    return libSodium().crypto_core_ed25519_hashbytes();
+  }
+
+  static long crypto_core_ed25519_scalarbytes() {
+    return libSodium().crypto_core_ed25519_scalarbytes();
+  }
+
+  static long crypto_core_ed25519_nonreducedscalarbytes() {
+    return libSodium().crypto_core_ed25519_nonreducedscalarbytes();
+  }
+
   static int crypto_core_ed25519_is_valid_point(byte[] p) {
     return libSodium().crypto_core_ed25519_is_valid_point(p);
   }
@@ -2822,6 +2838,114 @@ public final class Sodium {
     return libSodium().crypto_core_ed25519_from_uniform(p, r);
   }
 
+  static int crypto_core_ed25519_from_hash(byte[] p, byte[] h) {
+    return libSodium().crypto_core_ed25519_from_hash(p, h);
+  }
+
+  static void crypto_core_ed25519_random(byte[] p) {
+    libSodium().crypto_core_ed25519_random(p);
+  }
+
+  static void crypto_core_ed25519_scalar_random(byte[] r) {
+    libSodium().crypto_core_ed25519_scalar_random(r);
+  }
+
+  static int crypto_core_ed25519_scalar_invert(byte[] recip, byte[] s) {
+    return libSodium().crypto_core_ed25519_scalar_invert(recip, s);
+  }
+
+  static void crypto_core_ed25519_scalar_negate(byte[] neg, byte[] s) {
+    libSodium().crypto_core_ed25519_scalar_negate(neg, s);
+  }
+
+  static void crypto_core_ed25519_scalar_complement(byte[] comp, byte[] s) {
+    libSodium().crypto_core_ed25519_scalar_complement(comp, s);
+  }
+
+  static void crypto_core_ed25519_scalar_add(byte[] z, byte[] x, byte[] y) {
+    libSodium().crypto_core_ed25519_scalar_add(z, x, y);
+  }
+
+  static void crypto_core_ed25519_scalar_sub(byte[] z, byte[] x, byte[] y) {
+    libSodium().crypto_core_ed25519_scalar_sub(z, x, y);
+  }
+
+  static void crypto_core_ed25519_scalar_mul(byte[] z, byte[] x, byte[] y) {
+    libSodium().crypto_core_ed25519_scalar_mul(z, x, y);
+  }
+
+  static void crypto_core_ed25519_scalar_reduce(byte[] r, byte[] s) {
+    libSodium().crypto_core_ed25519_scalar_reduce(r, s);
+  }
+
+  static long crypto_core_ristretto255_bytes() {
+    return libSodium().crypto_core_ristretto255_bytes();
+  }
+
+  static long crypto_core_ristretto255_hashbytes() {
+    return libSodium().crypto_core_ristretto255_hashbytes();
+  }
+
+  static long crypto_core_ristretto255_scalarbytes() {
+    return libSodium().crypto_core_ristretto255_scalarbytes();
+  }
+
+  static long crypto_core_ristretto255_nonreducedscalarbytes() {
+    return libSodium().crypto_core_ristretto255_nonreducedscalarbytes();
+  }
+
+  static int crypto_core_ristretto255_is_valid_point(byte[] p) {
+    return libSodium().crypto_core_ristretto255_is_valid_point(p);
+  }
+
+  static int crypto_core_ristretto255_add(byte[] r, byte[] p, byte[] q) {
+    return libSodium().crypto_core_ristretto255_add(r, p, q);
+  }
+
+  static int crypto_core_ristretto255_sub(byte[] r, byte[] p, byte[] q) {
+    return libSodium().crypto_core_ristretto255_sub(r, p, q);
+  }
+
+  static int crypto_core_ristretto255_from_hash(byte[] p, byte[] r) {
+    return libSodium().crypto_core_ristretto255_from_hash(p, r);
+  }
+
+  static void crypto_core_ristretto255_random(byte[] p) {
+    libSodium().crypto_core_ristretto255_random(p);
+  }
+
+  static void crypto_core_ristretto255_scalar_random(byte[] r) {
+    libSodium().crypto_core_ristretto255_scalar_random(r);
+  }
+
+  static int crypto_core_ristretto255_scalar_invert(byte[] recip, byte[] s) {
+    return libSodium().crypto_core_ristretto255_scalar_invert(recip, s);
+  }
+
+  static void crypto_core_ristretto255_scalar_negate(byte[] neg, byte[] s) {
+    libSodium().crypto_core_ristretto255_scalar_negate(neg, s);
+  }
+
+  static void crypto_core_ristretto255_scalar_complement(byte[] comp, byte[] s) {
+    libSodium().crypto_core_ristretto255_scalar_complement(comp, s);
+  }
+
+  static void crypto_core_ristretto255_scalar_add(byte[] z, byte[] x, byte[] y) {
+    libSodium().crypto_core_ristretto255_scalar_add(z, x, y);
+  }
+
+  static void crypto_core_ristretto255_scalar_sub(byte[] z, byte[] x, byte[] y) {
+    libSodium().crypto_core_ristretto255_scalar_sub(z, x, y);
+  }
+
+  static void crypto_core_ristretto255_scalar_mul(byte[] z, byte[] x, byte[] y) {
+    libSodium().crypto_core_ristretto255_scalar_mul(z, x, y);
+  }
+
+  static void crypto_core_ristretto255_scalar_reduce(byte[] r, byte[] s) {
+    libSodium().crypto_core_ristretto255_scalar_reduce(r, s);
+  }
+
   static long crypto_scalarmult_ed25519_bytes() {
     return libSodium().crypto_scalarmult_ed25519_bytes();
   }
@@ -2834,8 +2958,32 @@ public final class Sodium {
     return libSodium().crypto_scalarmult_ed25519(q, n, p);
   }
 
+  static int crypto_scalarmult_ed25519_noclamp(byte[] q, byte[] n, byte[] p) {
+    return libSodium().crypto_scalarmult_ed25519_noclamp(q, n, p);
+  }
+
   static int crypto_scalarmult_ed25519_base(byte[] q, byte[] n) {
     return libSodium().crypto_scalarmult_ed25519_base(q, n);
+  }
+
+  static int crypto_scalarmult_ed25519_base_noclamp(byte[] q, byte[] n) {
+    return libSodium().crypto_scalarmult_ed25519_base_noclamp(q, n);
+  }
+
+  static long crypto_scalarmult_ristretto255_bytes() {
+    return libSodium().crypto_scalarmult_ristretto255_bytes();
+  }
+
+  static long crypto_scalarmult_ristretto255_scalarbytes() {
+    return libSodium().crypto_scalarmult_ristretto255_scalarbytes();
+  }
+
+  static int crypto_scalarmult_ristretto255(byte[] q, byte[] n, byte[] p) {
+    return libSodium().crypto_scalarmult_ristretto255(q, n, p);
+  }
+
+  static int crypto_scalarmult_ristretto255_base(byte[] q, byte[] n) {
+    return libSodium().crypto_scalarmult_ristretto255_base(q, n);
   }
 
   static long crypto_secretbox_xchacha20poly1305_keybytes() {
