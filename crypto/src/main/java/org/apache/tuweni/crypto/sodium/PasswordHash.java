@@ -153,6 +153,8 @@ public final class PasswordHash {
     }
 
     /**
+     * Provides the bytes of this salt.
+     * 
      * @return The bytes of this salt.
      */
     public Bytes bytes() {
@@ -160,6 +162,8 @@ public final class PasswordHash {
     }
 
     /**
+     * Provides the bytes of this salt.
+     * 
      * @return The bytes of this salt.
      */
     public byte[] bytesArray() {
@@ -189,6 +193,8 @@ public final class PasswordHash {
     }
 
     /**
+     * Returns the currently recommended algorithm
+     * 
      * @return The currently recommended algorithm.
      */
     public static Algorithm recommended() {
@@ -196,6 +202,8 @@ public final class PasswordHash {
     }
 
     /**
+     * Returns the version 1.3 of the Argon2i algorithm.
+     * 
      * @return Version 1.3 of the Argon2i algorithm.
      */
     public static Algorithm argon2i13() {
@@ -203,6 +211,8 @@ public final class PasswordHash {
     }
 
     /**
+     * Returns the version 1.3 of the Argon2id algorithm.
+     * 
      * @return Version 1.3 of the Argon2id algorithm.
      */
     public static Algorithm argon2id13() {
@@ -554,6 +564,8 @@ public final class PasswordHash {
   }
 
   /**
+   * Returns the minimum hash length
+   * 
    * @return The minimum hash length (16).
    */
   public static int minHashLength() {
@@ -569,6 +581,8 @@ public final class PasswordHash {
   }
 
   /**
+   * Returns the maximum hash length
+   * 
    * @return The maximum hash length.
    */
   public static int maxHashLength() {
@@ -714,6 +728,8 @@ public final class PasswordHash {
     NEEDS_REHASH;
 
     /**
+     * Returns true if the verification passed.
+     * 
      * @return {@code true} if the verification passed.
      */
     public boolean passed() {
@@ -721,6 +737,8 @@ public final class PasswordHash {
     }
 
     /**
+     * Returns true if the hash should be regenerated.
+     * 
      * @return {@code true} if the hash should be regenerated.
      */
     public boolean needsRehash() {
@@ -923,6 +941,8 @@ public final class PasswordHash {
   }
 
   /**
+   * Returns the minimum operations limit
+   * 
    * @return The minimum operations limit (1).
    */
   public static long minOpsLimit() {
@@ -934,6 +954,8 @@ public final class PasswordHash {
   }
 
   /**
+   * Returns an operations limit for interactive use-cases
+   * 
    * @return An operations limit suitable for interactive use-cases (2).
    */
   public static long interactiveOpsLimit() {
@@ -941,6 +963,8 @@ public final class PasswordHash {
   }
 
   /**
+   * Returns an operations limit for most use-cases
+   * 
    * @return An operations limit suitable for most use-cases (3).
    */
   public static long moderateOpsLimit() {
@@ -948,6 +972,8 @@ public final class PasswordHash {
   }
 
   /**
+   * Returns an operations limit for sensitive use-cases (4).
+   * 
    * @return An operations limit for sensitive use-cases (4).
    */
   public static long sensitiveOpsLimit() {
@@ -955,6 +981,8 @@ public final class PasswordHash {
   }
 
   /**
+   * Returns the maximum operations limit.
+   * 
    * @return The maximum operations limit (4294967295).
    */
   public static long maxOpsLimit() {
@@ -972,6 +1000,8 @@ public final class PasswordHash {
   }
 
   /**
+   * Returns the minimum memory limit.
+   * 
    * @return The minimum memory limit (8192).
    */
   public static long minMemLimit() {
@@ -983,6 +1013,8 @@ public final class PasswordHash {
   }
 
   /**
+   * Returns a memory limit for interactive use-cases.
+   * 
    * @return A memory limit suitable for interactive use-cases (67108864).
    */
   public static long interactiveMemLimit() {
@@ -990,6 +1022,8 @@ public final class PasswordHash {
   }
 
   /**
+   * Returns a memory limit for most use-cases
+   * 
    * @return A memory limit suitable for most use-cases (268435456).
    */
   public static long moderateMemLimit() {
@@ -997,6 +1031,8 @@ public final class PasswordHash {
   }
 
   /**
+   * Returns a memory limit for sensitive use-cases
+   * 
    * @return A memory limit suitable for sensitive use-cases (1073741824).
    */
   public static long sensitiveMemLimit() {
@@ -1004,6 +1040,8 @@ public final class PasswordHash {
   }
 
   /**
+   * Returns the max memory limit.
+   * 
    * @return The maximum memory limit (4398046510080).
    */
   public static long maxMemLimit() {

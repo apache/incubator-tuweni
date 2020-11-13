@@ -23,8 +23,6 @@ import org.apache.tuweni.crypto.sodium.SHA256Hash;
 import org.apache.tuweni.crypto.sodium.SecretBox;
 import org.apache.tuweni.crypto.sodium.Signature;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Class responsible for performing a Secure Scuttlebutt handshake with a remote peer, as defined in the
@@ -37,8 +35,6 @@ import org.slf4j.LoggerFactory;
  * If the handshake fails, a HandshakeException will be thrown.
  */
 public final class SecureScuttlebuttHandshakeServer {
-
-  private static final Logger logger = LoggerFactory.getLogger(SecureScuttlebuttHandshakeServer.class);
 
   private final Signature.KeyPair longTermKeyPair;
   private final Box.KeyPair ephemeralKeyPair;

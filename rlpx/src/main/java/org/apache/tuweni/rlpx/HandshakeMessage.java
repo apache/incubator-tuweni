@@ -21,11 +21,15 @@ import org.apache.tuweni.crypto.SECP256K1;
 public interface HandshakeMessage {
 
   /**
+   * Provides the ephemeral public key
+   * 
    * @return the ephemeral public key included in the response
    */
   public SECP256K1.PublicKey ephemeralPublicKey();
 
   /**
+   * Provides the nonce
+   * 
    * @return the response nonce
    */
   public Bytes32 nonce();

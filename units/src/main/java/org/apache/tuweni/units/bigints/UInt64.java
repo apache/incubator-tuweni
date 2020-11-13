@@ -86,7 +86,7 @@ public final class UInt64 implements UInt64Value<UInt64> {
    *
    * @param bytes The bytes containing a {@link UInt64}.
    * @return A {@link UInt64} containing the specified value.
-   * @throws IllegalArgumentException if {@code bytes.size() &gt; 8}.
+   * @throws IllegalArgumentException if {@code bytes.size() > 8}.
    */
   public static UInt64 fromBytes(Bytes bytes) {
     checkArgument(bytes.size() <= 8, "Argument is greater than 8 bytes");

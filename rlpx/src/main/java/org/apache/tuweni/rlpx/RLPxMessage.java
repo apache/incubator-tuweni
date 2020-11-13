@@ -44,6 +44,8 @@ public final class RLPxMessage {
   }
 
   /**
+   * Message raw content
+   * 
    * @return the raw content of the message
    */
   public Bytes content() {
@@ -51,6 +53,8 @@ public final class RLPxMessage {
   }
 
   /**
+   * Message ID
+   * 
    * @return the message ID
    */
   public int messageId() {

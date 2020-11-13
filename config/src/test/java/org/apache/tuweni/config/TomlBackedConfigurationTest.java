@@ -126,33 +126,33 @@ class TomlBackedConfigurationTest {
     assertEquals(99, config.getInteger("foo.bar"));
     InvalidConfigurationPropertyTypeException e =
         assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getString("foo.bar"));
-    assertEquals("Value of 'foo.bar' is a integer", e.getMessage());
+    assertEquals("Value of 'foo.bar' is a integer", e.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(2, 1), e.position());
 
     assertEquals("buz", config.getString("foo.baz"));
     e = assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getDouble("foo.baz"));
-    assertEquals("Value of 'foo.baz' is a string", e.getMessage());
+    assertEquals("Value of 'foo.baz' is a string", e.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(3, 1), e.position());
 
     assertFalse(config.getBoolean("foo.biz"));
     e = assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getLong("foo.biz"));
-    assertEquals("Value of 'foo.biz' is a boolean", e.getMessage());
+    assertEquals("Value of 'foo.biz' is a boolean", e.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(4, 1), e.position());
 
     e = assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getLong("foo"));
-    assertEquals("Value of 'foo' is a table", e.getMessage());
+    assertEquals("Value of 'foo' is a table", e.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(1, 1), e.position());
 
     e = assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getListOfString("foo.buz"));
-    assertEquals("List property 'foo.buz' does not contain strings", e.getMessage());
+    assertEquals("List property 'foo.buz' does not contain strings", e.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(5, 1), e.position());
 
     e = assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getListOfInteger("foo.sbuz"));
-    assertEquals("List property 'foo.sbuz' does not contain integers", e.getMessage());
+    assertEquals("List property 'foo.sbuz' does not contain integers", e.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(6, 1), e.position());
 
     e = assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getListOfMap("foo.sbuz"));
-    assertEquals("List property 'foo.sbuz' does not contain maps", e.getMessage());
+    assertEquals("List property 'foo.sbuz' does not contain maps", e.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(6, 1), e.position());
   }
 
@@ -170,11 +170,12 @@ class TomlBackedConfigurationTest {
     );
     // @formatter:on
     assertFalse(config.hasErrors());
-    Exception e = assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getInteger("foo.' bar'"));
-    assertEquals("Value of property 'foo.\" bar\"' is too large for an integer", e.getMessage());
+    InvalidConfigurationPropertyTypeException e =
+        assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getInteger("foo.' bar'"));
+    assertEquals("Value of property 'foo.\" bar\"' is too large for an integer", e.getMessageWithoutPosition());
 
     e = assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getListOfInteger("foo.buz"));
-    assertEquals("Value of property 'foo.buz', index 2, is too large for an integer", e.getMessage());
+    assertEquals("Value of property 'foo.buz', index 2, is too large for an integer", e.getMessageWithoutPosition());
   }
 
   @Test
@@ -188,7 +189,12 @@ class TomlBackedConfigurationTest {
   void invalidTOMLFile() throws Exception {
     Configuration config = Configuration.fromToml("foo=\"12\"\nfoobar = \"156.34");
     assertTrue(config.hasErrors());
-    assertEquals("Unexpected end of input, expected \" or a character", config.errors().get(0).getMessage());
+    assertTrue(
+        config
+            .errors()
+            .get(0)
+            .getMessageWithoutPosition()
+            .startsWith("Unexpected end of input, expected \" or a character"));
     assertEquals(DocumentPosition.positionAt(2, 17), config.errors().get(0).position());
     assertEquals("12", config.getString("foo"));
   }
@@ -244,7 +250,7 @@ class TomlBackedConfigurationTest {
     Configuration config = Configuration.fromToml(" foo = \"bar\"", schema);
     assertTrue(config.hasErrors());
     ConfigurationError error = config.errors().get(0);
-    assertEquals("No bar allowed", error.getMessage());
+    assertEquals("No bar allowed", error.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(1, 2), error.position());
   }
 
@@ -259,7 +265,7 @@ class TomlBackedConfigurationTest {
     Configuration config = Configuration.fromToml(" foo = " + (1L + Integer.MAX_VALUE) + "\n", schema);
     assertTrue(config.hasErrors());
     ConfigurationError error = config.errors().get(0);
-    assertEquals("Value of property 'foo' is too large for an integer", error.getMessage());
+    assertEquals("Value of property 'foo' is too large for an integer", error.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(1, 2), error.position());
   }
 
@@ -274,7 +280,7 @@ class TomlBackedConfigurationTest {
     Configuration config = Configuration.fromToml(" foo = [1, 2]\n", schema);
     assertTrue(config.hasErrors());
     ConfigurationError error = config.errors().get(0);
-    assertEquals("Value of property 'foo', index 0, is not a string", error.getMessage());
+    assertEquals("Value of property 'foo', index 0, is not a string", error.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(1, 2), error.position());
   }
 
@@ -289,7 +295,7 @@ class TomlBackedConfigurationTest {
     Configuration config = Configuration.fromToml(" foo = ['a', 'b']\n", schema);
     assertTrue(config.hasErrors());
     ConfigurationError error = config.errors().get(0);
-    assertEquals("Value of property 'foo', index 0, is not an integer", error.getMessage());
+    assertEquals("Value of property 'foo', index 0, is not an integer", error.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(1, 2), error.position());
   }
 
@@ -320,7 +326,7 @@ class TomlBackedConfigurationTest {
     Configuration config = Configuration.fromToml(" foo = [1, 2, " + (1L + Integer.MAX_VALUE) + ", 3]\n", schema);
     assertTrue(config.hasErrors());
     ConfigurationError error = config.errors().get(0);
-    assertEquals("Value of property 'foo', index 2, is too large for an integer", error.getMessage());
+    assertEquals("Value of property 'foo', index 2, is too large for an integer", error.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(1, 2), error.position());
   }
 
@@ -335,7 +341,7 @@ class TomlBackedConfigurationTest {
     Configuration config = Configuration.fromToml(" foo = ['a', 'b']\n", schema);
     assertTrue(config.hasErrors());
     ConfigurationError error = config.errors().get(0);
-    assertEquals("Value of property 'foo', index 0, is not a long", error.getMessage());
+    assertEquals("Value of property 'foo', index 0, is not a long", error.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(1, 2), error.position());
   }
 
@@ -361,7 +367,7 @@ class TomlBackedConfigurationTest {
     Configuration config = Configuration.fromToml(" foo = 15\n", schema);
     assertTrue(config.hasErrors());
     ConfigurationError error = config.errors().get(0);
-    assertEquals("Value of property 'foo' is outside range [0,10)", error.getMessage());
+    assertEquals("Value of property 'foo' is outside range [0,10)", error.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(1, 2), error.position());
 
     Configuration config2 = Configuration.fromToml(" foo = 9\n", schema);

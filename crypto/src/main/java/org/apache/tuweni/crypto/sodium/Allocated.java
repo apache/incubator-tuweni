@@ -84,6 +84,7 @@ public final class Allocated implements Destroyable {
   }
 
   /**
+   * Returns true if the value is destroyed.
    *
    * @return true if the allocated value is destroyed
    */
@@ -93,6 +94,8 @@ public final class Allocated implements Destroyable {
   }
 
   /**
+   * Provides the bytes of this key.
+   * 
    * @return The bytes of this key.
    */
   public Bytes bytes() {
@@ -100,6 +103,8 @@ public final class Allocated implements Destroyable {
   }
 
   /**
+   * Provides the bytes of this key.
+   * 
    * @return The bytes of this key.
    */
   public byte[] bytesArray() {

@@ -106,11 +106,13 @@ class RLPReferenceTestSuite {
     });
   }
 
+  @SuppressWarnings("UnusedMethod")
   @MustBeClosed
   private static Stream<Arguments> readRLPTests() throws IOException {
     return findTests("**/RLPTests/rlptest.json");
   }
 
+  @SuppressWarnings("UnusedMethod")
   @MustBeClosed
   private static Stream<Arguments> readInvalidRLPTests() throws IOException {
     return findTests("**/RLPTests/invalidRLPTest.json");

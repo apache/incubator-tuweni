@@ -50,7 +50,8 @@ public final class Invite {
   }
 
   /**
-   *
+   * The host to connect to
+   * 
    * @return the host to connect to to redeem the invite
    */
   public String host() {
@@ -58,7 +59,8 @@ public final class Invite {
   }
 
   /**
-   *
+   * The port of the host to connect to
+   * 
    * @return the port of the host to connect to to redeem the invite
    */
   public int port() {
@@ -66,7 +68,8 @@ public final class Invite {
   }
 
   /**
-   *
+   * The identity of the invite
+   * 
    * @return the public key associated with the invite
    */
   public Identity identity() {

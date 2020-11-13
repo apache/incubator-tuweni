@@ -42,7 +42,8 @@ public final class SignatureAndPublicKey {
   }
 
   /**
-   *
+   * Provides the public key.
+   * 
    * @return the public key of the pair
    */
   public PublicKey publicKey() {
@@ -50,7 +51,8 @@ public final class SignatureAndPublicKey {
   }
 
   /**
-   *
+   * Provides the signature.
+   * 
    * @return the signature of the pair
    */
   public Signature signature() {

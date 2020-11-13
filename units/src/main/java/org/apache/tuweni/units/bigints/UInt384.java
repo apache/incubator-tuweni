@@ -96,7 +96,7 @@ public final class UInt384 implements UInt384Value<UInt384> {
    *
    * @param bytes The bytes containing a {@link UInt384}.
    * @return A {@link UInt384} containing the specified value.
-   * @throws IllegalArgumentException if {@code bytes.size() &gt; 48}.
+   * @throws IllegalArgumentException if {@code bytes.size() > 48}.
    */
   public static UInt384 fromBytes(Bytes bytes) {
     return new UInt384(Bytes48.leftPad(bytes));

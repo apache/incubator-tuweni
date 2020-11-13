@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  */
 class Fnv1aTest {
 
+
   @ParameterizedTest()
   @MethodSource("vectorSupplier")
   void testVector(UInt32 h, UInt32 d, UInt32 expected) {
@@ -35,7 +36,7 @@ class Fnv1aTest {
     assertEquals(expected, result);
   }
 
-
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> vectorSupplier() {
     return Stream
         .of(

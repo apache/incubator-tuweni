@@ -56,6 +56,7 @@ public class RPCRequestBody {
   }
 
   /**
+   * Serialize body to bytes.
    *
    * @param objectMapper the object mapper to serialize to bytes with
    * @return the bytes representation of this RPC request body. The request is first encoded into JSON, then from JSON

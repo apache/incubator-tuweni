@@ -63,6 +63,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.add(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addProvider() {
     return Stream
         .of(
@@ -92,6 +93,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.add(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addUInt256Provider() {
     return Stream
         .of(
@@ -128,6 +130,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.add(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addLongProvider() {
     return Stream
         .of(
@@ -157,6 +160,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.addMod(v2, m));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addModProvider() {
     return Stream
         .of(
@@ -181,6 +185,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.addMod(v2, m));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addModUInt256UInt256Provider() {
     return Stream
         .of(
@@ -205,6 +210,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.addMod(v2, m));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addModLongUInt256Provider() {
     return Stream
         .of(
@@ -229,6 +235,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.addMod(v2, m));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addModLongLongProvider() {
     return Stream
         .of(Arguments.of(v(0), 1L, 2L, v(1)), Arguments.of(v(1), 1L, 2L, v(0)), Arguments.of(v(2), 1L, 2L, v(1)));
@@ -252,6 +259,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.subtract(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> subtractProvider() {
     return Stream
         .of(
@@ -274,6 +282,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.subtract(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> subtractUInt256Provider() {
     return Stream
         .of(
@@ -303,6 +312,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.subtract(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> subtractLongProvider() {
     return Stream
         .of(
@@ -326,6 +336,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.multiply(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> multiplyProvider() {
     return Stream
         .of(
@@ -359,6 +370,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.multiply(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> multiplyUInt256Provider() {
     return Stream
         .of(
@@ -414,6 +426,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.multiply(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> multiplyLongProvider() {
     return Stream
         .of(
@@ -464,6 +477,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.multiplyMod(v2, m));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> multiplyModProvider() {
     return Stream
         .of(
@@ -491,6 +505,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.multiplyMod(v2, m));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> multiplyModUInt256UInt256Provider() {
     return Stream
         .of(
@@ -519,6 +534,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.multiplyMod(v2, m));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> multiplyModLongUInt256Provider() {
     return Stream
         .of(
@@ -552,6 +568,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.multiplyMod(v2, m));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> multiplyModLongLongProvider() {
     return Stream
         .of(
@@ -591,6 +608,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.divide(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> divideProvider() {
     return Stream
         .of(
@@ -626,6 +644,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.divide(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> divideUInt256Provider() {
     return Stream
         .of(
@@ -662,6 +681,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.divide(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> divideLongProvider() {
     return Stream
         .of(
@@ -703,6 +723,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.pow(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> powUInt256Provider() {
     return Stream
         .of(
@@ -723,6 +744,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.pow(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> powLongProvider() {
     return Stream
         .of(
@@ -744,6 +766,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.mod(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> modUInt256Provider() {
     return Stream
         .of(
@@ -779,6 +802,7 @@ class BaseUInt256ValueTest {
     assertValueEquals(expected, v1.mod(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> modLongProvider() {
     return Stream
         .of(
@@ -825,6 +849,7 @@ class BaseUInt256ValueTest {
     assertEquals(expected, v1.compareTo(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> compareToProvider() {
     return Stream
         .of(
@@ -874,6 +899,7 @@ class BaseUInt256ValueTest {
     assertEquals(expected, value.toBytes());
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> toBytesProvider() {
     return Stream
         .of(
@@ -905,6 +931,7 @@ class BaseUInt256ValueTest {
     assertEquals(expected, value.toMinimalBytes());
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> toMinimalBytesProvider() {
     return Stream
         .of(
@@ -924,6 +951,7 @@ class BaseUInt256ValueTest {
     assertEquals(expected, value.numberOfLeadingZeros());
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> numberOfLeadingZerosProvider() {
     return Stream
         .of(
@@ -942,6 +970,7 @@ class BaseUInt256ValueTest {
     assertEquals(expected, value.bitLength());
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> bitLengthProvider() {
     return Stream
         .of(
@@ -960,6 +989,7 @@ class BaseUInt256ValueTest {
     assertThrows(ArithmeticException.class, () -> value.addExact(operand));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addExactProvider() {
     return Stream.of(Arguments.of(Value.MAX_VALUE, v(1)), Arguments.of(Value.MAX_VALUE, Value.MAX_VALUE));
   }
@@ -970,6 +1000,7 @@ class BaseUInt256ValueTest {
     assertThrows(ArithmeticException.class, () -> value.addExact(operand));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addExactLongProvider() {
     return Stream
         .of(Arguments.of(Value.MAX_VALUE, 3), Arguments.of(Value.MAX_VALUE, Long.MAX_VALUE), Arguments.of(v(0), -1));
@@ -981,6 +1012,7 @@ class BaseUInt256ValueTest {
     assertThrows(ArithmeticException.class, () -> value.subtractExact(operand));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> subtractExactProvider() {
     return Stream.of(Arguments.of(v(0), v(1)), Arguments.of(v(0), Value.MAX_VALUE));
   }
@@ -991,10 +1023,12 @@ class BaseUInt256ValueTest {
     assertThrows(ArithmeticException.class, () -> value.subtractExact(operand));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> subtractExactLongProvider() {
     return Stream.of(Arguments.of(v(0), 1), Arguments.of(v(0), Long.MAX_VALUE), Arguments.of(Value.MAX_VALUE, -1));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private void assertValueEquals(Value expected, Value actual) {
     String msg = String.format("Expected %s but got %s", expected.toHexString(), actual.toHexString());
     assertEquals(expected, actual, msg);

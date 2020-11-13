@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 
 import org.junit.jupiter.api.Test;
 
@@ -113,28 +114,28 @@ class MutableTomlArrayTest {
 
   @Test
   void shouldGetOffSetDateTime() {
-    OffsetDateTime time = OffsetDateTime.now();
+    OffsetDateTime time = OffsetDateTime.now(ZoneId.of("America/Los_Angeles"));
     MutableTomlArray array = new MutableTomlArray().append(time, positionAt(1, 1));
     assertEquals(time, array.getOffsetDateTime(0));
   }
 
   @Test
   void shouldGetLocalDateTime() {
-    LocalDateTime time = LocalDateTime.now();
+    LocalDateTime time = LocalDateTime.now(ZoneId.of("America/Los_Angeles"));
     MutableTomlArray array = new MutableTomlArray().append(time, positionAt(1, 1));
     assertEquals(time, array.getLocalDateTime(0));
   }
 
   @Test
   void shouldGetLocalDate() {
-    LocalDate time = LocalDate.now();
+    LocalDate time = LocalDate.now(ZoneId.of("America/Los_Angeles"));
     MutableTomlArray array = new MutableTomlArray().append(time, positionAt(1, 1));
     assertEquals(time, array.getLocalDate(0));
   }
 
   @Test
   void shouldGetLocalTime() {
-    LocalTime time = LocalTime.now();
+    LocalTime time = LocalTime.now(ZoneId.of("America/Los_Angeles"));
     MutableTomlArray array = new MutableTomlArray().append(time, positionAt(1, 1));
     assertEquals(time, array.getLocalTime(0));
   }

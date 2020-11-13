@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -418,7 +417,7 @@ final class TomlBackedConfiguration implements Configuration {
   }
 
   private static Map<String, Object> deepToMap(TomlTable table) {
-    return table.toMap().entrySet().stream().collect(Collectors.toMap(Entry::getKey, e -> {
+    return table.toMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
       Object o = e.getValue();
       if (o instanceof TomlArray) {
         return deepToList((TomlArray) o);

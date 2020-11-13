@@ -34,7 +34,7 @@ public final class RawRequestService {
 
   private final Multiplexer multiplexer;
 
-  protected RawRequestService(Multiplexer multiplexer) {
+  RawRequestService(Multiplexer multiplexer) {
     this.multiplexer = multiplexer;
   }
 

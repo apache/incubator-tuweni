@@ -169,6 +169,8 @@ public final class Box implements AutoCloseable {
     }
 
     /**
+     * Provides the bytes of this key
+     * 
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -176,6 +178,8 @@ public final class Box implements AutoCloseable {
     }
 
     /**
+     * Provides the bytes of this key
+     * 
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {
@@ -406,6 +410,8 @@ public final class Box implements AutoCloseable {
     }
 
     /**
+     * Provides the bytes of this seed
+     * 
      * @return The bytes of this seed.
      */
     public Bytes bytes() {
@@ -413,6 +419,8 @@ public final class Box implements AutoCloseable {
     }
 
     /**
+     * Provides the bytes of this seed
+     * 
      * @return The bytes of this seed.
      */
     public byte[] bytesArray() {
@@ -534,6 +542,8 @@ public final class Box implements AutoCloseable {
     }
 
     /**
+     * Provides the public key
+     * 
      * @return The public key of the key pair.
      */
     public PublicKey publicKey() {
@@ -541,6 +551,8 @@ public final class Box implements AutoCloseable {
     }
 
     /**
+     * Provides the secret key
+     * 
      * @return The secret key of the key pair.
      */
     public SecretKey secretKey() {
@@ -676,6 +688,8 @@ public final class Box implements AutoCloseable {
     }
 
     /**
+     * Provides the bytes of this nonce
+     * 
      * @return The bytes of this nonce.
      */
     public Bytes bytes() {
@@ -683,6 +697,8 @@ public final class Box implements AutoCloseable {
     }
 
     /**
+     * Provides the bytes of this nonce
+     * 
      * @return The bytes of this nonce.
      */
     public byte[] bytesArray() {

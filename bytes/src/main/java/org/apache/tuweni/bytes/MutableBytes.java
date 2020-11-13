@@ -69,9 +69,9 @@ public interface MutableBytes extends Bytes {
    * @param length The length of the resulting value.
    * @return A {@link Bytes} value that expose the bytes of {@code value} from {@code offset} (inclusive) to
    *         {@code offset + length} (exclusive).
-   * @throws IndexOutOfBoundsException if {@code offset &lt; 0 || (value.length > 0 && offset >=
+   * @throws IndexOutOfBoundsException if {@code offset < 0 || (value.length > 0 && offset >=
    *     value.length)}.
-   * @throws IllegalArgumentException if {@code length &lt; 0 || offset + length > value.length}.
+   * @throws IllegalArgumentException if {@code length < 0 || offset + length > value.length}.
    */
   static MutableBytes wrap(byte[] value, int offset, int length) {
     checkNotNull(value);
@@ -110,9 +110,9 @@ public interface MutableBytes extends Bytes {
    *        {@code wrapBuffer(buffer, i, 1).get(0) == buffer.getByte(i)}.
    * @param size The size of the returned value.
    * @return A {@link MutableBytes} value.
-   * @throws IndexOutOfBoundsException if {@code offset &lt; 0 || (buffer.length() > 0 && offset >=
+   * @throws IndexOutOfBoundsException if {@code offset < 0 || (buffer.length() > 0 && offset >=
    *     buffer.length())}.
-   * @throws IllegalArgumentException if {@code length &lt; 0 || offset + length > buffer.length()}.
+   * @throws IllegalArgumentException if {@code length < 0 || offset + length > buffer.length()}.
    */
   static MutableBytes wrapBuffer(Buffer buffer, int offset, int size) {
     checkNotNull(buffer);
@@ -151,9 +151,9 @@ public interface MutableBytes extends Bytes {
    *        {@code wrapByteBuf(byteBuf, i, 1).get(0) == byteBuf.getByte(i)}.
    * @param size The size of the returned value.
    * @return A {@link MutableBytes} value.
-   * @throws IndexOutOfBoundsException if {@code offset &lt; 0 || (byteBuf.capacity() > 0 && offset >=
+   * @throws IndexOutOfBoundsException if {@code offset < 0 || (byteBuf.capacity() > 0 && offset >=
    *     byteBuf.capacity())}.
-   * @throws IllegalArgumentException if {@code length &lt; 0 || offset + length > byteBuf.capacity()}.
+   * @throws IllegalArgumentException if {@code length < 0 || offset + length > byteBuf.capacity()}.
    */
   static MutableBytes wrapByteBuf(ByteBuf byteBuf, int offset, int size) {
     checkNotNull(byteBuf);
@@ -192,9 +192,9 @@ public interface MutableBytes extends Bytes {
    *        {@code wrapByteBuffer(byteBuffer, i, 1).get(0) == byteBuffer.getByte(i)}.
    * @param size The size of the returned value.
    * @return A {@link MutableBytes} value.
-   * @throws IndexOutOfBoundsException if {@code offset &lt; 0 || (byteBuffer.limit() > 0 && offset >=
+   * @throws IndexOutOfBoundsException if {@code offset < 0 || (byteBuffer.limit() > 0 && offset >=
    *     byteBuffer.limit())}.
-   * @throws IllegalArgumentException if {@code length &lt; 0 || offset + length > byteBuffer.limit()}.
+   * @throws IllegalArgumentException if {@code length < 0 || offset + length > byteBuffer.limit()}.
    */
   static MutableBytes wrapByteBuffer(ByteBuffer byteBuffer, int offset, int size) {
     checkNotNull(byteBuffer);
@@ -236,7 +236,7 @@ public interface MutableBytes extends Bytes {
    *
    * @param i The index of the byte to set.
    * @param b The value to set that byte to.
-   * @throws IndexOutOfBoundsException if {@code i < 0} or {i &gt;= size()}.
+   * @throws IndexOutOfBoundsException if {@code i < 0} or {i >= size()}.
    */
   void set(int i, byte b);
 
@@ -245,7 +245,7 @@ public interface MutableBytes extends Bytes {
    *
    * @param offset The offset of the bytes to set.
    * @param bytes The value to set bytes to.
-   * @throws IndexOutOfBoundsException if {@code i < 0} or {i &gt;= size()}.
+   * @throws IndexOutOfBoundsException if {@code i < 0} or {i >= size()}.
    */
   default void set(int offset, Bytes bytes) {
     for (int i = 0; i < bytes.size(); i++) {
@@ -258,7 +258,7 @@ public interface MutableBytes extends Bytes {
    *
    * @param i The index, which must less than or equal to {@code size() - 4}.
    * @param value The integer value.
-   * @throws IndexOutOfBoundsException if {@code i &lt; 0} or {@code i &gt; size() - 4}.
+   * @throws IndexOutOfBoundsException if {@code i < 0} or {@code i > size() - 4}.
    */
   default void setInt(int i, int value) {
     int size = size();
@@ -279,7 +279,7 @@ public interface MutableBytes extends Bytes {
    *
    * @param i The index, which must less than or equal to {@code size() - 8}.
    * @param value The long value.
-   * @throws IndexOutOfBoundsException if {@code i &lt; 0} or {@code i &gt; size() - 8}.
+   * @throws IndexOutOfBoundsException if {@code i < 0} or {@code i > size() - 8}.
    */
   default void setLong(int i, long value) {
     int size = size();
@@ -350,8 +350,8 @@ public interface MutableBytes extends Bytes {
    * @param length The length of the resulting value.
    * @return A new mutable view over the bytes of this value from index {@code i} (included) to index {@code i + length}
    *         (excluded).
-   * @throws IllegalArgumentException if {@code length &lt; 0}.
-   * @throws IndexOutOfBoundsException if {@code i &lt; 0} or {i &gt;= size()} or {i + length &gt; size()} .
+   * @throws IllegalArgumentException if {@code length < 0}.
+   * @throws IndexOutOfBoundsException if {@code i < 0} or {i >= size()} or {i + length > size()} .
    */
   MutableBytes mutableSlice(int i, int length);
 

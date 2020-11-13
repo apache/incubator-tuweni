@@ -25,4 +25,13 @@ public class Author {
   public Author(String id) {
     this.id = id;
   }
+
+  /**
+   * The author id
+   * 
+   * @return the author id
+   */
+  public String getId() {
+    return id;
+  }
 }

@@ -75,6 +75,8 @@ public final class ScuttlebuttClientFactory {
   }
 
   /**
+   * Creates a SSB client with a network key
+   * 
    * @param vertx the vertx instance to use for network IO
    * @param host The host to connect to as a scuttlebutt client
    * @param port The port to connect on
@@ -105,6 +107,8 @@ public final class ScuttlebuttClientFactory {
   }
 
   /**
+   * Creates a SSB client with an invite
+   * 
    * @param vertx the vertx instance to use for network IO
    * @param keyPair The keys to use for the secret handshake
    * @param invite the invitation to the remote server

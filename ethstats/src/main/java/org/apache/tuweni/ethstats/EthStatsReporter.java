@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -254,7 +255,11 @@ public final class EthStatsReporter {
   }
 
   private void requestHistory(JsonNode list) {
-    historyRequester.accept(null);
+    List<UInt256> request = new ArrayList<>();
+    for (JsonNode elt : list) {
+      request.add(UInt256.fromHexString(elt.asText()));
+    }
+    historyRequester.accept(request);
   }
 
   private void writePing(WebSocket ws) {

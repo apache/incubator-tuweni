@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 public final class SecureScuttlebuttVertxClient {
 
   private static final Logger logger = LoggerFactory.getLogger(NetSocketClientHandler.class);
-  private Invite invite;
 
   private class NetSocketClientHandler<T extends ClientHandler> {
 

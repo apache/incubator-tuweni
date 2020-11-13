@@ -45,7 +45,7 @@ class FileBackedFingerprintRepositoryTest {
   @Test
   void testRelativePath() throws IOException {
     try {
-      FileBackedFingerprintRepository repo = new FileBackedFingerprintRepository(Paths.get("tmp", "foo"));
+      new FileBackedFingerprintRepository(Paths.get("tmp", "foo"));
     } finally {
       deleteRecursively(Paths.get("tmp"));
     }

@@ -21,12 +21,20 @@ import javax.security.auth.Destroyable;
  */
 public interface SecretEncryptionStream extends Destroyable {
 
-  /** @return The header for the stream. */
+  /**
+   * Returns the header for the stream
+   * 
+   * @return The header for the stream.
+   */
   default Bytes header() {
     return Bytes.wrap(headerArray());
   }
 
-  /** @return The header for the stream. */
+  /**
+   * Returns the header for the stream
+   * 
+   * @return The header for the stream.
+   */
   byte[] headerArray();
 
   /**

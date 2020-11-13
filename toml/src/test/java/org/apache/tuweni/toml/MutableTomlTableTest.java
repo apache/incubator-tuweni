@@ -76,7 +76,7 @@ class MutableTomlTableTest {
       table.set("foo.bar", "two", positionAt(2, 5));
     });
 
-    assertEquals("foo.bar previously defined at line 1, column 3", e.getMessage());
+    assertEquals("foo.bar previously defined at line 1, column 3", e.getMessageWithoutPosition());
   }
 
   @ParameterizedTest
@@ -87,9 +87,10 @@ class MutableTomlTableTest {
     TomlParseError e = assertThrows(TomlParseError.class, () -> {
       table.set(path, "two", positionAt(2, 5));
     });
-    assertEquals(expected + " previously defined at line 1, column 3", e.getMessage());
+    assertEquals(expected + " previously defined at line 1, column 3", e.getMessageWithoutPosition());
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> quotesComplexKeyInErrorSupplier() {
     return Stream
         .of(
@@ -106,7 +107,7 @@ class MutableTomlTableTest {
       table.set("foo.bar.baz", "two", positionAt(2, 5));
     });
 
-    assertEquals("foo.bar is not a table (previously defined at line 5, column 3)", e.getMessage());
+    assertEquals("foo.bar is not a table (previously defined at line 5, column 3)", e.getMessageWithoutPosition());
   }
 
   @Test
@@ -124,7 +125,7 @@ class MutableTomlTableTest {
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
       table.get("foo.=bar");
     });
-    assertEquals("Invalid key: Unexpected '=', expected a-z, A-Z, 0-9, ', or \"", e.getMessage());
+    assertEquals("Invalid key: Unexpected '=', expected a-z, A-Z, 0-9, ', or \" (line 1, column 5)", e.getMessage());
   }
 
   @Test

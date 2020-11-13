@@ -59,6 +59,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.add(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addProvider() {
     return Stream
         .of(
@@ -80,6 +81,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.add(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addLongProvider() {
     return Stream
         .of(
@@ -103,6 +105,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.addMod(v2, m));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addModProvider() {
     return Stream
         .of(
@@ -127,6 +130,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.addMod(v2, m));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addModUInt32UInt32Provider() {
     return Stream
         .of(
@@ -151,6 +155,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.addMod(v2, m));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addModLongUInt32Provider() {
     return Stream
         .of(
@@ -175,6 +180,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.addMod(v2, m));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addModLongLongProvider() {
     return Stream.of(Arguments.of(v(0), 1, 2, v(1)), Arguments.of(v(1), 1, 2, v(0)), Arguments.of(v(2), 1, 2, v(1)));
   }
@@ -197,6 +203,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.subtract(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> subtractProvider() {
     return Stream
         .of(
@@ -215,6 +222,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.subtract(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> subtractLongProvider() {
     return Stream
         .of(
@@ -236,6 +244,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.multiply(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> multiplyProvider() {
     return Stream
         .of(
@@ -259,6 +268,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.multiply(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> multiplyLongProvider() {
     return Stream
         .of(
@@ -290,6 +300,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.multiplyMod(v2, m));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> multiplyModProvider() {
     return Stream
         .of(
@@ -312,6 +323,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.multiplyMod(v2, m));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> multiplyModLongUInt32Provider() {
     return Stream
         .of(
@@ -340,6 +352,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.multiplyMod(v2, m));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> multiplyModLongLongProvider() {
     return Stream
         .of(
@@ -374,6 +387,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.divide(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> divideProvider() {
     return Stream
         .of(
@@ -404,6 +418,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.divide(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> divideLongProvider() {
     return Stream
         .of(
@@ -440,6 +455,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.pow(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> powUInt32Provider() {
     return Stream
         .of(
@@ -456,6 +472,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.pow(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> powLongProvider() {
     return Stream
         .of(
@@ -472,6 +489,7 @@ class UInt32Test {
     assertValueEquals(expected, v1.mod(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> modLongProvider() {
     return Stream
         .of(
@@ -514,6 +532,7 @@ class UInt32Test {
     }
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> andProvider() {
     return Stream
         .of(
@@ -535,6 +554,7 @@ class UInt32Test {
     }
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> orProvider() {
     return Stream
         .of(
@@ -558,6 +578,7 @@ class UInt32Test {
     }
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> xorProvider() {
     return Stream
         .of(
@@ -575,6 +596,7 @@ class UInt32Test {
     assertValueEquals(expected, value.not());
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> notProvider() {
     return Stream
         .of(
@@ -589,6 +611,7 @@ class UInt32Test {
     assertValueEquals(expected, value.shiftLeft(distance));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> shiftLeftProvider() {
     return Stream
         .of(
@@ -613,6 +636,7 @@ class UInt32Test {
     assertValueEquals(expected, value.shiftRight(distance));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> shiftRightProvider() {
     return Stream
         .of(
@@ -641,6 +665,7 @@ class UInt32Test {
     assertEquals(expected, value.intValue());
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> intValueProvider() {
     return Stream
         .of(
@@ -662,6 +687,7 @@ class UInt32Test {
     assertEquals(expected, value.toLong());
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> longValueProvider() {
     return Stream
         .of(
@@ -683,6 +709,7 @@ class UInt32Test {
     assertEquals(expected, v1.compareTo(v2));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> compareToProvider() {
     return Stream
         .of(
@@ -704,6 +731,7 @@ class UInt32Test {
     assertEquals(expected, value.toBytes());
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> toBytesProvider() {
     return Stream
         .of(
@@ -718,6 +746,7 @@ class UInt32Test {
     assertEquals(expected, value.toMinimalBytes());
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> toMinimalBytesProvider() {
     return Stream
         .of(
@@ -733,6 +762,7 @@ class UInt32Test {
     assertEquals(expected, value.numberOfLeadingZeros());
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> numberOfLeadingZerosProvider() {
     return Stream
         .of(
@@ -751,6 +781,7 @@ class UInt32Test {
     assertEquals(expected, value.bitLength());
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> bitLengthProvider() {
     return Stream
         .of(
@@ -769,6 +800,7 @@ class UInt32Test {
     assertThrows(ArithmeticException.class, () -> value.addExact(operand));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addExactProvider() {
     return Stream.of(Arguments.of(UInt32.MAX_VALUE, v(1)), Arguments.of(UInt32.MAX_VALUE, UInt32.MAX_VALUE));
   }
@@ -779,6 +811,7 @@ class UInt32Test {
     assertThrows(ArithmeticException.class, () -> value.addExact(operand));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> addExactLongProvider() {
     return Stream
         .of(
@@ -793,6 +826,7 @@ class UInt32Test {
     assertThrows(ArithmeticException.class, () -> value.subtractExact(operand));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> subtractExactProvider() {
     return Stream.of(Arguments.of(v(0), v(1)), Arguments.of(v(0), UInt32.MAX_VALUE));
   }
@@ -803,6 +837,7 @@ class UInt32Test {
     assertThrows(ArithmeticException.class, () -> value.subtractExact(operand));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> subtractExactLongProvider() {
     return Stream.of(Arguments.of(v(0), 1), Arguments.of(v(0), Integer.MAX_VALUE), Arguments.of(UInt32.MAX_VALUE, -1));
   }

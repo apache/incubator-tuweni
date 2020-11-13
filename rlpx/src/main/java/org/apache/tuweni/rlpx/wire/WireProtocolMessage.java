@@ -21,11 +21,15 @@ interface WireProtocolMessage {
 
 
   /**
+   * Provides the message payload
+   * 
    * @return the payload of the wire message, ready for consumption.
    */
   Bytes toBytes();
 
   /**
+   * Provides the message code
+   * 
    * @return the code associated with the message type according to the subprotocol.
    */
   int messageType();

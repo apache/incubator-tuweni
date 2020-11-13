@@ -102,6 +102,8 @@ public final class KeyExchange {
     }
 
     /**
+     * Provides the bytes of this key.
+     * 
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -109,6 +111,8 @@ public final class KeyExchange {
     }
 
     /**
+     * Provides the bytes of this key.
+     * 
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {
@@ -300,6 +304,8 @@ public final class KeyExchange {
     }
 
     /**
+     * Provides the bytes of this seed.
+     * 
      * @return The bytes of this seed.
      */
     public Bytes bytes() {
@@ -307,6 +313,8 @@ public final class KeyExchange {
     }
 
     /**
+     * Provides the bytes of this seed.
+     * 
      * @return The bytes of this seed.
      */
     public byte[] bytesArray() {
@@ -417,6 +425,8 @@ public final class KeyExchange {
     }
 
     /**
+     * Provides the public key of the key pair.
+     * 
      * @return The public key of the key pair.
      */
     public PublicKey publicKey() {
@@ -424,6 +434,8 @@ public final class KeyExchange {
     }
 
     /**
+     * Provides the secret key of the key pair.
+     * 
      * @return The secret key of the key pair.
      */
     public SecretKey secretKey() {
@@ -585,12 +597,20 @@ public final class KeyExchange {
       this.txKey = txKey;
     }
 
-    /** @return The session key that will be used to receive data. */
+    /**
+     * Provides the session key that will be used to receive data.
+     * 
+     * @return The session key that will be used to receive data.
+     */
     public SessionKey rx() {
       return rxKey;
     }
 
-    /** @return The session key that will be used to send data. */
+    /**
+     * Provides the session key that will be used to send data.
+     * 
+     * @return The session key that will be used to send data.
+     */
     public SessionKey tx() {
       return txKey;
     }

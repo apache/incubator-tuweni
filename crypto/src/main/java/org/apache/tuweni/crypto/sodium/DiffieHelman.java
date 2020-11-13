@@ -125,6 +125,8 @@ public final class DiffieHelman {
     }
 
     /**
+     * Provides the bytes of this key
+     * 
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -132,6 +134,8 @@ public final class DiffieHelman {
     }
 
     /**
+     * Provides the bytes of this key
+     * 
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {
@@ -310,6 +314,8 @@ public final class DiffieHelman {
     }
 
     /**
+     * Provides the public key
+     * 
      * @return The public key of the key pair.
      */
     public PublicKey publicKey() {
@@ -317,6 +323,8 @@ public final class DiffieHelman {
     }
 
     /**
+     * Provides the secret key
+     * 
      * @return The secret key of the key pair.
      */
     public SecretKey secretKey() {
@@ -447,6 +455,8 @@ public final class DiffieHelman {
     }
 
     /**
+     * Provides the bytes of this key.
+     * 
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -454,6 +464,8 @@ public final class DiffieHelman {
     }
 
     /**
+     * Provides the bytes of this key.
+     * 
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {

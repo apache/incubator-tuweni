@@ -37,6 +37,7 @@ class ConcatenatedBytesTest {
     assertArrayEquals(Arrays.copyOfRange(res, first.length, res.length), second);
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> concatenatedWrapProvider() {
     return Stream
         .of(

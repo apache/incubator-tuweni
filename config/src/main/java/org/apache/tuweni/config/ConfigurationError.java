@@ -65,6 +65,8 @@ public final class ConfigurationError extends RuntimeException {
   }
 
   /**
+   * Provides the position in the input where the error occurred.
+   *
    * @return The position in the input where the error occurred, or {@code null} if no position information is
    *         available.
    */
@@ -73,11 +75,15 @@ public final class ConfigurationError extends RuntimeException {
     return position;
   }
 
+  public String getMessageWithoutPosition() {
+    return super.getMessage();
+  }
+
   @Override
-  public String toString() {
+  public String getMessage() {
     if (position == null) {
-      return getMessage();
+      return super.getMessage();
     }
-    return getMessage() + " (" + position + ")";
+    return super.getMessage() + " (" + position + ")";
   }
 }

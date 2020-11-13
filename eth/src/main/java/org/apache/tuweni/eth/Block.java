@@ -80,6 +80,8 @@ public final class Block {
   }
 
   /**
+   * Provides the block body
+   * 
    * @return the block body.
    */
   public BlockBody getBody() {
@@ -87,6 +89,8 @@ public final class Block {
   }
 
   /**
+   * Provides the block header
+   * 
    * @return the block header.
    */
   public BlockHeader getHeader() {
@@ -116,6 +120,8 @@ public final class Block {
   }
 
   /**
+   * Provides the block bytes
+   * 
    * @return The RLP serialized form of this block.
    */
   public Bytes toBytes() {

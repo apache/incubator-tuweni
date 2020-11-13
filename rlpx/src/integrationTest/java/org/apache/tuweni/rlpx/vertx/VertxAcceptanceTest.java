@@ -81,12 +81,6 @@ class VertxAcceptanceTest {
 
   private static class MyCustomSubProtocol implements SubProtocol {
 
-    private final int i;
-
-    public MyCustomSubProtocol(int i) {
-      this.i = i;
-    }
-
     public MyCustomSubProtocolHandler handler;
 
     @Override
@@ -120,8 +114,8 @@ class VertxAcceptanceTest {
   void testTwoServicesSendingMessagesOfCustomSubProtocolToEachOther(@VertxInstance Vertx vertx) throws Exception {
     SECP256K1.KeyPair kp = SECP256K1.KeyPair.random();
     SECP256K1.KeyPair secondKp = SECP256K1.KeyPair.random();
-    MyCustomSubProtocol sp = new MyCustomSubProtocol(1);
-    MyCustomSubProtocol secondSp = new MyCustomSubProtocol(2);
+    MyCustomSubProtocol sp = new MyCustomSubProtocol();
+    MyCustomSubProtocol secondSp = new MyCustomSubProtocol();
     MemoryWireConnectionsRepository repository = new MemoryWireConnectionsRepository();
     VertxRLPxService service =
         new VertxRLPxService(vertx, 0, "localhost", 10000, kp, Collections.singletonList(sp), "Client 1", repository);
@@ -162,8 +156,8 @@ class VertxAcceptanceTest {
       throws Exception {
     SECP256K1.KeyPair kp = SECP256K1.KeyPair.random();
     SECP256K1.KeyPair secondKp = SECP256K1.KeyPair.random();
-    MyCustomSubProtocol sp = new MyCustomSubProtocol(1);
-    MyCustomSubProtocol secondSp = new MyCustomSubProtocol(2);
+    MyCustomSubProtocol sp = new MyCustomSubProtocol();
+    MyCustomSubProtocol secondSp = new MyCustomSubProtocol();
     MemoryWireConnectionsRepository repository = new MemoryWireConnectionsRepository();
     MemoryWireConnectionsRepository secondRepository = new MemoryWireConnectionsRepository();
 

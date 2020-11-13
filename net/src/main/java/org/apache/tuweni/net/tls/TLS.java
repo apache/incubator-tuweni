@@ -91,6 +91,7 @@ public final class TLS {
    * @return {@code true} if a self-signed certificate was created.
    * @throws IOException If an IO error occurs creating the certificate.
    */
+  @SuppressWarnings("JdkObsolete")
   public static boolean createSelfSignedCertificateIfMissing(Path key, Path certificate, String commonName)
       throws IOException {
     if (Files.exists(certificate) || Files.exists(key)) {

@@ -342,6 +342,8 @@ public final class XChaCha20Poly1305 {
     }
 
     /**
+     * Provides the bytes of this nonce
+     * 
      * @return The bytes of this nonce.
      */
     public Bytes bytes() {
@@ -349,6 +351,8 @@ public final class XChaCha20Poly1305 {
     }
 
     /**
+     * Provides the bytes of this nonce
+     * 
      * @return The bytes of this nonce.
      */
     public byte[] bytesArray() {

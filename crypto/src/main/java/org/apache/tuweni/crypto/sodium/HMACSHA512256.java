@@ -119,6 +119,8 @@ public final class HMACSHA512256 {
     }
 
     /**
+     * Provides the bytes of this key.
+     * 
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -126,6 +128,8 @@ public final class HMACSHA512256 {
     }
 
     /**
+     * Provides the bytes of this key.
+     * 
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {

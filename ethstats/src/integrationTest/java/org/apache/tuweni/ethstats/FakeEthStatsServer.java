@@ -65,6 +65,10 @@ class FakeEthStatsServer {
     return websocket;
   }
 
+  public String getNetworkInterface() {
+    return networkInterface;
+  }
+
   public int getPort() {
     return port;
   }

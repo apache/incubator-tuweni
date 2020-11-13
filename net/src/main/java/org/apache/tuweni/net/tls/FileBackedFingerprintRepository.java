@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 final class FileBackedFingerprintRepository implements FingerprintRepository {
 
@@ -85,7 +84,7 @@ final class FileBackedFingerprintRepository implements FingerprintRepository {
         continue;
       }
 
-      Entry<String, Bytes> entry;
+      Map.Entry<String, Bytes> entry;
       try {
         entry = parseLine(line);
       } catch (IOException e) {
@@ -121,7 +120,7 @@ final class FileBackedFingerprintRepository implements FingerprintRepository {
                 continue;
               }
 
-              Entry<String, Bytes> entry;
+              Map.Entry<String, Bytes> entry;
               try {
                 entry = parseLine(line);
               } catch (IOException e) {
@@ -157,7 +156,7 @@ final class FileBackedFingerprintRepository implements FingerprintRepository {
     }
   }
 
-  private static Entry<String, Bytes> parseLine(String line) throws IOException {
+  private static Map.Entry<String, Bytes> parseLine(String line) throws IOException {
     String[] segments = line.split("\\s+", 2);
     if (segments.length != 2) {
       throw new IOException("Invalid line");

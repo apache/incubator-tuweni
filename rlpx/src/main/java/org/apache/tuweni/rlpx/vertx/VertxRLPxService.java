@@ -250,7 +250,8 @@ public final class VertxRLPxService implements RLPxService {
   }
 
   /**
-   *
+   * Provides the actual port in use.
+   * 
    * @return the port used by the server
    * @throws IllegalStateException if the service is not started
    */
@@ -262,6 +263,7 @@ public final class VertxRLPxService implements RLPxService {
   }
 
   /**
+   * Provides the advertised port.
    *
    * @return the port advertised by the server
    * @throws IllegalStateException if the service is not started

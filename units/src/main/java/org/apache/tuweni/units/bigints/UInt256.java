@@ -95,7 +95,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
    *
    * @param bytes The bytes containing a {@link UInt256}.
    * @return A {@link UInt256} containing the specified value.
-   * @throws IllegalArgumentException if {@code bytes.size() &gt; 32}.
+   * @throws IllegalArgumentException if {@code bytes.size() > 32}.
    */
   public static UInt256 fromBytes(final Bytes bytes) {
     if (bytes instanceof Bytes32) {

@@ -234,6 +234,8 @@ public final class Transaction {
   }
 
   /**
+   * Provides the transaction nonce
+   * 
    * @return The transaction nonce.
    */
   public UInt256 getNonce() {
@@ -241,6 +243,8 @@ public final class Transaction {
   }
 
   /**
+   * Provides the gas price
+   * 
    * @return The transaction gas price.
    */
   public Wei getGasPrice() {
@@ -248,6 +252,8 @@ public final class Transaction {
   }
 
   /**
+   * Provides the gas limit
+   * 
    * @return The transaction gas limit.
    */
   public Gas getGasLimit() {
@@ -255,6 +261,8 @@ public final class Transaction {
   }
 
   /**
+   * Provides the target contact address.
+   * 
    * @return The target contract address, or null if not present.
    */
   @Nullable
@@ -263,6 +271,8 @@ public final class Transaction {
   }
 
   /**
+   * Returns true if the transaction creates a contract.
+   * 
    * @return {@code true} if the transaction is a contract creation ({@code to} address is {@code null}).
    */
   public boolean isContractCreation() {
@@ -270,6 +280,8 @@ public final class Transaction {
   }
 
   /**
+   * Provides the amount of eth to transfer
+   * 
    * @return The amount of Eth to transfer.
    */
   public Wei getValue() {
@@ -277,6 +289,8 @@ public final class Transaction {
   }
 
   /**
+   * Provides the transaction signature
+   * 
    * @return The transaction signature.
    */
   public SECP256K1.Signature getSignature() {
@@ -284,6 +298,8 @@ public final class Transaction {
   }
 
   /**
+   * Provides the transaction payload
+   * 
    * @return The transaction payload.
    */
   public Bytes getPayload() {
@@ -291,6 +307,8 @@ public final class Transaction {
   }
 
   /**
+   * Provides the chain id
+   * 
    * @return the chain id of the transaction, or null if no chain id was encoded on the transaction.
    * @see <a href="https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md">EIP-155</a>
    */
@@ -313,6 +331,8 @@ public final class Transaction {
   }
 
   /**
+   * Provides the sender's address
+   * 
    * @return The sender of the transaction, or {@code null} if the signature is invalid.
    */
   @Nullable
@@ -376,6 +396,8 @@ public final class Transaction {
   }
 
   /**
+   * Provides the transaction bytes
+   * 
    * @return The RLP serialized form of this transaction.
    */
   public Bytes toBytes() {

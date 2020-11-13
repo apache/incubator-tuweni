@@ -31,6 +31,7 @@ public class ProgPoWMathTest {
     assertEquals(expected, result, expected.toHexString() + " <> " + result.toHexString());
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> mergeVectors() {
     return Stream
         .of(
