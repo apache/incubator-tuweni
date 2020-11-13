@@ -12,6 +12,7 @@
  */
 package org.apache.tuweni.crypto.sodium;
 
+
 import javax.annotation.Nullable;
 
 import jnr.ffi.Pointer;
@@ -2140,6 +2141,9 @@ public interface LibSodium {
   // int sodium_runtime_has_rdrand(void);
   int sodium_runtime_has_rdrand();
 
+  // int _sodium_runtime_get_cpu_features(void);
+  int _sodium_runtime_get_cpu_features();
+
   // void sodium_memzero(void *const pnt, const size_t len);
   void sodium_memzero(/*@In @Out*/ Pointer pnt, @In @ssize_t long len);
 
@@ -2160,6 +2164,9 @@ public interface LibSodium {
 
   // void sodium_add(unsigned char * a, const unsigned char * b, const size_t len);
   void sodium_add(/*@In @Out*/ Pointer a, @In Pointer b, @In @ssize_t long len);
+
+  // void sodium_sub(unsigned char * a, const unsigned char * b, const size_t len);
+  void sodium_sub(/*@In @Out*/ byte[] a, @In byte[] b, @In @ssize_t long len);
 
   // char * sodium_bin2hex(char *const hex, const size_t hex_maxlen, const unsigned char *const bin, const size_t bin_len);
   // FIXME: JNR-FFI code generation fails for this method
@@ -2237,6 +2244,9 @@ public interface LibSodium {
       @In byte[] buf,
       @In @ssize_t long padded_buflen,
       @In @ssize_t long blocksize);
+
+  // int _sodium_alloc_init(void);
+  int _sodium_alloc_init();
 
   // size_t crypto_stream_xchacha20_keybytes(void);
   @ssize_t
@@ -2400,6 +2410,18 @@ public interface LibSodium {
   @ssize_t
   long crypto_core_ed25519_uniformbytes();
 
+  // size_t crypto_core_ed25519_hashbytes(void);
+  @ssize_t
+  long crypto_core_ed25519_hashbytes();
+
+  // size_t crypto_core_ed25519_scalarbytes(void);
+  @ssize_t
+  long crypto_core_ed25519_scalarbytes();
+
+  // size_t crypto_core_ed25519_nonreducedscalarbytes(void);
+  @ssize_t
+  long crypto_core_ed25519_nonreducedscalarbytes();
+
   // int crypto_core_ed25519_is_valid_point(const unsigned char * p);
   int crypto_core_ed25519_is_valid_point(@In byte[] p);
 
@@ -2412,6 +2434,91 @@ public interface LibSodium {
   // int crypto_core_ed25519_from_uniform(unsigned char * p, const unsigned char * r);
   int crypto_core_ed25519_from_uniform(@Out byte[] p, @In byte[] r);
 
+  // int crypto_core_ed25519_from_hash(unsigned char * p, const unsigned char * h);
+  int crypto_core_ed25519_from_hash(@Out byte[] p, @In byte[] h);
+
+  // void crypto_core_ed25519_random(unsigned char * p);
+  void crypto_core_ed25519_random(@Out byte[] p);
+
+  // void crypto_core_ed25519_scalar_random(unsigned char * r);
+  void crypto_core_ed25519_scalar_random(@Out byte[] r);
+
+  // int crypto_core_ed25519_scalar_invert(unsigned char * recip, const unsigned char * s);
+  int crypto_core_ed25519_scalar_invert(@Out byte[] recip, @In byte[] s);
+
+  // void crypto_core_ed25519_scalar_negate(unsigned char * neg, const unsigned char * s);
+  void crypto_core_ed25519_scalar_negate(@Out byte[] neg, @In byte[] s);
+
+  // void crypto_core_ed25519_scalar_complement(unsigned char * comp, const unsigned char * s);
+  void crypto_core_ed25519_scalar_complement(@Out byte[] comp, @In byte[] s);
+
+  // void crypto_core_ed25519_scalar_add(unsigned char * z, const unsigned char * x, const unsigned char * y);
+  void crypto_core_ed25519_scalar_add(@Out byte[] z, @In byte[] x, @In byte[] y);
+
+  // void crypto_core_ed25519_scalar_sub(unsigned char * z, const unsigned char * x, const unsigned char * y);
+  void crypto_core_ed25519_scalar_sub(@Out byte[] z, @In byte[] x, @In byte[] y);
+
+  // void crypto_core_ed25519_scalar_mul(unsigned char * z, const unsigned char * x, const unsigned char * y);
+  void crypto_core_ed25519_scalar_mul(@Out byte[] z, @In byte[] x, @In byte[] y);
+
+  // void crypto_core_ed25519_scalar_reduce(unsigned char * r, const unsigned char * s);
+  void crypto_core_ed25519_scalar_reduce(@Out byte[] r, @In byte[] s);
+
+  // size_t crypto_core_ristretto255_bytes(void);
+  @ssize_t
+  long crypto_core_ristretto255_bytes();
+
+  // size_t crypto_core_ristretto255_hashbytes(void);
+  @ssize_t
+  long crypto_core_ristretto255_hashbytes();
+
+  // size_t crypto_core_ristretto255_scalarbytes(void);
+  @ssize_t
+  long crypto_core_ristretto255_scalarbytes();
+
+  // size_t crypto_core_ristretto255_nonreducedscalarbytes(void);
+  @ssize_t
+  long crypto_core_ristretto255_nonreducedscalarbytes();
+
+  // int crypto_core_ristretto255_is_valid_point(const unsigned char * p);
+  int crypto_core_ristretto255_is_valid_point(@In byte[] p);
+
+  // int crypto_core_ristretto255_add(unsigned char * r, const unsigned char * p, const unsigned char * q);
+  int crypto_core_ristretto255_add(@Out byte[] r, @In byte[] p, @In byte[] q);
+
+  // int crypto_core_ristretto255_sub(unsigned char * r, const unsigned char * p, const unsigned char * q);
+  int crypto_core_ristretto255_sub(@Out byte[] r, @In byte[] p, @In byte[] q);
+
+  // int crypto_core_ristretto255_from_hash(unsigned char * p, const unsigned char * r);
+  int crypto_core_ristretto255_from_hash(@Out byte[] p, @In byte[] r);
+
+  // void crypto_core_ristretto255_random(unsigned char * p);
+  void crypto_core_ristretto255_random(@Out byte[] p);
+
+  // void crypto_core_ristretto255_scalar_random(unsigned char * r);
+  void crypto_core_ristretto255_scalar_random(@Out byte[] r);
+
+  // int crypto_core_ristretto255_scalar_invert(unsigned char * recip, const unsigned char * s);
+  int crypto_core_ristretto255_scalar_invert(@Out byte[] recip, @In byte[] s);
+
+  // void crypto_core_ristretto255_scalar_negate(unsigned char * neg, const unsigned char * s);
+  void crypto_core_ristretto255_scalar_negate(@Out byte[] neg, @In byte[] s);
+
+  // void crypto_core_ristretto255_scalar_complement(unsigned char * comp, const unsigned char * s);
+  void crypto_core_ristretto255_scalar_complement(@Out byte[] comp, @In byte[] s);
+
+  // void crypto_core_ristretto255_scalar_add(unsigned char * z, const unsigned char * x, const unsigned char * y);
+  void crypto_core_ristretto255_scalar_add(@Out byte[] z, @In byte[] x, @In byte[] y);
+
+  // void crypto_core_ristretto255_scalar_sub(unsigned char * z, const unsigned char * x, const unsigned char * y);
+  void crypto_core_ristretto255_scalar_sub(@Out byte[] z, @In byte[] x, @In byte[] y);
+
+  // void crypto_core_ristretto255_scalar_mul(unsigned char * z, const unsigned char * x, const unsigned char * y);
+  void crypto_core_ristretto255_scalar_mul(@Out byte[] z, @In byte[] x, @In byte[] y);
+
+  // void crypto_core_ristretto255_scalar_reduce(unsigned char * r, const unsigned char * s);
+  void crypto_core_ristretto255_scalar_reduce(@Out byte[] r, @In byte[] s);
+
   // size_t crypto_scalarmult_ed25519_bytes(void);
   @ssize_t
   long crypto_scalarmult_ed25519_bytes();
@@ -2423,8 +2530,28 @@ public interface LibSodium {
   // int crypto_scalarmult_ed25519(unsigned char * q, const unsigned char * n, const unsigned char * p);
   int crypto_scalarmult_ed25519(@Out byte[] q, @In byte[] n, @In byte[] p);
 
+  // int crypto_scalarmult_ed25519_noclamp(unsigned char * q, const unsigned char * n, const unsigned char * p);
+  int crypto_scalarmult_ed25519_noclamp(@Out byte[] q, @In byte[] n, @In byte[] p);
+
   // int crypto_scalarmult_ed25519_base(unsigned char * q, const unsigned char * n);
   int crypto_scalarmult_ed25519_base(@Out byte[] q, @In byte[] n);
+
+  // int crypto_scalarmult_ed25519_base_noclamp(unsigned char * q, const unsigned char * n);
+  int crypto_scalarmult_ed25519_base_noclamp(@Out byte[] q, @In byte[] n);
+
+  // size_t crypto_scalarmult_ristretto255_bytes(void);
+  @ssize_t
+  long crypto_scalarmult_ristretto255_bytes();
+
+  // size_t crypto_scalarmult_ristretto255_scalarbytes(void);
+  @ssize_t
+  long crypto_scalarmult_ristretto255_scalarbytes();
+
+  // int crypto_scalarmult_ristretto255(unsigned char * q, const unsigned char * n, const unsigned char * p);
+  int crypto_scalarmult_ristretto255(@Out byte[] q, @In byte[] n, @In byte[] p);
+
+  // int crypto_scalarmult_ristretto255_base(unsigned char * q, const unsigned char * n);
+  int crypto_scalarmult_ristretto255_base(@Out byte[] q, @In byte[] n);
 
   // size_t crypto_secretbox_xchacha20poly1305_keybytes(void);
   @ssize_t
