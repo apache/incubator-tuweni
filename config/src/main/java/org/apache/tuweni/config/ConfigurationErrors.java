@@ -23,6 +23,8 @@ public final class ConfigurationErrors {
   private ConfigurationErrors() {}
 
   /**
+   * Provides an empty list of errors.
+   *
    * @return An empty list of errors.
    */
   public static List<ConfigurationError> noErrors() {

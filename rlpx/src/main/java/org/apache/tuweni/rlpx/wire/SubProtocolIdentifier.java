@@ -26,13 +26,15 @@ public interface SubProtocolIdentifier {
   }
 
   /**
-   *
+   * Provides the subprotocol name
+   * 
    * @return the name of the subprotocol
    */
   String name();
 
   /**
-   *
+   * Provides the subprotocol version
+   * 
    * @return the version of the subprotocol
    */
   int version();

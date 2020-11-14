@@ -518,6 +518,7 @@ public final class SECP256K1 {
     }
 
     /**
+     * Provides the bytes of the key.
      * @return The bytes of the key.
      */
     public Bytes32 bytes() {
@@ -526,6 +527,7 @@ public final class SECP256K1 {
     }
 
     /**
+     * Provides the bytes of the key.
      * @return The bytes of the key.
      */
     public byte[] bytesArray() {
@@ -678,6 +680,7 @@ public final class SECP256K1 {
     }
 
     /**
+     * Provides the bytes of the key.
      * @return The bytes of the key.
      */
     public Bytes bytes() {
@@ -685,6 +688,8 @@ public final class SECP256K1 {
     }
 
     /**
+     * Provides the bytes of the key.
+     *
      * @return The bytes of the key.
      */
     public byte[] bytesArray() {
@@ -708,6 +713,7 @@ public final class SECP256K1 {
     }
 
     /**
+     * Provides this key represented as hexadecimal, starting with "0x".
      * @return This key represented as hexadecimal, starting with "0x".
      */
     public String toHexString() {
@@ -802,6 +808,7 @@ public final class SECP256K1 {
     }
 
     /**
+     * Provides the secret key
      * @return The secret key.
      */
     public SecretKey secretKey() {
@@ -809,6 +816,7 @@ public final class SECP256K1 {
     }
 
     /**
+     * Provides the public key
      * @return The public key.
      */
     public PublicKey publicKey() {
@@ -888,6 +896,7 @@ public final class SECP256K1 {
     }
 
     /**
+     * Provides the v-value of the signature.
      * @return The v-value (recovery id) of the signature.
      */
     public byte v() {
@@ -895,6 +904,7 @@ public final class SECP256K1 {
     }
 
     /**
+     * Provides the r-value of the signature.
      * @return The r-value of the signature.
      */
     public BigInteger r() {
@@ -902,6 +912,7 @@ public final class SECP256K1 {
     }
 
     /**
+     * Provides the s-value of the signature.
      * @return The s-value of the signature.
      */
     public BigInteger s() {
@@ -931,6 +942,8 @@ public final class SECP256K1 {
     }
 
     /**
+     * Provides the bytes of the signature.
+     *
      * @return The bytes of the signature.
      */
     public Bytes bytes() {

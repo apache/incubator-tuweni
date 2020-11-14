@@ -156,6 +156,8 @@ public final class BlockHeader {
   }
 
   /**
+   * Provides the block's beneficiary's address.
+   * 
    * @return the block's beneficiary's address.
    */
   @JsonGetter("miner")
@@ -164,6 +166,8 @@ public final class BlockHeader {
   }
 
   /**
+   * Provides the difficulty of the block.
+   * 
    * @return the difficulty of the block.
    */
   @JsonGetter("difficulty")
@@ -172,6 +176,8 @@ public final class BlockHeader {
   }
 
   /**
+   * Provides the extra data stored with the block.
+   * 
    * @return the extra data stored with the block.
    */
   @JsonGetter("extraData")
@@ -180,6 +186,8 @@ public final class BlockHeader {
   }
 
   /**
+   * Provides the gas limit of the block.
+   * 
    * @return the gas limit of the block.
    */
   @JsonGetter("gasLimit")
@@ -188,6 +196,8 @@ public final class BlockHeader {
   }
 
   /**
+   * Provides the gas used for the block.
+   * 
    * @return the gas used for the block.
    */
   @JsonGetter("gasUsed")
@@ -196,6 +206,8 @@ public final class BlockHeader {
   }
 
   /**
+   * Provides the hash of the block header.
+   * 
    * @return the hash of the block header.
    */
   @JsonGetter("hash")
@@ -208,6 +220,8 @@ public final class BlockHeader {
   }
 
   /**
+   * Provides the bloom filter of the logs of the block.
+   * 
    * @return the bloom filter of the logs of the block.
    */
   @JsonGetter("logsBloom")
@@ -216,7 +230,9 @@ public final class BlockHeader {
   }
 
   /**
-   * @return the hash associated with computional work on the block.
+   * Provides the hash associated with computational work on the block.
+   * 
+   * @return the hash associated with computational work on the block.
    */
   @JsonGetter("mixHash")
   public Hash getMixHash() {
@@ -224,6 +240,8 @@ public final class BlockHeader {
   }
 
   /**
+   * Provides the nonce of the block.
+   * 
    * @return the nonce of the block.
    */
   @JsonGetter("nonce")
@@ -232,6 +250,8 @@ public final class BlockHeader {
   }
 
   /**
+   * Provides the number of the block.
+   * 
    * @return the number of the block.
    */
   @JsonGetter("number")
@@ -240,6 +260,8 @@ public final class BlockHeader {
   }
 
   /**
+   * Provides the ommer hash.
+   * 
    * @return the ommer hash.
    */
   @JsonGetter("sha3Uncles")
@@ -248,6 +270,8 @@ public final class BlockHeader {
   }
 
   /**
+   * Provides the parent hash, or null if none was available.
+   * 
    * @return the parent hash, or null if none was available.
    */
   @Nullable
@@ -257,6 +281,8 @@ public final class BlockHeader {
   }
 
   /**
+   * Provides the hash associated with the transaction receipts tree.
+   * 
    * @return the hash associated with the transaction receipts tree.
    */
   @JsonGetter("receiptsRoot")
@@ -265,6 +291,8 @@ public final class BlockHeader {
   }
 
   /**
+   * Provides the hash associated with the state tree.
+   * 
    * @return the hash associated with the state tree.
    */
   @JsonGetter("stateRoot")
@@ -273,6 +301,8 @@ public final class BlockHeader {
   }
 
   /**
+   * Provides the timestamp of the block
+   * 
    * @return the timestamp of the block.
    */
   @JsonGetter("timestamp")
@@ -281,6 +311,8 @@ public final class BlockHeader {
   }
 
   /**
+   * Provides the root hash of the transactions tree
+   * 
    * @return the hash associated with the transactions tree.
    */
   @JsonGetter("transactionsRoot")
@@ -372,6 +404,8 @@ public final class BlockHeader {
   }
 
   /**
+   * Provides this block header as bytes.
+   *
    * @return The RLP serialized form of this block header.
    */
   public Bytes toBytes() {

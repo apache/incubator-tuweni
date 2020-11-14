@@ -94,7 +94,8 @@ public final class LocalIdentity {
   }
 
   /**
-   *
+   * The canonical form of an invite
+   * 
    * @return the local identity in canonical form according to the Scuttlebutt protocol guide.
    */
   public String toCanonicalForm() {

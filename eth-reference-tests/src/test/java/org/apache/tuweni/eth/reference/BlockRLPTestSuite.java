@@ -63,6 +63,7 @@ class BlockRLPTestSuite {
     assertEquals(Hash.fromHexString(hash), rlpBlock.getHeader().getHash());
   }
 
+  @SuppressWarnings("UnusedMethod")
   @MustBeClosed
   private static Stream<Arguments> readBlockChainTests() throws IOException {
     return Resources.find("**/BlockchainTests/**/*.json").flatMap(url -> {

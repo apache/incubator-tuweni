@@ -52,9 +52,9 @@ public interface MutableBytes32 extends MutableBytes, Bytes32 {
    *        words, you will have {@code wrap(value, i).get(0) == value[i]}.
    * @return A {@link MutableBytes32} that exposes the bytes of {@code value} from {@code offset} (inclusive) to
    *         {@code offset + 32} (exclusive).
-   * @throws IndexOutOfBoundsException if {@code offset &lt; 0 || (value.length &gt; 0 && offset >=
+   * @throws IndexOutOfBoundsException if {@code offset < 0 || (value.length > 0 && offset >=
    *     value.length)}.
-   * @throws IllegalArgumentException if {@code length &lt; 0 || offset + 32 &gt; value.length}.
+   * @throws IllegalArgumentException if {@code length < 0 || offset + 32 > value.length}.
    */
   static MutableBytes32 wrap(byte[] value, int offset) {
     checkNotNull(value);
@@ -92,9 +92,9 @@ public interface MutableBytes32 extends MutableBytes, Bytes32 {
    *        words, you will have {@code wrap(value, i).get(0) == value.get(i)}.
    * @return A {@link Bytes32} that exposes the bytes of {@code value} from {@code offset} (inclusive) to
    *         {@code offset + 32} (exclusive).
-   * @throws IndexOutOfBoundsException if {@code offset &lt; 0 || (value.size() &gt; 0 && offset >=
+   * @throws IndexOutOfBoundsException if {@code offset < 0 || (value.size() > 0 && offset >=
    *     value.size())}.
-   * @throws IllegalArgumentException if {@code length &lt; 0 || offset + 32 &gt; value.size()}.
+   * @throws IllegalArgumentException if {@code length < 0 || offset + 32 > value.size()}.
    */
   static MutableBytes32 wrap(MutableBytes value, int offset) {
     checkNotNull(value);

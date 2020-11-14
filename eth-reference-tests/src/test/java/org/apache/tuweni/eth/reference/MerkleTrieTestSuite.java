@@ -69,11 +69,13 @@ class MerkleTrieTestSuite {
     assertEquals(Bytes.fromHexString(root), trie.rootHash());
   }
 
+  @SuppressWarnings("UnusedMethod")
   @MustBeClosed
   private static Stream<Arguments> readTrieTests() throws IOException {
     return findTests("**/TrieTests/trietest.json");
   }
 
+  @SuppressWarnings("UnusedMethod")
   @MustBeClosed
   private static Stream<Arguments> readAnyOrderTrieTests() throws IOException {
     return findTests("**/TrieTests/trieanyorder.json");

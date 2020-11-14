@@ -90,7 +90,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * Return a {@link UInt32} containing the value described by the specified bytes.
    *
    * @param bytes The bytes containing a {@link UInt32}. \ * @return A {@link UInt32} containing the specified value.
-   * @throws IllegalArgumentException if {@code bytes.size() &gt; 4}.
+   * @throws IllegalArgumentException if {@code bytes.size() > 4}.
    */
   public static UInt32 fromBytes(Bytes bytes) {
     return fromBytes(bytes, ByteOrder.BIG_ENDIAN);
@@ -102,7 +102,7 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * @param bytes The bytes containing a {@link UInt32}.
    * @param byteOrder the byte order of the value
    * @return A {@link UInt32} containing the specified value.
-   * @throws IllegalArgumentException if {@code bytes.size() &gt; 4}.
+   * @throws IllegalArgumentException if {@code bytes.size() > 4}.
    */
   public static UInt32 fromBytes(Bytes bytes, ByteOrder byteOrder) {
     checkArgument(bytes.size() <= 4, "Argument is greater than 4 bytes");
@@ -314,7 +314,8 @@ public final class UInt32 implements UInt32Value<UInt32> {
     if (value.isZero()) {
       throw new ArithmeticException("divide by zero");
     }
-    if (value == ONE) {
+
+    if (value.equals(ONE)) {
       return this;
     }
     return create(toBigInteger().divide(value.toBigInteger()).intValue());

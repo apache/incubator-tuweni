@@ -76,6 +76,8 @@ public final class BlockBody {
   }
 
   /**
+   * Provides the block transactions
+   * 
    * @return the transactions of the block.
    */
   public List<Transaction> getTransactions() {
@@ -83,6 +85,8 @@ public final class BlockBody {
   }
 
   /**
+   * Provides the block ommers
+   * 
    * @return the list of ommers for this block.
    */
   public List<BlockHeader> getOmmers() {
@@ -107,6 +111,8 @@ public final class BlockBody {
   }
 
   /**
+   * Provides the block body bytes
+   * 
    * @return The RLP serialized form of this block body.
    */
   public Bytes toBytes() {

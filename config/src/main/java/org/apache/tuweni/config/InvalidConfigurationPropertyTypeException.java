@@ -36,6 +36,8 @@ public final class InvalidConfigurationPropertyTypeException extends RuntimeExce
   }
 
   /**
+   * Provides the position of the property in the configuration document.
+   *
    * @return The position of the property in the configuration document, or {@code null} if there is no position
    *         available.
    */
@@ -44,11 +46,15 @@ public final class InvalidConfigurationPropertyTypeException extends RuntimeExce
     return position;
   }
 
+  public String getMessageWithoutPosition() {
+    return super.getMessage();
+  }
+
   @Override
-  public String toString() {
+  public String getMessage() {
     if (position == null) {
-      return getMessage();
+      return super.getMessage();
     }
-    return getMessage() + " (" + position + ")";
+    return super.getMessage() + " (" + position + ")";
   }
 }

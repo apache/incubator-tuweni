@@ -66,6 +66,7 @@ class BytesTest extends CommonBytesTests {
     assertArrayEquals(value.toArray(), bytes);
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> wrapProvider() {
     return Stream
         .of(
@@ -111,6 +112,7 @@ class BytesTest extends CommonBytesTests {
     assertWrapSlice((byte[]) arr, offset, length);
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> wrapSliceProvider() {
     return Stream
         .of(
@@ -555,7 +557,7 @@ class BytesTest extends CommonBytesTests {
   @Test
   void andResult() {
     MutableBytes result = MutableBytes.create(4);
-    Bytes value = Bytes.fromHexString("0x01000001").and(Bytes.fromHexString("0x01000000"), result);
+    Bytes.fromHexString("0x01000001").and(Bytes.fromHexString("0x01000000"), result);
     assertEquals(Bytes.fromHexString("0x01000000"), result);
   }
 
@@ -568,7 +570,7 @@ class BytesTest extends CommonBytesTests {
   @Test
   void orResult() {
     MutableBytes result = MutableBytes.create(4);
-    Bytes value = Bytes.fromHexString("0x01000001").or(Bytes.fromHexString("0x01000000"), result);
+    Bytes.fromHexString("0x01000001").or(Bytes.fromHexString("0x01000000"), result);
     assertEquals(Bytes.fromHexString("0x01000001"), result);
   }
 
@@ -581,7 +583,7 @@ class BytesTest extends CommonBytesTests {
   @Test
   void xorResult() {
     MutableBytes result = MutableBytes.create(4);
-    Bytes value = Bytes.fromHexString("0x01000001").xor(Bytes.fromHexString("0x01000000"), result);
+    Bytes.fromHexString("0x01000001").xor(Bytes.fromHexString("0x01000000"), result);
     assertEquals(Bytes.fromHexString("0x00000001"), result);
   }
 
@@ -594,7 +596,7 @@ class BytesTest extends CommonBytesTests {
   @Test
   void notResult() {
     MutableBytes result = MutableBytes.create(4);
-    Bytes value = Bytes.fromHexString("0x01000001").not(result);
+    Bytes.fromHexString("0x01000001").not(result);
     assertEquals(Bytes.fromHexString("0xfefffffe"), result);
   }
 

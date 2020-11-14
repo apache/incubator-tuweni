@@ -24,11 +24,15 @@ import java.util.List;
 public interface SubProtocol {
 
   /**
+   * Provides the identifier of the subprotocol
+   * 
    * @return the identifier of the subprotocol
    */
   SubProtocolIdentifier id();
 
   /**
+   * Returns true if the subprotocol supports a sub protocol ID.
+   * 
    * @param subProtocolIdentifier the identifier of the subprotocol
    * @return true if the subprotocol ID and version are supported, false otherwise
    */

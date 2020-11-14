@@ -68,7 +68,7 @@ class TomlTest {
     TomlParseResult result = Toml.parse("[foo]\n bar.baz = 1", TomlVersion.V0_4_0);
     assertTrue(result.hasErrors());
     TomlParseError error = result.errors().get(0);
-    assertEquals("Dotted keys are not supported", error.getMessage());
+    assertEquals("Dotted keys are not supported", error.getMessageWithoutPosition());
     assertEquals(2, error.position().line());
     assertEquals(2, error.position().column());
   }
@@ -81,6 +81,7 @@ class TomlTest {
     assertEquals(expected, result.getString("foo"));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> stringSupplier() {
     return Stream
         .of(
@@ -125,7 +126,7 @@ class TomlTest {
     TomlParseResult result = Toml.parse("foo = \"\\UFFFF00FF\"");
     assertTrue(result.hasErrors());
     TomlParseError error = result.errors().get(0);
-    assertEquals("Invalid unicode escape sequence", error.getMessage());
+    assertEquals("Invalid unicode escape sequence", error.getMessageWithoutPosition());
     assertEquals(1, error.position().line());
     assertEquals(8, error.position().column());
   }
@@ -138,6 +139,7 @@ class TomlTest {
     assertEquals(expected, result.getLong("foo"));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> integerSupplier() {
     return Stream
         .of(
@@ -163,6 +165,7 @@ class TomlTest {
     assertEquals(expected, result.getDouble("foo"));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> floatSupplier() {
     // @formatter:off
     return Stream.of(
@@ -210,6 +213,7 @@ class TomlTest {
     assertEquals(expected, result.getOffsetDateTime("foo"));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> offsetDateSupplier() {
     // @formatter:off
     return Stream.of(
@@ -235,6 +239,7 @@ class TomlTest {
     assertEquals(expected, result.getLocalDateTime("foo"));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> localDateTimeSupplier() {
     return Stream
         .of(
@@ -253,6 +258,7 @@ class TomlTest {
     assertEquals(expected, result.getLocalDate("foo"));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> localDateSupplier() {
     return Stream
         .of(
@@ -271,6 +277,7 @@ class TomlTest {
     assertEquals(expected, result.getLocalTime("foo"));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> localTimeSupplier() {
     return Stream
         .of(
@@ -292,6 +299,7 @@ class TomlTest {
     assertTomlArrayEquals(expected, array);
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> arraySupplier() {
     return Stream
         .of(
@@ -315,6 +323,7 @@ class TomlTest {
     assertEquals(expected, result.get(key));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> tableSupplier() {
     return Stream
         .of(
@@ -332,6 +341,7 @@ class TomlTest {
     assertEquals(expected, result.get(key));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> inlineTableSupplier() {
     return Stream
         .of(
@@ -364,6 +374,7 @@ class TomlTest {
     assertEquals(expected, element);
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> arrayTableSupplier() {
     return Stream
         .of(
@@ -393,11 +404,12 @@ class TomlTest {
     TomlParseResult result = Toml.parse(input);
     List<TomlParseError> errors = result.errors();
     assertFalse(errors.isEmpty());
-    assertEquals(expected, errors.get(0).getMessage(), () -> joinErrors(result));
+    assertEquals(expected, errors.get(0).getMessageWithoutPosition(), () -> joinErrors(result));
     assertEquals(line, errors.get(0).position().line());
     assertEquals(column, errors.get(0).position().column());
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> errorCaseSupplier() {
     // @formatter:off
     return Stream.of(

@@ -142,16 +142,19 @@ class SSZTestSuite {
     });
   }
 
+  @SuppressWarnings("UnusedMethod")
   @MustBeClosed
   private static Stream<Arguments> readUintBoundsTests() throws IOException {
     return findTests("**/ssz/uint_bounds.yaml");
   }
 
+  @SuppressWarnings("UnusedMethod")
   @MustBeClosed
   private static Stream<Arguments> readUintRandomTests() throws IOException {
     return findTests("**/ssz/uint_random.yaml");
   }
 
+  @SuppressWarnings("UnusedMethod")
   @MustBeClosed
   private static Stream<Arguments> readUintWrongLength() throws IOException {
     return findTests("**/ssz/uint_wrong_length.yaml");

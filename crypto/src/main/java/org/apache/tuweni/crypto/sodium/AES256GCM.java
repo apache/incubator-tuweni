@@ -317,6 +317,8 @@ public final class AES256GCM implements AutoCloseable {
     }
 
     /**
+     * Provides the bytes of this nonce.
+     * 
      * @return The bytes of this nonce.
      */
     public Bytes bytes() {
@@ -324,6 +326,8 @@ public final class AES256GCM implements AutoCloseable {
     }
 
     /**
+     * Provides the bytes of this nonce.
+     * 
      * @return The bytes of this nonce.
      */
     public byte[] bytesArray() {

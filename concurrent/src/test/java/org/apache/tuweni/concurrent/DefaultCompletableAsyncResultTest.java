@@ -336,7 +336,6 @@ class DefaultCompletableAsyncResultTest {
 
   @Test
   void testRunOnExecutor() throws InterruptedException {
-    AtomicReference<Boolean> executed = new AtomicReference<>();
     ExecutorService service = Executors.newSingleThreadExecutor();
     AsyncResult<String> result = AsyncResult.executeBlocking(service, () -> "foo");
     assertEquals("foo", result.get());
@@ -345,7 +344,6 @@ class DefaultCompletableAsyncResultTest {
 
   @Test
   void testRunOnWorker(@VertxInstance Vertx vertx) throws InterruptedException {
-    AtomicReference<Boolean> executed = new AtomicReference<>();
     WorkerExecutor executor = vertx.createSharedWorkerExecutor("foo");
     AsyncResult<String> result = AsyncResult.executeBlocking(executor, () -> "foo");
     assertEquals("foo", result.get());

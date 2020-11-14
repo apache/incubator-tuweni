@@ -40,6 +40,8 @@ public class RPCFunction {
   }
 
   /**
+   * Provides the list representation of the namespace and function call.
+   * 
    * @return The list representation of the namespace and function call.
    */
   public List<String> asList() {

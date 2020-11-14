@@ -258,6 +258,8 @@ public final class KeyDerivation {
   }
 
   /**
+   * Provides the required length for the context
+   * 
    * @return The required length for the context (8).
    */
   public static int contextLength() {
@@ -269,6 +271,8 @@ public final class KeyDerivation {
   }
 
   /**
+   * Provides the minimum length for a new sub key
+   * 
    * @return The minimum length for a new sub key (16).
    */
   public static int minSubKeyLength() {
@@ -280,6 +284,8 @@ public final class KeyDerivation {
   }
 
   /**
+   * Provides the maximum length for a new sub key
+   * 
    * @return The maximum length for a new sub key (64).
    */
   public static int maxSubKeyLength() {

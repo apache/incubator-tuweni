@@ -82,6 +82,7 @@ public final class RPCMessage {
   }
 
   /**
+   * Returns true is this is the last message in the stream
    *
    * @return true if this is a last message in a stream, and it is not an error
    */
@@ -90,6 +91,7 @@ public final class RPCMessage {
   }
 
   /**
+   * Returns true if this an error message.
    *
    * @return true if this is an error message response
    */
@@ -98,6 +100,8 @@ public final class RPCMessage {
   }
 
   /**
+   * Gets error body
+   *
    * @param objectMapper the object mapper to deserialize with
    * @return the RPC error response body, if this is an error response - nothing otherwise
    */
@@ -116,8 +120,9 @@ public final class RPCMessage {
   }
 
   /**
+   * Gets exception from object mapper.
    *
-   * @param objectMapper the objectmatter to deserialize the error with.
+   * @param objectMapper the object mapper to deserialize the error with.
    *
    * @return an exception if this represents an error RPC response, otherwise nothing
    */

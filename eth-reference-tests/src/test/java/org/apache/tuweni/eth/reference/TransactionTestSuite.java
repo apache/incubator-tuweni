@@ -95,6 +95,7 @@ class TransactionTestSuite {
     fail("Expected an invalid transaction but it was successfully read");
   }
 
+  @SuppressWarnings("UnusedMethod")
   @MustBeClosed
   private static Stream<Arguments> readTransactionTests() throws IOException {
     return Resources

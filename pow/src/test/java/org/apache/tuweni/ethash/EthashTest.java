@@ -33,7 +33,6 @@ class EthashTest {
     long nonce = 2170677771517793035L;
     Bytes mixHash = Bytes.fromHexString("0xd1e82d611846e4b162ad3ba0f129611c3a67f2c3aeda19ad862765cf64b383f6");
     Bytes contentToHash = Bytes.fromHexString("0x783b5c2bc6f879509cd69009cb28fecf004d63833d7e444109b7ab9e327ac866");
-    long epoch = EthHash.epoch(blockNumber);
     long datasetSize = EthHash.getFullSize(blockNumber);
     long cacheSize = EthHash.getCacheSize(blockNumber);
     assertEquals(1157627776, datasetSize);

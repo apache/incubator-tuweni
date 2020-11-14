@@ -117,7 +117,8 @@ public final class RLPxConnection {
   }
 
   /**
-   *
+   * Provides the local public key
+   * 
    * @return our public key associated with this connection
    */
   public SECP256K1.PublicKey publicKey() {
@@ -125,7 +126,8 @@ public final class RLPxConnection {
   }
 
   /**
-   *
+   * Provides the peer public key
+   * 
    * @return the public key of the peer associated with this connection
    */
   public SECP256K1.PublicKey peerPublicKey() {

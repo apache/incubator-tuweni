@@ -255,9 +255,6 @@ allprojects {
 
   dependencies {
     errorprone 'com.google.errorprone:error_prone_core'
-    if (JavaVersion.current().isJava8()) {
-      errorproneJavac("com.google.errorprone:javac")
-    }
   }
 
   tasks.withType(AbstractArchiveTask) {
@@ -281,16 +278,6 @@ allprojects {
       excludedPaths = '.*/generated-src/.*'
       check('FutureReturnValueIgnored', CheckSeverity.OFF)
       check('UnnecessaryParentheses', CheckSeverity.OFF)
-
-      // This check is broken in Java 12.  See https://github.com/google/error-prone/issues/1257
-      if (JavaVersion.current() == JavaVersion.VERSION_12) {
-        check('Finally', CheckSeverity.OFF)
-      }
-
-      // This check is broken after Java 12.  See https://github.com/google/error-prone/issues/1352
-      if (JavaVersion.current() > JavaVersion.VERSION_12) {
-        check('TypeParameterUnusedInFormals', CheckSeverity.OFF)
-      }
 
       disableWarningsInGeneratedCode = true
     }

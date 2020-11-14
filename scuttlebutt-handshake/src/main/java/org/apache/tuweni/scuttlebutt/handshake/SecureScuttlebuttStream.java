@@ -136,8 +136,6 @@ final class SecureScuttlebuttStream implements SecureScuttlebuttStreamClient, Se
   }
 
   private Bytes encrypt(Bytes message, SecretBox.Key clientToServerKey, MutableBytes clientToServerNonce) {
-    int messages = (int) Math.ceil((double) message.size() / 4096d);
-
     ArrayList<Bytes> bytes = breakIntoParts(message);
 
     List<Bytes> segments = bytes

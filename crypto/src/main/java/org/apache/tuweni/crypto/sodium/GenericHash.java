@@ -48,7 +48,8 @@ public final class GenericHash {
     }
 
     /**
-     *
+     * Provides the length of the input
+     * 
      * @return the length of the input
      */
     public int length() {
@@ -113,6 +114,8 @@ public final class GenericHash {
     }
 
     /**
+     * Provides the bytes of this key
+     * 
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -120,6 +123,8 @@ public final class GenericHash {
     }
 
     /**
+     * Provides the bytes of this key
+     * 
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {
@@ -149,6 +154,8 @@ public final class GenericHash {
 
     /**
      *
+     * Provides the length of the key
+     * 
      * @return the length of the key
      */
     public int length() {
@@ -213,6 +220,8 @@ public final class GenericHash {
     }
 
     /**
+     * Provides the bytes of this key
+     * 
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -220,6 +229,8 @@ public final class GenericHash {
     }
 
     /**
+     * Provides the bytes of this key
+     * 
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {

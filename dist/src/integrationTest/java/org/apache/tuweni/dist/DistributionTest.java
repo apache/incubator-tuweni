@@ -48,6 +48,7 @@ class DistributionTest {
     return parentFolder.resolve("build").resolve("distributions").toAbsolutePath();
   }
 
+  @SuppressWarnings("JdkObsolete")
   @Test
   void testZipFileContents() throws IOException {
     Map<String, Set<String>> dupes = new HashMap<>();

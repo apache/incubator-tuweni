@@ -14,8 +14,6 @@ package org.apache.tuweni.io;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.Enumeration;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -29,22 +27,6 @@ import java.util.stream.StreamSupport;
 public final class Streams {
   private Streams() {}
 
-  private static final PrintStream NULL_PRINT_STREAM = new PrintStream(NullOutputStream.INSTANCE);
-
-  /**
-   * @return An {@link OutputStream} that discards all input.
-   */
-  public static OutputStream nullOutputStream() {
-    return NullOutputStream.INSTANCE;
-  }
-
-  /**
-   * @return A {@link PrintStream} that discards all input.
-   */
-  public static PrintStream nullPrintStream() {
-    return NULL_PRINT_STREAM;
-  }
-
   /**
    * Stream an {@link Enumeration}.
    *
@@ -52,6 +34,7 @@ public final class Streams {
    * @param <T> The type of objects in the enumeration.
    * @return A stream over the enumeration.
    */
+  @SuppressWarnings("JdkObsolete")
   public static <T> Stream<T> enumerationStream(Enumeration<T> enumeration) {
     requireNonNull(enumeration);
     return StreamSupport.stream(new Spliterators.AbstractSpliterator<>(Long.MAX_VALUE, Spliterator.ORDERED) {

@@ -126,6 +126,8 @@ public interface Configuration {
   }
 
   /**
+   * Returns true if the document has errors.
+   * 
    * @return {@code true} if the TOML document contained errors.
    */
   default boolean hasErrors() {

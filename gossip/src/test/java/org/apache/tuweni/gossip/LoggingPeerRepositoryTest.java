@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 class LoggingPeerRepositoryTest {
 
   private static final Peer FOO = new Peer() {};
-  private static final Peer BAR = new Peer() {};
 
   @Test
   void testAddEagerPeer() {

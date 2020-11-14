@@ -45,10 +45,11 @@ public final class FeedService {
 
 
   /**
-   *
+   * Constructor of the feed service
+   * 
    * @param multiplexer the RPC request multiplexer to make requests with.
    */
-  protected FeedService(Multiplexer multiplexer) {
+  FeedService(Multiplexer multiplexer) {
     this.multiplexer = multiplexer;
   }
 

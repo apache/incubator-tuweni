@@ -16,7 +16,6 @@ import java.math.BigInteger;
 
 import org.bouncycastle.crypto.*;
 import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.generators.EphemeralKeyPairGenerator;
 import org.bouncycastle.crypto.params.*;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.BigIntegers;
@@ -40,8 +39,6 @@ public class EthereumIESEncryptionEngine {
   IESParameters param;
 
   byte[] V;
-  private EphemeralKeyPairGenerator keyPairGenerator;
-  private KeyParser keyParser;
   private byte[] IV;
 
 
@@ -101,7 +98,7 @@ public class EthereumIESEncryptionEngine {
   }
 
   private byte[] encryptBlock(byte[] in, int inOff, int inLen) throws InvalidCipherTextException {
-    byte[] C = null, K = null, K1 = null, K2 = null;
+    byte[] C, K, K1, K2;
     int len;
 
 
@@ -171,7 +168,7 @@ public class EthereumIESEncryptionEngine {
 
   private byte[] decryptBlock(byte[] in_enc, int inOff, int inLen) throws InvalidCipherTextException {
     byte[] M, K, K1, K2;
-    int len = 0;
+    int len;
 
     // Ensure that the length of the input is greater than the MAC in bytes
     if (inLen < V.length + mac.getMacSize()) {

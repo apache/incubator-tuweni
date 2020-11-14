@@ -30,6 +30,7 @@ class MergeTest {
     assertEquals(result, ProgPoW.merge(a, b, r));
   }
 
+  @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> mergeVectors() {
     return Stream
         .of(

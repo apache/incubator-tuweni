@@ -62,13 +62,6 @@ class StateTest {
   @Test
   void testInitialState() {
     EphemeralPeerRepository repo = new EphemeralPeerRepository();
-    State state = new State(
-        repo,
-        Hash::keccak256,
-        new MockMessageSender(),
-        messageListener,
-        (message, peer) -> true,
-        (peer) -> true);
     assertTrue(repo.peers().isEmpty());
     assertTrue(repo.lazyPushPeers().isEmpty());
     assertTrue(repo.eagerPushPeers().isEmpty());

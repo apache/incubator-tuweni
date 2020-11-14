@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -133,7 +132,7 @@ final class MutableTomlTable implements TomlTable {
 
   @Override
   public Map<String, Object> toMap() {
-    return properties.entrySet().stream().collect(Collectors.toMap(Entry::getKey, e -> e.getValue().value));
+    return properties.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().value));
   }
 
   MutableTomlTable createTable(List<String> path, TomlPosition position) {

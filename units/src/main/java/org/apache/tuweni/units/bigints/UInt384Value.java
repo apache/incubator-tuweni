@@ -42,6 +42,8 @@ import java.math.BigInteger;
 public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
 
   /**
+   * Returns true is this is 0.
+   *
    * @return True if this is the value 0.
    */
   default boolean isZero() {
@@ -279,6 +281,8 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
   T mod(long modulus);
 
   /**
+   * Returns true if this value fits an int
+   *
    * @return True if this value fits a java {@code int} (i.e. is less or equal to {@code Integer.MAX_VALUE}).
    */
   default boolean fitsInt() {
@@ -293,6 +297,8 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
   }
 
   /**
+   * Returns the value as an int.
+   *
    * @return This value as a java {@code int} assuming it is small enough to fit an {@code int}.
    * @throws ArithmeticException If the value does not fit an {@code int}, that is if {@code !fitsInt()}.
    */
@@ -304,6 +310,8 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
   }
 
   /**
+   * Returns true if this value fits in a long.
+   * 
    * @return True if this value fits a java {@code long} (i.e. is less or equal to {@code Long.MAX_VALUE}).
    */
   default boolean fitsLong() {
@@ -317,6 +325,8 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
   }
 
   /**
+   * Returns this value as a long.
+   *
    * @return This value as a java {@code long} assuming it is small enough to fit a {@code long}.
    * @throws ArithmeticException If the value does not fit a {@code long}, that is if {@code !fitsLong()}.
    */
@@ -328,6 +338,8 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
   }
 
   /**
+   * Returns this value as a {@link BigInteger}.
+   * 
    * @return This value as a {@link BigInteger}.
    */
   default BigInteger toBigInteger() {
@@ -348,7 +360,11 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
     return toBytes().toHexString();
   }
 
-  /** @return This value represented as a minimal hexadecimal string (without any leading zero). */
+  /**
+   * Returns this value represented as a minimal hexadecimal string (without any leading zero).
+   * 
+   * @return This value represented as a minimal hexadecimal string (without any leading zero).
+   */
   default String toShortHexString() {
     return toBytes().toShortHexString();
   }
@@ -361,16 +377,22 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
   UInt384 toUInt384();
 
   /**
+   * Returns the value as bytes
+   * 
    * @return The value as bytes.
    */
   Bytes48 toBytes();
 
   /**
+   * Retuns the value as bytes without any leading zero bytes.
+   * 
    * @return The value as bytes without any leading zero bytes.
    */
   Bytes toMinimalBytes();
 
   /**
+   * Returns the number of zero bits preceding the highest-order ("leftmost") one-bit
+   * 
    * @return the number of zero bits preceding the highest-order ("leftmost") one-bit in the binary representation of
    *         this value, or 384 if the value is equal to zero.
    */
@@ -379,6 +401,8 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
   }
 
   /**
+   * Returns the number of bits following and including the highest-order ("leftmost") one-bit
+   * 
    * @return The number of bits following and including the highest-order ("leftmost") one-bit in the binary
    *         representation of this value, or zero if all bits are zero.
    */

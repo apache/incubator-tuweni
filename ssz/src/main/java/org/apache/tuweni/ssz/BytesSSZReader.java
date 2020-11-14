@@ -295,28 +295,6 @@ final class BytesSSZReader implements SSZReader {
     return elements;
   }
 
-  private <T> List<T> readFixedList(LongFunction<byte[]> bytesSupplier, Function<byte[], T> converter) {
-    int originalIndex = this.index;
-    List<T> elements;
-    try {
-      // use a long to simulate reading unsigned
-      long listSize = consumeBytes(4).toLong(LITTLE_ENDIAN);
-      elements = new ArrayList<>();
-      while (listSize > 0) {
-        byte[] bytes = bytesSupplier.apply(listSize);
-        elements.add(converter.apply(bytes));
-        listSize -= bytes.length;
-        if (listSize < 0) {
-          throw new InvalidSSZTypeException("SSZ encoded list length does not align with lengths of its elements");
-        }
-      }
-    } catch (Exception e) {
-      this.index = originalIndex;
-      throw e;
-    }
-    return elements;
-  }
-
   private <T> List<T> readFixedList(int listSize, LongFunction<byte[]> bytesSupplier, Function<byte[], T> converter) {
     int originalIndex = this.index;
     List<T> elements;

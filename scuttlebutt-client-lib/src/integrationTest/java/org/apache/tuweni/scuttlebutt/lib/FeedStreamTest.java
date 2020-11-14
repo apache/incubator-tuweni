@@ -74,7 +74,7 @@ class FeedStreamTest {
 
     assertTrue(lastPosted.isPresent());
 
-    FeedMessage lastFeedMessagePosted = lastPosted.get();
+    lastPosted.get();
 
     CompletableAsyncResult<Optional<FeedMessage>> lastMessage = AsyncResult.incomplete();
 

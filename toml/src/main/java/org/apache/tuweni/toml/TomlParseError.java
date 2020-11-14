@@ -30,14 +30,20 @@ public final class TomlParseError extends RuntimeException {
   }
 
   /**
+   * Provides the position in the input where the error occurred.
+   * 
    * @return The position in the input where the error occurred.
    */
   public TomlPosition position() {
     return position;
   }
 
+  public String getMessageWithoutPosition() {
+    return super.getMessage();
+  }
+
   @Override
-  public String toString() {
-    return getMessage() + " (" + position + ")";
+  public String getMessage() {
+    return super.getMessage() + " (" + position + ")";
   }
 }

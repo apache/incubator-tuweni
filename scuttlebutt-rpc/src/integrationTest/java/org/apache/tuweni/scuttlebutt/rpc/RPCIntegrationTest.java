@@ -68,7 +68,9 @@ class RPCIntegrationTest {
     }
 
     @Override
-    public void streamClosed() {}
+    public void streamClosed() {
+      terminationFn.run();
+    }
 
     void sendMessage(Bytes bytes) {
       sender.accept(bytes);

@@ -43,6 +43,8 @@ public class RPCResponse {
   }
 
   /**
+   * Response body
+   * 
    * @return the RPC response body
    */
   public Bytes body() {
@@ -50,6 +52,8 @@ public class RPCResponse {
   }
 
   /**
+   * Responsse body type
+   * 
    * @return The type of the data contained in the body.
    */
   public BodyType bodyType() {
