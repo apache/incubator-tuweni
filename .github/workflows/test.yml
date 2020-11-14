@@ -53,3 +53,27 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           flags: unit
+  test-windows:
+    runs-on: windows-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - name: Cache Gradle packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+      - name: Cache Maven Repository
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: gradle test
+        uses: eskatos/gradle-command-action@v1
+        with:
+          gradle-version: 6.3
+          arguments: test
