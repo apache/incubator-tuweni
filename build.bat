@@ -12,7 +12,5 @@ REM specific language governing permissions and limitations under the License.
 @echo on
 bitsadmin /transfer myDownloadJob https://services.gradle.org/distributions/gradle-6.5.1-bin.zip d:\gradle.zip
 unzip d:\gradle.zip -d gradle_download
-set "task=%1"
-if "%task%"=="" set "myvar=assemble"
 call gradle_download/gradle-6.5.1/bin/gradle.bat setup
-call gradlew.bat %task%
+call gradlew.bat assemble

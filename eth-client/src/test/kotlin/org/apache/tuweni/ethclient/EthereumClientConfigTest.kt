@@ -20,15 +20,14 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.lang.IllegalArgumentException
 import java.nio.file.Paths
 
 class EthereumClientConfigTest {
 
   @Test
   fun testFileConfig() {
-    val config =
-      EthereumClientConfig.fromFile(Paths.get(EthereumClientConfigTest::class.java.getResource("/minimal.conf").path))
+    val config = EthereumClientConfig.fromFile(
+      Paths.get(EthereumClientConfigTest::class.java.getResource("/minimal.conf").toURI()))
     assertNotNull(config)
   }
 
@@ -83,7 +82,10 @@ class EthereumClientConfigTest {
   @Test
   fun toToml() {
     val config = EthereumClientConfig.fromString("[storage.forui]\npath=\"data\"")
-    assertEquals("[storage.forui]\npath = \"data\"\n", config.toToml())
+    assertEquals(
+      "[storage.forui]${System.lineSeparator()}path = \"data\"${System.lineSeparator()}",
+      config.toToml()
+    )
   }
 
   @Test

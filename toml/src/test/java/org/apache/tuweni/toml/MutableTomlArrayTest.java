@@ -143,6 +143,15 @@ class MutableTomlArrayTest {
   @Test
   void toJson() {
     MutableTomlArray array = new MutableTomlArray().append("foo", positionAt(1, 1)).append("bar", positionAt(10, 1));
-    assertEquals("[\n  \"foo\",\n  \"bar\"\n]\n", array.toJson());
+    assertEquals(
+        "["
+            + System.lineSeparator()
+            + "  \"foo\","
+            + System.lineSeparator()
+            + "  \"bar\""
+            + System.lineSeparator()
+            + "]"
+            + System.lineSeparator(),
+        array.toJson());
   }
 }
