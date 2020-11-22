@@ -469,8 +469,8 @@ allprojects {
               }
             }
             issueManagement {
-              system = "jira"
-              url = "https://issues.apache.org/jira/projects/TUWENI"
+              system = "github"
+              url = "https://www.github.com/apache/incubator-tuweni/issues"
             }
           }
 
@@ -482,7 +482,7 @@ allprojects {
             }
 
             def dependenciesNode = asNode().appendNode('dependencies')
-            def addDependencyNode = { dep, optional ->
+            def addDependencyNode = { dep, optional, scope ->
               def dependencyNode = dependenciesNode.appendNode('dependency')
               if (dep instanceof ProjectDependency) {
                 dependencyNode.appendNode('groupId', 'org.apache.tuweni')
@@ -501,6 +501,9 @@ allprojects {
               if (optional) {
                 dependencyNode.appendNode('optional', 'true')
               }
+              if (scope != null) {
+                dependencyNode.appendNode('scope', scope)
+              }
 
               def ers = dep.excludeRules
               if (!ers.empty) {
@@ -512,12 +515,17 @@ allprojects {
                 }
               }
             }
-
+            configurations.implementation.allDependencies.each { dep ->
+              addDependencyNode(dep, false, null)
+            }
             configurations.compile.allDependencies.each { dep ->
-              addDependencyNode(dep, false)
+              addDependencyNode(dep, false, null)
             }
             configurations.compileOnly.allDependencies.each { dep ->
-              addDependencyNode(dep, true)
+              addDependencyNode(dep, true, null)
+            }
+            configurations.runtimeOnly.allDependencies.each { dep ->
+              addDependencyNode(dep, false, 'runtime')
             }
 
             if (System.getenv('ENABLE_SIGNING') == 'true') {
