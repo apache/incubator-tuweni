@@ -26,7 +26,7 @@ import java.util.TimerTask
  * Resolves DNS records over time, refreshing records.
  *
  * @param enrLink the ENR link to start with, of the form enrtree://PUBKEY@domain
- * @param listeners Listeners notified when records are read and whenever they are updated.
+ * @param listener Listener notified when records are read and whenever they are updated.
  * @param dnsServer the DNS server to use for DNS query. If null, the default DNS server will be used.
  * @param seq the sequence number of the root record. If the root record seq is higher, proceed with visit.
  * @param period the period at which to poll DNS records
@@ -34,20 +34,29 @@ import java.util.TimerTask
  */
 class DNSDaemon @JvmOverloads constructor(
   private val enrLink: String,
-  val listeners: Set<(Long, List<EthereumNodeRecord>) -> Unit> = HashSet(),
+  private val listener: DNSDaemonListener?,
   private val seq: Long = 0,
   private val period: Long = 60000L,
   private val dnsServer: String? = null,
   private val resolver: Resolver = SimpleResolver(dnsServer)
 ) {
+
+  val listeners = HashSet<DNSDaemonListener>()
+
   private val timer: Timer = Timer(false)
 
   init {
-    timer.scheduleAtFixedRate(DNSTimerTask(resolver, seq, enrLink, this::updateRecords), 0, period)
+    listener?.let {
+      listeners.add(listener)
+    }
   }
 
   private fun updateRecords(records: List<EthereumNodeRecord>) {
-    listeners.forEach { it(seq, records) }
+    listeners.forEach { it.newRecords(seq, records) }
+  }
+
+  public fun start() {
+    timer.scheduleAtFixedRate(DNSTimerTask(resolver, seq, enrLink, this::updateRecords), 0, period)
   }
 
   /**

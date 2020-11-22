@@ -17,7 +17,9 @@
 package org.apache.tuweni.ethclient
 
 import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.discovery.DNSDaemon
+import org.apache.tuweni.discovery.DNSDaemonListener
 import org.apache.tuweni.kv.KeyValueStore
 import org.apache.tuweni.peer.repository.PeerRepository
 
@@ -55,19 +57,23 @@ class DNSClient(
    */
   suspend fun start() {
     config.domain().let { domain ->
-      dnsDaemon = DNSDaemon(
+      val daemon = DNSDaemon(
         seq = seq(),
         enrLink = domain,
         period = config.pollingPeriod(),
-        listeners = setOf { seq, enrs ->
-          runBlocking {
-            seq(seq)
-            enrs.map {
-              peerRepository.storeIdentity(it.ip().hostAddress, it.tcp()!!, it.publicKey())
+        listener = object : DNSDaemonListener {
+          override fun newRecords(seq: Long, records: List<EthereumNodeRecord>) {
+            runBlocking {
+              seq(seq)
+              records.map {
+                peerRepository.storeIdentity(it.ip().hostAddress, it.tcp()!!, it.publicKey())
+              }
             }
           }
         }
       )
+      daemon.start()
+      dnsDaemon = daemon
     }
   }
 
