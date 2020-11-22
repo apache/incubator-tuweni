@@ -27,7 +27,6 @@ static def mandatoryFiles(CopySpec spec) {
     from ".."
     include 'DISCLAIMER'
     include 'LICENSE'
-    include 'NOTICE'
   }
   spec.into('licenses') { from '../build/reports/license' }
 }
@@ -55,6 +54,7 @@ asfNexusPassword=
 }
 
 assemble.dependsOn builtGradleProperties
+assemble.dependsOn rootProject.createNotice
 
 distributions {
   main {
@@ -64,6 +64,10 @@ distributions {
       into('') {
         from ".."
         include 'README.md'
+      }
+      into('') {
+        from "../build/reports/notice"
+        include 'NOTICE'
       }
       def libs = []
       def sources = []
@@ -102,6 +106,7 @@ distributions {
       mandatoryFiles(it)
       into('') {
         from ".."
+        include 'NOTICE'
         include 'README.md'
         include 'build.sh'
         include 'build.bat'
