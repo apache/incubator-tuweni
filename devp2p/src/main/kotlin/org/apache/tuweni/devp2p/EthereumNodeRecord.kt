@@ -264,9 +264,17 @@ class EthereumNodeRecord(
    * @return the ENR public key
    */
   fun publicKey(): SECP256K1.PublicKey {
+    return SECP256K1.PublicKey.fromBytes(publicKeyBytes())
+  }
+
+  /**
+   * The ENR public key entry bytes
+   * @return the ENR public key bytes
+   */
+  fun publicKeyBytes(): Bytes {
     val keyBytes = data["secp256k1"] ?: throw InvalidNodeRecordException("Missing secp256k1 entry")
     val ecPoint = SECP256K1.Parameters.CURVE.getCurve().decodePoint(keyBytes.toArrayUnsafe())
-    return SECP256K1.PublicKey.fromBytes(Bytes.wrap(ecPoint.getEncoded(false)).slice(1))
+    return Bytes.wrap(ecPoint.getEncoded(false)).slice(1)
   }
 
   /**
