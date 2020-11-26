@@ -55,6 +55,8 @@ class PingPongTest {
         AsyncResult.incomplete(),
         "127.0.0.1",
         1234);
+    conn.registerListener(event -> {
+    });
 
     AsyncCompletion completion = conn.sendPing();
     assertFalse(completion.isDone());
@@ -70,7 +72,8 @@ class PingPongTest {
     DefaultWireConnection conn = new DefaultWireConnection(nodeId, peerNodeId, capturedPong::set, helloMessage -> {
     }, () -> {
     }, new LinkedHashMap<>(), 1, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
-
+    conn.registerListener(event -> {
+    });
     conn.messageReceived(new RLPxMessage(2, Bytes.EMPTY));
     assertNotNull(capturedPong.get());
     assertEquals(3, capturedPong.get().messageId());

@@ -15,10 +15,29 @@ package org.apache.tuweni.rlpx.wire;
 
 import org.apache.tuweni.crypto.SECP256K1;
 
+import java.util.Collection;
+
 /**
  * A stateful connection between two peers under the Devp2p wire protocol.
  */
 public interface WireConnection {
+
+  /**
+   * Listener of events occurring on the connection.
+   */
+  interface EventListener {
+
+    /**
+     * Callback for the listener to be notified of events.
+     * 
+     * @param event the event type
+     */
+    void onEvent(Event event);
+  }
+
+  public enum Event {
+    CONNECTED, DISCONNECTED;
+  }
 
   /**
    * Returns true if the connection supports the subprotocol
@@ -27,6 +46,13 @@ public interface WireConnection {
    * @return true if the subprotocol is supported
    */
   boolean supports(SubProtocolIdentifier subProtocolIdentifier);
+
+  /**
+   * Provides the subprotocols the connection supports in common with the service.
+   * 
+   * @return agreed subprotocols
+   */
+  Collection<SubProtocolIdentifier> agreedSubprotocols();
 
   /**
    * Whether the peer asked to disconnect
@@ -85,4 +111,11 @@ public interface WireConnection {
    * @return the hello message the remote peer sent.
    */
   HelloMessage getPeerHello();
+
+  /**
+   * Registers a listener to consume events sent by this connection.
+   *
+   * @param listener the function called when an event triggers
+   */
+  void registerListener(EventListener listener);
 }

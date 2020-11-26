@@ -24,6 +24,19 @@ import javax.annotation.Nullable;
 public interface WireConnectionRepository {
 
   /**
+   * Connection listener
+   */
+  interface Listener {
+
+    /**
+     * Callback triggered when a connection changes
+     * 
+     * @param conn the connection change
+     */
+    void connectionEvent(WireConnection conn);
+  }
+
+  /**
    * Adds a new wire connection to the repository.
    * 
    * @param wireConnection the new wire connection
@@ -62,4 +75,19 @@ public interface WireConnectionRepository {
    *
    */
   void close();
+
+  /**
+   * Adds a listener called when connection occurs, ie when the connection is established and capabilities are
+   * exchanged.
+   * 
+   * @param listener the listener
+   */
+  void addConnectionListener(Listener listener);
+
+  /**
+   * Adds a listener called when disconnection occurs, either from us or the peer initiative.
+   * 
+   * @param listener the listener
+   */
+  void addDisconnectionListener(Listener listener);
 }
