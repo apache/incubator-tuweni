@@ -37,6 +37,29 @@ public interface RLPxService {
    */
   AsyncResult<WireConnection> connectTo(SECP256K1.PublicKey peerPublicKey, InetSocketAddress peerAddress);
 
+  /**
+   * Provides the actual port in use.
+   *
+   * @return the port used by the server
+   * @throws IllegalStateException if the service is not started
+   */
+  int actualPort();
+
+  /**
+   * Provides the actual socket address (network interface and port) in use.
+   *
+   * @return the socket address used by the server
+   * @throws IllegalStateException if the service is not started
+   */
+  InetSocketAddress actualSocketAddress();
+
+  /**
+   * Provides the advertised port.
+   *
+   * @return the port advertised by the server
+   * @throws IllegalStateException if the service is not started
+   */
+  int advertisedPort();
 
   /**
    * Starts the service.

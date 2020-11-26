@@ -111,6 +111,19 @@ internal class LESSubProtocolHandlerTest {
   )
 
   private class MyRLPxService : RLPxService {
+
+    override fun actualPort(): Int {
+      TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun actualSocketAddress(): InetSocketAddress {
+      TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun advertisedPort(): Int {
+      TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun getClient(subProtocolIdentifier: SubProtocolIdentifier): SubProtocolClient {
       TODO("not implemented")
     }
