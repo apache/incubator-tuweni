@@ -249,12 +249,7 @@ public final class VertxRLPxService implements RLPxService {
     }
   }
 
-  /**
-   * Provides the actual port in use.
-   * 
-   * @return the port used by the server
-   * @throws IllegalStateException if the service is not started
-   */
+  @Override
   public int actualPort() {
     if (!started.get()) {
       throw new IllegalStateException("The RLPx service is not active");
@@ -262,12 +257,15 @@ public final class VertxRLPxService implements RLPxService {
     return server.actualPort();
   }
 
-  /**
-   * Provides the advertised port.
-   *
-   * @return the port advertised by the server
-   * @throws IllegalStateException if the service is not started
-   */
+  @Override
+  public InetSocketAddress actualSocketAddress() {
+    if (!started.get()) {
+      throw new IllegalStateException("The RLPx service is not active");
+    }
+    return new InetSocketAddress(networkInterface, server.actualPort());
+  }
+
+  @Override
   public int advertisedPort() {
     if (!started.get()) {
       throw new IllegalStateException("The RLPx service is not active");
