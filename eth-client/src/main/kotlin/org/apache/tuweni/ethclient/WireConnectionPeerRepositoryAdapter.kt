@@ -25,6 +25,17 @@ import java.util.concurrent.ConcurrentHashMap
 
 class WireConnectionPeerRepositoryAdapter(val peerRepository: PeerRepository) : WireConnectionRepository {
 
+  private val connectionListeners = ArrayList<WireConnectionRepository.Listener>()
+  private val disconnectionListeners = ArrayList<WireConnectionRepository.Listener>()
+
+  override fun addConnectionListener(listener: WireConnectionRepository.Listener) {
+    connectionListeners.add(listener)
+  }
+
+  override fun addDisconnectionListener(listener: WireConnectionRepository.Listener) {
+    disconnectionListeners.add(listener)
+  }
+
   private val connections = ConcurrentHashMap<String, WireConnection>()
 
   override fun add(wireConnection: WireConnection): String {
@@ -33,6 +44,17 @@ class WireConnectionPeerRepositoryAdapter(val peerRepository: PeerRepository) : 
     val peer = peerRepository.storePeer(id, Instant.now(), Instant.now())
     peerRepository.addConnection(peer, id)
     connections[id.id()] = wireConnection
+    wireConnection.registerListener {
+      if (it == WireConnection.Event.CONNECTED) {
+        for (listener in connectionListeners) {
+          listener.connectionEvent(wireConnection)
+        }
+      } else if (it == WireConnection.Event.DISCONNECTED) {
+        for (listener in disconnectionListeners) {
+          listener.connectionEvent(wireConnection)
+        }
+      }
+    }
     return id.id()
   }
 

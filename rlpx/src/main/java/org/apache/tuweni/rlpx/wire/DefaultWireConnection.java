@@ -19,6 +19,8 @@ import org.apache.tuweni.concurrent.CompletableAsyncResult;
 import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.rlpx.RLPxMessage;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,6 +61,7 @@ public final class DefaultWireConnection implements WireConnection {
   private DisconnectReason disconnectReason;
   private boolean disconnectRequested;
   private boolean disconnectReceived;
+  private EventListener eventListener;
 
   /**
    * Default constructor.
@@ -150,17 +153,21 @@ public final class DefaultWireConnection implements WireConnection {
                   .stream()
                   .map(subprotocols::get)
                   .map(handler -> handler.handleNewPeerConnection(this)));
-      allSubProtocols.thenRun(() -> ready.complete(this));
+      allSubProtocols.thenRun(() -> {
+        ready.complete(this);
+        eventListener.onEvent(Event.CONNECTED);
+      });
       return;
     } else if (message.messageId() == 1) {
       DisconnectMessage disconnect = DisconnectMessage.read(message.content());
       logger.info("Received disconnect {}", disconnect);
-      disconnectHandler.run();
       disconnectReceived = true;
       disconnectReason = DisconnectReason.valueOf(disconnect.reason());
+      disconnectHandler.run();
       if (!ready.isDone()) {
         ready.cancel();
       }
+      eventListener.onEvent(Event.DISCONNECTED);
       return;
     }
 
@@ -233,9 +240,10 @@ public final class DefaultWireConnection implements WireConnection {
   public void disconnect(DisconnectReason reason) {
     logger.debug("Sending disconnect message with reason {}", reason);
     writer.accept(new RLPxMessage(1, new DisconnectMessage(reason).toBytes()));
-    disconnectHandler.run();
     disconnectRequested = true;
     disconnectReason = reason;
+    disconnectHandler.run();
+    eventListener.onEvent(Event.DISCONNECTED);
   }
 
   /**
@@ -284,6 +292,15 @@ public final class DefaultWireConnection implements WireConnection {
       }
     }
     return false;
+  }
+
+  @Override
+  public Collection<SubProtocolIdentifier> agreedSubprotocols() {
+    List<SubProtocolIdentifier> identifiers = new ArrayList<>();
+    for (SubProtocol sp : subprotocolRangeMap.asMapOfRanges().values()) {
+      identifiers.addAll(sp.getCapabilities());
+    }
+    return identifiers;
   }
 
   public void sendMessage(SubProtocolIdentifier subProtocolIdentifier, int messageType, Bytes message) {
@@ -343,5 +360,10 @@ public final class DefaultWireConnection implements WireConnection {
   @Override
   public HelloMessage getPeerHello() {
     return peerHelloMessage;
+  }
+
+  @Override
+  public void registerListener(EventListener listener) {
+    eventListener = listener;
   }
 }

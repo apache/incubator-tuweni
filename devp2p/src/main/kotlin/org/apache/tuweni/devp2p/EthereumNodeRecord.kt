@@ -282,6 +282,7 @@ class EthereumNodeRecord(
    * @return the hash of the public key
    */
   fun nodeId() = EthereumNodeRecord.nodeId(publicKey())
+
   /**
    * The ip associated with the ENR
    * @return The IP adress of the ENR

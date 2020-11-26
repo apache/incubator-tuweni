@@ -13,6 +13,7 @@
 package org.apache.tuweni.rlpx.vertx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,15 +27,19 @@ import org.apache.tuweni.junit.BouncyCastleExtension;
 import org.apache.tuweni.junit.VertxExtension;
 import org.apache.tuweni.junit.VertxInstance;
 import org.apache.tuweni.rlpx.MemoryWireConnectionsRepository;
+import org.apache.tuweni.rlpx.RLPxService;
 import org.apache.tuweni.rlpx.wire.DisconnectReason;
 import org.apache.tuweni.rlpx.wire.SubProtocol;
 import org.apache.tuweni.rlpx.wire.SubProtocolClient;
+import org.apache.tuweni.rlpx.wire.SubProtocolHandler;
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
 import org.apache.tuweni.rlpx.wire.WireConnection;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.vertx.core.Vertx;
 import org.junit.jupiter.api.Test;
@@ -156,19 +161,55 @@ class VertxRLPxServiceTest {
     SECP256K1.KeyPair peerPair = SECP256K1.KeyPair.random();
 
     MemoryWireConnectionsRepository repository = new MemoryWireConnectionsRepository();
+    AtomicBoolean called = new AtomicBoolean();
+    repository.addConnectionListener(conn -> called.set(true));
+    List<SubProtocol> protocols = Collections.singletonList(new SubProtocol() {
+      @Override
+      public SubProtocolIdentifier id() {
+        return SubProtocolIdentifier.of("eth", 63);
+      }
+
+      @Override
+      public boolean supports(SubProtocolIdentifier subProtocolIdentifier) {
+        return false;
+      }
+
+      @Override
+      public int versionRange(int version) {
+        return 0;
+      }
+
+      @Override
+      public SubProtocolHandler createHandler(RLPxService service, SubProtocolClient client) {
+        SubProtocolHandler handler = mock(SubProtocolHandler.class);
+        when(handler.stop()).thenReturn(AsyncCompletion.COMPLETED);
+        return handler;
+      }
+
+      @Override
+      public SubProtocolClient createClient(RLPxService service) {
+        return mock(SubProtocolClient.class);
+      }
+    });
     VertxRLPxService service =
-        new VertxRLPxService(vertx, 0, "localhost", 10000, ourPair, new ArrayList<>(), "abc", repository);
+        new VertxRLPxService(vertx, 0, "localhost", 10000, ourPair, protocols, "abc", repository);
     service.start().join();
 
     MemoryWireConnectionsRepository peerRepository = new MemoryWireConnectionsRepository();
     VertxRLPxService peerService =
-        new VertxRLPxService(vertx, 0, "localhost", 10000, peerPair, new ArrayList<>(), "abc", peerRepository);
+        new VertxRLPxService(vertx, 0, "localhost", 10000, peerPair, protocols, "abc", peerRepository);
     peerService.start().join();
 
     try {
-      service.connectTo(peerPair.publicKey(), new InetSocketAddress("localhost", peerService.actualPort()));
-      Thread.sleep(3000);
+      WireConnection conn =
+          service.connectTo(peerPair.publicKey(), new InetSocketAddress("localhost", peerService.actualPort())).get();
+      assertNotNull(conn);
       assertEquals(1, repository.asMap().size());
+
+      AtomicBoolean disconnect = new AtomicBoolean();
+      repository.addDisconnectionListener(c -> disconnect.set(true));
+      service.disconnect(conn, DisconnectReason.CLIENT_QUITTING);
+      assertTrue(disconnect.get());
 
     } finally {
       service.stop();

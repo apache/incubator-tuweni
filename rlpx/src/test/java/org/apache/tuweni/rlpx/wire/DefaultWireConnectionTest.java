@@ -40,7 +40,8 @@ class DefaultWireConnectionTest {
         new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
         }, new LinkedHashMap<>(), 3, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
-
+    conn.registerListener(event -> {
+    });
     conn.messageReceived(new RLPxMessage(45, Bytes.EMPTY));
     assertEquals(1, capturedDisconnect.get().messageId());
     DisconnectMessage msg = DisconnectMessage.read(capturedDisconnect.get().content());
@@ -55,6 +56,8 @@ class DefaultWireConnectionTest {
         new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
         }, new LinkedHashMap<>(), 4, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
+    conn.registerListener(event -> {
+    });
     conn.sendHello();
     conn.messageReceived(new RLPxMessage(45, Bytes.EMPTY));
     assertEquals(1, capturedDisconnect.get().messageId());
@@ -70,6 +73,8 @@ class DefaultWireConnectionTest {
         new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
         }, new LinkedHashMap<>(), 28, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
+    conn.registerListener(event -> {
+    });
     conn.sendHello();
     conn
         .messageReceived(
@@ -92,6 +97,8 @@ class DefaultWireConnectionTest {
         new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
         }, new LinkedHashMap<>(), 32, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
+    conn.registerListener(event -> {
+    });
     conn.sendHello();
     conn
         .messageReceived(
@@ -110,6 +117,8 @@ class DefaultWireConnectionTest {
         new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
         }, new LinkedHashMap<>(), 32, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
+    conn.registerListener(event -> {
+    });
     conn.sendHello();
     conn
         .messageReceived(
@@ -129,6 +138,8 @@ class DefaultWireConnectionTest {
     DefaultWireConnection conn = new DefaultWireConnection(nodeId, nodeId, capturedDisconnect::set, helloMessage -> {
     }, () -> {
     }, new LinkedHashMap<>(), 33, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
+    conn.registerListener(event -> {
+    });
     conn.sendHello();
     conn
         .messageReceived(
@@ -147,6 +158,8 @@ class DefaultWireConnectionTest {
         new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
         }, new LinkedHashMap<>(), 5, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
+    conn.registerListener(event -> {
+    });
     conn.sendHello();
     conn
         .messageReceived(
