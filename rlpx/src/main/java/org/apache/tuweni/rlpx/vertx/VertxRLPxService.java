@@ -18,6 +18,7 @@ import org.apache.tuweni.concurrent.AsyncCompletion;
 import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
 import org.apache.tuweni.concurrent.CompletableAsyncResult;
+import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.crypto.SECP256K1.KeyPair;
 import org.apache.tuweni.crypto.SECP256K1.PublicKey;
 import org.apache.tuweni.rlpx.HandshakeMessage;
@@ -35,6 +36,7 @@ import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier;
 import org.apache.tuweni.rlpx.wire.WireConnection;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,13 +70,14 @@ public final class VertxRLPxService implements RLPxService {
   private final KeyPair keyPair;
   private final List<SubProtocol> subProtocols;
   private final String clientId;
+  private final WireConnectionRepository repository;
 
   private LinkedHashMap<SubProtocol, SubProtocolHandler> handlers;
   private LinkedHashMap<SubProtocol, SubProtocolClient> clients;
   private NetClient client;
   private NetServer server;
 
-  private final WireConnectionRepository repository;
+  private List<SECP256K1.PublicKey> keepAliveList = new ArrayList<>();
 
   private static void checkPort(int port) {
     if (port < 0 || port > 65536) {
@@ -146,6 +149,23 @@ public final class VertxRLPxService implements RLPxService {
     this.subProtocols = subProtocols;
     this.clientId = clientId;
     this.repository = repository;
+    repository.addDisconnectionListener(c -> {
+      if (keepAliveList.contains(c.peerPublicKey())) {
+
+        tryConnect(c.peerPublicKey(), new InetSocketAddress(c.peerHost(), c.peerPort()));
+      }
+    });
+  }
+
+  private void tryConnect(SECP256K1.PublicKey peerPublicKey, InetSocketAddress inetSocketAddress) {
+    vertx.runOnContext(event -> connectTo(peerPublicKey, inetSocketAddress).whenComplete((result, e) -> {
+      if (e != null) {
+        logger.warn("Error reconnecting to peer {}@{}: {}", peerPublicKey, inetSocketAddress, e);
+        tryConnect(peerPublicKey, inetSocketAddress);
+      } else {
+        logger.info("Connected successfully to keep alive peer {}@{}", peerPublicKey, inetSocketAddress);
+      }
+    }));
   }
 
   @Override
@@ -394,5 +414,10 @@ public final class VertxRLPxService implements RLPxService {
     repository.add(wireConnection);
     wireConnection.handleConnectionStart();
     return wireConnection;
+  }
+
+  @Override
+  public void addToKeepAliveList(SECP256K1.PublicKey peerPublicKey) {
+    keepAliveList.add(peerPublicKey);
   }
 }

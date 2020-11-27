@@ -29,7 +29,7 @@ import java.net.InetSocketAddress;
 public interface RLPxService {
 
   /**
-   * Connects to a remote peer
+   * Connects to a remote peer.
    *
    * @param peerPublicKey the peer public key
    * @param peerAddress the peer host and port
@@ -60,6 +60,13 @@ public interface RLPxService {
    * @throws IllegalStateException if the service is not started
    */
   int advertisedPort();
+
+  /**
+   * Adds a peer public key to the list of peers to keep alive.
+   *
+   * @param peerPublicKey the peer public key
+   */
+  void addToKeepAliveList(SECP256K1.PublicKey peerPublicKey);
 
   /**
    * Starts the service.
