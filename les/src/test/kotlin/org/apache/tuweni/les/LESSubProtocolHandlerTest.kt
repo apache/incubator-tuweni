@@ -64,6 +64,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetSocketAddress
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.Collections.emptyList
 import java.util.UUID
 
 @ExtendWith(BouncyCastleExtension::class, VertxExtension::class, LuceneIndexWriterExtension::class)
@@ -111,6 +112,9 @@ internal class LESSubProtocolHandlerTest {
   )
 
   private class MyRLPxService : RLPxService {
+    override fun addToKeepAliveList(peerPublicKey: SECP256K1.PublicKey) {
+      TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+    }
 
     override fun actualPort(): Int {
       TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
