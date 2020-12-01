@@ -28,7 +28,7 @@ class DiscoveryV5ServiceTest {
   @Test
   void testStartAndStop() throws InterruptedException {
     DiscoveryV5Service service =
-        DiscoveryService.open(SECP256K1.KeyPair.random(), 0, new InetSocketAddress("localhost", 0));
+        DiscoveryService.open(SECP256K1.KeyPair.random(), 0, new InetSocketAddress("localhost", 34555));
     service.startAsync().join();
     service.terminateAsync().join();
   }
