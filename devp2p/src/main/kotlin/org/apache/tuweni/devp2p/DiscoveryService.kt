@@ -496,6 +496,7 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
 
   override fun shutdownNow() {
     job.cancel()
+    shutdown()
   }
 
   @OptIn(ObsoleteCoroutinesApi::class, InternalCoroutinesApi::class)
