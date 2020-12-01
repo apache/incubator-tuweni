@@ -60,7 +60,6 @@ import org.apache.tuweni.concurrent.coroutines.asyncResult
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.kademlia.orderedInsert
 import org.apache.tuweni.kademlia.xorDistCmp
-import org.apache.tuweni.net.coroutines.CoroutineChannelGroup
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.InetAddress
