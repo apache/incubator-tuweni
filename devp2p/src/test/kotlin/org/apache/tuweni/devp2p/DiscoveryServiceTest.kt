@@ -75,7 +75,7 @@ internal class DiscoveryServiceTest {
     )
     val address = InetSocketAddress(InetAddress.getLoopbackAddress(), discoveryService.localPort)
     val clientKeyPair = SECP256K1.KeyPair.random()
-    val client = aSocket(ActorSelectorManager(Dispatchers.IO)).udp().bind(InetSocketAddress(0))
+    val client = aSocket(ActorSelectorManager(Dispatchers.IO)).udp().bind()
     val clientEndpoint = Endpoint("192.168.1.1", 5678, 7654)
     val ping = PingPacket.create(
       clientKeyPair,
@@ -106,7 +106,7 @@ internal class DiscoveryServiceTest {
   fun shouldPingBootstrapNodeAndValidate() = runBlocking {
     val bootstrapKeyPair = SECP256K1.KeyPair.random()
     val bootstrapClient =
-      aSocket(ActorSelectorManager(Dispatchers.Default)).udp().bind(InetSocketAddress("127.0.0.1", 0))
+      aSocket(ActorSelectorManager(Dispatchers.Default)).udp().bind()
 
     val serviceKeyPair = SECP256K1.KeyPair.random()
     val peerRepository = EphemeralPeerRepository()
@@ -174,7 +174,7 @@ internal class DiscoveryServiceTest {
   fun shouldIgnoreBootstrapNodeRespondingWithDifferentNodeId() = runBlocking {
     val bootstrapKeyPair = SECP256K1.KeyPair.random()
     val bootstrapClient =
-      aSocket(ActorSelectorManager(Dispatchers.Default)).udp().bind(InetSocketAddress("127.0.0.1", 0))
+      aSocket(ActorSelectorManager(Dispatchers.Default)).udp().bind()
 
     val serviceKeyPair = SECP256K1.KeyPair.random()
     val peerRepository = EphemeralPeerRepository()
@@ -233,7 +233,7 @@ internal class DiscoveryServiceTest {
   fun shouldPingBootstrapNodeWithAdvertisedAddress() = runBlocking {
     val bootstrapKeyPair = SECP256K1.KeyPair.random()
     val bootstrapClient =
-      aSocket(ActorSelectorManager(Dispatchers.Default)).udp().bind(InetSocketAddress("localhost", 0))
+      aSocket(ActorSelectorManager(Dispatchers.Default)).udp().bind()
 
     val discoveryService = DiscoveryService.open(
       host = "127.0.0.1",
@@ -264,7 +264,7 @@ internal class DiscoveryServiceTest {
   fun shouldRetryPingsToBootstrapNodes() = runBlocking {
     val bootstrapKeyPair = SECP256K1.KeyPair.random()
     val bootstrapClient =
-      aSocket(ActorSelectorManager(Dispatchers.Default)).udp().bind(InetSocketAddress("localhost", 0))
+      aSocket(ActorSelectorManager(Dispatchers.Default)).udp().bind()
 
     val discoveryService = DiscoveryService.open(
       host = "127.0.0.1",
@@ -310,7 +310,7 @@ internal class DiscoveryServiceTest {
     val address = InetSocketAddress(InetAddress.getLoopbackAddress(), discoveryService.localPort)
 
     val clientKeyPair = SECP256K1.KeyPair.random()
-    val client = aSocket(ActorSelectorManager(Dispatchers.IO)).udp().bind(InetSocketAddress(0))
+    val client = aSocket(ActorSelectorManager(Dispatchers.IO)).udp().bind()
     val findNodes =
       FindNodePacket.create(
         clientKeyPair,
