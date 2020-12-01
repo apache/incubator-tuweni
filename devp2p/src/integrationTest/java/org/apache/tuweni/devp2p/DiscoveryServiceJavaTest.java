@@ -48,6 +48,7 @@ class DiscoveryServiceJavaTest {
     AsyncResult<List<Peer>> result = service.lookupAsync(SECP256K1.KeyPair.random().publicKey());
     List<Peer> peers = result.get();
     service.shutdown();
+    service.awaitTerminationAsync().join();
     assertTrue(peers.isEmpty());
   }
 
@@ -58,8 +59,8 @@ class DiscoveryServiceJavaTest {
     DiscoveryService service = DiscoveryService.Companion
         .open(
             SECP256K1.KeyPair.random(),
-            0,
-            "localhost",
+            32456,
+            "127.0.0.1",
             1,
             emptyMap(),
             Collections
@@ -68,12 +69,9 @@ class DiscoveryServiceJavaTest {
     AsyncResult<Peer> result =
         repository.getAsync(URI.create("enode://" + peerKeyPair.publicKey().toHexString() + "@127.0.0.1:10000"));
     assertEquals(peerKeyPair.publicKey(), result.get().getNodeId());
-    AsyncResult<Peer> byURI =
-        repository.getAsync(URI.create("enode://" + peerKeyPair.publicKey().toHexString() + "@127.0.0.1:10000"));
-    assertEquals(peerKeyPair.publicKey(), byURI.get().getNodeId());
     AsyncResult<Peer> byURIString =
         repository.getAsync("enode://" + peerKeyPair.publicKey().toHexString() + "@127.0.0.1:10000");
     assertEquals(peerKeyPair.publicKey(), byURIString.get().getNodeId());
-    service.shutdown();
+    service.shutdownNow();
   }
 }
