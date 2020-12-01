@@ -67,5 +67,8 @@ class ConnectTwoServersTest {
     assertEquals(1, otherStorage.storage.size)
     assertNotNull(otherStorage.find(Hash.sha2_256(service.enr().toRLP())))
     assertNotNull(storage.find(Hash.sha2_256(otherService.enr().toRLP())))
+
+    service.terminate()
+    otherService.terminate()
   }
 }
