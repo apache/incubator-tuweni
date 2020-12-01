@@ -23,10 +23,8 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.newCoroutineContext
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.CompletableAsyncResult
@@ -59,20 +57,24 @@ import kotlin.coroutines.resumeWithException
  * @param start Co-routine start option. The default value is [CoroutineStart.DEFAULT].
  * @param block The co-routine code.
  */
-@UseExperimental(InternalCoroutinesApi::class, ObsoleteCoroutinesApi::class, ExperimentalCoroutinesApi::class)
 fun <T> CoroutineScope.asyncResult(
   context: CoroutineContext = Dispatchers.Default,
   start: CoroutineStart = CoroutineStart.DEFAULT,
   block: suspend CoroutineScope.() -> T
 ): AsyncResult<T> {
-  require(!start.isLazy) { "$start start is not supported" }
-  val newContext = this.newCoroutineContext(context)
-  val job = Job(newContext[Job])
-  val coroutine = AsyncResultCoroutine<T>(newContext + job)
-  job.invokeOnCompletion { coroutine.asyncResult.cancel() }
-  coroutine.asyncResult.whenComplete { _, _ -> job.cancel() }
-  start(block, receiver = coroutine, completion = coroutine) // use the specified start strategy
-  return coroutine.asyncResult
+  val asyncResult = AsyncResult.incomplete<T>()
+  try {
+    launch(context, start) {
+      try {
+        asyncResult.complete(block())
+      } catch (t: Throwable) {
+        asyncResult.completeExceptionally(t)
+      }
+    }
+  } catch (t: Throwable) {
+    asyncResult.completeExceptionally(t)
+  }
+  return asyncResult
 }
 
 private class AsyncResultCoroutine<T>(
@@ -91,15 +93,15 @@ private class AsyncResultCoroutine<T>(
  * Converts this deferred value to an [AsyncResult].
  * The deferred value is cancelled when the returned [AsyncResult] is cancelled or otherwise completed.
  */
-@UseExperimental(ExperimentalCoroutinesApi::class, ObsoleteCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 fun <T> Deferred<T>.asAsyncResult(): AsyncResult<T> {
   val asyncResult = AsyncResult.incomplete<T>()
   asyncResult.whenComplete { _, _ -> cancel() }
-  invokeOnCompletion {
-    try {
-      asyncResult.complete(getCompleted())
-    } catch (exception: Exception) {
+  invokeOnCompletion { exception ->
+    if (exception != null) {
       asyncResult.completeExceptionally(exception)
+    } else {
+      asyncResult.complete(getCompleted())
     }
   }
   return asyncResult
@@ -109,7 +111,6 @@ fun <T> Deferred<T>.asAsyncResult(): AsyncResult<T> {
  * Converts this [AsyncResult] to an instance of [Deferred].
  * The [AsyncResult] is cancelled when the resulting deferred is cancelled.
  */
-@UseExperimental(ObsoleteCoroutinesApi::class)
 fun <T> AsyncResult<T>.asDeferred(): Deferred<T> {
   // Fast path if already completed
   if (isDone) {

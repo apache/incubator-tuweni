@@ -16,11 +16,19 @@
  */
 package org.apache.tuweni.devp2p
 
+import io.ktor.network.selector.ActorSelectorManager
+import io.ktor.network.sockets.Datagram
+import io.ktor.network.sockets.aSocket
+import io.ktor.util.KtorExperimentalAPI
+import io.ktor.util.network.port
+import io.ktor.utils.io.core.ByteReadPacket
+import io.ktor.utils.io.core.readAvailable
+import io.ktor.utils.io.core.readFully
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.junit.BouncyCastleExtension
-import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -32,25 +40,12 @@ import org.junit.jupiter.api.Timeout
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetAddress
 import java.net.InetSocketAddress
-import java.net.SocketAddress
 import java.net.URI
 import java.nio.ByteBuffer
 
-private suspend fun CoroutineDatagramChannel.send(packet: Packet, address: SocketAddress): Int {
-  val buffer = packet.encodeTo(ByteBuffer.allocate(2048))
-  buffer.flip()
-  return send(buffer, address)
-}
-
-private suspend fun CoroutineDatagramChannel.receivePacket(): Packet {
-  val buffer = ByteBuffer.allocate(2048)
-  receive(buffer)
-  buffer.flip()
-  return Packet.decodeFrom(buffer)
-}
-
 @Timeout(10)
 @ExtendWith(BouncyCastleExtension::class)
+@OptIn(KtorExperimentalAPI::class)
 internal class DiscoveryServiceTest {
 
   @Test
@@ -79,9 +74,8 @@ internal class DiscoveryServiceTest {
       peerRepository = peerRepository
     )
     val address = InetSocketAddress(InetAddress.getLoopbackAddress(), discoveryService.localPort)
-
     val clientKeyPair = SECP256K1.KeyPair.random()
-    val client = CoroutineDatagramChannel.open()
+    val client = aSocket(ActorSelectorManager(Dispatchers.IO)).udp().bind(InetSocketAddress(0))
     val clientEndpoint = Endpoint("192.168.1.1", 5678, 7654)
     val ping = PingPacket.create(
       clientKeyPair,
@@ -90,23 +84,29 @@ internal class DiscoveryServiceTest {
       Endpoint(address),
       null
     )
-    client.send(ping, address)
-
-    val pong = client.receivePacket() as PongPacket
+    val bytes = ByteBuffer.allocate(Packet.MAX_SIZE)
+    ping.encodeTo(bytes)
+    bytes.flip()
+    client.send(Datagram(ByteReadPacket(bytes), address))
+    val datagram = client.receive()
+    val buffer = ByteBuffer.allocate(datagram.packet.remaining.toInt())
+    datagram.packet.readFully(buffer)
+    val pong = Packet.decodeFrom(buffer) as PongPacket
     assertEquals(discoveryService.nodeId, pong.nodeId)
     assertEquals(ping.hash, pong.pingHash)
 
     val peer = peerRepository.get(URI("enode://" + clientKeyPair.publicKey().toHexString() + "@127.0.0.1:5678"))
     assertNotNull(peer.endpoint)
     assertEquals(clientEndpoint.tcpPort, peer.endpoint.tcpPort)
-
     discoveryService.shutdownNow()
+    client.close()
   }
 
   @Test
   fun shouldPingBootstrapNodeAndValidate() = runBlocking {
     val bootstrapKeyPair = SECP256K1.KeyPair.random()
-    val bootstrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress("127.0.0.1", 0))
+    val bootstrapClient =
+      aSocket(ActorSelectorManager(Dispatchers.Default)).udp().bind(InetSocketAddress("127.0.0.1", 0))
 
     val serviceKeyPair = SECP256K1.KeyPair.random()
     val peerRepository = EphemeralPeerRepository()
@@ -115,17 +115,21 @@ internal class DiscoveryServiceTest {
       host = "127.0.0.1",
       keyPair = serviceKeyPair,
       bootstrapURIs = listOf(
-        URI("enode://" + bootstrapKeyPair.publicKey().toHexString() + "@127.0.0.1:" + bootstrapClient.localPort)
+        URI("enode://" + bootstrapKeyPair.publicKey().toHexString() + "@127.0.0.1:" + bootstrapClient.localAddress.port)
       ),
       peerRepository = peerRepository,
       routingTable = routingTable
     )
     val address = InetSocketAddress(InetAddress.getLoopbackAddress(), discoveryService.localPort)
 
-    val ping = bootstrapClient.receivePacket() as PingPacket
+    val datagram = bootstrapClient.receive()
+    val buffer = ByteBuffer.allocate(datagram.packet.remaining.toInt())
+    datagram.packet.readFully(buffer)
+    val ping = Packet.decodeFrom(buffer) as PingPacket
     assertEquals(discoveryService.nodeId, ping.nodeId)
-    assertEquals(ping.to,
-      Endpoint("127.0.0.1", bootstrapClient.localPort, bootstrapClient.localPort)
+    assertEquals(
+      ping.to,
+      Endpoint("127.0.0.1", bootstrapClient.localAddress.port, bootstrapClient.localAddress.port)
     )
     assertEquals(discoveryService.localPort, ping.from.udpPort)
     assertNull(ping.from.tcpPort)
@@ -137,9 +141,16 @@ internal class DiscoveryServiceTest {
       ping.hash,
       null
     )
-    bootstrapClient.send(pong, address)
+    val bytes = ByteBuffer.allocate(Packet.MAX_SIZE)
+    pong.encodeTo(bytes)
+    bytes.flip()
+    bootstrapClient.send(Datagram(ByteReadPacket(bytes), address))
 
-    val findNodes = bootstrapClient.receivePacket() as FindNodePacket
+    val findNodesDatagram = bootstrapClient.receive()
+    val b = ByteBuffer.allocate(Packet.MAX_SIZE)
+    findNodesDatagram.packet.readAvailable(b)
+    b.flip()
+    val findNodes = Packet.decodeFrom(b) as FindNodePacket
     assertEquals(discoveryService.nodeId, findNodes.nodeId)
     assertEquals(discoveryService.nodeId, findNodes.target)
 
@@ -147,12 +158,12 @@ internal class DiscoveryServiceTest {
       peerRepository.get(
         URI(
           "enode://" + bootstrapKeyPair.publicKey().toHexString() +
-            "@127.0.0.1:" + bootstrapClient.localPort
+            "@127.0.0.1:" + bootstrapClient.localAddress.port
         )
       )
     assertNotNull(bootstrapPeer.lastVerified)
     assertNotNull(bootstrapPeer.endpoint)
-    assertEquals(bootstrapClient.localPort, bootstrapPeer.endpoint.tcpPort)
+    assertEquals(bootstrapClient.localAddress.port, bootstrapPeer.endpoint.tcpPort)
 
     assertTrue(routingTable.contains(bootstrapPeer))
 
@@ -162,7 +173,8 @@ internal class DiscoveryServiceTest {
   @Test
   fun shouldIgnoreBootstrapNodeRespondingWithDifferentNodeId() = runBlocking {
     val bootstrapKeyPair = SECP256K1.KeyPair.random()
-    val bootstrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress("127.0.0.1", 0))
+    val bootstrapClient =
+      aSocket(ActorSelectorManager(Dispatchers.Default)).udp().bind(InetSocketAddress("127.0.0.1", 0))
 
     val serviceKeyPair = SECP256K1.KeyPair.random()
     val peerRepository = EphemeralPeerRepository()
@@ -171,17 +183,21 @@ internal class DiscoveryServiceTest {
       host = "127.0.0.1",
       keyPair = serviceKeyPair,
       bootstrapURIs = listOf(
-        URI("enode://" + bootstrapKeyPair.publicKey().toHexString() + "@127.0.0.1:" + bootstrapClient.localPort)
+        URI("enode://" + bootstrapKeyPair.publicKey().toHexString() + "@127.0.0.1:" + bootstrapClient.localAddress.port)
       ),
       peerRepository = peerRepository,
       routingTable = routingTable
     )
     val address = InetSocketAddress(InetAddress.getLoopbackAddress(), discoveryService.localPort)
 
-    val ping = bootstrapClient.receivePacket() as PingPacket
+    val datagram = bootstrapClient.receive()
+    val buffer = ByteBuffer.allocate(datagram.packet.remaining.toInt())
+    datagram.packet.readFully(buffer)
+    val ping = Packet.decodeFrom(buffer) as PingPacket
     assertEquals(discoveryService.nodeId, ping.nodeId)
-    assertEquals(ping.to,
-      Endpoint("127.0.0.1", bootstrapClient.localPort, bootstrapClient.localPort)
+    assertEquals(
+      ping.to,
+      Endpoint("127.0.0.1", bootstrapClient.localAddress.port, bootstrapClient.localAddress.port)
     )
     assertEquals(discoveryService.localPort, ping.from.udpPort)
     assertNull(ping.from.tcpPort)
@@ -193,14 +209,18 @@ internal class DiscoveryServiceTest {
       ping.hash,
       null
     )
-    bootstrapClient.send(pong, address)
+
+    val bytes = ByteBuffer.allocate(Packet.MAX_SIZE)
+    pong.encodeTo(bytes)
+    bytes.flip()
+    bootstrapClient.send(Datagram(ByteReadPacket(bytes), address))
 
     delay(1000)
     val bootstrapPeer =
       peerRepository.get(
         URI(
           "enode://" + bootstrapKeyPair.publicKey().toHexString() +
-            "@127.0.0.1:" + bootstrapClient.localPort
+            "@127.0.0.1:" + bootstrapClient.localAddress.port
         )
       )
     assertNull(bootstrapPeer.lastVerified)
@@ -212,22 +232,29 @@ internal class DiscoveryServiceTest {
   @Test
   fun shouldPingBootstrapNodeWithAdvertisedAddress() = runBlocking {
     val bootstrapKeyPair = SECP256K1.KeyPair.random()
-    val boostrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress("localhost", 0))
+    val bootstrapClient =
+      aSocket(ActorSelectorManager(Dispatchers.Default)).udp().bind(InetSocketAddress("localhost", 0))
 
     val discoveryService = DiscoveryService.open(
       host = "127.0.0.1",
       keyPair = SECP256K1.KeyPair.random(),
       bootstrapURIs = listOf(
-        URI("enode://" + bootstrapKeyPair.publicKey().bytes().toHexString() + "@127.0.0.1:" + boostrapClient.localPort)
+        URI(
+          "enode://" + bootstrapKeyPair.publicKey().bytes()
+            .toHexString() + "@127.0.0.1:" + bootstrapClient.localAddress.port
+        )
       ),
       advertiseAddress = InetAddress.getByName("192.168.66.55"),
       advertiseUdpPort = 3836,
       advertiseTcpPort = 8765
     )
 
-    val ping = boostrapClient.receivePacket() as PingPacket
+    val datagram = bootstrapClient.receive()
+    val buffer = ByteBuffer.allocate(datagram.packet.remaining.toInt())
+    datagram.packet.readFully(buffer)
+    val ping = Packet.decodeFrom(buffer) as PingPacket
     assertEquals(discoveryService.nodeId, ping.nodeId)
-    assertEquals(Endpoint("127.0.0.1", boostrapClient.localPort, boostrapClient.localPort), ping.to)
+    assertEquals(Endpoint("127.0.0.1", bootstrapClient.localAddress.port, bootstrapClient.localAddress.port), ping.to)
     assertEquals(Endpoint("192.168.66.55", 3836, 8765), ping.from)
 
     discoveryService.shutdownNow()
@@ -236,29 +263,40 @@ internal class DiscoveryServiceTest {
   @Test
   fun shouldRetryPingsToBootstrapNodes() = runBlocking {
     val bootstrapKeyPair = SECP256K1.KeyPair.random()
-    val boostrapClient = CoroutineDatagramChannel.open().bind(InetSocketAddress("localhost", 0))
+    val bootstrapClient =
+      aSocket(ActorSelectorManager(Dispatchers.Default)).udp().bind(InetSocketAddress("localhost", 0))
 
     val discoveryService = DiscoveryService.open(
       host = "127.0.0.1",
       keyPair = SECP256K1.KeyPair.random(),
       bootstrapURIs = listOf(
-        URI("enode://" + bootstrapKeyPair.publicKey().bytes().toHexString() + "@127.0.0.1:" + boostrapClient.localPort)
+        URI(
+          "enode://" + bootstrapKeyPair.publicKey().bytes()
+            .toHexString() + "@127.0.0.1:" + bootstrapClient.localAddress.port
+        )
       )
     )
-
-    val ping1 = boostrapClient.receivePacket() as PingPacket
+    val datagram1 = bootstrapClient.receive()
+    val buffer1 = ByteBuffer.allocate(datagram1.packet.remaining.toInt())
+    datagram1.packet.readFully(buffer1)
+    val ping1 = Packet.decodeFrom(buffer1) as PingPacket
     assertEquals(discoveryService.nodeId, ping1.nodeId)
-    assertEquals(Endpoint("127.0.0.1", boostrapClient.localPort, boostrapClient.localPort), ping1.to)
-
-    val ping2 = boostrapClient.receivePacket() as PingPacket
+    assertEquals(Endpoint("127.0.0.1", bootstrapClient.localAddress.port, bootstrapClient.localAddress.port), ping1.to)
+    val datagram2 = bootstrapClient.receive()
+    val buffer2 = ByteBuffer.allocate(datagram2.packet.remaining.toInt())
+    datagram2.packet.readFully(buffer2)
+    val ping2 = Packet.decodeFrom(buffer2) as PingPacket
     assertEquals(discoveryService.nodeId, ping2.nodeId)
-    assertEquals(Endpoint("127.0.0.1", boostrapClient.localPort, boostrapClient.localPort), ping2.to)
-
-    val ping3 = boostrapClient.receivePacket() as PingPacket
+    assertEquals(Endpoint("127.0.0.1", bootstrapClient.localAddress.port, bootstrapClient.localAddress.port), ping2.to)
+    val datagram3 = bootstrapClient.receive()
+    val buffer3 = ByteBuffer.allocate(datagram3.packet.remaining.toInt())
+    datagram3.packet.readFully(buffer3)
+    val ping3 = Packet.decodeFrom(buffer3) as PingPacket
     assertEquals(discoveryService.nodeId, ping3.nodeId)
-    assertEquals(Endpoint("127.0.0.1", boostrapClient.localPort, boostrapClient.localPort), ping3.to)
-
+    assertEquals(Endpoint("127.0.0.1", bootstrapClient.localAddress.port, bootstrapClient.localAddress.port), ping3.to)
     discoveryService.shutdownNow()
+    discoveryService.awaitTermination()
+    bootstrapClient.close()
   }
 
   @Test
@@ -272,21 +310,26 @@ internal class DiscoveryServiceTest {
     val address = InetSocketAddress(InetAddress.getLoopbackAddress(), discoveryService.localPort)
 
     val clientKeyPair = SECP256K1.KeyPair.random()
-    val client = CoroutineDatagramChannel.open()
+    val client = aSocket(ActorSelectorManager(Dispatchers.IO)).udp().bind(InetSocketAddress(0))
     val findNodes =
       FindNodePacket.create(
         clientKeyPair,
         System.currentTimeMillis(),
         SECP256K1.KeyPair.random().publicKey()
       )
-    client.send(findNodes, address)
+    val bytes = ByteBuffer.allocate(Packet.MAX_SIZE)
+    findNodes.encodeTo(bytes)
+    bytes.flip()
+    client.send(Datagram(ByteReadPacket(bytes), address))
 
-    val ping = client.receivePacket() as PingPacket
+    val datagram = client.receive()
+    val buffer = ByteBuffer.allocate(datagram.packet.remaining.toInt())
+    datagram.packet.readFully(buffer)
+    val ping = Packet.decodeFrom(buffer) as PingPacket
     assertEquals(discoveryService.nodeId, ping.nodeId)
 
     // check it didn't immediately send neighbors
     delay(500)
-    assertNull(client.tryReceive(ByteBuffer.allocate(2048)))
 
     val pong = PongPacket.create(
       clientKeyPair,
@@ -295,14 +338,24 @@ internal class DiscoveryServiceTest {
       ping.hash,
       null
     )
-    client.send(pong, address)
+    val bytes2 = ByteBuffer.allocate(Packet.MAX_SIZE)
+    pong.encodeTo(bytes2)
+    bytes2.flip()
+    client.send(Datagram(ByteReadPacket(bytes2), address))
 
-    val neighbors = client.receivePacket() as NeighborsPacket
+    val datagram2 = client.receive()
+    val buffer2 = ByteBuffer.allocate(datagram2.packet.remaining.toInt())
+    datagram2.packet.readFully(buffer2)
+    val neighbors = Packet.decodeFrom(buffer2) as NeighborsPacket
     assertEquals(discoveryService.nodeId, neighbors.nodeId)
 
     val peer =
-      peerRepository.get(URI("enode://" + clientKeyPair.publicKey().toHexString() +
-        "@127.0.0.1:" + discoveryService.localPort))
+      peerRepository.get(
+        URI(
+          "enode://" + clientKeyPair.publicKey().toHexString() +
+            "@127.0.0.1:" + discoveryService.localPort
+        )
+      )
     assertNotNull(peer.lastVerified)
     assertNotNull(peer.endpoint)
 

@@ -133,7 +133,7 @@ internal class CoroutineSelectorTest {
     job1.await()
   }
 
-  @UseExperimental(ExperimentalCoroutinesApi::class)
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun shouldCancelOutstanding() = runBlocking {
     val server = ServerSocketChannel.open()

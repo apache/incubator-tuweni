@@ -77,7 +77,7 @@ class MerklePatriciaTrie<V>(valueSerializer: (V) -> Bytes) : MerkleTrie<Bytes, V
   override suspend fun get(key: Bytes): V? = root.accept(getVisitor, bytesToPath(key)).value()
 
   // This implementation does not suspend, so we can use the unconfined context
-  @UseExperimental(ExperimentalCoroutinesApi::class)
+  @OptIn(ExperimentalCoroutinesApi::class)
   override fun getAsync(key: Bytes): AsyncResult<V?> = runBlocking(Dispatchers.Unconfined) {
     AsyncResult.completed(get(key))
   }
@@ -90,7 +90,7 @@ class MerklePatriciaTrie<V>(valueSerializer: (V) -> Bytes) : MerkleTrie<Bytes, V
   }
 
   // This implementation does not suspend, so we can use the unconfined context
-  @UseExperimental(ExperimentalCoroutinesApi::class)
+  @OptIn(ExperimentalCoroutinesApi::class)
   override fun putAsync(key: Bytes, value: V?): AsyncCompletion = runBlocking(Dispatchers.Unconfined) {
     put(key, value)
     AsyncCompletion.completed()
@@ -101,7 +101,7 @@ class MerklePatriciaTrie<V>(valueSerializer: (V) -> Bytes) : MerkleTrie<Bytes, V
   }
 
   // This implementation does not suspend, so we can use the unconfined context
-  @UseExperimental(ExperimentalCoroutinesApi::class)
+  @OptIn(ExperimentalCoroutinesApi::class)
   override fun removeAsync(key: Bytes): AsyncCompletion = runBlocking(Dispatchers.Unconfined) {
     remove(key)
     AsyncCompletion.completed()

@@ -18,6 +18,15 @@ package org.apache.tuweni.devp2p
 
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
+import io.ktor.network.selector.ActorSelectorManager
+import io.ktor.network.sockets.BoundDatagramSocket
+import io.ktor.network.sockets.Datagram
+import io.ktor.network.sockets.aSocket
+import io.ktor.network.sockets.isClosed
+import io.ktor.util.KtorExperimentalAPI
+import io.ktor.util.network.port
+import io.ktor.utils.io.core.ByteReadPacket
+import io.ktor.utils.io.core.readFully
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -25,6 +34,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
@@ -50,9 +60,7 @@ import org.apache.tuweni.concurrent.coroutines.asyncResult
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.kademlia.orderedInsert
 import org.apache.tuweni.kademlia.xorDistCmp
-import org.apache.tuweni.net.coroutines.CommonCoroutineGroup
 import org.apache.tuweni.net.coroutines.CoroutineChannelGroup
-import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.InetAddress
@@ -64,6 +72,7 @@ import java.nio.channels.ClosedChannelException
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.CoroutineContext
 
@@ -132,7 +141,6 @@ interface DiscoveryService {
       advertiseTcpPort: Int? = null,
       routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
       packetFilter: ((SECP256K1.PublicKey, InetSocketAddress) -> Boolean)? = null,
-      channelGroup: CoroutineChannelGroup = CommonCoroutineGroup,
       bufferAllocator: () -> ByteBuffer = DEFAULT_BUFFER_ALLOCATOR,
       timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER
     ): DiscoveryService {
@@ -149,7 +157,6 @@ interface DiscoveryService {
         advertiseTcpPort,
         routingTable,
         packetFilter,
-        channelGroup,
         bufferAllocator,
         timeSupplier
       )
@@ -186,13 +193,12 @@ interface DiscoveryService {
       advertiseTcpPort: Int? = null,
       routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
       packetFilter: ((SECP256K1.PublicKey, InetSocketAddress) -> Boolean)? = null,
-      channelGroup: CoroutineChannelGroup = CommonCoroutineGroup,
       bufferAllocator: () -> ByteBuffer = DEFAULT_BUFFER_ALLOCATOR,
       timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER
     ): DiscoveryService {
       return CoroutineDiscoveryService(
         keyPair, seq, enrData, bindAddress, bootstrapURIs, advertiseAddress, advertiseUdpPort, advertiseTcpPort,
-        peerRepository, routingTable, packetFilter, channelGroup, bufferAllocator, timeSupplier
+        peerRepository, routingTable, packetFilter, bufferAllocator, timeSupplier
       )
     }
   }
@@ -296,7 +302,8 @@ interface DiscoveryService {
   val unexpectedENRResponses: Long
 }
 
-internal class CoroutineDiscoveryService(
+@OptIn(ObsoleteCoroutinesApi::class)
+internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) constructor(
   private val keyPair: SECP256K1.KeyPair,
   private val seq: Long = Instant.now().toEpochMilli(),
   private val enrData: Map<String, Bytes>,
@@ -308,10 +315,11 @@ internal class CoroutineDiscoveryService(
   private val peerRepository: PeerRepository = EphemeralPeerRepository(),
   private val routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
   private val packetFilter: ((SECP256K1.PublicKey, InetSocketAddress) -> Boolean)? = null,
-  channelGroup: CoroutineChannelGroup = CommonCoroutineGroup,
   private val bufferAllocator: () -> ByteBuffer = DiscoveryService.DEFAULT_BUFFER_ALLOCATOR,
   private val timeSupplier: () -> Long = DiscoveryService.CURRENT_TIME_SUPPLIER,
-  private val channel: CoroutineDatagramChannel = CoroutineDatagramChannel.open(channelGroup)
+  private val job: Job = Job(),
+  override val coroutineContext: CoroutineContext = job + Dispatchers.Default + CoroutineExceptionHandler { _, _ -> },
+  private val channel: BoundDatagramSocket = aSocket(ActorSelectorManager(coroutineContext)).udp().bind(bindAddress)
 ) : DiscoveryService, CoroutineScope {
 
   companion object {
@@ -322,23 +330,19 @@ internal class CoroutineDiscoveryService(
   private val selfEndpoint: Endpoint
   private val enr: Bytes
 
-  private val job = Job()
-  // override the default exception handler, which dumps to stderr
-  override val coroutineContext: CoroutineContext
-    get() = job + Dispatchers.Default + CoroutineExceptionHandler { _, _ -> }
-
+  private val shutdown = AtomicBoolean(false)
   private val activityLatch = CoroutineLatch(1)
   private val bootstrapperCount: Deferred<Int>
   private val refreshLoop: Job
 
   override val isShutdown: Boolean
-    get() = !channel.isOpen
+    get() = shutdown.get()
 
   override val isTerminated: Boolean
     get() = activityLatch.isOpen
 
   override val localPort: Int
-    get() = channel.localPort
+    get() = channel.localAddress.port
 
   override val nodeId: SECP256K1.PublicKey
     get() = keyPair.publicKey()
@@ -364,11 +368,10 @@ internal class CoroutineDiscoveryService(
   override var unexpectedNeighbors: Long by AtomicLong(0)
 
   init {
-    channel.bind(bindAddress)
 
     selfEndpoint = Endpoint(
-      advertiseAddress ?: channel.getAdvertisableAddress()!!,
-      advertiseUdpPort ?: channel.localPort,
+      advertiseAddress ?: (channel.localAddress as InetSocketAddress).address,
+      advertiseUdpPort ?: channel.localAddress.port,
       advertiseTcpPort
     )
 
@@ -447,23 +450,17 @@ internal class CoroutineDiscoveryService(
   }
 
   private suspend fun receivePackets() {
-    while (channel.isOpen) {
-      val datagram = bufferAllocator()
-      val address = try {
-        channel.receive(datagram)
-      } catch (e: ClosedChannelException) {
-        break
-      }
-      datagram.flip()
+    while (!channel.isClosed) {
+      val datagram = channel.receive()
 
       // do quick sanity checks and discard bad packets before launching a co-routine
-      if (datagram.limit() < Packet.MIN_SIZE) {
-        logger.debug("{}: ignoring under-sized packet with source {}", serviceDescriptor, address)
+      if (datagram.packet.remaining < Packet.MIN_SIZE) {
+        logger.debug("{}: ignoring under-sized packet with source {}", serviceDescriptor, datagram.address)
         ++invalidPackets
         continue
       }
-      if (datagram.limit() > Packet.MAX_SIZE) {
-        logger.debug("{}: ignoring over-sized packet with source {}", serviceDescriptor, address)
+      if (datagram.packet.remaining > Packet.MAX_SIZE) {
+        logger.debug("{}: ignoring over-sized packet with source {}", serviceDescriptor, datagram.address)
         ++invalidPackets
         continue
       }
@@ -472,7 +469,7 @@ internal class CoroutineDiscoveryService(
       val arrivalTime = timeSupplier()
       val job = launch {
         try {
-          receivePacket(datagram, address, arrivalTime)
+          receivePacket(datagram.packet, datagram.address, arrivalTime)
         } catch (e: Throwable) {
           logger.error(serviceDescriptor + ": unexpected error during packet handling", e)
         }
@@ -485,11 +482,11 @@ internal class CoroutineDiscoveryService(
   override suspend fun awaitBootstrap(): Int = bootstrapperCount.await()
 
   override fun shutdown() {
-    if (channel.isOpen) {
+    if (shutdown.compareAndSet(false, true)) {
       logger.info("{}: shutdown", serviceDescriptor)
+      channel.close()
+      refreshLoop.cancel()
     }
-    channel.close()
-    refreshLoop.cancel()
   }
 
   override suspend fun awaitTermination() {
@@ -502,7 +499,7 @@ internal class CoroutineDiscoveryService(
     job.cancel()
   }
 
-  @UseExperimental(ObsoleteCoroutinesApi::class)
+  @OptIn(ObsoleteCoroutinesApi::class, InternalCoroutinesApi::class)
   override suspend fun lookup(target: SECP256K1.PublicKey): List<Peer> {
     val targetId = target.bytesArray()
     val results = neighbors(target).toMutableList()
@@ -523,7 +520,14 @@ internal class CoroutineDiscoveryService(
       toQuery.forEach { p -> findNodes(p, target, nodes) }
       while (true) {
         // stop if no more responses are received after the given time
-        val node = withTimeoutOrNull(LOOKUP_RESPONSE_TIMEOUT_MS) { nodes.receiveOrNull() } ?: break
+        val node = withTimeoutOrNull(LOOKUP_RESPONSE_TIMEOUT_MS) {
+          val valueOrClosed = nodes.receiveOrClosed()
+          if (valueOrClosed.isClosed) {
+                null
+          } else {
+                valueOrClosed.value
+          }
+        } ?: break
         val peer = peerRepository.get(selfEndpoint.address.hostAddress, selfEndpoint.udpPort, node.nodeId)
         if (!results.contains(peer)) {
           results.orderedInsert(peer) { a, _ -> targetId.xorDistCmp(a.nodeId.bytesArray(), node.nodeId.bytesArray()) }
@@ -535,22 +539,28 @@ internal class CoroutineDiscoveryService(
     }
   }
 
+  @ObsoleteCoroutinesApi
   override fun lookupAsync(target: SECP256K1.PublicKey) = asyncResult { lookup(target) }
 
+  @ObsoleteCoroutinesApi
   private suspend fun refresh() {
     logger.debug("{}: table refresh triggered", serviceDescriptor)
     // TODO: instead of a random target, choose a target to optimally fill the peer table
     lookup(SECP256K1.KeyPair.random().publicKey())
   }
 
-  private suspend fun receivePacket(datagram: ByteBuffer, address: SocketAddress, arrivalTime: Long) {
+  private suspend fun receivePacket(datagram: ByteReadPacket, address: SocketAddress, arrivalTime: Long) {
     if (address !is InetSocketAddress) {
       throw IOException("Datagram received from non-inet socket address: " + address.javaClass)
     }
 
     val packet: Packet
     try {
-      packet = Packet.decodeFrom(datagram)
+      val size = Math.min(Packet.MAX_SIZE, datagram.remaining.toInt())
+      val buffer = ByteBuffer.allocate(size)
+      datagram.readFully(buffer)
+      buffer.flip()
+      packet = Packet.decodeFrom(buffer)
     } catch (e: DecodingException) {
       logger.debug("{}: ignoring invalid packet from {}", serviceDescriptor, address)
       ++invalidPackets
@@ -905,7 +915,6 @@ internal class CoroutineDiscoveryService(
     val enr: EthereumNodeRecord
   )
 
-  @UseExperimental(ObsoleteCoroutinesApi::class)
   private suspend fun findNodes(peer: Peer, target: SECP256K1.PublicKey) {
     // consume all received nodes (and discard), thus suspending until completed
     Channel<Node>(capacity = Channel.CONFLATED).also { findNodes(peer, target, it) }.consumeEach { }
@@ -939,7 +948,7 @@ internal class CoroutineDiscoveryService(
       job = launch { sendLoop() }
     }
 
-    @UseExperimental(ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun sendLoop() {
       try {
         while (true) {
@@ -1014,6 +1023,6 @@ internal class CoroutineDiscoveryService(
     val buffer = bufferAllocator()
     packet.encodeTo(buffer)
     buffer.flip()
-    channel.send(buffer, address)
+    channel.send(Datagram(ByteReadPacket(buffer), address))
   }
 }
