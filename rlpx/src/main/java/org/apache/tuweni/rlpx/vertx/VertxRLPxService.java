@@ -417,7 +417,7 @@ public final class VertxRLPxService implements RLPxService {
   }
 
   @Override
-  public void addToKeepAliveList(SECP256K1.PublicKey peerPublicKey) {
-    keepAliveList.add(peerPublicKey);
+  public boolean addToKeepAliveList(SECP256K1.PublicKey peerPublicKey) {
+    return keepAliveList.add(peerPublicKey);
   }
 }

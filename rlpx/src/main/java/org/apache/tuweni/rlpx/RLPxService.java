@@ -66,7 +66,7 @@ public interface RLPxService {
    *
    * @param peerPublicKey the peer public key
    */
-  void addToKeepAliveList(SECP256K1.PublicKey peerPublicKey);
+  boolean addToKeepAliveList(SECP256K1.PublicKey peerPublicKey);
 
   /**
    * Starts the service.

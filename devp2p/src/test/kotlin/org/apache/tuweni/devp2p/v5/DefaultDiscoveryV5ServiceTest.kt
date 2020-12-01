@@ -16,13 +16,16 @@
  */
 package org.apache.tuweni.devp2p.v5
 
+import io.ktor.network.selector.ActorSelectorManager
+import io.ktor.network.sockets.aSocket
+import io.ktor.util.KtorExperimentalAPI
+import io.ktor.utils.io.core.readFully
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.io.Base64URLSafe
 import org.apache.tuweni.junit.BouncyCastleExtension
-import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Timeout
@@ -62,15 +65,17 @@ class DefaultDiscoveryV5ServiceTest {
       bootstrapENRList = bootstrapENRList
     )
 
+  @OptIn(KtorExperimentalAPI::class)
   @Test
   fun startInitializesConnectorAndBootstraps() = runBlocking {
-    val recipientSocket = CoroutineDatagramChannel.open()
-    recipientSocket.bind(InetSocketAddress("localhost", 19001))
+    val recipientSocket =
+      aSocket(ActorSelectorManager(coroutineContext)).udp().bind(InetSocketAddress("localhost", 19001))
 
     discoveryV5Service.start()
 
-    val buffer = ByteBuffer.allocate(Message.MAX_UDP_MESSAGE_SIZE)
-    recipientSocket.receive(buffer)
+    val datagram = recipientSocket.receive()
+    val buffer = ByteBuffer.allocate(datagram.packet.remaining.toInt())
+    datagram.packet.readFully(buffer)
     buffer.flip()
     val receivedBytes = Bytes.wrapByteBuffer(buffer)
     val content = receivedBytes.slice(45)

@@ -16,6 +16,13 @@
  */
 package org.apache.tuweni.devp2p.v5
 
+import io.ktor.network.selector.ActorSelectorManager
+import io.ktor.network.sockets.Datagram
+import io.ktor.network.sockets.aSocket
+import io.ktor.network.sockets.isClosed
+import io.ktor.util.KtorExperimentalAPI
+import io.ktor.utils.io.core.ByteReadPacket
+import io.ktor.utils.io.core.readFully
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -33,10 +40,10 @@ import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
+import org.apache.tuweni.devp2p.Packet
 import org.apache.tuweni.devp2p.v5.encrypt.SessionKey
 import org.apache.tuweni.devp2p.v5.topic.TopicTable
 import org.apache.tuweni.io.Base64URLSafe
-import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import org.slf4j.LoggerFactory
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -174,7 +181,8 @@ internal class DefaultDiscoveryV5Service(
     private val logger = LoggerFactory.getLogger(DefaultDiscoveryV5Service::class.java)
   }
 
-  private val channel = CoroutineDatagramChannel.open()
+  @OptIn(KtorExperimentalAPI::class)
+  private val channel = aSocket(ActorSelectorManager(coroutineContext)).udp().bind(bindAddress)
   private val handshakes = ExpiringMap<InetSocketAddress, HandshakeSession>()
   private val sessions = ConcurrentHashMap<InetSocketAddress, Session>()
   private val started = AtomicBoolean(false)
@@ -185,8 +193,6 @@ internal class DefaultDiscoveryV5Service(
 
   @ObsoleteCoroutinesApi
   override suspend fun start(): AsyncCompletion {
-    channel.bind(bindAddress)
-
     receiveJob = launch { receiveDatagram() }
     return bootstrap()
   }
@@ -221,7 +227,7 @@ internal class DefaultDiscoveryV5Service(
       val buffer = ByteBuffer.allocate(message.size())
       buffer.put(message.toArrayUnsafe())
       buffer.flip()
-      channel.send(buffer, addr)
+      channel.send(Datagram(ByteReadPacket(buffer), addr))
     }
   }
 
@@ -236,24 +242,25 @@ internal class DefaultDiscoveryV5Service(
   })
 
   private suspend fun receiveDatagram() {
-    while (channel.isOpen) {
-      val datagram = ByteBuffer.allocate(Message.MAX_UDP_MESSAGE_SIZE)
-      val address = channel.receive(datagram) as InetSocketAddress
-
-      datagram.flip()
-
-      var session = sessions.get(address)
+    while (!channel.isClosed) {
+      val datagram = channel.receive()
+      var session = sessions.get(datagram.address)
       try {
-        val message = Bytes.wrapByteBuffer(datagram)
+        val size = Math.min(Packet.MAX_SIZE, datagram.packet.remaining.toInt())
+        val buffer = ByteBuffer.allocate(size)
+        datagram.packet.readFully(buffer)
+        buffer.flip()
+        val message = Bytes.wrapByteBuffer(buffer)
         if (message.slice(0, 32) == whoAreYouHeader && session != null) {
-          sessions.remove(address)
+          sessions.remove(datagram.address)
           session = null
         }
         if (session == null) {
-          val handshakeSession = handshakes.computeIfAbsent(address) { createHandshake(it) }
+          val handshakeSession =
+            handshakes.computeIfAbsent(datagram.address as InetSocketAddress) { createHandshake(it) }
           handshakeSession.processMessage(message)
         } else {
-          session.processMessage(Bytes.wrapByteBuffer(datagram))
+          session.processMessage(message)
         }
       } catch (e: ClosedChannelException) {
         break
