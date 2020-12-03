@@ -20,6 +20,58 @@ import org.junit.jupiter.api.Test;
 class Bytes32Test {
 
   @Test
+  void testMutableBytes32WrapWithOffset() {
+    Bytes bytes = Bytes
+        .fromHexString(
+            "0x00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff");
+    MutableBytes mutableBytes = MutableBytes.create(48);
+    bytes.copyTo(mutableBytes);
+    assertEquals(
+        "0x112233445566778899aabbccddeeff00112233445566778899aabbccddeeff00",
+        Bytes32.wrap(mutableBytes, 1).toHexString());
+  }
+
+  @Test
+  void testMutableBytes32SliceWithOffset() {
+    Bytes bytes = Bytes
+        .fromHexString(
+            "0x00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff");
+    MutableBytes mutableBytes = MutableBytes.create(48);
+    bytes.copyTo(mutableBytes);
+    assertEquals("0x11", mutableBytes.slice(1, 1).toHexString());
+    assertEquals("0x1122", mutableBytes.slice(1, 2).toHexString());
+    assertEquals("0x112233445566778899aa", mutableBytes.slice(1, 10).toHexString());
+    assertEquals("0x112233445566778899aabbccddeeff", mutableBytes.slice(1, 15).toHexString());
+    assertEquals(
+        "0x112233445566778899aabbccddeeff00112233445566778899aabbccddee",
+        mutableBytes.slice(1, 30).toHexString());
+    assertEquals(
+        "0x112233445566778899aabbccddeeff00112233445566778899aabbccddeeff00",
+        mutableBytes.slice(1, 32).toHexString());
+    assertEquals(
+        "0x112233445566778899aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899aabbccddee",
+        mutableBytes.slice(1, 46).toHexString());
+  }
+
+  @Test
+  void testBytes32SliceWithOffset() {
+    Bytes bytes = Bytes
+        .fromHexString(
+            "0x00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff");
+    assertEquals("0x11", bytes.slice(1, 1).toHexString());
+    assertEquals("0x1122", bytes.slice(1, 2).toHexString());
+    assertEquals("0x112233445566778899aa", bytes.slice(1, 10).toHexString());
+    assertEquals("0x112233445566778899aabbccddeeff", bytes.slice(1, 15).toHexString());
+    assertEquals("0x112233445566778899aabbccddeeff00112233445566778899aabbccddee", bytes.slice(1, 30).toHexString());
+    assertEquals(
+        "0x112233445566778899aabbccddeeff00112233445566778899aabbccddeeff00",
+        bytes.slice(1, 32).toHexString());
+    assertEquals(
+        "0x112233445566778899aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899aabbccddee",
+        bytes.slice(1, 46).toHexString());
+  }
+
+  @Test
   void failsWhenWrappingArraySmallerThan32() {
     Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes32.wrap(new byte[31]));
     assertEquals("Expected 32 bytes but got 31", exception.getMessage());

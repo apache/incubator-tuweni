@@ -108,7 +108,7 @@ public interface Bytes32 extends Bytes {
     if (slice instanceof Bytes32) {
       return (Bytes32) slice;
     }
-    return new DelegatingBytes32(value);
+    return new DelegatingBytes32(slice);
   }
 
   /**
