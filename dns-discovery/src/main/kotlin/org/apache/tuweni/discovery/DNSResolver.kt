@@ -45,6 +45,7 @@ import org.xbill.DNS.Section
 import org.xbill.DNS.SimpleResolver
 import org.xbill.DNS.Type
 import org.xbill.DNS.WireParseException
+import java.io.IOException
 
 /**
  * Resolves a set of ENR nodes from a host name.
@@ -155,6 +156,13 @@ class DNSResolver @JvmOverloads constructor(
         logger.debug("No TXT record for $domainName")
         return null
       }
+    } catch (e: IOException) {
+      if (resolver is SimpleResolver) {
+        logger.warn("I/O exception contacting remote DNS server ${resolver.address}", e)
+      } else {
+        logger.warn("I/O exception contacting remote DNS server", e)
+      }
+      return null
     } catch (e: WireParseException) {
       logger.error("Error reading TXT record", e)
       return null
@@ -168,21 +176,21 @@ class DNSResolver @JvmOverloads constructor(
         return true
       }
 
-    if (entry is ENRNode) {
-      return visitor.visit(entry.nodeRecord)
-    } else if (entry is ENRTree) {
-      for (e in entry.entries) {
-        val keepGoing = internalVisit(e, domainName, visitor)
-        if (!keepGoing) {
-          return false
+      if (entry is ENRNode) {
+        return visitor.visit(entry.nodeRecord)
+      } else if (entry is ENRTree) {
+        for (e in entry.entries) {
+          val keepGoing = internalVisit(e, domainName, visitor)
+          if (!keepGoing) {
+            return false
+          }
         }
+      } else if (entry is ENRTreeLink) {
+        visitTree(entry, visitor)
+      } else {
+        logger.debug("Unsupported type of node $entry")
       }
-    } else if (entry is ENRTreeLink) {
-      visitTree(entry, visitor)
-    } else {
-      logger.debug("Unsupported type of node $entry")
-    }
-    return true
+      return true
     } catch (e: InvalidEntryException) {
       logger.warn(e.message, e)
       return true
