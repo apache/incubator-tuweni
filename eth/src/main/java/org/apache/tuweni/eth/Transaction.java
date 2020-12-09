@@ -14,7 +14,6 @@ package org.apache.tuweni.eth;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
-import static org.apache.tuweni.crypto.Hash.keccak256;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.crypto.SECP256K1;
@@ -343,15 +342,26 @@ public final class Transaction {
     return verifySignatureAndGetSender();
   }
 
+  /**
+   * Extracts the public key of the signature of the transaction. If the transaction is invalid, the public key may be
+   * null.
+   * 
+   * @return the public key of the key pair that signed the transaction.
+   */
+  @Nullable
+  public SECP256K1.PublicKey extractPublicKey() {
+    Bytes data = signatureData(nonce, gasPrice, gasLimit, to, value, payload, chainId);
+    SECP256K1.PublicKey publicKey = SECP256K1.PublicKey.recoverFromSignature(data, signature);
+    return publicKey;
+  }
+
   @Nullable
   private Address verifySignatureAndGetSender() {
-    Bytes data = signatureData(nonce, gasPrice, gasLimit, to, value, payload, chainId);
-
-    SECP256K1.PublicKey publicKey = SECP256K1.PublicKey.recoverFromSignature(data, signature);
+    SECP256K1.PublicKey publicKey = extractPublicKey();
     if (publicKey == null) {
       validSignature = false;
     } else {
-      sender = Address.fromBytes(Bytes.wrap(keccak256(publicKey.bytesArray()), 12, 20));
+      sender = Address.fromPublicKey(publicKey);
       validSignature = true;
     }
 
