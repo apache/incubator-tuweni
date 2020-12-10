@@ -197,6 +197,7 @@ class HobbitsTransport(
         }
       }
       Transport.WS -> {
+        @Suppress("DEPRECATION")
         httpClient!!.websocket(port, host, requestURI, { handler ->
           handler.exceptionHandler(exceptionHandler)
             .writeBinaryMessage(Buffer.buffer(message.toBytes().toArrayUnsafe())).end()
@@ -343,6 +344,7 @@ class HobbitsTransport(
         val httpServer = vertx.createHttpServer()
         wsServers[id] = httpServer
 
+        @Suppress("DEPRECATION")
         httpServer.websocketHandler {
           if (endpoint.requestURI == null || it.path().startsWith(endpoint.requestURI)) {
             it.accept()

@@ -20,6 +20,7 @@ import io.ktor.network.selector.ActorSelectorManager
 import io.ktor.network.sockets.aSocket
 import io.ktor.util.KtorExperimentalAPI
 import io.ktor.utils.io.core.readFully
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.crypto.SECP256K1
@@ -34,6 +35,7 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.time.Instant
+import java.util.concurrent.Executors
 
 @Timeout(10)
 @ExtendWith(BouncyCastleExtension::class)
@@ -69,7 +71,8 @@ class DefaultDiscoveryV5ServiceTest {
   @Test
   fun startInitializesConnectorAndBootstraps() = runBlocking {
     val recipientSocket =
-      aSocket(ActorSelectorManager(coroutineContext)).udp().bind(InetSocketAddress("localhost", 19001))
+      aSocket(ActorSelectorManager(Executors.newSingleThreadExecutor().asCoroutineDispatcher())).udp()
+        .bind(InetSocketAddress("localhost", 19001))
 
     discoveryV5Service.start()
 
@@ -85,7 +88,7 @@ class DefaultDiscoveryV5ServiceTest {
       content
     )
     assertEquals(message.data.size(), Message.RANDOM_DATA_LENGTH)
-    recipientSocket.close()
     discoveryV5Service.terminate()
+    recipientSocket.close()
   }
 }

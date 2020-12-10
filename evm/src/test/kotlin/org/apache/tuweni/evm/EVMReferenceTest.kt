@@ -76,7 +76,7 @@ class EVMReferenceTest {
     @JvmStatic
     @Throws(IOException::class)
     private fun findTests(): Stream<Arguments> {
-      return findTests("**/*.json")
+      return findTests("/VMTests/**/*.json")
     }
 
     @Throws(IOException::class)
@@ -85,7 +85,7 @@ class EVMReferenceTest {
         try {
           url.openConnection().getInputStream().use { input -> prepareTests(input) }
         } catch (e: IOException) {
-          throw UncheckedIOException(e)
+          throw UncheckedIOException("Could not read $url", e)
         }
       }
     }

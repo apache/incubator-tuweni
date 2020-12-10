@@ -71,8 +71,7 @@ class Wallet(file: Path, password: String) {
       val nonce = AES256GCM.Nonce.fromBytes(nonceBytes)
       val encrypted = AES256GCM.encrypt(Bytes32.random(), Bytes.EMPTY, key, nonce)
       file.parent.toFile().mkdirs()
-      Files.w
-      rite(
+      Files.write(
         file,
         encrypted.toHexString().encodeToByteArray(),
         StandardOpenOption.CREATE,
