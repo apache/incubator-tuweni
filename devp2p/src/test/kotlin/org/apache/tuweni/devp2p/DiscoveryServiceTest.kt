@@ -168,6 +168,7 @@ internal class DiscoveryServiceTest {
     assertTrue(routingTable.contains(bootstrapPeer))
 
     discoveryService.shutdownNow()
+    bootstrapClient.close()
   }
 
   @Test
@@ -227,6 +228,7 @@ internal class DiscoveryServiceTest {
     assertFalse(routingTable.contains(bootstrapPeer))
 
     discoveryService.shutdownNow()
+    bootstrapClient.close()
   }
 
   @Test
@@ -258,6 +260,7 @@ internal class DiscoveryServiceTest {
     assertEquals(Endpoint("192.168.66.55", 3836, 8765), ping.from)
 
     discoveryService.shutdownNow()
+    bootstrapClient.close()
   }
 
   @Test
@@ -360,6 +363,7 @@ internal class DiscoveryServiceTest {
     assertNotNull(peer.endpoint)
 
     discoveryService.shutdownNow()
+    client.close()
   }
 
   @Disabled
