@@ -48,7 +48,6 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.AsyncResult
-import org.apache.tuweni.concurrent.coroutines.CoroutineLatch
 import org.apache.tuweni.concurrent.coroutines.asyncCompletion
 import org.apache.tuweni.concurrent.coroutines.asyncResult
 import org.apache.tuweni.concurrent.coroutines.await
@@ -114,7 +113,7 @@ interface DiscoveryService {
      * @param advertiseTcpPort the TCP port to advertise to peers, or `null` if it should be the same as the UDP port.
      * @param routingTable a [PeerRoutingTable] which handles the ÐΞVp2p routing table
      * @param packetFilter a filter for incoming packets
-\     * @param bufferAllocator a [ByteBuffer] allocator, which must return buffers of size 1280 bytes or larger
+     \     * @param bufferAllocator a [ByteBuffer] allocator, which must return buffers of size 1280 bytes or larger
      * @param timeSupplier a function supplying the current time, in milliseconds since the epoch
      */
     @JvmOverloads
@@ -319,7 +318,6 @@ internal class CoroutineDiscoveryService constructor(
   private var enr: Bytes? = null
 
   private val shutdown = AtomicBoolean(false)
-  private val activityLatch = CoroutineLatch(1)
   private val bootstrapped = AsyncCompletion.incomplete()
   private var refreshLoop: Job? = null
   private val server = vertx.createDatagramSocket()
@@ -370,24 +368,14 @@ internal class CoroutineDiscoveryService constructor(
     )
     selfEndpoint = endpoint
     refreshLoop = launch {
-      activityLatch.countUp()
-      try {
-        while (true) {
-          delay(REFRESH_INTERVAL_MS)
-          refresh()
-        }
-      } finally {
-        activityLatch.countDown()
+      while (true) {
+        delay(REFRESH_INTERVAL_MS)
+        refresh()
       }
     }
     launch {
       bootstrapURIs.map { uri ->
-        activityLatch.countUp()
-        try {
-          bootstrapFrom(uri)
-        } finally {
-          activityLatch.countDown()
-        }
+        bootstrapFrom(uri)
       }
       bootstrapped.complete()
     }
@@ -432,16 +420,14 @@ internal class CoroutineDiscoveryService constructor(
       return
     }
 
-    activityLatch.countUp()
     val arrivalTime = timeSupplier()
-    val job = launch {
+    launch {
       try {
         receivePacket(packet.data(), packet.sender(), arrivalTime)
       } catch (e: Throwable) {
         logger.error("$serviceDescriptor: unexpected error during packet handling", e)
       }
     }
-    job.invokeOnCompletion { activityLatch.countDown() }
   }
 
   override suspend fun awaitBootstrap() = bootstrapped.await()
@@ -460,7 +446,6 @@ internal class CoroutineDiscoveryService constructor(
       verifyingEndpoints.cleanUp()
       findNodeStates.invalidateAll()
       findNodeStates.cleanUp()
-      activityLatch.countDown()
       refreshLoop?.cancel()
     }
   }
