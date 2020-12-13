@@ -27,11 +27,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.apache.tuweni.concurrent.AsyncResult
-import org.apache.tuweni.concurrent.CompletableAsyncResult
 import java.util.concurrent.CancellationException
 import java.util.concurrent.CompletionException
 import java.util.function.BiConsumer
-import kotlin.Result
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
@@ -75,18 +73,6 @@ fun <T> CoroutineScope.asyncResult(
     asyncResult.completeExceptionally(t)
   }
   return asyncResult
-}
-
-private class AsyncResultCoroutine<T>(
-  override val context: CoroutineContext,
-  val asyncResult: CompletableAsyncResult<T> = AsyncResult.incomplete()
-) : Continuation<T>, CoroutineScope {
-  override val coroutineContext: CoroutineContext get() = context
-  override fun resumeWith(result: Result<T>) {
-    result
-      .onSuccess { asyncResult.complete(it) }
-      .onFailure { asyncResult.completeExceptionally(it) }
-  }
 }
 
 /**
