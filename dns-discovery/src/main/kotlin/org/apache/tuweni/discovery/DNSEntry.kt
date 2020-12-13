@@ -105,15 +105,20 @@ internal class ENRTreeRoot(attrs: Map<String, String>) : DNSEntry {
   val linkRoot: String
   init {
     if (attrs["enrtree-root"] == null || attrs["seq"] == null || attrs["sig"] == null || attrs["e"] == null ||
-      attrs["l"] == null) {
+      attrs["l"] == null
+    ) {
       throw InvalidEntryException("Missing attributes on root entry")
     }
 
     version = attrs["enrtree-root"]!!
     seq = attrs["seq"]!!.toLong()
     val sigBytes = Base64URLSafe.decode(attrs["sig"]!!)
-    sig = SECP256K1.Signature.fromBytes(Bytes.concatenate(sigBytes,
-      Bytes.wrap(ByteArray(Math.max(0, 65 - sigBytes.size())))))
+    sig = SECP256K1.Signature.fromBytes(
+      Bytes.concatenate(
+        sigBytes,
+        Bytes.wrap(ByteArray(Math.max(0, 65 - sigBytes.size())))
+      )
+    )
     enrRoot = attrs["e"]!!
     linkRoot = attrs["l"]!!
   }

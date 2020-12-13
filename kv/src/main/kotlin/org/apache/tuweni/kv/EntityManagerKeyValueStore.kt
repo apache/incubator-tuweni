@@ -34,12 +34,12 @@ import kotlin.coroutines.CoroutineContext
  * @param coroutineContext the kotlin coroutine context.
  */
 class EntityManagerKeyValueStore<K, V>
-        constructor(
-          private val entityManagerProvider: () -> EntityManager,
-          private val entityClass: Class<V>,
-          private val idAccessor: (V) -> K,
-          override val coroutineContext: CoroutineContext = Dispatchers.IO
-        ) : KeyValueStore<K, V> {
+constructor(
+  private val entityManagerProvider: () -> EntityManager,
+  private val entityClass: Class<V>,
+  private val idAccessor: (V) -> K,
+  override val coroutineContext: CoroutineContext = Dispatchers.IO
+) : KeyValueStore<K, V> {
 
   companion object {
     /**

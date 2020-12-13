@@ -22,14 +22,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.newCoroutineContext
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.apache.tuweni.concurrent.AsyncCompletion
-import org.apache.tuweni.concurrent.CompletableAsyncCompletion
 import java.util.concurrent.CancellationException
 import java.util.concurrent.CompletionException
 import java.util.function.Consumer
@@ -59,39 +55,31 @@ import kotlin.coroutines.resumeWithException
  * @param start Co-routine start option. The default value is [CoroutineStart.DEFAULT].
  * @param block The co-routine code.
  */
-@UseExperimental(InternalCoroutinesApi::class, ObsoleteCoroutinesApi::class, ExperimentalCoroutinesApi::class)
 fun CoroutineScope.asyncCompletion(
   context: CoroutineContext = Dispatchers.Default,
   start: CoroutineStart = CoroutineStart.DEFAULT,
   block: suspend CoroutineScope.() -> Unit
 ): AsyncCompletion {
-  require(!start.isLazy) { "$start start is not supported" }
-  val newContext = this.newCoroutineContext(context)
-  val job = Job(newContext[Job])
-  val coroutine = AsyncCompletionCoroutine(newContext + job)
-  job.invokeOnCompletion { coroutine.asynCompletion.cancel() }
-  coroutine.asynCompletion.whenComplete { job.cancel() }
-  start(block, receiver = coroutine, completion = coroutine) // use the specified start strategy
-  return coroutine.asynCompletion
-}
-
-private class AsyncCompletionCoroutine(
-  override val context: CoroutineContext,
-  val asynCompletion: CompletableAsyncCompletion = AsyncCompletion.incomplete()
-) : Continuation<Unit>, CoroutineScope {
-  override val coroutineContext: CoroutineContext get() = context
-  override fun resumeWith(result: Result<Unit>) {
-    result
-      .onSuccess { asynCompletion.complete() }
-      .onFailure { asynCompletion.completeExceptionally(it) }
+  val completion = AsyncCompletion.incomplete()
+  try {
+    launch(context, start) {
+      try {
+        block()
+        completion.complete()
+      } catch (t: Throwable) {
+        completion.completeExceptionally(t)
+      }
+    }
+  } catch (t: Throwable) {
+    completion.completeExceptionally(t)
   }
+  return completion
 }
 
 /**
  * Converts this deferred value to a [AsyncCompletion].
  * The deferred value is cancelled when the returned [AsyncCompletion] is cancelled or otherwise completed.
  */
-@UseExperimental(ObsoleteCoroutinesApi::class)
 fun Deferred<Unit>.asAsyncCompletion(): AsyncCompletion {
   val asyncCompletion = AsyncCompletion.incomplete()
   asyncCompletion.whenComplete { cancel() }
@@ -109,7 +97,6 @@ fun Deferred<Unit>.asAsyncCompletion(): AsyncCompletion {
  * Converts this job to a [AsyncCompletion].
  * The job is cancelled when the returned [AsyncCompletion] is cancelled or otherwise completed.
  */
-@UseExperimental(ObsoleteCoroutinesApi::class)
 fun Job.asAsyncCompletion(): AsyncCompletion {
   val asyncCompletion = AsyncCompletion.incomplete()
   asyncCompletion.whenComplete { cancel() }
@@ -127,7 +114,6 @@ fun Job.asAsyncCompletion(): AsyncCompletion {
  * Converts this [AsyncCompletion] to an instance of [Deferred].
  * The [AsyncCompletion] is cancelled when the resulting deferred is cancelled.
  */
-@UseExperimental(ObsoleteCoroutinesApi::class)
 fun AsyncCompletion.asDeferred(): Deferred<Unit> {
   // Fast path if already completed
   if (isDone) {

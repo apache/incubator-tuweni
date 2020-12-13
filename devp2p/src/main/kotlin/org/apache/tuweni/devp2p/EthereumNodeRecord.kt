@@ -99,31 +99,31 @@ class EthereumNodeRecord(
      */
     @JvmStatic
     fun fromRLP(reader: RLPReader, rlp: Bytes): EthereumNodeRecord {
-        val sig = reader.readValue()
+      val sig = reader.readValue()
 
-        val seq = reader.readLong()
+      val seq = reader.readLong()
 
-        val data = mutableMapOf<String, Bytes>()
-        val listData = mutableMapOf<String, List<Bytes>>()
-        while (!reader.isComplete) {
-          val key = reader.readString()
-          if (reader.nextIsList()) {
-            listData[key] = reader.readListContents { listreader ->
-              if (listreader.nextIsList()) {
-                // TODO complex structures not supported
-                listreader.skipNext()
-                null
-              } else {
-                listreader.readValue()
-              }
-            }.filterNotNull()
-          } else {
-            val value = reader.readValue()
-            data[key] = value
-          }
+      val data = mutableMapOf<String, Bytes>()
+      val listData = mutableMapOf<String, List<Bytes>>()
+      while (!reader.isComplete) {
+        val key = reader.readString()
+        if (reader.nextIsList()) {
+          listData[key] = reader.readListContents { listreader ->
+            if (listreader.nextIsList()) {
+              // TODO complex structures not supported
+              listreader.skipNext()
+              null
+            } else {
+              listreader.readValue()
+            }
+          }.filterNotNull()
+        } else {
+          val value = reader.readValue()
+          data[key] = value
         }
+      }
 
-        return EthereumNodeRecord(sig, seq, data, listData, rlp)
+      return EthereumNodeRecord(sig, seq, data, listData, rlp)
     }
 
     fun encode(
@@ -243,15 +243,19 @@ class EthereumNodeRecord(
       encode(data = data, seq = seq, writer = it)
     }
 
-    val sig = SECP256K1.Signature.create(1, signature.slice(0, 32).toUnsignedBigInteger(),
-      signature.slice(32).toUnsignedBigInteger())
+    val sig = SECP256K1.Signature.create(
+      1, signature.slice(0, 32).toUnsignedBigInteger(),
+      signature.slice(32).toUnsignedBigInteger()
+    )
 
     val pubKey = publicKey()
     val recovered = SECP256K1.PublicKey.recoverFromSignature(encoded, sig)
 
     if (pubKey != recovered) {
-      val sig0 = SECP256K1.Signature.create(0, signature.slice(0, 32).toUnsignedBigInteger(),
-        signature.slice(32).toUnsignedBigInteger())
+      val sig0 = SECP256K1.Signature.create(
+        0, signature.slice(0, 32).toUnsignedBigInteger(),
+        signature.slice(32).toUnsignedBigInteger()
+      )
       val recovered0 = SECP256K1.PublicKey.recoverFromSignature(encoded, sig0)
       if (pubKey != recovered0) {
         throw InvalidNodeRecordException("Public key does not match signature")

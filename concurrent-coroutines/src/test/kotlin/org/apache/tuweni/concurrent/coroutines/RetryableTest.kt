@@ -100,7 +100,6 @@ internal class RetryableTest {
             throw RuntimeException("catch me")
           }
           delay(1000)
-          "done $i"
         }
       }
     }

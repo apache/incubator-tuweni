@@ -45,7 +45,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Top-level class to run an Ethereum client.
  */
-@UseExperimental(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class EthereumClient(
   val vertx: Vertx,
   val config: EthereumClientConfig,
@@ -94,9 +94,11 @@ class EthereumClient(
     config.dnsClients().forEach {
       val peerRepository = peerRepositories[it.peerRepository()]
       if (peerRepository == null) {
-        val message = (if (peerRepositories.isEmpty()) "none" else peerRepositories.keys.joinToString(
-          ","
-        )) + " defined"
+        val message = (
+          if (peerRepositories.isEmpty()) "none" else peerRepositories.keys.joinToString(
+            ","
+          )
+          ) + " defined"
         throw IllegalArgumentException(
           "Repository $peerRepository not found, $message"
         )
@@ -106,41 +108,45 @@ class EthereumClient(
       dnsClient.start()
     }
 
-    AsyncCompletion.allOf(config.rlpxServices().map { rlpxConfig ->
-      val peerRepository = peerRepositories[rlpxConfig.peerRepository()]
-      val repository = storageRepositories[rlpxConfig.repository()]
-      if (repository == null) {
-        val message = (if (storageRepositories.isEmpty()) "none" else storageRepositories.keys.joinToString(
-          ","
-        )) + " defined"
-        throw IllegalArgumentException(
-          "Repository ${rlpxConfig.repository()} not found, $message"
-        )
-      }
-      val genesisFile = repoToGenesisFile[repository]
-      val genesisBlock = repository.retrieveGenesisBlock()
-      val service = VertxRLPxService(
-        vertx,
-        rlpxConfig.port(),
-        rlpxConfig.networkInterface(),
-        rlpxConfig.advertisedPort(),
-        SECP256K1.KeyPair.random(),
-        listOf(
-          EthSubprotocol(
-            repository = repository,
-            blockchainInfo = SimpleBlockchainInformation(
-              UInt256.valueOf(genesisFile!!.chainId.toLong()), genesisBlock.header.difficulty,
-              genesisBlock.header.hash, genesisBlock.header.number, genesisBlock.header.hash, genesisFile.forks
-            ),
-            pendingTransactionsPool = MemoryTransactionPool()
+    AsyncCompletion.allOf(
+      config.rlpxServices().map { rlpxConfig ->
+        val peerRepository = peerRepositories[rlpxConfig.peerRepository()]
+        val repository = storageRepositories[rlpxConfig.repository()]
+        if (repository == null) {
+          val message = (
+            if (storageRepositories.isEmpty()) "none" else storageRepositories.keys.joinToString(
+              ","
+            )
+            ) + " defined"
+          throw IllegalArgumentException(
+            "Repository ${rlpxConfig.repository()} not found, $message"
           )
-        ),
-        rlpxConfig.clientName(),
-        WireConnectionPeerRepositoryAdapter(peerRepository!!)
-      )
-      services[rlpxConfig.getName()] = service
-      service.start()
-    }).await()
+        }
+        val genesisFile = repoToGenesisFile[repository]
+        val genesisBlock = repository.retrieveGenesisBlock()
+        val service = VertxRLPxService(
+          vertx,
+          rlpxConfig.port(),
+          rlpxConfig.networkInterface(),
+          rlpxConfig.advertisedPort(),
+          SECP256K1.KeyPair.random(),
+          listOf(
+            EthSubprotocol(
+              repository = repository,
+              blockchainInfo = SimpleBlockchainInformation(
+                UInt256.valueOf(genesisFile!!.chainId.toLong()), genesisBlock.header.difficulty,
+                genesisBlock.header.hash, genesisBlock.header.number, genesisBlock.header.hash, genesisFile.forks
+              ),
+              pendingTransactionsPool = MemoryTransactionPool()
+            )
+          ),
+          rlpxConfig.clientName(),
+          WireConnectionPeerRepositoryAdapter(peerRepository!!)
+        )
+        services[rlpxConfig.getName()] = service
+        service.start()
+      }
+    ).await()
 
     Runtime.getRuntime().addShutdownHook(object : Thread() {
       override fun run() = this@EthereumClient.stop()

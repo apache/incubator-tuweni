@@ -65,11 +65,13 @@ class RedisKeyValueStore<K, V>(
     fun open(
       uri: String
     ) =
-      RedisKeyValueStore<Bytes, Bytes>(uri,
+      RedisKeyValueStore<Bytes, Bytes>(
+        uri,
         Function.identity<Bytes>()::apply,
         Function.identity<Bytes>()::apply,
         Function.identity<Bytes>()::apply,
-        Function.identity<Bytes>()::apply)
+        Function.identity<Bytes>()::apply
+      )
 
     /**
      * Open a Redis-backed key-value store.
@@ -88,11 +90,13 @@ class RedisKeyValueStore<K, V>(
       valueSerializer: Function<V, Bytes>,
       keyDeserializer: Function<Bytes, K>,
       valueDeserializer: Function<Bytes, V>
-    ) = RedisKeyValueStore(uri,
+    ) = RedisKeyValueStore(
+      uri,
       keySerializer::apply,
       valueSerializer::apply,
       keyDeserializer::apply,
-      valueDeserializer::apply)
+      valueDeserializer::apply
+    )
 
     /**
      * Open a Redis-backed key-value store.
@@ -112,11 +116,13 @@ class RedisKeyValueStore<K, V>(
       keyDeserializer: Function<Bytes, K>,
       valueDeserializer: Function<Bytes, V>
     ) =
-      RedisKeyValueStore(port = port,
+      RedisKeyValueStore(
+        port = port,
         keySerializer = keySerializer::apply,
         valueSerializer = valueSerializer::apply,
         keyDeserializer = keyDeserializer::apply,
-        valueDeserializer = valueDeserializer::apply)
+        valueDeserializer = valueDeserializer::apply
+      )
 
     /**
      * Open a Redis-backed key-value store.
@@ -136,12 +142,14 @@ class RedisKeyValueStore<K, V>(
       keyDeserializer: Function<Bytes, K>,
       valueDeserializer: Function<Bytes, V>
     ) =
-      RedisKeyValueStore(6379,
+      RedisKeyValueStore(
+        6379,
         address,
         keySerializer::apply,
         valueSerializer::apply,
         keyDeserializer::apply,
-        valueDeserializer::apply)
+        valueDeserializer::apply
+      )
 
     /**
      * Open a Redis-backed key-value store.
@@ -163,12 +171,14 @@ class RedisKeyValueStore<K, V>(
       keyDeserializer: Function<Bytes, K>,
       valueDeserializer: Function<Bytes, V>
     ) =
-      RedisKeyValueStore(port,
+      RedisKeyValueStore(
+        port,
         address,
         keySerializer::apply,
         valueSerializer::apply,
         keyDeserializer::apply,
-        valueDeserializer::apply)
+        valueDeserializer::apply
+      )
 
     /**
      * A [RedisCodec] for working with Bytes classes.
@@ -200,11 +210,13 @@ class RedisKeyValueStore<K, V>(
     valueSerializer: (V) -> Bytes,
     keyDeserializer: (Bytes) -> K,
     valueDeserializer: (Bytes) -> V
-  ) : this(RedisURI.create(address.hostAddress, port).toURI().toString(),
+  ) : this(
+    RedisURI.create(address.hostAddress, port).toURI().toString(),
     keySerializer,
     valueSerializer,
     keyDeserializer,
-    valueDeserializer)
+    valueDeserializer
+  )
 
   init {
     val redisClient = RedisClient.create(uri)

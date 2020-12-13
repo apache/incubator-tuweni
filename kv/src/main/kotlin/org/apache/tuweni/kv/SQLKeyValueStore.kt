@@ -72,11 +72,13 @@ constructor(
       valueSerializer: (V) -> Bytes,
       keyDeserializer: (Bytes) -> K,
       valueDeserializer: (Bytes?) -> V?
-    ) = SQLKeyValueStore<K, V>(jdbcurl = jdbcUrl,
+    ) = SQLKeyValueStore<K, V>(
+      jdbcurl = jdbcUrl,
       keySerializer = keySerializer,
       valueSerializer = valueSerializer,
-    keyDeserializer = keyDeserializer,
-      valueDeserializer = valueDeserializer)
+      keyDeserializer = keyDeserializer,
+      valueDeserializer = valueDeserializer
+    )
 
     /**
      * Open a relational database backed key-value store.
@@ -104,14 +106,16 @@ constructor(
       keyDeserializer: (Bytes) -> K,
       valueDeserializer: (Bytes?) -> V?
     ) =
-      SQLKeyValueStore<K, V>(jdbcUrl,
+      SQLKeyValueStore<K, V>(
+        jdbcUrl,
         tableName,
         keyColumn,
         valueColumn,
         keySerializer,
         valueSerializer,
         keyDeserializer,
-        valueDeserializer)
+        valueDeserializer
+      )
   }
 
   private val connectionPool: BoneCP
@@ -135,38 +139,38 @@ constructor(
   }
 
   override suspend fun get(key: K): V? {
-      connectionPool.asyncConnection.await().use {
-        val stmt = it.prepareStatement("SELECT $valueColumn FROM $tableName WHERE $keyColumn = ?")
-        stmt.setBytes(1, keySerializer(key).toArrayUnsafe())
-        stmt.execute()
+    connectionPool.asyncConnection.await().use {
+      val stmt = it.prepareStatement("SELECT $valueColumn FROM $tableName WHERE $keyColumn = ?")
+      stmt.setBytes(1, keySerializer(key).toArrayUnsafe())
+      stmt.execute()
 
-        val rs = stmt.resultSet
+      val rs = stmt.resultSet
 
-        return if (rs.next()) {
-          valueDeserializer(Bytes.wrap(rs.getBytes(1)))
-        } else {
-          null
-        }
+      return if (rs.next()) {
+        valueDeserializer(Bytes.wrap(rs.getBytes(1)))
+      } else {
+        null
       }
+    }
   }
 
   override suspend fun put(key: K, value: V) {
     connectionPool.asyncConnection.await().use {
-        val stmt = it.prepareStatement("INSERT INTO $tableName($keyColumn, $valueColumn) VALUES(?,?)")
-        stmt.setBytes(1, keySerializer(key).toArrayUnsafe())
-        stmt.setBytes(2, valueSerializer(value).toArrayUnsafe())
-        it.autoCommit = false
-        try {
-          stmt.execute()
-        } catch (e: SQLException) {
-          val updateStmt = it.prepareStatement("UPDATE $tableName SET $valueColumn=? WHERE $keyColumn=?")
-          updateStmt.setBytes(1, valueSerializer(value).toArrayUnsafe())
-          updateStmt.setBytes(2, keySerializer(key).toArrayUnsafe())
-          updateStmt.execute()
-        }
-        it.commit()
-        Unit
+      val stmt = it.prepareStatement("INSERT INTO $tableName($keyColumn, $valueColumn) VALUES(?,?)")
+      stmt.setBytes(1, keySerializer(key).toArrayUnsafe())
+      stmt.setBytes(2, valueSerializer(value).toArrayUnsafe())
+      it.autoCommit = false
+      try {
+        stmt.execute()
+      } catch (e: SQLException) {
+        val updateStmt = it.prepareStatement("UPDATE $tableName SET $valueColumn=? WHERE $keyColumn=?")
+        updateStmt.setBytes(1, valueSerializer(value).toArrayUnsafe())
+        updateStmt.setBytes(2, keySerializer(key).toArrayUnsafe())
+        updateStmt.execute()
       }
+      it.commit()
+      Unit
+    }
   }
 
   private class SQLIterator<K>(val resultSet: ResultSet, val keyDeserializer: (Bytes) -> K) : Iterator<K> {

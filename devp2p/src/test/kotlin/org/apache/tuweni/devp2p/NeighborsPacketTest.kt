@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.nio.ByteBuffer
 
 @ExtendWith(BouncyCastleExtension::class)
 internal class NeighborsPacketTest {
@@ -32,9 +31,9 @@ internal class NeighborsPacketTest {
   fun shouldHaveExpectedMinimumSize() {
     val packet =
       NeighborsPacket.create(SECP256K1.KeyPair.random(), System.currentTimeMillis(), emptyList())
-    val buffer = packet.encodeTo(ByteBuffer.allocate(Packet.MAX_SIZE))
+    val buffer = packet.encode()
     // the minimum also includes a list length prefix of 4 bytes
-    assertEquals(NeighborsPacket.RLP_MIN_SIZE, buffer.position() + 4)
+    assertEquals(NeighborsPacket.RLP_MIN_SIZE, buffer.size() + 4)
   }
 
   @Test
@@ -47,11 +46,7 @@ internal class NeighborsPacketTest {
     val now = System.currentTimeMillis()
     val pong = NeighborsPacket.create(keyPair, now, neighbors)
 
-    val buffer = ByteBuffer.allocate(Packet.MAX_SIZE)
-    pong.encodeTo(buffer)
-    buffer.flip()
-
-    val datagram = Bytes.wrapByteBuffer(buffer)
+    val datagram = pong.encode()
     val packet = Packet.decodeFrom(datagram)
     assertTrue(packet is NeighborsPacket)
 

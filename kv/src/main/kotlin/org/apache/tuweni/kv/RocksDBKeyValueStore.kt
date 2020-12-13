@@ -71,11 +71,13 @@ constructor(
       valueSerializer: Function<V, Bytes>,
       keyDeserializer: Function<Bytes, K>,
       valueDeserializer: Function<Bytes, V>
-    ) = RocksDBKeyValueStore(dbPath,
+    ) = RocksDBKeyValueStore(
+      dbPath,
       keySerializer::apply,
       valueSerializer::apply,
       keyDeserializer::apply,
-      valueDeserializer::apply)
+      valueDeserializer::apply
+    )
 
     /**
      * Open a RocksDB-backed key-value store.
@@ -99,12 +101,14 @@ constructor(
       valueDeserializer: Function<Bytes, V>,
       options: Options
     ) =
-      RocksDBKeyValueStore(dbPath,
+      RocksDBKeyValueStore(
+        dbPath,
         keySerializer::apply,
         valueSerializer::apply,
         keyDeserializer::apply,
         valueDeserializer::apply,
-        options)
+        options
+      )
   }
 
   private var db: RocksDB

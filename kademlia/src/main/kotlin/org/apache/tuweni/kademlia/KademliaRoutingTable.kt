@@ -255,7 +255,12 @@ class KademliaRoutingTable<T>(
    * @param node the peer to compare to
    * @return the distance between the peer and our identity
    */
-  fun logDistToSelf(node: T): Int = distanceCache.get(node) { distanceToSelf.invoke(node) }
+  fun logDistToSelf(node: T): Int {
+    if (node == null) {
+      return 0
+    }
+    return distanceCache.get(node) { distanceToSelf(node) }
+  }
 
   private fun idForNode(node: T): ByteArray {
     val id = nodeId(node)

@@ -71,8 +71,10 @@ internal class PutVisitor<V>(
       return nodeFactory.createLeaf(leafPath, value)
     }
 
-    assert(commonPathLength < leafPath.size() && commonPathLength < path.size(),
-      { "Should not have consumed non-matching terminator" })
+    assert(
+      commonPathLength < leafPath.size() && commonPathLength < path.size(),
+      { "Should not have consumed non-matching terminator" }
+    )
 
     // The current leaf path must be split to accommodate the new value.
 

@@ -90,11 +90,11 @@ public final class HelloMessage implements WireProtocolMessage {
     return 0;
   }
 
-  Bytes nodeId() {
+  public Bytes nodeId() {
     return nodeId;
   }
 
-  List<Capability> capabilities() {
+  public List<Capability> capabilities() {
     return capabilities;
   }
 
@@ -102,7 +102,7 @@ public final class HelloMessage implements WireProtocolMessage {
     return p2pVersion;
   }
 
-  String clientId() {
+  public String clientId() {
     return clientId;
   }
 

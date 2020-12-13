@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.devp2p.v5
 
+import io.vertx.core.net.SocketAddress
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
@@ -29,7 +30,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetAddress
-import java.net.InetSocketAddress
 
 @ExtendWith(BouncyCastleExtension::class)
 class HandshakeSessionTest {
@@ -39,8 +39,8 @@ class HandshakeSessionTest {
     runBlocking {
       val keyPair = SECP256K1.KeyPair.random()
       val peerKeyPair = SECP256K1.KeyPair.random()
-      val address = InetSocketAddress(InetAddress.getLoopbackAddress(), 1234)
-      val peerAddress = InetSocketAddress(InetAddress.getLoopbackAddress(), 1235)
+      val address = SocketAddress.inetSocketAddress(1234, "localhost")
+      val peerAddress = SocketAddress.inetSocketAddress(1235, "localhost")
       val enr = EthereumNodeRecord.create(keyPair, ip = InetAddress.getLoopbackAddress(), udp = 1234)
       val peerEnr = EthereumNodeRecord.create(peerKeyPair, ip = InetAddress.getLoopbackAddress(), udp = 1235)
       var peerSession: HandshakeSession? = null

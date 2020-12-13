@@ -44,9 +44,11 @@ class EthSubprotocol(
   override fun id(): SubProtocolIdentifier = ETH65
 
   override fun supports(subProtocolIdentifier: SubProtocolIdentifier): Boolean {
-    return "eth".equals(subProtocolIdentifier.name()) && (subProtocolIdentifier.version() == ETH62.version() ||
-      subProtocolIdentifier.version() == ETH63.version() || subProtocolIdentifier.version() == ETH64.version() ||
-      subProtocolIdentifier.version() == ETH65.version())
+    return "eth".equals(subProtocolIdentifier.name()) && (
+      subProtocolIdentifier.version() == ETH62.version() ||
+        subProtocolIdentifier.version() == ETH63.version() || subProtocolIdentifier.version() == ETH64.version() ||
+        subProtocolIdentifier.version() == ETH65.version()
+      )
   }
 
   override fun versionRange(version: Int): Int {

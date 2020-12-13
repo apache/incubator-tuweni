@@ -67,7 +67,8 @@ internal data class GetBlockHeadersMessage(val reqID: Long, val queries: List<Bl
                 else
                   BlockHeaderQuery.Direction.FORWARD
               )
-            })
+            }
+          )
         }
         GetBlockHeadersMessage(reqId, queries)
       }

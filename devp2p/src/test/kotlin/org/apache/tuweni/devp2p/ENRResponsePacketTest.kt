@@ -16,7 +16,6 @@
  */
 package org.apache.tuweni.devp2p
 
-import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.junit.BouncyCastleExtension
@@ -25,7 +24,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetAddress
-import java.nio.ByteBuffer
 
 @ExtendWith(BouncyCastleExtension::class)
 internal class ENRResponsePacketTest {
@@ -43,11 +41,7 @@ internal class ENRResponsePacketTest {
     val now = System.currentTimeMillis()
     val pong = ENRResponsePacket.create(keyPair, now, requestHash, enr)
 
-    val buffer = ByteBuffer.allocate(Packet.MAX_SIZE)
-    pong.encodeTo(buffer)
-    buffer.flip()
-
-    val datagram = Bytes.wrapByteBuffer(buffer)
+    val datagram = pong.encode()
     val packet = Packet.decodeFrom(datagram)
     assertTrue(packet is ENRResponsePacket)
 

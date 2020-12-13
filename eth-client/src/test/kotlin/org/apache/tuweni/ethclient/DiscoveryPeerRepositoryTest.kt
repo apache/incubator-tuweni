@@ -35,7 +35,7 @@ class DiscoveryPeerRepositoryTest {
     runBlocking {
       val peer = repo.get("enode://${key.toHexString()}@127.0.0.1:3000")
       assertEquals(3000, peer.endpoint.udpPort)
-      assertEquals("127.0.0.1", peer.endpoint.address.hostAddress)
+      assertEquals("127.0.0.1", peer.endpoint.address)
       assertEquals(key, peer.nodeId)
     }
   }

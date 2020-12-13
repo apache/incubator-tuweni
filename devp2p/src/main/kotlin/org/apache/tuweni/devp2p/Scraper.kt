@@ -16,6 +16,8 @@
  */
 package org.apache.tuweni.devp2p
 
+import io.vertx.core.Vertx
+import io.vertx.core.net.SocketAddress
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
@@ -26,7 +28,6 @@ import org.apache.tuweni.concurrent.ExpiringSet
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
 import org.bouncycastle.jce.provider.BouncyCastleProvider
-import java.net.InetSocketAddress
 import java.net.URI
 import java.security.Security
 import java.util.concurrent.ConcurrentHashMap
@@ -47,20 +48,25 @@ object ScraperApp {
 
   fun run(args: Array<String>) {
     val uris = args.map { URI.create(it) }
-    val addr = InetSocketAddress("0.0.0.0", 11000)
+    val addr = SocketAddress.inetSocketAddress(11000, "0.0.0.0")
     val seen = ConcurrentHashMap.newKeySet<String>()
-    val scraper = Scraper(initialURIs = uris, bindAddress = addr, listeners = listOf { _, nodes ->
-      for (node in nodes) {
-        if (seen.add(node.uri())) {
-          println(node)
+    val scraper = Scraper(
+      initialURIs = uris, bindAddress = addr,
+      listeners = listOf { _, nodes ->
+        for (node in nodes) {
+          if (seen.add(node.uri())) {
+            println(node)
+          }
         }
       }
-    })
-    Runtime.getRuntime().addShutdownHook(Thread {
-      runBlocking {
-        scraper.stop().await()
+    )
+    Runtime.getRuntime().addShutdownHook(
+      Thread {
+        runBlocking {
+          scraper.stop().await()
+        }
       }
-    })
+    )
     runBlocking {
       scraper.start().await()
     }
@@ -74,8 +80,9 @@ object ScraperApp {
  */
 class Scraper(
   override val coroutineContext: CoroutineContext = Executors.newFixedThreadPool(100).asCoroutineDispatcher(),
+  val vertx: Vertx = Vertx.vertx(),
   val initialURIs: List<URI>,
-  val bindAddress: InetSocketAddress,
+  val bindAddress: SocketAddress,
   val listeners: List<(Peer, List<Peer>) -> Unit>,
   val maxWaitForNewPeers: Long = 20,
   val waitBetweenScrapes: Long = 5 * 60
@@ -86,6 +93,7 @@ class Scraper(
 
   fun start() = async {
     val newService = DiscoveryService.open(
+      vertx,
       keyPair = SECP256K1.KeyPair.random(),
       bindAddress = bindAddress,
       bootstrapURIs = initialURIs
@@ -125,9 +133,7 @@ class Scraper(
 
   fun stop() = async {
     if (started.compareAndSet(true, false)) {
-      val s = service
-      service = null
-      s!!.awaitTermination()
+      service?.shutdown()
     }
   }
 }

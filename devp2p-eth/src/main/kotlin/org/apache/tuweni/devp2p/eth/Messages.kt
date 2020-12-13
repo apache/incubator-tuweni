@@ -107,9 +107,11 @@ internal data class NewBlockHashes(val hashes: List<Pair<Hash, Long>>) {
     fun read(payload: Bytes): NewBlockHashes = RLP.decodeList(payload) {
       val hashes = ArrayList<Pair<Hash, Long>>()
       while (!it.isComplete) {
-        hashes.add(it.readList { pairReader ->
-          Pair(Hash.fromBytes(pairReader.readValue()), pairReader.readLong())
-        })
+        hashes.add(
+          it.readList { pairReader ->
+            Pair(Hash.fromBytes(pairReader.readValue()), pairReader.readLong())
+          }
+        )
       }
       NewBlockHashes(hashes)
     }
@@ -151,9 +153,11 @@ internal data class BlockHeaders(val headers: List<BlockHeader>) {
     fun read(payload: Bytes): BlockHeaders = RLP.decodeList(payload) {
       val headers = ArrayList<BlockHeader>()
       while (!it.isComplete) {
-        headers.add(it.readList { rlp ->
-          BlockHeader.readFrom(rlp)
-        })
+        headers.add(
+          it.readList { rlp ->
+            BlockHeader.readFrom(rlp)
+          }
+        )
       }
       BlockHeaders(headers)
     }
@@ -191,9 +195,11 @@ internal data class BlockBodies(val bodies: List<BlockBody>) {
     fun read(payload: Bytes): BlockBodies = RLP.decodeList(payload) {
       val bodies = ArrayList<BlockBody>()
       while (!it.isComplete) {
-        bodies.add(it.readList { rlp ->
-          BlockBody.readFrom(rlp)
-        })
+        bodies.add(
+          it.readList { rlp ->
+            BlockBody.readFrom(rlp)
+          }
+        )
       }
       BlockBodies(bodies)
     }

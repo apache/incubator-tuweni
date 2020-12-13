@@ -249,15 +249,15 @@ internal class BlockchainRepositoryTest {
     )
     val genesisBlock = Block(genesisHeader, BlockBody(emptyList(), emptyList()))
     val repo = BlockchainRepository.init(
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        MapKeyValueStore(),
-        BlockchainIndex(writer),
-        genesisBlock
-      )
+      MapKeyValueStore(),
+      MapKeyValueStore(),
+      MapKeyValueStore(),
+      MapKeyValueStore(),
+      MapKeyValueStore(),
+      MapKeyValueStore(),
+      BlockchainIndex(writer),
+      genesisBlock
+    )
 
     val header = BlockHeader(
       genesisHeader.getHash(),
@@ -475,11 +475,18 @@ internal class BlockchainRepositoryTest {
       genesisBlock
     )
 
-    val txReceipt = TransactionReceipt(Bytes32.random(), 3, LogsBloomFilter(Bytes.random(256)),
-      listOf(Log(Address.fromBytes(
-        Bytes.random(20)),
-        Bytes.fromHexString("deadbeef"),
-        listOf(Bytes32.random(), Bytes32.random()))))
+    val txReceipt = TransactionReceipt(
+      Bytes32.random(), 3, LogsBloomFilter(Bytes.random(256)),
+      listOf(
+        Log(
+          Address.fromBytes(
+            Bytes.random(20)
+          ),
+          Bytes.fromHexString("deadbeef"),
+          listOf(Bytes32.random(), Bytes32.random())
+        )
+      )
+    )
 
     val txHash = Hash.fromBytes(Bytes32.random())
     val blockHash = Hash.fromBytes(Bytes32.random())

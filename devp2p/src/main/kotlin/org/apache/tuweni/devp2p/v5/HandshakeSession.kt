@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.devp2p.v5
 
+import io.vertx.core.net.SocketAddress
 import kotlinx.coroutines.CoroutineScope
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncResult
@@ -30,16 +31,15 @@ import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.rlp.RLPReader
 import org.apache.tuweni.units.bigints.UInt256
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
 import kotlin.coroutines.CoroutineContext
 
 private val DISCOVERY_ID_NONCE: Bytes = Bytes.wrap("discovery-id-nonce".toByteArray())
 
 internal class HandshakeSession(
   private val keyPair: SECP256K1.KeyPair,
-  private val address: InetSocketAddress,
+  private val address: SocketAddress,
   private var publicKey: SECP256K1.PublicKey? = null,
-  private val sendFn: (address: InetSocketAddress, message: Bytes) -> Unit,
+  private val sendFn: (SocketAddress, Bytes) -> Unit,
   private val enr: () -> EthereumNodeRecord,
   override val coroutineContext: CoroutineContext
 ) : CoroutineScope {
@@ -56,7 +56,7 @@ internal class HandshakeSession(
     private val logger = LoggerFactory.getLogger(HandshakeSession::class.java)
   }
 
-  fun connect(): AsyncResult<SessionKey> {
+  suspend fun connect(): AsyncResult<SessionKey> {
     val message = RandomMessage()
     tokens.add(message.authTag)
     val tag = tag()
@@ -122,13 +122,17 @@ internal class HandshakeSession(
         Bytes.concatenate(Bytes.of(MessageType.FINDNODE.byte()), findNode.toRLP()),
         newTag
       )
-      val response = Bytes.concatenate(newTag, RLP.encodeList {
-        it.writeValue(authTag)
-        it.writeValue(message.idNonce)
-        it.writeValue(Bytes.wrap("gcm".toByteArray()))
-        it.writeValue(ephemeralKeyPair.publicKey().bytes())
-        it.writeValue(authResponse)
-      }, encryptedMessage)
+      val response = Bytes.concatenate(
+        newTag,
+        RLP.encodeList {
+          it.writeValue(authTag)
+          it.writeValue(message.idNonce)
+          it.writeValue(Bytes.wrap("gcm".toByteArray()))
+          it.writeValue(ephemeralKeyPair.publicKey().bytes())
+          it.writeValue(authResponse)
+        },
+        encryptedMessage
+      )
       logger.trace("Sending handshake FindNode {}", response)
       connected.complete(newSession)
       sendFn(address, response)
@@ -185,14 +189,18 @@ internal class HandshakeSession(
     ephemeralPublicKey: SECP256K1.PublicKey,
     publicKey: SECP256K1.PublicKey
   ): Boolean {
-    val signature = SECP256K1.Signature.create(1, signatureBytes.slice(0, 32).toUnsignedBigInteger(),
-      signatureBytes.slice(32).toUnsignedBigInteger())
+    val signature = SECP256K1.Signature.create(
+      1, signatureBytes.slice(0, 32).toUnsignedBigInteger(),
+      signatureBytes.slice(32).toUnsignedBigInteger()
+    )
 
     val signValue = Bytes.concatenate(DISCOVERY_ID_NONCE, idNonce, ephemeralPublicKey.bytes())
     val hashedSignValue = Hash.sha2_256(signValue)
     if (!SECP256K1.verifyHashed(hashedSignValue, signature, publicKey)) {
-      val signature0 = SECP256K1.Signature.create(0, signatureBytes.slice(0, 32).toUnsignedBigInteger(),
-        signatureBytes.slice(32).toUnsignedBigInteger())
+      val signature0 = SECP256K1.Signature.create(
+        0, signatureBytes.slice(0, 32).toUnsignedBigInteger(),
+        signatureBytes.slice(32).toUnsignedBigInteger()
+      )
       return SECP256K1.verifyHashed(hashedSignValue, signature0, publicKey)
     } else {
       return true

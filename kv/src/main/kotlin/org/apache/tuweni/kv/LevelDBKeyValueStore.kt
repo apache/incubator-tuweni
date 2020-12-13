@@ -77,11 +77,13 @@ constructor(
       keyDeserializer: Function<Bytes, K>,
       valueDeserializer: Function<Bytes, V>
     ): LevelDBKeyValueStore<K, V> =
-      LevelDBKeyValueStore(dbPath,
+      LevelDBKeyValueStore(
+        dbPath,
         keySerializer::apply,
         valueSerializer::apply,
         keyDeserializer::apply,
-        valueDeserializer::apply)
+        valueDeserializer::apply
+      )
 
     /**
      * Open a LevelDB-backed key-value store.
@@ -105,12 +107,14 @@ constructor(
       valueDeserializer: Function<Bytes, V>,
       options: Options
     ) =
-      LevelDBKeyValueStore(dbPath,
+      LevelDBKeyValueStore(
+        dbPath,
         keySerializer::apply,
         valueSerializer::apply,
         keyDeserializer::apply,
         valueDeserializer::apply,
-        options)
+        options
+      )
 
     /**
      * Open a LevelDB-backed key-value store using Bytes keys and values.
@@ -124,11 +128,13 @@ constructor(
     fun open(
       dbPath: Path
     ) =
-      LevelDBKeyValueStore<Bytes, Bytes>(dbPath,
+      LevelDBKeyValueStore<Bytes, Bytes>(
+        dbPath,
         Function.identity<Bytes>()::apply,
         Function.identity<Bytes>()::apply,
         Function.identity<Bytes>()::apply,
-        Function.identity<Bytes>()::apply)
+        Function.identity<Bytes>()::apply
+      )
   }
 
   private var db: DB
@@ -153,8 +159,10 @@ constructor(
     }
   }
 
-  override suspend fun put(key: K, value: V) = db.put(keySerializer(key).toArrayUnsafe(),
-    valueSerializer(value).toArrayUnsafe())
+  override suspend fun put(key: K, value: V) = db.put(
+    keySerializer(key).toArrayUnsafe(),
+    valueSerializer(value).toArrayUnsafe()
+  )
 
   private class KIterator<K>(val iter: DBIterator, val keyDeserializer: (Bytes) -> K) : Iterator<K> {
     override fun hasNext(): Boolean = iter.hasNext()

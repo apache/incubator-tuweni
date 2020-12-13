@@ -16,10 +16,16 @@
  */
 package org.apache.tuweni.devp2p.v5
 
+import io.vertx.core.Vertx
+import io.vertx.core.buffer.Buffer
+import io.vertx.core.datagram.DatagramPacket
+import io.vertx.core.net.SocketAddress
+import io.vertx.kotlin.core.datagram.closeAwait
+import io.vertx.kotlin.core.datagram.listenAwait
+import io.vertx.kotlin.core.datagram.sendAwait
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -33,15 +39,14 @@ import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
+import org.apache.tuweni.devp2p.Packet
 import org.apache.tuweni.devp2p.v5.encrypt.SessionKey
 import org.apache.tuweni.devp2p.v5.topic.TopicTable
 import org.apache.tuweni.io.Base64URLSafe
-import org.apache.tuweni.net.coroutines.CoroutineDatagramChannel
 import org.slf4j.LoggerFactory
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
-import java.nio.channels.ClosedChannelException
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
@@ -55,6 +60,7 @@ object DiscoveryService {
 
   /**
    * Creates a new discovery service, generating the node ENR and configuring the UDP connector.
+   * @param vertx Vert.x instance
    * @param keyPair the key pair identifying the node running the service.
    * @param bindAddress the address to bind the node to.
    * @param enrSeq the sequence of the ENR of the node
@@ -65,6 +71,7 @@ object DiscoveryService {
   @JvmStatic
   @JvmOverloads
   fun open(
+    vertx: Vertx,
     keyPair: SECP256K1.KeyPair,
     localPort: Int,
     bindAddress: InetSocketAddress = InetSocketAddress(InetAddress.getLoopbackAddress(), localPort),
@@ -84,6 +91,7 @@ object DiscoveryService {
     )
     // val connector = UdpConnector(bindAddress, keyPair, selfENR, enrStorage)
     return DefaultDiscoveryV5Service(
+      vertx,
       bindAddress,
       bootstrapENRList,
       enrStorage,
@@ -143,7 +151,7 @@ interface DiscoveryV5Service : CoroutineScope {
    */
   suspend fun addPeer(
     enr: EthereumNodeRecord,
-    address: InetSocketAddress = InetSocketAddress(enr.ip(), enr.udp()!!)
+    address: SocketAddress = SocketAddress.inetSocketAddress(enr.udp()!!, enr.ip().hostAddress)
   ): AsyncCompletion
 
   /**
@@ -159,6 +167,7 @@ interface DiscoveryV5Service : CoroutineScope {
 }
 
 internal class DefaultDiscoveryV5Service(
+  private val vertx: Vertx,
   private val bindAddress: InetSocketAddress,
   private val bootstrapENRList: List<String>,
   private val enrStorage: ENRStorage,
@@ -170,37 +179,33 @@ internal class DefaultDiscoveryV5Service(
 ) : DiscoveryV5Service {
 
   companion object {
-
     private val logger = LoggerFactory.getLogger(DefaultDiscoveryV5Service::class.java)
   }
 
-  private val channel = CoroutineDatagramChannel.open()
-  private val handshakes = ExpiringMap<InetSocketAddress, HandshakeSession>()
-  private val sessions = ConcurrentHashMap<InetSocketAddress, Session>()
+  private val server = vertx.createDatagramSocket()
+  private val handshakes = ExpiringMap<SocketAddress, HandshakeSession>()
+  private val sessions = ConcurrentHashMap<SocketAddress, Session>()
   private val started = AtomicBoolean(false)
   private val nodeId = EthereumNodeRecord.nodeId(keyPair.publicKey())
   private val whoAreYouHeader = Hash.sha2_256(Bytes.concatenate(nodeId, Bytes.wrap("WHOAREYOU".toByteArray())))
 
   private lateinit var receiveJob: Job
 
-  @ObsoleteCoroutinesApi
   override suspend fun start(): AsyncCompletion {
-    channel.bind(bindAddress)
-
-    receiveJob = launch { receiveDatagram() }
+    server.handler(this::receiveDatagram).listenAwait(bindAddress.port, bindAddress.hostString)
     return bootstrap()
   }
 
   override suspend fun terminate() {
     if (started.compareAndSet(true, false)) {
       receiveJob.cancel()
-      channel.close()
+      server.closeAwait()
     }
   }
 
   override fun enr(): EthereumNodeRecord = selfEnr
 
-  override suspend fun addPeer(enr: EthereumNodeRecord, address: InetSocketAddress): AsyncCompletion {
+  override suspend fun addPeer(enr: EthereumNodeRecord, address: SocketAddress): AsyncCompletion {
     val session = sessions[address]
     if (session == null) {
       logger.trace("Creating new session for peer {}", enr)
@@ -216,53 +221,50 @@ internal class DefaultDiscoveryV5Service(
     }
   }
 
-  private fun send(addr: InetSocketAddress, message: Bytes) {
+  private fun send(addr: SocketAddress, message: Bytes) {
     launch {
-      val buffer = ByteBuffer.allocate(message.size())
-      buffer.put(message.toArrayUnsafe())
-      buffer.flip()
-      channel.send(buffer, addr)
+      server.sendAwait(Buffer.buffer(message.toArrayUnsafe()), addr.port(), addr.host())
     }
   }
 
-  private suspend fun bootstrap(): AsyncCompletion = AsyncCompletion.allOf(bootstrapENRList.map {
-    logger.trace("Connecting to bootstrap peer {}", it)
-    var encodedEnr = it
-    if (it.startsWith("enr:")) {
-      encodedEnr = it.substringAfter("enr:")
+  private suspend fun bootstrap(): AsyncCompletion = AsyncCompletion.allOf(
+    bootstrapENRList.map {
+      logger.trace("Connecting to bootstrap peer {}", it)
+      var encodedEnr = it
+      if (it.startsWith("enr:")) {
+        encodedEnr = it.substringAfter("enr:")
+      }
+      val rlpENR = Base64URLSafe.decode(encodedEnr)
+      addPeer(rlpENR)
     }
-    val rlpENR = Base64URLSafe.decode(encodedEnr)
-    addPeer(rlpENR)
-  })
+  )
 
-  private suspend fun receiveDatagram() {
-    while (channel.isOpen) {
-      val datagram = ByteBuffer.allocate(Message.MAX_UDP_MESSAGE_SIZE)
-      val address = channel.receive(datagram) as InetSocketAddress
-
-      datagram.flip()
-
-      var session = sessions.get(address)
-      try {
-        val message = Bytes.wrapByteBuffer(datagram)
-        if (message.slice(0, 32) == whoAreYouHeader && session != null) {
-          sessions.remove(address)
-          session = null
-        }
-        if (session == null) {
-          val handshakeSession = handshakes.computeIfAbsent(address) { createHandshake(it) }
-          handshakeSession.processMessage(message)
-        } else {
-          session.processMessage(Bytes.wrapByteBuffer(datagram))
-        }
-      } catch (e: ClosedChannelException) {
-        break
+  private fun receiveDatagram(packet: DatagramPacket) {
+    var session = sessions.get(packet.sender())
+    val size = Math.min(Packet.MAX_SIZE, packet.data().length())
+    val buffer = ByteBuffer.allocate(size)
+    packet.data().byteBuf.readBytes(buffer)
+    buffer.flip()
+    val message = Bytes.wrapByteBuffer(buffer)
+    if (message.slice(0, 32) == whoAreYouHeader && session != null) {
+      sessions.remove(packet.sender())
+      session = null
+    }
+    if (session == null) {
+      val handshakeSession =
+        handshakes.computeIfAbsent(packet.sender()) { createHandshake(it) }
+      launch {
+        handshakeSession.processMessage(message)
+      }
+    } else {
+      launch {
+        session.processMessage(message)
       }
     }
   }
 
   private fun createHandshake(
-    address: InetSocketAddress,
+    address: SocketAddress,
     publicKey: SECP256K1.PublicKey? = null,
     receivedEnr: EthereumNodeRecord? = null
   ): HandshakeSession {
@@ -281,7 +283,7 @@ internal class DefaultDiscoveryV5Service(
 
   private fun createSession(
     newSession: HandshakeSession,
-    address: InetSocketAddress,
+    address: SocketAddress,
     sessionKey: SessionKey,
     receivedEnr: EthereumNodeRecord
   ): Session {

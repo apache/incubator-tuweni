@@ -169,12 +169,12 @@ class HobbitsTransport(
         @Suppress("DEPRECATION")
         val req = httpClient!!.request(HttpMethod.POST, port, host, requestURI)
           .exceptionHandler(exceptionHandler).handler {
-          if (it.statusCode() == 200) {
-            completion.complete()
-          } else {
-            completion.completeExceptionally(RuntimeException("${it.statusCode()}"))
+            if (it.statusCode() == 200) {
+              completion.complete()
+            } else {
+              completion.completeExceptionally(RuntimeException("${it.statusCode()}"))
+            }
           }
-        }
         req.end(Buffer.buffer(message.toBytes().toArrayUnsafe()))
       }
       Transport.TCP -> {
@@ -190,21 +190,25 @@ class HobbitsTransport(
       Transport.UDP -> {
         udpClient!!.send(Buffer.buffer(message.toBytes().toArrayUnsafe()), port, host) { handler ->
           if (handler.failed()) {
-                completion.completeExceptionally(handler.cause())
+            completion.completeExceptionally(handler.cause())
           } else {
-                completion.complete()
-            }
+            completion.complete()
+          }
         }
       }
       Transport.WS -> {
-        httpClient!!.websocket(port, host, requestURI, { handler ->
-          handler.exceptionHandler(exceptionHandler)
-            .writeBinaryMessage(Buffer.buffer(message.toBytes().toArrayUnsafe())).end()
-          completion.complete()
-        },
-        { exception ->
-          completion.completeExceptionally(exception)
-        })
+        @Suppress("DEPRECATION")
+        httpClient!!.websocket(
+          port, host, requestURI,
+          { handler ->
+            handler.exceptionHandler(exceptionHandler)
+              .writeBinaryMessage(Buffer.buffer(message.toBytes().toArrayUnsafe())).end()
+            completion.complete()
+          },
+          { exception ->
+            completion.completeExceptionally(exception)
+          }
+        )
       }
     }
     completion.await()
@@ -294,15 +298,16 @@ class HobbitsTransport(
         val completion = AsyncCompletion.incomplete()
         val tcpServer = vertx.createNetServer()
         tcpServers[id] = tcpServer
-        tcpServer.connectHandler { connectHandler -> connectHandler.handler { buffer ->
-          val bytes = Bytes.wrapBuffer(buffer)
-          val message = Message.readMessage(bytes)
-          if (message == null) {
-            incompleteMessageHandler(bytes)
-          } else {
-            endpoint.handler(message)
+        tcpServer.connectHandler { connectHandler ->
+          connectHandler.handler { buffer ->
+            val bytes = Bytes.wrapBuffer(buffer)
+            val message = Message.readMessage(bytes)
+            if (message == null) {
+              incompleteMessageHandler(bytes)
+            } else {
+              endpoint.handler(message)
+            }
           }
-        }
         }.listen(endpoint.port, endpoint.networkInterface) {
           if (it.failed()) {
             completion.completeExceptionally(it.cause())
@@ -343,6 +348,7 @@ class HobbitsTransport(
         val httpServer = vertx.createHttpServer()
         wsServers[id] = httpServer
 
+        @Suppress("DEPRECATION")
         httpServer.websocketHandler {
           if (endpoint.requestURI == null || it.path().startsWith(endpoint.requestURI)) {
             it.accept()

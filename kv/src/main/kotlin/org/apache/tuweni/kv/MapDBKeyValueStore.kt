@@ -73,11 +73,13 @@ constructor(
       keyDeserializer: Function<Bytes, K>,
       valueDeserializer: Function<Bytes, V>
     ) =
-      MapDBKeyValueStore<K, V>(dbPath,
+      MapDBKeyValueStore<K, V>(
+        dbPath,
         keySerializer::apply,
         valueSerializer::apply,
         keyDeserializer::apply,
-        valueDeserializer::apply)
+        valueDeserializer::apply
+      )
 
     /**
      * Open a MapDB-backed key-value store using Bytes keys and values.
@@ -90,11 +92,13 @@ constructor(
     fun open(
       dbPath: Path
     ) =
-      MapDBKeyValueStore<Bytes, Bytes>(dbPath,
+      MapDBKeyValueStore<Bytes, Bytes>(
+        dbPath,
         Function.identity<Bytes>()::apply,
         Function.identity<Bytes>()::apply,
         Function.identity<Bytes>()::apply,
-        Function.identity<Bytes>()::apply)
+        Function.identity<Bytes>()::apply
+      )
   }
 
   private val db: DB

@@ -36,8 +36,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
+import io.vertx.core.Promise;
 import io.vertx.core.TimeoutStream;
 import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
@@ -163,9 +163,10 @@ public final class EthStatsReporter {
 
   private void startInternal(CompletableAsyncCompletion completion) {
     for (URI uri : ethstatsServerURIs) {
-      executor.executeBlocking((Future<Boolean> handler) -> connect(handler, uri), result -> {
+      executor.executeBlocking((Promise<Boolean> handler) -> connect(handler, uri), result -> {
         logger.debug("Attempting to connect", result.cause());
-        if (result.succeeded() && result.result()) {
+        Boolean res = result.result();
+        if (result.succeeded() && res) {
           completion.complete();
         }
       });
@@ -182,7 +183,7 @@ public final class EthStatsReporter {
     vertx.setTimer(DELAY, handler -> this.startInternal(completion));
   }
 
-  private void connect(Future<Boolean> result, URI uri) {
+  private void connect(Promise<Boolean> result, URI uri) {
     client
         .websocket(
             uri.getPort(),
@@ -201,7 +202,7 @@ public final class EthStatsReporter {
                   JsonNode emitEvent = node.get("emit");
                   if (emitEvent.isArray()) {
                     String eventValue = emitEvent.get(0).textValue();
-                    if (!result.isComplete()) {
+                    if (!result.future().isComplete()) {
                       if (!"ready".equals(eventValue)) {
                         logger.warn(message);
                         result.complete(false);

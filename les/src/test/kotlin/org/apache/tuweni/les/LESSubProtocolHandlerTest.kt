@@ -112,7 +112,7 @@ internal class LESSubProtocolHandlerTest {
   )
 
   private class MyRLPxService : RLPxService {
-    override fun addToKeepAliveList(peerPublicKey: SECP256K1.PublicKey) {
+    override fun addToKeepAliveList(peerPublicKey: SECP256K1.PublicKey): Boolean {
       TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 

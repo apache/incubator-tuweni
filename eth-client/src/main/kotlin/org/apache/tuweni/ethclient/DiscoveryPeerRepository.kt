@@ -39,7 +39,7 @@ class DiscoveryPeerRepository(private val repository: org.apache.tuweni.peer.rep
 
   override suspend fun get(uri: URI): Peer {
     val (nodeId, endpoint) = parseEnodeUri(uri)
-    return get(endpoint.address.hostAddress, endpoint.udpPort, nodeId)
+    return get(endpoint.address, endpoint.udpPort, nodeId)
   }
 
   override fun getAsync(uri: URI): AsyncResult<Peer> = GlobalScope.asyncResult { get(uri) }

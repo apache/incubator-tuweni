@@ -28,8 +28,19 @@ dependencyManagement {
     dependency('com.winterbe:expekt:0.5.0')
     dependency('dnsjava:dnsjava:3.3.1')
     dependency('info.picocli:picocli:4.0.0-alpha-2')
+    dependency('io.ktor:ktor-client-core:1.4.2')
+    dependency('io.ktor:ktor-client-json:1.4.2')
+    dependency('io.ktor:ktor-client-serialization:1.4.2')
+    dependency('io.ktor:ktor-client-cio:1.4.2')
+    dependency('io.ktor:ktor-network:1.4.2')
+    dependency('io.ktor:ktor-server-core:1.4.2')
+    dependency('io.ktor:ktor-server-netty:1.4.2')
+    ''
     dependency('io.lettuce:lettuce-core:5.1.3.RELEASE')
-    dependency('io.vertx:vertx-core:3.6.2')
+    dependency('io.vertx:vertx-core:3.9.4')
+    dependency('io.vertx:vertx-lang-kotlin:3.9.4')
+    dependency('io.vertx:vertx-lang-kotlin-coroutines:3.9.4')
+    dependency('io.vertx:vertx-web:3.9.4')
     dependency('javax.persistence:javax.persistence-api:2.2')
     dependencySet(group: 'org.antlr', version: '4.7.1') {
       entry 'antlr4'
@@ -64,12 +75,12 @@ dependencyManagement {
     }
     dependency('org.infinispan:infinispan-core:9.4.5.Final')
     dependency('org.jetbrains:annotations:16.0.3')
-    dependencySet(group: 'org.jetbrains.kotlin', version: '1.3.20') {
+    dependencySet(group: 'org.jetbrains.kotlin', version: '1.4.20') {
       entry 'kotlin-reflect'
       entry 'kotlin-stdlib'
       entry 'kotlin-stdlib-jdk8'
     }
-    dependencySet(group: 'org.jetbrains.kotlinx', version: '1.1.1') {
+    dependencySet(group: 'org.jetbrains.kotlinx', version: '1.4.2') {
       entry 'kotlinx-coroutines-core'
       entry 'kotlinx-coroutines-guava'
       entry 'kotlinx-coroutines-jdk8'

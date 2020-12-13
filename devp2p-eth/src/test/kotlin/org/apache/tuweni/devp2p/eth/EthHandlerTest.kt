@@ -135,7 +135,8 @@ class EthHandlerTest {
             TransactionReceipt(
               Bytes32.random(),
               32L, LogsBloomFilter(), emptyList()
-            ), txIndex, tx.hash, newBlock.header.hash
+            ),
+            txIndex, tx.hash, newBlock.header.hash
           )
           txIndex++
         }
@@ -164,13 +165,15 @@ class EthHandlerTest {
         UInt64.ZERO
       )
       val block = Block(
-        header, BlockBody(
+        header,
+        BlockBody(
           listOf(
             Transaction(
               UInt256.ONE, Wei.valueOf(20L), Gas.valueOf(3000),
               Address.fromBytes(Bytes.random(20)), Wei.valueOf(1000), Bytes.EMPTY, SECP256K1.KeyPair.random()
             )
-          ), emptyList()
+          ),
+          emptyList()
         )
       )
       return block

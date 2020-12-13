@@ -67,7 +67,7 @@ internal class TopicTable(
       return 0 // put immediately
     } else {
       // table is full (wait time = target-ad-lifetime - oldest in table of youngest in queue)
-      val oldestInTable = table.entries.map { it.value.youngest().regTime }.min() ?: -1
+      val oldestInTable = table.entries.map { it.value.youngest().regTime }.minOrNull() ?: -1
       return TARGET_AD_LIFETIME_MS - (timeSupplier() - oldestInTable)
     }
   }
@@ -90,11 +90,11 @@ internal class TopicTable(
   }
 
   private fun Cache<String, TargetAd>.oldest(): TargetAd {
-    return asMap().values.minBy { it.regTime } ?: throw IllegalArgumentException(QUEUE_EMPTY_MSG)
+    return asMap().values.minByOrNull { it.regTime } ?: throw IllegalArgumentException(QUEUE_EMPTY_MSG)
   }
 
   private fun Cache<String, TargetAd>.youngest(): TargetAd {
-    return asMap().values.maxBy { it.regTime } ?: throw IllegalArgumentException(QUEUE_EMPTY_MSG)
+    return asMap().values.maxByOrNull { it.regTime } ?: throw IllegalArgumentException(QUEUE_EMPTY_MSG)
   }
 
   companion object {
