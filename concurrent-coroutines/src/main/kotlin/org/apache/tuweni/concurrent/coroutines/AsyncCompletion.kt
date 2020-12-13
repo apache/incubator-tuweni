@@ -64,7 +64,7 @@ fun CoroutineScope.asyncCompletion(
   try {
     launch(context, start) {
       try {
-      block()
+        block()
         completion.complete()
       } catch (t: Throwable) {
         completion.completeExceptionally(t)

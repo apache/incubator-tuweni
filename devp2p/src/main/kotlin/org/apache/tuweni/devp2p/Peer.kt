@@ -106,7 +106,7 @@ interface Peer {
   fun updateENR(record: EthereumNodeRecord, time: Long)
 
   fun uri(): String {
-    return "enode://${nodeId.toHexString()}@${endpoint.address.hostAddress}:${endpoint.tcpPort
+    return "enode://${nodeId.toHexString()}@${endpoint.address}:${endpoint.tcpPort
       ?: 30303}?discPort=${endpoint.udpPort}"
   }
 }

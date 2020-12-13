@@ -24,7 +24,7 @@ import java.net.InetAddress
 internal data class Ticket(
   val topic: Bytes,
   val srcNodeId: Bytes,
-  val srcIp: InetAddress,
+  val srcIp: String,
   val requestTime: Long,
   val waitTime: Long,
   val cumTime: Long
@@ -43,7 +43,7 @@ internal data class Ticket(
         val requestTime = reader.readLong()
         val waitTime = reader.readLong()
         val cumTime = reader.readLong()
-        return@decodeList Ticket(topic, srcNodeId, srcIp, requestTime, waitTime, cumTime)
+        return@decodeList Ticket(topic, srcNodeId, srcIp.hostAddress, requestTime, waitTime, cumTime)
       }
     }
 
@@ -57,7 +57,7 @@ internal data class Ticket(
     return RLP.encodeList { writer ->
       writer.writeValue(topic)
       writer.writeValue(srcNodeId)
-      writer.writeValue(Bytes.wrap(srcIp.address))
+      writer.writeValue(Bytes.wrap(InetAddress.getByName(srcIp).address))
       writer.writeLong(requestTime)
       writer.writeLong(waitTime)
       writer.writeLong(cumTime)
@@ -71,7 +71,7 @@ internal data class Ticket(
 
   fun validate(
     srcNodeId: Bytes,
-    srcIp: InetAddress,
+    srcIp: String,
     now: Long,
     topic: Bytes
   ) {

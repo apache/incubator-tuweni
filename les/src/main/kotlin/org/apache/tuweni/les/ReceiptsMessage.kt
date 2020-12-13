@@ -31,8 +31,10 @@ internal data class ReceiptsMessage(
       writer.writeLong(reqID)
       writer.writeLong(bufferValue)
       writer.writeList(receipts) {
-        eltWriter, listOfReceipts -> eltWriter.writeList(listOfReceipts) {
-          txWriter, txReceipt -> txReceipt.writeTo(txWriter)
+        eltWriter, listOfReceipts ->
+        eltWriter.writeList(listOfReceipts) {
+          txWriter, txReceipt ->
+          txReceipt.writeTo(txWriter)
         }
       }
     }

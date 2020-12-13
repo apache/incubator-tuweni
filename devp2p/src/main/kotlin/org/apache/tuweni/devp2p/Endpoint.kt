@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.devp2p
 
+import io.vertx.core.net.SocketAddress
 import org.apache.tuweni.rlp.RLPException
 import org.apache.tuweni.rlp.RLPReader
 import org.apache.tuweni.rlp.RLPWriter
@@ -40,7 +41,7 @@ private fun parseInetAddress(address: String): InetAddress {
  * @throws IllegalArgumentException if either port is out of range
  */
 data class Endpoint(
-  val address: InetAddress,
+  val address: String,
   val udpPort: Int = DEFAULT_PORT,
   val tcpPort: Int? = null
 ) {
@@ -48,20 +49,9 @@ data class Endpoint(
   /**
    * Create a new endpoint.
    *
-   * @param address the IP string literal
-   * @param udpPort the UDP port for the endpoint
-   * @param tcpPort the TCP port for the endpoint or `null` if no TCP port is known
-   * @throws IllegalArgumentException if the address isn't an IP address, or either port is out of range
+   * @param address a SocketAddress, containing the IP address the UDP port
    */
-  constructor(address: String, udpPort: Int = DEFAULT_PORT, tcpPort: Int? = null) :
-    this(parseInetAddress(address), udpPort, tcpPort)
-
-  /**
-   * Create a new endpoint.
-   *
-   * @param address an InetSocketAddress, containing the IP address the UDP port
-   */
-  constructor(address: InetSocketAddress, tcpPort: Int? = null) : this(address.address, address.port, tcpPort)
+  constructor(address: SocketAddress, tcpPort: Int? = null) : this(address.host(), address.port(), tcpPort)
 
   companion object {
 
@@ -111,7 +101,7 @@ data class Endpoint(
   /**
    * UDP socket address of the endpoint
    */
-  val udpSocketAddress: InetSocketAddress = InetSocketAddress(address, udpPort)
+  val udpSocketAddress: SocketAddress = SocketAddress.inetSocketAddress(udpPort, address)
   /**
    * TCP socket address of the endpoint, if set
    */
@@ -123,11 +113,11 @@ data class Endpoint(
    * @param writer the RLP writer
    */
   internal fun writeTo(writer: RLPWriter) {
-    writer.writeByteArray(address.address)
+    writer.writeByteArray(InetAddress.getByName(address).address)
     writer.writeInt(udpPort)
     writer.writeInt(tcpPort ?: 0)
   }
 
   // rough over-estimate, assuming maximum size encoding for the port numbers
-  internal fun rlpSize(): Int = 1 + address.address.size + 2 * (1 + 2)
+  internal fun rlpSize(): Int = 1 + InetAddress.getByName(address).address.size + 2 * (1 + 2)
 }

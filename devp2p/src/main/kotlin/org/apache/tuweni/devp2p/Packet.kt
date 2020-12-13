@@ -97,14 +97,10 @@ internal sealed class Packet(
 
   fun isExpired(now: Long): Boolean = expiration <= now
 
-  abstract fun encodeTo(dst: ByteBuffer): ByteBuffer
+  abstract fun encode(): Bytes
 
-  protected fun encodeTo(dst: ByteBuffer, packetType: PacketType, contentWriter: (RLPWriter) -> Unit): ByteBuffer {
-    hash.appendTo(dst)
-    signature.bytes().appendTo(dst)
-    dst.put(packetType.typeId)
-    RLP.encodeListTo(dst, contentWriter)
-    return dst
+  protected fun encodeTo(packetType: PacketType, contentWriter: (RLPWriter) -> Unit): Bytes {
+    return Bytes.wrap(hash, signature.bytes(), Bytes.of(packetType.typeId), RLP.encodeList(contentWriter))
   }
 }
 
@@ -180,7 +176,7 @@ internal class PingPacket private constructor(
     }
   }
 
-  override fun encodeTo(dst: ByteBuffer) = encodeTo(dst, PacketType.PING) { writer ->
+  override fun encode() = encodeTo(PacketType.PING) { writer ->
     encodeTo(writer, from, to, expiration, enrSeq)
   }
 }
@@ -247,7 +243,7 @@ internal class PongPacket private constructor(
     }
   }
 
-  override fun encodeTo(dst: ByteBuffer) = encodeTo(dst, PacketType.PONG) { writer ->
+  override fun encode() = encodeTo(PacketType.PONG) { writer ->
     encodeTo(writer, to, pingHash, expiration, enrSeq)
   }
 }
@@ -301,7 +297,7 @@ internal class FindNodePacket private constructor(
     }
   }
 
-  override fun encodeTo(dst: ByteBuffer) = encodeTo(dst, PacketType.FIND_NODE) { writer ->
+  override fun encode() = encodeTo(PacketType.FIND_NODE) { writer ->
     encodeTo(writer, target, expiration)
   }
 }
@@ -382,7 +378,7 @@ internal class NeighborsPacket private constructor(
     }
   }
 
-  override fun encodeTo(dst: ByteBuffer) = encodeTo(dst, PacketType.NEIGHBORS) { writer ->
+  override fun encode() = encodeTo(PacketType.NEIGHBORS) { writer ->
     encodeTo(writer, nodes, expiration)
   }
 }
@@ -432,8 +428,8 @@ internal class ENRRequestPacket private constructor(
     }
   }
 
-  override fun encodeTo(dst: ByteBuffer) = encodeTo(dst, PacketType.ENRREQUEST) { writer ->
-    ENRRequestPacket.encodeTo(writer, expiration)
+  override fun encode() = encodeTo(PacketType.ENRREQUEST) { writer ->
+    encodeTo(writer, expiration)
   }
 }
 
@@ -492,7 +488,7 @@ internal class ENRResponsePacket private constructor(
     }
   }
 
-  override fun encodeTo(dst: ByteBuffer) = encodeTo(dst, PacketType.ENRRESPONSE) { writer ->
+  override fun encode() = encodeTo(PacketType.ENRRESPONSE) { writer ->
     ENRResponsePacket.encodeTo(writer, requestHash, enr, expiration)
   }
 }

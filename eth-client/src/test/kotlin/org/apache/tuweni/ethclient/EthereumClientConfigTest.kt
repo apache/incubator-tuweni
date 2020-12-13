@@ -27,7 +27,8 @@ class EthereumClientConfigTest {
   @Test
   fun testFileConfig() {
     val config = EthereumClientConfig.fromFile(
-      Paths.get(EthereumClientConfigTest::class.java.getResource("/minimal.conf").toURI()))
+      Paths.get(EthereumClientConfigTest::class.java.getResource("/minimal.conf").toURI())
+    )
     assertNotNull(config)
   }
 

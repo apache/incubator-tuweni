@@ -166,13 +166,15 @@ class EthereumVirtualMachineTest {
       val inputData = Bytes.wrap("hello w\u0000".toByteArray(StandardCharsets.UTF_8))
       val gas = Gas.valueOf(200000)
       val result =
-        vm.execute(sender, destination, value, Bytes.fromHexString("0x00"), inputData, gas,
+        vm.execute(
+          sender, destination, value, Bytes.fromHexString("0x00"), inputData, gas,
           Wei.valueOf(0),
           Address.fromBytes(Bytes.random(20)),
           0,
           0,
           2,
-          UInt256.valueOf(1), CallKind.EVMC_CREATE)
+          UInt256.valueOf(1), CallKind.EVMC_CREATE
+        )
       assertEquals(EVMExecutionStatusCode.EVMC_SUCCESS, result.statusCode)
       assertEquals(20000, result.gasLeft)
     } finally {
@@ -199,13 +201,15 @@ class EthereumVirtualMachineTest {
       val value = Bytes.fromHexString("0x3100")
       val inputData = Bytes.wrap("hello w\u0000".toByteArray(StandardCharsets.UTF_8))
       val gas = Gas.valueOf(200000)
-      val result = vm.execute(sender, destination, value, code, inputData, gas,
+      val result = vm.execute(
+        sender, destination, value, code, inputData, gas,
         Wei.valueOf(0),
         Address.fromBytes(Bytes.random(20)),
         0,
         0,
         2,
-        UInt256.valueOf(1))
+        UInt256.valueOf(1)
+      )
       return result
     } finally {
       vm.stop()

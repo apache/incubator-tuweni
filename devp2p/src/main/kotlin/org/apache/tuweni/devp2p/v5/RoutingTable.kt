@@ -37,7 +37,8 @@ internal class RoutingTable(
     distanceToSelf = {
       val xorResult = key(it) xorDist selfNodeId
       if (xorResult == 0) 0 else IntMath.log2(xorResult, RoundingMode.FLOOR)
-    })
+    }
+  )
 
   val size: Int
     get() = table.size

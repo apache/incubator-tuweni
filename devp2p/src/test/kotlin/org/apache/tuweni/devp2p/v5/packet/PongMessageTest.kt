@@ -20,14 +20,13 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.devp2p.v5.PongMessage
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.net.InetAddress
 
 class PongMessageTest {
 
   @Test
   fun encodeCreatesValidBytesSequence() {
     val requestId = Bytes.fromHexString("0xC6E32C5E89CAA754")
-    val message = PongMessage(requestId, 0, InetAddress.getLoopbackAddress(), 9090)
+    val message = PongMessage(requestId, 0, "127.0.0.1", 9090)
 
     val encodingResult = message.toRLP()
 

@@ -41,10 +41,6 @@ import org.slf4j.LoggerFactory
  *
  * This repository allows storing blocks, block headers and metadata about the blockchain, such as forks and head
  * information.
- */
-class BlockchainRepository
-/**
- * Default constructor.
  *
  * @param chainMetadata the key-value store to store chain metadata
  * @param blockBodyStore the key-value store to store block bodies
@@ -53,15 +49,16 @@ class BlockchainRepository
  * @param transactionStore the key-value store to store transactions
  * @param stateStore the key-value store to store the global state
  * @param blockchainIndex the blockchain index to index values
- */(
-   private val chainMetadata: KeyValueStore<Bytes, Bytes>,
-   private val blockBodyStore: KeyValueStore<Bytes, Bytes>,
-   private val blockHeaderStore: KeyValueStore<Bytes, Bytes>,
-   private val transactionReceiptStore: KeyValueStore<Bytes, Bytes>,
-   private val transactionStore: KeyValueStore<Bytes, Bytes>,
-   private val stateStore: KeyValueStore<Bytes, Bytes>,
-   private val blockchainIndex: BlockchainIndex
- ) {
+ */
+class BlockchainRepository(
+  private val chainMetadata: KeyValueStore<Bytes, Bytes>,
+  private val blockBodyStore: KeyValueStore<Bytes, Bytes>,
+  private val blockHeaderStore: KeyValueStore<Bytes, Bytes>,
+  private val transactionReceiptStore: KeyValueStore<Bytes, Bytes>,
+  private val transactionStore: KeyValueStore<Bytes, Bytes>,
+  private val stateStore: KeyValueStore<Bytes, Bytes>,
+  private val blockchainIndex: BlockchainIndex
+) {
 
   companion object {
 
@@ -414,15 +411,18 @@ class BlockchainRepository
     logger.trace("Entering getAccountStoreValue")
     val accountStateBytes = stateStore.get(Hash.hash(address)) ?: return null
     val accountState = AccountState.fromBytes(accountStateBytes)
-    val tree = StoredMerklePatriciaTrie.storingBytes(object : MerkleStorage {
-      override suspend fun get(hash: Bytes32): Bytes? {
-        return stateStore.get(hash)
-      }
+    val tree = StoredMerklePatriciaTrie.storingBytes(
+      object : MerkleStorage {
+        override suspend fun get(hash: Bytes32): Bytes? {
+          return stateStore.get(hash)
+        }
 
-      override suspend fun put(hash: Bytes32, content: Bytes) {
-        stateStore.put(hash, content)
-      }
-    }, accountState.storageRoot)
+        override suspend fun put(hash: Bytes32, content: Bytes) {
+          stateStore.put(hash, content)
+        }
+      },
+      accountState.storageRoot
+    )
     return tree.get(key)
   }
 

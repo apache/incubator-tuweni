@@ -37,7 +37,8 @@ internal data class GetBlockBodiesMessage(val reqID: Long, val blockHashes: List
       ) { reader ->
         GetBlockBodiesMessage(
           reader.readLong(),
-          reader.readListContents { elementReader -> Hash.fromBytes(elementReader.readValue()) })
+          reader.readListContents { elementReader -> Hash.fromBytes(elementReader.readValue()) }
+        )
       }
     }
   }

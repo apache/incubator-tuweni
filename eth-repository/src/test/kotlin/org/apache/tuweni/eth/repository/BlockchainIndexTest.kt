@@ -188,8 +188,10 @@ internal class BlockchainIndexTest {
     }
 
     run {
-      val entries = reader.findInRange(BlockHeaderFields.NUMBER, header.number.subtract(5),
-        header.number.add(5))
+      val entries = reader.findInRange(
+        BlockHeaderFields.NUMBER, header.number.subtract(5),
+        header.number.add(5)
+      )
       assertEquals(1, entries.size)
       assertEquals(header.hash, entries[0])
     }
@@ -263,7 +265,8 @@ internal class BlockchainIndexTest {
   fun queryTransactionReceiptByField(@LuceneIndexWriter writer: IndexWriter) {
     val blockchainIndex = BlockchainIndex(writer)
 
-    val txReceipt = TransactionReceipt(Bytes32.random(), 3,
+    val txReceipt = TransactionReceipt(
+      Bytes32.random(), 3,
       LogsBloomFilter(Bytes.random(256)),
       listOf(
         Log(
@@ -279,7 +282,8 @@ internal class BlockchainIndexTest {
 
     blockchainIndex.index { it.indexTransactionReceipt(txReceipt, 43, txHash, blockHash) }
 
-    val txReceiptWithStatus = TransactionReceipt(42, 322,
+    val txReceiptWithStatus = TransactionReceipt(
+      42, 322,
       LogsBloomFilter(Bytes.random(256)),
       listOf(
         Log(

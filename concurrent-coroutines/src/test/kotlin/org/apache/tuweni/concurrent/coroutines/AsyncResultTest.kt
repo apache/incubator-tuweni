@@ -120,10 +120,10 @@ class AsyncResultTest {
     var result: AsyncResult<String>? = null
     assertThrows<IllegalArgumentException> {
       runBlocking {
-      result = async {
-        delay(1000)
-        throw IllegalArgumentException("foo")
-      }.asAsyncResult()
+        result = async {
+          delay(1000)
+          throw IllegalArgumentException("foo")
+        }.asAsyncResult()
 
         result!!.await()
       }

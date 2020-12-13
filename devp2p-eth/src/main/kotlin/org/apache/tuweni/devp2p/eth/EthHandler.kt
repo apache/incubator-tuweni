@@ -214,7 +214,8 @@ internal class EthHandler(
     val newPeer = PeerInfo()
     pendingStatus[connection.uri()] = newPeer
     service.send(
-      EthSubprotocol.ETH64, MessageType.Status.code, connection, StatusMessage(
+      EthSubprotocol.ETH64, MessageType.Status.code, connection,
+      StatusMessage(
         EthSubprotocol.ETH64.version(),
         blockchainInfo.networkID(), blockchainInfo.totalDifficulty(),
         blockchainInfo.bestHash(), blockchainInfo.genesisHash(), blockchainInfo.getLatestForkHash(),

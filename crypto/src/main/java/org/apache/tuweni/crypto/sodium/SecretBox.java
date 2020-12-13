@@ -1771,8 +1771,8 @@ public final class SecretBox {
       long opsLimit,
       long memLimit,
       PasswordHash.Algorithm algorithm) {
-    assert Nonce.length() >= PasswordHash.Salt
-        .length() : "SecretBox.Nonce has insufficient length for deriving a PasswordHash.Salt ("
+    assert Nonce.length() >= PasswordHash.Salt.length()
+        : "SecretBox.Nonce has insufficient length for deriving a PasswordHash.Salt ("
             + Nonce.length()
             + " < "
             + PasswordHash.Salt.length()

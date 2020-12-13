@@ -46,36 +46,48 @@ class Relayer(
     val uri = URI.create(bind)
     when (uri.scheme) {
       "http" -> {
-        transport.createHTTPEndpoint(networkInterface = uri.host, port = uri.port, handler = {
-          async {
-            interceptor(it)
-            transport.sendMessage(it, Transport.HTTP, toURI.host, toURI.port, toURI.path)
+        transport.createHTTPEndpoint(
+          networkInterface = uri.host, port = uri.port,
+          handler = {
+            async {
+              interceptor(it)
+              transport.sendMessage(it, Transport.HTTP, toURI.host, toURI.port, toURI.path)
+            }
           }
-        })
+        )
       }
       "tcp" -> {
-        transport.createTCPEndpoint(networkInterface = uri.host, port = uri.port, handler = {
-          async {
-            interceptor(it)
-            transport.sendMessage(it, Transport.TCP, toURI.host, toURI.port, toURI.path)
+        transport.createTCPEndpoint(
+          networkInterface = uri.host, port = uri.port,
+          handler = {
+            async {
+              interceptor(it)
+              transport.sendMessage(it, Transport.TCP, toURI.host, toURI.port, toURI.path)
+            }
           }
-        })
+        )
       }
       "udp" -> {
-        transport.createUDPEndpoint(networkInterface = uri.host, port = uri.port, handler = {
-          async {
-            interceptor(it)
-            transport.sendMessage(it, Transport.UDP, toURI.host, toURI.port, toURI.path)
+        transport.createUDPEndpoint(
+          networkInterface = uri.host, port = uri.port,
+          handler = {
+            async {
+              interceptor(it)
+              transport.sendMessage(it, Transport.UDP, toURI.host, toURI.port, toURI.path)
+            }
           }
-        })
+        )
       }
       "ws" -> {
-        transport.createWSEndpoint(networkInterface = uri.host, port = uri.port, handler = {
-          async {
-            interceptor(it)
-            transport.sendMessage(it, Transport.WS, toURI.host, toURI.port, toURI.path)
+        transport.createWSEndpoint(
+          networkInterface = uri.host, port = uri.port,
+          handler = {
+            async {
+              interceptor(it)
+              transport.sendMessage(it, Transport.WS, toURI.host, toURI.port, toURI.path)
+            }
           }
-        })
+        )
       }
     }
   }

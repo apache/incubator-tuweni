@@ -47,9 +47,11 @@ class RelayerApp(val vertx: Vertx, val relayer: Relayer) {
       val vertx = Vertx.vertx()
       val relayer = Relayer(vertx, opts.bind, opts.to, ::println)
       val app = RelayerApp(vertx, relayer)
-      Runtime.getRuntime().addShutdownHook(Thread {
-        app.close()
-      })
+      Runtime.getRuntime().addShutdownHook(
+        Thread {
+          app.close()
+        }
+      )
       runBlocking {
         relayer.start()
         println("Relayer started, bound to ${opts.bind} and targeting ${opts.to}")

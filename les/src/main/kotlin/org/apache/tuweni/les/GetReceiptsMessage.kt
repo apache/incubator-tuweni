@@ -37,7 +37,8 @@ internal data class GetReceiptsMessage(val reqID: Long, val blockHashes: List<Ha
       ) { reader ->
         GetReceiptsMessage(
           reader.readLong(),
-          reader.readListContents { elementReader -> Hash.fromBytes(elementReader.readValue()) })
+          reader.readListContents { elementReader -> Hash.fromBytes(elementReader.readValue()) }
+        )
       }
     }
   }

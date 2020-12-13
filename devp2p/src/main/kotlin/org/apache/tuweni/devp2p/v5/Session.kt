@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.devp2p.v5
 
+import io.vertx.core.net.SocketAddress
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -38,7 +39,6 @@ import org.apache.tuweni.rlp.InvalidRLPTypeException
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.rlp.RLPReader
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
 import kotlin.coroutines.CoroutineContext
 
 private const val MAX_NODES_IN_RESPONSE: Int = 4
@@ -54,8 +54,8 @@ internal class Session(
   private val nodeId: Bytes32,
   private val tag: Bytes32,
   private val sessionKey: SessionKey,
-  private val address: InetSocketAddress,
-  private val sendFn: (address: InetSocketAddress, message: Bytes) -> Unit,
+  private val address: SocketAddress,
+  private val sendFn: (SocketAddress, Bytes) -> Unit,
   private val ourENR: () -> EthereumNodeRecord,
   private val routingTable: RoutingTable,
   private val topicTable: TopicTable,
@@ -173,7 +173,7 @@ internal class Session(
   ) {
     activePing = AsyncCompletion.incomplete()
     val response =
-      PongMessage(message.requestId, ourENR().seq(), address.address, address.port)
+      PongMessage(message.requestId, ourENR().seq(), address.host(), address.port())
     send(response)
   }
 
@@ -215,14 +215,14 @@ internal class Session(
 
     val existingTicket = if (!message.ticket.isEmpty) {
       val ticket = Ticket.decrypt(message.ticket, sessionKey.initiatorKey)
-      ticket.validate(nodeId, address.address, now(), message.topic)
+      ticket.validate(nodeId, address.host(), now(), message.topic)
       ticket
     } else null
 
     // Create new ticket
     val waitTime = topicTable.put(topic, message.nodeRecord)
     val cumTime = (existingTicket?.cumTime ?: waitTime) + waitTime
-    val ticket = Ticket(message.topic, nodeId, address.address, now(), waitTime, cumTime)
+    val ticket = Ticket(message.topic, nodeId, address.host(), now(), waitTime, cumTime)
     val encryptedTicket = ticket.encrypt(sessionKey.initiatorKey)
 
     // Send ticket

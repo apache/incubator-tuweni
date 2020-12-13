@@ -120,10 +120,10 @@ class AsyncCompletionTest {
     var completion: AsyncCompletion? = null
     assertThrows<IllegalArgumentException> {
       runBlocking {
-      completion = async {
-        delay(1000)
-        throw IllegalArgumentException("foo")
-      }.asAsyncCompletion()
+        completion = async {
+          delay(1000)
+          throw IllegalArgumentException("foo")
+        }.asAsyncCompletion()
 
         completion!!.await()
       }

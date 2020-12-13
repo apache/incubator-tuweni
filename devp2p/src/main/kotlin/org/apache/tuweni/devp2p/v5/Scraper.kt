@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.devp2p.v5
 
+import io.vertx.core.Vertx
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
@@ -50,19 +51,26 @@ object ScraperApp {
     val enrs = args.map { EthereumNodeRecord.fromRLP(Base64URLSafe.decode(it)) }
     val addr = InetSocketAddress("0.0.0.0", 10000)
     val seen = ConcurrentHashMap.newKeySet<EthereumNodeRecord>()
-    val scraper = Scraper(initialENRs = enrs, bindAddress = addr, listeners = listOf { _, nodes ->
-      for (node in nodes) {
-        if (seen.add(node)) {
-          println(node.ip().hostAddress + "," + node.udp() + "," + node.data["attnets"] + "," +
-            Base64URLSafe.encode(node.toRLP()))
+    val scraper = Scraper(
+      initialENRs = enrs, bindAddress = addr,
+      listeners = listOf { _, nodes ->
+        for (node in nodes) {
+          if (seen.add(node)) {
+            println(
+              node.ip().hostAddress + "," + node.udp() + "," + node.data["attnets"] + "," +
+                Base64URLSafe.encode(node.toRLP())
+            )
+          }
         }
       }
-    })
-    Runtime.getRuntime().addShutdownHook(Thread {
-      runBlocking {
-        scraper.stop().await()
+    )
+    Runtime.getRuntime().addShutdownHook(
+      Thread {
+        runBlocking {
+          scraper.stop().await()
+        }
       }
-    })
+    )
     runBlocking {
       scraper.start().await()
     }
@@ -76,6 +84,7 @@ object ScraperApp {
  */
 class Scraper(
   override val coroutineContext: CoroutineContext = Executors.newFixedThreadPool(100).asCoroutineDispatcher(),
+  val vertx: Vertx = Vertx.vertx(),
   val initialENRs: List<EthereumNodeRecord>,
   val bindAddress: InetSocketAddress,
   val listeners: List<(EthereumNodeRecord, List<EthereumNodeRecord>) -> Unit>,
@@ -87,9 +96,9 @@ class Scraper(
   private val started = AtomicBoolean(false)
 
   fun start() = async {
-    val coroutineContext = Executors.newFixedThreadPool(100).asCoroutineDispatcher()
     val newService = DiscoveryService.open(
       coroutineContext = coroutineContext,
+      vertx = vertx,
       keyPair = SECP256K1.KeyPair.random(),
       localPort = 0,
       bindAddress = bindAddress,

@@ -160,7 +160,8 @@ object MapDBKeyValueStoreSpec : Spek({
     keySerializer = { it },
     valueSerializer = { it },
     keyDeserializer = { it },
-    valueDeserializer = { it })
+    valueDeserializer = { it }
+  )
 
   describe("a MapDB-backed key value store") {
 
@@ -209,7 +210,8 @@ object MapDBKeyValueStoreSpec : Spek({
         keySerializer = { it },
         valueSerializer = { it },
         keyDeserializer = { it },
-        valueDeserializer = { it })
+        valueDeserializer = { it }
+      )
       kv2.close()
       runBlocking {
         var caught = false
@@ -236,7 +238,8 @@ object LevelDBKeyValueStoreSpec : Spek({
     keySerializer = { it },
     valueSerializer = { it },
     keyDeserializer = { it },
-    valueDeserializer = { it })
+    valueDeserializer = { it }
+  )
   afterGroup {
     kv.close()
     MoreFiles.deleteRecursively(path, RecursiveDeleteOption.ALLOW_INSECURE)
@@ -286,7 +289,8 @@ object LevelDBKeyValueStoreSpec : Spek({
         keySerializer = { it },
         valueSerializer = { it },
         keyDeserializer = { it },
-        valueDeserializer = { it })
+        valueDeserializer = { it }
+      )
       kv2.close()
       runBlocking {
         var caught = false
@@ -308,7 +312,8 @@ object RocksDBKeyValueStoreSpec : Spek({
     keySerializer = { it },
     valueSerializer = { it },
     keyDeserializer = { it },
-    valueDeserializer = { it })
+    valueDeserializer = { it }
+  )
   afterGroup {
     kv.close()
     MoreFiles.deleteRecursively(path, RecursiveDeleteOption.ALLOW_INSECURE)
@@ -360,7 +365,8 @@ object RocksDBKeyValueStoreSpec : Spek({
         keySerializer = { it },
         valueSerializer = { it },
         keyDeserializer = { it },
-        valueDeserializer = { it })
+        valueDeserializer = { it }
+      )
       kv2.close()
       runBlocking {
         var caught = false
@@ -389,7 +395,8 @@ object SQLKeyValueStoreSpec : Spek({
     keySerializer = { it },
     valueSerializer = { it },
     keyDeserializer = { it },
-    valueDeserializer = { it })
+    valueDeserializer = { it }
+  )
   val otherkv = SQLKeyValueStore.open(
     jdbcUrl,
     "store2",
@@ -398,7 +405,8 @@ object SQLKeyValueStoreSpec : Spek({
     keySerializer = { it },
     valueSerializer = { it },
     keyDeserializer = { it },
-    valueDeserializer = { it })
+    valueDeserializer = { it }
+  )
   afterGroup {
     kv.close()
     otherkv.close()
@@ -465,7 +473,8 @@ object SQLKeyValueStoreSpec : Spek({
         keySerializer = { it },
         valueSerializer = { it },
         keyDeserializer = { it },
-        valueDeserializer = { it })
+        valueDeserializer = { it }
+      )
       kv2.close()
       runBlocking {
         var caught = false

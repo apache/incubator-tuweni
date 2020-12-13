@@ -26,7 +26,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import java.net.InetAddress
 
 @ExtendWith(BouncyCastleExtension::class)
 internal class EphemeralPeerRepositoryTest {
@@ -54,7 +53,7 @@ internal class EphemeralPeerRepositoryTest {
         "b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b"
     )
     assertEquals(expectedId, peer.nodeId)
-    assertEquals(InetAddress.getByName("172.20.0.4"), peer.endpoint.address)
+    assertEquals("172.20.0.4", peer.endpoint.address)
     assertEquals(7654, peer.endpoint.udpPort)
     assertEquals(7654, peer.endpoint.tcpPort)
   }
@@ -74,7 +73,7 @@ internal class EphemeralPeerRepositoryTest {
         "b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b"
     )
     assertEquals(expectedId, peer.nodeId)
-    assertEquals(InetAddress.getByName("172.20.0.4"), peer.endpoint.address)
+    assertEquals("172.20.0.4", peer.endpoint.address)
     assertEquals(30303, peer.endpoint.udpPort)
     assertEquals(30303, peer.endpoint.tcpPort)
   }
@@ -94,7 +93,7 @@ internal class EphemeralPeerRepositoryTest {
         "b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b"
     )
     assertEquals(expectedId, peer.nodeId)
-    assertEquals(InetAddress.getByName("172.20.0.4"), peer.endpoint.address)
+    assertEquals("172.20.0.4", peer.endpoint.address)
     assertEquals(23456, peer.endpoint.udpPort)
     assertEquals(54789, peer.endpoint.tcpPort)
   }
@@ -172,7 +171,7 @@ internal class EphemeralPeerRepositoryTest {
         "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b"
     )
     assertEquals(expectedId, peer.nodeId)
-    assertEquals(InetAddress.getByName("172.20.0.4"), peer.endpoint.address)
+    assertEquals("172.20.0.4", peer.endpoint.address)
     assertEquals(23456, peer.endpoint.udpPort)
     assertEquals(54789, peer.endpoint.tcpPort)
   }

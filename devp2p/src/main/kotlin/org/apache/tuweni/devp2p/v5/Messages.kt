@@ -180,11 +180,14 @@ internal class WhoAreYouMessage(
   override fun type(): MessageType = MessageType.WHOAREYOU
 
   override fun toRLP(): Bytes {
-    return Bytes.concatenate(magic, RLP.encodeList { w ->
-      w.writeValue(token)
-      w.writeValue(idNonce)
-      w.writeLong(enrSeq)
-    })
+    return Bytes.concatenate(
+      magic,
+      RLP.encodeList { w ->
+        w.writeValue(token)
+        w.writeValue(idNonce)
+        w.writeLong(enrSeq)
+      }
+    )
   }
 }
 
@@ -256,7 +259,7 @@ internal class RegTopicMessage(
 internal class PongMessage(
   val requestId: Bytes = Message.requestId(),
   val enrSeq: Long = 0,
-  val recipientIp: InetAddress,
+  val recipientIp: String,
   val recipientPort: Int
 ) : Message {
 
@@ -269,7 +272,7 @@ internal class PongMessage(
       writer.writeValue(requestId)
       writer.writeLong(enrSeq)
 
-      val bytesIp = Bytes.wrap(recipientIp.address)
+      val bytesIp = Bytes.wrap(InetAddress.getByName(recipientIp).address)
       writer.writeValue(bytesIp)
       writer.writeInt(recipientPort)
     }
@@ -282,7 +285,7 @@ internal class PongMessage(
         val enrSeq = reader.readLong()
         val address = InetAddress.getByAddress(reader.readValue().toArray())
         val recipientPort = reader.readInt()
-        return@decodeList PongMessage(requestId, enrSeq, address, recipientPort)
+        return@decodeList PongMessage(requestId, enrSeq, address.hostAddress, recipientPort)
       }
     }
   }

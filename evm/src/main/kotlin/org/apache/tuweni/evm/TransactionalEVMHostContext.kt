@@ -257,8 +257,16 @@ class TransactionalEVMHostContext(
     val beneficiaryAddress = Address.fromBytes(Bytes.wrap(beneficiary))
     val beneficiaryAccountState = repository.getAccount(beneficiaryAddress)
     if (beneficiaryAccountState === null) {
-      repository.storeAccount(beneficiaryAddress, AccountState(UInt256.ZERO, Wei.valueOf(0), Hash.fromBytes(
-        MerklePatriciaTrie.storingBytes().rootHash()), Hash.hash(Bytes.EMPTY)))
+      repository.storeAccount(
+        beneficiaryAddress,
+        AccountState(
+          UInt256.ZERO, Wei.valueOf(0),
+          Hash.fromBytes(
+            MerklePatriciaTrie.storingBytes().rootHash()
+          ),
+          Hash.hash(Bytes.EMPTY)
+        )
+      )
     }
     account?.apply {
       val balance = balanceChanges.putIfAbsent(beneficiaryAddress, account.balance)
@@ -303,13 +311,16 @@ class TransactionalEVMHostContext(
    */
   override fun getTxContext(): ByteBuffer {
     logger.trace("Entering getTxContext")
-    return ByteBuffer.allocateDirect(160).put(Bytes.concatenate(gasPrice.toBytes(),
-      sender, currentCoinbase, Bytes.ofUnsignedLong(currentNumber),
-      Bytes.ofUnsignedLong(currentTimestamp),
-      Bytes.ofUnsignedLong(currentGasLimit),
-      currentDifficulty.toBytes(),
-      UInt256.ONE.toBytes()
-    ).toArrayUnsafe())
+    return ByteBuffer.allocateDirect(160).put(
+      Bytes.concatenate(
+        gasPrice.toBytes(),
+        sender, currentCoinbase, Bytes.ofUnsignedLong(currentNumber),
+        Bytes.ofUnsignedLong(currentTimestamp),
+        Bytes.ofUnsignedLong(currentGasLimit),
+        currentDifficulty.toBytes(),
+        UInt256.ONE.toBytes()
+      ).toArrayUnsafe()
+    )
   }
 
   /**

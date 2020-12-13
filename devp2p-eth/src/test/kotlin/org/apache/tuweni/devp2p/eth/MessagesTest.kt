@@ -260,7 +260,8 @@ class MessagesTest {
           SECP256K1.KeyPair.random(),
           1
         )
-      ))
+      )
+    )
     val read = PooledTransactions.read(pooledTransactions.toBytes())
     assertEquals(pooledTransactions, read)
   }

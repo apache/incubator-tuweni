@@ -18,28 +18,23 @@ package org.apache.tuweni.devp2p
 
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
-import io.ktor.network.selector.ActorSelectorManager
-import io.ktor.network.sockets.BoundDatagramSocket
-import io.ktor.network.sockets.Datagram
-import io.ktor.network.sockets.aSocket
-import io.ktor.network.sockets.isClosed
-import io.ktor.util.KtorExperimentalAPI
-import io.ktor.util.network.port
-import io.ktor.utils.io.core.ByteReadPacket
-import io.ktor.utils.io.core.readFully
+import io.vertx.core.Vertx
+import io.vertx.core.buffer.Buffer
+import io.vertx.core.datagram.DatagramPacket
+import io.vertx.core.net.SocketAddress
+import io.vertx.kotlin.core.datagram.closeAwait
+import io.vertx.kotlin.core.datagram.listenAwait
+import io.vertx.kotlin.core.datagram.sendAwait
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ClosedSendChannelException
@@ -49,7 +44,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.coroutines.yield
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.concurrent.AsyncCompletion
@@ -57,14 +51,12 @@ import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.coroutines.CoroutineLatch
 import org.apache.tuweni.concurrent.coroutines.asyncCompletion
 import org.apache.tuweni.concurrent.coroutines.asyncResult
+import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.kademlia.orderedInsert
 import org.apache.tuweni.kademlia.xorDistCmp
 import org.slf4j.LoggerFactory
-import java.io.IOException
 import java.net.InetAddress
-import java.net.InetSocketAddress
-import java.net.SocketAddress
 import java.net.URI
 import java.nio.ByteBuffer
 import java.nio.channels.ClosedChannelException
@@ -103,11 +95,11 @@ interface DiscoveryService {
 
   companion object {
     internal val CURRENT_TIME_SUPPLIER: () -> Long = { System.currentTimeMillis() }
-    internal val DEFAULT_BUFFER_ALLOCATOR = { ByteBuffer.allocate(Packet.MAX_SIZE) }
 
     /**
      * Start the discovery service.
      *
+     * @param vertx Vert.x instance
      * @param keyPair the local node's keypair
      * @param port the port to listen on (defaults to `0`, which will cause a random free port to be chosen)
      * @param host the host name or IP address of the interface to bind to (defaults to `null`, which will cause the
@@ -122,12 +114,12 @@ interface DiscoveryService {
      * @param advertiseTcpPort the TCP port to advertise to peers, or `null` if it should be the same as the UDP port.
      * @param routingTable a [PeerRoutingTable] which handles the ÐΞVp2p routing table
      * @param packetFilter a filter for incoming packets
-     * @param channelGroup the [CoroutineChannelGroup] for network channels created by this service
-     * @param bufferAllocator a [ByteBuffer] allocator, which must return buffers of size 1280 bytes or larger
+\     * @param bufferAllocator a [ByteBuffer] allocator, which must return buffers of size 1280 bytes or larger
      * @param timeSupplier a function supplying the current time, in milliseconds since the epoch
      */
     @JvmOverloads
     fun open(
+      vertx: Vertx,
       keyPair: SECP256K1.KeyPair,
       port: Int = 0,
       host: String? = null,
@@ -135,16 +127,20 @@ interface DiscoveryService {
       enrData: Map<String, Bytes> = emptyMap(),
       bootstrapURIs: List<URI> = emptyList(),
       peerRepository: PeerRepository = EphemeralPeerRepository(),
-      advertiseAddress: InetAddress? = null,
+      advertiseAddress: String? = null,
       advertiseUdpPort: Int? = null,
       advertiseTcpPort: Int? = null,
       routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
-      packetFilter: ((SECP256K1.PublicKey, InetSocketAddress) -> Boolean)? = null,
-      bufferAllocator: () -> ByteBuffer = DEFAULT_BUFFER_ALLOCATOR,
+      packetFilter: ((SECP256K1.PublicKey, SocketAddress) -> Boolean)? = null,
       timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER
     ): DiscoveryService {
-      val bindAddress = if (host == null) InetSocketAddress(port) else InetSocketAddress(host, port)
+      val bindAddress =
+        if (host == null) SocketAddress.inetSocketAddress(port, "127.0.0.1") else SocketAddress.inetSocketAddress(
+          port,
+          host
+        )
       return open(
+        vertx,
         keyPair,
         bindAddress,
         seq,
@@ -156,7 +152,6 @@ interface DiscoveryService {
         advertiseTcpPort,
         routingTable,
         packetFilter,
-        bufferAllocator,
         timeSupplier
       )
     }
@@ -164,6 +159,7 @@ interface DiscoveryService {
     /**
      * Start the discovery service.
      *
+     * @param vertx Vert.x instance
      * @param keyPair the local node's keypair
      * @param bindAddress the address to listen on
      * @param seq the sequence number of the Ethereum Node Record
@@ -175,29 +171,28 @@ interface DiscoveryService {
      * @param advertiseTcpPort the TCP port to advertise to peers, or `null` if it should be the same as the UDP port.
      * @param routingTable a [PeerRoutingTable] which handles the ÐΞVp2p routing table
      * @param packetFilter a filter for incoming packets
-     * @param channelGroup the [CoroutineChannelGroup] for network channels created by this service
-     * @param bufferAllocator a [ByteBuffer] allocator, which must return buffers of size 1280 bytes or larger
      * @param timeSupplier a function supplying the current time, in milliseconds since the epoch
      */
     @JvmOverloads
     fun open(
+      vertx: Vertx,
       keyPair: SECP256K1.KeyPair,
-      bindAddress: InetSocketAddress,
+      bindAddress: SocketAddress,
       seq: Long = Instant.now().toEpochMilli(),
       enrData: Map<String, Bytes> = emptyMap(),
       bootstrapURIs: List<URI> = emptyList(),
       peerRepository: PeerRepository = EphemeralPeerRepository(),
-      advertiseAddress: InetAddress? = null,
+      advertiseAddress: String? = null,
       advertiseUdpPort: Int? = null,
       advertiseTcpPort: Int? = null,
       routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
-      packetFilter: ((SECP256K1.PublicKey, InetSocketAddress) -> Boolean)? = null,
-      bufferAllocator: () -> ByteBuffer = DEFAULT_BUFFER_ALLOCATOR,
+      packetFilter: ((SECP256K1.PublicKey, SocketAddress) -> Boolean)? = null,
       timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER
     ): DiscoveryService {
       return CoroutineDiscoveryService(
+        vertx,
         keyPair, seq, enrData, bindAddress, bootstrapURIs, advertiseAddress, advertiseUdpPort, advertiseTcpPort,
-        peerRepository, routingTable, packetFilter, bufferAllocator, timeSupplier
+        peerRepository, routingTable, packetFilter, timeSupplier
       )
     }
   }
@@ -206,11 +201,6 @@ interface DiscoveryService {
    * `true` if the service has been shutdown
    */
   val isShutdown: Boolean
-
-  /**
-   * `true` if the service has terminated
-   */
-  val isTerminated: Boolean
 
   /**
    * the UDP port that the service is listening on
@@ -225,9 +215,14 @@ interface DiscoveryService {
   /**
    * Suspend until the bootstrap peers have been reached, or failed.
    *
-   * @return the number of bootstrap peers successfully added
    */
-  suspend fun awaitBootstrap(): Int
+  suspend fun awaitBootstrap()
+
+  /**
+   * Suspend until the bootstrap peers have been reached, or failed.
+   *
+   */
+  fun awaitBootstrapAsync(): AsyncCompletion
 
   /**
    * Attempt to find a specific peer, or peers close to it.
@@ -246,55 +241,50 @@ interface DiscoveryService {
   fun lookupAsync(target: SECP256K1.PublicKey): AsyncResult<List<Peer>>
 
   /**
-   * Request shutdown of this service. The service will terminate at a later time (see [DiscoveryService.awaitTermination]).
+   * Shuts down this service.
    */
-  fun shutdown()
+  suspend fun shutdown()
 
   /**
    * Suspend until this service has terminated.
    */
-  suspend fun awaitTermination()
-
-  /**
-   * Provide a completion that will complete when the service has terminated.
-   *
-   * @return A completion that will complete when the service has terminated.
-   */
-  fun awaitTerminationAsync(): AsyncCompletion
-
-  /**
-   * Shutdown this service immediately.
-   */
-  fun shutdownNow()
+  fun shutdownAsync(): AsyncCompletion
 
   /**
    * Counter of invalid packets
    */
   val invalidPackets: Long
+
   /**
    * Counter of packets sent to self
    */
   val selfPackets: Long
+
   /**
    * Counter of expired packets
    */
   val expiredPackets: Long
+
   /**
    * Counter of filtered packets
    */
   val filteredPackets: Long
+
   /**
    * Counter of unvalidated peer packets
    */
   val unvalidatedPeerPackets: Long
+
   /**
    * Counter of unexpected pongs
    */
   val unexpectedPongs: Long
+
   /**
    * Counter of unexpected NEIGHBORS messages
    */
   val unexpectedNeighbors: Long
+
   /**
    * Counter of unexpected ENRResponse messages
    */
@@ -302,23 +292,22 @@ interface DiscoveryService {
 }
 
 @OptIn(ObsoleteCoroutinesApi::class)
-internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) constructor(
+internal class CoroutineDiscoveryService constructor(
+  vertx: Vertx,
   private val keyPair: SECP256K1.KeyPair,
   private val seq: Long = Instant.now().toEpochMilli(),
   private val enrData: Map<String, Bytes>,
-  bindAddress: InetSocketAddress,
-  bootstrapURIs: List<URI> = emptyList(),
-  advertiseAddress: InetAddress? = null,
-  advertiseUdpPort: Int? = null,
-  advertiseTcpPort: Int? = null,
+  private val bindAddress: SocketAddress,
+  private val bootstrapURIs: List<URI> = emptyList(),
+  private val advertiseAddress: String? = null,
+  private val advertiseUdpPort: Int? = null,
+  private val advertiseTcpPort: Int? = null,
   private val peerRepository: PeerRepository = EphemeralPeerRepository(),
   private val routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
-  private val packetFilter: ((SECP256K1.PublicKey, InetSocketAddress) -> Boolean)? = null,
-  private val bufferAllocator: () -> ByteBuffer = DiscoveryService.DEFAULT_BUFFER_ALLOCATOR,
+  private val packetFilter: ((SECP256K1.PublicKey, SocketAddress) -> Boolean)? = null,
   private val timeSupplier: () -> Long = DiscoveryService.CURRENT_TIME_SUPPLIER,
   private val job: Job = Job(),
   override val coroutineContext: CoroutineContext = job + Dispatchers.Default + CoroutineExceptionHandler { _, _ -> },
-  private val channel: BoundDatagramSocket = aSocket(ActorSelectorManager(coroutineContext)).udp().bind(bindAddress)
 ) : DiscoveryService, CoroutineScope {
 
   companion object {
@@ -326,29 +315,27 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
   }
 
   private val serviceDescriptor = "ÐΞVp2p discovery " + System.identityHashCode(this)
-  private val selfEndpoint: Endpoint
-  private val enr: Bytes
+  private var selfEndpoint: Endpoint? = null
+  private var enr: Bytes? = null
 
   private val shutdown = AtomicBoolean(false)
   private val activityLatch = CoroutineLatch(1)
-  private val bootstrapperCount: Deferred<Int>
-  private val refreshLoop: Job
+  private val bootstrapped = AsyncCompletion.incomplete()
+  private var refreshLoop: Job? = null
+  private val server = vertx.createDatagramSocket()
 
   override val isShutdown: Boolean
     get() = shutdown.get()
 
-  override val isTerminated: Boolean
-    get() = activityLatch.isOpen
-
   override val localPort: Int
-    get() = channel.localAddress.port
+    get() = server.localAddress().port()
 
   override val nodeId: SECP256K1.PublicKey
     get() = keyPair.publicKey()
 
-  private val verifyingEndpoints: Cache<InetSocketAddress, EndpointVerification> =
+  private val verifyingEndpoints: Cache<SocketAddress, EndpointVerification> =
     CacheBuilder.newBuilder().expireAfterAccess(PEER_VERIFICATION_RETRY_DELAY_MS, TimeUnit.MILLISECONDS).build()
-  private val requestingENRs: Cache<InetSocketAddress, ENRRequest> =
+  private val requestingENRs: Cache<SocketAddress, ENRRequest> =
     CacheBuilder.newBuilder().expireAfterAccess(ENR_REQUEST_RETRY_DELAY_MS, TimeUnit.MILLISECONDS).build()
   private val awaitingPongs = ConcurrentHashMap<Bytes32, EndpointVerification>()
   private val awaitingENRs = ConcurrentHashMap<Bytes32, ENRRequest>()
@@ -367,32 +354,21 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
   override var unexpectedNeighbors: Long by AtomicLong(0)
 
   init {
+    start()
+  }
 
-    selfEndpoint = Endpoint(
-      advertiseAddress ?: (channel.localAddress as InetSocketAddress).address,
-      advertiseUdpPort ?: channel.localAddress.port,
+  fun start() = launch {
+    server.handler { receiveDatagram(it) }.listenAwait(bindAddress.port(), bindAddress.host())
+    val endpoint = Endpoint(
+      advertiseAddress ?: (server.localAddress()).host(),
+      advertiseUdpPort ?: server.localAddress().port(),
       advertiseTcpPort
     )
-
     enr = EthereumNodeRecord.toRLP(
-      keyPair, seq, enrData, null, selfEndpoint.address, selfEndpoint.tcpPort,
-      selfEndpoint.udpPort
+      keyPair, seq, enrData, null, InetAddress.getByName(endpoint.address), endpoint.tcpPort,
+      endpoint.udpPort
     )
-
-    val bootstrapping = bootstrapURIs.map { uri ->
-      activityLatch.countUp()
-      async {
-        try {
-          bootstrapFrom(uri)
-        } finally {
-          activityLatch.countDown()
-        }
-      }
-    }
-    bootstrapperCount = async {
-      bootstrapping.awaitAll().sumBy { success -> if (success) 1 else 0 }
-    }
-
+    selfEndpoint = endpoint
     refreshLoop = launch {
       activityLatch.countUp()
       try {
@@ -404,24 +380,19 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
         activityLatch.countDown()
       }
     }
-
-    logger.info("{}: started, listening on {}", serviceDescriptor, channel.localAddress)
     launch {
-      try {
-        receivePackets()
-      } finally {
-        for (pending in awaitingPongs.values) {
-          pending.complete(null)
+      bootstrapURIs.map { uri ->
+        activityLatch.countUp()
+        try {
+          bootstrapFrom(uri)
+        } finally {
+          activityLatch.countDown()
         }
-        awaitingPongs.clear()
-        verifyingEndpoints.invalidateAll()
-        verifyingEndpoints.cleanUp()
-        findNodeStates.invalidateAll()
-        findNodeStates.cleanUp()
-        activityLatch.countDown()
       }
-      logger.info("{}: terminated", serviceDescriptor)
+      bootstrapped.complete()
     }
+
+    logger.info("{}: started, listening on {}", serviceDescriptor, server.localAddress())
   }
 
   private suspend fun bootstrapFrom(uri: URI): Boolean {
@@ -448,56 +419,53 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
     }
   }
 
-  private suspend fun receivePackets() {
-    while (!channel.isClosed) {
-      val datagram = channel.receive()
-
-      // do quick sanity checks and discard bad packets before launching a co-routine
-      if (datagram.packet.remaining < Packet.MIN_SIZE) {
-        logger.debug("{}: ignoring under-sized packet with source {}", serviceDescriptor, datagram.address)
-        ++invalidPackets
-        continue
-      }
-      if (datagram.packet.remaining > Packet.MAX_SIZE) {
-        logger.debug("{}: ignoring over-sized packet with source {}", serviceDescriptor, datagram.address)
-        ++invalidPackets
-        continue
-      }
-
-      activityLatch.countUp()
-      val arrivalTime = timeSupplier()
-      val job = launch {
-        try {
-          receivePacket(datagram.packet, datagram.address, arrivalTime)
-        } catch (e: Throwable) {
-          logger.error(serviceDescriptor + ": unexpected error during packet handling", e)
-        }
-      }
-      job.invokeOnCompletion { activityLatch.countDown() }
-      yield()
+  private fun receiveDatagram(packet: DatagramPacket) {
+    // do quick sanity checks and discard bad packets before launching a co-routine
+    if (packet.data().length() < Packet.MIN_SIZE) {
+      logger.debug("{}: ignoring under-sized packet with source {}", serviceDescriptor, packet.sender())
+      ++invalidPackets
+      return
     }
+    if (packet.data().length() > Packet.MAX_SIZE) {
+      logger.debug("{}: ignoring over-sized packet with source {}", serviceDescriptor, packet.sender())
+      ++invalidPackets
+      return
+    }
+
+    activityLatch.countUp()
+    val arrivalTime = timeSupplier()
+    val job = launch {
+      try {
+        receivePacket(packet.data(), packet.sender(), arrivalTime)
+      } catch (e: Throwable) {
+        logger.error("$serviceDescriptor: unexpected error during packet handling", e)
+      }
+    }
+    job.invokeOnCompletion { activityLatch.countDown() }
   }
 
-  override suspend fun awaitBootstrap(): Int = bootstrapperCount.await()
+  override suspend fun awaitBootstrap() = bootstrapped.await()
 
-  override fun shutdown() {
+  override fun awaitBootstrapAsync(): AsyncCompletion = bootstrapped
+
+  override suspend fun shutdown() {
     if (shutdown.compareAndSet(false, true)) {
       logger.info("{}: shutdown", serviceDescriptor)
-      channel.close()
-      refreshLoop.cancel()
+      server.closeAwait()
+      for (pending in awaitingPongs.values) {
+        pending.complete(null)
+      }
+      awaitingPongs.clear()
+      verifyingEndpoints.invalidateAll()
+      verifyingEndpoints.cleanUp()
+      findNodeStates.invalidateAll()
+      findNodeStates.cleanUp()
+      activityLatch.countDown()
+      refreshLoop?.cancel()
     }
   }
 
-  override suspend fun awaitTermination() {
-    activityLatch.await()
-  }
-
-  override fun awaitTerminationAsync(): AsyncCompletion = asyncCompletion { awaitTermination() }
-
-  override fun shutdownNow() {
-    job.cancel()
-    shutdown()
-  }
+  override fun shutdownAsync(): AsyncCompletion = asyncCompletion { shutdown() }
 
   @OptIn(ObsoleteCoroutinesApi::class, InternalCoroutinesApi::class)
   override suspend fun lookup(target: SECP256K1.PublicKey): List<Peer> {
@@ -505,7 +473,7 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
     val results = neighbors(target).toMutableList()
 
     // maybe add ourselves to the set
-    val selfPeer = peerRepository.get(selfEndpoint.address.hostAddress, selfEndpoint.udpPort, nodeId)
+    val selfPeer = peerRepository.get(selfEndpoint!!.address, selfEndpoint!!.udpPort, nodeId)
     results.orderedInsert(selfPeer) { a, _ -> targetId.xorDistCmp(a.nodeId.bytesArray(), nodeId.bytesArray()) }
     results.removeAt(results.lastIndex)
 
@@ -523,12 +491,12 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
         val node = withTimeoutOrNull(LOOKUP_RESPONSE_TIMEOUT_MS) {
           val valueOrClosed = nodes.receiveOrClosed()
           if (valueOrClosed.isClosed) {
-                null
+            null
           } else {
-                valueOrClosed.value
+            valueOrClosed.value
           }
         } ?: break
-        val peer = peerRepository.get(selfEndpoint.address.hostAddress, selfEndpoint.udpPort, node.nodeId)
+        val peer = peerRepository.get(selfEndpoint!!.address, selfEndpoint!!.udpPort, node.nodeId)
         if (!results.contains(peer)) {
           results.orderedInsert(peer) { a, _ -> targetId.xorDistCmp(a.nodeId.bytesArray(), node.nodeId.bytesArray()) }
           results.removeAt(results.lastIndex)
@@ -549,18 +517,11 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
     lookup(SECP256K1.KeyPair.random().publicKey())
   }
 
-  private suspend fun receivePacket(datagram: ByteReadPacket, address: SocketAddress, arrivalTime: Long) {
-    if (address !is InetSocketAddress) {
-      throw IOException("Datagram received from non-inet socket address: " + address.javaClass)
-    }
+  private suspend fun receivePacket(datagram: Buffer, address: SocketAddress, arrivalTime: Long) {
 
     val packet: Packet
     try {
-      val size = Math.min(Packet.MAX_SIZE, datagram.remaining.toInt())
-      val buffer = ByteBuffer.allocate(size)
-      datagram.readFully(buffer)
-      buffer.flip()
-      packet = Packet.decodeFrom(buffer)
+      packet = Packet.decodeFrom(Bytes.wrap(datagram.bytes))
     } catch (e: DecodingException) {
       logger.debug("{}: ignoring invalid packet from {}", serviceDescriptor, address)
       ++invalidPackets
@@ -595,12 +556,12 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
     }.let {} // guarantees "when" matching is exhaustive
   }
 
-  private suspend fun handlePing(packet: PingPacket, from: InetSocketAddress, arrivalTime: Long) {
+  private suspend fun handlePing(packet: PingPacket, from: SocketAddress, arrivalTime: Long) {
     // COMPATIBILITY: The ping packet should contain the canonical endpoint for the peer, yet it is often observed to
     // be incorrect (using private-subnet addresses, wildcard addresses, etc). So instead, respond to the source
     // address of the packet itself.
     val fromEndpoint = Endpoint(from, packet.from.tcpPort)
-    val peer = peerRepository.get(from.hostString, from.port, packet.nodeId)
+    val peer = peerRepository.get(from.host(), from.port(), packet.nodeId)
     // update the endpoint if the peer does not have one that's been proven
     var currentEndpoint = peer.updateEndpoint(fromEndpoint, arrivalTime, arrivalTime - ENDPOINT_PROOF_LONGEVITY_MS)
     if (currentEndpoint.tcpPort != packet.from.tcpPort) {
@@ -617,7 +578,7 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
     // traffic amplification attack
   }
 
-  private suspend fun handlePong(packet: PongPacket, from: InetSocketAddress, arrivalTime: Long) {
+  private suspend fun handlePong(packet: PongPacket, from: SocketAddress, arrivalTime: Long) {
     val pending = awaitingPongs.remove(packet.pingHash) ?: run {
       logger.debug("{}: received unexpected or late pong from {}", serviceDescriptor, from)
       ++unexpectedPongs
@@ -630,7 +591,7 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
     // accept the pong and update the new peer record with the proven endpoint, preferring to keep its current
     // tcpPort and otherwise keeping the tcpPort of the original peer.
     val peer =
-      if (sender.nodeId == packet.nodeId) sender else peerRepository.get(from.hostName, from.port, packet.nodeId)
+      if (sender.nodeId == packet.nodeId) sender else peerRepository.get(from.host(), from.port(), packet.nodeId)
     val endpoint = if (peer.verifyEndpoint(pending.endpoint, arrivalTime)) {
       pending.endpoint
     } else {
@@ -661,9 +622,9 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
     }
   }
 
-  private suspend fun handleFindNode(packet: FindNodePacket, from: InetSocketAddress, arrivalTime: Long) {
+  private suspend fun handleFindNode(packet: FindNodePacket, from: SocketAddress, arrivalTime: Long) {
     // if the peer has not been validated, delay sending neighbors until it is
-    val peer = peerRepository.get(from.hostString, from.port, packet.nodeId)
+    val peer = peerRepository.get(from.host(), from.port(), packet.nodeId)
     val (_, endpoint) = ensurePeerIsValid(peer, from, arrivalTime) ?: run {
       logger.debug("{}: received findNode from {} which cannot be validated", serviceDescriptor, from)
       ++unvalidatedPeerPackets
@@ -680,12 +641,12 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
     }
   }
 
-  private fun handleNeighbors(packet: NeighborsPacket, from: InetSocketAddress) {
+  private fun handleNeighbors(packet: NeighborsPacket, from: SocketAddress) {
     findNodeStates.getIfPresent(packet.nodeId)?.let { state ->
       for (node in packet.nodes) {
         launch {
           logger.debug("{}: received neighbour {} from {}", serviceDescriptor, node.endpoint.address, from)
-          val neighbor = peerRepository.get(from.hostName, from.port, node.nodeId)
+          val neighbor = peerRepository.get(from.host(), from.port(), node.nodeId)
           val now = timeSupplier()
           neighbor.updateEndpoint(node.endpoint, now, now - ENDPOINT_PROOF_LONGEVITY_MS)
 
@@ -707,8 +668,8 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
     }
   }
 
-  private suspend fun handleENRRequest(packet: ENRRequestPacket, from: InetSocketAddress, arrivalTime: Long) {
-    val peer = peerRepository.get(from.hostName, from.port, packet.nodeId)
+  private suspend fun handleENRRequest(packet: ENRRequestPacket, from: SocketAddress, arrivalTime: Long) {
+    val peer = peerRepository.get(from.host(), from.port(), packet.nodeId)
     val (_, endpoint) = ensurePeerIsValid(peer, from, arrivalTime) ?: run {
       logger.debug("{}: received enrRequest from {} which cannot be validated", serviceDescriptor, from)
       ++unvalidatedPeerPackets
@@ -718,10 +679,10 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
     logger.debug("{}: received enrRequest from {}", serviceDescriptor, from)
 
     val address = endpoint.udpSocketAddress
-    sendPacket(address, ENRResponsePacket.create(keyPair, timeSupplier(), packet.hash, enr))
+    sendPacket(address, ENRResponsePacket.create(keyPair, timeSupplier(), packet.hash, enr!!))
   }
 
-  private suspend fun handleENRResponse(packet: ENRResponsePacket, from: InetSocketAddress, arrivalTime: Long) {
+  private suspend fun handleENRResponse(packet: ENRResponsePacket, from: SocketAddress, arrivalTime: Long) {
     val pending = awaitingENRs.remove(packet.requestHash) ?: run {
       logger.debug("{}: received unexpected or late enr response from {}", serviceDescriptor, from)
       ++unexpectedENRResponses
@@ -734,7 +695,7 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
     // accept the pong and update the new peer record with the proven endpoint, preferring to keep its current
     // tcpPort and otherwise keeping the tcpPort of the original peer.
     val peer =
-      if (sender.nodeId == packet.nodeId) sender else peerRepository.get(from.hostName, from.port, packet.nodeId)
+      if (sender.nodeId == packet.nodeId) sender else peerRepository.get(from.host(), from.port(), packet.nodeId)
 
     val enr = EthereumNodeRecord.fromRLP(packet.enr)
     try {
@@ -761,7 +722,7 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
 
   private suspend fun ensurePeerIsValid(
     peer: Peer,
-    address: InetSocketAddress,
+    address: SocketAddress,
     arrivalTime: Long
   ): VerificationResult? {
     val now = timeSupplier()
@@ -784,6 +745,7 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
   // to avoid concurrent attempts to verify the same endpoint
   private inner class EndpointVerification(val endpoint: Endpoint, val peer: Peer) {
     private val deferred = CompletableDeferred<VerificationResult?>()
+
     @Volatile
     private var active: Job? = null
     private var nextPingMs: Long = 0
@@ -825,7 +787,7 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
     }
 
     private suspend fun sendPing(now: Long = timeSupplier()) {
-      val pingPacket = PingPacket.create(keyPair, now, selfEndpoint, endpoint, seq)
+      val pingPacket = PingPacket.create(keyPair, now, selfEndpoint!!, endpoint, seq)
 
       // create local references to be captured in the closure, rather than the whole packet instance
       val hash = pingPacket.hash
@@ -867,10 +829,10 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
   // to avoid concurrent attempts to request the same information.
   private inner class ENRRequest(val endpoint: Endpoint, val peer: Peer) {
     private val deferred = CompletableDeferred<ENRResult?>()
+
     @Volatile
     private var active: Job? = null
     private var nextENRRequest: Long = 0
-    private var retryDelay: Long = 0
 
     suspend fun verify(now: Long = timeSupplier()): ENRResult? {
       if (!deferred.isCompleted) {
@@ -939,8 +901,10 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
     // will be sent
     private val targets = Channel<FindNodeRequest>(capacity = Channel.UNLIMITED)
     private val job: Job
+
     @Volatile
     private var results: SendChannel<Node>? = null
+
     @Volatile
     private var lastReceive: Long = 0
 
@@ -1019,10 +983,7 @@ internal class CoroutineDiscoveryService @OptIn(KtorExperimentalAPI::class) cons
     }
   }
 
-  private suspend fun sendPacket(address: InetSocketAddress, packet: Packet) {
-    val buffer = bufferAllocator()
-    packet.encodeTo(buffer)
-    buffer.flip()
-    channel.send(Datagram(ByteReadPacket(buffer), address))
+  private suspend fun sendPacket(address: SocketAddress, packet: Packet) {
+    server.sendAwait(Buffer.buffer(packet.encode().toArrayUnsafe()), address.port(), address.host())
   }
 }
