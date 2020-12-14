@@ -40,7 +40,6 @@ import java.util.Scanner
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 
-
 @SpringBootApplication
 class FaucetApplication {
 
