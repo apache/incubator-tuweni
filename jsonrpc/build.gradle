@@ -13,6 +13,7 @@
 description = 'Asynchronous Ethereum JSON-RPC client'
 
 dependencies {
+  implementation 'org.slf4j:slf4j-api'
   implementation 'com.fasterxml.jackson.core:jackson-databind'
   implementation "com.google.guava:guava"
   implementation "org.jetbrains.kotlin:kotlin-stdlib"
@@ -31,4 +32,6 @@ dependencies {
   testImplementation 'org.junit.jupiter:junit-jupiter-params'
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+  runtimeOnly 'ch.qos.logback:logback-classic'
 }
