@@ -23,7 +23,6 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -83,7 +82,7 @@ public class KeyFileLoader {
       }
       String secretJSON = String.join("", list);
 
-      HashMap<String, String> values = objectMapper.readValue(secretJSON, new TypeReference<Map<String, String>>() {});
+      HashMap<String, String> values = objectMapper.readValue(secretJSON, new TypeReference<>() {});
       String pubKey = values.get("public").replace(".ed25519", "");
       String privateKey = values.get("private").replace(".ed25519", "");
 

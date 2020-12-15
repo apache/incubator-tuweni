@@ -60,4 +60,9 @@ class WeiTest {
       Wei.valueOf(BigInteger.valueOf(-123L));
     });
   }
+
+  @Test
+  void testFromEth() {
+    assertEquals(Wei.valueOf((long) Math.pow(10, 18)), Wei.fromEth(1));
+  }
 }

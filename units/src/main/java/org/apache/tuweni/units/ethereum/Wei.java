@@ -40,6 +40,17 @@ public final class Wei extends BaseUInt256Value<Wei> {
   }
 
   /**
+   * Return a {@link Wei} containing the specified value from an ETH
+   * 
+   * @param ethValue the value in eth
+   * @return A {@link Wei} containing the specified value.
+   * @throws IllegalArgumentException If the value is negative.
+   */
+  public static Wei fromEth(long ethValue) {
+    return valueOf(ethValue * (long) Math.pow(10, 18));
+  }
+
+  /**
    * Return a {@link Wei} containing the specified value.
    *
    * @param value The value to create a {@link Wei} for.
