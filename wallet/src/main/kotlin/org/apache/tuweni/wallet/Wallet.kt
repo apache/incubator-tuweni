@@ -111,4 +111,8 @@ class Wallet(file: Path, password: String) {
     val pubKey = tx.extractPublicKey()
     return keyPair.publicKey() == pubKey
   }
+
+  fun address(): Address {
+    return Address.fromPublicKey(keyPair.publicKey())
+  }
 }

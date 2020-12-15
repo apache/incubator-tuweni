@@ -22,7 +22,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -58,7 +57,7 @@ class Utils {
 
     ObjectMapper mapper = new ObjectMapper();
 
-    HashMap<String, String> values = mapper.readValue(secretJSON, new TypeReference<Map<String, String>>() {});
+    Map<String, String> values = mapper.readValue(secretJSON, new TypeReference<>() {});
     String pubKey = values.get("public").replace(".ed25519", "");
     String privateKey = values.get("private").replace(".ed25519", "");
 
