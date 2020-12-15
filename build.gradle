@@ -239,6 +239,14 @@ allprojects {
   apply from: "${rootDir}/dependency-versions.gradle"
   apply from: "${rootDir}/gradle/check-licenses.gradle"
 
+  bootJar {
+    enabled = false
+  }
+
+  jar {
+    enabled = true
+  }
+
   version = buildVersion
 
   repositories {

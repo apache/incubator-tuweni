@@ -15,6 +15,15 @@ description = 'Ethereum Faucet'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'org.jetbrains.kotlin.plugin.spring'
 
+bootJar {
+  enabled = true
+  mainClassName = 'org.apache.tuweni.faucet.FaucetApplicationKt'
+}
+
+jar {
+  enabled = false
+}
+
 dependencies {
   implementation 'com.fasterxml.jackson.core:jackson-databind'
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -51,3 +60,4 @@ dependencies {
 
   runtimeOnly 'ch.qos.logback:logback-classic'
 }
+
