@@ -83,7 +83,7 @@ class JSONRPCClientTest {
         request.bodyHandler {
           sent.complete(it.toString(StandardCharsets.UTF_8))
         }
-        request.response().end("")
+        request.response().end("{\"result\":\"\"}")
       }
 
       val hash = it.sendRawTransaction(tx)
