@@ -66,6 +66,11 @@ class FaucetApplication {
   }
 
   @Bean
+  fun createWebClient(): WebClient {
+    return WebClient.create()
+  }
+
+  @Bean
   fun oauth2UserService(rest: WebClient): OAuth2UserService<OAuth2UserRequest, OAuth2User>? {
     val delegate = DefaultOAuth2UserService()
     return OAuth2UserService { request: OAuth2UserRequest ->
