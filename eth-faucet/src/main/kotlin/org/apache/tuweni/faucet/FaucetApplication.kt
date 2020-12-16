@@ -108,11 +108,7 @@ class FaucetApplication {
 
 fun main(args: Array<String>) {
   Security.addProvider(BouncyCastleProvider())
-  println("Please enter your wallet password:")
-  val scanner = Scanner(System.`in`)
-  val password: String = scanner.next()
-  scanner.close()
-  runApplication<FaucetApplication>(*args, "--wallet.password=$password")
+  runApplication<FaucetApplication>(*args)
 }
 
 @Component("htmlConfig")

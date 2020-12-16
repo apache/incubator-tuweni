@@ -14,9 +14,15 @@ The faucet will top up their accounts up to to max balance that is permitted.
 
 ## Running locally
 
-Start the faucet with the main method in `FaucetApplication`.
+Start the faucet with the script in the distribution `eth-faucet`.
 
-When the system starts, enter the password for your wallet. If it is the first time the application runs, the wallet is created.
+You will need to pass in a wallet password.
+
+```
+$> ./eth-faucet --wallet.password=changeit
+```
+
+If it is the first time the application runs, the wallet is created.
 
 Navigate to localhost:8080 and sign in using github.
 
