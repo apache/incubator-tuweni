@@ -36,7 +36,6 @@ import org.springframework.web.reactive.function.client.WebClient
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.security.Security
-import java.util.Scanner
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 
