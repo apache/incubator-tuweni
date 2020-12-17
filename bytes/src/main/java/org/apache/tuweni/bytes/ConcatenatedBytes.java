@@ -131,7 +131,7 @@ final class ConcatenatedBytes extends AbstractBytes {
         throw new IllegalStateException("element sizes do not match total size");
       }
       vSize = this.values[j].size();
-      if (length < vSize) {
+      if (length < vSize + firstValue.size()) {
         break;
       }
       remaining -= vSize;
