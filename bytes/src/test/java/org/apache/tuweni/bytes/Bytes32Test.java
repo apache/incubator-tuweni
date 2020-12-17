@@ -20,6 +20,14 @@ import org.junit.jupiter.api.Test;
 class Bytes32Test {
 
   @Test
+  void testConcatenation() {
+    Bytes wrapped = Bytes.wrap(Bytes.wrap(new byte[32]), Bytes.wrap(new byte[6]));
+    assertEquals(37, wrapped.slice(0, 37).size());
+    Bytes wrappedCopy = wrapped.slice(0, 37).copy();
+    assertEquals(wrapped.slice(0, 37), wrappedCopy);
+  }
+
+  @Test
   void testMutableBytes32WrapWithOffset() {
     Bytes bytes = Bytes
         .fromHexString(
