@@ -51,6 +51,12 @@ class FaucetController {
   @Autowired
   var wallet: Wallet? = null
 
+  @Value("\${faucet.gasPrice}")
+  var gasPrice: Long? = null
+
+  @Value("\${faucet.gas}")
+  var gas: Long? = null
+
   @Value("\${faucet.maxETH}")
   var maxETH: Long? = null
 
@@ -97,8 +103,8 @@ class FaucetController {
         val tx =
           wallet!!.sign(
             nonce,
-            Wei.valueOf(30000),
-            Gas.valueOf(3000000),
+            Wei.valueOf(gasPrice!!),
+            Gas.valueOf(gas!!),
             addr,
             missing,
             Bytes.EMPTY,

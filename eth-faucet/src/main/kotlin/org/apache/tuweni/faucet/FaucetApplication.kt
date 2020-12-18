@@ -74,19 +74,21 @@ class FaucetApplication {
     val delegate = DefaultOAuth2UserService()
     return OAuth2UserService { request: OAuth2UserRequest ->
       val user = delegate.loadUser(request)
-      val client = OAuth2AuthorizedClient(request.clientRegistration, user.name, request.accessToken)
-      val url = user.getAttribute<String>("organizations_url")
-      val orgs = rest
-        .get().uri(url ?: "")
-        .attributes(oauth2AuthorizedClient(client))
-        .retrieve()
-        .bodyToMono(MutableList::class.java)
-        .block()
-      val found = orgs?.stream()?.anyMatch { org ->
-        authorizedOrg == (org as Map<*, *>)["login"]
-      } ?: false
-      if (!found) {
-        throw OAuth2AuthenticationException(OAuth2Error("invalid_token", "Not in authorized team", ""))
+      authorizedOrg?.let {
+        val client = OAuth2AuthorizedClient(request.clientRegistration, user.name, request.accessToken)
+        val url = user.getAttribute<String>("organizations_url")
+        val orgs = rest
+          .get().uri(url ?: "")
+          .attributes(oauth2AuthorizedClient(client))
+          .retrieve()
+          .bodyToMono(MutableList::class.java)
+          .block()
+        val found = orgs?.stream()?.anyMatch { org ->
+          authorizedOrg == (org as Map<*, *>)["login"]
+        } ?: false
+        if (!found) {
+          throw OAuth2AuthenticationException(OAuth2Error("invalid_token", "Not in authorized team", ""))
+        }
       }
       user
     }
