@@ -196,29 +196,3 @@ task checkLicenses {
     }
   }
 }
-
-task createNotice {
-  description "Create a NOTICE file with all dependencies"
-  dependsOn ':downloadLicenses'
-
-  doLast {
-    def xml = new XmlParser().parse("$rootProject.buildDir/reports/license/license-dependency.xml")
-    new File("$rootProject.buildDir/reports/notice").mkdirs()
-    def binaryNoticeFile = new File("$rootProject.buildDir/reports/notice/NOTICE")
-    binaryNoticeFile.write(new File("$rootProject.projectDir/NOTICE").text)
-    def lines = []
-    def maxLength = 0
-    xml.each { license ->
-      license.dependency.each {
-        def line = it.text() + " is bundled with this distribution under " + license.@name + "."
-        maxLength = Math.max(maxLength, line.size())
-        lines << line
-      }
-    }
-    for (line in lines) {
-      binaryNoticeFile.append("=".repeat(maxLength) + "\n")
-      binaryNoticeFile.append(line + "\n")
-    }
-    binaryNoticeFile.append("=".repeat(maxLength) + "\n")
-  }
-}

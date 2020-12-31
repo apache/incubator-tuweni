@@ -22,11 +22,32 @@ apply plugin: 'distribution'
 
 jar { enabled = false }
 
+task createBinaryLicense {
+  description "Create a LICENSE file with all dependencies"
+
+  doLast {
+    new File("$project.buildDir/license").mkdirs()
+    def binaryNoticeFile = new File("$project.buildDir/license/LICENSE")
+    binaryNoticeFile.write(new File("$rootProject.projectDir/LICENSE").text)
+    binaryNoticeFile.append(new File("$rootProject.projectDir/LICENSE-binary").text)
+  }
+}
+
+task createBinaryNotice {
+  description "Create a NOTICE file with all dependencies"
+
+  doLast {
+    new File("$project.buildDir/notice").mkdirs()
+    def binaryNoticeFile = new File("$project.buildDir/notice/NOTICE")
+    binaryNoticeFile.write(new File("$rootProject.projectDir/NOTICE").text)
+    binaryNoticeFile.append(new File("$rootProject.projectDir/NOTICE-binary").text)
+  }
+}
+
 static def mandatoryFiles(CopySpec spec) {
   spec.into('') {
     from ".."
     include 'DISCLAIMER'
-    include 'LICENSE'
   }
   spec.into('licenses') { from '../build/reports/license' }
 }
@@ -54,7 +75,8 @@ asfNexusPassword=
 }
 
 assemble.dependsOn builtGradleProperties
-assemble.dependsOn rootProject.createNotice
+assemble.dependsOn createBinaryLicense
+assemble.dependsOn createBinaryNotice
 
 distributions {
   main {
@@ -66,7 +88,11 @@ distributions {
         include 'README.md'
       }
       into('') {
-        from "../build/reports/notice"
+        from "$project.buildDir/license"
+        include 'LICENSE'
+      }
+      into('') {
+        from "$project.buildDir/notice"
         include 'NOTICE'
       }
       def libs = []
@@ -103,11 +129,12 @@ distributions {
       into('') {
         from 'build'
         include 'gradle.properties'
+        include 'NOTICE'
       }
       mandatoryFiles(it)
       into('') {
         from ".."
-        include 'NOTICE'
+        include 'LICENSE'
         include 'README.md'
         include 'build.sh'
         include 'build.bat'
