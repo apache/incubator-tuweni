@@ -34,16 +34,15 @@ import java.nio.file.StandardOpenOption
 /**
  * Wallet containing a private key that is secured with symmetric encryption.
  *
- * This is vastly insecure - do not use in anything remotely close to production.
+ * This has not been audited for security concerns and should not be used in production.
  *
- * This wallet encrypts the key pair at rest, but keeps the keypair in memory, which may be dumped.
+ * This wallet encrypts the key pair at rest, and encrypts the key in memory.
  *
- * Nonce is also based on the password, should be instead stored in the wallet and unique.
+ * Nonce is based on the password, should be instead stored in the wallet and unique.
  *
  * The wallet loads from a file.
  */
 class Wallet(file: Path, password: String) {
-  // FIXME do not store keys in memory
   private val keyPair: SECP256K1.KeyPair
 
   init {
@@ -54,7 +53,10 @@ class Wallet(file: Path, password: String) {
     val key = AES256GCM.Key.fromBytes(hash)
     val nonce = AES256GCM.Nonce.fromBytes(nonceBytes)
     val decrypted = AES256GCM.decrypt(encrypted, key, nonce)
-    keyPair = SECP256K1.KeyPair.fromSecretKey(SECP256K1.SecretKey.fromBytes(decrypted as Bytes32))
+    keyPair =
+      SECP256K1.KeyPair.fromSecretKey(
+        SECP256K1.SecretKey.fromBytes(Bytes32.secure(decrypted!!.toArrayUnsafe()))
+      )
   }
 
   companion object {

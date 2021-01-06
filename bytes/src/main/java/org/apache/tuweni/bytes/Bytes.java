@@ -89,6 +89,36 @@ public interface Bytes extends Comparable<Bytes> {
   }
 
   /**
+   * Wrap the provided byte array as a {@link Bytes} value, encrypted in memory.
+   *
+   *
+   * @param value The value to secure.
+   * @return A {@link Bytes} value securing {@code value}.
+   */
+  static Bytes secure(byte[] value) {
+    return secure(value, 0, value.length);
+  }
+
+  /**
+   * Wrap a slice of a byte array as a {@link Bytes} value, encrypted in memory.
+   *
+   *
+   * @param value The value to secure.
+   * @param offset The index (inclusive) in {@code value} of the first byte exposed by the returned value. In other
+   *        words, you will have {@code wrap(value, o, l).get(0) == value[o]}.
+   * @param length The length of the resulting value.
+   * @return A {@link Bytes} value that holds securely the bytes of {@code value} from {@code offset} (inclusive) to
+   *         {@code offset + length} (exclusive).
+   * @throws IndexOutOfBoundsException if {@code offset < 0 || (value.length > 0 && offset >=
+   *     value.length)}.
+   * @throws IllegalArgumentException if {@code length < 0 || offset + length > value.length}.
+   */
+  static Bytes secure(byte[] value, int offset, int length) {
+    checkNotNull(value);
+    return new GuardedByteArrayBytes(value, offset, length);
+  }
+
+  /**
    * Wrap a list of other values into a concatenated view.
    *
    * <p>
