@@ -31,7 +31,4 @@ jobs:
         with:
           submodules: true
       - name: gradle checkLicenses
-        uses: eskatos/gradle-command-action@v1
-        with:
-          gradle-version: 6.3
-          arguments: checkLicenses
+        run: gradle checkLicenses

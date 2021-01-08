@@ -47,7 +47,4 @@ jobs:
         with:
           java-version: 11
       - name: gradle test
-        uses: eskatos/gradle-command-action@v1
-        with:
-          gradle-version: 6.3
-          arguments: test
+        run: gradle test

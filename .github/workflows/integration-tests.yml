@@ -59,10 +59,7 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
           restore-keys: ${{ runner.os }}-m2
       - name: gradle integrationTest
-        uses: eskatos/gradle-command-action@v1
-        with:
-          gradle-version: 6.3
-          arguments: integrationTest jacocoTestReport
+        run: gradle integrationTest jacocoTestReport
       - name: Upload to Codecov
         uses: codecov/codecov-action@v1
         with:

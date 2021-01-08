@@ -41,12 +41,9 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
           restore-keys: ${{ runner.os }}-m2
       - name: gradle assemble
-        uses: eskatos/gradle-command-action@v1
+        run: gradle assemble -x test -Psignatory.keyId=38F6C7215DD49C32 -Psigning.gnupg.keyName=38F6C7215DD49C32 -Psigning.gnupg.executable=gpg
         env:
           ENABLE_SIGNING: true
-        with:
-          gradle-version: 6.3
-          arguments: assemble -x test -Psignatory.keyId=38F6C7215DD49C32 -Psigning.gnupg.keyName=38F6C7215DD49C32 -Psigning.gnupg.executable=gpg
       - name: Upload source distrib
         uses: actions/upload-artifact@v2
         with:

@@ -33,7 +33,4 @@ jobs:
         with:
           submodules: true
       - name: gradle rat spotlessCheck
-        uses: eskatos/gradle-command-action@v1
-        with:
-          gradle-version: 6.3
-          arguments: rat spotlessCheck
+        run: gradle rat spotlessCheck
