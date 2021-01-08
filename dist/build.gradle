@@ -29,7 +29,7 @@ task createBinaryLicense {
     new File("$project.buildDir/license").mkdirs()
     def binaryNoticeFile = new File("$project.buildDir/license/LICENSE")
     binaryNoticeFile.write(new File("$rootProject.projectDir/LICENSE").text)
-    binaryNoticeFile.append(new File("$rootProject.projectDir/LICENSE-binary").text)
+    binaryNoticeFile.append(new File("$project.projectDir/LICENSE-binary").text)
   }
 }
 
@@ -40,7 +40,7 @@ task createBinaryNotice {
     new File("$project.buildDir/notice").mkdirs()
     def binaryNoticeFile = new File("$project.buildDir/notice/NOTICE")
     binaryNoticeFile.write(new File("$rootProject.projectDir/NOTICE").text)
-    binaryNoticeFile.append(new File("$rootProject.projectDir/NOTICE-binary").text)
+    binaryNoticeFile.append(new File("$project.projectDir/NOTICE-binary").text)
   }
 }
 
@@ -129,12 +129,12 @@ distributions {
       into('') {
         from 'build'
         include 'gradle.properties'
-        include 'NOTICE'
       }
       mandatoryFiles(it)
       into('') {
         from ".."
         include 'LICENSE'
+        include 'NOTICE'
         include 'README.md'
         include 'build.sh'
         include 'build.bat'
@@ -142,6 +142,8 @@ distributions {
         include '*.gradle'
         include 'dependency-versions.gradle'
         include 'gradle/resources/*'
+        include 'dist/LICENSE-binary'
+        include 'dist/NOTICE-binary'
         include 'gradle/*'
         include 'gradle/docker/*'
       }

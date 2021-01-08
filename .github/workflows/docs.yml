@@ -45,10 +45,7 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
           restore-keys: ${{ runner.os }}-m2
       - name: gradle setup
-        uses: eskatos/gradle-command-action@v1
-        with:
-          gradle-version: 6.3
-          arguments: setup
+        run: gradle setup
       - name: gradle docs
         run: bash -c "./gradlew dokka | tee >( grep -i 'No documentation for' | grep -v DisconnectReason | grep -v RPCFlag | grep -v RPCRequestType | grep -v TomlVersion | grep -v PasswordHash | grep -v MessageSender | grep -v 'Identity.Curve' > docs_warning)"
 #      - name: Fail if warnings

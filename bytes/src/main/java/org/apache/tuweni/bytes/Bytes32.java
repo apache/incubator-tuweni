@@ -67,6 +67,36 @@ public interface Bytes32 extends Bytes {
   }
 
   /**
+   * Secures the provided byte array, which must be of length 32, as a {@link Bytes32}.
+   *
+   * @param bytes The bytes to secure.
+   * @return A {@link Bytes32} securing {@code value}.
+   * @throws IllegalArgumentException if {@code value.length != 32}.
+   */
+  static Bytes32 secure(byte[] bytes) {
+    checkNotNull(bytes);
+    checkArgument(bytes.length == SIZE, "Expected %s bytes but got %s", SIZE, bytes.length);
+    return secure(bytes, 0);
+  }
+
+  /**
+   * Secures a slice/sub-part of the provided array as a {@link Bytes32}.
+   *
+   * @param bytes The bytes to secure.
+   * @param offset The index (inclusive) in {@code value} of the first byte exposed by the returned value. In other
+   *        words, you will have {@code wrap(value, i).get(0) == value[i]}.
+   * @return A {@link Bytes32} that holds securely the bytes of {@code value} from {@code offset} (inclusive) to
+   *         {@code offset + 32} (exclusive).
+   * @throws IndexOutOfBoundsException if {@code offset < 0 || (value.length > 0 && offset >=
+   *     value.length)}.
+   * @throws IllegalArgumentException if {@code length < 0 || offset + 32 > value.length}.
+   */
+  static Bytes32 secure(byte[] bytes, int offset) {
+    checkNotNull(bytes);
+    return new GuardedByteArrayBytes32(bytes, offset);
+  }
+
+  /**
    * Wrap a the provided value, which must be of size 32, as a {@link Bytes32}.
    *
    * <p>
