@@ -771,7 +771,7 @@ public final class Sodium {
     return libSodium().crypto_hash_sha512_bytes();
   }
 
-  static int crypto_hash_sha512(byte[] out, byte[] in, long inlen) {
+  static int crypto_hash_sha512(Pointer out, Pointer in, long inlen) {
     return libSodium().crypto_hash_sha512(out, in, inlen);
   }
 

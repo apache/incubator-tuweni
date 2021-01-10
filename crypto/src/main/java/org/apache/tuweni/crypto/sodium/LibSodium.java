@@ -404,7 +404,7 @@ public interface LibSodium {
   long crypto_hash_sha512_bytes();
 
   // int crypto_hash_sha512(unsigned char * out, const unsigned char * in, unsigned long long inlen);
-  int crypto_hash_sha512(@Out byte[] out, @In byte[] in, @In @u_int64_t long inlen);
+  int crypto_hash_sha512(@Out Pointer out, @In Pointer in, @In @u_int64_t long inlen);
 
   // int crypto_hash_sha512_init(crypto_hash_sha512_state * state);
   int crypto_hash_sha512_init(@Out Pointer state);

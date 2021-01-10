@@ -16,6 +16,8 @@ import static java.util.Objects.requireNonNull;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
+import org.apache.tuweni.crypto.sodium.SHA256Hash;
+import org.apache.tuweni.crypto.sodium.Sodium;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -27,6 +29,8 @@ import java.security.NoSuchAlgorithmException;
  * https://www.bouncycastle.org/wiki/display/JA1/Provider+Installation for detail.
  */
 public final class Hash {
+  static boolean USE_SODIUM = true;
+
   private Hash() {}
 
   // SHA-2
@@ -79,6 +83,19 @@ public final class Hash {
    * @return A digest.
    */
   public static byte[] sha2_256(byte[] input) {
+    if (USE_SODIUM && Sodium.isAvailable()) {
+      SHA256Hash.Input shaInput = SHA256Hash.Input.fromBytes(input);
+      try {
+        SHA256Hash.Hash result = SHA256Hash.hash(shaInput);
+        try {
+          return SHA256Hash.hash(shaInput).bytesArray();
+        } finally {
+          result.destroy();
+        }
+      } finally {
+        shaInput.destroy();
+      }
+    }
     try {
       return digestUsingAlgorithm(input, SHA2_256);
     } catch (NoSuchAlgorithmException e) {
@@ -93,6 +110,19 @@ public final class Hash {
    * @return A digest.
    */
   public static Bytes32 sha2_256(Bytes input) {
+    if (USE_SODIUM && Sodium.isAvailable()) {
+      SHA256Hash.Input shaInput = SHA256Hash.Input.fromBytes(input);
+      try {
+        SHA256Hash.Hash result = SHA256Hash.hash(shaInput);
+        try {
+          return (Bytes32) SHA256Hash.hash(shaInput).bytes();
+        } finally {
+          result.destroy();
+        }
+      } finally {
+        shaInput.destroy();
+      }
+    }
     try {
       return (Bytes32) digestUsingAlgorithm(input, SHA2_256);
     } catch (NoSuchAlgorithmException e) {

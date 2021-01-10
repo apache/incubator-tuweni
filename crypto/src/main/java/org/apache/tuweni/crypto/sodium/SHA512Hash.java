@@ -20,7 +20,7 @@ import javax.security.auth.Destroyable;
 import jnr.ffi.Pointer;
 
 /**
- * SHA-256 hashing.
+ * SHA-512 hashing.
  *
  * The SHA-256 and SHA-512 functions are provided for interoperability with other applications. If you are looking for a
  * generic hash function and not specifically SHA-2, using crypto_generichash() (BLAKE2b) might be a better choice.
@@ -34,10 +34,10 @@ import jnr.ffi.Pointer;
  *
  * @see <a href="https://libsodium.gitbook.io/doc/advanced/sha-2_hash_function">SHA-2</a>
  */
-public class SHA256Hash {
+public class SHA512Hash {
 
   /**
-   * Input of a SHA-256 hash function
+   * Input of a SHA-512 hash function
    */
   public static final class Input implements Destroyable {
     /**
@@ -46,50 +46,50 @@ public class SHA256Hash {
      * @param secret a Diffie-Helman secret
      * @return a hash input
      */
-    public static SHA256Hash.Input fromSecret(DiffieHelman.Secret secret) {
-      return new SHA256Hash.Input(
+    public static SHA512Hash.Input fromSecret(DiffieHelman.Secret secret) {
+      return new SHA512Hash.Input(
           Sodium.dup(secret.value.pointer(), DiffieHelman.Secret.length()),
           DiffieHelman.Secret.length());
     }
 
     /**
-     * Create a {@link SHA256Hash.Input} from a pointer.
+     * Create a {@link SHA512Hash.Input} from a pointer.
      *
      * @param allocated the allocated pointer
      * @return An input.
      */
-    public static SHA256Hash.Input fromPointer(Allocated allocated) {
-      return new SHA256Hash.Input(Sodium.dup(allocated.pointer(), allocated.length()), allocated.length());
+    public static SHA512Hash.Input fromPointer(Allocated allocated) {
+      return new SHA512Hash.Input(Sodium.dup(allocated.pointer(), allocated.length()), allocated.length());
     }
 
     /**
-     * Create a {@link SHA256Hash.Input} from a hash.
+     * Create a {@link SHA512Hash.Input} from a hash.
      *
      * @param hash the hash
      * @return An input.
      */
-    public static SHA256Hash.Input fromHash(SHA256Hash.Hash hash) {
-      return new SHA256Hash.Input(Sodium.dup(hash.value.pointer(), hash.value.length()), hash.value.length());
+    public static SHA512Hash.Input fromHash(SHA512Hash.Hash hash) {
+      return new SHA512Hash.Input(Sodium.dup(hash.value.pointer(), hash.value.length()), hash.value.length());
     }
 
     /**
-     * Create a {@link SHA256Hash.Input} from an array of bytes.
+     * Create a {@link SHA512Hash.Input} from an array of bytes.
      *
      * @param bytes The bytes for the input.
      * @return An input.
      */
-    public static SHA256Hash.Input fromBytes(Bytes bytes) {
+    public static SHA512Hash.Input fromBytes(Bytes bytes) {
       return fromBytes(bytes.toArrayUnsafe());
     }
 
     /**
-     * Create a {@link SHA256Hash.Input} from an array of bytes.
+     * Create a {@link SHA512Hash.Input} from an array of bytes.
      *
      * @param bytes The bytes for the input.
      * @return An input.
      */
-    public static SHA256Hash.Input fromBytes(byte[] bytes) {
-      return Sodium.dup(bytes, SHA256Hash.Input::new);
+    public static SHA512Hash.Input fromBytes(byte[] bytes) {
+      return Sodium.dup(bytes, SHA512Hash.Input::new);
     }
 
     private final Allocated value;
@@ -122,10 +122,10 @@ public class SHA256Hash {
       if (obj == this) {
         return true;
       }
-      if (!(obj instanceof SHA256Hash.Input)) {
+      if (!(obj instanceof SHA512Hash.Input)) {
         return false;
       }
-      SHA256Hash.Input other = (SHA256Hash.Input) obj;
+      SHA512Hash.Input other = (SHA512Hash.Input) obj;
       return other.value.equals(value);
     }
 
@@ -154,7 +154,7 @@ public class SHA256Hash {
   }
 
   /**
-   * SHA-256 hash output
+   * SHA-512 hash output
    */
   public static final class Hash implements Destroyable {
     Allocated value;
@@ -179,10 +179,10 @@ public class SHA256Hash {
       if (obj == this) {
         return true;
       }
-      if (!(obj instanceof SHA256Hash.Hash)) {
+      if (!(obj instanceof SHA512Hash.Hash)) {
         return false;
       }
-      SHA256Hash.Hash other = (SHA256Hash.Hash) obj;
+      SHA512Hash.Hash other = (SHA512Hash.Hash) obj;
       return other.value.equals(value);
     }
 
@@ -220,23 +220,23 @@ public class SHA256Hash {
      * @return The length of the hash in bytes (32).
      */
     public static int length() {
-      long hashbytes = Sodium.crypto_hash_sha256_bytes();
+      long hashbytes = Sodium.crypto_hash_sha512_bytes();
       if (hashbytes > Integer.MAX_VALUE) {
-        throw new SodiumException("crypto_hash_sha256_bytes: " + hashbytes + " is too large");
+        throw new SodiumException("crypto_hash_sha512_bytes: " + hashbytes + " is too large");
       }
       return (int) hashbytes;
     }
   }
 
   /**
-   * Hashes input to a SHA-256 hash
+   * Hashes input to a SHA-512 hash
    * 
    * @param input the input of the hash function
-   * @return a SHA-256 hash of the input
+   * @return a SHA-512 hash of the input
    */
-  public static SHA256Hash.Hash hash(SHA256Hash.Input input) {
-    Pointer output = Sodium.malloc(SHA256Hash.Hash.length());
-    Sodium.crypto_hash_sha256(output, input.value.pointer(), input.length());
-    return new SHA256Hash.Hash(output, SHA256Hash.Hash.length());
+  public static SHA512Hash.Hash hash(SHA512Hash.Input input) {
+    Pointer output = Sodium.malloc(SHA512Hash.Hash.length());
+    Sodium.crypto_hash_sha512(output, input.value.pointer(), input.length());
+    return new SHA512Hash.Hash(output, SHA512Hash.Hash.length());
   }
 }
