@@ -65,7 +65,7 @@ Subject:[VOTE] Apache Tuweni ${RELEASE VERSION} release
 We're voting on the source distributions available here:
 https://dist.apache.org/repos/dist/dev/incubator/tuweni/${RELEASE VERSION}/
 The release tag is present here:
-https://github.com/apache/incubator-tuweni/releases/tag/v${RELEASE VERSION}
+https://github.com/apache/incubator-tuweni/releases/tag/v${RELEASE VERSION}-rc
 
 Please review and vote as appropriate.
 
