@@ -16,4 +16,4 @@
  */
 package org.apache.tuweni.faucet.controller
 
-class FaucetRequest(var addr: String?, var message: String?)
+class FaucetRequest(var addr: String?, var message: String?, var alertClass: String?)

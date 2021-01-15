@@ -120,6 +120,12 @@ class HtmlConfig() {
   @Value("\${html.request_message}")
   var requestMessage: String? = null
 
+  @Value("\${html.address_help}")
+  var addressHelp: String? = null
+
+  @Value("\${html.submit_button}")
+  var submitBtn: String? = null
+
   @Value("\${faucet.maxETH}")
   var maxETH: Long? = null
 }

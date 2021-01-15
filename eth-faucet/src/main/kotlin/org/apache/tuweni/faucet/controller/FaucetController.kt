@@ -33,23 +33,18 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
+import java.net.ConnectException
 import javax.annotation.PostConstruct
 
 val logger = LoggerFactory.getLogger("faucet")
 
 @Controller
-class FaucetController {
-
-  @Autowired
-  val vertx: Vertx? = null
+class FaucetController(@Autowired val vertx: Vertx, @Autowired val wallet: Wallet) {
 
   var jsonrpcClient: JSONRPCClient? = null
 
   @Value("\${faucet.chainId}")
   var chainId: Int? = null
-
-  @Autowired
-  var wallet: Wallet? = null
 
   @Value("\${faucet.gasPrice}")
   var gasPrice: Long? = null
@@ -68,12 +63,12 @@ class FaucetController {
 
   @PostConstruct
   fun createClient() {
-    jsonrpcClient = JSONRPCClient(vertx!!, rpcPort!!, rpcHost!!)
+    jsonrpcClient = JSONRPCClient(vertx, rpcPort!!, rpcHost!!)
   }
 
   @GetMapping("/")
   fun index(model: Model): String {
-    model.addAttribute("faucetRequest", FaucetRequest("", ""))
+    model.addAttribute("faucetRequest", FaucetRequest("", null, ""))
     return "index"
   }
 
@@ -85,6 +80,7 @@ class FaucetController {
       addr = Address.fromHexString(request.addr ?: "")
     } catch (e: IllegalArgumentException) {
       request.message = e.message ?: "Invalid address"
+      request.alertClass = "alert-danger"
       return "index"
     }
     try {
@@ -94,31 +90,37 @@ class FaucetController {
         val lessThanMax = Wei.fromEth(maxETH!!).compareTo(balance) == 1
         if (!lessThanMax) {
           request.message = "Balance is more than this faucet gives."
+          request.alertClass = "alert-primary"
           return@runBlocking "index"
         }
         val missing = Wei.fromEth(maxETH!!).subtract(balance)
-        val nonce = jsonrpcClient!!.getTransactionCount_latest(wallet!!.address())
+        val nonce = jsonrpcClient!!.getTransactionCount_latest(wallet.address())
         // Otherwise, send money with the faucet account.
         logger.info("Sending $missing to $addr")
-        val tx =
-          wallet!!.sign(
-            nonce,
-            Wei.valueOf(gasPrice!!),
-            Gas.valueOf(gas!!),
-            addr,
-            missing,
-            Bytes.EMPTY,
-            chainId!!
-          )
+        val tx = wallet.sign(
+          nonce,
+          Wei.valueOf(gasPrice!!),
+          Gas.valueOf(gas!!),
+          addr,
+          missing,
+          Bytes.EMPTY,
+          chainId!!
+        )
 
         logger.info("Transaction ready to send")
         val txHash = jsonrpcClient!!.sendRawTransaction(tx)
         logger.info("Transaction sent to client with hash $txHash")
         request.message = "Transaction hash: $txHash"
+        request.alertClass = "alert-success"
         return@runBlocking "index"
       }
     } catch (e: ClientRequestException) {
       request.message = e.message
+      request.alertClass = "alert-danger"
+      return "index"
+    } catch (e: ConnectException) {
+      request.message = "Could not connect to a client. Try again later."
+      request.alertClass = "alert-danger"
       return "index"
     }
   }
