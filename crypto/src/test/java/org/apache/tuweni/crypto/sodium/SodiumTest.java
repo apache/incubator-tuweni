@@ -37,9 +37,10 @@ class SodiumTest {
 
   @Test
   void checkCryptoHashSha512MultiPart() {
-    byte[] message = "This is a test message".getBytes(UTF_8);
-    byte[] hash = new byte[(int) Sodium.crypto_hash_sha512_bytes()];
-    int rc = Sodium.crypto_hash_sha512(hash, message, message.length);
+    byte[] messageBytes = "This is a test message".getBytes(UTF_8);
+    Pointer message = Sodium.dup(messageBytes);
+    Pointer hash = Sodium.malloc(SHA512Hash.Hash.length());
+    int rc = Sodium.crypto_hash_sha512(hash, message, messageBytes.length);
     assertEquals(0, rc);
 
     Pointer state = Sodium.sodium_malloc(Sodium.crypto_hash_sha512_statebytes());
@@ -55,7 +56,8 @@ class SodiumTest {
       byte[] hash2 = new byte[(int) Sodium.crypto_hash_sha512_bytes()];
       Sodium.crypto_hash_sha512_final(state, hash2);
 
-      assertArrayEquals(hash, hash2);
+      byte[] hashBytes = Sodium.reify(hash, 64);
+      assertArrayEquals(hashBytes, hash2);
     } finally {
       Sodium.sodium_free(state);
     }

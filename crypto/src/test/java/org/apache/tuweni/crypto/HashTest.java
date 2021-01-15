@@ -48,6 +48,29 @@ class HashTest {
   }
 
   @Test
+  void sha2_256_withoutSodium() {
+    Hash.USE_SODIUM = false;
+    try {
+      String horseSha2 = "fd62862b6dc213bee77c2badd6311528253c6cb3107e03c16051aa15584eca1c";
+      String cowSha2 = "beb134754910a4b4790c69ab17d3975221f4c534b70c8d6e82b30c165e8c0c09";
+
+      Bytes resultHorse = Hash.sha2_256(Bytes.wrap("horse".getBytes(UTF_8)));
+      assertEquals(Bytes.fromHexString(horseSha2), resultHorse);
+
+      byte[] resultHorse2 = Hash.sha2_256("horse".getBytes(UTF_8));
+      assertArrayEquals(Bytes.fromHexString(horseSha2).toArray(), resultHorse2);
+
+      Bytes resultCow = Hash.sha2_256(Bytes.wrap("cow".getBytes(UTF_8)));
+      assertEquals(Bytes.fromHexString(cowSha2), resultCow);
+
+      byte[] resultCow2 = Hash.sha2_256("cow".getBytes(UTF_8));
+      assertArrayEquals(Bytes.fromHexString(cowSha2).toArray(), resultCow2);
+    } finally {
+      Hash.USE_SODIUM = true;
+    }
+  }
+
+  @Test
   void sha2_512_256() {
     String horseSha2 = "6d64886cd066b81cf2dcf16ae70e97017d35f2f4ab73c5c5810aaa9ab573dab3";
     String cowSha2 = "7d26bad15e2f266cb4cbe9b1913978cb8a8bd08d92ee157b6be87c92dfce2d3e";
@@ -125,6 +148,7 @@ class HashTest {
   void testWithoutProviders() {
     Provider[] providers = Security.getProviders();
     Stream.of(Security.getProviders()).map(Provider::getName).forEach(Security::removeProvider);
+    Hash.USE_SODIUM = false;
     try {
       assertThrows(IllegalStateException.class, () -> Hash.sha2_256("horse".getBytes(UTF_8)));
       assertThrows(IllegalStateException.class, () -> Hash.sha2_256(Bytes.wrap("horse".getBytes(UTF_8))));
@@ -140,6 +164,7 @@ class HashTest {
       for (Provider p : providers) {
         Security.addProvider(p);
       }
+      Hash.USE_SODIUM = true;
     }
   }
 }
