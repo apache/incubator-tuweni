@@ -36,7 +36,9 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import java.net.ConnectException
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicReference
 
@@ -95,6 +97,15 @@ class JSONRPCClientTest {
           "0ac4c721d5222e4e38cc6ca\"]}",
         sent.await()
       )
+    }
+  }
+
+  @Test
+  fun testGetBalanceToMissingClient(@VertxInstance vertx: Vertx) {
+    JSONRPCClient(vertx, 1234, "localhost").use {
+      assertThrows<ConnectException> {
+        runBlocking { it.getBalance_latest(Address.fromHexString("0x0102030405060708090a0b0c0d0e0f0102030405")) }
+      }
     }
   }
 }
