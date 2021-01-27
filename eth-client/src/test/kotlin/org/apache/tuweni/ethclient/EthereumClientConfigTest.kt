@@ -91,9 +91,9 @@ class EthereumClientConfigTest {
 
   @Test
   fun testDNSClient() {
-    val config = EthereumClientConfig.fromString("[dns.mine]\ndomain=\"example.com\"\npollingPeriod=1000")
+    val config = EthereumClientConfig.fromString("[dns.mine]\nenrLink=\"example.com\"\npollingPeriod=1000")
     assertEquals(1, config.dnsClients().size)
-    assertEquals("example.com", config.dnsClients()[0].domain())
+    assertEquals("example.com", config.dnsClients()[0].enrLink())
     assertEquals(1000, config.dnsClients()[0].pollingPeriod())
     assertEquals("default", config.dnsClients()[0].peerRepository())
     assertEquals("mine", config.dnsClients()[0].getName())

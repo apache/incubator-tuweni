@@ -28,6 +28,7 @@ import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.eth.EthClient
 import org.apache.tuweni.devp2p.eth.EthController
+import org.apache.tuweni.devp2p.eth.RandomConnectionSelectionStrategy
 import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.Block
@@ -199,7 +200,11 @@ internal class LESSubProtocolHandlerTest {
           block
         )
       val pool = MemoryTransactionPool()
-      val controller = EthController(repo, pool, EthClient(service, pool))
+      val controller = EthController(
+        repo,
+        pool,
+        EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository()))
+      )
 
       val handler = LESSubProtocolHandler(
         service,
@@ -255,7 +260,11 @@ internal class LESSubProtocolHandlerTest {
           block
         )
       val pool = MemoryTransactionPool()
-      val controller = EthController(repo, pool, EthClient(service, pool))
+      val controller = EthController(
+        repo,
+        pool,
+        EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository()))
+      )
 
       val handler = LESSubProtocolHandler(
         service,
@@ -287,7 +296,11 @@ internal class LESSubProtocolHandlerTest {
     val service = MyRLPxService()
     val repo = BlockchainRepository.inMemory()
     val pool = MemoryTransactionPool()
-    val controller = EthController(repo, pool, EthClient(service, pool))
+    val controller = EthController(
+      repo,
+      pool,
+      EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository()))
+    )
 
     val handler = LESSubProtocolHandler(
       service,
@@ -328,7 +341,11 @@ internal class LESSubProtocolHandlerTest {
           block
         )
       val pool = MemoryTransactionPool()
-      val controller = EthController(repo, pool, EthClient(service, pool))
+      val controller = EthController(
+        repo,
+        pool,
+        EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository()))
+      )
       val handler = LESSubProtocolHandler(
         service,
         LES_ID,
@@ -397,7 +414,11 @@ internal class LESSubProtocolHandlerTest {
           block
         )
       val pool = MemoryTransactionPool()
-      val controller = EthController(repo, pool, EthClient(service, pool))
+      val controller = EthController(
+        repo,
+        pool,
+        EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository()))
+      )
       val handler = LESSubProtocolHandler(
         service,
         LES_ID,
@@ -454,7 +475,11 @@ internal class LESSubProtocolHandlerTest {
           block
         )
       val pool = MemoryTransactionPool()
-      val controller = EthController(repo, pool, EthClient(service, pool))
+      val controller = EthController(
+        repo,
+        pool,
+        EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository()))
+      )
 
       val handler = LESSubProtocolHandler(
         service,

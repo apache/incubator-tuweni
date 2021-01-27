@@ -56,10 +56,10 @@ class DNSClient(
    * Start the client
    */
   suspend fun start() {
-    config.domain().let { domain ->
+    config.enrLink().let { link ->
       val daemon = DNSDaemon(
         seq = seq(),
-        enrLink = domain,
+        enrLink = link,
         period = config.pollingPeriod(),
         listener = object : DNSDaemonListener {
           override fun newRecords(seq: Long, records: List<EthereumNodeRecord>) {

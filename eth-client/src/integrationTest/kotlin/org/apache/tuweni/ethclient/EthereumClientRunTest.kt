@@ -17,10 +17,12 @@
 package org.apache.tuweni.ethclient
 
 import io.vertx.core.Vertx
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.junit.VertxInstance
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -38,5 +40,25 @@ class EthereumClientRunTest {
     client1.stop()
     client2.stop()
     // TODO connect the rlpx servers
+  }
+
+  // this actually connects the client to mainnet!
+  @Disabled
+  @Test
+  fun connectToMainnet(@VertxInstance vertx: Vertx) = runBlocking {
+    val config = EthereumClientConfig.fromString(
+      "" +
+        "[storage.default]\n" +
+        "genesis=\"default\"\n" +
+        "path=\"mainnet\"\n" +
+        "[genesis.default]\n" +
+        "path=classpath:/mainnet.json\n" +
+        "[dns.default]\n" +
+        "enrLink=\"enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@all.mainnet.ethdisco.net\""
+    )
+    val client = EthereumClient(vertx, config)
+    client.start()
+    delay(300000)
+    println("Got ${client.peerRepositories["default"]!!.activeConnections().count()} connections")
   }
 }

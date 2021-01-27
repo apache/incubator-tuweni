@@ -35,6 +35,7 @@ import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.trie.MerkleStorage
 import org.apache.tuweni.trie.StoredMerklePatriciaTrie
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 /**
  * Repository housing blockchain information.
@@ -115,6 +116,8 @@ class BlockchainRepository(
     }
   }
 
+  val blockHeaderListeners = mutableMapOf<String, (BlockHeader) -> Unit>()
+
   /**
    * Stores a block body into the repository.
    *
@@ -174,6 +177,19 @@ class BlockchainRepository(
     blockHeaderStore.put(header.hash, header.toBytes())
     indexBlockHeader(header)
     logger.debug("Stored header {} {}", header.number, header.hash)
+    blockHeaderListeners.values.forEach {
+      it(header)
+    }
+  }
+
+  fun addBlockHeaderListener(listener: (BlockHeader) -> Unit): String {
+    val uuid = UUID.randomUUID().toString()
+    blockHeaderListeners[uuid] = listener
+    return uuid
+  }
+
+  fun removeBlockHeaderListener(listenerId: String) {
+    blockHeaderListeners.remove(listenerId)
   }
 
   private suspend fun indexBlockHeader(header: BlockHeader) {

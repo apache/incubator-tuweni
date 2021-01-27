@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.TransactionPool
 import org.apache.tuweni.rlpx.RLPxService
+import org.apache.tuweni.rlpx.WireConnectionRepository
 import org.apache.tuweni.rlpx.wire.SubProtocol
 import org.apache.tuweni.rlpx.wire.SubProtocolClient
 import org.apache.tuweni.rlpx.wire.SubProtocolHandler
@@ -32,6 +33,8 @@ class EthSubprotocol(
   private val blockchainInfo: BlockchainInformation,
   private val repository: BlockchainRepository,
   private val pendingTransactionsPool: TransactionPool,
+  private val selectionStrategy:
+    (WireConnectionRepository) -> ConnectionSelectionStrategy = ::RandomConnectionSelectionStrategy,
   private val listener: (WireConnection, Status) -> Unit = { _, _ -> }
 ) : SubProtocol {
 
@@ -41,6 +44,7 @@ class EthSubprotocol(
     val ETH64 = SubProtocolIdentifier.of("eth", 64)
     val ETH65 = SubProtocolIdentifier.of("eth", 65)
   }
+
   override fun id(): SubProtocolIdentifier = ETH65
 
   override fun supports(subProtocolIdentifier: SubProtocolIdentifier): Boolean {
@@ -67,6 +71,6 @@ class EthSubprotocol(
   override fun getCapabilities() = mutableListOf(ETH62, ETH63, ETH64, ETH65)
 
   override fun createClient(service: RLPxService): SubProtocolClient {
-    return EthClient(service, pendingTransactionsPool)
+    return EthClient(service, pendingTransactionsPool, selectionStrategy(service.repository()))
   }
 }

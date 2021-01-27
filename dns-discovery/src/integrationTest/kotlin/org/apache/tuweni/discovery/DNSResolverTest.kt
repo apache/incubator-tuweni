@@ -50,7 +50,6 @@ class DNSResolverTest {
       visitor
     )
     assertTrue(nodes.size > 0)
-    println(nodes.size)
   }
 
   @Disabled("too expensive for CI")

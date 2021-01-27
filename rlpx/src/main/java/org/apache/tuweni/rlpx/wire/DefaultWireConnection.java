@@ -160,7 +160,7 @@ public final class DefaultWireConnection implements WireConnection {
       return;
     } else if (message.messageId() == 1) {
       DisconnectMessage disconnect = DisconnectMessage.read(message.content());
-      logger.info("Received disconnect {}", disconnect);
+      logger.debug("Received disconnect {}", disconnect);
       disconnectReceived = true;
       disconnectReason = DisconnectReason.valueOf(disconnect.reason());
       disconnectHandler.run();

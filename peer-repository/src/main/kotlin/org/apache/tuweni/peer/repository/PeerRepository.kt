@@ -49,6 +49,9 @@ interface Peer {
   fun lastDiscovered(): Instant?
 }
 
+/**
+ * Connections of a peer. Can be a past connection.
+ */
 interface Connection {
   fun active(): Boolean
   fun peer(): Peer

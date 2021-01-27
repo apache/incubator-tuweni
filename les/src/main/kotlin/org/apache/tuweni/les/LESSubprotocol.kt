@@ -18,6 +18,7 @@ package org.apache.tuweni.les
 
 import kotlinx.coroutines.Dispatchers
 import org.apache.tuweni.devp2p.eth.BlockchainInformation
+import org.apache.tuweni.devp2p.eth.ConnectionSelectionStrategy
 import org.apache.tuweni.devp2p.eth.EthClient
 import org.apache.tuweni.devp2p.eth.EthController
 import org.apache.tuweni.devp2p.eth.EthRequestsManager
@@ -63,6 +64,7 @@ class LESSubprotocol(
   private val flowControlMinimumRateOfRecharge: UInt256,
   private val repo: BlockchainRepository,
   private val pendingTransactionsPool: TransactionPool,
+  private val connectionSelectionStrategy: ConnectionSelectionStrategy,
   private val listener: (WireConnection, Status) -> Unit = { _, _ -> }
 ) : SubProtocol {
 
@@ -73,7 +75,7 @@ class LESSubprotocol(
    * @return a new client for the subprotocol, bound to the service.
    */
   override fun createClient(service: RLPxService): SubProtocolClient {
-    return EthClient(service, pendingTransactionsPool)
+    return EthClient(service, pendingTransactionsPool, connectionSelectionStrategy)
   }
 
   /**
