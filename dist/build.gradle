@@ -49,7 +49,7 @@ static def mandatoryFiles(CopySpec spec) {
     from ".."
     include 'DISCLAIMER'
   }
-  spec.into('licenses') { from '../build/reports/license' }
+  spec.into('license') { from '../build/reports/license' }
 }
 
 task builtGradleProperties()  {
@@ -75,6 +75,7 @@ asfNexusPassword=
 }
 
 assemble.dependsOn builtGradleProperties
+assemble.dependsOn rootProject.checkLicenses
 assemble.dependsOn createBinaryLicense
 assemble.dependsOn createBinaryNotice
 
@@ -86,6 +87,10 @@ distributions {
       into('') {
         from ".."
         include 'README.md'
+      }
+      into('license') {
+        from "netty-license"
+        include "*"
       }
       into('') {
         from "$project.buildDir/license"
