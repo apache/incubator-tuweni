@@ -12,6 +12,7 @@
  */
 package org.apache.tuweni.bytes;
 
+
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkElementIndex;
 
@@ -204,5 +205,10 @@ final class ConcatenatedBytes extends AbstractBytes {
       offset += vSize;
       destinationOffset += vSize;
     }
+  }
+
+  @Override
+  public int hashCode() {
+    return computeHashcode();
   }
 }

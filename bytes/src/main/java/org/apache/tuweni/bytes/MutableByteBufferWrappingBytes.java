@@ -67,4 +67,9 @@ public class MutableByteBufferWrappingBytes extends ByteBufferWrappingBytes impl
   public Bytes copy() {
     return new ArrayWrappingBytes(toArray());
   }
+
+  @Override
+  public int hashCode() {
+    return computeHashcode();
+  }
 }

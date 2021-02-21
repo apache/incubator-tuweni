@@ -149,35 +149,6 @@ class ArrayWrappingBytes extends AbstractBytes {
     buffer.appendBytes(bytes, offset, length);
   }
 
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == this) {
-      return true;
-    }
-    if (!(obj instanceof ArrayWrappingBytes)) {
-      return super.equals(obj);
-    }
-    ArrayWrappingBytes other = (ArrayWrappingBytes) obj;
-    if (length != other.length) {
-      return false;
-    }
-    for (int i = 0; i < length; ++i) {
-      if (bytes[offset + i] != other.bytes[other.offset + i]) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = 1;
-    int size = size();
-    for (int i = 0; i < size; i++) {
-      result = 31 * result + bytes[offset + i];
-    }
-    return result;
-  }
 
   @Override
   public byte[] toArray() {
