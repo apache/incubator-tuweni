@@ -17,8 +17,9 @@
 package org.apache.tuweni.devp2p.eth
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.concurrent.AsyncCompletion
-import org.apache.tuweni.concurrent.CompletableAsyncCompletion
+import org.apache.tuweni.concurrent.AsyncResult
+import org.apache.tuweni.concurrent.CompletableAsyncResult
+import org.apache.tuweni.eth.Block
 import org.apache.tuweni.eth.BlockBody
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
@@ -30,75 +31,126 @@ import org.apache.tuweni.rlpx.wire.WireConnection
  * Requests manager used to request and check requests of block data
  */
 interface EthRequestsManager {
+
+  /**
+   * Strategy to pick a connection.
+   * @return the connection selection strategy
+   */
+  fun connectionSelectionStrategy(): ConnectionSelectionStrategy
+
   /**
    * Requests a block header
    * @param blockHash the block hash
+   * @param connection the connection to use
    * @return a handle to the completion of the operation
    */
-  fun requestBlockHeader(blockHash: Hash): AsyncCompletion
+  fun requestBlockHeader(
+    blockHash: Hash,
+    connection: WireConnection? = connectionSelectionStrategy().selectConnection()
+  ): AsyncResult<BlockHeader>
+
   /**
    * Requests block headers
    * @param blockHashes the block hashes
+   * @param connection the connection to use
    * @return a handle to the completion of the operation
    */
-  fun requestBlockHeaders(blockHashes: List<Hash>): AsyncCompletion
+  fun requestBlockHeaders(
+    blockHashes: List<Hash>,
+    connection: WireConnection? = connectionSelectionStrategy().selectConnection()
+  ): AsyncResult<List<BlockHeader>>
+
   /**
    * Requests block headers
    * @param blockHash the hash of the block
    * @param maxHeaders the max number of headers to provide
    * @param skip the headers to skip in between each header provided
    * @param reverse whether to provide headers in forward or backwards order
+   * @param connection the connection to use
    * @return a handle to the completion of the operation
    */
-  fun requestBlockHeaders(blockHash: Hash, maxHeaders: Long, skip: Long, reverse: Boolean): AsyncCompletion
+  fun requestBlockHeaders(
+    blockHash: Hash,
+    maxHeaders: Long,
+    skip: Long,
+    reverse: Boolean,
+    connection: WireConnection? = connectionSelectionStrategy().selectConnection()
+  ): AsyncResult<List<BlockHeader>>
+
   /**
    * Requests block headers
    * @param blockNumber the number of the block
    * @param maxHeaders the max number of headers to provide
    * @param skip the headers to skip in between each header provided
    * @param reverse whether to provide headers in forward or backwards order
+   * @param connection the connection to use
    * @return a handle to the completion of the operation
    */
-  fun requestBlockHeaders(blockNumber: Long, maxHeaders: Long, skip: Long, reverse: Boolean): AsyncCompletion
+  fun requestBlockHeaders(
+    blockNumber: Long,
+    maxHeaders: Long,
+    skip: Long,
+    reverse: Boolean,
+    connection: WireConnection? = connectionSelectionStrategy().selectConnection()
+  ): AsyncResult<List<BlockHeader>>
+
   /**
    * Requests block bodies from block hashes
    * @param blockHashes the hashes of the blocks
+   * @param connection the connection to use
    * @return a handle to the completion of the operation
    */
-  fun requestBlockBodies(blockHashes: List<Hash>): AsyncCompletion
+  fun requestBlockBodies(
+    blockHashes: List<Hash>,
+    connection: WireConnection? = connectionSelectionStrategy().selectConnection()
+  ): AsyncResult<List<BlockBody>>
+
   /**
    * Requests a block from block hash
    * @param blockHash the hash of the block
+   * @param connection the connection to use
    * @return a handle to the completion of the operation
    */
-  fun requestBlock(blockHash: Hash): AsyncCompletion
+  fun requestBlock(
+    blockHash: Hash,
+    connection: WireConnection? = connectionSelectionStrategy().selectConnection()
+  ): AsyncResult<Block>
+
   /**
    * Requests transaction receipts
    * @param blockHashes the hashes to request transaction receipts for
+   * @param connection the connection to use
    * @return a handle to the completion of the operation
    */
-  fun requestTransactionReceipts(blockHashes: List<Hash>): AsyncCompletion
+  fun requestTransactionReceipts(
+    blockHashes: List<Hash>,
+    connection: WireConnection? = connectionSelectionStrategy().selectConnection()
+  ): AsyncResult<List<List<TransactionReceipt>>>
+
   /**
    * Checks if a request was made to get block headers
    * @param connection the wire connection sending data
-   * @param header the block header just received
+   * @params headers list of block headers just received
    * @return a handle to the completion of the operation, or null if no such request was placed
    */
-  fun wasRequested(connection: WireConnection, header: BlockHeader): CompletableAsyncCompletion?
+  fun wasRequested(connection: WireConnection, headers: List<BlockHeader>): CompletableAsyncResult<List<BlockHeader>>?
+
   /**
    * Checks if a request was made to get block bodies
    * @param connection the wire connection sending data
    * @param bodies the bodies just received
    * @return a handle to the completion of the operation, with metadata, or null if no such request was placed
    */
-  fun wasRequested(connection: WireConnection, bodies: List<BlockBody>): Request?
+  fun wasRequested(connection: WireConnection, bodies: List<BlockBody>): Request<List<BlockBody>>?
+
   /**
    * Checks if a request was made to get node data
    * @param connection the wire connection sending data
    * @param elements the data just received
    * @return a handle to the completion of the operation, with metadata, or null if no such request was placed
    */
-  fun nodeDataWasRequested(connection: WireConnection, elements: List<Bytes?>): Request?
+  fun nodeDataWasRequested(connection: WireConnection, elements: List<Bytes?>): Request<List<Bytes?>>?
+
   /**
    * Checks if a request was made to get transaction receipts
    * @param connection the wire connection sending data
@@ -108,7 +160,7 @@ interface EthRequestsManager {
   fun transactionReceiptsRequested(
     connection: WireConnection,
     transactionReceipts: List<List<TransactionReceipt>>
-  ): Request?
+  ): Request<List<List<TransactionReceipt>>>?
 
   /**
    * Submits a new pending transaction to the transaction pool to be gossiped to peers.
@@ -123,4 +175,4 @@ interface EthRequestsManager {
  * @param handle the handle to the request completion
  * @param data data associated with the request
  */
-data class Request(val connectionId: String, val handle: CompletableAsyncCompletion, val data: Any)
+data class Request<T>(val connectionId: String, val handle: CompletableAsyncResult<T>, val data: Any)

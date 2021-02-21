@@ -20,7 +20,7 @@ dependencies {
   implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
   implementation 'org.apache.lucene:lucene-core'
 
-
+  implementation project(':bytes')
   implementation project(':devp2p-eth')
   implementation project(':devp2p')
   implementation project(':concurrent')
@@ -43,6 +43,7 @@ dependencies {
   testImplementation 'org.junit.jupiter:junit-jupiter-params'
   testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin'
   testImplementation 'org.mockito:mockito-junit-jupiter'
+  testImplementation 'ch.qos.logback:logback-classic'
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 

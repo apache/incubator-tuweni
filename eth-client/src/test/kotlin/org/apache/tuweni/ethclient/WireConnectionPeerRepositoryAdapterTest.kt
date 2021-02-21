@@ -20,8 +20,6 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.junit.BouncyCastleExtension
-import org.apache.tuweni.peer.repository.PeerRepository
-import org.apache.tuweni.peer.repository.memory.MemoryPeerRepository
 import org.apache.tuweni.rlpx.wire.WireConnection
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -34,7 +32,7 @@ class WireConnectionPeerRepositoryAdapterTest {
 
   @Test
   fun testCloseNoop() {
-    val repository = mock(PeerRepository::class.java)
+    val repository = mock(EthereumPeerRepository::class.java)
     val connRepo = WireConnectionPeerRepositoryAdapter(repository)
     connRepo.close()
     verifyNoInteractions(repository)
@@ -42,7 +40,7 @@ class WireConnectionPeerRepositoryAdapterTest {
 
   @Test
   fun addPeer() {
-    val repository = MemoryPeerRepository()
+    val repository = MemoryEthereumPeerRepository()
     val connRepo = WireConnectionPeerRepositoryAdapter(repository)
     val pubKey = SECP256K1.KeyPair.random().publicKey()
     val conn = mock<WireConnection> {
@@ -64,7 +62,7 @@ class WireConnectionPeerRepositoryAdapterTest {
 
   @Test
   fun addAndGet() {
-    val repository = MemoryPeerRepository()
+    val repository = MemoryEthereumPeerRepository()
     val connRepo = WireConnectionPeerRepositoryAdapter(repository)
     val pubKey = SECP256K1.KeyPair.random().publicKey()
     val conn = mock<WireConnection> {

@@ -105,23 +105,10 @@ class EthController(
   }
 
   suspend fun addNewBlockHeaders(connection: WireConnection, headers: List<BlockHeader>) {
-    val handle = requestsManager.wasRequested(connection, headers.first()) ?: return
-    val bodiesToRequest = mutableListOf<Hash>()
-    val headersToRequest = mutableListOf<Hash>()
-    headers.forEach { header ->
-      repository.storeBlockHeader(header)
-      if (!repository.hasBlockBody(header.hash)) {
-        bodiesToRequest.add(header.hash)
-      }
-      header.parentHash?.let {
-        if (!repository.hasBlockHeader(it)) {
-          headersToRequest.add(it)
-        }
-      }
+    val request = requestsManager.wasRequested(connection, headers)
+    if (request != null) {
+      request.complete(headers)
     }
-    requestsManager.requestBlockHeaders(headersToRequest)
-    requestsManager.requestBlockBodies(bodiesToRequest)
-    handle.complete()
   }
 
   suspend fun addNewBlockBodies(connection: WireConnection, bodies: List<BlockBody>) {
@@ -131,6 +118,7 @@ class EthController(
       for (i in 0..hashes.size) {
         repository.storeBlockBody(hashes[i] as Hash, bodies[i])
       }
+      request.handle.complete(bodies)
     }
   }
 
@@ -150,6 +138,7 @@ class EthController(
           repository.storeNodeData(hashes[i] as Hash, elt)
         }
       }
+      request.handle.complete(elements)
     }
   }
 
@@ -172,6 +161,7 @@ class EthController(
           )
         }
       }
+      request.handle.complete(transactionReceipts)
     }
   }
 

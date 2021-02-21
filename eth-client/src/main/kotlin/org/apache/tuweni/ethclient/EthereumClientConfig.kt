@@ -63,7 +63,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       DNSConfigurationImpl(
         section,
         sectionConfig.getString("peerRepository"),
-        sectionConfig.getString("domain"),
+        sectionConfig.getString("enrLink"),
         sectionConfig.getLong("pollingPeriod")
       )
     }
@@ -76,7 +76,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       storageSection.addString("genesis", null, "Reference to a genesis configuration", null)
 
       val dnsSection = SchemaBuilder.create()
-      dnsSection.addString("domain", null, "DNS domain to query for records", null)
+      dnsSection.addString("enrLink", null, "DNS domain to query for records", null)
       dnsSection.addLong("pollingPeriod", 50000, "Polling period to refresh DNS records", null)
       dnsSection.addString("peerRepository", "default", "Peer repository to which records should go", null)
       val builder = SchemaBuilder.create()
@@ -132,7 +132,7 @@ interface RLPxServiceConfiguration {
 }
 
 interface DNSConfiguration {
-  fun domain(): String
+  fun enrLink(): String
   fun pollingPeriod(): Long
   fun getName(): String
   fun peerRepository(): String
@@ -184,7 +184,7 @@ internal data class DataStoreConfigurationImpl(
 data class DNSConfigurationImpl(
   private val name: String,
   private val peerRepository: String,
-  private val domain: String,
+  private val enrLink: String,
   private val pollingPeriod: Long
 ) :
   DNSConfiguration {
@@ -192,7 +192,7 @@ data class DNSConfigurationImpl(
 
   override fun peerRepository() = peerRepository
 
-  override fun domain(): String = domain
+  override fun enrLink() = enrLink
 
   override fun pollingPeriod(): Long = pollingPeriod
 }

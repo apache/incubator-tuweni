@@ -18,11 +18,13 @@ package org.apache.tuweni.les
 
 import kotlinx.coroutines.Dispatchers
 import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.devp2p.eth.RandomConnectionSelectionStrategy
 import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.MemoryTransactionPool
 import org.apache.tuweni.junit.TempDirectoryExtension
+import org.apache.tuweni.rlpx.MemoryWireConnectionsRepository
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
 import org.apache.tuweni.units.bigints.UInt256
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -57,7 +59,8 @@ internal class LESSubprotocolTest {
       UInt256.ZERO,
       UInt256.ZERO,
       BlockchainRepository.inMemory(),
-      MemoryTransactionPool()
+      MemoryTransactionPool(),
+      RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository())
     )
     assertTrue(sp.supports(SubProtocolIdentifier.of("les", 2)))
   }
@@ -76,7 +79,8 @@ internal class LESSubprotocolTest {
       UInt256.ZERO,
       UInt256.ZERO,
       BlockchainRepository.inMemory(),
-      MemoryTransactionPool()
+      MemoryTransactionPool(),
+      RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository())
     )
     assertFalse(sp.supports(SubProtocolIdentifier.of("les", 3)))
   }
@@ -94,7 +98,8 @@ internal class LESSubprotocolTest {
       UInt256.ZERO,
       UInt256.ZERO,
       BlockchainRepository.inMemory(),
-      MemoryTransactionPool()
+      MemoryTransactionPool(),
+      RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository())
     )
     assertFalse(sp.supports(SubProtocolIdentifier.of("eth", 2)))
   }

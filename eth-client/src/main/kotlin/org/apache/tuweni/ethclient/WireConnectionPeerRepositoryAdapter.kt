@@ -16,16 +16,22 @@
  */
 package org.apache.tuweni.ethclient
 
-import org.apache.tuweni.peer.repository.PeerRepository
+import org.apache.tuweni.devp2p.eth.Status
 import org.apache.tuweni.rlpx.WireConnectionRepository
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
 import org.apache.tuweni.rlpx.wire.WireConnection
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
-class WireConnectionPeerRepositoryAdapter(val peerRepository: PeerRepository) : WireConnectionRepository {
+/**
+ * Class bridging the subprotocols and the connection repository of the RLPx service, updating the Ethereum peer repository with information.
+ */
+class WireConnectionPeerRepositoryAdapter(val peerRepository: EthereumPeerRepository) : WireConnectionRepository {
 
+  private val wireConnectionToIdentities = ConcurrentHashMap<String, String>()
+  private val connections = ConcurrentHashMap<String, WireConnection>()
   private val connectionListeners = ArrayList<WireConnectionRepository.Listener>()
+
   private val disconnectionListeners = ArrayList<WireConnectionRepository.Listener>()
 
   override fun addConnectionListener(listener: WireConnectionRepository.Listener) {
@@ -36,14 +42,14 @@ class WireConnectionPeerRepositoryAdapter(val peerRepository: PeerRepository) : 
     disconnectionListeners.add(listener)
   }
 
-  private val connections = ConcurrentHashMap<String, WireConnection>()
-
   override fun add(wireConnection: WireConnection): String {
     val id =
       peerRepository.storeIdentity(wireConnection.peerHost(), wireConnection.peerPort(), wireConnection.peerPublicKey())
+
     val peer = peerRepository.storePeer(id, Instant.now(), Instant.now())
     peerRepository.addConnection(peer, id)
     connections[id.id()] = wireConnection
+    wireConnectionToIdentities[wireConnection.uri()] = id.id()
     wireConnection.registerListener {
       if (it == WireConnection.Event.CONNECTED) {
         for (listener in connectionListeners) {
@@ -53,6 +59,7 @@ class WireConnectionPeerRepositoryAdapter(val peerRepository: PeerRepository) : 
         for (listener in disconnectionListeners) {
           listener.connectionEvent(wireConnection)
         }
+        peerRepository.markConnectionInactive(peer, id)
       }
     }
     return id.id()
@@ -67,5 +74,12 @@ class WireConnectionPeerRepositoryAdapter(val peerRepository: PeerRepository) : 
 
   override fun close() {
     connections.clear()
+    wireConnectionToIdentities.clear()
+  }
+
+  fun get(ethereumConnection: EthereumConnection): WireConnection? = connections[ethereumConnection.identity().id()]
+
+  fun listenToStatus(conn: WireConnection, status: Status) {
+    wireConnectionToIdentities[conn.uri()]?.let { peerRepository.storeStatus(it, status) }
   }
 }
