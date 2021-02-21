@@ -30,7 +30,7 @@ const val DELAY: Long = 1000
 const val HEADER_PARENT_HEADER_REQUEST_SIZE: Long = 64
 
 class FromUnknownParentSynchronizer(
-  executor: ExecutorService = Executors.newFixedThreadPool(1),
+  executor: ExecutorService = Executors.newSingleThreadExecutor(),
   coroutineContext: CoroutineContext = executor.asCoroutineDispatcher(),
   repository: BlockchainRepository,
   client: EthClient,

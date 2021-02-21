@@ -34,7 +34,7 @@ const val HEADER_REQUEST_SIZE = 1024L
  *
  */
 class PeerStatusEthSynchronizer(
-  executor: ExecutorService = Executors.newFixedThreadPool(1),
+  executor: ExecutorService = Executors.newSingleThreadExecutor(),
   coroutineContext: CoroutineContext = executor.asCoroutineDispatcher(),
   repository: BlockchainRepository,
   client: EthClient,

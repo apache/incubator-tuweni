@@ -130,7 +130,7 @@ interface EthRequestsManager {
   /**
    * Checks if a request was made to get block headers
    * @param connection the wire connection sending data
-   * @param header the block header just received
+   * @params headers list of block headers just received
    * @return a handle to the completion of the operation, or null if no such request was placed
    */
   fun wasRequested(connection: WireConnection, headers: List<BlockHeader>): CompletableAsyncResult<List<BlockHeader>>?

@@ -28,7 +28,7 @@ import kotlin.coroutines.CoroutineContext
 const val BEST_PEER_DELAY: Long = 5000
 
 class FromBestBlockSynchronizer(
-  executor: ExecutorService = Executors.newFixedThreadPool(1),
+  executor: ExecutorService = Executors.newSingleThreadExecutor(),
   coroutineContext: CoroutineContext = executor.asCoroutineDispatcher(),
   repository: BlockchainRepository,
   client: EthClient,
