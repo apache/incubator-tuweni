@@ -27,9 +27,9 @@ task createBinaryLicense {
 
   doLast {
     new File("$project.buildDir/license").mkdirs()
-    def binaryNoticeFile = new File("$project.buildDir/license/LICENSE")
-    binaryNoticeFile.write(new File("$rootProject.projectDir/LICENSE").text)
-    binaryNoticeFile.append(new File("$project.projectDir/LICENSE-binary").text)
+    def binaryLicenseFile = new File("$project.buildDir/license/LICENSE")
+    binaryLicenseFile.write(new File("$rootProject.projectDir/LICENSE").text)
+    binaryLicenseFile.append(new File("$project.projectDir/LICENSE-binary").text)
   }
 }
 
@@ -49,7 +49,7 @@ static def mandatoryFiles(CopySpec spec) {
     from ".."
     include 'DISCLAIMER'
   }
-  spec.into('license') { from '../build/reports/license' }
+  spec.into('license-reports') { from '../build/reports/license' }
 }
 
 task builtGradleProperties()  {
@@ -88,7 +88,7 @@ distributions {
         from ".."
         include 'README.md'
       }
-      into('license') {
+      into('license-reports') {
         from "netty-license"
         include "*"
       }
