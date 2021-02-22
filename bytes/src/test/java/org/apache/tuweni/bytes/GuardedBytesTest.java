@@ -178,7 +178,8 @@ class GuardedBytesTest extends CommonBytesTests {
 
     // Sanity check for copy(): modify within the wrapped slice and check the copy differs now.
     bytes[2] = 42;
-    assertNotEquals(copy, wrapped);
+    assertEquals("0x2a7f", wrapped.toHexString());
+    assertEquals(Bytes.fromHexString("0x7f7f"), copy);
   }
 
   @Test

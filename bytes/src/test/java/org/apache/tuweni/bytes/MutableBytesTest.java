@@ -13,9 +13,12 @@
 package org.apache.tuweni.bytes;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.nio.ByteBuffer;
 
 import io.netty.buffer.Unpooled;
 import io.vertx.core.buffer.Buffer;
@@ -108,5 +111,37 @@ class MutableBytesTest {
     assertSame(MutableBytes.EMPTY, b);
     b = MutableBytes.wrapByteBuf(Unpooled.buffer(), 4, 0);
     assertSame(MutableBytes.EMPTY, b);
+  }
+
+  @Test
+  void testHashcodeUpdates() {
+    MutableBytes dest = MutableBytes.create(32);
+    int hashCode = dest.hashCode();
+    dest.set(1, (byte) 123);
+    assertNotEquals(hashCode, dest.hashCode());
+  }
+
+  @Test
+  void testHashcodeUpdatesBuffer() {
+    MutableBytes dest = MutableBytes.wrapBuffer(Buffer.buffer(new byte[4]));
+    int hashCode = dest.hashCode();
+    dest.set(1, (byte) 123);
+    assertNotEquals(hashCode, dest.hashCode());
+  }
+
+  @Test
+  void testHashcodeUpdatesByteBuffer() {
+    MutableBytes dest = MutableBytes.wrapByteBuffer(ByteBuffer.wrap(new byte[4]));
+    int hashCode = dest.hashCode();
+    dest.set(1, (byte) 123);
+    assertNotEquals(hashCode, dest.hashCode());
+  }
+
+  @Test
+  void testHashcodeUpdatesByteBuf() {
+    MutableBytes dest = MutableBytes.wrapByteBuf(Unpooled.buffer(4));
+    int hashCode = dest.hashCode();
+    dest.set(1, (byte) 123);
+    assertNotEquals(hashCode, dest.hashCode());
   }
 }

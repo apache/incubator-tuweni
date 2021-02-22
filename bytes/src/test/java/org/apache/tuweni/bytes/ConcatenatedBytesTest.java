@@ -16,6 +16,7 @@ import static org.apache.tuweni.bytes.Bytes.fromHexString;
 import static org.apache.tuweni.bytes.Bytes.wrap;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -112,5 +113,14 @@ class ConcatenatedBytesTest {
     MutableBytes dest = MutableBytes.create(32);
     bytes.copyTo(dest, 10);
     assertEquals(Bytes.fromHexString("0x0000000000000000000001234567000000000000000000000000000000000000"), dest);
+  }
+
+  @Test
+  void testHashcodeUpdates() {
+    MutableBytes dest = MutableBytes.create(32);
+    Bytes bytes = wrap(dest, fromHexString("0x4567"));
+    int hashCode = bytes.hashCode();
+    dest.set(1, (byte) 123);
+    assertNotEquals(hashCode, bytes.hashCode());
   }
 }

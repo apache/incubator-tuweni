@@ -89,4 +89,9 @@ class MutableArrayWrappingBytes extends ArrayWrappingBytes implements MutableByt
   public Bytes copy() {
     return new ArrayWrappingBytes(toArray());
   }
+
+  @Override
+  public int hashCode() {
+    return computeHashcode();
+  }
 }

@@ -20,6 +20,8 @@ public abstract class AbstractBytes implements Bytes {
 
   static final char[] HEX_CODE = "0123456789abcdef".toCharArray();
 
+  private Integer hashCode;
+
   /**
    * Compare this value and the provided one for equality.
    *
@@ -48,16 +50,24 @@ public abstract class AbstractBytes implements Bytes {
         return false;
       }
     }
+
     return true;
   }
 
-  @Override
-  public int hashCode() {
+  protected int computeHashcode() {
     int result = 1;
     for (int i = 0; i < size(); i++) {
       result = 31 * result + get(i);
     }
     return result;
+  }
+
+  @Override
+  public int hashCode() {
+    if (this.hashCode == null) {
+      this.hashCode = computeHashcode();
+    }
+    return this.hashCode;
   }
 
   @Override

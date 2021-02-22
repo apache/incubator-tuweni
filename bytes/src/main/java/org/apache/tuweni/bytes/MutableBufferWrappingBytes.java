@@ -73,4 +73,9 @@ final class MutableBufferWrappingBytes extends BufferWrappingBytes implements Mu
   public MutableBytes mutableCopy() {
     return MutableBytes.wrap(toArray());
   }
+
+  @Override
+  public int hashCode() {
+    return computeHashcode();
+  }
 }
