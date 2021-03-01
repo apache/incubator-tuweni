@@ -14,7 +14,7 @@
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import org.gradle.crypto.checksum.Checksum
 
-plugins { id 'com.bmuschko.docker-remote-api' version '3.2.3' }
+plugins { id 'com.bmuschko.docker-remote-api' version '6.7.0' }
 
 description = 'Tuweni distribution.'
 
@@ -224,19 +224,15 @@ task createChecksums(type: Checksum, dependsOn: [
 
 build.dependsOn('createChecksums')
 
-task buildGossipImage(type: DockerBuildImage) {
+task buildBinImage(type: DockerBuildImage) {
   dependsOn distTar
   inputDir = projectDir
-  dockerFile = file("docker/gossip.Dockerfile")
-  tag = "apache-tuweni/gossip:$project.version"
+  dockerFile = file("docker/tuweni.Dockerfile")
+  images = [
+    "apache-tuweni/tuweni:$project.version"
+  ]
 }
 
-task buildRelayerImage(type: DockerBuildImage) {
-  dependsOn distTar
-  inputDir = projectDir
-  dockerFile = file("docker/relayer.Dockerfile")
-  tag = "apache-tuweni/relayer:$project.version"
-}
 integrationTest.dependsOn build
 
 dependencies {
