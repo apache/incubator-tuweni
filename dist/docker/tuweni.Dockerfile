@@ -11,9 +11,13 @@
 
 FROM openjdk:11.0.3-jre-stretch
 
-COPY build/distributions/tuweni-bin-*.tgz /usr/relayer.tgz
-RUN cd /usr \
-  && tar xzf relayer.tgz \
-  && mv tuweni-relayer-*/relayer relayer
+RUN apt-get update && apt-get install -y libsodium-dev
 
-ENTRYPOINT ["/usr/relayer/bin/relayer"]
+COPY build/distributions/tuweni-bin-*.tgz /usr/tuweni.tgz
+RUN cd /usr \
+  && tar xzf tuweni.tgz \
+  && mv /usr/tuweni-bin-* /usr/tuweni \
+  && rm tuweni.tgz
+
+WORKDIR "/usr/tuweni/bin"
+ENTRYPOINT ["/usr/tuweni/bin/tuweni"]
