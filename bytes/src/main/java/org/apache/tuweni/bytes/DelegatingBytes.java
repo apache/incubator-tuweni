@@ -22,7 +22,7 @@ package org.apache.tuweni.bytes;
  */
 public class DelegatingBytes extends AbstractBytes implements Bytes {
 
-  private final Bytes delegate;
+  final Bytes delegate;
 
   protected DelegatingBytes(Bytes delegate) {
     this.delegate = delegate;
@@ -52,4 +52,15 @@ public class DelegatingBytes extends AbstractBytes implements Bytes {
   public MutableBytes mutableCopy() {
     return MutableBytes.wrap(toArray());
   }
+
+  @Override
+  public boolean equals(final Object o) {
+    return delegate.equals(o);
+  }
+
+  @Override
+  public int hashCode() {
+    return delegate.hashCode();
+  }
+
 }

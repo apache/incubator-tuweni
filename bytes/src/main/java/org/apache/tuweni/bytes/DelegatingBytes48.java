@@ -20,27 +20,15 @@ package org.apache.tuweni.bytes;
  * <p>
  * This class may be used to create more types that represent 48 bytes, but need a different name for business logic.
  */
-public class DelegatingBytes48 extends AbstractBytes implements Bytes48 {
-
-  private final Bytes delegate;
+public class DelegatingBytes48 extends DelegatingBytes implements Bytes48 {
 
   protected DelegatingBytes48(Bytes delegate) {
-    this.delegate = delegate;
+    super(delegate);
   }
 
   @Override
   public int size() {
     return Bytes48.SIZE;
-  }
-
-  @Override
-  public byte get(int i) {
-    return delegate.get(i);
-  }
-
-  @Override
-  public Bytes slice(int index, int length) {
-    return delegate.slice(index, length);
   }
 
   @Override
