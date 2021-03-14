@@ -34,6 +34,7 @@ class DNSResolverTest {
     assertNotNull(rec)
   }
 
+  @Disabled("too unstable on CI")
   @Test
   fun resolveAllGoerliNodes() {
     val resolver = DNSResolver()

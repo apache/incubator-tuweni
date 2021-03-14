@@ -22,12 +22,14 @@ import org.apache.tuweni.junit.BouncyCastleExtension;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(BouncyCastleExtension.class)
 class DiscoveryAPITest {
 
+  @Disabled("too unstable on CI")
   @Test
   void resolveNames() {
     DNSResolver resolver = new DNSResolver();
