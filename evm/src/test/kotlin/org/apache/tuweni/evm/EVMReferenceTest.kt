@@ -28,6 +28,7 @@ import org.apache.tuweni.eth.EthJsonModule
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.evm.impl.EvmVmImpl
 import org.apache.tuweni.io.Resources
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.LuceneIndexWriter
@@ -44,6 +45,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assumptions.assumeFalse
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
@@ -54,6 +56,7 @@ import java.io.InputStream
 import java.io.UncheckedIOException
 import java.util.stream.Stream
 
+@Disabled
 @ExtendWith(LuceneIndexWriterExtension::class, BouncyCastleExtension::class)
 class EVMReferenceTest {
 
@@ -157,7 +160,7 @@ class EVMReferenceTest {
         repository.storeCode(state.code!!)
       }
     }
-    val vm = EthereumVirtualMachine(repository, evmcFile, evmOneVm)
+    val vm = EthereumVirtualMachine(repository, EvmVmImpl::create)
     vm.start()
     try {
       val result = vm.execute(

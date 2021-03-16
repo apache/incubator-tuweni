@@ -23,11 +23,7 @@ import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
-import org.ethereum.evmc.EvmcVm
-import org.ethereum.evmc.HostContext
 import org.slf4j.LoggerFactory
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 
 /**
  * Types of EVM calls
@@ -115,55 +111,17 @@ data class EVMResult(
 /**
  * Message sent to the EVM for execution
  */
-internal data class EVMMessage(
+data class EVMMessage(
   val kind: Int,
   val flags: Int,
   val depth: Int = 0,
   val gas: Gas,
   val destination: Address,
   val sender: Address,
-  val inputData: Long,
-  val inputDataSize: Int,
+  val inputData: Bytes,
   val value: Bytes,
   val createSalt: Bytes32 = Bytes32.ZERO
-) {
-
-  companion object {
-    fun fromBytes(message: Bytes): EVMMessage {
-      return EVMMessage(
-        message.getInt(0),
-        message.getInt(4),
-        message.getInt(8),
-        Gas.valueOf(message.getLong(16)),
-        Address.fromBytes(message.slice(24, 20)),
-        Address.fromBytes(message.slice(44, 20)),
-        message.getLong(64),
-        message.getInt(72),
-        message.slice(76, 32),
-        Bytes32.wrap(message.slice(108, 32))
-      )
-    }
-  }
-
-  fun toByteBuffer(): ByteBuffer {
-
-    return ByteBuffer.allocateDirect(
-      4 + 4 + 4 + 4 + 8 + 20 + 20 + 8 +
-        4 + 32 + 32
-    ).order(ByteOrder.nativeOrder())
-      .putInt(kind)
-      .putInt(flags)
-      .putInt(depth)
-      .putInt(0) // padding?
-      .putLong(gas.toLong())
-      .put(destination.toArrayUnsafe())
-      .put(sender.toArrayUnsafe())
-      .putLong(inputData)
-      .putInt(inputDataSize)
-      .put(Bytes32.leftPad(value).toArrayUnsafe())
-      .put(createSalt.toArrayUnsafe())
-  }
-}
+)
 
 /**
  * An Ethereum Virtual Machine.
@@ -175,8 +133,7 @@ internal data class EVMMessage(
  */
 class EthereumVirtualMachine(
   private val repository: BlockchainRepository,
-  private val evmcFile: String,
-  private val vmFile: String,
+  private val evmVmFactory: () -> EvmVm,
   private val options: Map<String, String> = mapOf()
 ) {
 
@@ -184,7 +141,7 @@ class EthereumVirtualMachine(
     private val logger = LoggerFactory.getLogger(EthereumVirtualMachine::class.java)
   }
 
-  private var vm: EvmcVm? = null
+  private var vm: EvmVm? = null
 
   private fun vm() = vm!!
 
@@ -192,9 +149,9 @@ class EthereumVirtualMachine(
    * Start the EVM
    */
   fun start() {
-    vm = EvmcVm.create(evmcFile, vmFile)
+    vm = evmVmFactory()
     options.forEach { (k, v) ->
-      vm().set_option(k, v)
+      vm().setOption(k, v)
     }
   }
 
@@ -262,14 +219,13 @@ class EthereumVirtualMachine(
       currentGasLimit,
       currentDifficulty
     )
-    val inputDataBuffer = ByteBuffer.allocateDirect(inputData.size()).put(inputData.toArrayUnsafe())
     val result =
       executeInternal(
         sender,
         destination,
         value,
         code,
-        vm().address(inputDataBuffer),
+        inputData,
         inputData.size(),
         gas,
         callKind,
@@ -278,7 +234,7 @@ class EthereumVirtualMachine(
         hostContext
       )
 
-    return EVMResult.fromBytes(Bytes.wrapByteBuffer(result), hostContext)
+    return result
   }
 
   internal fun executeInternal(
@@ -286,27 +242,27 @@ class EthereumVirtualMachine(
     destination: Address,
     value: Bytes,
     code: Bytes,
-    inputData: Long,
+    inputData: Bytes,
     inputDataSize: Int,
     gas: Gas,
     callKind: CallKind = CallKind.EVMC_CALL,
     revision: HardFork = HardFork.EVMC_MAX_REVISION,
     depth: Int = 0,
     hostContext: HostContext
-  ): ByteBuffer {
+  ): EVMResult {
     val msg =
       EVMMessage(
         callKind.number, 0, depth, gas, destination, sender, inputData,
-        inputDataSize, value
-      ).toByteBuffer()
+        value
+      )
 
     val result = vm().execute(
       hostContext,
       revision.number,
       msg,
-      ByteBuffer.allocateDirect(code.size()).put(code.toArrayUnsafe()),
+      code,
       code.size()
-    ).order(ByteOrder.nativeOrder())
+    )
     return result
   }
 
@@ -315,5 +271,5 @@ class EthereumVirtualMachine(
    *
    * @return the EVM capabilities
    */
-  fun capabilities(): Int = vm()._capabilities
+  fun capabilities(): Int = vm().capabilities()
 }
