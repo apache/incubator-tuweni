@@ -42,7 +42,7 @@ class EvmVmImpl() : EvmVm {
     TODO("Not yet implemented")
   }
 
-  override fun execute(hostContext: HostContext, number: Int, msg: EVMMessage, put: Bytes?, size: Int): EVMResult {
+  override fun execute(hostContext: HostContext, fork: Int, msg: EVMMessage, code: Bytes?): EVMResult {
     TODO("Not yet implemented")
   }
 

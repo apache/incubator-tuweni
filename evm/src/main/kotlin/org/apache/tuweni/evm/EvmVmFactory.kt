@@ -18,6 +18,7 @@ package org.apache.tuweni.evm
 
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.eth.Address
 
 /**
  * This interface represents the callback functions must be implemented in order to interface with
@@ -33,7 +34,7 @@ interface HostContext {
    * @param address The address of the account the query is about.
    * @return true if exists, false otherwise.
    */
-  fun accountExists(address: Bytes?): Boolean
+  suspend fun accountExists(address: Address): Boolean
 
   /**
    * Get storage function.
@@ -45,7 +46,7 @@ interface HostContext {
    * @param key The index of the account's storage entry.
    * @return The storage value at the given storage key or null bytes if the account does not exist.
    */
-  fun getStorage(address: Bytes?, key: Bytes?): Bytes?
+  suspend fun getStorage(address: Address, keyBytes: Bytes): Bytes32
 
   /**
    * Set storage function.
@@ -61,7 +62,7 @@ interface HostContext {
    * @param value The value to be stored.
    * @return The effect on the storage item.
    */
-  fun setStorage(address: Bytes?, key: Bytes?, value: Bytes?): Int
+  suspend fun setStorage(address: Address, key: Bytes, value: Bytes32): Int
 
   /**
    * Get balance function.
@@ -72,7 +73,7 @@ interface HostContext {
    * @param address The address of the account.
    * @return The balance of the given account or 0 if the account does not exist.
    */
-  fun getBalance(address: Bytes?): Bytes?
+  suspend fun getBalance(address: Address): Bytes32
 
   /**
    * Get code size function.
@@ -84,7 +85,7 @@ interface HostContext {
    * @param address The address of the account.
    * @return The size of the code in the account or 0 if the account does not exist.
    */
-  fun getCodeSize(address: Bytes?): Int
+  suspend fun getCodeSize(address: Address): Int
 
   /**
    * Get code hash function.
@@ -97,7 +98,7 @@ interface HostContext {
    * @param address The address of the account.
    * @return The hash of the code in the account or null bytes if the account does not exist.
    */
-  fun getCodeHash(address: Bytes?): Bytes32?
+  suspend fun getCodeHash(address: Address): Bytes32
 
   /**
    * Copy code function.
@@ -111,7 +112,7 @@ interface HostContext {
    * @param address The address of the account.
    * @return A copy of the requested code.
    */
-  fun getCode(address: Bytes?): Bytes?
+  suspend fun getCode(address: Address): Bytes
 
   /**
    * Selfdestruct function.
@@ -123,7 +124,7 @@ interface HostContext {
    * @param address The address of the contract to be selfdestructed.
    * @param beneficiary The address where the remaining ETH is going to be transferred.
    */
-  fun selfdestruct(address: Bytes?, beneficiary: Bytes?)
+  suspend fun selfdestruct(address: Address, beneficiary: Address)
 
   /**
    * This function supports EVM calls.
@@ -131,7 +132,7 @@ interface HostContext {
    * @param msg The call parameters.
    * @return The result of the call.
    */
-  fun call(msg: Bytes?): Bytes?
+  suspend fun call(evmMessage: EVMMessage): EVMResult
 
   /**
    * Get transaction context function.
@@ -141,7 +142,7 @@ interface HostContext {
    *
    * @return The transaction context.
    */
-  val txContext: Bytes?
+  fun getTxContext(): Bytes?
 
   /**
    * Get block hash function.
@@ -154,7 +155,7 @@ interface HostContext {
    * @param number The block number.
    * @return The block hash or null bytes if the information about the block is not available.
    */
-  fun getBlockHash(number: Long): Bytes?
+  fun getBlockHash(number: Long): Bytes32
 
   /**
    * Log function.
@@ -169,13 +170,13 @@ interface HostContext {
    * @param topics The the array of topics attached to the log.
    * @param topicCount The number of the topics. Valid values are between 0 and 4 inclusively.
    */
-  fun emitLog(address: Bytes?, data: Bytes?, dataSize: Int, topics: Array<Bytes?>?, topicCount: Int)
+  fun emitLog(address: Address, data: Bytes, topics: Array<Bytes>, topicCount: Int)
 }
 
 interface EvmVm {
   fun setOption(key: String, value: String)
   fun version(): String
   fun close()
-  fun execute(hostContext: HostContext, number: Int, msg: EVMMessage, put: Bytes?, size: Int): EVMResult
+  fun execute(hostContext: HostContext, fork: Int, msg: EVMMessage, code: Bytes?): EVMResult
   fun capabilities(): Int
 }

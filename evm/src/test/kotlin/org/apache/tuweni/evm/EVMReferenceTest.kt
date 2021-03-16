@@ -42,8 +42,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assumptions.assumeFalse
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
@@ -66,14 +64,6 @@ class EVMReferenceTest {
 
     init {
       mapper.registerModule(EthJsonModule())
-    }
-
-    @JvmStatic
-    @BeforeAll
-    fun checkOS() {
-      val osName = System.getProperty("os.name").toLowerCase()
-      val isWindows = osName.startsWith("windows")
-      assumeFalse(isWindows, "No Windows binaries available")
     }
 
     @JvmStatic
@@ -104,22 +94,6 @@ class EVMReferenceTest {
         .map { entry ->
           Arguments.of(entry.key, entry.value)
         }
-    }
-  }
-
-  private val evmcFile: String
-  private val evmOneVm: String
-
-  init {
-    val osName = System.getProperty("os.name").toLowerCase()
-    val isMacOs = osName.startsWith("mac os x")
-
-    if (isMacOs) {
-      evmcFile = EVMReferenceTest::class.java.getResource("/libevmc.dylib").file
-      evmOneVm = EVMReferenceTest::class.java.getResource("/libevmone.0.5.0.dylib").file
-    } else {
-      evmcFile = EVMReferenceTest::class.java.getResource("/libevmc.so").file
-      evmOneVm = EVMReferenceTest::class.java.getResource("/libevmone.so.0.5.0").file
     }
   }
 

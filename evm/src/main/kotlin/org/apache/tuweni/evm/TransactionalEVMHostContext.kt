@@ -16,7 +16,6 @@
  */
 package org.apache.tuweni.evm
 
-import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.AccountState
@@ -28,10 +27,7 @@ import org.apache.tuweni.trie.MerklePatriciaTrie
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
-import org.ethereum.evmc.HostContext
 import org.slf4j.LoggerFactory
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 
 /**
  * EVM context that records changes to the world state, so they can be applied atomically.
@@ -57,7 +53,7 @@ class TransactionalEVMHostContext(
     private val logger = LoggerFactory.getLogger(TransactionalEVMHostContext::class.java)
   }
 
-  val accountChanges = HashMap<Address, HashMap<Bytes, Bytes>>()
+  val accountChanges = HashMap<Address, HashMap<Bytes, Bytes32>>()
   val logs = mutableListOf<Log>()
   val accountsToDestroy = mutableListOf<Address>()
   val balanceChanges = HashMap<Address, Wei>()
@@ -70,10 +66,9 @@ class TransactionalEVMHostContext(
    * @param address The address of the account the query is about.
    * @return true if exists, false otherwise.
    */
-  override fun accountExists(bytes: ByteArray): Boolean = runBlocking {
+  override suspend fun accountExists(address: Address): Boolean {
     logger.trace("Entering accountExists")
-    val address = Address.fromBytes(Bytes.wrap(bytes))
-    accountChanges.containsKey(address) ||
+    return accountChanges.containsKey(address) ||
       repository.accountsExists(address)
   }
 
@@ -87,17 +82,12 @@ class TransactionalEVMHostContext(
    * @param key The index of the account's storage entry.
    * @return The storage value at the given storage key or null bytes if the account does not exist.
    */
-  override fun getStorage(addressBytes: ByteArray, keyBytes: ByteArray): ByteBuffer = runBlocking {
+  override suspend fun getStorage(address: Address, keyBytes: Bytes): Bytes32 {
     logger.trace("Entering getStorage")
-    val address = Address.fromBytes(Bytes.wrap(addressBytes))
     val key = Bytes32.wrap(keyBytes)
     val value = accountChanges[address]?.get(key)
     logger.info("Found value $value")
-    return@runBlocking if (value == null) {
-      ByteBuffer.allocateDirect(32).put(ByteArray(32))
-    } else {
-      ByteBuffer.allocateDirect(value.size()).put(value.toArrayUnsafe())
-    }
+    return value ?: Bytes32.ZERO
   }
 
   /**
@@ -124,10 +114,7 @@ class TransactionalEVMHostContext(
    * A storage item has been deleted: X -> 0.
    * EVMC_STORAGE_DELETED = 4
    */
-  override fun setStorage(addressBytes: ByteArray, keyBytes: ByteArray, valueBytes: ByteArray): Int {
-    val key = Bytes.wrap(keyBytes)
-    val value = Bytes.wrap(valueBytes)
-    val address = Address.fromBytes(Bytes.wrap(addressBytes))
+  override suspend fun setStorage(address: Address, key: Bytes, value: Bytes32): Int {
     logger.trace("Entering setStorage {} {} {}", address, key, value)
     var newAccount = false
     accountChanges.computeIfAbsent(address) {
@@ -165,21 +152,15 @@ class TransactionalEVMHostContext(
    * @param address The address of the account.
    * @return The balance of the given account or 0 if the account does not exist.
    */
-  override fun getBalance(addressBytes: ByteArray): ByteBuffer = runBlocking {
+  override suspend fun getBalance(address: Address): Bytes32 {
     logger.trace("Entering getBalance")
-    val response = ByteBuffer.allocateDirect(32)
 
-    val address = Address.fromBytes(Bytes.wrap(addressBytes))
     val balance = balanceChanges[address]
     balance?.let {
-      return@runBlocking response.put(it.toBytes().toArrayUnsafe())
+      return it.toBytes()
     }
     val account = repository.getAccount(address)
-    account?.let {
-      response.put(account.balance.toBytes().toArrayUnsafe())
-    }
-
-    response
+    return account?.balance?.toBytes() ?: Bytes32.ZERO
   }
 
   /**
@@ -192,10 +173,10 @@ class TransactionalEVMHostContext(
    * @param address The address of the account.
    * @return The size of the code in the account or 0 if the account does not exist.
    */
-  override fun getCodeSize(address: ByteArray): Int = runBlocking {
+  override suspend fun getCodeSize(address: Address): Int {
     logger.trace("Entering getCodeSize")
-    val code = repository.getAccountCode(Address.fromBytes(Bytes.wrap(address)))
-    code?.size() ?: 0
+    val code = repository.getAccountCode(address)
+    return code?.size() ?: 0
   }
 
   /**
@@ -209,13 +190,11 @@ class TransactionalEVMHostContext(
    * @param address The address of the account.
    * @return The hash of the code in the account or null bytes if the account does not exist.
    */
-  override fun getCodeHash(address: ByteArray): ByteBuffer = runBlocking {
+  override suspend fun getCodeHash(address: Address): Bytes32 {
     logger.trace("Entering getCodeHash")
-    val account = repository.getAccount(Address.fromBytes(Bytes.wrap(address)))
-    val response = ByteBuffer.allocateDirect(32).order(ByteOrder.nativeOrder())
+    val account = repository.getAccount(address)
 
-    account?.let { response.put(it.codeHash.toArrayUnsafe()) }
-    response
+    return account?.codeHash ?: Bytes32.ZERO
   }
 
   /**
@@ -230,13 +209,10 @@ class TransactionalEVMHostContext(
    * @param address The address of the account.
    * @return A copy of the requested code.
    */
-  override fun getCode(address: ByteArray): ByteBuffer = runBlocking {
+  override suspend fun getCode(address: Address): Bytes {
     logger.trace("Entering getCode")
-    val code = repository.getAccountCode(Address.fromBytes(Bytes.wrap(address)))
-    code?.let {
-      val response = ByteBuffer.allocateDirect(code.size()).order(ByteOrder.nativeOrder())
-      response.put(it.toArrayUnsafe())
-    } ?: ByteBuffer.allocateDirect(0)
+    val code = repository.getAccountCode(address)
+    return code ?: Bytes.EMPTY
   }
 
   /**
@@ -249,16 +225,14 @@ class TransactionalEVMHostContext(
    * @param address The address of the contract to be selfdestructed.
    * @param beneficiary The address where the remaining ETH is going to be transferred.
    */
-  override fun selfdestruct(address: ByteArray, beneficiary: ByteArray): Unit = runBlocking {
+  override suspend fun selfdestruct(address: Address, beneficiary: Address) {
     logger.trace("Entering selfdestruct")
-    val addr = Address.fromBytes(Bytes.wrap(address))
-    accountsToDestroy.add(addr)
-    val account = repository.getAccount(addr)
-    val beneficiaryAddress = Address.fromBytes(Bytes.wrap(beneficiary))
-    val beneficiaryAccountState = repository.getAccount(beneficiaryAddress)
+    accountsToDestroy.add(address)
+    val account = repository.getAccount(address)
+    val beneficiaryAccountState = repository.getAccount(beneficiary)
     if (beneficiaryAccountState === null) {
       repository.storeAccount(
-        beneficiaryAddress,
+        beneficiary,
         AccountState(
           UInt256.ZERO, Wei.valueOf(0),
           Hash.fromBytes(
@@ -269,13 +243,12 @@ class TransactionalEVMHostContext(
       )
     }
     account?.apply {
-      val balance = balanceChanges.putIfAbsent(beneficiaryAddress, account.balance)
+      val balance = balanceChanges.putIfAbsent(beneficiary, account.balance)
       balance?.let {
-        balanceChanges[beneficiaryAddress] = it.add(account.balance)
+        balanceChanges[beneficiary] = it.add(account.balance)
       }
     }
     logger.trace("Done selfdestruct")
-    return@runBlocking
   }
 
   /**
@@ -284,16 +257,14 @@ class TransactionalEVMHostContext(
    * @param msg The call parameters.
    * @return The result of the call.
    */
-  override fun call(msg: ByteBuffer): ByteBuffer {
+  override suspend fun call(evmMessage: EVMMessage): EVMResult {
     logger.trace("Entering call")
-    val evmMessage = EVMMessage.fromBytes(Bytes.wrapByteBuffer(msg))
     val result = ethereumVirtualMachine.executeInternal(
       evmMessage.sender,
       evmMessage.destination,
       evmMessage.value,
       Bytes.EMPTY,
       evmMessage.inputData,
-      evmMessage.inputDataSize,
       evmMessage.gas,
       depth = depth + 1,
       hostContext = this
@@ -309,17 +280,15 @@ class TransactionalEVMHostContext(
    *
    * @return The transaction context.
    */
-  override fun getTxContext(): ByteBuffer {
+  override fun getTxContext(): Bytes? {
     logger.trace("Entering getTxContext")
-    return ByteBuffer.allocateDirect(160).put(
-      Bytes.concatenate(
-        gasPrice.toBytes(),
-        sender, currentCoinbase, Bytes.ofUnsignedLong(currentNumber),
-        Bytes.ofUnsignedLong(currentTimestamp),
-        Bytes.ofUnsignedLong(currentGasLimit),
-        currentDifficulty.toBytes(),
-        UInt256.ONE.toBytes()
-      ).toArrayUnsafe()
+    return Bytes.concatenate(
+      gasPrice.toBytes(),
+      sender, currentCoinbase, Bytes.ofUnsignedLong(currentNumber),
+      Bytes.ofUnsignedLong(currentTimestamp),
+      Bytes.ofUnsignedLong(currentGasLimit),
+      currentDifficulty.toBytes(),
+      UInt256.ONE.toBytes()
     )
   }
 
@@ -334,10 +303,10 @@ class TransactionalEVMHostContext(
    * @param number The block number.
    * @return The block hash or null bytes if the information about the block is not available.
    */
-  override fun getBlockHash(number: Long): ByteBuffer {
+  override fun getBlockHash(number: Long): Bytes32 {
     logger.trace("Entering getBlockHash")
     val listOfCandidates = repository.findBlockByHashOrNumber(UInt256.valueOf(number).toBytes())
-    return ByteBuffer.allocateDirect(32).put((listOfCandidates.firstOrNull() ?: Bytes.EMPTY).toArrayUnsafe())
+    return listOfCandidates.firstOrNull() ?: Bytes32.ZERO
   }
 
   /**
@@ -353,7 +322,7 @@ class TransactionalEVMHostContext(
    * @param topics The the array of topics attached to the log.
    * @param topicCount The number of the topics. Valid values are between 0 and 4 inclusively.
    */
-  override fun emitLog(address: ByteArray, data: ByteArray, dataSize: Int, topics: Array<ByteArray>, topicCount: Int) {
+  override fun emitLog(address: Address, data: Bytes, topics: Array<Bytes>, topicCount: Int) {
     logger.trace("Entering emitLog")
     logs.add(Log(Address.fromBytes(Bytes.wrap(address)), Bytes.wrap(data), topics.map { Bytes32.wrap(it) }))
   }

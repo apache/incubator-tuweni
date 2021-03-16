@@ -23,7 +23,6 @@ import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
-import org.slf4j.LoggerFactory
 
 /**
  * Types of EVM calls
@@ -97,16 +96,7 @@ data class EVMResult(
   val statusCode: EVMExecutionStatusCode,
   val gasLeft: Long,
   val hostContext: TransactionalEVMHostContext
-) {
-  companion object {
-    fun fromBytes(bytes: Bytes, hostContext: TransactionalEVMHostContext): EVMResult {
-      return EVMResult(fromCode(bytes.getInt(0)), bytes.getLong(8), hostContext)
-    }
-  }
-
-  fun toBytes() =
-    Bytes32.rightPad(Bytes.concatenate(Bytes.ofUnsignedInt(statusCode.number.toLong()), Bytes.ofUnsignedLong(gasLeft)))
-}
+)
 
 /**
  * Message sent to the EVM for execution
@@ -127,8 +117,7 @@ data class EVMMessage(
  * An Ethereum Virtual Machine.
  *
  * @param repository the blockchain repository
- * @param evmcFile the full path of the shared library for EVMc
- * @param vmFile the full path to an EVM library compatible with EVMc, such as evmone or hera
+ * @param evmVmFactory factory to create the EVM
  * @param options the options to set on the EVM, specific to the library
  */
 class EthereumVirtualMachine(
@@ -136,10 +125,6 @@ class EthereumVirtualMachine(
   private val evmVmFactory: () -> EvmVm,
   private val options: Map<String, String> = mapOf()
 ) {
-
-  companion object {
-    private val logger = LoggerFactory.getLogger(EthereumVirtualMachine::class.java)
-  }
 
   private var vm: EvmVm? = null
 
@@ -226,7 +211,6 @@ class EthereumVirtualMachine(
         value,
         code,
         inputData,
-        inputData.size(),
         gas,
         callKind,
         revision,
@@ -243,7 +227,6 @@ class EthereumVirtualMachine(
     value: Bytes,
     code: Bytes,
     inputData: Bytes,
-    inputDataSize: Int,
     gas: Gas,
     callKind: CallKind = CallKind.EVMC_CALL,
     revision: HardFork = HardFork.EVMC_MAX_REVISION,
@@ -256,14 +239,12 @@ class EthereumVirtualMachine(
         value
       )
 
-    val result = vm().execute(
+    return vm().execute(
       hostContext,
       revision.number,
       msg,
-      code,
-      code.size()
+      code
     )
-    return result
   }
 
   /**
