@@ -18,7 +18,6 @@ package org.apache.tuweni.stratum.server
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.json.JsonMapper
-import io.vertx.core.json.JsonObject
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.slf4j.LoggerFactory
@@ -96,14 +95,14 @@ class Stratum1Protocol(
   }
 
   override fun canHandle(initialMessage: String, conn: StratumConnection): Boolean {
-    if (initialMessage.contains("mining.subscribe")) {
+    if (!initialMessage.contains("mining.subscribe")) {
       logger.debug("Invalid first message method: {}", initialMessage)
       return false
     }
     val requestBody: JsonRpcRequest
     try {
-      requestBody = JsonObject(initialMessage).mapTo(JsonRpcRequest::class.java)
-    } catch (e: IllegalArgumentException) {
+      requestBody = mapper.readValue(initialMessage, JsonRpcRequest::class.java)
+    } catch (e: JsonProcessingException) {
       logger.debug(e.message, e)
       return false
     }
@@ -160,13 +159,13 @@ class Stratum1Protocol(
 
   override fun handle(conn: StratumConnection, message: String) {
     try {
-      val req: JsonRpcRequest = JsonObject(message).mapTo(JsonRpcRequest::class.java)
+      val req: JsonRpcRequest = mapper.readValue(message, JsonRpcRequest::class.java)
       if ("mining.authorize" == req.method) {
         handleMiningAuthorize(conn, req)
       } else if ("mining.submit" == req.method) {
         handleMiningSubmit(conn, req)
       }
-    } catch (e: IllegalArgumentException) {
+    } catch (e: JsonProcessingException) {
       logger.debug(e.message, e)
       conn.close()
     } catch (e: IOException) {
@@ -231,17 +230,18 @@ class Stratum1EthProxyProtocol(
   private var currentInput: PoWInput? = null
 
   override fun canHandle(initialMessage: String, conn: StratumConnection): Boolean {
-    if (!initialMessage.contains("eth_submitLogin")) {
-      logger.debug("Invalid first message method: {}", initialMessage)
-      return false
-    }
-    val req = mapper.readValue(initialMessage, JsonRpcRequest::class.java)
     try {
+      val req = mapper.readValue(initialMessage, JsonRpcRequest::class.java)
+      if (req.method != "eth_submitLogin") {
+        logger.debug("Invalid first message method: {}", initialMessage)
+        return false
+      }
       val response = mapper.writeValueAsString(JsonRpcSuccessResponse(req.id, result = true))
       conn.send(response + "\n")
     } catch (e: JsonProcessingException) {
       logger.debug(e.message, e)
       conn.close()
+      return false
     }
     return true
   }
@@ -265,7 +265,7 @@ class Stratum1EthProxyProtocol(
 
   override fun handle(conn: StratumConnection, message: String) {
     try {
-      val req: JsonRpcRequest = JsonObject(message).mapTo(JsonRpcRequest::class.java)
+      val req: JsonRpcRequest = mapper.readValue(message, JsonRpcRequest::class.java)
       if ("eth_getWork" == req.method) {
         sendNewWork(conn, req.id)
       } else if ("eth_submitWork" == req.method) {
@@ -275,7 +275,7 @@ class Stratum1EthProxyProtocol(
       } else {
         logger.debug("Unsupported message: {}", req.method)
       }
-    } catch (e: IllegalArgumentException) {
+    } catch (e: JsonProcessingException) {
       logger.debug(e.message, e)
       conn.close()
     } catch (e: IOException) {
