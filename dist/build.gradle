@@ -75,7 +75,7 @@ asfNexusPassword=
 }
 
 assemble.dependsOn builtGradleProperties
-assemble.dependsOn rootProject.checkLicenses
+assemble.dependsOn rootProject.lazyDownloadLicenses
 assemble.dependsOn createBinaryLicense
 assemble.dependsOn createBinaryNotice
 
@@ -153,11 +153,12 @@ distributions {
         include 'gradle/docker/*'
       }
       rootProject.subprojects.each { s ->
-        into(s.name) {
+        def sPath = rootProject.projectDir.toPath().relativize(s.projectDir.toPath()).toString()
+        into(sPath) {
           from s.projectDir.toPath().resolve("build.gradle")
         }
-        into("${s.name}/src/main") {
-          from s.projectDir.toPath().resolve("src/main")
+        into("${sPath}/src") {
+          from s.projectDir.toPath().resolve("src")
         }
       }
     }

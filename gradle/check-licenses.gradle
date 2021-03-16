@@ -46,7 +46,7 @@ ext.acceptedLicenses = [
  * This plugin generates a list of dependencies.
  */
 downloadLicenses {
-  includeProjectDependencies = true
+  includeProjectDependencies = false
   reportByDependency = false
   reportByLicenseType = true
   dependencyConfiguration = 'compileClasspath'
@@ -155,7 +155,6 @@ downloadLicenses {
     (group('org.checkerframework')): mit,
     (group('org.jboss.spec.javax.transaction')): cddl1,
     (group('org.rocksdb')): apache2,
-    (group('tuweni')): apache2,
     (group('org.glassfish.jersey.core')): epl2,
     (group('org.glassfish.jersey.containers')): epl2,
     (group('org.glassfish.jersey.inject')): epl2,
@@ -169,15 +168,19 @@ downloadLicenses {
     (group('org.glassfish')): epl2,
     (group('org.glassfish.hk2')): epl2,
     (group('jakarta.annotation')): epl2,
-    (group('com.sun.mail')): epl2,
-    'org.ethereum:evmc:7.4.0.3': apache2
+    (group('com.sun.mail')): epl2
   ]
 }
 
+task lazyDownloadLicenses() {
+  if (!file("$rootProject.buildDir/reports/license/license-dependency.xml").exists()) {
+    dependsOn ':downloadLicenses'
+  }
+}
 
 task checkLicenses {
   description "Verify that all dependencies use accepted licenses."
-  dependsOn ':downloadLicenses'
+  dependsOn ':lazyDownloadLicenses'
 
   def bads = ""
   doLast {
