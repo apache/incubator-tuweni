@@ -14,39 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.evm.impl
 
-import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.evm.EVMMessage
-import org.apache.tuweni.evm.EVMResult
-import org.apache.tuweni.evm.EvmVm
+package org.apache.tuweni.evm.impl.frontier
+
+import org.apache.tuweni.evm.EVMExecutionStatusCode
 import org.apache.tuweni.evm.HostContext
+import org.apache.tuweni.evm.impl.GasManager
+import org.apache.tuweni.evm.impl.Opcode
+import org.apache.tuweni.evm.impl.Stack
 
-class EvmVmImpl() : EvmVm {
-
-  companion object {
-    fun create(): EvmVm {
-      return EvmVmImpl()
-    }
-  }
-
-  override fun setOption(key: String, value: String) {
-    TODO("Not yet implemented")
-  }
-
-  override fun version(): String {
-    TODO("Not yet implemented")
-  }
-
-  override fun close() {
-    TODO("Not yet implemented")
-  }
-
-  override fun execute(hostContext: HostContext, fork: Int, msg: EVMMessage, code: Bytes?): EVMResult {
-    TODO("Not yet implemented")
-  }
-
-  override fun capabilities(): Int {
-    TODO("Not yet implemented")
+val add = Opcode { gasManager, _, stack ->
+  gasManager.add(3L)
+  val item = stack.pop()
+  val item2 = stack.pop()
+  if (null == item || null == item2) {
+    EVMExecutionStatusCode.STACK_UNDERFLOW
+  } else {
+    stack.push(item.add(item2))
+    EVMExecutionStatusCode.SUCCESS
   }
 }

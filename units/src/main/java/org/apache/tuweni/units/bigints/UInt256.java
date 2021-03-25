@@ -17,6 +17,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.bytes.MutableBytes;
+import org.apache.tuweni.bytes.MutableBytes32;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -98,6 +99,9 @@ public final class UInt256 implements UInt256Value<UInt256> {
    * @throws IllegalArgumentException if {@code bytes.size() > 32}.
    */
   public static UInt256 fromBytes(final Bytes bytes) {
+    if (bytes instanceof UInt256) {
+      return (UInt256) bytes;
+    }
     if (bytes instanceof Bytes32) {
       final byte[] array = bytes.toArrayUnsafe();
       return new UInt256(
@@ -530,6 +534,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
    * @param bytes the bytes to perform the operation with
    * @return the result of a bit-wise AND
    */
+  @Override
   public UInt256 and(Bytes32 bytes) {
     int[] result = new int[INTS_SIZE];
     for (int i = INTS_SIZE - 1, j = 28; i >= 0; --i, j -= 4) {
@@ -562,6 +567,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
    * @param bytes the bytes to perform the operation with
    * @return the result of a bit-wise OR
    */
+  @Override
   public UInt256 or(Bytes32 bytes) {
     int[] result = new int[INTS_SIZE];
     for (int i = INTS_SIZE - 1, j = 28; i >= 0; --i, j -= 4) {
@@ -593,6 +599,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
    * @param bytes the bytes to perform the operation with
    * @return the result of a bit-wise XOR
    */
+  @Override
   public UInt256 xor(Bytes32 bytes) {
     int[] result = new int[INTS_SIZE];
     for (int i = INTS_SIZE - 1, j = 28; i >= 0; --i, j -= 4) {
@@ -609,6 +616,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
    *
    * @return the result of a bit-wise NOT
    */
+  @Override
   public UInt256 not() {
     int[] result = new int[INTS_SIZE];
     for (int i = INTS_SIZE - 1; i >= 0; --i) {
@@ -623,6 +631,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
    * @param distance The number of bits to shift by.
    * @return A value containing the shifted bits.
    */
+  @Override
   public UInt256 shiftRight(int distance) {
     if (distance == 0) {
       return this;
@@ -655,6 +664,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
    * @param distance The number of bits to shift by.
    * @return A value containing the shifted bits.
    */
+  @Override
   public UInt256 shiftLeft(int distance) {
     if (distance == 0) {
       return this;
@@ -708,17 +718,6 @@ public final class UInt256 implements UInt256Value<UInt256> {
   }
 
   @Override
-  public int compareTo(UInt256 other) {
-    for (int i = 0; i < INTS_SIZE; ++i) {
-      int cmp = Long.compare(((long) this.ints[i]) & LONG_MASK, ((long) other.ints[i]) & LONG_MASK);
-      if (cmp != 0) {
-        return cmp;
-      }
-    }
-    return 0;
-  }
-
-  @Override
   public boolean fitsInt() {
     for (int i = 0; i < INTS_SIZE - 1; i++) {
       if (this.ints[i] != 0) {
@@ -746,6 +745,18 @@ public final class UInt256 implements UInt256Value<UInt256> {
     }
     // Lastly, the left-most byte of the int must not start with a 1.
     return this.ints[INTS_SIZE - 2] >= 0;
+  }
+
+  @Override
+  public byte get(int i) {
+    int whichInt = i/INTS_SIZE;
+    int whichIndex = i%4;
+    return (byte) (this.ints[whichInt] >> (8 * whichIndex) & 0xFF);
+  }
+
+  @Override
+  public Bytes32 copy() {
+    return toBytes();
   }
 
   @Override
@@ -778,43 +789,56 @@ public final class UInt256 implements UInt256Value<UInt256> {
     return this;
   }
 
+  private byte[] toByteArray() {
+    return new byte[] {
+            (byte) (ints[0] >> 24),
+            (byte) (ints[0] >> 16),
+            (byte) (ints[0] >> 8),
+            (byte) (ints[0]),
+            (byte) (ints[1] >> 24),
+            (byte) (ints[1] >> 16),
+            (byte) (ints[1] >> 8),
+            (byte) (ints[1]),
+            (byte) (ints[2] >> 24),
+            (byte) (ints[2] >> 16),
+            (byte) (ints[2] >> 8),
+            (byte) (ints[2]),
+            (byte) (ints[3] >> 24),
+            (byte) (ints[3] >> 16),
+            (byte) (ints[3] >> 8),
+            (byte) (ints[3]),
+            (byte) (ints[4] >> 24),
+            (byte) (ints[4] >> 16),
+            (byte) (ints[4] >> 8),
+            (byte) (ints[4]),
+            (byte) (ints[5] >> 24),
+            (byte) (ints[5] >> 16),
+            (byte) (ints[5] >> 8),
+            (byte) (ints[5]),
+            (byte) (ints[6] >> 24),
+            (byte) (ints[6] >> 16),
+            (byte) (ints[6] >> 8),
+            (byte) (ints[6]),
+            (byte) (ints[7] >> 24),
+            (byte) (ints[7] >> 16),
+            (byte) (ints[7] >> 8),
+            (byte) (ints[7])};
+  }
+
+  @Override
+  public Bytes slice(int i, int length) {
+    return toBytes().slice(i, length);
+  }
+
+  @Override
+  public MutableBytes32 mutableCopy() {
+    return MutableBytes32.wrap(toByteArray());
+  }
+
   @Override
   public Bytes32 toBytes() {
     return Bytes32
-        .wrap(
-            new byte[] {
-                (byte) (ints[0] >> 24),
-                (byte) (ints[0] >> 16),
-                (byte) (ints[0] >> 8),
-                (byte) (ints[0]),
-                (byte) (ints[1] >> 24),
-                (byte) (ints[1] >> 16),
-                (byte) (ints[1] >> 8),
-                (byte) (ints[1]),
-                (byte) (ints[2] >> 24),
-                (byte) (ints[2] >> 16),
-                (byte) (ints[2] >> 8),
-                (byte) (ints[2]),
-                (byte) (ints[3] >> 24),
-                (byte) (ints[3] >> 16),
-                (byte) (ints[3] >> 8),
-                (byte) (ints[3]),
-                (byte) (ints[4] >> 24),
-                (byte) (ints[4] >> 16),
-                (byte) (ints[4] >> 8),
-                (byte) (ints[4]),
-                (byte) (ints[5] >> 24),
-                (byte) (ints[5] >> 16),
-                (byte) (ints[5] >> 8),
-                (byte) (ints[5]),
-                (byte) (ints[6] >> 24),
-                (byte) (ints[6] >> 16),
-                (byte) (ints[6] >> 8),
-                (byte) (ints[6]),
-                (byte) (ints[7] >> 24),
-                (byte) (ints[7] >> 16),
-                (byte) (ints[7] >> 8),
-                (byte) (ints[7])});
+        .wrap(toByteArray());
   }
 
   @Override

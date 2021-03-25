@@ -443,7 +443,7 @@ public final class SSZ {
    * @return the SSZ encoding in a {@link Bytes} value
    */
   public static Bytes encodeUInt256(UInt256 value) {
-    return value.toBytes().reverse();
+    return value.reverse();
   }
 
   /**

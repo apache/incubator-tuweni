@@ -39,16 +39,7 @@ import java.math.BigInteger;
  *
  * @param <T> The concrete type of the value.
  */
-public interface UInt256Value<T extends UInt256Value<T>> extends Comparable<T> {
-
-  /**
-   * Returns true is the value is 0.
-   * 
-   * @return True if this is the value 0.
-   */
-  default boolean isZero() {
-    return toBytes().isZero();
-  }
+public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
 
   /**
    * Returns a value that is {@code (this + value)}.
@@ -347,13 +338,12 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Comparable<T> {
    */
   default boolean fitsInt() {
     // Ints are 4 bytes, so anything but the 4 last bytes must be zeroes
-    Bytes32 bytes = toBytes();
     for (int i = 0; i < Bytes32.SIZE - 4; i++) {
-      if (bytes.get(i) != 0)
+      if (get(i) != 0)
         return false;
     }
     // Lastly, the left-most byte of the int must not start with a 1.
-    return bytes.get(Bytes32.SIZE - 4) >= 0;
+    return get(Bytes32.SIZE - 4) >= 0;
   }
 
   /**
@@ -366,7 +356,7 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Comparable<T> {
     if (!fitsInt()) {
       throw new ArithmeticException("Value does not fit a 4 byte int");
     }
-    return toBytes().getInt(Bytes32.SIZE - 4);
+    return getInt(Bytes32.SIZE - 4);
   }
 
   /**
@@ -377,56 +367,11 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Comparable<T> {
   default boolean fitsLong() {
     // Longs are 8 bytes, so anything but the 8 last bytes must be zeroes
     for (int i = 0; i < Bytes32.SIZE - 8; i++) {
-      if (toBytes().get(i) != 0)
+      if (get(i) != 0)
         return false;
     }
     // Lastly, the left-most byte of the long must not start with a 1.
-    return toBytes().get(Bytes32.SIZE - 8) >= 0;
-  }
-
-  /**
-   * Provides the value as a long.
-   *
-   * @return This value as a java {@code long} assuming it is small enough to fit a {@code long}.
-   * @throws ArithmeticException If the value does not fit a {@code long}, that is if {@code !fitsLong()}.
-   */
-  default long toLong() {
-    if (!fitsLong()) {
-      throw new ArithmeticException("Value does not fit a 8 byte long");
-    }
-    return toBytes().getLong(Bytes32.SIZE - 8);
-  }
-
-  /**
-   * Provides the value as a BigInteger.
-   *
-   * @return This value as a {@link BigInteger}.
-   */
-  default BigInteger toBigInteger() {
-    return toBytes().toUnsignedBigInteger();
-  }
-
-  /**
-   * This value represented as an hexadecimal string.
-   *
-   * <p>
-   * Note that this representation includes all the 32 underlying bytes, no matter what the integer actually represents
-   * (in other words, it can have many leading zeros). For a shorter representation that don't include leading zeros,
-   * use {@link #toShortHexString}.
-   *
-   * @return This value represented as an hexadecimal string.
-   */
-  default String toHexString() {
-    return toBytes().toHexString();
-  }
-
-  /**
-   * Returns this value represented as a minimal hexadecimal string (without any leading zero)
-   * 
-   * @return This value represented as a minimal hexadecimal string (without any leading zero).
-   */
-  default String toShortHexString() {
-    return toBytes().toShortHexString();
+    return get(Bytes32.SIZE - 8) >= 0;
   }
 
   /**
@@ -449,25 +394,4 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Comparable<T> {
    * @return The value as bytes without any leading zero bytes.
    */
   Bytes toMinimalBytes();
-
-  /**
-   * Provides the number of zero bits preceding the highest-order one-bit.
-   *
-   * @return the number of zero bits preceding the highest-order ("leftmost") one-bit in the binary representation of
-   *         this value, or 256 if the value is equal to zero.
-   */
-  default int numberOfLeadingZeros() {
-    return toBytes().numberOfLeadingZeros();
-  }
-
-  /**
-   * Provides the number of bits following and including the highest-order ("leftmost") one-bit in the binary
-   * representation of this value, or zero if all bits are zero.
-   * 
-   * @return The number of bits following and including the highest-order ("leftmost") one-bit in the binary
-   *         representation of this value, or zero if all bits are zero.
-   */
-  default int bitLength() {
-    return toBytes().bitLength();
-  }
 }

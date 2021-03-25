@@ -84,6 +84,10 @@ class ByteBufferWrappingBytes extends AbstractBytes {
         this.length - i,
         i);
 
+    if (length == 32) {
+      return new ByteBufferWrappingBytes32(byteBuffer, offset + i, length);
+    }
+
     return new ByteBufferWrappingBytes(byteBuffer, offset + i, length);
   }
 

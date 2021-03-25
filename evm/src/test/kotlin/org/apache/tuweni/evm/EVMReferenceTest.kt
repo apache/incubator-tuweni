@@ -54,7 +54,6 @@ import java.io.InputStream
 import java.io.UncheckedIOException
 import java.util.stream.Stream
 
-@Disabled
 @ExtendWith(LuceneIndexWriterExtension::class, BouncyCastleExtension::class)
 class EVMReferenceTest {
 
@@ -105,135 +104,139 @@ class EVMReferenceTest {
   }
 
   @ParameterizedTest(name = "{index}: {0}")
-  @DisplayName("{0}")
   @MethodSource("findTests")
   fun runReferenceTest(testName: String, test: JsonReferenceTest) {
-    assertNotNull(testName)
-    println(testName)
+    runBlocking {
+      assertNotNull(testName)
+      println(testName)
 
-    val repository = BlockchainRepository(
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      BlockchainIndex(writer!!)
-    )
-    test.pre!!.forEach { address, state ->
-      runBlocking {
-        val tree = MerklePatriciaTrie.storingBytes()
-        state.storage!!.forEach { key, value ->
-          runBlocking {
-            tree.put(key, value)
-          }
-        }
-        val accountState =
-          AccountState(state.nonce!!, state.balance!!, Hash.fromBytes(tree.rootHash()), Hash.hash(state.code!!))
-        repository.storeAccount(address, accountState)
-        repository.storeCode(state.code!!)
-      }
-    }
-    val vm = EthereumVirtualMachine(repository, EvmVmImpl::create)
-    vm.start()
-    try {
-      val result = vm.execute(
-        test.exec?.origin!!,
-        test.exec?.address!!,
-        test.exec?.value!!,
-        test.exec?.code!!,
-        test.exec?.data!!,
-        test.exec?.gas!!,
-        test.exec?.gasPrice!!,
-        test.env?.currentCoinbase!!,
-        test.env?.currentNumber!!.toLong(),
-        test.env?.currentTimestamp!!.toLong(),
-        test.env?.currentGasLimit!!.toLong(),
-        test.env?.currentDifficulty!!
+      val repository = BlockchainRepository(
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        BlockchainIndex(writer!!)
       )
-      if (test.post == null) {
-        assertNotEquals(EVMExecutionStatusCode.EVMC_SUCCESS, result.statusCode)
-        if (testName.contains("JumpDest", true) ||
-          testName.contains("OutsideBoundary", true) ||
-          testName.contains("outOfBoundary", true) ||
-          testName.startsWith("DynamicJump_valueUnderflow") ||
-          testName.startsWith("jumpiToUintmaxPlus1") ||
-          testName.startsWith("jumpToUintmaxPlus1") ||
-          testName.startsWith("DynamicJumpi0") ||
-          testName.startsWith("DynamicJumpJD_DependsOnJumps0") ||
-          testName.startsWith("jumpHigh") ||
-          testName.startsWith("bad_indirect_jump2") ||
-          testName.startsWith("DynamicJumpPathologicalTest1") ||
-          testName.startsWith("jumpToUint64maxPlus1") ||
-          testName.startsWith("jumpiToUint64maxPlus1") ||
-          testName.startsWith("jumpi0") ||
-          testName.startsWith("DynamicJumpPathologicalTest3") ||
-          testName.startsWith("DynamicJumpPathologicalTest2") ||
-          testName.startsWith("jump1") ||
-          testName.startsWith("bad_indirect_jump1") ||
-          testName.startsWith("BlockNumberDynamicJumpi0") ||
-          testName.startsWith("gasOverFlow") ||
-          testName.startsWith("DynamicJump1") ||
-          testName.startsWith("BlockNumberDynamicJump1") ||
-          testName.startsWith("JDfromStorageDynamicJump1") ||
-          testName.startsWith("JDfromStorageDynamicJumpi0")
-        ) {
-          assertEquals(EVMExecutionStatusCode.EVMC_BAD_JUMP_DESTINATION, result.statusCode)
-        } else if (testName.contains("underflow", true) ||
-          testName.startsWith("swap2error") ||
-          testName.startsWith("dup2error") ||
-          testName.startsWith("pop1") ||
-          testName.startsWith("jumpOntoJump") ||
-          testName.startsWith("swapAt52becameMstore") ||
-          testName.startsWith("stack_loop") ||
-          testName.startsWith("201503110206PYTHON") ||
-          testName.startsWith("201503112218PYTHON") ||
-          testName.startsWith("201503110219PYTHON") ||
-          testName.startsWith("201503102320PYTHON")
-        ) {
-          assertEquals(EVMExecutionStatusCode.EVMC_STACK_UNDERFLOW, result.statusCode)
-        } else if (testName.contains("outofgas", true) ||
-          testName.contains("TooHigh", true) ||
-          testName.contains("MemExp", true) ||
-          testName.contains("return1", true) ||
-          testName.startsWith("sha3_bigOffset") ||
-          testName.startsWith("sha3_3") ||
-          testName.startsWith("sha3_4") ||
-          testName.startsWith("sha3_5") ||
-          testName.startsWith("sha3_6") ||
-          testName.startsWith("sha3_bigSize") ||
-          testName.startsWith("ackermann33")
-        ) {
-          assertEquals(EVMExecutionStatusCode.EVMC_OUT_OF_GAS, result.statusCode)
-        } else if (testName.contains("stacklimit", true)) {
-          assertEquals(EVMExecutionStatusCode.EVMC_STACK_OVERFLOW, result.statusCode)
-        } else {
-          println(result.statusCode)
-          TODO()
-        }
-      } else {
-        test.post!!.forEach { address, state ->
-          runBlocking {
-            assertTrue(repository.accountsExists(address) || result.hostContext.accountChanges.containsKey(address))
-            val accountState = repository.getAccount(address)
-            val balance = accountState?.balance?.add(
-              result.hostContext.balanceChanges.get(address) ?: Wei.valueOf(0)
-            ) ?: Wei.valueOf(0)
-            assertEquals(state.balance, balance)
-            assertEquals(state.nonce, accountState!!.nonce)
-          }
-        }
-        test.logs?.let {
-          val logsTree = MerklePatriciaTrie.storingBytes()
-          result.hostContext.logs.forEach {
+      test.pre!!.forEach { address, state ->
+        runBlocking {
+          val tree = MerklePatriciaTrie.storingBytes()
+          state.storage!!.forEach { key, value ->
             runBlocking {
-              logsTree.put(Hash.hash(it.toBytes()), it.toBytes())
+              tree.put(key, value)
+            }
+          }
+          val accountState =
+            AccountState(state.nonce!!, state.balance!!, Hash.fromBytes(tree.rootHash()), Hash.hash(state.code!!))
+          repository.storeAccount(address, accountState)
+          repository.storeCode(state.code!!)
+        }
+      }
+      val vm = EthereumVirtualMachine(repository, EvmVmImpl::create)
+      vm.start()
+      try {
+        val result = vm.execute(
+          test.exec?.origin!!,
+          test.exec?.address!!,
+          test.exec?.value!!,
+          test.exec?.code!!,
+          test.exec?.data!!,
+          test.exec?.gas!!,
+          test.exec?.gasPrice!!,
+          test.env?.currentCoinbase!!,
+          test.env?.currentNumber!!.toLong(),
+          test.env?.currentTimestamp!!.toLong(),
+          test.env?.currentGasLimit!!.toLong(),
+          test.env?.currentDifficulty!!
+        )
+        if (test.post == null) {
+          assertNotEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
+          if (testName.contains("JumpDest", true) ||
+            testName.contains("OutsideBoundary", true) ||
+            testName.contains("outOfBoundary", true) ||
+            testName.startsWith("DynamicJump_valueUnderflow") ||
+            testName.startsWith("jumpiToUintmaxPlus1") ||
+            testName.startsWith("jumpToUintmaxPlus1") ||
+            testName.startsWith("DynamicJumpi0") ||
+            testName.startsWith("DynamicJumpJD_DependsOnJumps0") ||
+            testName.startsWith("jumpHigh") ||
+            testName.startsWith("bad_indirect_jump2") ||
+            testName.startsWith("DynamicJumpPathologicalTest1") ||
+            testName.startsWith("jumpToUint64maxPlus1") ||
+            testName.startsWith("jumpiToUint64maxPlus1") ||
+            testName.startsWith("jumpi0") ||
+            testName.startsWith("DynamicJumpPathologicalTest3") ||
+            testName.startsWith("DynamicJumpPathologicalTest2") ||
+            testName.startsWith("jump1") ||
+            testName.startsWith("bad_indirect_jump1") ||
+            testName.startsWith("BlockNumberDynamicJumpi0") ||
+            testName.startsWith("gasOverFlow") ||
+            testName.startsWith("DynamicJump1") ||
+            testName.startsWith("BlockNumberDynamicJump1") ||
+            testName.startsWith("JDfromStorageDynamicJump1") ||
+            testName.startsWith("JDfromStorageDynamicJumpi0")
+          ) {
+            assertEquals(EVMExecutionStatusCode.BAD_JUMP_DESTINATION, result.statusCode)
+          } else if (testName.contains("underflow", true) ||
+            testName.startsWith("swap2error") ||
+            testName.startsWith("dup2error") ||
+            testName.startsWith("pop1") ||
+            testName.startsWith("jumpOntoJump") ||
+            testName.startsWith("swapAt52becameMstore") ||
+            testName.startsWith("stack_loop") ||
+            testName.startsWith("201503110206PYTHON") ||
+            testName.startsWith("201503112218PYTHON") ||
+            testName.startsWith("201503110219PYTHON") ||
+            testName.startsWith("201503102320PYTHON")
+          ) {
+            assertEquals(EVMExecutionStatusCode.STACK_UNDERFLOW, result.statusCode)
+          } else if (testName.contains("outofgas", true) ||
+            testName.contains("TooHigh", true) ||
+            testName.contains("MemExp", true) ||
+            testName.contains("return1", true) ||
+            testName.startsWith("sha3_bigOffset") ||
+            testName.startsWith("sha3_3") ||
+            testName.startsWith("sha3_4") ||
+            testName.startsWith("sha3_5") ||
+            testName.startsWith("sha3_6") ||
+            testName.startsWith("sha3_bigSize") ||
+            testName.startsWith("ackermann33")
+          ) {
+            assertEquals(EVMExecutionStatusCode.OUT_OF_GAS, result.statusCode)
+          } else if (testName.contains("stacklimit", true)) {
+            assertEquals(EVMExecutionStatusCode.STACK_OVERFLOW, result.statusCode)
+          } else {
+            println(result.statusCode)
+            TODO()
+          }
+        } else {
+          assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
+          test.post!!.forEach { address, state ->
+            runBlocking {
+              assertTrue(repository.accountsExists(address) || (result.hostContext as TransactionalEVMHostContext).accountChanges.containsKey(
+                address))
+              val accountState = repository.getAccount(address)
+              val balance = accountState?.balance?.add(
+                (result.hostContext as TransactionalEVMHostContext).balanceChanges.get(address) ?: Wei.valueOf(0)
+              ) ?: Wei.valueOf(0)
+              assertEquals(state.balance, balance)
+              assertEquals(state.nonce, accountState!!.nonce)
+              assertEquals(state.storage!!.size, (result.hostContext as TransactionalEVMHostContext).accountChanges.size)
+            }
+          }
+          test.logs?.let {
+            val logsTree = MerklePatriciaTrie.storingBytes()
+            (result.hostContext as TransactionalEVMHostContext).logs.forEach {
+              runBlocking {
+                logsTree.put(Hash.hash(it.toBytes()), it.toBytes())
+              }
             }
           }
         }
+      } finally {
+        vm.stop()
       }
-    } finally {
-      vm.stop()
     }
   }
 }

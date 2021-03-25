@@ -375,7 +375,7 @@ public final class SECP256K1 {
 
     ECDHBasicAgreement agreement = new ECDHBasicAgreement();
     agreement.init(privKeyP);
-    return UInt256.valueOf(agreement.calculateAgreement(pubKeyP)).toBytes();
+    return UInt256.valueOf(agreement.calculateAgreement(pubKeyP));
   }
 
   public static Bytes deriveECDHKeyAgreement(Bytes srcPrivKey, Bytes destPubKey) {
@@ -948,8 +948,8 @@ public final class SECP256K1 {
      */
     public Bytes bytes() {
       MutableBytes signature = MutableBytes.create(65);
-      UInt256.valueOf(r).toBytes().copyTo(signature, 0);
-      UInt256.valueOf(s).toBytes().copyTo(signature, 32);
+      UInt256.valueOf(r).copyTo(signature, 0);
+      UInt256.valueOf(s).copyTo(signature, 32);
       signature.set(64, v);
       return signature;
     }
