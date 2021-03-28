@@ -18,15 +18,38 @@ package org.apache.tuweni.stratum.server
 
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
+import io.vertx.core.net.KeyCertOptions
 import io.vertx.core.net.NetServer
 import io.vertx.core.net.NetServerOptions
 import io.vertx.core.net.NetSocket
+import io.vertx.core.net.SelfSignedCertificate
 import io.vertx.kotlin.core.net.closeAwait
 import io.vertx.kotlin.core.net.listenAwait
+import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
+
+/**
+ * Simple main function to run the server with a self-signed certificate.
+ */
+fun main() = runBlocking {
+  val selfSignedCertificate = SelfSignedCertificate.create()
+  val server = StratumServer(
+    Vertx.vertx(), port = 10000, networkInterface = "0.0.0.0", sslOptions = selfSignedCertificate.keyCertOptions(),
+    submitCallback = { true }, seedSupplier = { Bytes32.random() }, hashrateCallback = { _, _ -> true }
+  )
+  server.start()
+  Runtime.getRuntime().addShutdownHook(
+    Thread {
+      runBlocking {
+        StratumServer.logger.info("Shutting down...")
+        server.stop()
+      }
+    }
+  )
+}
 
 /**
  * Server capable of handling connections from Stratum clients, authenticate and serve content for them.
@@ -35,6 +58,7 @@ class StratumServer(
   val vertx: Vertx,
   private val port: Int,
   val networkInterface: String,
+  private val sslOptions: KeyCertOptions?,
   extranonce: String = "",
   submitCallback: (PoWSolution) -> Boolean,
   seedSupplier: () -> Bytes32,
@@ -55,9 +79,11 @@ class StratumServer(
 
   suspend fun start() {
     if (started.compareAndSet(false, true)) {
-      val server = vertx.createNetServer(
-        NetServerOptions().setPort(port).setHost(networkInterface).setTcpKeepAlive(true)
-      )
+      val options = NetServerOptions().setPort(port).setHost(networkInterface).setTcpKeepAlive(true)
+      sslOptions?.let {
+        options.setKeyCertOptions(it)
+      }
+      val server = vertx.createNetServer(options)
       server.exceptionHandler { e -> logger.error(e.message, e) }
       server.connectHandler(this::handleConnection)
       server.listenAwait()
