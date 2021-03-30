@@ -142,6 +142,26 @@ public interface Bytes32 extends Bytes {
   }
 
   /**
+   * Left pad a {@link Bytes} value with a fill byte to create a {@link Bytes32}.
+   *
+   * @param value The bytes value pad.
+   * @param fill the byte to fill with
+   * @return A {@link Bytes32} that exposes the left-padded bytes of {@code value}.
+   * @throws IllegalArgumentException if {@code value.size() > 32}.
+   */
+  static Bytes32 leftPad(Bytes value, byte fill) {
+    checkNotNull(value);
+    if (value instanceof Bytes32) {
+      return (Bytes32) value;
+    }
+    checkArgument(value.size() <= SIZE, "Expected at most %s bytes but got %s", SIZE, value.size());
+    MutableBytes32 result = MutableBytes32.create();
+    result.fill(fill);
+    value.copyTo(result, SIZE - value.size());
+    return result;
+  }
+
+  /**
    * Left pad a {@link Bytes} value with zero bytes to create a {@link Bytes32}.
    *
    * @param value The bytes value pad.

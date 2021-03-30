@@ -27,6 +27,7 @@ import org.apache.tuweni.trie.CompactEncoding.bytesToPath
 import java.util.function.Function
 import kotlin.text.Charsets.UTF_8
 
+internal fun bytes32Identity(b: Bytes32): Bytes32 = b
 internal fun bytesIdentity(b: Bytes): Bytes = b
 internal fun stringSerializer(s: String): Bytes = Bytes.wrap(s.toByteArray(UTF_8))
 internal fun stringDeserializer(b: Bytes): String = String(b.toArrayUnsafe(), UTF_8)

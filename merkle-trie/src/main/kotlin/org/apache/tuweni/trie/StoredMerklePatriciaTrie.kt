@@ -50,6 +50,16 @@ class StoredMerklePatriciaTrie<V> : MerkleTrie<Bytes, V> {
       StoredMerklePatriciaTrie(storage, rootHash, ::bytesIdentity, ::bytesIdentity)
 
     /**
+     * Create a trie with keys and values of type [Bytes32].
+     *
+     * @param storage The storage to use for persistence.
+     * @param rootHash The initial root has for the trie, which should be already present in `storage`.
+     */
+    @JvmStatic
+    fun storingBytes32(storage: MerkleStorage, rootHash: Bytes32): StoredMerklePatriciaTrie<Bytes32> =
+      StoredMerklePatriciaTrie(storage, rootHash, ::bytes32Identity) { b -> b as Bytes32 }
+
+    /**
      * Create a trie with value of type [String].
      *
      * Strings are stored in UTF-8 encoding.

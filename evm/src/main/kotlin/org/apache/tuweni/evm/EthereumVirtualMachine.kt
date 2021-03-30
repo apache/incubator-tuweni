@@ -20,6 +20,7 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.evm.impl.GasManager
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
@@ -90,13 +91,14 @@ val latestHardFork = HardFork.BERLIN
 /**
  * Result of EVM execution
  * @param statusCode the execution result status
- * @param gasLeft how much gas is left
  * @param hostContext the context of changes
+ * @param output the output of the execution
  */
 data class EVMResult(
   val statusCode: EVMExecutionStatusCode,
-  val gasLeft: Long,
-  val hostContext: HostContext
+  val gasManager: GasManager,
+  val hostContext: HostContext,
+  val output: Bytes? = null,
 )
 
 /**
@@ -273,7 +275,7 @@ interface HostContext {
   suspend fun accountExists(address: Address): Boolean
 
   /**
-   * Get storage function.
+   * Get repository storage function.
    *
    *
    * This function is used by a VM to query the given account storage entry.
@@ -282,7 +284,19 @@ interface HostContext {
    * @param key The index of the account's storage entry.
    * @return The storage value at the given storage key or null bytes if the account does not exist.
    */
-  suspend fun getStorage(address: Address, keyBytes: Bytes): Bytes32
+  suspend fun getRepositoryStorage(address: Address, keyBytes: Bytes): Bytes32
+
+  /**
+   * Get storage function.
+   *
+   *
+   * This function is used by a VM to query first the transaction changes, and then the given account storage entry.
+   *
+   * @param address The address of the account.
+   * @param key The index of the account's storage entry.
+   * @return The storage value at the given storage key or null bytes if the account does not exist.
+   */
+  suspend fun getStorage(address: Address, key: Bytes32): Bytes32
 
   /**
    * Set storage function.
@@ -309,7 +323,7 @@ interface HostContext {
    * @param address The address of the account.
    * @return The balance of the given account or 0 if the account does not exist.
    */
-  suspend fun getBalance(address: Address): Bytes32
+  suspend fun getBalance(address: Address): Wei
 
   /**
    * Get code size function.
@@ -407,6 +421,32 @@ interface HostContext {
    * @param topicCount The number of the topics. Valid values are between 0 and 4 inclusively.
    */
   fun emitLog(address: Address, data: Bytes, topics: Array<Bytes>, topicCount: Int)
+
+  /**
+   * Returns true if the account was never used.
+   */
+  fun warmUpAccount(address: Address): Boolean
+
+  /**
+   * Returns true if the storage slot was never used.
+   */
+  fun warmUpStorage(address: Address, key: UInt256): Boolean
+
+  /**
+   * Provides the gas price of the transaction.
+   */
+  fun getGasPrice(): Wei
+
+  /**
+   * Provides the timestamp of the transaction
+   */
+  fun timestamp(): UInt256
+  fun getGasLimit(): Long
+  fun getBlockNumber(): Long
+  fun getCoinbase(): Address
+  fun getDifficulty(): UInt256
+  fun increaseBalance(recipientAddress: Address, amount: Wei)
+  fun setBalance(address: Address, balance: Wei)
 }
 
 interface EvmVm {

@@ -423,11 +423,11 @@ class BlockchainRepository(
    * @param address the address of the account
    * @param key the key of the value to retrieve in the account storage.
    */
-  suspend fun getAccountStoreValue(address: Address, key: Bytes32): Bytes? {
+  suspend fun getAccountStoreValue(address: Address, key: Bytes32): Bytes32? {
     logger.trace("Entering getAccountStoreValue")
     val accountStateBytes = stateStore.get(Hash.hash(address)) ?: return null
     val accountState = AccountState.fromBytes(accountStateBytes)
-    val tree = StoredMerklePatriciaTrie.storingBytes(
+    val tree = StoredMerklePatriciaTrie.storingBytes32(
       object : MerkleStorage {
         override suspend fun get(hash: Bytes32): Bytes? {
           return stateStore.get(hash)

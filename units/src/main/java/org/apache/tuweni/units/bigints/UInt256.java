@@ -21,6 +21,7 @@ import org.apache.tuweni.bytes.MutableBytes32;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import javax.annotation.Nullable;
 
 /**
  * An unsigned 256-bit precision number.
@@ -54,6 +55,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
 
   // The unsigned int components of the value
   private final int[] ints;
+  private Integer hashCode;
 
   /**
    * Return a {@code UInt256} containing the specified value.
@@ -248,7 +250,8 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (modulus.isZero()) {
       throw new ArithmeticException("addMod with zero modulus");
     }
-    return UInt256.valueOf(toBigInteger().add(value.toBigInteger()).mod(modulus.toBigInteger()));
+    return UInt256
+        .valueOf(toUnsignedBigInteger().add(value.toUnsignedBigInteger()).mod(modulus.toUnsignedBigInteger()));
   }
 
   @Override
@@ -256,7 +259,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (modulus.isZero()) {
       throw new ArithmeticException("addMod with zero modulus");
     }
-    return UInt256.valueOf(toBigInteger().add(BigInteger.valueOf(value)).mod(modulus.toBigInteger()));
+    return UInt256.valueOf(toUnsignedBigInteger().add(BigInteger.valueOf(value)).mod(modulus.toUnsignedBigInteger()));
   }
 
   @Override
@@ -267,7 +270,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (modulus < 0) {
       throw new ArithmeticException("addMod unsigned with negative modulus");
     }
-    return UInt256.valueOf(toBigInteger().add(BigInteger.valueOf(value)).mod(BigInteger.valueOf(modulus)));
+    return UInt256.valueOf(toUnsignedBigInteger().add(BigInteger.valueOf(value)).mod(BigInteger.valueOf(modulus)));
   }
 
   @Override
@@ -374,7 +377,8 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (value.equals(UInt256.ONE)) {
       return mod(modulus);
     }
-    return UInt256.valueOf(toBigInteger().multiply(value.toBigInteger()).mod(modulus.toBigInteger()));
+    return UInt256
+        .valueOf(toUnsignedBigInteger().multiply(value.toUnsignedBigInteger()).mod(modulus.toUnsignedBigInteger()));
   }
 
   @Override
@@ -391,7 +395,8 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (value < 0) {
       throw new ArithmeticException("multiplyMod unsigned by negative");
     }
-    return UInt256.valueOf(toBigInteger().multiply(BigInteger.valueOf(value)).mod(modulus.toBigInteger()));
+    return UInt256
+        .valueOf(toUnsignedBigInteger().multiply(BigInteger.valueOf(value)).mod(modulus.toUnsignedBigInteger()));
   }
 
   @Override
@@ -411,7 +416,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (value < 0) {
       throw new ArithmeticException("multiplyMod unsigned by negative");
     }
-    return UInt256.valueOf(toBigInteger().multiply(BigInteger.valueOf(value)).mod(BigInteger.valueOf(modulus)));
+    return UInt256.valueOf(toUnsignedBigInteger().multiply(BigInteger.valueOf(value)).mod(BigInteger.valueOf(modulus)));
   }
 
   @Override
@@ -422,7 +427,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (value.equals(UInt256.ONE)) {
       return this;
     }
-    return UInt256.valueOf(toBigInteger().divide(value.toBigInteger()));
+    return UInt256.valueOf(toUnsignedBigInteger().divide(value.toUnsignedBigInteger()));
   }
 
   @Override
@@ -439,7 +444,20 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (isPowerOf2(value)) {
       return shiftRight(log2(value));
     }
-    return UInt256.valueOf(toBigInteger().divide(BigInteger.valueOf(value)));
+    return UInt256.valueOf(toUnsignedBigInteger().divide(BigInteger.valueOf(value)));
+  }
+
+  public UInt256 sdiv0(UInt256 divisor) {
+    if (divisor.isZero()) {
+      return UInt256.ZERO;
+    } else {
+      BigInteger result = this.toBigInteger().divide(divisor.toBigInteger());
+      Bytes resultBytes = Bytes.wrap(result.toByteArray());
+      if (resultBytes.size() > 32) {
+        resultBytes = resultBytes.slice(resultBytes.size() - 32, 32);
+      }
+      return UInt256.fromBytes(Bytes32.leftPad(resultBytes, result.signum() < 0 ? (byte) 0xFF : 0x00));
+    }
   }
 
   @Override
@@ -454,12 +472,12 @@ public final class UInt256 implements UInt256Value<UInt256> {
 
   @Override
   public UInt256 pow(UInt256 exponent) {
-    return UInt256.valueOf(toBigInteger().modPow(exponent.toBigInteger(), P_2_256));
+    return UInt256.valueOf(toUnsignedBigInteger().modPow(exponent.toUnsignedBigInteger(), P_2_256));
   }
 
   @Override
   public UInt256 pow(long exponent) {
-    return UInt256.valueOf(toBigInteger().modPow(BigInteger.valueOf(exponent), P_2_256));
+    return UInt256.valueOf(toUnsignedBigInteger().modPow(BigInteger.valueOf(exponent), P_2_256));
   }
 
   @Override
@@ -467,7 +485,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (modulus.isZero()) {
       throw new ArithmeticException("mod by zero");
     }
-    return UInt256.valueOf(toBigInteger().mod(modulus.toBigInteger()));
+    return UInt256.valueOf(toUnsignedBigInteger().mod(modulus.toUnsignedBigInteger()));
   }
 
   @Override
@@ -492,7 +510,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
       }
       return new UInt256(result);
     }
-    return UInt256.valueOf(toBigInteger().mod(BigInteger.valueOf(modulus)));
+    return UInt256.valueOf(toUnsignedBigInteger().mod(BigInteger.valueOf(modulus)));
   }
 
   @Override
@@ -501,6 +519,32 @@ public final class UInt256 implements UInt256Value<UInt256> {
       return UInt256.ZERO;
     }
     return mod(modulus);
+  }
+
+  /**
+   * Returns a value that is the {@code (this signed mod modulus)}, or 0 if modulus is 0.
+   *
+   * @param modulus The modulus.
+   * @return {@code this signed mod modulus}.
+   */
+  public UInt256 smod0(UInt256 modulus) {
+    if (modulus.equals(UInt256.ZERO)) {
+      return UInt256.ZERO;
+    }
+
+    BigInteger bi = this.toBigInteger();
+    BigInteger result = bi.abs().mod(modulus.toBigInteger().abs());
+
+    if (bi.signum() < 0) {
+      result = result.negate();
+    }
+
+    Bytes resultBytes = Bytes.wrap(result.toByteArray());
+    if (resultBytes.size() > 32) {
+      resultBytes = resultBytes.slice(resultBytes.size() - 32, 32);
+    }
+
+    return UInt256.fromBytes(Bytes32.leftPad(resultBytes, result.signum() < 0 ? (byte) 0xFF : 0x00));
   }
 
   @Override
@@ -692,29 +736,50 @@ public final class UInt256 implements UInt256Value<UInt256> {
   }
 
   @Override
-  public boolean equals(Object object) {
+  public boolean equals(@Nullable Object object) {
     if (object == this) {
       return true;
     }
-    if (!(object instanceof UInt256)) {
-      return false;
+    if (object instanceof UInt256) {
+      UInt256 other = (UInt256) object;
+      for (int i = 0; i < INTS_SIZE; ++i) {
+        if (this.ints[i] != other.ints[i]) {
+          return false;
+        }
+      }
+      return true;
     }
-    UInt256 other = (UInt256) object;
-    for (int i = 0; i < INTS_SIZE; ++i) {
-      if (this.ints[i] != other.ints[i]) {
+    if (object instanceof Bytes) {
+      Bytes other = (Bytes) object;
+      if (this.size() != other.size()) {
         return false;
       }
+
+      for (int i = 0; i < size(); i++) {
+        if (this.get(i) != other.get(i)) {
+          return false;
+        }
+      }
+
+      return true;
     }
-    return true;
+    return false;
+  }
+
+  int computeHashcode() {
+    int result = 1;
+    for (int i = 0; i < size(); i++) {
+      result = 31 * result + get(i);
+    }
+    return result;
   }
 
   @Override
   public int hashCode() {
-    int result = 1;
-    for (int i = 0; i < INTS_SIZE; ++i) {
-      result = 31 * result + this.ints[i];
+    if (this.hashCode == null) {
+      this.hashCode = computeHashcode();
     }
-    return result;
+    return this.hashCode;
   }
 
   @Override
@@ -749,9 +814,9 @@ public final class UInt256 implements UInt256Value<UInt256> {
 
   @Override
   public byte get(int i) {
-    int whichInt = i/INTS_SIZE;
-    int whichIndex = i%4;
-    return (byte) (this.ints[whichInt] >> (8 * whichIndex) & 0xFF);
+    int whichInt = i / 4;
+    int whichIndex = 3 - i % 4;
+    return (byte) ((this.ints[whichInt] >> (8 * whichIndex)) & 0xFF);
   }
 
   @Override
@@ -769,19 +834,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
 
   @Override
   public String toString() {
-    return toBigInteger().toString();
-  }
-
-  @Override
-  public BigInteger toBigInteger() {
-    byte[] mag = new byte[32];
-    for (int i = 0, j = 0; i < INTS_SIZE; ++i) {
-      mag[j++] = (byte) (this.ints[i] >>> 24);
-      mag[j++] = (byte) ((this.ints[i] >>> 16) & 0xFF);
-      mag[j++] = (byte) ((this.ints[i] >>> 8) & 0xFF);
-      mag[j++] = (byte) (this.ints[i] & 0xFF);
-    }
-    return new BigInteger(1, mag);
+    return toHexString();
   }
 
   @Override
@@ -791,38 +844,38 @@ public final class UInt256 implements UInt256Value<UInt256> {
 
   private byte[] toByteArray() {
     return new byte[] {
-            (byte) (ints[0] >> 24),
-            (byte) (ints[0] >> 16),
-            (byte) (ints[0] >> 8),
-            (byte) (ints[0]),
-            (byte) (ints[1] >> 24),
-            (byte) (ints[1] >> 16),
-            (byte) (ints[1] >> 8),
-            (byte) (ints[1]),
-            (byte) (ints[2] >> 24),
-            (byte) (ints[2] >> 16),
-            (byte) (ints[2] >> 8),
-            (byte) (ints[2]),
-            (byte) (ints[3] >> 24),
-            (byte) (ints[3] >> 16),
-            (byte) (ints[3] >> 8),
-            (byte) (ints[3]),
-            (byte) (ints[4] >> 24),
-            (byte) (ints[4] >> 16),
-            (byte) (ints[4] >> 8),
-            (byte) (ints[4]),
-            (byte) (ints[5] >> 24),
-            (byte) (ints[5] >> 16),
-            (byte) (ints[5] >> 8),
-            (byte) (ints[5]),
-            (byte) (ints[6] >> 24),
-            (byte) (ints[6] >> 16),
-            (byte) (ints[6] >> 8),
-            (byte) (ints[6]),
-            (byte) (ints[7] >> 24),
-            (byte) (ints[7] >> 16),
-            (byte) (ints[7] >> 8),
-            (byte) (ints[7])};
+        (byte) (ints[0] >> 24),
+        (byte) (ints[0] >> 16),
+        (byte) (ints[0] >> 8),
+        (byte) (ints[0]),
+        (byte) (ints[1] >> 24),
+        (byte) (ints[1] >> 16),
+        (byte) (ints[1] >> 8),
+        (byte) (ints[1]),
+        (byte) (ints[2] >> 24),
+        (byte) (ints[2] >> 16),
+        (byte) (ints[2] >> 8),
+        (byte) (ints[2]),
+        (byte) (ints[3] >> 24),
+        (byte) (ints[3] >> 16),
+        (byte) (ints[3] >> 8),
+        (byte) (ints[3]),
+        (byte) (ints[4] >> 24),
+        (byte) (ints[4] >> 16),
+        (byte) (ints[4] >> 8),
+        (byte) (ints[4]),
+        (byte) (ints[5] >> 24),
+        (byte) (ints[5] >> 16),
+        (byte) (ints[5] >> 8),
+        (byte) (ints[5]),
+        (byte) (ints[6] >> 24),
+        (byte) (ints[6] >> 16),
+        (byte) (ints[6] >> 8),
+        (byte) (ints[6]),
+        (byte) (ints[7] >> 24),
+        (byte) (ints[7] >> 16),
+        (byte) (ints[7] >> 8),
+        (byte) (ints[7])};
   }
 
   @Override
@@ -837,8 +890,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
 
   @Override
   public Bytes32 toBytes() {
-    return Bytes32
-        .wrap(toByteArray());
+    return Bytes32.wrap(toByteArray());
   }
 
   @Override

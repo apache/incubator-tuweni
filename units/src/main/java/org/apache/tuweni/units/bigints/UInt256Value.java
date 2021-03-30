@@ -16,7 +16,6 @@ package org.apache.tuweni.units.bigints;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 
-import java.math.BigInteger;
 
 /**
  * Represents a 256-bit (32 bytes) unsigned integer value.
@@ -394,4 +393,44 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
    * @return The value as bytes without any leading zero bytes.
    */
   Bytes toMinimalBytes();
+
+  /**
+   * Returns true if this value is greater than the other one
+   * 
+   * @param other the other value being compared
+   * @return true if this value is greater than the other one, false otherwise
+   */
+  default boolean greaterThan(UInt256Value<T> other) {
+    return compareTo(other) > 0;
+  }
+
+  /**
+   * Returns true if this value is greater or equal than the other one
+   * 
+   * @param other the other value being compared
+   * @return true if this value is greater or equal than the other one, false otherwise
+   */
+  default boolean greaterOrEqualThan(UInt256Value<T> other) {
+    return compareTo(other) >= 0;
+  }
+
+  /**
+   * Returns true if this value is less than the other one
+   * 
+   * @param other the other value being compared
+   * @return true if this value is less than the other one, false otherwise
+   */
+  default boolean lessThan(UInt256Value<T> other) {
+    return compareTo(other) < 0;
+  }
+
+  /**
+   * Returns true if this value is less or equal than the other one
+   * 
+   * @param other the other value being compared
+   * @return true if this value is less or equal than the other one, false otherwise
+   */
+  default boolean lessOrEqualThan(UInt256Value<T> other) {
+    return compareTo(other) <= 0;
+  }
 }

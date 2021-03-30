@@ -23,14 +23,16 @@ import org.apache.tuweni.evm.EVMResult
 import org.apache.tuweni.evm.EvmVm
 import org.apache.tuweni.evm.HardFork
 import org.apache.tuweni.evm.HostContext
+import org.slf4j.LoggerFactory
 
-class EvmVmImpl() : EvmVm {
+class EvmVmImpl : EvmVm {
 
   companion object {
     fun create(): EvmVm {
       return EvmVmImpl()
     }
-    val registry = mapOf(Pair(HardFork.FRONTIER, OpcodeRegistry.frontier()))
+    val registry = OpcodeRegistry.create()
+    val logger = LoggerFactory.getLogger(EvmVmImpl::class.java)
   }
 
   override fun setOption(key: String, value: String) {
@@ -42,25 +44,58 @@ class EvmVmImpl() : EvmVm {
   }
 
   override suspend fun close() {
-
   }
 
   override suspend fun execute(hostContext: HostContext, fork: HardFork, msg: EVMMessage, code: Bytes): EVMResult {
+    logger.trace("Code: $code")
     val stack = Stack()
     var current = 0
     val gasManager = GasManager(msg.gas)
+    val memory = Memory()
+    val executionPath = mutableListOf<Byte>()
     while (current < code.size()) {
-      val opcode = registry[fork]?.opcodes?.get(code.get(current))
-          ?: return EVMResult(EVMExecutionStatusCode.INVALID_INSTRUCTION, gasManager.gasLeft(), hostContext)
-      val result = opcode.execute(gasManager, hostContext, stack)
-      if (result != EVMExecutionStatusCode.SUCCESS) {
-        return EVMResult(result, gasManager.gasLeft(), hostContext)
+      if (logger.isTraceEnabled) {
+        logger.trace("Stack contents (${stack.size()}):")
+        for (i in (0 until stack.size())) {
+          logger.trace("$i - ${stack.get(i)?.toHexString()}")
+        }
+      }
+      executionPath.add(code.get(current))
+      val opcode = registry.get(fork, code.get(current))
+      if (opcode == null) {
+        logger.error("Could not find opcode for ${code.slice(current, 1)} at position $current")
+        return EVMResult(EVMExecutionStatusCode.INVALID_INSTRUCTION, gasManager, hostContext)
+      }
+      val currentOpcodeByte = code.get(current)
+      current++
+      val result = opcode.execute(gasManager, hostContext, stack, msg, code, current, memory)
+      logger.trace(
+        ">> OPCODE: ${opcodes[currentOpcodeByte] ?: currentOpcodeByte.toString(16)} " +
+          "gas: ${gasManager.gasLeft()} cost: ${gasManager.lastGasCost()}"
+      )
+      if (result?.status != null) {
+        if (logger.isTraceEnabled) {
+          logger.trace(executionPath.map { opcodes[it] ?: it.toString(16) }.joinToString(">"))
+        }
+        return EVMResult(result.status, gasManager, hostContext, result.output)
+      }
+      result?.newCodePosition?.let {
+        current = result.newCodePosition
+      }
+      if (gasManager.gas.tooHigh()) {
+        return EVMResult(EVMExecutionStatusCode.OUT_OF_GAS, gasManager, hostContext)
       }
       if (gasManager.gasLeft() < 0) {
-        return EVMResult(EVMExecutionStatusCode.OUT_OF_GAS, gasManager.gasLeft(), hostContext)
+        return EVMResult(EVMExecutionStatusCode.OUT_OF_GAS, gasManager, hostContext)
+      }
+      if (stack.overflowed()) {
+        return EVMResult(EVMExecutionStatusCode.STACK_OVERFLOW, gasManager, hostContext)
       }
     }
-    return EVMResult(EVMExecutionStatusCode.SUCCESS, gasManager.gasLeft(), hostContext)
+    if (logger.isTraceEnabled) {
+      logger.trace(executionPath.map { opcodes[it] ?: it.toString(16) }.joinToString(">"))
+    }
+    return EVMResult(EVMExecutionStatusCode.SUCCESS, gasManager, hostContext)
   }
 
   override fun capabilities(): Int {

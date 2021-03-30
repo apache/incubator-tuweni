@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.runBlocking
 import org.apache.lucene.index.IndexWriter
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.AccountState
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.EthJsonModule
@@ -43,8 +44,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -73,7 +72,7 @@ class EVMReferenceTest {
 
     @Throws(IOException::class)
     private fun findTests(glob: String): Stream<Arguments> {
-      return Resources.find(glob).flatMap { url ->
+      return Resources.find(glob).filter { !it.file.contains("loop") }.flatMap { url ->
         try {
           url.openConnection().getInputStream().use { input -> prepareTests(input) }
         } catch (e: IOException) {
@@ -212,17 +211,26 @@ class EVMReferenceTest {
           }
         } else {
           assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
+
           test.post!!.forEach { address, state ->
             runBlocking {
-              assertTrue(repository.accountsExists(address) || (result.hostContext as TransactionalEVMHostContext).accountChanges.containsKey(
-                address))
+              assertTrue(
+                repository.accountsExists(address) ||
+                  (result.hostContext as TransactionalEVMHostContext).accountChanges.containsKey(address)
+              )
               val accountState = repository.getAccount(address)
               val balance = accountState?.balance?.add(
                 (result.hostContext as TransactionalEVMHostContext).balanceChanges.get(address) ?: Wei.valueOf(0)
               ) ?: Wei.valueOf(0)
               assertEquals(state.balance, balance)
               assertEquals(state.nonce, accountState!!.nonce)
-              assertEquals(state.storage!!.size, (result.hostContext as TransactionalEVMHostContext).accountChanges.size)
+
+              val accountChanges = (result.hostContext as TransactionalEVMHostContext).accountChanges[address]
+              assertEquals(state.storage!!.size, accountChanges?.size ?: 0)
+              for (stored in state.storage!!) {
+                val changed = accountChanges?.get(stored.key)
+                assertEquals(stored.value, changed)
+              }
             }
           }
           test.logs?.let {
@@ -232,6 +240,16 @@ class EVMReferenceTest {
                 logsTree.put(Hash.hash(it.toBytes()), it.toBytes())
               }
             }
+          }
+
+          assertEquals(test.gas, result.gasManager.gasLeft())
+          if (test.out?.isEmpty ?: false) {
+            assertTrue(result.output == null || result.output?.isEmpty ?: false)
+          } else {
+            assertEquals(
+              test.out?.let { if (it.size() < 32) Bytes32.rightPad(it) else it },
+              result.output?.let { if (it.size() < 32) Bytes32.rightPad(it) else it }
+            )
           }
         }
       } finally {
@@ -247,7 +265,7 @@ data class Env(
   var currentDifficulty: UInt256? = null,
   var currentGasLimit: UInt256? = null,
   var currentNumber: UInt256? = null,
-  var currentTimestamp: UInt256? = null
+  var currentTimestamp: UInt256? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -259,7 +277,7 @@ data class Exec(
   var gas: Gas? = null,
   var gasPrice: Wei? = null,
   var origin: Address? = null,
-  var value: Bytes? = null
+  var value: Bytes? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -267,7 +285,7 @@ data class JsonAccountState(
   var balance: Wei? = null,
   var code: Bytes? = null,
   var nonce: UInt256? = null,
-  var storage: Map<Bytes, Bytes>? = null
+  var storage: Map<UInt256, UInt256>? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -278,5 +296,5 @@ data class JsonReferenceTest(
   var logs: Bytes? = null,
   var out: Bytes? = null,
   var post: Map<Address, JsonAccountState>? = null,
-  var pre: Map<Address, JsonAccountState>? = null
+  var pre: Map<Address, JsonAccountState>? = null,
 )

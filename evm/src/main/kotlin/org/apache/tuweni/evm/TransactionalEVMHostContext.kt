@@ -41,7 +41,7 @@ class TransactionalEVMHostContext(
   val value: Bytes,
   val code: Bytes,
   val gas: Gas,
-  val gasPrice: Wei,
+  private val gasPrice: Wei,
   val currentCoinbase: Address,
   val currentNumber: Long,
   val currentTimestamp: Long,
@@ -57,6 +57,7 @@ class TransactionalEVMHostContext(
   val logs = mutableListOf<Log>()
   val accountsToDestroy = mutableListOf<Address>()
   val balanceChanges = HashMap<Address, Wei>()
+  val warmedUpStorage = HashSet<Bytes>()
   /**
    * Check account existence function.
    *
@@ -72,6 +73,14 @@ class TransactionalEVMHostContext(
       repository.accountsExists(address)
   }
 
+  override suspend fun getRepositoryStorage(address: Address, keyBytes: Bytes): Bytes32 {
+    logger.trace("Entering getRepositoryStorage")
+    val key = Bytes32.wrap(keyBytes)
+    val value = repository.getAccountStoreValue(address, key)
+    logger.info("Found value $value")
+    return value ?: Bytes32.ZERO
+  }
+
   /**
    * Get storage function.
    *
@@ -82,12 +91,14 @@ class TransactionalEVMHostContext(
    * @param key The index of the account's storage entry.
    * @return The storage value at the given storage key or null bytes if the account does not exist.
    */
-  override suspend fun getStorage(address: Address, keyBytes: Bytes): Bytes32 {
+  override suspend fun getStorage(address: Address, key: Bytes32): Bytes32 {
     logger.trace("Entering getStorage")
-    val key = Bytes32.wrap(keyBytes)
-    val value = accountChanges[address]?.get(key)
+    var value = accountChanges[address]?.get(key)
     logger.info("Found value $value")
-    return value ?: Bytes32.ZERO
+    if (value == null) {
+      value = repository.getAccountStoreValue(address, key)?.let { UInt256.fromBytes(it) }
+    }
+    return value ?: UInt256.ZERO
   }
 
   /**
@@ -125,12 +136,14 @@ class TransactionalEVMHostContext(
     val oldValue = map.get(key)
     val storageAdded = newAccount || oldValue == null
     val storageWasModifiedBefore = map.containsKey(key)
-    val storageModified = !value.equals(oldValue)
-    if (value.size() == 0) {
-      map.remove(key)
-      return 4
+    val storageModified = !(value == UInt256.ZERO && oldValue == null) && !value.equals(oldValue)
+    if (!storageModified) {
+      return 0
     }
     map.put(key, value)
+    if (value.size() == 0) {
+      return 4
+    }
     if (storageModified) {
       if (storageAdded) {
         return 3
@@ -152,15 +165,15 @@ class TransactionalEVMHostContext(
    * @param address The address of the account.
    * @return The balance of the given account or 0 if the account does not exist.
    */
-  override suspend fun getBalance(address: Address): Bytes32 {
+  override suspend fun getBalance(address: Address): Wei {
     logger.trace("Entering getBalance")
 
     val balance = balanceChanges[address]
     balance?.let {
-      return it.toBytes()
+      return it
     }
     val account = repository.getAccount(address)
-    return account?.balance?.toBytes() ?: Bytes32.ZERO
+    return account?.balance ?: Wei.valueOf(0)
   }
 
   /**
@@ -271,7 +284,6 @@ class TransactionalEVMHostContext(
     )
     return result
   }
-
   /**
    * Get transaction context function.
    *
@@ -325,5 +337,31 @@ class TransactionalEVMHostContext(
   override fun emitLog(address: Address, data: Bytes, topics: Array<Bytes>, topicCount: Int) {
     logger.trace("Entering emitLog")
     logs.add(Log(Address.fromBytes(Bytes.wrap(address)), Bytes.wrap(data), topics.map { Bytes32.wrap(it) }))
+  }
+
+  override fun warmUpAccount(address: Address): Boolean =
+    !warmedUpStorage.add(address)
+
+  override fun warmUpStorage(address: Address, key: UInt256): Boolean =
+    !warmedUpStorage.add(Bytes.concatenate(address, Bytes.fromHexString("0x0f"), key))
+
+  override fun getGasPrice() = gasPrice
+
+  override fun getGasLimit() = currentGasLimit
+
+  override fun getBlockNumber() = currentNumber
+
+  override fun getCoinbase() = currentCoinbase
+
+  override fun timestamp(): UInt256 = UInt256.valueOf(currentTimestamp)
+
+  override fun getDifficulty() = currentDifficulty
+
+  override fun increaseBalance(recipientAddress: Address, amount: Wei) {
+    TODO("Not yet implemented")
+  }
+
+  override fun setBalance(address: Address, balance: Wei) {
+    TODO("Not yet implemented")
   }
 }

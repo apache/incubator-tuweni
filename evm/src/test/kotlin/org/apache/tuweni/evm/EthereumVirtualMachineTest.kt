@@ -62,28 +62,28 @@ class EthereumVirtualMachineTest {
   fun testExecuteCall(@LuceneIndexWriter writer: IndexWriter) {
     val result = runCode(writer, Bytes.fromHexString("0x30600052596000f3"))
     assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-    assertEquals(0, result.gasLeft)
+    assertEquals(0, result.gasManager.gasLeft())
   }
 
   @Test
   fun testExecuteCounter(@LuceneIndexWriter writer: IndexWriter) {
     val result = runCode(writer, Bytes.fromHexString("0x600160005401600055"))
     assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-    assertEquals(0, result.gasLeft)
+    assertEquals(0, result.gasManager.gasLeft())
   }
 
   @Test
   fun testExecuteReturnBlockNumber(@LuceneIndexWriter writer: IndexWriter) {
     val result = runCode(writer, Bytes.fromHexString("0x43600052596000f3"))
     assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-    assertEquals(100000, result.gasLeft)
+    assertEquals(100000, result.gasManager.gasLeft())
   }
 
   @Test
   fun testExecuteSaveReturnBlockNumber(@LuceneIndexWriter writer: IndexWriter) {
     val result = runCode(writer, Bytes.fromHexString("0x4360005543600052596000f3"))
     assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-    assertEquals(100000, result.gasLeft)
+    assertEquals(100000, result.gasManager.gasLeft())
   }
 
   @Test
@@ -153,7 +153,7 @@ class EthereumVirtualMachineTest {
         )
       }
       assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-      assertEquals(20000, result.gasLeft)
+      assertEquals(20000, result.gasManager.gasLeft())
     } finally {
       vm.stop()
     }
