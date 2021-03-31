@@ -12,13 +12,11 @@
  */
 package org.apache.tuweni.ethstats;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
-import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.eth.Address;
 import org.apache.tuweni.eth.Hash;
 import org.apache.tuweni.junit.VertxExtension;
@@ -57,14 +55,9 @@ public class EthStatsReporterTest {
         },
         now::toEpochMilli);
 
-    AsyncResult<String> nextMessage = server.captureNextMessage();
     reporter.start().join();
     assertNotNull(server.getWebsocket());
-    assertEquals(
-        "{\"emit\":[\"hello\",{\"id\":\"foo\",\"info\":{\"api\":\"No\",\"canUpdateHistory\":true,\"client\":\"0.1.0\",\"name\":\"name\",\"net\":\"10\",\"node\":\"node\",\"os\":\"Windoz\",\"os_v\":\"64\",\"port\":33030,\"protocol\":\"eth/63\"},\"secret\":\"wat\"}]}",
-        nextMessage.get());
 
-    nextMessage = server.captureNextMessage();
     reporter
         .sendNewHead(
             new BlockStats(
@@ -81,13 +74,19 @@ public class EthStatsReporterTest {
                 Hash.fromBytes(Bytes32.random()),
                 Hash.fromBytes(Bytes32.random()),
                 Collections.emptyList()));
-    assertTrue(nextMessage.get().startsWith("{\"emit\":[\"block\",{\"block\""), nextMessage.get());
-    nextMessage = server.captureNextMessage();
+
     reporter.sendNewNodeStats(new NodeStats(true, false, true, 42, 9, 4000, 100));
-    assertTrue(nextMessage.get().startsWith("{\"emit\":[\"stats\",{\"stats\":"), nextMessage.get());
-    nextMessage = server.captureNextMessage();
     reporter.sendNewPendingTransactionCount(42);
-    assertEquals("{\"emit\":[\"pending\",{\"stats\":{\"pending\":42},\"id\":\"foo\"}]}", nextMessage.get());
+    server.waitForMessages(4);
+    assertTrue(4 <= server.getResults().size());
+    assertTrue(
+        server
+            .messagesContain(
+                "{\"emit\":[\"hello\",{\"id\":\"foo\",\"info\":{\"api\":\"No\",\"canUpdateHistory\":true,\"client\":\"0.1.0\",\"name\":\"name\",\"net\":\"10\",\"node\":\"node\",\"os\":\"Windoz\",\"os_v\":\"64\",\"port\":33030,\"protocol\":\"eth/63\"},\"secret\":\"wat\"}]}"));
+    assertTrue(server.messagesContain("{\"emit\":[\"node-ping\",{\"id\":\"foo\""));
+    assertTrue(server.messagesContain("{\"emit\":[\"block\",{\"block\""));
+    assertTrue(server.messagesContain("{\"emit\":[\"pending\",{\"stats\":{\"pending\":42},\"id\":\"foo\"}]}"));
+    assertTrue(server.messagesContain("{\"emit\":[\"stats\",{\"stats\":"));
 
     reporter.stop();
   }
