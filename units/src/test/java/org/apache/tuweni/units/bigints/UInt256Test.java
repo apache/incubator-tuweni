@@ -1141,9 +1141,9 @@ class UInt256Test {
   @Test
   void testHashcode() {
     UInt256 value = UInt256.ZERO;
-    assertEquals(31, value.hashCode());
+    assertEquals(2111290369, value.hashCode());
     UInt256 valueOne = UInt256.ONE;
-    assertEquals(31, valueOne.hashCode());
+    assertEquals(2111290370, valueOne.hashCode());
   }
 
   @Test
