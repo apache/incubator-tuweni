@@ -400,10 +400,10 @@ interface HostContext {
    *
    * This function is used by a VM to query the hash of the header of the given block. If the
    * information about the requested block is not available, then this is signalled by returning
-   * null bytes.
+   * zeroed bytes.
    *
-   * @param number The block number.
-   * @return The block hash or null bytes if the information about the block is not available.
+   * @param number The block hash.
+   * @return The block hash or zeroed bytes if the information about the block is not available.
    */
   fun getBlockHash(number: Long): Bytes32
 
@@ -417,10 +417,9 @@ interface HostContext {
    * @param address The address of the contract that generated the log.
    * @param data The unindexed data attached to the log.
    * @param dataSize The length of the data.
-   * @param topics The the array of topics attached to the log.
-   * @param topicCount The number of the topics. Valid values are between 0 and 4 inclusively.
+   * @param topics The list of topics attached to the log.
    */
-  fun emitLog(address: Address, data: Bytes, topics: Array<Bytes>, topicCount: Int)
+  fun emitLog(address: Address, data: Bytes, topics: List<Bytes32>)
 
   /**
    * Returns true if the account was never used.
@@ -443,10 +442,11 @@ interface HostContext {
   fun timestamp(): UInt256
   fun getGasLimit(): Long
   fun getBlockNumber(): Long
+  fun getBlockHash(): Bytes32
   fun getCoinbase(): Address
   fun getDifficulty(): UInt256
-  fun increaseBalance(recipientAddress: Address, amount: Wei)
-  fun setBalance(address: Address, balance: Wei)
+  fun increaseBalance(address: Address, amount: Wei)
+  suspend fun setBalance(address: Address, balance: Wei)
 }
 
 interface EvmVm {

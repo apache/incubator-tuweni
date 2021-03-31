@@ -77,19 +77,22 @@ class EvmVmImpl : EvmVm {
         if (logger.isTraceEnabled) {
           logger.trace(executionPath.map { opcodes[it] ?: it.toString(16) }.joinToString(">"))
         }
+        if (result.status == EVMExecutionStatusCode.SUCCESS && !gasManager.hasGasLeft()) {
+          return EVMResult(EVMExecutionStatusCode.OUT_OF_GAS, gasManager, hostContext)
+        }
         return EVMResult(result.status, gasManager, hostContext, result.output)
       }
       result?.newCodePosition?.let {
         current = result.newCodePosition
       }
-      if (gasManager.gas.tooHigh()) {
-        return EVMResult(EVMExecutionStatusCode.OUT_OF_GAS, gasManager, hostContext)
-      }
-      if (gasManager.gasLeft() < 0) {
+      if (!gasManager.hasGasLeft()) {
         return EVMResult(EVMExecutionStatusCode.OUT_OF_GAS, gasManager, hostContext)
       }
       if (stack.overflowed()) {
         return EVMResult(EVMExecutionStatusCode.STACK_OVERFLOW, gasManager, hostContext)
+      }
+      if (result?.validationStatus != null) {
+        return EVMResult(result.validationStatus, gasManager, hostContext)
       }
     }
     if (logger.isTraceEnabled) {

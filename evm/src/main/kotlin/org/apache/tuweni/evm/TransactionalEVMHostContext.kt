@@ -304,39 +304,15 @@ class TransactionalEVMHostContext(
     )
   }
 
-  /**
-   * Get block hash function.
-   *
-   *
-   * This function is used by a VM to query the hash of the header of the given block. If the
-   * information about the requested block is not available, then this is signalled by returning
-   * null bytes.
-   *
-   * @param number The block number.
-   * @return The block hash or null bytes if the information about the block is not available.
-   */
   override fun getBlockHash(number: Long): Bytes32 {
     logger.trace("Entering getBlockHash")
     val listOfCandidates = repository.findBlockByHashOrNumber(UInt256.valueOf(number).toBytes())
     return listOfCandidates.firstOrNull() ?: Bytes32.ZERO
   }
 
-  /**
-   * Log function.
-   *
-   *
-   * This function is used by an EVM to inform about a LOG that happened during an EVM bytecode
-   * execution.
-   *
-   * @param address The address of the contract that generated the log.
-   * @param data The unindexed data attached to the log.
-   * @param dataSize The length of the data.
-   * @param topics The the array of topics attached to the log.
-   * @param topicCount The number of the topics. Valid values are between 0 and 4 inclusively.
-   */
-  override fun emitLog(address: Address, data: Bytes, topics: Array<Bytes>, topicCount: Int) {
+  override fun emitLog(address: Address, data: Bytes, topics: List<Bytes32>) {
     logger.trace("Entering emitLog")
-    logs.add(Log(Address.fromBytes(Bytes.wrap(address)), Bytes.wrap(data), topics.map { Bytes32.wrap(it) }))
+    logs.add(Log(Address.fromBytes(Bytes.wrap(address)), data, topics))
   }
 
   override fun warmUpAccount(address: Address): Boolean =
@@ -351,17 +327,19 @@ class TransactionalEVMHostContext(
 
   override fun getBlockNumber() = currentNumber
 
+  override fun getBlockHash() = getBlockHash(currentNumber)
+
   override fun getCoinbase() = currentCoinbase
 
   override fun timestamp(): UInt256 = UInt256.valueOf(currentTimestamp)
 
   override fun getDifficulty() = currentDifficulty
 
-  override fun increaseBalance(recipientAddress: Address, amount: Wei) {
-    TODO("Not yet implemented")
+  override fun increaseBalance(address: Address, amount: Wei) {
+    balanceChanges[address] = balanceChanges[address]?.add(amount) ?: amount
   }
 
-  override fun setBalance(address: Address, balance: Wei) {
-    TODO("Not yet implemented")
+  override suspend fun setBalance(address: Address, balance: Wei) {
+    balanceChanges[address] = getBalance(address).subtract(balance)
   }
 }

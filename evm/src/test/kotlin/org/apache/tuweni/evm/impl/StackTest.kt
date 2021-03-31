@@ -85,4 +85,18 @@ class StackTest {
     assertEquals(UInt256.valueOf(2), stack.pop())
     assertEquals(UInt256.valueOf(1), stack.pop())
   }
+
+  @Test
+  fun pushSet() {
+    val stack = Stack(10)
+    stack.push(UInt256.valueOf(3))
+    stack.push(UInt256.valueOf(2))
+    stack.push(UInt256.valueOf(1))
+    stack.set(2, UInt256.valueOf(4))
+    stack.set(1, UInt256.valueOf(5))
+    stack.set(0, UInt256.valueOf(6))
+    assertEquals(UInt256.valueOf(6), stack.get(0))
+    assertEquals(UInt256.valueOf(5), stack.get(1))
+    assertEquals(UInt256.valueOf(4), stack.get(2))
+  }
 }

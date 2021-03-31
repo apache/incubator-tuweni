@@ -20,7 +20,7 @@ import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.bytes.MutableBytes
 import org.apache.tuweni.units.bigints.UInt256
 
-class Stack(private val maxSize: Int = 1024) {
+class Stack(private val maxSize: Int = 1025) {
 
   private val mutableStack = MutableBytes.create(maxSize * 32)
   private var size = 0
@@ -54,6 +54,6 @@ class Stack(private val maxSize: Int = 1024) {
   fun overflowed(): Boolean = size >= maxSize
 
   fun set(i: Int, elt: UInt256) {
-    mutableStack.set(i, elt)
+    mutableStack.set((size - i - 1) * 32, elt)
   }
 }

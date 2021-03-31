@@ -57,7 +57,7 @@ class StoredMerklePatriciaTrie<V> : MerkleTrie<Bytes, V> {
      */
     @JvmStatic
     fun storingBytes32(storage: MerkleStorage, rootHash: Bytes32): StoredMerklePatriciaTrie<Bytes32> =
-      StoredMerklePatriciaTrie(storage, rootHash, ::bytes32Identity) { b -> b as Bytes32 }
+      StoredMerklePatriciaTrie(storage, rootHash, ::bytes32Identity) { b -> Bytes32.wrap(b) }
 
     /**
      * Create a trie with value of type [String].

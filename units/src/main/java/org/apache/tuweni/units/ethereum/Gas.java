@@ -41,7 +41,7 @@ public final class Gas implements Comparable<Gas> {
 
   public final static Gas ZERO = Gas.valueOf(0);
   public final static Gas MAX = Gas.valueOf(Long.MAX_VALUE);
-  private final static Gas TOO_HIGH = new Gas(-1);
+  public final static Gas TOO_HIGH = new Gas(-1);
 
   private final long value;
 
@@ -125,7 +125,11 @@ public final class Gas implements Comparable<Gas> {
     if (tooHigh() || other.tooHigh()) {
       return TOO_HIGH;
     }
-    return Gas.valueOf(Math.subtractExact(value, other.value));
+    long newValue = Math.subtractExact(value, other.value);
+    if (newValue < 0) {
+      return TOO_HIGH;
+    }
+    return Gas.valueOf(newValue);
   }
 
   public Gas multiply(Gas other) {

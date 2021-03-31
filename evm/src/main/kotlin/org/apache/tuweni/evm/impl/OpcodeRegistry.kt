@@ -27,6 +27,7 @@ import org.apache.tuweni.evm.impl.frontier.addmod
 import org.apache.tuweni.evm.impl.frontier.address
 import org.apache.tuweni.evm.impl.frontier.and
 import org.apache.tuweni.evm.impl.frontier.balance
+import org.apache.tuweni.evm.impl.frontier.blockhash
 import org.apache.tuweni.evm.impl.frontier.byte
 import org.apache.tuweni.evm.impl.frontier.calldatacopy
 import org.apache.tuweni.evm.impl.frontier.calldataload
@@ -89,29 +90,45 @@ import java.nio.ByteBuffer
 data class Result(
   val status: EVMExecutionStatusCode? = null,
   val newCodePosition: Int? = null,
-  val output: Bytes? = null
+  val output: Bytes? = null,
+  val validationStatus: EVMExecutionStatusCode? = null,
 )
 
 class Memory {
 
   companion object {
+    val capacity = 1000000000
     val logger = LoggerFactory.getLogger(Memory::class.java)
-    val memoryRef = object : ThreadLocal<ByteBuffer>() {
-      override fun initialValue(): ByteBuffer {
-        return ByteBuffer.allocateDirect(1000000)
-      }
-    }
   }
 
   var wordsSize = UInt256.ZERO
-  val memoryData = MutableBytes.wrapByteBuffer(memoryRef.get().clear())
+  var memoryData: MutableBytes? = null
 
-  fun write(offset: UInt256, sourceOffset: UInt256, numBytes: UInt256, code: Bytes) {
+  fun write(offset: UInt256, sourceOffset: UInt256, numBytes: UInt256, code: Bytes): Boolean {
     logger.trace("Write to memory at offset $offset, size $numBytes")
-    logger.trace("Writing ${code.slice(sourceOffset.intValue(), numBytes.intValue())}")
-    memoryData.set(offset.intValue(), code.slice(sourceOffset.intValue(), numBytes.intValue()))
+    val maxDistance = offset.add(numBytes)
+    if (!offset.fitsInt() || !numBytes.fitsInt() || !maxDistance.fitsInt() || maxDistance.intValue() > capacity) {
+      logger.warn("Memory write aborted, values too large")
+      return false
+    }
+    var localMemoryData = memoryData
+    if (localMemoryData == null) {
+      localMemoryData = MutableBytes.wrapByteBuffer(ByteBuffer.allocate(maxDistance.intValue()))
+    } else if (localMemoryData.size() < maxDistance.intValue()) {
+      val buffer = ByteBuffer.allocate(maxDistance.intValue() * 2)
+      buffer.put(localMemoryData.toArrayUnsafe())
+      localMemoryData = MutableBytes.wrapByteBuffer(buffer)
+    }
+    memoryData = localMemoryData
+    if (sourceOffset.fitsInt() && sourceOffset.intValue() < code.size()) {
+      val maxCodeLength = code.size() - sourceOffset.intValue()
+      val length = if (maxCodeLength < numBytes.intValue()) maxCodeLength else numBytes.intValue()
+      logger.trace("Writing ${code.slice(sourceOffset.intValue(), maxCodeLength)}")
+      memoryData!!.set(offset.intValue(), code.slice(sourceOffset.intValue(), length))
+    }
 
     wordsSize = newSize(offset, numBytes)
+    return true
   }
 
   fun allocatedBytes(): UInt256 {
@@ -123,15 +140,33 @@ class Memory {
   }
 
   fun newSize(memOffset: UInt256, length: UInt256): UInt256 {
-    val candidate = memOffset.add(length).divideCeil(32)
-    return if (wordsSize > candidate) wordsSize else candidate
+
+    val candidate = memOffset.add(length)
+    if (candidate < memOffset || candidate < length) {
+      return UInt256.MAX_VALUE
+    }
+    val candidateWords = candidate.divideCeil(32)
+    return if (wordsSize > candidateWords) wordsSize else candidateWords
   }
 
-  fun read(from: UInt256, length: UInt256): Bytes {
-    if (!from.fitsInt() || !length.fitsInt()) {
-      return Bytes.EMPTY
+  fun read(from: UInt256, length: UInt256): Bytes? {
+    val max = from.add(length)
+    if (!from.fitsInt() || !length.fitsInt() || !max.fitsInt()) {
+      return null
     }
-    return memoryData.slice(from.intValue(), length.intValue())
+    val localMemoryData = memoryData
+    if (localMemoryData != null) {
+      if (localMemoryData.size() < max.intValue()) {
+        val l = max.intValue() - localMemoryData.size()
+        return Bytes.concatenate(
+          localMemoryData.slice(from.intValue(), length.intValue() - l),
+          Bytes.wrap(ByteArray(l))
+        )
+      }
+      return localMemoryData.slice(from.intValue(), length.intValue())
+    } else {
+      return Bytes.wrap(ByteArray(length.intValue()))
+    }
   }
 }
 
@@ -191,6 +226,7 @@ class OpcodeRegistry(val opcodes: Map<HardFork, Map<Byte, Opcode>>) {
       opcodes[0x39] = codecopy
       opcodes[0x3a] = gasPrice
       opcodes[0x3b] = extcodesize
+      opcodes[0x40] = blockhash
       opcodes[0x41] = coinbase
       opcodes[0x42] = timestamp
       opcodes[0x43] = number
@@ -270,6 +306,7 @@ val opcodes = mapOf<Byte, String>(
   Pair(0x39, "codecopy"),
   Pair(0x3a, "gasPrice"),
   Pair(0x3b, "extcodesize"),
+  Pair(0x40, "blockhash"),
   Pair(0x41, "coinbase"),
   Pair(0x42, "timestamp"),
   Pair(0x43, "number"),
@@ -286,6 +323,7 @@ val opcodes = mapOf<Byte, String>(
   Pair(0x58, "pc"),
   Pair(0x59, "msize"),
   Pair(0x5a, "gas"),
+  Pair(0x5b, "jumpdest"),
   Pair(0x60, "push1"),
   Pair(0x61, "push2"),
   Pair(0x62, "push3"),

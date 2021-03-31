@@ -285,7 +285,7 @@ val exp = Opcode { gasManager, _, stack, _, _, _, _ ->
   } else {
     val numBytes: Int = (power.bitLength() + 7) / 8
 
-    val cost: Gas = (Gas.valueOf(10).multiply(Gas.valueOf(numBytes.toLong())))
+    val cost = (Gas.valueOf(50).multiply(Gas.valueOf(numBytes.toLong())))
       .add(Gas.valueOf(10))
     gasManager.add(cost)
 
@@ -332,7 +332,7 @@ fun swap(index: Int): Opcode {
     val eltN = stack.get(index) ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
     val elt0 = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
     stack.push(eltN)
-    stack.set(index - 1, elt0)
+    stack.set(index, elt0)
     Result()
   }
 }
@@ -355,7 +355,7 @@ val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
       val originalValue = hostContext.getRepositoryStorage(address, key)
       if (originalValue.equals(currentValue)) {
         if (originalValue.isZero) {
-          Gas.valueOf(20000)
+          Gas.valueOf(20000 - 2100)
         } else Gas.valueOf(5000 - 2100)
       } else {
         Gas.valueOf(100)
@@ -493,6 +493,17 @@ val number = Opcode { gasManager, hostContext, stack, _, _, _, _ ->
   Result()
 }
 
+val blockhash = Opcode { gasManager, hostContext, stack, _, _, _, _ ->
+  gasManager.add(20)
+  val number = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  if (!number.fitsLong() || number.toLong() < hostContext.getBlockNumber() - 256) {
+    stack.push(UInt256.ZERO)
+  } else {
+    stack.push(UInt256.fromBytes(hostContext.getBlockHash(number.toLong())))
+  }
+  Result()
+}
+
 val codesize = Opcode { gasManager, _, stack, _, code, _, _ ->
   gasManager.add(2)
   stack.push(UInt256.valueOf(code.size().toLong()))
@@ -507,7 +518,7 @@ val timestamp = Opcode { gasManager, hostContext, stack, _, _, _, _ ->
 
 fun memoryCost(length: UInt256): Gas {
   if (!length.fitsInt()) {
-    return Gas.MAX
+    return Gas.TOO_HIGH
   }
   val len: Gas = Gas.valueOf(length)
   val base: Gas = len.multiply(len).divide(Gas.valueOf(512))
@@ -571,7 +582,7 @@ val mload = Opcode { gasManager, _, stack, _, _, _, memory ->
   val memoryCost = post.subtract(pre)
   gasManager.add(Gas.valueOf(3L).add(memoryCost))
 
-  stack.push(Bytes32.leftPad(memory.read(location, UInt256.valueOf(32))))
+  stack.push(Bytes32.leftPad(memory.read(location, UInt256.valueOf(32)) ?: Bytes.EMPTY))
   Result()
 }
 
@@ -609,10 +620,6 @@ val calldatacopy = Opcode { gasManager, _, stack, msg, _, _, memory ->
   val memoryCost = post.subtract(pre)
 
   gasManager.add(copyCost.add(memoryCost))
-
-  if (!memOffset.fitsInt() || !sourceOffset.fitsInt()) {
-    return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
-  }
 
   memory.write(memOffset, sourceOffset, length, msg.inputData)
 
@@ -655,8 +662,25 @@ val sha3 = Opcode { gasManager, _, stack, _, _, _, memory ->
   val memoryCost = post.subtract(pre)
   gasManager.add(copyCost.add(memoryCost))
   val bytes = memory.read(from, length)
-  stack.push(Hash.keccak256(bytes))
+  stack.push(if (bytes == null) Bytes32.ZERO else Hash.keccak256(bytes))
   Result()
+}
+
+fun computeValidJumpDestinations(code: Bytes): Set<Int> {
+  var index = 0
+  val destinations = HashSet<Int>()
+  while (index < code.size()) {
+    val currentOpcode = code.get(index)
+    if (currentOpcode == 0x5b.toByte()) {
+      destinations.add(index)
+    }
+    if (currentOpcode.toInt() >= 0x60 && currentOpcode < 0x80) {
+      index += currentOpcode - 0x60 + 1
+    }
+    index++
+  }
+
+  return destinations
 }
 
 val jump = Opcode { gasManager, _, stack, _, code, _, _ ->
@@ -665,8 +689,8 @@ val jump = Opcode { gasManager, _, stack, _, code, _, _ ->
   if (!jumpDest.fitsInt() || jumpDest.intValue() >= code.size()) {
     return@Opcode Result(EVMExecutionStatusCode.BAD_JUMP_DESTINATION)
   }
-  val byte = code.get(jumpDest.intValue())
-  if (byte != 0x5B.toByte()) {
+  val validDestinations = computeValidJumpDestinations(code)
+  if (!validDestinations.contains(jumpDest.intValue())) {
     return@Opcode Result(EVMExecutionStatusCode.BAD_JUMP_DESTINATION)
   }
   Result(newCodePosition = jumpDest.intValue())
@@ -682,8 +706,8 @@ val jumpi = Opcode { gasManager, _, stack, _, code, _, _ ->
   if (!jumpDest.fitsInt() || jumpDest.intValue() >= code.size()) {
     return@Opcode Result(EVMExecutionStatusCode.BAD_JUMP_DESTINATION)
   }
-  val byte = code.get(jumpDest.intValue())
-  if (byte != 0x5B.toByte()) {
+  val validDestinations = computeValidJumpDestinations(code)
+  if (!validDestinations.contains(jumpDest.intValue())) {
     return@Opcode Result(EVMExecutionStatusCode.BAD_JUMP_DESTINATION)
   }
   Result(newCodePosition = jumpDest.intValue())
@@ -703,28 +727,32 @@ fun log(topics: Int): Opcode {
     }
 
     val cost = Gas.valueOf(375).add((Gas.valueOf(8).multiply(Gas.valueOf(length)))).add(
-      (
-        Gas.valueOf(375)
-          .multiply(
-            Gas.valueOf(
-              topics.toLong()
-            )
+      Gas.valueOf(375)
+        .multiply(
+          Gas.valueOf(
+            topics.toLong()
           )
         )
     )
-    gasManager.add(cost)
+    val pre = memoryCost(memory.size())
+    val post: Gas = memoryCost(memory.newSize(location, length))
+    gasManager.add(cost.add(post.subtract(pre)))
     val address = msg.destination
 
-    val data: Bytes = memory.read(location, length)
+    val data = memory.read(location, length)
 
-    val topicList = mutableListOf<Bytes>()
+    val topicList = mutableListOf<Bytes32>()
     for (i in 0 until topics) {
       topicList.add(stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW))
     }
 
-    hostContext.emitLog(address, data, topicList.toTypedArray(), topics)
+    hostContext.emitLog(address, data ?: Bytes.EMPTY, topicList.toList())
 
-    Result()
+    if (data == null) {
+      Result(validationStatus = EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
+    } else {
+      Result()
+    }
   }
 }
 
@@ -747,15 +775,15 @@ val signextend = Opcode { gasManager, _, stack, _, _, _, _ ->
   if (null == item || null == item2) {
     Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   } else {
-    if (!item2.fitsInt() || item2.intValue() > 31) {
-      stack.push(item)
+    if (!item.fitsInt() || item.intValue() > 31) {
+      stack.push(item2)
     } else {
-      val byteIndex: Int = 32 - 1 - item2.getInt(32 - 4)
+      val byteIndex: Int = 32 - 1 - item.getInt(32 - 4)
       stack.push(
         UInt256.fromBytes(
           Bytes32.leftPad(
-            item.slice(byteIndex),
-            if (item.get(byteIndex) < 0) 0xFF.toByte() else 0x00
+            item2.slice(byteIndex),
+            if (item2.get(byteIndex) < 0) 0xFF.toByte() else 0x00
           )
         )
       )
