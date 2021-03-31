@@ -17,8 +17,6 @@
 package org.apache.tuweni.evm.impl
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.bytes.MutableBytes
-import org.apache.tuweni.evm.EVMExecutionStatusCode
 import org.apache.tuweni.evm.EVMMessage
 import org.apache.tuweni.evm.HardFork
 import org.apache.tuweni.evm.HostContext
@@ -83,9 +81,6 @@ import org.apache.tuweni.evm.impl.berlin.sub
 import org.apache.tuweni.evm.impl.berlin.swap
 import org.apache.tuweni.evm.impl.berlin.timestamp
 import org.apache.tuweni.evm.impl.berlin.xor
-import org.apache.tuweni.units.bigints.UInt256
-import org.slf4j.LoggerFactory
-import java.nio.ByteBuffer
 
 fun interface Opcode {
   fun execute(
@@ -184,4 +179,3 @@ class OpcodeRegistry(val opcodes: Map<HardFork, Map<Byte, Opcode>>) {
     }
   }
 }
-

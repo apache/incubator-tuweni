@@ -17,7 +17,6 @@
 package org.apache.tuweni.evm.impl
 
 import org.apache.tuweni.units.ethereum.Gas
-import org.slf4j.LoggerFactory
 
 class GasManager(val gas: Gas) {
 
