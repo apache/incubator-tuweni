@@ -96,7 +96,7 @@ public final class Gas implements Comparable<Gas> {
     try {
       return new Gas(value.longValueExact());
     } catch (ArithmeticException e) {
-      throw new IllegalArgumentException(e.getMessage(), e);
+      return Gas.TOO_HIGH;
     }
   }
 

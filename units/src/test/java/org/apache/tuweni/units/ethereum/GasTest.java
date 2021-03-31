@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
@@ -31,16 +32,27 @@ class GasTest {
   @Test
   void testOverflowThroughAddition() {
     Gas max = Gas.valueOf(Long.MAX_VALUE);
-    assertThrows(ArithmeticException.class, () -> {
-      max.add(Gas.valueOf(1L));
-    });
+    assertTrue(max.add(Gas.valueOf(1L)).tooHigh());
   }
 
   @Test
   void testOverflow() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      Gas.valueOf(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE));
-    });
+    Gas value = Gas.valueOf(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE));
+    assertTrue(value.tooHigh());
+  }
+
+  @Test
+  void testOverflowAndAddMore() {
+    Gas first = Gas.valueOf(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE));
+    Gas second = Gas.valueOf(1);
+    assertTrue(first.add(second).tooHigh());
+  }
+
+  @Test
+  void testOverflowAndRemove() {
+    Gas first = Gas.valueOf(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE));
+    Gas second = Gas.valueOf(10);
+    assertTrue(first.subtract(second).tooHigh());
   }
 
   @Test
@@ -101,9 +113,7 @@ class GasTest {
 
   @Test
   void testOverflowUInt256() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      Gas.valueOf(UInt256.MAX_VALUE);
-    });
+    assertTrue(Gas.valueOf(UInt256.MAX_VALUE).tooHigh());
   }
 
   @Test
