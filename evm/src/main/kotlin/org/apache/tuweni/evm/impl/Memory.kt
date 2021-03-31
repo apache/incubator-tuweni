@@ -1,0 +1,83 @@
+package org.apache.tuweni.evm.impl
+
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.MutableBytes
+import org.apache.tuweni.units.bigints.UInt256
+import org.slf4j.LoggerFactory
+import java.nio.ByteBuffer
+
+class Memory {
+
+  companion object {
+    val capacity = 1000000000
+    val logger = LoggerFactory.getLogger(Memory::class.java)
+  }
+
+  var wordsSize = UInt256.ZERO
+  var memoryData: MutableBytes? = null
+
+  fun write(offset: UInt256, sourceOffset: UInt256, numBytes: UInt256, code: Bytes): Boolean {
+    logger.trace("Write to memory at offset $offset, size $numBytes")
+    val maxDistance = offset.add(numBytes)
+    if (!offset.fitsInt() || !numBytes.fitsInt() || !maxDistance.fitsInt() || maxDistance.intValue() > capacity) {
+      logger.warn("Memory write aborted, values too large")
+      return false
+    }
+    var localMemoryData = memoryData
+    if (localMemoryData == null) {
+      localMemoryData = MutableBytes.wrapByteBuffer(ByteBuffer.allocate(maxDistance.intValue()))
+    } else if (localMemoryData.size() < maxDistance.intValue()) {
+      val buffer = ByteBuffer.allocate(maxDistance.intValue() * 2)
+      buffer.put(localMemoryData.toArrayUnsafe())
+      localMemoryData = MutableBytes.wrapByteBuffer(buffer)
+    }
+    memoryData = localMemoryData
+    if (sourceOffset.fitsInt() && sourceOffset.intValue() < code.size()) {
+      val maxCodeLength = code.size() - sourceOffset.intValue()
+      val length = if (maxCodeLength < numBytes.intValue()) maxCodeLength else numBytes.intValue()
+      logger.trace("Writing ${code.slice(sourceOffset.intValue(), maxCodeLength)}")
+      memoryData!!.set(offset.intValue(), code.slice(sourceOffset.intValue(), length))
+    }
+
+    wordsSize = newSize(offset, numBytes)
+    return true
+  }
+
+  fun allocatedBytes(): UInt256 {
+    return wordsSize.multiply(32)
+  }
+
+  fun size(): UInt256 {
+    return wordsSize
+  }
+
+  fun newSize(memOffset: UInt256, length: UInt256): UInt256 {
+
+    val candidate = memOffset.add(length)
+    if (candidate < memOffset || candidate < length) {
+      return UInt256.MAX_VALUE
+    }
+    val candidateWords = candidate.divideCeil(32)
+    return if (wordsSize > candidateWords) wordsSize else candidateWords
+  }
+
+  fun read(from: UInt256, length: UInt256): Bytes? {
+    val max = from.add(length)
+    if (!from.fitsInt() || !length.fitsInt() || !max.fitsInt()) {
+      return null
+    }
+    val localMemoryData = memoryData
+    if (localMemoryData != null) {
+      if (localMemoryData.size() < max.intValue()) {
+        val l = max.intValue() - localMemoryData.size()
+        return Bytes.concatenate(
+          localMemoryData.slice(from.intValue(), length.intValue() - l),
+          Bytes.wrap(ByteArray(l))
+        )
+      }
+      return localMemoryData.slice(from.intValue(), length.intValue())
+    } else {
+      return Bytes.wrap(ByteArray(length.intValue()))
+    }
+  }
+}

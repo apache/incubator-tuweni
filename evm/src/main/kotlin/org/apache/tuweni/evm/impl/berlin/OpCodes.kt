@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.evm.impl.frontier
+package org.apache.tuweni.evm.impl.berlin
 
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes

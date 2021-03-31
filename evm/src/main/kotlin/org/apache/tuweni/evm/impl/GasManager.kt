@@ -21,10 +21,6 @@ import org.slf4j.LoggerFactory
 
 class GasManager(val gas: Gas) {
 
-  companion object {
-    val logger = LoggerFactory.getLogger(GasManager::class.java)
-  }
-
   var gasCost = Gas.ZERO
   var lastGasCost = Gas.ZERO
 

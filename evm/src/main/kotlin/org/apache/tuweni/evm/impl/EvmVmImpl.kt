@@ -23,7 +23,15 @@ import org.apache.tuweni.evm.EVMResult
 import org.apache.tuweni.evm.EvmVm
 import org.apache.tuweni.evm.HardFork
 import org.apache.tuweni.evm.HostContext
+import org.apache.tuweni.evm.opcodes
 import org.slf4j.LoggerFactory
+
+data class Result(
+  val status: EVMExecutionStatusCode? = null,
+  val newCodePosition: Int? = null,
+  val output: Bytes? = null,
+  val validationStatus: EVMExecutionStatusCode? = null,
+)
 
 class EvmVmImpl : EvmVm {
 
