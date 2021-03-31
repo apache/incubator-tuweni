@@ -36,7 +36,7 @@ class StratumServerTest {
 
   @Test
   fun testStartStopServer(@VertxInstance vertx: Vertx) {
-    val server = StratumServer(vertx, 0, "127.0.0.1", "", { true }, Bytes32::random, { _, _ -> true })
+    val server = StratumServer(vertx, 0, "127.0.0.1", null, "", { true }, Bytes32::random, { _, _ -> true })
     runBlocking {
       server.start()
       assertNotEquals(0, server.port())
@@ -46,7 +46,7 @@ class StratumServerTest {
 
   @Test
   fun testBadClient(@VertxInstance vertx: Vertx) {
-    val server = StratumServer(vertx, 0, "127.0.0.1", "", { true }, Bytes32::random, { _, _ -> true })
+    val server = StratumServer(vertx, 0, "127.0.0.1", null, "", { true }, Bytes32::random, { _, _ -> true })
     val disconnected = AsyncCompletion.incomplete()
     runBlocking {
       server.start()
@@ -63,7 +63,7 @@ class StratumServerTest {
 
   @Test
   fun testValidClient(@VertxInstance vertx: Vertx) {
-    val server = StratumServer(vertx, 0, "127.0.0.1", "", { true }, Bytes32::random, { _, _ -> true })
+    val server = StratumServer(vertx, 0, "127.0.0.1", null, "", { true }, Bytes32::random, { _, _ -> true })
     runBlocking {
       server.start()
       val client = vertx.createNetClient(NetClientOptions().setTcpKeepAlive(true))
