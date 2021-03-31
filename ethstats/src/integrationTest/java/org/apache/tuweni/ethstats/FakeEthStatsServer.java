@@ -13,9 +13,10 @@
 package org.apache.tuweni.ethstats;
 
 import org.apache.tuweni.concurrent.AsyncCompletion;
-import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
-import org.apache.tuweni.concurrent.CompletableAsyncResult;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
@@ -27,7 +28,7 @@ class FakeEthStatsServer {
   private final String networkInterface;
   private int port;
   private ServerWebSocket websocket;
-  private CompletableAsyncResult<String> result;
+  private List<String> results = new ArrayList<>();
 
   FakeEthStatsServer(Vertx vertx, String networkInterface, int port) {
     this.networkInterface = networkInterface;
@@ -55,9 +56,7 @@ class FakeEthStatsServer {
     websocket.accept();
     websocket.writeTextMessage("{\"emit\":[\"ready\"]}");
     websocket.handler(buffer -> {
-      if (result != null) {
-        result.complete(buffer.toString());
-      }
+      results.add(buffer.toString());
     });
   }
 
@@ -73,8 +72,25 @@ class FakeEthStatsServer {
     return port;
   }
 
-  public AsyncResult<String> captureNextMessage() {
-    result = AsyncResult.incomplete();
-    return result;
+  public List<String> getResults() {
+    return results;
+  }
+
+  public void waitForMessages(int numberOfMessages) throws InterruptedException {
+    for (int i = 0; i < 100; i++) {
+      if (getResults().size() >= numberOfMessages) {
+        return;
+      }
+      Thread.sleep(100);
+    }
+  }
+
+  public boolean messagesContain(String test) {
+    for (String message : getResults()) {
+      if (message.contains(test)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
