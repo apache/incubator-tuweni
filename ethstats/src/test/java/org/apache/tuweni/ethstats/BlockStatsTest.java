@@ -54,7 +54,7 @@ class BlockStatsTest {
             + stats.getParentHash()
             + "\",\"timestamp\":32,\"miner\":\""
             + stats.getMiner().toHexString()
-            + "\",\"gasUsed\":23,\"gasLimit\":4000,\"difficulty\":\"0\",\"totalDifficulty\":\"1\",\"transactions\":[{\"hash\":\""
+            + "\",\"gasUsed\":23,\"gasLimit\":4000,\"difficulty\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"totalDifficulty\":\"0x0000000000000000000000000000000000000000000000000000000000000001\",\"transactions\":[{\"hash\":\""
             + stats.getTransactions().get(0).getHash().toHexString()
             + "\"}],\"transactionsRoot\":\""
             + stats.getTransactionsRoot()
