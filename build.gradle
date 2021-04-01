@@ -14,9 +14,6 @@ import org.ajoberstar.grgit.Grgit
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import java.util.regex.Pattern
-import net.ltgt.gradle.errorprone.CheckSeverity
 
 buildscript {
   repositories {
@@ -284,8 +281,8 @@ allprojects {
 
     options.errorprone {
       excludedPaths = '.*/generated-src/.*'
-      check('FutureReturnValueIgnored', CheckSeverity.OFF)
-      check('UnnecessaryParentheses', CheckSeverity.OFF)
+      check('FutureReturnValueIgnored', net.ltgt.gradle.errorprone.CheckSeverity.OFF)
+      check('UnnecessaryParentheses', net.ltgt.gradle.errorprone.CheckSeverity.OFF)
 
       disableWarningsInGeneratedCode = true
     }
