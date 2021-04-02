@@ -96,10 +96,10 @@ public class EthHash {
    * @return A byte array holding MixHash in its first 32 bytes and the EthHash result in the bytes 32 to 63
    */
   public static Bytes hashimotoLight(long size, UInt32[] cache, Bytes header, Bytes nonce) {
-    return hashimoto(size, header, nonce, (ind) -> calcDatasetItem(cache, ind));
+    return hashimoto(size, header, nonce, (ind) -> calcDatasetItem((int) size, cache, ind));
   }
 
-  private static Bytes hashimoto(long size, Bytes header, Bytes nonce, Function<UInt32, Bytes> datasetLookup) {
+  static Bytes hashimoto(long size, Bytes header, Bytes nonce, Function<UInt32, Bytes> datasetLookup) {
     long n = Long.divideUnsigned(size, MIX_BYTES);
     Bytes seed = Hash.keccak512(Bytes.concatenate(header, nonce.reverse()));
     Bytes[] mixBufferElts = new Bytes[MIX_BYTES / HASH_BYTES];
@@ -150,11 +150,11 @@ public class EthHash {
   /**
    * Provides the size of the cache at a given block number
    *
-   * @param block_number the block number
-   * @return the size of the cache at the block number, in bytes
+   * @param epoch the current epoch
+   * @return the size of the cache at the epoch, in bytes
    */
-  public static int getCacheSize(long block_number) {
-    long sz = CACHE_BYTES_INIT + CACHE_BYTES_GROWTH * (block_number / EPOCH_LENGTH);
+  public static int getCacheSize(long epoch) {
+    long sz = CACHE_BYTES_INIT + CACHE_BYTES_GROWTH * epoch;
     sz -= HASH_BYTES;
     while (!isPrime(sz / HASH_BYTES)) {
       sz -= 2 * HASH_BYTES;
@@ -163,13 +163,13 @@ public class EthHash {
   }
 
   /**
-   * Provides the size of the full dataset at a given block number
+   * Provides the size of the full dataset at a given epoch
    *
-   * @param block_number the block number
-   * @return the size of the full dataset at the block number, in bytes
+   * @param epoch the block number
+   * @return the size of the full dataset at the epoch, in bytes
    */
-  public static long getFullSize(long block_number) {
-    long sz = DATASET_BYTES_INIT + DATASET_BYTES_GROWTH * (block_number / EPOCH_LENGTH);
+  public static long getFullSize(long epoch) {
+    long sz = DATASET_BYTES_INIT + DATASET_BYTES_GROWTH * epoch;
     sz -= MIX_BYTES;
     while (!isPrime(sz / MIX_BYTES)) {
       sz -= 2 * MIX_BYTES;
@@ -180,14 +180,14 @@ public class EthHash {
   /**
    * Generates the EthHash cache for given parameters.
    *
-   * @param cacheSize Size of the cache to generate
-   * @param block Block Number to generate cache for
+   * @param epoch The epoch to generate the cache for
    * @return EthHash Cache
    */
-  public static UInt32[] mkCache(int cacheSize, long block) {
+  public static UInt32[] mkCache(long epoch) {
+    int cacheSize = getCacheSize(epoch);
     int rows = cacheSize / HASH_BYTES;
     List<Bytes> cache = new ArrayList<>(rows);
-    cache.add(Hash.keccak512(dagSeed(block)));
+    cache.add(Hash.keccak512(dagSeed(epoch)));
 
     for (int i = 1; i < rows; ++i) {
       cache.add(Hash.keccak512(cache.get(i - 1)));
@@ -222,11 +222,12 @@ public class EthHash {
   /**
    * Calculate a data set item based on the previous cache for a given index
    *
+   * @param length the current DAG cache length
    * @param cache the DAG cache
    * @param index the current index
    * @return a new DAG item to append to the DAG
    */
-  public static Bytes calcDatasetItem(UInt32[] cache, UInt32 index) {
+  public static Bytes calcDatasetItem(int length, UInt32[] cache, UInt32 index) {
     int rows = cache.length / HASH_WORDS;
     UInt32[] mixInts = new UInt32[HASH_BYTES / 4];
     int offset = index.mod(rows).multiply(HASH_WORDS).intValue();
@@ -248,10 +249,10 @@ public class EthHash {
     return Hash.keccak512(intToByte(mixInts));
   }
 
-  private static Bytes dagSeed(long block) {
+  private static Bytes dagSeed(long epoch) {
     Bytes32 seed = Bytes32.wrap(new byte[32]);
-    if (Long.compareUnsigned(block, EPOCH_LENGTH) >= 0) {
-      for (int i = 0; i < Long.divideUnsigned(block, EPOCH_LENGTH); i++) {
+    if (epoch > 0) {
+      for (int i = 0; i < epoch; i++) {
         seed = Hash.keccak256(seed);
       }
     }
@@ -274,5 +275,11 @@ public class EthHash {
 
   private static boolean isPrime(long number) {
     return number > 2 && IntStream.rangeClosed(2, (int) Math.sqrt(number)).noneMatch(n -> (number % n == 0));
+  }
+
+  public static Bytes hashimotoLightForEpoch(long epoch, Bytes contentToHash, Bytes nonce) {
+    long datasetSize = EthHash.getFullSize(epoch);
+    UInt32[] cache = EthHash.mkCache(epoch);
+    return hashimotoLight(datasetSize, cache, contentToHash, nonce);
   }
 }
