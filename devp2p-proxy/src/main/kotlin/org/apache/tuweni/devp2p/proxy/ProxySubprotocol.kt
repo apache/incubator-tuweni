@@ -24,7 +24,7 @@ import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
 class ProxySubprotocol() : SubProtocol {
 
   companion object {
-    val ID = SubProtocolIdentifier.of("proxy", 1)
+    val ID = SubProtocolIdentifier.of("pxy", 1)
   }
 
   override fun id() = ID
