@@ -1122,6 +1122,43 @@ class UInt256Test {
     assertThrows(ArithmeticException.class, () -> value.subtractExact(operand));
   }
 
+  @Test
+  void testGet() {
+    UInt256 value = UInt256.ONE;
+    assertEquals(1, value.get(31));
+    UInt256 value5 = UInt256.valueOf(5);
+    assertEquals(5, value5.get(31));
+    UInt256 value255 = UInt256.valueOf(255);
+    assertEquals((byte) 0xff, value255.get(31));
+    UInt256 value256 = UInt256.valueOf(256);
+    assertEquals(1, value256.get(30));
+
+    for (int i = 0; i < 32; i++) {
+      assertEquals(0, UInt256.ZERO.get(i));
+    }
+  }
+
+  @Test
+  void testHashcode() {
+    UInt256 value = UInt256.ZERO;
+    assertEquals(2111290369, value.hashCode());
+    UInt256 valueOne = UInt256.ONE;
+    assertEquals(2111290370, valueOne.hashCode());
+  }
+
+  @Test
+  void testOverflowSubtraction() {
+    UInt256 value = UInt256.fromHexString("0x8000000000000000000000000000000000000000000000000000000000000000");
+    UInt256 result = UInt256.ZERO.subtract(value);
+    assertEquals(value, result);
+  }
+
+  @Test
+  void testEquals() {
+    UInt256 value = UInt256.ZERO;
+    assertEquals(Bytes32.leftPad(Bytes.of(0)), value);
+  }
+
   @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> subtractExactLongProvider() {
     return Stream.of(Arguments.of(v(0), 1), Arguments.of(v(0), Long.MAX_VALUE), Arguments.of(UInt256.MAX_VALUE, -1));

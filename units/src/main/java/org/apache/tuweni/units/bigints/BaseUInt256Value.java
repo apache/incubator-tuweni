@@ -16,6 +16,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
+import org.apache.tuweni.bytes.MutableBytes32;
 
 import java.math.BigInteger;
 import java.util.function.Function;
@@ -83,7 +84,8 @@ public abstract class BaseUInt256Value<T extends UInt256Value<T>> implements UIn
    *
    * @return A copy of this value, or itself if immutable.
    */
-  protected T copy() {
+  @Override
+  public T copy() {
     return ctor.apply(value);
   }
 
@@ -317,11 +319,6 @@ public abstract class BaseUInt256Value<T extends UInt256Value<T>> implements UIn
     return ctor.apply(this.value.mod0(modulus));
   }
 
-  @Override
-  public int compareTo(T other) {
-    return compareTo(other.toUInt256());
-  }
-
   /**
    * Compare two {@link UInt256} values.
    *
@@ -362,11 +359,26 @@ public abstract class BaseUInt256Value<T extends UInt256Value<T>> implements UIn
 
   @Override
   public Bytes32 toBytes() {
-    return value.toBytes();
+    return value;
   }
 
   @Override
   public Bytes toMinimalBytes() {
     return value.toMinimalBytes();
+  }
+
+  @Override
+  public byte get(int i) {
+    return value.get(i);
+  }
+
+  @Override
+  public Bytes slice(int i, int length) {
+    return value.slice(i, length);
+  }
+
+  @Override
+  public MutableBytes32 mutableCopy() {
+    return MutableBytes32.wrap(value.toArrayUnsafe());
   }
 }

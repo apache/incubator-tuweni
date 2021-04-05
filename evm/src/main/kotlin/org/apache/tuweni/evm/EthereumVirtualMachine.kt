@@ -20,6 +20,7 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.evm.impl.GasManager
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
@@ -28,37 +29,37 @@ import org.apache.tuweni.units.ethereum.Wei
  * Types of EVM calls
  */
 enum class CallKind(val number: Int) {
-  EVMC_CALL(0),
-  EVMC_DELEGATECALL(1),
-  EVMC_CALLCODE(2),
-  EVMC_CREATE(3),
-  EVMC_CREATE2(4)
+  CALL(0),
+  DELEGATECALL(1),
+  CALLCODE(2),
+  CREATE(3),
+  CREATE2(4)
 }
 
 /**
  * EVM execution status codes
  */
 enum class EVMExecutionStatusCode(val number: Int) {
-  EVMC_SUCCESS(0),
-  EVMC_FAILURE(1),
-  EVMC_REVERT(2),
-  EVMC_OUT_OF_GAS(3),
-  EVMC_INVALID_INSTRUCTION(4),
-  EVMC_UNDEFINED_INSTRUCTION(5),
-  EVMC_STACK_OVERFLOW(6),
-  EVMC_STACK_UNDERFLOW(7),
-  EVMC_BAD_JUMP_DESTINATION(8),
-  EVMC_INVALID_MEMORY_ACCESS(9),
-  EVMC_CALL_DEPTH_EXCEEDED(10),
-  EVMC_STATIC_MODE_VIOLATION(11),
-  EVMC_PRECOMPILE_FAILURE(12),
-  EVMC_CONTRACT_VALIDATION_FAILURE(13),
-  EVMC_ARGUMENT_OUT_OF_RANGE(14),
-  EVMC_WASM_UNREACHABLE_INSTRUCTION(15),
-  EVMC_WASM_TRAP(16),
-  EVMC_INTERNAL_ERROR(-1),
-  EVMC_REJECTED(-2),
-  EVMC_OUT_OF_MEMORY(-3);
+  SUCCESS(0),
+  FAILURE(1),
+  REVERT(2),
+  OUT_OF_GAS(3),
+  INVALID_INSTRUCTION(4),
+  UNDEFINED_INSTRUCTION(5),
+  STACK_OVERFLOW(6),
+  STACK_UNDERFLOW(7),
+  BAD_JUMP_DESTINATION(8),
+  INVALID_MEMORY_ACCESS(9),
+  CALL_DEPTH_EXCEEDED(10),
+  STATIC_MODE_VIOLATION(11),
+  PRECOMPILE_FAILURE(12),
+  CONTRACT_VALIDATION_FAILURE(13),
+  ARGUMENT_OUT_OF_RANGE(14),
+  WASM_UNREACHABLE_INSTRUCTION(15),
+  WASM_TRAP(16),
+  INTERNAL_ERROR(-1),
+  REJECTED(-2),
+  OUT_OF_MEMORY(-3);
 }
 
 /**
@@ -74,28 +75,30 @@ fun fromCode(code: Int): EVMExecutionStatusCode = EVMExecutionStatusCode.values(
  * Known hard fork revisions to execute against.
  */
 enum class HardFork(val number: Int) {
-  EVMC_FRONTIER(0),
-  EVMC_HOMESTEAD(1),
-  EVMC_TANGERINE_WHISTLE(2),
-  EVMC_SPURIOUS_DRAGON(3),
-  EVMC_BYZANTIUM(4),
-  EVMC_CONSTANTINOPLE(5),
-  EVMC_PETERSBURG(6),
-  EVMC_ISTANBUL(7),
-  EVMC_BERLIN(8),
-  EVMC_MAX_REVISION(8)
+  FRONTIER(0),
+  HOMESTEAD(1),
+  TANGERINE_WHISTLE(2),
+  SPURIOUS_DRAGON(3),
+  BYZANTIUM(4),
+  CONSTANTINOPLE(5),
+  PETERSBURG(6),
+  ISTANBUL(7),
+  BERLIN(8),
 }
+
+val latestHardFork = HardFork.BERLIN
 
 /**
  * Result of EVM execution
  * @param statusCode the execution result status
- * @param gasLeft how much gas is left
  * @param hostContext the context of changes
+ * @param output the output of the execution
  */
 data class EVMResult(
   val statusCode: EVMExecutionStatusCode,
-  val gasLeft: Long,
-  val hostContext: TransactionalEVMHostContext
+  val gasManager: GasManager,
+  val hostContext: HostContext,
+  val output: Bytes? = null,
 )
 
 /**
@@ -133,7 +136,7 @@ class EthereumVirtualMachine(
   /**
    * Start the EVM
    */
-  fun start() {
+  suspend fun start() {
     vm = evmVmFactory()
     options.forEach { (k, v) ->
       vm().setOption(k, v)
@@ -150,7 +153,7 @@ class EthereumVirtualMachine(
   /**
    * Stop the EVM
    */
-  fun stop() {
+  suspend fun stop() {
     vm().close()
   }
 
@@ -171,7 +174,7 @@ class EthereumVirtualMachine(
    * @param revision the hard fork revision in which to execute
    * @return the result of the execution
    */
-  fun execute(
+  suspend fun execute(
     sender: Address,
     destination: Address,
     value: Bytes,
@@ -184,8 +187,8 @@ class EthereumVirtualMachine(
     currentTimestamp: Long,
     currentGasLimit: Long,
     currentDifficulty: UInt256,
-    callKind: CallKind = CallKind.EVMC_CALL,
-    revision: HardFork = HardFork.EVMC_MAX_REVISION,
+    callKind: CallKind = CallKind.CALL,
+    revision: HardFork = latestHardFork,
     depth: Int = 0
   ): EVMResult {
     val hostContext = TransactionalEVMHostContext(
@@ -221,15 +224,15 @@ class EthereumVirtualMachine(
     return result
   }
 
-  internal fun executeInternal(
+  internal suspend fun executeInternal(
     sender: Address,
     destination: Address,
     value: Bytes,
     code: Bytes,
     inputData: Bytes,
     gas: Gas,
-    callKind: CallKind = CallKind.EVMC_CALL,
-    revision: HardFork = HardFork.EVMC_MAX_REVISION,
+    callKind: CallKind = CallKind.CALL,
+    revision: HardFork = latestHardFork,
     depth: Int = 0,
     hostContext: HostContext
   ): EVMResult {
@@ -241,7 +244,7 @@ class EthereumVirtualMachine(
 
     return vm().execute(
       hostContext,
-      revision.number,
+      revision,
       msg,
       code
     )
@@ -254,3 +257,316 @@ class EthereumVirtualMachine(
    */
   fun capabilities(): Int = vm().capabilities()
 }
+
+/**
+ * This interface represents the callback functions must be implemented in order to interface with
+ * the EVM.
+ */
+interface HostContext {
+  /**
+   * Check account existence function.
+   *
+   *
+   * This function is used by the VM to check if there exists an account at given address.
+   *
+   * @param address The address of the account the query is about.
+   * @return true if exists, false otherwise.
+   */
+  suspend fun accountExists(address: Address): Boolean
+
+  /**
+   * Get repository storage function.
+   *
+   *
+   * This function is used by a VM to query the given account storage entry.
+   *
+   * @param address The address of the account.
+   * @param key The index of the account's storage entry.
+   * @return The storage value at the given storage key or null bytes if the account does not exist.
+   */
+  suspend fun getRepositoryStorage(address: Address, keyBytes: Bytes): Bytes32
+
+  /**
+   * Get storage function.
+   *
+   *
+   * This function is used by a VM to query first the transaction changes, and then the given account storage entry.
+   *
+   * @param address The address of the account.
+   * @param key The index of the account's storage entry.
+   * @return The storage value at the given storage key or null bytes if the account does not exist.
+   */
+  suspend fun getStorage(address: Address, key: Bytes32): Bytes32
+
+  /**
+   * Set storage function.
+   *
+   *
+   * This function is used by a VM to update the given account storage entry. The VM MUST make
+   * sure that the account exists. This requirement is only a formality because VM implementations
+   * only modify storage of the account of the current execution context (i.e. referenced by
+   * message::destination).
+   *
+   * @param address The address of the account.
+   * @param key The index of the storage entry.
+   * @param value The value to be stored.
+   * @return The effect on the storage item.
+   */
+  suspend fun setStorage(address: Address, key: Bytes, value: Bytes32): Int
+
+  /**
+   * Get balance function.
+   *
+   *
+   * This function is used by a VM to query the balance of the given account.
+   *
+   * @param address The address of the account.
+   * @return The balance of the given account or 0 if the account does not exist.
+   */
+  suspend fun getBalance(address: Address): Wei
+
+  /**
+   * Get code size function.
+   *
+   *
+   * This function is used by a VM to get the size of the code stored in the account at the given
+   * address.
+   *
+   * @param address The address of the account.
+   * @return The size of the code in the account or 0 if the account does not exist.
+   */
+  suspend fun getCodeSize(address: Address): Int
+
+  /**
+   * Get code hash function.
+   *
+   *
+   * This function is used by a VM to get the keccak256 hash of the code stored in the account at
+   * the given address. For existing accounts not having a code, this function returns keccak256
+   * hash of empty data.
+   *
+   * @param address The address of the account.
+   * @return The hash of the code in the account or null bytes if the account does not exist.
+   */
+  suspend fun getCodeHash(address: Address): Bytes32
+
+  /**
+   * Copy code function.
+   *
+   *
+   * This function is used by an EVM to request a copy of the code of the given account to the
+   * memory buffer provided by the EVM. The Client MUST copy the requested code, starting with the
+   * given offset, to the provided memory buffer up to the size of the buffer or the size of the
+   * code, whichever is smaller.
+   *
+   * @param address The address of the account.
+   * @return A copy of the requested code.
+   */
+  suspend fun getCode(address: Address): Bytes
+
+  /**
+   * Selfdestruct function.
+   *
+   *
+   * This function is used by an EVM to SELFDESTRUCT given contract. The execution of the
+   * contract will not be stopped, that is up to the EVM.
+   *
+   * @param address The address of the contract to be selfdestructed.
+   * @param beneficiary The address where the remaining ETH is going to be transferred.
+   */
+  suspend fun selfdestruct(address: Address, beneficiary: Address)
+
+  /**
+   * This function supports EVM calls.
+   *
+   * @param msg The call parameters.
+   * @return The result of the call.
+   */
+  suspend fun call(evmMessage: EVMMessage): EVMResult
+
+  /**
+   * Get transaction context function.
+   *
+   *
+   * This function is used by an EVM to retrieve the transaction and block context.
+   *
+   * @return The transaction context.
+   */
+  fun getTxContext(): Bytes?
+
+  /**
+   * Get block hash function.
+   *
+   *
+   * This function is used by a VM to query the hash of the header of the given block. If the
+   * information about the requested block is not available, then this is signalled by returning
+   * zeroed bytes.
+   *
+   * @param number The block hash.
+   * @return The block hash or zeroed bytes if the information about the block is not available.
+   */
+  fun getBlockHash(number: Long): Bytes32
+
+  /**
+   * Log function.
+   *
+   *
+   * This function is used by an EVM to inform about a LOG that happened during an EVM bytecode
+   * execution.
+   *
+   * @param address The address of the contract that generated the log.
+   * @param data The unindexed data attached to the log.
+   * @param dataSize The length of the data.
+   * @param topics The list of topics attached to the log.
+   */
+  fun emitLog(address: Address, data: Bytes, topics: List<Bytes32>)
+
+  /**
+   * Returns true if the account was never used.
+   */
+  fun warmUpAccount(address: Address): Boolean
+
+  /**
+   * Returns true if the storage slot was never used.
+   */
+  fun warmUpStorage(address: Address, key: UInt256): Boolean
+
+  /**
+   * Provides the gas price of the transaction.
+   */
+  fun getGasPrice(): Wei
+
+  /**
+   * Provides the timestamp of the transaction
+   */
+  fun timestamp(): UInt256
+  fun getGasLimit(): Long
+  fun getBlockNumber(): Long
+  fun getBlockHash(): Bytes32
+  fun getCoinbase(): Address
+  fun getDifficulty(): UInt256
+  fun increaseBalance(address: Address, amount: Wei)
+  suspend fun setBalance(address: Address, balance: Wei)
+}
+
+interface EvmVm {
+  fun setOption(key: String, value: String)
+  fun version(): String
+  suspend fun close()
+  suspend fun execute(hostContext: HostContext, fork: HardFork, msg: EVMMessage, code: Bytes): EVMResult
+  fun capabilities(): Int
+}
+
+val opcodes = mapOf<Byte, String>(
+  Pair(0x00, "stop"),
+  Pair(0x01, "add"),
+  Pair(0x02, "mul"),
+  Pair(0x03, "sub"),
+  Pair(0x04, "div"),
+  Pair(0x05, "sdiv"),
+  Pair(0x06, "mod"),
+  Pair(0x06, "mod"),
+  Pair(0x07, "smod"),
+  Pair(0x08, "addmod"),
+  Pair(0x09, "mulmod"),
+  Pair(0x0a, "exp"),
+  Pair(0x0b, "signextend"),
+  Pair(0x10, "lt"),
+  Pair(0x11, "gt"),
+  Pair(0x12, "slt"),
+  Pair(0x13, "sgt"),
+  Pair(0x14, "eq"),
+  Pair(0x15, "isZero"),
+  Pair(0x16, "and"),
+  Pair(0x17, "or"),
+  Pair(0x18, "xor"),
+  Pair(0x19, "not"),
+  Pair(0x1a, "byte"),
+  Pair(0x20, "sha3"),
+  Pair(0x30, "address"),
+  Pair(0x31, "balance"),
+  Pair(0x32, "origin"),
+  Pair(0x33, "caller"),
+  Pair(0x34, "callvalue"),
+  Pair(0x35, "calldataload"),
+  Pair(0x36, "calldatasize"),
+  Pair(0x37, "calldatacopy"),
+  Pair(0x38, "codesize"),
+  Pair(0x39, "codecopy"),
+  Pair(0x3a, "gasPrice"),
+  Pair(0x3b, "extcodesize"),
+  Pair(0x40, "blockhash"),
+  Pair(0x41, "coinbase"),
+  Pair(0x42, "timestamp"),
+  Pair(0x43, "number"),
+  Pair(0x44, "difficulty"),
+  Pair(0x45, "gaslimit"),
+  Pair(0x50, "pop"),
+  Pair(0x51, "mload"),
+  Pair(0x52, "mstore"),
+  Pair(0x53, "mstore8"),
+  Pair(0x54, "sload"),
+  Pair(0x55, "sstore"),
+  Pair(0x56, "jump"),
+  Pair(0x57, "jumpi"),
+  Pair(0x58, "pc"),
+  Pair(0x59, "msize"),
+  Pair(0x5a, "gas"),
+  Pair(0x5b, "jumpdest"),
+  Pair(0x60, "push1"),
+  Pair(0x61, "push2"),
+  Pair(0x62, "push3"),
+  Pair(0x63, "push4"),
+  Pair(0x64, "push5"),
+  Pair(0x65, "push6"),
+  Pair(0x66, "push7"),
+  Pair(0x67, "push8"),
+  Pair(0x68, "push9"),
+  Pair(0x69, "push10"),
+  Pair(0x6a, "push11"),
+  Pair(0x6b, "push12"),
+  Pair(0x6c, "push13"),
+  Pair(0x6d, "push14"),
+  Pair(0x6e, "push15"),
+  Pair(0x6f, "push16"),
+  Pair(0x70, "push17"),
+  Pair(0x71, "push18"),
+  Pair(0x72, "push19"),
+  Pair(0x73, "push20"),
+  Pair(0x74, "push21"),
+  Pair(0x75, "push22"),
+  Pair(0x76, "push23"),
+  Pair(0x77, "push24"),
+  Pair(0x78, "push25"),
+  Pair(0x79, "push26"),
+  Pair(0x7a, "push27"),
+  Pair(0x7b, "push28"),
+  Pair(0x7c, "push29"),
+  Pair(0x7d, "push30"),
+  Pair(0x7e, "push31"),
+  Pair(0x7f, "push32"),
+  Pair(0x90.toByte(), "swap1"),
+  Pair(0x91.toByte(), "swap2"),
+  Pair(0x92.toByte(), "swap3"),
+  Pair(0x93.toByte(), "swap4"),
+  Pair(0x94.toByte(), "swap5"),
+  Pair(0x95.toByte(), "swap6"),
+  Pair(0x96.toByte(), "swap7"),
+  Pair(0x97.toByte(), "swap8"),
+  Pair(0x98.toByte(), "swap9"),
+  Pair(0x99.toByte(), "swap10"),
+  Pair(0x9a.toByte(), "swap11"),
+  Pair(0x9b.toByte(), "swap12"),
+  Pair(0x9c.toByte(), "swap13"),
+  Pair(0x9d.toByte(), "swap14"),
+  Pair(0x9e.toByte(), "swap15"),
+  Pair(0x9f.toByte(), "swap16"),
+  Pair(0xf3.toByte(), "return"),
+  Pair(0xa0.toByte(), "log0"),
+  Pair(0xa1.toByte(), "log1"),
+  Pair(0xa2.toByte(), "log2"),
+  Pair(0xa3.toByte(), "log3"),
+  Pair(0xa4.toByte(), "log4"),
+  Pair(0xfe.toByte(), "invalid"),
+  Pair(0xff.toByte(), "selfdestruct"),
+)

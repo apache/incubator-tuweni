@@ -41,7 +41,7 @@ class TransactionalEVMHostContext(
   val value: Bytes,
   val code: Bytes,
   val gas: Gas,
-  val gasPrice: Wei,
+  private val gasPrice: Wei,
   val currentCoinbase: Address,
   val currentNumber: Long,
   val currentTimestamp: Long,
@@ -57,6 +57,7 @@ class TransactionalEVMHostContext(
   val logs = mutableListOf<Log>()
   val accountsToDestroy = mutableListOf<Address>()
   val balanceChanges = HashMap<Address, Wei>()
+  val warmedUpStorage = HashSet<Bytes>()
   /**
    * Check account existence function.
    *
@@ -72,6 +73,14 @@ class TransactionalEVMHostContext(
       repository.accountsExists(address)
   }
 
+  override suspend fun getRepositoryStorage(address: Address, keyBytes: Bytes): Bytes32 {
+    logger.trace("Entering getRepositoryStorage")
+    val key = Bytes32.wrap(keyBytes)
+    val value = repository.getAccountStoreValue(address, key)
+    logger.info("Found value $value")
+    return value ?: Bytes32.ZERO
+  }
+
   /**
    * Get storage function.
    *
@@ -82,12 +91,14 @@ class TransactionalEVMHostContext(
    * @param key The index of the account's storage entry.
    * @return The storage value at the given storage key or null bytes if the account does not exist.
    */
-  override suspend fun getStorage(address: Address, keyBytes: Bytes): Bytes32 {
+  override suspend fun getStorage(address: Address, key: Bytes32): Bytes32 {
     logger.trace("Entering getStorage")
-    val key = Bytes32.wrap(keyBytes)
-    val value = accountChanges[address]?.get(key)
+    var value = accountChanges[address]?.get(key)
     logger.info("Found value $value")
-    return value ?: Bytes32.ZERO
+    if (value == null) {
+      value = repository.getAccountStoreValue(address, key)?.let { UInt256.fromBytes(it) }
+    }
+    return value ?: UInt256.ZERO
   }
 
   /**
@@ -125,12 +136,14 @@ class TransactionalEVMHostContext(
     val oldValue = map.get(key)
     val storageAdded = newAccount || oldValue == null
     val storageWasModifiedBefore = map.containsKey(key)
-    val storageModified = !value.equals(oldValue)
-    if (value.size() == 0) {
-      map.remove(key)
-      return 4
+    val storageModified = !(value == UInt256.ZERO && oldValue == null) && !value.equals(oldValue)
+    if (!storageModified) {
+      return 0
     }
     map.put(key, value)
+    if (value.size() == 0) {
+      return 4
+    }
     if (storageModified) {
       if (storageAdded) {
         return 3
@@ -152,15 +165,15 @@ class TransactionalEVMHostContext(
    * @param address The address of the account.
    * @return The balance of the given account or 0 if the account does not exist.
    */
-  override suspend fun getBalance(address: Address): Bytes32 {
+  override suspend fun getBalance(address: Address): Wei {
     logger.trace("Entering getBalance")
 
     val balance = balanceChanges[address]
     balance?.let {
-      return it.toBytes()
+      return it
     }
     val account = repository.getAccount(address)
-    return account?.balance?.toBytes() ?: Bytes32.ZERO
+    return account?.balance ?: Wei.valueOf(0)
   }
 
   /**
@@ -271,7 +284,6 @@ class TransactionalEVMHostContext(
     )
     return result
   }
-
   /**
    * Get transaction context function.
    *
@@ -292,38 +304,42 @@ class TransactionalEVMHostContext(
     )
   }
 
-  /**
-   * Get block hash function.
-   *
-   *
-   * This function is used by a VM to query the hash of the header of the given block. If the
-   * information about the requested block is not available, then this is signalled by returning
-   * null bytes.
-   *
-   * @param number The block number.
-   * @return The block hash or null bytes if the information about the block is not available.
-   */
   override fun getBlockHash(number: Long): Bytes32 {
     logger.trace("Entering getBlockHash")
     val listOfCandidates = repository.findBlockByHashOrNumber(UInt256.valueOf(number).toBytes())
     return listOfCandidates.firstOrNull() ?: Bytes32.ZERO
   }
 
-  /**
-   * Log function.
-   *
-   *
-   * This function is used by an EVM to inform about a LOG that happened during an EVM bytecode
-   * execution.
-   *
-   * @param address The address of the contract that generated the log.
-   * @param data The unindexed data attached to the log.
-   * @param dataSize The length of the data.
-   * @param topics The the array of topics attached to the log.
-   * @param topicCount The number of the topics. Valid values are between 0 and 4 inclusively.
-   */
-  override fun emitLog(address: Address, data: Bytes, topics: Array<Bytes>, topicCount: Int) {
+  override fun emitLog(address: Address, data: Bytes, topics: List<Bytes32>) {
     logger.trace("Entering emitLog")
-    logs.add(Log(Address.fromBytes(Bytes.wrap(address)), Bytes.wrap(data), topics.map { Bytes32.wrap(it) }))
+    logs.add(Log(Address.fromBytes(Bytes.wrap(address)), data, topics))
+  }
+
+  override fun warmUpAccount(address: Address): Boolean =
+    !warmedUpStorage.add(address)
+
+  override fun warmUpStorage(address: Address, key: UInt256): Boolean =
+    !warmedUpStorage.add(Bytes.concatenate(address, Bytes.fromHexString("0x0f"), key))
+
+  override fun getGasPrice() = gasPrice
+
+  override fun getGasLimit() = currentGasLimit
+
+  override fun getBlockNumber() = currentNumber
+
+  override fun getBlockHash() = getBlockHash(currentNumber)
+
+  override fun getCoinbase() = currentCoinbase
+
+  override fun timestamp(): UInt256 = UInt256.valueOf(currentTimestamp)
+
+  override fun getDifficulty() = currentDifficulty
+
+  override fun increaseBalance(address: Address, amount: Wei) {
+    balanceChanges[address] = balanceChanges[address]?.add(amount) ?: amount
+  }
+
+  override suspend fun setBalance(address: Address, balance: Wei) {
+    balanceChanges[address] = getBalance(address).subtract(balance)
   }
 }

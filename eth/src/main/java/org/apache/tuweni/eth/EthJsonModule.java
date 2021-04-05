@@ -179,6 +179,14 @@ public class EthJsonModule extends SimpleModule {
     }
   }
 
+  static class UInt256KeyDeserializer extends KeyDeserializer {
+
+    @Override
+    public UInt256 deserializeKey(String key, DeserializationContext ctxt) throws IOException {
+      return UInt256.fromHexString(key);
+    }
+  }
+
   public EthJsonModule() {
     addSerializer(Hash.class, new HashSerializer());
     addSerializer(Address.class, new AddressSerializer());
@@ -192,6 +200,7 @@ public class EthJsonModule extends SimpleModule {
     addDeserializer(Gas.class, new GasDeserializer());
     addDeserializer(Wei.class, new WeiDeserializer());
     addDeserializer(UInt256.class, new UInt256Deserializer());
+    addKeyDeserializer(UInt256.class, new UInt256KeyDeserializer());
     addDeserializer(Bytes.class, new BytesDeserializer());
   }
 }

@@ -21,11 +21,12 @@ import org.apache.tuweni.units.bigints.UInt256;
 import java.math.BigInteger;
 
 import com.google.common.base.Objects;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A unit measure of Gas as used by the Ethereum VM.
  */
-public final class Gas {
+public final class Gas implements Comparable<Gas> {
 
   private final static int MAX_CONSTANT = 64;
   private final static BigInteger BI_MAX_CONSTANT = BigInteger.valueOf(MAX_CONSTANT);
@@ -37,6 +38,10 @@ public final class Gas {
       CONSTANTS[i] = new Gas(i);
     }
   }
+
+  public final static Gas ZERO = Gas.valueOf(0);
+  public final static Gas MAX = Gas.valueOf(Long.MAX_VALUE);
+  public final static Gas TOO_HIGH = new Gas(-1);
 
   private final long value;
 
@@ -56,7 +61,7 @@ public final class Gas {
       return CONSTANTS[value.intValue()];
     }
     if (!value.fitsLong()) {
-      throw new IllegalArgumentException("Gas value cannot be larger than 2^63 - 1");
+      return Gas.TOO_HIGH;
     }
     return new Gas(value.toLong());
   }
@@ -91,7 +96,7 @@ public final class Gas {
     try {
       return new Gas(value.longValueExact());
     } catch (ArithmeticException e) {
-      throw new IllegalArgumentException(e.getMessage(), e);
+      return Gas.TOO_HIGH;
     }
   }
 
@@ -106,7 +111,39 @@ public final class Gas {
   }
 
   public Gas add(Gas other) {
-    return Gas.valueOf(Math.addExact(value, other.value));
+    if (tooHigh() || other.tooHigh()) {
+      return TOO_HIGH;
+    }
+    try {
+      return Gas.valueOf(Math.addExact(value, other.value));
+    } catch (ArithmeticException e) {
+      return TOO_HIGH;
+    }
+  }
+
+  public Gas subtract(Gas other) {
+    if (tooHigh() || other.tooHigh()) {
+      return TOO_HIGH;
+    }
+    long newValue = Math.subtractExact(value, other.value);
+    if (newValue < 0) {
+      return TOO_HIGH;
+    }
+    return Gas.valueOf(newValue);
+  }
+
+  public Gas multiply(Gas other) {
+    if (tooHigh() || other.tooHigh()) {
+      return TOO_HIGH;
+    }
+    return Gas.valueOf(Math.multiplyExact(value, other.value));
+  }
+
+  public Gas divide(Gas other) {
+    if (tooHigh() || other.tooHigh()) {
+      return TOO_HIGH;
+    }
+    return Gas.valueOf(value / other.value);
   }
 
   @Override
@@ -147,5 +184,19 @@ public final class Gas {
 
   public int compareTo(long other) {
     return Long.compare(value, other);
+  }
+
+  @Override
+  public int compareTo(@NotNull Gas o) {
+    return compareTo(o.value);
+  }
+
+  /**
+   * Returns true if the gas value is past the maximum allowed gas, 2^63 -1
+   * 
+   * @return true if gas is past allowed maximum
+   */
+  public boolean tooHigh() {
+    return value == -1;
   }
 }

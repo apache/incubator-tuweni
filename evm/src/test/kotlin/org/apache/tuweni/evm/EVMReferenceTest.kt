@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.runBlocking
 import org.apache.lucene.index.IndexWriter
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.AccountState
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.EthJsonModule
@@ -35,6 +36,9 @@ import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
 import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.trie.MerklePatriciaTrie
+import org.apache.tuweni.trie.MerkleStorage
+import org.apache.tuweni.trie.MerkleTrie
+import org.apache.tuweni.trie.StoredMerklePatriciaTrie
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
@@ -43,8 +47,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -54,7 +56,6 @@ import java.io.InputStream
 import java.io.UncheckedIOException
 import java.util.stream.Stream
 
-@Disabled
 @ExtendWith(LuceneIndexWriterExtension::class, BouncyCastleExtension::class)
 class EVMReferenceTest {
 
@@ -74,7 +75,7 @@ class EVMReferenceTest {
 
     @Throws(IOException::class)
     private fun findTests(glob: String): Stream<Arguments> {
-      return Resources.find(glob).flatMap { url ->
+      return Resources.find(glob).filter { !(it.file.contains("loop") && it.file.contains("10M")) }.flatMap { url ->
         try {
           url.openConnection().getInputStream().use { input -> prepareTests(input) }
         } catch (e: IOException) {
@@ -105,135 +106,175 @@ class EVMReferenceTest {
   }
 
   @ParameterizedTest(name = "{index}: {0}")
-  @DisplayName("{0}")
   @MethodSource("findTests")
   fun runReferenceTest(testName: String, test: JsonReferenceTest) {
-    assertNotNull(testName)
-    println(testName)
-
-    val repository = BlockchainRepository(
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      BlockchainIndex(writer!!)
-    )
-    test.pre!!.forEach { address, state ->
-      runBlocking {
-        val tree = MerklePatriciaTrie.storingBytes()
-        state.storage!!.forEach { key, value ->
-          runBlocking {
-            tree.put(key, value)
-          }
-        }
-        val accountState =
-          AccountState(state.nonce!!, state.balance!!, Hash.fromBytes(tree.rootHash()), Hash.hash(state.code!!))
-        repository.storeAccount(address, accountState)
-        repository.storeCode(state.code!!)
-      }
-    }
-    val vm = EthereumVirtualMachine(repository, EvmVmImpl::create)
-    vm.start()
-    try {
-      val result = vm.execute(
-        test.exec?.origin!!,
-        test.exec?.address!!,
-        test.exec?.value!!,
-        test.exec?.code!!,
-        test.exec?.data!!,
-        test.exec?.gas!!,
-        test.exec?.gasPrice!!,
-        test.env?.currentCoinbase!!,
-        test.env?.currentNumber!!.toLong(),
-        test.env?.currentTimestamp!!.toLong(),
-        test.env?.currentGasLimit!!.toLong(),
-        test.env?.currentDifficulty!!
+    runBlocking {
+      assertNotNull(testName)
+      println(testName)
+      val stateStore = MapKeyValueStore<Bytes, Bytes>()
+      val repository = BlockchainRepository(
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        stateStore,
+        BlockchainIndex(writer!!)
       )
-      if (test.post == null) {
-        assertNotEquals(EVMExecutionStatusCode.EVMC_SUCCESS, result.statusCode)
-        if (testName.contains("JumpDest", true) ||
-          testName.contains("OutsideBoundary", true) ||
-          testName.contains("outOfBoundary", true) ||
-          testName.startsWith("DynamicJump_valueUnderflow") ||
-          testName.startsWith("jumpiToUintmaxPlus1") ||
-          testName.startsWith("jumpToUintmaxPlus1") ||
-          testName.startsWith("DynamicJumpi0") ||
-          testName.startsWith("DynamicJumpJD_DependsOnJumps0") ||
-          testName.startsWith("jumpHigh") ||
-          testName.startsWith("bad_indirect_jump2") ||
-          testName.startsWith("DynamicJumpPathologicalTest1") ||
-          testName.startsWith("jumpToUint64maxPlus1") ||
-          testName.startsWith("jumpiToUint64maxPlus1") ||
-          testName.startsWith("jumpi0") ||
-          testName.startsWith("DynamicJumpPathologicalTest3") ||
-          testName.startsWith("DynamicJumpPathologicalTest2") ||
-          testName.startsWith("jump1") ||
-          testName.startsWith("bad_indirect_jump1") ||
-          testName.startsWith("BlockNumberDynamicJumpi0") ||
-          testName.startsWith("gasOverFlow") ||
-          testName.startsWith("DynamicJump1") ||
-          testName.startsWith("BlockNumberDynamicJump1") ||
-          testName.startsWith("JDfromStorageDynamicJump1") ||
-          testName.startsWith("JDfromStorageDynamicJumpi0")
-        ) {
-          assertEquals(EVMExecutionStatusCode.EVMC_BAD_JUMP_DESTINATION, result.statusCode)
-        } else if (testName.contains("underflow", true) ||
-          testName.startsWith("swap2error") ||
-          testName.startsWith("dup2error") ||
-          testName.startsWith("pop1") ||
-          testName.startsWith("jumpOntoJump") ||
-          testName.startsWith("swapAt52becameMstore") ||
-          testName.startsWith("stack_loop") ||
-          testName.startsWith("201503110206PYTHON") ||
-          testName.startsWith("201503112218PYTHON") ||
-          testName.startsWith("201503110219PYTHON") ||
-          testName.startsWith("201503102320PYTHON")
-        ) {
-          assertEquals(EVMExecutionStatusCode.EVMC_STACK_UNDERFLOW, result.statusCode)
-        } else if (testName.contains("outofgas", true) ||
-          testName.contains("TooHigh", true) ||
-          testName.contains("MemExp", true) ||
-          testName.contains("return1", true) ||
-          testName.startsWith("sha3_bigOffset") ||
-          testName.startsWith("sha3_3") ||
-          testName.startsWith("sha3_4") ||
-          testName.startsWith("sha3_5") ||
-          testName.startsWith("sha3_6") ||
-          testName.startsWith("sha3_bigSize") ||
-          testName.startsWith("ackermann33")
-        ) {
-          assertEquals(EVMExecutionStatusCode.EVMC_OUT_OF_GAS, result.statusCode)
-        } else if (testName.contains("stacklimit", true)) {
-          assertEquals(EVMExecutionStatusCode.EVMC_STACK_OVERFLOW, result.statusCode)
-        } else {
-          println(result.statusCode)
-          TODO()
-        }
-      } else {
-        test.post!!.forEach { address, state ->
-          runBlocking {
-            assertTrue(repository.accountsExists(address) || result.hostContext.accountChanges.containsKey(address))
-            val accountState = repository.getAccount(address)
-            val balance = accountState?.balance?.add(
-              result.hostContext.balanceChanges.get(address) ?: Wei.valueOf(0)
-            ) ?: Wei.valueOf(0)
-            assertEquals(state.balance, balance)
-            assertEquals(state.nonce, accountState!!.nonce)
-          }
-        }
-        test.logs?.let {
-          val logsTree = MerklePatriciaTrie.storingBytes()
-          result.hostContext.logs.forEach {
+      test.pre!!.forEach { address, state ->
+        runBlocking {
+          val tree = MerklePatriciaTrie.storingBytes()
+          state.storage!!.forEach { key, value ->
             runBlocking {
-              logsTree.put(Hash.hash(it.toBytes()), it.toBytes())
+              tree.put(key, value)
+            }
+          }
+          val accountState =
+            AccountState(state.nonce!!, state.balance!!, Hash.fromBytes(tree.rootHash()), Hash.hash(state.code!!))
+          repository.storeAccount(address, accountState)
+          repository.storeCode(state.code!!)
+          val accountStorage = state.storage
+
+          if (accountStorage != null) {
+            val accountStorageTree = StoredMerklePatriciaTrie.storingBytes32(
+              object : MerkleStorage {
+                override suspend fun get(hash: Bytes32): Bytes? {
+                  return stateStore.get(hash)
+                }
+
+                override suspend fun put(hash: Bytes32, content: Bytes) {
+                  stateStore.put(hash, content)
+                }
+              },
+              MerkleTrie.EMPTY_TRIE_ROOT_HASH
+            )
+            for (entry in accountStorage) {
+              accountStorageTree.put(Bytes32.leftPad(entry.key), Bytes32.leftPad(entry.value))
             }
           }
         }
       }
-    } finally {
-      vm.stop()
+      val vm = EthereumVirtualMachine(repository, EvmVmImpl::create)
+      vm.start()
+      try {
+        val result = vm.execute(
+          test.exec?.origin!!,
+          test.exec?.address!!,
+          test.exec?.value!!,
+          test.exec?.code!!,
+          test.exec?.data!!,
+          test.exec?.gas!!,
+          test.exec?.gasPrice!!,
+          test.env?.currentCoinbase!!,
+          test.env?.currentNumber!!.toLong(),
+          test.env?.currentTimestamp!!.toLong(),
+          test.env?.currentGasLimit!!.toLong(),
+          test.env?.currentDifficulty!!
+        )
+        if (test.post == null) {
+          assertNotEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
+          if (testName.contains("JumpDest", true) ||
+            testName.contains("OutsideBoundary", true) ||
+            testName.contains("outOfBoundary", true) ||
+            testName.startsWith("jumpiToUintmaxPlus1") ||
+            testName.startsWith("jumpToUintmaxPlus1") ||
+            testName.startsWith("DynamicJumpi0") ||
+            testName.startsWith("DynamicJumpJD_DependsOnJumps0") ||
+            testName.startsWith("jumpHigh") ||
+            testName.startsWith("bad_indirect_jump2") ||
+            testName.startsWith("DynamicJumpPathologicalTest1") ||
+            testName.startsWith("jumpToUint64maxPlus1") ||
+            testName.startsWith("jumpiToUint64maxPlus1") ||
+            testName.startsWith("jumpi0") ||
+            testName.startsWith("DynamicJumpPathologicalTest3") ||
+            testName.startsWith("DynamicJumpPathologicalTest2") ||
+            testName.startsWith("jump1") ||
+            testName.startsWith("bad_indirect_jump1") ||
+            testName.startsWith("BlockNumberDynamicJumpi0") ||
+            testName.startsWith("gasOverFlow") ||
+            testName.startsWith("DynamicJump1") ||
+            testName.startsWith("BlockNumberDynamicJump1") ||
+            testName.startsWith("JDfromStorageDynamicJump1") ||
+            testName.startsWith("JDfromStorageDynamicJumpi0")
+          ) {
+            assertEquals(EVMExecutionStatusCode.BAD_JUMP_DESTINATION, result.statusCode)
+          } else if (testName.contains("underflow", true) ||
+            testName.startsWith("swap2error") ||
+            testName.startsWith("dup2error") ||
+            testName.startsWith("DynamicJump_valueUnderflow") ||
+            testName.startsWith("pop1") ||
+            testName.startsWith("jumpOntoJump") ||
+            testName.startsWith("swapAt52becameMstore") ||
+            testName.startsWith("stack_loop") ||
+            testName.startsWith("201503110206PYTHON") ||
+            testName.startsWith("201503112218PYTHON") ||
+            testName.startsWith("201503110219PYTHON") ||
+            testName.startsWith("201503102320PYTHON")
+          ) {
+            assertEquals(EVMExecutionStatusCode.STACK_UNDERFLOW, result.statusCode)
+          } else if (testName.contains("outofgas", true) ||
+            testName.contains("TooHigh", true) ||
+            testName.contains("MemExp", true) ||
+            testName.contains("return1", true) ||
+            testName.startsWith("sha3_bigOffset") ||
+            testName.startsWith("sha3_3") ||
+            testName.startsWith("sha3_4") ||
+            testName.startsWith("sha3_5") ||
+            testName.startsWith("sha3_6") ||
+            testName.startsWith("sha3_bigSize") ||
+            testName.startsWith("ackermann33")
+          ) {
+            assertEquals(EVMExecutionStatusCode.OUT_OF_GAS, result.statusCode)
+          } else if (testName.contains("stacklimit", true)) {
+            assertEquals(EVMExecutionStatusCode.STACK_OVERFLOW, result.statusCode)
+          } else {
+            println(result.statusCode)
+            TODO()
+          }
+        } else {
+          assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
+
+          test.post!!.forEach { address, state ->
+            runBlocking {
+              assertTrue(
+                repository.accountsExists(address) ||
+                  (result.hostContext as TransactionalEVMHostContext).accountChanges.containsKey(address)
+              )
+              val accountState = repository.getAccount(address)
+              val balance = accountState?.balance?.add(
+                (result.hostContext as TransactionalEVMHostContext).balanceChanges.get(address) ?: Wei.valueOf(0)
+              ) ?: Wei.valueOf(0)
+              assertEquals(state.balance, balance)
+              assertEquals(state.nonce, accountState!!.nonce)
+
+              for (stored in state.storage!!) {
+                val changed = result.hostContext.getStorage(address, stored.key)
+                assertEquals(stored.value, changed)
+              }
+            }
+          }
+          test.logs?.let {
+            val logsTree = MerklePatriciaTrie.storingBytes()
+            (result.hostContext as TransactionalEVMHostContext).logs.forEach {
+              runBlocking {
+                logsTree.put(Hash.hash(it.toBytes()), it.toBytes())
+              }
+            }
+          }
+
+          // assertEquals(test.gas, result.gasManager.gasLeft())
+          if (test.out?.isEmpty == true) {
+            assertTrue(result.output == null || result.output?.isEmpty ?: false)
+          } else {
+            assertEquals(
+              test.out?.let { if (it.size() < 32) Bytes32.rightPad(it) else it },
+              result.output?.let { if (it.size() < 32) Bytes32.rightPad(it) else it }
+            )
+          }
+        }
+      } finally {
+        vm.stop()
+      }
     }
   }
 }
@@ -244,7 +285,7 @@ data class Env(
   var currentDifficulty: UInt256? = null,
   var currentGasLimit: UInt256? = null,
   var currentNumber: UInt256? = null,
-  var currentTimestamp: UInt256? = null
+  var currentTimestamp: UInt256? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -256,7 +297,7 @@ data class Exec(
   var gas: Gas? = null,
   var gasPrice: Wei? = null,
   var origin: Address? = null,
-  var value: Bytes? = null
+  var value: Bytes? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -264,7 +305,7 @@ data class JsonAccountState(
   var balance: Wei? = null,
   var code: Bytes? = null,
   var nonce: UInt256? = null,
-  var storage: Map<Bytes, Bytes>? = null
+  var storage: Map<UInt256, UInt256>? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -275,5 +316,5 @@ data class JsonReferenceTest(
   var logs: Bytes? = null,
   var out: Bytes? = null,
   var post: Map<Address, JsonAccountState>? = null,
-  var pre: Map<Address, JsonAccountState>? = null
+  var pre: Map<Address, JsonAccountState>? = null,
 )

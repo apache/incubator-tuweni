@@ -16,37 +16,32 @@
  */
 package org.apache.tuweni.evm.impl
 
-import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.evm.EVMMessage
-import org.apache.tuweni.evm.EVMResult
-import org.apache.tuweni.evm.EvmVm
-import org.apache.tuweni.evm.HostContext
+import org.apache.tuweni.units.ethereum.Gas
 
-class EvmVmImpl() : EvmVm {
+class GasManager(val gas: Gas) {
 
-  companion object {
-    fun create(): EvmVm {
-      return EvmVmImpl()
+  var gasCost = Gas.ZERO
+  var lastGasCost = Gas.ZERO
+
+  fun add(g: Long) {
+    add(Gas.valueOf(g))
+  }
+
+  fun add(gas: Gas) {
+    lastGasCost = gas
+    gasCost = gasCost.add(gas)
+  }
+
+  fun gasLeft(): Gas {
+    if (gas.tooHigh() || gasCost.tooHigh()) {
+      return Gas.ZERO
     }
+    return gas.subtract(gasCost)
   }
 
-  override fun setOption(key: String, value: String) {
-    TODO("Not yet implemented")
+  fun hasGasLeft(): Boolean {
+    return !gas.subtract(gasCost).tooHigh()
   }
 
-  override fun version(): String {
-    TODO("Not yet implemented")
-  }
-
-  override fun close() {
-    TODO("Not yet implemented")
-  }
-
-  override fun execute(hostContext: HostContext, fork: Int, msg: EVMMessage, code: Bytes?): EVMResult {
-    TODO("Not yet implemented")
-  }
-
-  override fun capabilities(): Int {
-    TODO("Not yet implemented")
-  }
+  fun lastGasCost(): Gas = lastGasCost
 }
