@@ -360,9 +360,12 @@ allprojects {
     } else {
       archiveBaseName = rootProject.name + '-' + project.name
     }
+    def moduleName = archiveBaseName.toString().replaceAll('-','.')
     manifest {
       attributes('Implementation-Title': archiveBaseName,
-      'Implementation-Version': project.version)
+      'Implementation-Version': project.version,
+      'Automatic-Module-Name': moduleName
+      )
     }
     from(rootProject.projectDir) {
       include 'DISCLAIMER'
