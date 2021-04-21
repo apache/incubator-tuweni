@@ -22,7 +22,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.concurrent.ExpiringSet
 import org.apache.tuweni.concurrent.coroutines.await
@@ -30,7 +29,6 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.net.URI
 import java.security.Security
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
@@ -49,15 +47,10 @@ object ScraperApp {
   fun run(args: Array<String>) {
     val uris = args.map { URI.create(it) }
     val addr = SocketAddress.inetSocketAddress(11000, "0.0.0.0")
-    val seen = ConcurrentHashMap.newKeySet<String>()
     val scraper = Scraper(
-      initialURIs = uris, bindAddress = addr,
-      listeners = listOf { _, nodes ->
-        for (node in nodes) {
-          if (seen.add(node.uri())) {
-            println(node)
-          }
-        }
+      initialURIs = uris, bindAddress = addr, repository = EphemeralPeerRepository(),
+      listeners = listOf {
+        println(it.uri())
       }
     )
     Runtime.getRuntime().addShutdownHook(
@@ -83,51 +76,43 @@ class Scraper(
   val vertx: Vertx = Vertx.vertx(),
   val initialURIs: List<URI>,
   val bindAddress: SocketAddress,
-  val listeners: List<(Peer, List<Peer>) -> Unit>,
-  val maxWaitForNewPeers: Long = 20,
-  val waitBetweenScrapes: Long = 5 * 60
+  val repository: PeerRepository,
+  val listeners: List<(Peer) -> Unit>? = null,
+  val waitSecondsBetweenScrapes: Long = 30,
 ) : CoroutineScope {
 
   private var service: DiscoveryService? = null
   private val started = AtomicBoolean(false)
+  private val nodes = ExpiringSet<Peer>(24 * 60 * 60 * 1000)
 
   fun start() = async {
+    repository.addListener {
+      if (nodes.add(it)) {
+        if (listeners != null) {
+          for (listener in listeners) {
+            listener(it)
+          }
+        }
+      }
+    }
     val newService = DiscoveryService.open(
       vertx,
       keyPair = SECP256K1.KeyPair.random(),
       bindAddress = bindAddress,
-      bootstrapURIs = initialURIs
+      bootstrapURIs = initialURIs,
+      peerRepository = repository
     )
     service = newService
     started.set(true)
     while (started.get()) {
-      discover(maxWaitForNewPeers).await()
-      delay(waitBetweenScrapes * 1000)
+      discover().await()
+      delay(waitSecondsBetweenScrapes * 1000)
     }
   }
 
-  fun discover(maxWaitForNewPeers: Long) = async {
-    var newPeersDetected = true
-    val nodes = ExpiringSet<Peer>(24 * 60 * 60 * 1000)
-    while (newPeersDetected) {
-      newPeersDetected = false
-      for (node in nodes) {
-        service?.lookupAsync(node.nodeId)?.thenAccept {
-          if (it.isNotEmpty()) {
-            for (listener in listeners) {
-              launch {
-                listener(node, it)
-              }
-            }
-            for (newPeer in it) {
-              if (nodes.add(newPeer)) {
-                newPeersDetected = true
-              }
-            }
-          }
-        }
-      }
-      delay(maxWaitForNewPeers * 1000)
+  fun discover() = async {
+    for (node in nodes) {
+      service?.lookupAsync(node.nodeId)
     }
   }
 
