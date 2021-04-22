@@ -33,7 +33,7 @@ class DiscoveryPeerRepository(private val repository: org.apache.tuweni.peer.rep
   PeerRepository {
 
   override fun addListener(listener: (Peer) -> Unit) {
-    repository.addListener(listener)
+    TODO("Unsupported")
   }
 
   override suspend fun get(host: String, port: Int, nodeId: SECP256K1.PublicKey): Peer {
