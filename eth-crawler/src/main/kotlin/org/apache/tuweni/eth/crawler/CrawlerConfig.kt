@@ -55,7 +55,8 @@ class CrawlerConfig(val filePath: Path) {
       .addString(
         "jdbcUrl", null,
         "JDBC URL of the form jdbc:posgresql://localhost:5432", PropertyValidator.isPresent()
-      )
+      ).addString("network", "mainnet", "Network to use instead of providing a genesis file.", null)
+      .addString("genesisFile", "", "Genesis file to use in hello", null)
       .toSchema()
   }
 
@@ -68,4 +69,7 @@ class CrawlerConfig(val filePath: Path) {
   fun discoveryNetworkInterface() = config.getString("discoveryNetworkInterface")
 
   fun jdbcUrl() = config.getString("jdbcUrl")
+
+  fun genesisFile() = config.getString("genesisFile")
+  fun network() = config.getString("network")
 }

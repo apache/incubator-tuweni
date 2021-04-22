@@ -14,32 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.tuweni.devp2p.eth
 
-CREATE TABLE IF NOT EXISTS `identity` (
-    `id` varchar(36) PRIMARY KEY,
-    `publickey` bytea
-);
+import org.apache.tuweni.rlpx.RLPxService
+import org.apache.tuweni.rlpx.wire.SubProtocolClient
 
-CREATE TABLE IF NOT EXISTS `endpoint` (
-    `id` varchar(36) PRIMARY KEY,
-    `lastSeen` timestamp,
-    `lastVerified` timestamp,
-    `host` text,
-    `port` int,
-    `identity` varchar(36)
-);
-
-CREATE TABLE IF NOT EXISTS `nodeInfo` (
-    `id` varchar(36) PRIMARY KEY,
-    `createdAt` timestamp,
-    `p2pversion` int,
-    `clientId` text,
-    `capabilities` text,
-    `genesisHash` text,
-    `bestHash` text,
-    `totalDifficulty` text,
-    `identity` varchar(36)
-);
-
-ALTER TABLE endpoint ADD FOREIGN KEY (identity) REFERENCES identity(id);
-ALTER TABLE nodeInfo ADD FOREIGN KEY (identity) REFERENCES identity(id);
+/**
+ * Client of the ETH subprotocol, allowing to request block and node data
+ */
+class EthHelloClient(
+  private val service: RLPxService
+) : SubProtocolClient

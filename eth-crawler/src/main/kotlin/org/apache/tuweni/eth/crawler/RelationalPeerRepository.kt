@@ -26,7 +26,9 @@ import org.apache.tuweni.devp2p.Endpoint
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.Peer
 import org.apache.tuweni.devp2p.PeerRepository
+import org.apache.tuweni.devp2p.eth.Status
 import org.apache.tuweni.devp2p.parseEnodeUri
+import org.apache.tuweni.rlpx.wire.WireConnection
 import java.net.URI
 import java.sql.Timestamp
 import java.util.UUID
@@ -87,6 +89,48 @@ class RelationalPeerRepository(
 
   override fun getAsync(uri: String): AsyncResult<Peer> {
     return asyncResult { get(uri) }
+  }
+
+  fun recordInfo(wireConnection: WireConnection, status: Status) {
+    dataSource.connection.use { conn ->
+      val peer = get(wireConnection.peerPublicKey(), Endpoint(wireConnection.peerHost(), wireConnection.peerPort())) as RepositoryPeer
+      val stmt =
+        conn.prepareStatement(
+          "insert into nodeInfo(id, createdAt, p2pVersion, clientId, capabilities, genesisHash, bestHash, totalDifficulty, identity) values(?,?,?,?,?,?,?,?,?)"
+        )
+      stmt.use {
+        val peerHello = wireConnection.peerHello!!
+        it.setString(1, UUID.randomUUID().toString())
+        it.setTimestamp(2, Timestamp(System.currentTimeMillis()))
+        it.setInt(3, peerHello.p2pVersion())
+        it.setString(4, peerHello.clientId())
+        it.setString(5, peerHello.capabilities().map { it.name() + "/" + it.version() }.joinToString(","))
+        it.setString(6, status.genesisHash.toHexString())
+        it.setString(7, status.bestHash.toHexString())
+        it.setString(8, status.totalDifficulty.toHexString())
+        it.setString(9, peer.id)
+
+        it.execute()
+      }
+    }
+  }
+
+  fun getPeers(infoCollected: Long) {
+    dataSource.connection.use { conn ->
+      val stmt =
+        conn.prepareStatement(
+          "select id, max(createdAt), p2pVersion, clientId, capabilities, genesisHash, bestHash, totalDifficulty, distinct(identity) from nodeInfo  where createdAt < ?"
+        )
+      stmt.use {
+        it.setTimestamp(1, Timestamp(infoCollected))
+        // map results.
+//        val rs = stmt.executeQuery()
+//        val result =
+//        while (rs.next()) {
+//
+//        }
+      }
+    }
   }
 }
 

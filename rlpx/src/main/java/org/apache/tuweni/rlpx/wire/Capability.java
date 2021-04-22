@@ -14,7 +14,7 @@ package org.apache.tuweni.rlpx.wire;
 
 import java.util.Objects;
 
-final class Capability {
+public final class Capability {
 
   private final String name;
 
@@ -26,11 +26,11 @@ final class Capability {
     this.version = version;
   }
 
-  String name() {
+  public String name() {
     return name;
   }
 
-  int version() {
+  public int version() {
     return version;
   }
 
