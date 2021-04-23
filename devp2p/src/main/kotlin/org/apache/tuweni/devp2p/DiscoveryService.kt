@@ -374,17 +374,22 @@ internal class CoroutineDiscoveryService constructor(
       }
     }
     launch {
-      bootstrapURIs.map { uri ->
-        bootstrapFrom(uri)
-      }
-      bootstrapped.complete()
+      AsyncCompletion.allOf(
+        bootstrapURIs.map { uri ->
+          asyncCompletion { bootstrapFrom(uri) }
+        }
+      ).thenRun {
+        bootstrapped.complete()
+      }.await()
     }
 
     logger.info("{}: started, listening on {}", serviceDescriptor, server.localAddress())
   }
 
   private suspend fun bootstrapFrom(uri: URI): Boolean {
+    logger.info("Starting verification of bootnode $uri")
     val peer = peerRepository.get(uri)
+    logger.info("Starting verification of bootnode $uri")
     try {
       val result = withTimeout(BOOTSTRAP_PEER_VERIFICATION_TIMEOUT_MS) {
         endpointVerification(peer.endpoint, peer).verifyWithRetries()

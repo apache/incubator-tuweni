@@ -57,6 +57,8 @@ class CrawlerConfig(val filePath: Path) {
         "JDBC URL of the form jdbc:posgresql://localhost:5432", PropertyValidator.isPresent()
       ).addString("network", "mainnet", "Network to use instead of providing a genesis file.", null)
       .addString("genesisFile", "", "Genesis file to use in hello", null)
+      .addInteger("restPort", 1337, "REST port", null)
+      .addString("restNetworkInterface", "0.0.0.0", "REST network interface", null)
       .toSchema()
   }
 
@@ -72,4 +74,6 @@ class CrawlerConfig(val filePath: Path) {
 
   fun genesisFile() = config.getString("genesisFile")
   fun network() = config.getString("network")
+  fun restPort() = config.getInteger("restPort")
+  fun restNetworkInterface() = config.getString("restNetworkInterface")
 }

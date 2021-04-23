@@ -27,6 +27,8 @@ dependencies {
   implementation project(':rlp')
   implementation project(':rlpx')
   implementation project(':units')
+
+  implementation 'com.fasterxml.jackson.core:jackson-databind'
   implementation 'com.google.guava:guava'
   implementation 'com.zaxxer:HikariCP'
   implementation 'org.flywaydb:flyway-core'
@@ -37,6 +39,13 @@ dependencies {
   implementation 'org.slf4j:slf4j-api'
   implementation 'org.jetbrains.kotlin:kotlin-stdlib'
   implementation 'org.postgresql:postgresql'
+  implementation 'org.eclipse.jetty:jetty-server'
+  implementation 'org.eclipse.jetty:jetty-servlet'
+  implementation 'org.eclipse.jetty:jetty-util'
+  implementation 'org.glassfish.jersey.core:jersey-server'
+  implementation 'org.glassfish.jersey.containers:jersey-container-servlet'
+  implementation 'org.glassfish.jersey.inject:jersey-hk2'
+  implementation 'javax.xml.bind:jaxb-api'
 
   compileOnly 'org.bouncycastle:bcprov-jdk15on'
   runtimeOnly 'org.bouncycastle:bcprov-jdk15on'
@@ -44,10 +53,11 @@ dependencies {
   runtimeOnly 'org.bouncycastle:bcprov-jdk15on'
 
   testImplementation project(':junit')
+  testImplementation 'com.h2database:h2'
+  testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin'
   testImplementation 'org.bouncycastle:bcprov-jdk15on'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.junit.jupiter:junit-jupiter-params'
-  testImplementation 'com.h2database:h2'
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testRuntimeOnly 'ch.qos.logback:logback-classic'

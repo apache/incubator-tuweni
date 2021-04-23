@@ -14,35 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.tuweni.eth.crawler
 
-CREATE TABLE IF NOT EXISTS identity (
-    id varchar(36) PRIMARY KEY,
-    publickey bytea
-);
+import com.nhaarman.mockitokotlin2.mock
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Test
 
-CREATE TABLE IF NOT EXISTS endpoint (
-    id varchar(36) PRIMARY KEY,
-    lastSeen timestamp,
-    lastVerified timestamp,
-    host text,
-    port int,
-    identity varchar(36)
-);
+class CrawlerRESTServiceTest {
 
-CREATE TABLE IF NOT EXISTS nodeInfo (
-    id varchar(36) PRIMARY KEY,
-    createdAt timestamp,
-    host text,
-    port int,
-    publickey bytea,
-    p2pversion int,
-    clientId text,
-    capabilities text,
-    genesisHash text,
-    bestHash text,
-    totalDifficulty text,
-    identity varchar(36)
-);
-
-ALTER TABLE endpoint ADD FOREIGN KEY (identity) REFERENCES identity(id);
-ALTER TABLE nodeInfo ADD FOREIGN KEY (identity) REFERENCES identity(id);
+  @Test
+  fun startAndStop() = runBlocking {
+    val repo = mock<RelationalPeerRepository>()
+    val service = CrawlerRESTService(repository = repo)
+    service.start().await()
+    service.stop().await()
+    Unit
+  }
+}

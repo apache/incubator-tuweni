@@ -13,6 +13,7 @@
 package org.apache.tuweni.eth;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.apache.tuweni.units.ethereum.Gas;
 import org.apache.tuweni.units.ethereum.Wei;
@@ -63,6 +64,19 @@ public class EthJsonModule extends SimpleModule {
 
     @Override
     public void serialize(Bytes value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+      gen.writeString(value.toHexString());
+    }
+  }
+
+  static class PublicKeySerializer extends StdSerializer<SECP256K1.PublicKey> {
+
+    PublicKeySerializer() {
+      super(SECP256K1.PublicKey.class);
+    }
+
+    @Override
+    public void serialize(SECP256K1.PublicKey value, JsonGenerator gen, SerializerProvider provider)
+        throws IOException {
       gen.writeString(value.toHexString());
     }
   }
@@ -202,5 +216,6 @@ public class EthJsonModule extends SimpleModule {
     addDeserializer(UInt256.class, new UInt256Deserializer());
     addKeyDeserializer(UInt256.class, new UInt256KeyDeserializer());
     addDeserializer(Bytes.class, new BytesDeserializer());
+    addSerializer(SECP256K1.PublicKey.class, new PublicKeySerializer());
   }
 }

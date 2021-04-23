@@ -22,7 +22,6 @@ import org.apache.tuweni.rlpx.wire.WireConnection
  * Controller managing the state of the ETH or LES subprotocol handlers.
  */
 class EthHelloController(
-  val requestsManager: EthRequestsManager,
   val connectionsListener: (WireConnection, Status) -> Unit = { _, _ -> }
 ) {
 

@@ -103,6 +103,7 @@ class Scraper(
       peerRepository = repository
     )
     service = newService
+    newService.awaitBootstrap()
     started.set(true)
     while (started.get()) {
       discover().await()
@@ -112,7 +113,31 @@ class Scraper(
 
   fun discover() = async {
     for (node in nodes) {
-      service?.lookupAsync(node.nodeId)
+      service?.lookupAsync(node.nodeId)?.thenAccept {
+        for (newNode in it) {
+          if (nodes.add(newNode)) {
+            if (listeners != null) {
+              for (listener in listeners) {
+                listener(newNode)
+              }
+            }
+          }
+        }
+      }
+    }
+
+    for (i in 1..10) {
+      service?.lookupAsync(SECP256K1.KeyPair.random().publicKey())?.thenAccept {
+        for (newNode in it) {
+          if (nodes.add(newNode)) {
+            if (listeners != null) {
+              for (listener in listeners) {
+                listener(newNode)
+              }
+            }
+          }
+        }
+      }
     }
   }
 

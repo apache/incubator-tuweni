@@ -57,7 +57,7 @@ class EthHelloSubprotocol(
   }
 
   override fun createHandler(service: RLPxService, client: SubProtocolClient): SubProtocolHandler {
-    val controller = EthHelloController(client as EthRequestsManager, listener)
+    val controller = EthHelloController(listener)
     return EthHelloHandler(coroutineContext, blockchainInfo, service, controller)
   }
 

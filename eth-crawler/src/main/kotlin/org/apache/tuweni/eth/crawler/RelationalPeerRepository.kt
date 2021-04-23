@@ -18,6 +18,7 @@ package org.apache.tuweni.eth.crawler
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.coroutines.asyncResult
@@ -29,16 +30,22 @@ import org.apache.tuweni.devp2p.PeerRepository
 import org.apache.tuweni.devp2p.eth.Status
 import org.apache.tuweni.devp2p.parseEnodeUri
 import org.apache.tuweni.rlpx.wire.WireConnection
+import org.slf4j.LoggerFactory
+import java.lang.RuntimeException
 import java.net.URI
 import java.sql.Timestamp
 import java.util.UUID
 import javax.sql.DataSource
 import kotlin.coroutines.CoroutineContext
 
-class RelationalPeerRepository(
+open class RelationalPeerRepository(
   private val dataSource: DataSource,
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope, PeerRepository {
+
+  companion object {
+    internal val logger = LoggerFactory.getLogger(RelationalPeerRepository::class.java)
+  }
 
   private val listeners = mutableListOf<(Peer) -> Unit>()
 
@@ -52,28 +59,39 @@ class RelationalPeerRepository(
 
   fun get(nodeId: SECP256K1.PublicKey, endpoint: Endpoint): Peer {
     dataSource.connection.use { conn ->
+      logger.info("Get peer with $nodeId")
       val stmt = conn.prepareStatement("select id,publickey from identity where publickey=?")
-      stmt.setString(1, nodeId.bytes().toUnprefixedHexString())
-      val rs = stmt.executeQuery()
-      rs.use {
-        if (!rs.next()) {
-          val id = UUID.randomUUID().toString()
-          val insert = conn.prepareStatement("insert into identity(id, publickey) values(?, ?)")
-          insert.setString(1, id)
-          insert.setBytes(2, nodeId.bytes().toArrayUnsafe())
-          insert.execute()
-          val newPeer = RepositoryPeer(nodeId, id, endpoint, dataSource)
-          listeners.let {
-            for (listener in listeners) {
-              listener(newPeer)
+      stmt.setBytes(1, nodeId.bytes().toArrayUnsafe())
+      try {
+        val rs = stmt.executeQuery()
+        logger.info("Results")
+        rs.use {
+          if (!rs.next()) {
+            logger.info("Creating new peer with public key ${nodeId.toHexString()}")
+            val id = UUID.randomUUID().toString()
+            val insert = conn.prepareStatement("insert into identity(id, publickey) values(?, ?)")
+            insert.setString(1, id)
+            insert.setBytes(2, nodeId.bytes().toArrayUnsafe())
+            insert.execute()
+            val newPeer = RepositoryPeer(nodeId, id, endpoint, dataSource)
+            listeners.let {
+              for (listener in listeners) {
+                launch {
+                  listener(newPeer)
+                }
+              }
             }
+            return newPeer
+          } else {
+            logger.info("Found existing peer with public key ${nodeId.toHexString()}")
+            val id = rs.getString(1)
+            val pubKey = rs.getBytes(2)
+            return RepositoryPeer(SECP256K1.PublicKey.fromBytes(Bytes.wrap(pubKey)), id, endpoint, dataSource)
           }
-          return newPeer
-        } else {
-          val id = rs.getString(1)
-          val pubKey = rs.getBytes(2)
-          return RepositoryPeer(SECP256K1.PublicKey.fromBytes(Bytes.wrap(pubKey)), id, endpoint, dataSource)
         }
+      } catch (e: Exception) {
+        logger.error(e.message, e)
+        throw RuntimeException(e)
       }
     }
   }
@@ -96,43 +114,111 @@ class RelationalPeerRepository(
       val peer = get(wireConnection.peerPublicKey(), Endpoint(wireConnection.peerHost(), wireConnection.peerPort())) as RepositoryPeer
       val stmt =
         conn.prepareStatement(
-          "insert into nodeInfo(id, createdAt, p2pVersion, clientId, capabilities, genesisHash, bestHash, totalDifficulty, identity) values(?,?,?,?,?,?,?,?,?)"
+          "insert into nodeInfo(id, createdAt, host, port, publickey, p2pVersion, clientId, capabilities, genesisHash, bestHash, totalDifficulty, identity) values(?,?,?,?,?,?,?,?,?,?,?,?)"
         )
       stmt.use {
         val peerHello = wireConnection.peerHello!!
         it.setString(1, UUID.randomUUID().toString())
         it.setTimestamp(2, Timestamp(System.currentTimeMillis()))
-        it.setInt(3, peerHello.p2pVersion())
-        it.setString(4, peerHello.clientId())
-        it.setString(5, peerHello.capabilities().map { it.name() + "/" + it.version() }.joinToString(","))
-        it.setString(6, status.genesisHash.toHexString())
-        it.setString(7, status.bestHash.toHexString())
-        it.setString(8, status.totalDifficulty.toHexString())
-        it.setString(9, peer.id)
+        it.setString(3, wireConnection.peerHost())
+        it.setInt(4, wireConnection.peerPort())
+        it.setBytes(5, wireConnection.peerPublicKey().bytesArray())
+        it.setInt(6, peerHello.p2pVersion())
+        it.setString(7, peerHello.clientId())
+        it.setString(8, peerHello.capabilities().map { it.name() + "/" + it.version() }.joinToString(","))
+        it.setString(9, status.genesisHash.toHexString())
+        it.setString(10, status.bestHash.toHexString())
+        it.setString(11, status.totalDifficulty.toHexString())
+        it.setString(12, peer.id)
 
         it.execute()
       }
     }
   }
 
-  fun getPeers(infoCollected: Long) {
+  internal fun getPeers(infoCollected: Long, from: Int? = null, limit: Int? = null): List<PeerConnectionInfo> {
     dataSource.connection.use { conn ->
+      var query = "select distinct nodeinfo.host, nodeinfo.port, nodeinfo.publickey from nodeinfo \n" +
+        "  inner join (select id, max(createdAt) as maxCreatedAt from nodeinfo group by id) maxSeen \n" +
+        "  on nodeinfo.id = maxSeen.id and nodeinfo.createdAt = maxSeen.maxCreatedAt where createdAt < ?"
+      if (from != null && limit != null) {
+        query += " limit $limit offset $from"
+      }
       val stmt =
-        conn.prepareStatement(
-          "select id, max(createdAt), p2pVersion, clientId, capabilities, genesisHash, bestHash, totalDifficulty, distinct(identity) from nodeInfo  where createdAt < ?"
-        )
+        conn.prepareStatement(query)
       stmt.use {
         it.setTimestamp(1, Timestamp(infoCollected))
         // map results.
-//        val rs = stmt.executeQuery()
-//        val result =
-//        while (rs.next()) {
-//
-//        }
+        val rs = stmt.executeQuery()
+        val result = mutableListOf<PeerConnectionInfo>()
+        while (rs.next()) {
+          val pubkey = SECP256K1.PublicKey.fromBytes(Bytes.wrap(rs.getBytes(3)))
+          val port = rs.getInt(2)
+          val host = rs.getString(1)
+          result.add(PeerConnectionInfo(pubkey, host, port))
+        }
+        return result
+      }
+    }
+  }
+
+  internal fun getPeersWithInfo(infoCollected: Long, from: Int? = null, limit: Int? = null): List<PeerConnectionInfoDetails> {
+    dataSource.connection.use { conn ->
+      var query = "select distinct nodeinfo.host, nodeinfo.port, nodeinfo.publickey, nodeinfo.p2pversion, nodeinfo.clientId, nodeinfo.capabilities, nodeinfo.genesisHash, nodeinfo.besthash, nodeinfo.totalDifficulty from nodeinfo \n" +
+        "  inner join (select id, max(createdAt) as maxCreatedAt from nodeinfo group by id) maxSeen \n" +
+        "  on nodeinfo.id = maxSeen.id and nodeinfo.createdAt = maxSeen.maxCreatedAt where createdAt < ?"
+      if (from != null && limit != null) {
+        query += " limit $limit offset $from"
+      }
+      val stmt =
+        conn.prepareStatement(query)
+      stmt.use {
+        it.setTimestamp(1, Timestamp(infoCollected))
+        // map results.
+        val rs = stmt.executeQuery()
+        val result = mutableListOf<PeerConnectionInfoDetails>()
+        while (rs.next()) {
+          val pubkey = SECP256K1.PublicKey.fromBytes(Bytes.wrap(rs.getBytes(3)))
+          val port = rs.getInt(2)
+          val host = rs.getString(1)
+          val p2pVersion = rs.getInt(4)
+          val clientId = rs.getString(5)
+          val capabilities = rs.getString(6)
+          val genesisHash = rs.getString(7)
+          val bestHash = rs.getString(8)
+          val totalDifficulty = rs.getString(9)
+          result.add(PeerConnectionInfoDetails(pubkey, host, port, p2pVersion, clientId, capabilities, genesisHash, bestHash, totalDifficulty))
+        }
+        return result
+      }
+    }
+  }
+
+  internal fun getPendingPeers(): Set<PeerConnectionInfo> {
+    dataSource.connection.use { conn ->
+      val stmt =
+        conn.prepareStatement(
+          "select distinct endpoint.host, endpoint.port, identity.publickey from endpoint inner " +
+            "join identity on (endpoint.identity = identity.id) where endpoint.identity NOT IN (select identity from nodeinfo)"
+        )
+      stmt.use {
+        // map results.
+        val rs = stmt.executeQuery()
+        val result = mutableSetOf<PeerConnectionInfo>()
+        while (rs.next()) {
+          val pubkey = SECP256K1.PublicKey.fromBytes(Bytes.wrap(rs.getBytes(3)))
+          val port = rs.getInt(2)
+          val host = rs.getString(1)
+          result.add(PeerConnectionInfo(pubkey, host, port))
+        }
+        return result
       }
     }
   }
 }
+
+internal data class PeerConnectionInfo(val nodeId: SECP256K1.PublicKey, val host: String, val port: Int)
+internal data class PeerConnectionInfoDetails(val nodeId: SECP256K1.PublicKey, val host: String, val port: Int, val p2pVersion: Int, val clientId: String, val capabilities: String, val genesisHash: String, val bestHash: String, val totalDifficulty: String)
 
 internal class RepositoryPeer(
   override val nodeId: SECP256K1.PublicKey,
