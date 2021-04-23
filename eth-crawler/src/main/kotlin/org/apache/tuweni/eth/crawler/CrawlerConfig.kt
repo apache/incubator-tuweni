@@ -53,7 +53,7 @@ class CrawlerConfig(val filePath: Path) {
       .addString("rlpxNetworkInterface", "127.0.0.1", "RLPx network interface", null)
       .addListOfString("bootnodes", mainnetEthereumBootnodes, "Bootnodes to discover other peers from", null)
       .addString(
-        "jdbcUrl", null,
+        "jdbcUrl", System.getProperty("DATABASE_URL", System.getenv("DATABASE_URL")),
         "JDBC URL of the form jdbc:posgresql://localhost:5432", PropertyValidator.isPresent()
       ).addString("network", "mainnet", "Network to use instead of providing a genesis file.", null)
       .addString("genesisFile", "", "Genesis file to use in hello", null)
