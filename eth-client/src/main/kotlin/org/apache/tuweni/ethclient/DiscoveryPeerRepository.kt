@@ -31,6 +31,11 @@ import java.util.Objects
 
 class DiscoveryPeerRepository(private val repository: org.apache.tuweni.peer.repository.PeerRepository) :
   PeerRepository {
+
+  override fun addListener(listener: (Peer) -> Unit) {
+    TODO("Unsupported")
+  }
+
   override suspend fun get(host: String, port: Int, nodeId: SECP256K1.PublicKey): Peer {
     val identity = repository.storeIdentity(host, port, nodeId)
     val peer = repository.storePeer(identity, null, Instant.now())

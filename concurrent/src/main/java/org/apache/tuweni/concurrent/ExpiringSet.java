@@ -139,7 +139,7 @@ public final class ExpiringSet<E> implements Set<E> {
     purgeExpired();
     ExpiringEntry<E> oldEntry =
         storage.put(e, new ExpiringEntry<>(e, currentTimeSupplier.getAsLong() + evictionTimeout, null));
-    return oldEntry != null;
+    return oldEntry == null;
   }
 
   /**
@@ -183,21 +183,21 @@ public final class ExpiringSet<E> implements Set<E> {
     if (oldEntry != null && oldEntry.expiry < Long.MAX_VALUE) {
       expiryQueue.remove(oldEntry);
     }
-    return oldEntry != null;
+    return oldEntry == null;
   }
 
   @Override
   public boolean addAll(Collection<? extends E> c) {
     requireNonNull(c);
     purgeExpired();
-    boolean changed = false;
+    boolean noOldElements = true;
     for (E element : c) {
       ExpiringEntry<E> oldEntry = storage.put(element, new ExpiringEntry<>(element, Long.MAX_VALUE, null));
-      if (oldEntry == null) {
-        changed = true;
+      if (oldEntry != null) {
+        noOldElements = false;
       }
     }
-    return changed;
+    return noOldElements;
   }
 
   @Override

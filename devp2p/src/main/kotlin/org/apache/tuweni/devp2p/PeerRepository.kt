@@ -33,6 +33,11 @@ import java.util.concurrent.ConcurrentHashMap
 interface PeerRepository {
 
   /**
+   * Adds a listener to the repository, which will consume peer entries whenever they are added to the repository.
+   */
+  fun addListener(listener: (Peer) -> Unit)
+
+  /**
    *  Get a Peer based on a URI components.
    *
    * The returned peer will use the endpoint from the URI, unless the peer is already active, in
@@ -98,9 +103,14 @@ interface PeerRepository {
  *
  * Note: as the storage is in-memory, no retrieval methods in this implementation will suspend.
  */
-class EphemeralPeerRepository : PeerRepository {
+class EphemeralPeerRepository(private val peers: MutableMap<SECP256K1.PublicKey, Peer> = ConcurrentHashMap()) :
+  PeerRepository {
 
-  private val peers = ConcurrentHashMap<SECP256K1.PublicKey, EphemeralPeer>()
+  private val listeners = mutableListOf<(Peer) -> Unit>()
+
+  override fun addListener(listener: (Peer) -> Unit) {
+    listeners.add(listener)
+  }
 
   /**
    * Get a peer from node ID and endpoint information
@@ -109,10 +119,22 @@ class EphemeralPeerRepository : PeerRepository {
    * @return the peer
    */
   fun get(nodeId: SECP256K1.PublicKey, endpoint: Endpoint) =
-    peers.compute(nodeId) { _, peer -> peer ?: EphemeralPeer(nodeId, endpoint) } as Peer
+    peers.compute(nodeId) { _, peer ->
+      if (peer == null) {
+        val newPeer = EphemeralPeer(nodeId, endpoint)
+        listeners.let {
+          for (listener in listeners) {
+            listener(newPeer)
+          }
+        }
+        newPeer
+      } else {
+        peer
+      }
+    } as Peer
 
   override suspend fun get(host: String, port: Int, nodeId: SECP256K1.PublicKey): Peer {
-    return get(nodeId, Endpoint(host, port)) as EphemeralPeer
+    return get(nodeId, Endpoint(host, port))
   }
 
   override suspend fun get(uri: URI): Peer {
@@ -126,12 +148,13 @@ class EphemeralPeerRepository : PeerRepository {
 
   private inner class EphemeralPeer(
     override val nodeId: SECP256K1.PublicKey,
-    knownEndpoint: Endpoint
+    knownEndpoint: Endpoint,
   ) : Peer {
     @Volatile
     override var endpoint: Endpoint = knownEndpoint
 
     override var enr: EthereumNodeRecord? = null
+
     @Synchronized
     override fun getEndpoint(ifVerifiedOnOrAfter: Long): Endpoint? {
       if ((lastVerified ?: 0) >= ifVerifiedOnOrAfter) {

@@ -1,0 +1,69 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
+ * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
+ * to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+plugins { id 'application' }
+
+description = 'Ethereum Network Crawler.'
+
+dependencies {
+  implementation project(':bytes')
+  implementation project(':devp2p')
+  implementation project(':devp2p-eth')
+  implementation project(':concurrent')
+  implementation project(':concurrent-coroutines')
+  implementation project(':config')
+  implementation project(':crypto')
+  implementation project(':eth')
+  implementation project(':io')
+  implementation project(':rlp')
+  implementation project(':rlpx')
+  implementation project(':units')
+
+  implementation 'com.fasterxml.jackson.core:jackson-databind'
+  implementation 'com.google.guava:guava'
+  implementation 'com.zaxxer:HikariCP'
+  implementation 'org.flywaydb:flyway-core'
+  implementation 'io.vertx:vertx-core'
+  implementation 'io.vertx:vertx-lang-kotlin-coroutines'
+  implementation 'io.vertx:vertx-lang-kotlin'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+  implementation 'org.slf4j:slf4j-api'
+  implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+  implementation 'org.postgresql:postgresql'
+  implementation 'org.eclipse.jetty:jetty-server'
+  implementation 'org.eclipse.jetty:jetty-servlet'
+  implementation 'org.eclipse.jetty:jetty-util'
+  implementation 'org.glassfish.jersey.core:jersey-server'
+  implementation 'org.glassfish.jersey.containers:jersey-container-servlet'
+  implementation 'org.glassfish.jersey.inject:jersey-hk2'
+  implementation 'javax.xml.bind:jaxb-api'
+
+  compileOnly 'org.bouncycastle:bcprov-jdk15on'
+  runtimeOnly 'org.bouncycastle:bcprov-jdk15on'
+  runtimeOnly 'ch.qos.logback:logback-classic'
+  runtimeOnly 'org.bouncycastle:bcprov-jdk15on'
+
+  testImplementation project(':junit')
+  testImplementation 'com.h2database:h2'
+  testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin'
+  testImplementation 'org.bouncycastle:bcprov-jdk15on'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testImplementation 'org.junit.jupiter:junit-jupiter-params'
+
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+  testRuntimeOnly 'ch.qos.logback:logback-classic'
+}
+
+application {
+  mainClassName = 'org.apache.tuweni.eth.crawler.CrawlerApp'
+  applicationName = 'crawler'
+}

@@ -111,6 +111,7 @@ if (file('.git').exists()) {
         'eth2-reference-tests/**',
         'package-lock.json',
         '.github/pull_request_template.md',
+        'eth-crawler/src/main/resources/mainnet.json',
         'devp2p-eth/src/test/resources/mainnet.json',
         'devp2p-eth/src/test/resources/besu-dev.json',
         'dist/netty-license/*',
@@ -166,7 +167,7 @@ subprojects {
     }
     kotlin {
       licenseHeaderFile rootProject.file('gradle/spotless.license.txt')
-      ktlint("0.40.0").userData(['indent_size': '2', 'continuation_indent_size' : '2', 'max_line_length': '120', 'disabled_rules': 'import-ordering'])
+      ktlint("0.40.0").userData(['indent_size': '2', 'continuation_indent_size' : '2', 'disabled_rules': 'import-ordering'])
       endWithNewline()
     }
   }

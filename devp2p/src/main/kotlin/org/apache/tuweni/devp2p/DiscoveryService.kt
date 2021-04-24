@@ -374,17 +374,22 @@ internal class CoroutineDiscoveryService constructor(
       }
     }
     launch {
-      bootstrapURIs.map { uri ->
-        bootstrapFrom(uri)
-      }
-      bootstrapped.complete()
+      AsyncCompletion.allOf(
+        bootstrapURIs.map { uri ->
+          asyncCompletion { bootstrapFrom(uri) }
+        }
+      ).thenRun {
+        bootstrapped.complete()
+      }.await()
     }
 
     logger.info("{}: started, listening on {}", serviceDescriptor, server.localAddress())
   }
 
   private suspend fun bootstrapFrom(uri: URI): Boolean {
+    logger.info("Starting verification of bootnode $uri")
     val peer = peerRepository.get(uri)
+    logger.info("Starting verification of bootnode $uri")
     try {
       val result = withTimeout(BOOTSTRAP_PEER_VERIFICATION_TIMEOUT_MS) {
         endpointVerification(peer.endpoint, peer).verifyWithRetries()
@@ -456,6 +461,7 @@ internal class CoroutineDiscoveryService constructor(
   override suspend fun lookup(target: SECP256K1.PublicKey): List<Peer> {
     val targetId = target.bytesArray()
     val results = neighbors(target).toMutableList()
+    logger.debug("Initial neighbors query $results")
 
     // maybe add ourselves to the set
     val selfPeer = peerRepository.get(selfEndpoint!!.address, selfEndpoint!!.udpPort, nodeId)
@@ -469,6 +475,7 @@ internal class CoroutineDiscoveryService constructor(
       if (toQuery.isEmpty()) {
         return results
       }
+      logger.debug("About to query $toQuery")
       val nodes = Channel<Node>(capacity = Channel.UNLIMITED)
       toQuery.forEach { p -> findNodes(p, target, nodes) }
       while (true) {
