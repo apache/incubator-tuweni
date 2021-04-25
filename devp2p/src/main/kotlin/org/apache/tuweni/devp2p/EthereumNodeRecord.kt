@@ -52,6 +52,7 @@ class EthereumNodeRecord(
      * Derives the public key of an ethereum node record into a unique 32 bytes hash.
      * @param publicKey the public key to hash
      * @return the hash of the public key
+     * @throws IllegalArgumentException if the public key is not valid.
      */
     fun nodeId(publicKey: SECP256K1.PublicKey): Bytes32 {
       val pt = publicKey.asEcPoint()

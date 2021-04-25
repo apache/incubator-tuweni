@@ -25,7 +25,6 @@ import io.vertx.core.net.SocketAddress
 import io.vertx.kotlin.core.datagram.closeAwait
 import io.vertx.kotlin.core.datagram.listenAwait
 import io.vertx.kotlin.core.datagram.sendAwait
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -35,11 +34,8 @@ import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ClosedReceiveChannelException
-import kotlinx.coroutines.channels.ClosedSendChannelException
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
@@ -58,8 +54,8 @@ import org.slf4j.LoggerFactory
 import java.net.InetAddress
 import java.net.URI
 import java.nio.ByteBuffer
-import java.nio.channels.ClosedChannelException
 import java.time.Instant
+import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -131,7 +127,7 @@ interface DiscoveryService {
       advertiseTcpPort: Int? = null,
       routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
       packetFilter: ((SECP256K1.PublicKey, SocketAddress) -> Boolean)? = null,
-      timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER
+      timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER,
     ): DiscoveryService {
       val bindAddress =
         if (host == null) SocketAddress.inetSocketAddress(port, "127.0.0.1") else SocketAddress.inetSocketAddress(
@@ -186,7 +182,7 @@ interface DiscoveryService {
       advertiseTcpPort: Int? = null,
       routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
       packetFilter: ((SECP256K1.PublicKey, SocketAddress) -> Boolean)? = null,
-      timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER
+      timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER,
     ): DiscoveryService {
       return CoroutineDiscoveryService(
         vertx,
@@ -403,8 +399,9 @@ internal class CoroutineDiscoveryService constructor(
       }
       logger.info("{}: verified bootstrap peer {}", serviceDescriptor, uri)
       addToRoutingTable(peer)
-      findNodes(peer, nodeId)
-      logger.info("{}: completed bootstrapping from {}", serviceDescriptor, uri)
+      findNodes(peer, nodeId).thenRun {
+        logger.info("{}: completed bootstrapping from {}", serviceDescriptor, uri)
+      }
       return true
     } catch (_: TimeoutCancellationException) {
       logger.warn("{}: timeout verifying bootstrap node {}", serviceDescriptor, uri)
@@ -468,35 +465,21 @@ internal class CoroutineDiscoveryService constructor(
     results.orderedInsert(selfPeer) { a, _ -> targetId.xorDistCmp(a.nodeId.bytesArray(), nodeId.bytesArray()) }
     results.removeAt(results.lastIndex)
 
-    val queried = mutableSetOf(selfPeer)
-
-    while (true) {
-      val toQuery = results.filterNot { p -> queried.contains(p) }.take(3).toList()
-      if (toQuery.isEmpty()) {
-        return results
-      }
-      logger.debug("About to query $toQuery")
-      val nodes = Channel<Node>(capacity = Channel.UNLIMITED)
-      toQuery.forEach { p -> findNodes(p, target, nodes) }
-      while (true) {
-        // stop if no more responses are received after the given time
-        val node = withTimeoutOrNull(LOOKUP_RESPONSE_TIMEOUT_MS) {
-          val valueOrClosed = nodes.receiveOrClosed()
-          if (valueOrClosed.isClosed) {
-            null
-          } else {
-            valueOrClosed.value
+    withTimeout(LOOKUP_RESPONSE_TIMEOUT_MS) {
+      results.map { nodeToQuery ->
+        async {
+          val nodes = findNodes(nodeToQuery, target).await()
+          for (node in ArrayList(nodes)) {
+            val peer = peerRepository.get(selfEndpoint!!.address, selfEndpoint!!.udpPort, node.nodeId)
+            if (!results.contains(peer)) {
+              results.orderedInsert(peer) { a, _ -> targetId.xorDistCmp(a.nodeId.bytesArray(), node.nodeId.bytesArray()) }
+              results.removeAt(results.lastIndex)
+            }
           }
-        } ?: break
-        val peer = peerRepository.get(selfEndpoint!!.address, selfEndpoint!!.udpPort, node.nodeId)
-        if (!results.contains(peer)) {
-          results.orderedInsert(peer) { a, _ -> targetId.xorDistCmp(a.nodeId.bytesArray(), node.nodeId.bytesArray()) }
-          results.removeAt(results.lastIndex)
         }
       }
-      queried.addAll(toQuery)
-      nodes.close()
-    }
+    }.awaitAll()
+    return results
   }
 
   @ObsoleteCoroutinesApi
@@ -715,7 +698,7 @@ internal class CoroutineDiscoveryService constructor(
   private suspend fun ensurePeerIsValid(
     peer: Peer,
     address: SocketAddress,
-    arrivalTime: Long
+    arrivalTime: Long,
   ): VerificationResult? {
     val now = timeSupplier()
     peer.getEndpoint(now - ENDPOINT_PROOF_LONGEVITY_MS)?.let { endpoint ->
@@ -811,7 +794,7 @@ internal class CoroutineDiscoveryService constructor(
      *
      * This will typically be the same as peer.endpoint, but may not be due to concurrent updates.
      */
-    val endpoint: Endpoint
+    val endpoint: Endpoint,
   )
 
   private fun enrRequest(endpoint: Endpoint, peer: Peer) =
@@ -866,81 +849,46 @@ internal class CoroutineDiscoveryService constructor(
 
   private data class ENRResult(
     val peer: Peer,
-    val enr: EthereumNodeRecord
+    val enr: EthereumNodeRecord,
   )
 
-  private suspend fun findNodes(peer: Peer, target: SECP256K1.PublicKey) {
-    // consume all received nodes (and discard), thus suspending until completed
-    Channel<Node>(capacity = Channel.CONFLATED).also { findNodes(peer, target, it) }.consumeEach { }
-  }
-
-  private suspend fun findNodes(peer: Peer, target: SECP256K1.PublicKey, channel: SendChannel<Node>) {
+  private suspend fun findNodes(peer: Peer, target: SECP256K1.PublicKey): AsyncResult<List<Node>> {
     if (peer.nodeId == nodeId) {
       // for queries to self, respond directly
-      neighbors(target).map { p -> channel.send(p.toNode()) }
-      return
+      return AsyncResult.completed(neighbors(target).map { p -> p.toNode() })
     }
-    findNodeStates.get(peer.nodeId) { FindNodeState(peer) }.findNodes(target, channel)
+    return findNodeStates.get(peer.nodeId) { FindNodeState(peer) }.findNodes(target)
   }
 
   private fun neighbors(target: SECP256K1.PublicKey) = routingTable.nearest(target, DEVP2P_BUCKET_SIZE)
 
-  private data class FindNodeRequest(val target: SECP256K1.PublicKey, val results: SendChannel<Node>)
+  private data class FindNodeRequest(val target: SECP256K1.PublicKey)
 
   private inner class FindNodeState(val peer: Peer) {
-    // the protocol doesn't have a correlation mechanism between findNode requests and the associated responses,
-    // so requests have to be queued and a delay between them used to try and determine when no more responses
-    // will be sent
-    private val targets = Channel<FindNodeRequest>(capacity = Channel.UNLIMITED)
-    private val job: Job
 
-    @Volatile
-    private var results: SendChannel<Node>? = null
+    private val nodesCollected = Collections.synchronizedList(ArrayList<Node>())
+    private val result = AsyncResult.incomplete<List<Node>>()
+    private val start = timeSupplier()
 
     @Volatile
     private var lastReceive: Long = 0
 
-    init {
-      job = launch { sendLoop() }
-    }
-
     @OptIn(ExperimentalCoroutinesApi::class)
-    private suspend fun sendLoop() {
+    private suspend fun send(request: FindNodeRequest) {
       try {
-        while (true) {
-          val request = targets.receive()
-          if (request.results.isClosedForSend) {
-            continue
-          }
-          val endpoint = peer.endpoint
-          var now = timeSupplier()
-          results = request.results
-          lastReceive = now
-          val findNodePacket = FindNodePacket.create(keyPair, now, request.target)
-          sendPacket(endpoint.udpSocketAddress, findNodePacket)
-          logger.debug("{}: sent findNode to {} for {}", serviceDescriptor, endpoint.udpSocketAddress, request.target)
+        val endpoint = peer.endpoint
+        var now = timeSupplier()
+        lastReceive = now
+        val findNodePacket = FindNodePacket.create(keyPair, now, request.target)
+        sendPacket(endpoint.udpSocketAddress, findNodePacket)
+        logger.debug("{}: sent findNode to {} for {}", serviceDescriptor, endpoint.udpSocketAddress, request.target)
 
-          // wait for results, only moving onto the next when packets stop arriving for a reasonable period
-          do {
-            delay(lastReceive - now + FIND_NODES_QUERY_GAP_MS)
-            now = timeSupplier()
-          } while (now - lastReceive < FIND_NODES_QUERY_GAP_MS)
-          results?.close()
-          results = null
-
-          // issue a "get" on the state cache, to indicate that this state is still in use
-          val state = findNodeStates.getIfPresent(peer.nodeId)
-          if (state != this) {
-            logger.warn("{}: findNode state for {} has been replaced")
-            close()
-          }
+        // issue a "get" on the state cache, to indicate that this state is still in use
+        val state = findNodeStates.getIfPresent(peer.nodeId)
+        if (state != this) {
+          logger.warn("{}: findNode state for {} has been replaced")
+          close()
         }
-      } catch (_: ClosedReceiveChannelException) {
-        // ignore
-      } catch (_: CancellationException) {
-        // ignore
-      } catch (_: ClosedChannelException) {
-        // ignore
       } catch (e: Exception) {
         logger.error(
           "$serviceDescriptor: Error while sending FindNode requests for peer ${peer.nodeId}",
@@ -949,29 +897,21 @@ internal class CoroutineDiscoveryService constructor(
       }
     }
 
-    suspend fun findNodes(target: SECP256K1.PublicKey, channel: SendChannel<Node>) {
-      targets.send(FindNodeRequest(target, channel))
+    suspend fun findNodes(target: SECP256K1.PublicKey): AsyncResult<List<Node>> {
+      send(FindNodeRequest(target))
+      return result
     }
 
     fun receive(nodes: List<Node>) {
-      results?.let { channel ->
-        lastReceive = timeSupplier()
-        try {
-          nodes.forEach { node -> channel.offer(node) }
-        } catch (_: ClosedSendChannelException) {
-          results = null
-        }
+      lastReceive = timeSupplier()
+      nodesCollected.addAll(nodes)
+      if (lastReceive - start > FIND_NODES_QUERY_GAP_MS) {
+        close()
       }
     }
 
     fun close() {
-      job.cancel()
-      targets.close()
-      results?.close()
-      while (true) {
-        val request = targets.poll() ?: break
-        request.results.close()
-      }
+      result.complete(nodesCollected)
     }
   }
 

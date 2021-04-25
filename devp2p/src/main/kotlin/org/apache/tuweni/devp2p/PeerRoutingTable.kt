@@ -72,9 +72,9 @@ internal class DevP2PPeerRoutingTable(selfId: SECP256K1.PublicKey) : PeerRouting
     CacheBuilder.newBuilder().maximumSize((1L + 256) * 16).weakKeys().build()
 
   private val table = KademliaRoutingTable<Peer>(
-    selfId = hashForId(selfId),
+    selfId = hashForId(selfId)!!,
     k = DEVP2P_BUCKET_SIZE,
-    nodeId = { p -> hashForId(p.nodeId) }
+    nodeId = { p -> hashForId(p.nodeId)!! }
   )
 
   override val size: Int
@@ -89,12 +89,17 @@ internal class DevP2PPeerRoutingTable(selfId: SECP256K1.PublicKey) : PeerRouting
   override fun iterator(): Iterator<Peer> = table.iterator()
 
   override fun nearest(targetId: SECP256K1.PublicKey, limit: Int): List<Peer> =
-    table.nearest(hashForId(targetId), limit)
+    hashForId(targetId)?.let { table.nearest(it, limit) } ?: listOf()
 
   override fun add(node: Peer): Peer? = table.add(node)
 
   override fun evict(node: Peer): Boolean = table.evict(node)
 
-  private fun hashForId(id: SECP256K1.PublicKey): ByteArray =
-    idHashCache.get(id) { EthereumNodeRecord.nodeId(id).toArrayUnsafe() }
+  private fun hashForId(id: SECP256K1.PublicKey): ByteArray? {
+    try {
+      return idHashCache.get(id) { EthereumNodeRecord.nodeId(id).toArrayUnsafe() }
+    } catch (e: IllegalArgumentException) {
+      return null
+    }
+  }
 }
