@@ -51,8 +51,4 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
           restore-keys: ${{ runner.os }}-m2
       - name: gradle test
-        run: gradle test jacocoTestReport
-      - name: Upload to Codecov
-        uses: codecov/codecov-action@v1
-        with:
-          flags: unit
+        run: gradle test
