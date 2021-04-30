@@ -48,7 +48,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(TempDirectoryExtension.class)
 @ExtendWith(VertxExtension.class)
-class ClientCaOrWhitelistTest {
+class ClientCaOrAllowlistTest {
 
   private static HttpServer caValidServer;
   private static String fooFingerprint;
@@ -94,7 +94,7 @@ class ClientCaOrWhitelistTest {
     HttpClientOptions options = new HttpClientOptions();
     options
         .setSsl(true)
-        .setTrustOptions(VertxTrustOptions.whitelistServers(knownServersFile))
+        .setTrustOptions(VertxTrustOptions.allowlistServers(knownServersFile))
         .setConnectTimeout(1500)
         .setReuseAddress(true)
         .setReusePort(true);
@@ -135,7 +135,7 @@ class ClientCaOrWhitelistTest {
   }
 
   @Test
-  void shouldValidateWhitelisted() {
+  void shouldValidateAllowlisted() {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
     client
         .post(fooServer.actualPort(), "localhost", "/sample", response -> statusCode.complete(response.statusCode()))
@@ -145,7 +145,7 @@ class ClientCaOrWhitelistTest {
   }
 
   @Test
-  void shouldRejectNonWhitelisted() {
+  void shouldRejectNonAllowlisted() {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
     client
         .post(barServer.actualPort(), "localhost", "/sample", response -> statusCode.complete(response.statusCode()))

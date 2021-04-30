@@ -48,7 +48,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(TempDirectoryExtension.class)
 @ExtendWith(VertxExtension.class)
-class ServerCaOrWhitelistTest {
+class ServerCaOrAllowlistTest {
 
   private static HttpClient caClient;
   private static String fooFingerprint;
@@ -104,7 +104,7 @@ class ServerCaOrWhitelistTest {
         .setSsl(true)
         .setClientAuth(ClientAuth.REQUIRED)
         .setPemKeyCertOptions(serverCert.keyCertOptions())
-        .setTrustOptions(VertxTrustOptions.whitelistClients(knownClientsFile))
+        .setTrustOptions(VertxTrustOptions.allowlistClients(knownClientsFile))
         .setIdleTimeout(1500)
         .setReuseAddress(true)
         .setReusePort(true);
@@ -139,7 +139,7 @@ class ServerCaOrWhitelistTest {
   }
 
   @Test
-  void shouldValidateWhitelisted() {
+  void shouldValidateAllowlisted() {
     HttpClientRequest req = fooClient.get(httpServer.actualPort(), "localhost", "/upcheck");
     CompletableFuture<HttpClientResponse> respFuture = new CompletableFuture<>();
     req.handler(respFuture::complete).exceptionHandler(respFuture::completeExceptionally).end();
@@ -148,7 +148,7 @@ class ServerCaOrWhitelistTest {
   }
 
   @Test
-  void shouldRejectNonWhitelisted() {
+  void shouldRejectNonAllowlisted() {
     HttpClientRequest req = barClient.get(httpServer.actualPort(), "localhost", "/upcheck");
     CompletableFuture<HttpClientResponse> respFuture = new CompletableFuture<>();
     req.handler(respFuture::complete).exceptionHandler(respFuture::completeExceptionally).end();

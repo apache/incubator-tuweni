@@ -41,7 +41,7 @@ final class ClientFingerprintTrustManager extends X509ExtendedTrustManager {
     return new ClientFingerprintTrustManager(repository, true, false);
   }
 
-  static ClientFingerprintTrustManager whitelist(FingerprintRepository repository) {
+  static ClientFingerprintTrustManager allowlist(FingerprintRepository repository) {
     return new ClientFingerprintTrustManager(repository, false, false);
   }
 

@@ -258,9 +258,9 @@ public final class TrustManagerFactories {
    * @param knownServersFile The path to the file containing fingerprints by host.
    * @return A trust manager factory.
    */
-  public static TrustManagerFactory whitelistServers(Path knownServersFile) {
+  public static TrustManagerFactory allowlistServers(Path knownServersFile) {
     requireNonNull(knownServersFile);
-    return whitelistServers(new FileBackedFingerprintRepository(knownServersFile));
+    return allowlistServers(new FileBackedFingerprintRepository(knownServersFile));
   }
 
   /**
@@ -273,9 +273,9 @@ public final class TrustManagerFactories {
    * @param repository The repository in which to record fingerprints by host.
    * @return A trust manager factory.
    */
-  public static TrustManagerFactory whitelistServers(FingerprintRepository repository) {
+  public static TrustManagerFactory allowlistServers(FingerprintRepository repository) {
     requireNonNull(repository);
-    return whitelistServers(repository, true);
+    return allowlistServers(repository, true);
   }
 
   /**
@@ -289,9 +289,9 @@ public final class TrustManagerFactories {
    * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted.
    * @return A trust manager factory.
    */
-  public static TrustManagerFactory whitelistServers(Path knownServersFile, boolean acceptCASigned) {
+  public static TrustManagerFactory allowlistServers(Path knownServersFile, boolean acceptCASigned) {
     requireNonNull(knownServersFile);
-    return whitelistServers(new FileBackedFingerprintRepository(knownServersFile), acceptCASigned);
+    return allowlistServers(new FileBackedFingerprintRepository(knownServersFile), acceptCASigned);
   }
 
   /**
@@ -305,9 +305,9 @@ public final class TrustManagerFactories {
    * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted.
    * @return A trust manager factory.
    */
-  public static TrustManagerFactory whitelistServers(FingerprintRepository repository, boolean acceptCASigned) {
+  public static TrustManagerFactory allowlistServers(FingerprintRepository repository, boolean acceptCASigned) {
     requireNonNull(repository);
-    return wrap(ServerFingerprintTrustManager.whitelist(repository), acceptCASigned);
+    return wrap(ServerFingerprintTrustManager.allowlist(repository), acceptCASigned);
   }
 
   /**
@@ -321,10 +321,10 @@ public final class TrustManagerFactories {
    * @param tmf A {@link TrustManagerFactory} for checking server certificates against a CA.
    * @return A trust manager factory.
    */
-  public static TrustManagerFactory whitelistServers(Path knownServersFile, TrustManagerFactory tmf) {
+  public static TrustManagerFactory allowlistServers(Path knownServersFile, TrustManagerFactory tmf) {
     requireNonNull(knownServersFile);
     requireNonNull(tmf);
-    return whitelistServers(new FileBackedFingerprintRepository(knownServersFile), tmf);
+    return allowlistServers(new FileBackedFingerprintRepository(knownServersFile), tmf);
   }
 
   /**
@@ -338,10 +338,10 @@ public final class TrustManagerFactories {
    * @param tmf A {@link TrustManagerFactory} for checking server certificates against a CA.
    * @return A trust manager factory.
    */
-  public static TrustManagerFactory whitelistServers(FingerprintRepository repository, TrustManagerFactory tmf) {
+  public static TrustManagerFactory allowlistServers(FingerprintRepository repository, TrustManagerFactory tmf) {
     requireNonNull(repository);
     requireNonNull(tmf);
-    return wrap(ServerFingerprintTrustManager.whitelist(repository), tmf);
+    return wrap(ServerFingerprintTrustManager.allowlist(repository), tmf);
   }
 
   /**
@@ -611,9 +611,9 @@ public final class TrustManagerFactories {
    * @param knownClientsFile The path to the file containing fingerprints.
    * @return A trust manager factory.
    */
-  public static TrustManagerFactory whitelistClients(Path knownClientsFile) {
+  public static TrustManagerFactory allowlistClients(Path knownClientsFile) {
     requireNonNull(knownClientsFile);
-    return whitelistClients(new FileBackedFingerprintRepository(knownClientsFile));
+    return allowlistClients(new FileBackedFingerprintRepository(knownClientsFile));
   }
 
   /**
@@ -625,9 +625,9 @@ public final class TrustManagerFactories {
    * @param repository The repository containing fingerprints.
    * @return A trust manager factory.
    */
-  public static TrustManagerFactory whitelistClients(FingerprintRepository repository) {
+  public static TrustManagerFactory allowlistClients(FingerprintRepository repository) {
     requireNonNull(repository);
-    return whitelistClients(repository, true);
+    return allowlistClients(repository, true);
   }
 
   /**
@@ -640,9 +640,9 @@ public final class TrustManagerFactories {
    * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted.
    * @return A trust manager factory.
    */
-  public static TrustManagerFactory whitelistClients(Path knownClientsFile, boolean acceptCASigned) {
+  public static TrustManagerFactory allowlistClients(Path knownClientsFile, boolean acceptCASigned) {
     requireNonNull(knownClientsFile);
-    return whitelistClients(new FileBackedFingerprintRepository(knownClientsFile), acceptCASigned);
+    return allowlistClients(new FileBackedFingerprintRepository(knownClientsFile), acceptCASigned);
   }
 
   /**
@@ -655,9 +655,9 @@ public final class TrustManagerFactories {
    * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted.
    * @return A trust manager factory.
    */
-  public static TrustManagerFactory whitelistClients(FingerprintRepository repository, boolean acceptCASigned) {
+  public static TrustManagerFactory allowlistClients(FingerprintRepository repository, boolean acceptCASigned) {
     requireNonNull(repository);
-    return wrap(ClientFingerprintTrustManager.whitelist(repository), acceptCASigned);
+    return wrap(ClientFingerprintTrustManager.allowlist(repository), acceptCASigned);
   }
 
   /**
@@ -670,10 +670,10 @@ public final class TrustManagerFactories {
    * @param tmf A {@link TrustManagerFactory} for checking server certificates against a CA.
    * @return A trust manager factory.
    */
-  public static TrustManagerFactory whitelistClients(Path knownClientsFile, TrustManagerFactory tmf) {
+  public static TrustManagerFactory allowlistClients(Path knownClientsFile, TrustManagerFactory tmf) {
     requireNonNull(knownClientsFile);
     requireNonNull(tmf);
-    return whitelistClients(new FileBackedFingerprintRepository(knownClientsFile), tmf);
+    return allowlistClients(new FileBackedFingerprintRepository(knownClientsFile), tmf);
   }
 
   /**
@@ -686,10 +686,10 @@ public final class TrustManagerFactories {
    * @param tmf A {@link TrustManagerFactory} for checking server certificates against a CA.
    * @return A trust manager factory.
    */
-  public static TrustManagerFactory whitelistClients(FingerprintRepository repository, TrustManagerFactory tmf) {
+  public static TrustManagerFactory allowlistClients(FingerprintRepository repository, TrustManagerFactory tmf) {
     requireNonNull(repository);
     requireNonNull(tmf);
-    return wrap(ClientFingerprintTrustManager.whitelist(repository), tmf);
+    return wrap(ClientFingerprintTrustManager.allowlist(repository), tmf);
   }
 
   private static TrustManagerFactory wrap(X509TrustManager trustManager, boolean acceptCASigned) {
