@@ -27,19 +27,49 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.stream.Stream
 
+/**
+ * A peer repository of peers implementing the eth subprotocol.
+ */
 interface EthereumPeerRepository : PeerRepository {
+  /**
+   * Stores the status message sent for a connection
+   * @param connId the ID of the connection
+   * @param status the status message
+   */
   fun storeStatus(connId: String, status: Status)
 
+  /**
+   * Provides a stream of active connections.
+   *
+   * @return a stream of active connections
+   */
   fun activeConnections(): Stream<EthereumConnection>
 
+  /**
+   * Adds a listener to be called when a status message is received
+   * @param statusListener the listener
+   * @return a listener ID
+   */
   fun addStatusListener(statusListener: (EthereumConnection) -> Unit): String
 
+  /**
+   * Removes a status listener
+   * @param id the listener identifier
+   */
   fun removeStatusListener(id: String)
+
+  /**
+   * Adds a listener to be called when a new peer connects
+   * @param identityListener the listener
+   * @return a listener ID
+   */
   fun addIdentityListener(identityListener: (Identity) -> Unit): String
+  /**
+   * Removes an identity listener
+   * @param id the listener identifier
+   */
   fun removeIdentityListener(id: String)
 }
-
-interface EthereumPeer : Peer
 
 interface EthereumConnection : Connection {
   fun status(): Status?
