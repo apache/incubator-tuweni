@@ -34,6 +34,11 @@ class ProxyError(message: String?) : RuntimeException(message)
 
 class ProxyClient(private val service: SubprotocolService) : SubProtocolClient {
 
+  fun knownSites(): List<String> = service.repository().asIterable().map {
+    val peerInfo = proxyPeerRepository.peers[it.uri()]
+    peerInfo?.sites
+  }.filterNotNull().flatten().distinct()
+
   suspend fun request(site: String, message: Bytes): Bytes {
     val messageId = UUID.randomUUID().toString()
     var selectedConn: WireConnection? = null

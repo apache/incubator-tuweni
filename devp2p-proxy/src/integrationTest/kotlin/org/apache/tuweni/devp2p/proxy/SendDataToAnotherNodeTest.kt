@@ -17,6 +17,7 @@
 package org.apache.tuweni.devp2p.proxy
 
 import io.vertx.core.Vertx
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
@@ -27,6 +28,8 @@ import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.junit.VertxInstance
 import org.apache.tuweni.rlpx.vertx.VertxRLPxService
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetSocketAddress
@@ -62,9 +65,12 @@ class SendDataToAnotherNodeTest {
     AsyncCompletion.allOf(service.start(), service2.start()).await()
     val client = service.getClient(ProxySubprotocol.ID) as ProxyClient
     client.registeredSites["datasink"] = recorder
-    service.connectTo(service2kp.publicKey(), InetSocketAddress("127.0.0.1", service2.actualPort())).await()
-
+    val conn = service.connectTo(service2kp.publicKey(), InetSocketAddress("127.0.0.1", service2.actualPort())).await()
+    assertNotNull(conn)
+    delay(100)
+    assertTrue(conn.agreedSubprotocols().contains(ProxySubprotocol.ID))
     val client2 = service2.getClient(ProxySubprotocol.ID) as ProxyClient
+    assertTrue(client2.knownSites().contains("datasink"))
     client2.request("datasink", Bytes.wrap("Hello world".toByteArray()))
     client2.request("datasink", Bytes.wrap("foo".toByteArray()))
     client2.request("datasink", Bytes.wrap("foobar".toByteArray()))
