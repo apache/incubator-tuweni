@@ -241,8 +241,8 @@ public final class VertxTrustOptions {
    * @param knownServersFile The path to the file containing fingerprints by host.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions whitelistServers(Path knownServersFile) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.whitelistServers(knownServersFile));
+  public static TrustOptions allowlistServers(Path knownServersFile) {
+    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistServers(knownServersFile));
   }
 
   /**
@@ -255,8 +255,8 @@ public final class VertxTrustOptions {
    * @param repository The repository containing fingerprints by host.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions whitelistServers(FingerprintRepository repository) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.whitelistServers(repository));
+  public static TrustOptions allowlistServers(FingerprintRepository repository) {
+    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistServers(repository));
   }
 
   /**
@@ -270,8 +270,8 @@ public final class VertxTrustOptions {
    * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions whitelistServers(Path knownServersFile, boolean acceptCASigned) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.whitelistServers(knownServersFile, acceptCASigned));
+  public static TrustOptions allowlistServers(Path knownServersFile, boolean acceptCASigned) {
+    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistServers(knownServersFile, acceptCASigned));
   }
 
   /**
@@ -285,8 +285,8 @@ public final class VertxTrustOptions {
    * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions whitelistServers(FingerprintRepository repository, boolean acceptCASigned) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.whitelistServers(repository, acceptCASigned));
+  public static TrustOptions allowlistServers(FingerprintRepository repository, boolean acceptCASigned) {
+    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistServers(repository, acceptCASigned));
   }
 
   /**
@@ -300,8 +300,8 @@ public final class VertxTrustOptions {
    * @param tmf A {@link TrustManagerFactory} for checking server certificates against a CA.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions whitelistServers(Path knownServersFile, TrustManagerFactory tmf) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.whitelistServers(knownServersFile, tmf));
+  public static TrustOptions allowlistServers(Path knownServersFile, TrustManagerFactory tmf) {
+    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistServers(knownServersFile, tmf));
   }
 
   /**
@@ -315,8 +315,8 @@ public final class VertxTrustOptions {
    * @param tmf A {@link TrustManagerFactory} for checking server certificates against a CA.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions whitelistServers(FingerprintRepository repository, TrustManagerFactory tmf) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.whitelistServers(repository, tmf));
+  public static TrustOptions allowlistServers(FingerprintRepository repository, TrustManagerFactory tmf) {
+    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistServers(repository, tmf));
   }
 
   /**
@@ -571,8 +571,8 @@ public final class VertxTrustOptions {
    * @param knownClientsFile The path to the file containing fingerprints by common name.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions whitelistClients(Path knownClientsFile) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.whitelistClients(knownClientsFile));
+  public static TrustOptions allowlistClients(Path knownClientsFile) {
+    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistClients(knownClientsFile));
   }
 
   /**
@@ -585,8 +585,8 @@ public final class VertxTrustOptions {
    * @param repository The repository containing fingerprints by common name.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions whitelistClients(FingerprintRepository repository) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.whitelistClients(repository));
+  public static TrustOptions allowlistClients(FingerprintRepository repository) {
+    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistClients(repository));
   }
 
   /**
@@ -599,8 +599,8 @@ public final class VertxTrustOptions {
    * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions whitelistClients(Path knownClientsFile, boolean acceptCASigned) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.whitelistClients(knownClientsFile, acceptCASigned));
+  public static TrustOptions allowlistClients(Path knownClientsFile, boolean acceptCASigned) {
+    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistClients(knownClientsFile, acceptCASigned));
   }
 
   /**
@@ -613,8 +613,8 @@ public final class VertxTrustOptions {
    * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions whitelistClients(FingerprintRepository repository, boolean acceptCASigned) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.whitelistClients(repository, acceptCASigned));
+  public static TrustOptions allowlistClients(FingerprintRepository repository, boolean acceptCASigned) {
+    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistClients(repository, acceptCASigned));
   }
 
   /**
@@ -628,8 +628,8 @@ public final class VertxTrustOptions {
    * @param tmf A {@link TrustManagerFactory} for checking client certificates against a CA.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions whitelistClients(Path knownClientsFile, TrustManagerFactory tmf) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.whitelistClients(knownClientsFile, tmf));
+  public static TrustOptions allowlistClients(Path knownClientsFile, TrustManagerFactory tmf) {
+    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistClients(knownClientsFile, tmf));
   }
 
   /**
@@ -643,7 +643,7 @@ public final class VertxTrustOptions {
    * @param tmf A {@link TrustManagerFactory} for checking client certificates against a CA.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions whitelistClients(FingerprintRepository repository, TrustManagerFactory tmf) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.whitelistClients(repository, tmf));
+  public static TrustOptions allowlistClients(FingerprintRepository repository, TrustManagerFactory tmf) {
+    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistClients(repository, tmf));
   }
 }
