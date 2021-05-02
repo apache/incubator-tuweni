@@ -21,20 +21,18 @@ import org.apache.tuweni.rlpx.wire.SubProtocol
 import org.apache.tuweni.rlpx.wire.SubProtocolClient
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
 
-class ProxySubprotocol() : SubProtocol {
+class ProxySubprotocol : SubProtocol {
 
   companion object {
-    val ID = SubProtocolIdentifier.of("pxy", 1)
+    val ID = SubProtocolIdentifier.of("pxy", 1, 3)
   }
 
   override fun id() = ID
 
-  override fun supports(subProtocolIdentifier: SubProtocolIdentifier): Boolean = subProtocolIdentifier.equals(ID)
-
-  override fun versionRange(version: Int): Int = 3
+  override fun supports(subProtocolIdentifier: SubProtocolIdentifier): Boolean = subProtocolIdentifier == ID
 
   override fun createHandler(service: RLPxService, client: SubProtocolClient) =
     ProxyHandler(service = service, client = client as ProxyClient)
 
-  override fun createClient(service: RLPxService) = ProxyClient(service)
+  override fun createClient(service: RLPxService, subProtocolIdentifier: SubProtocolIdentifier) = ProxyClient(service)
 }

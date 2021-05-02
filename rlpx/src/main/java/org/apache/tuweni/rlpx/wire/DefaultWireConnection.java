@@ -46,7 +46,7 @@ public final class DefaultWireConnection implements WireConnection {
   private final Consumer<RLPxMessage> writer;
   private final Consumer<HelloMessage> afterHandshakeListener;
   private final Runnable disconnectHandler;
-  private final LinkedHashMap<SubProtocol, SubProtocolHandler> subprotocols;
+  private final LinkedHashMap<SubProtocolIdentifier, SubProtocolHandler> subprotocols;
   private final int p2pVersion;
   private final String clientId;
   private final int advertisedPort;
@@ -57,7 +57,7 @@ public final class DefaultWireConnection implements WireConnection {
   private CompletableAsyncCompletion awaitingPong;
   private HelloMessage myHelloMessage;
   private HelloMessage peerHelloMessage;
-  private RangeMap<Integer, SubProtocol> subprotocolRangeMap = TreeRangeMap.create();
+  private RangeMap<Integer, SubProtocolIdentifier> subprotocolRangeMap = TreeRangeMap.create();
   private DisconnectReason disconnectReason;
   private boolean disconnectRequested;
   private boolean disconnectReceived;
@@ -85,7 +85,7 @@ public final class DefaultWireConnection implements WireConnection {
       Consumer<RLPxMessage> writer,
       Consumer<HelloMessage> afterHandshakeListener,
       Runnable disconnectHandler,
-      LinkedHashMap<SubProtocol, SubProtocolHandler> subprotocols,
+      LinkedHashMap<SubProtocolIdentifier, SubProtocolHandler> subprotocols,
       int p2pVersion,
       String clientId,
       int advertisedPort,
@@ -132,6 +132,17 @@ public final class DefaultWireConnection implements WireConnection {
 
       if (peerHelloMessage.p2pVersion() > p2pVersion) {
         disconnect(DisconnectReason.INCOMPATIBLE_DEVP2P_VERSION);
+        ready.cancel();
+        return;
+      }
+
+      if (subprotocolRangeMap.asMapOfRanges().isEmpty()) {
+        logger
+            .debug(
+                "Useless peer detected, caps {}, our caps {}",
+                peerHelloMessage.capabilities(),
+                subprotocols.keySet());
+        disconnect(DisconnectReason.USELESS_PEER);
         ready.cancel();
         return;
       }
@@ -183,7 +194,8 @@ public final class DefaultWireConnection implements WireConnection {
         awaitingPong.complete();
       }
     } else {
-      Map.Entry<Range<Integer>, SubProtocol> subProtocolEntry = subprotocolRangeMap.getEntry(message.messageId());
+      Map.Entry<Range<Integer>, SubProtocolIdentifier> subProtocolEntry =
+          subprotocolRangeMap.getEntry(message.messageId());
       if (subProtocolEntry == null) {
         logger.debug("Unknown message received {}", message.messageId());
         disconnect(DisconnectReason.PROTOCOL_BREACH);
@@ -203,27 +215,29 @@ public final class DefaultWireConnection implements WireConnection {
     }
   }
 
-  private void initSupportedRange(List<Capability> capabilities) {
+  void initSupportedRange(List<Capability> capabilities) {
     int startRange = 16;
-    Map<String, Capability> pickedCapabilities = new HashMap<>();
-    for (SubProtocol sp : subprotocols.keySet()) {
+    Map<String, SubProtocolIdentifier> pickedCapabilities = new HashMap<>();
+    // find the max capability supported by the subprotocol
+    for (SubProtocolIdentifier sp : subprotocols.keySet()) {
       for (Capability cap : capabilities) {
-        if (sp.supports(SubProtocolIdentifier.of(cap.name(), cap.version()))) {
-          Capability oldPick = pickedCapabilities.get(cap.name());
+        if (sp.equals(SubProtocolIdentifier.of(cap.name(), cap.version()))) {
+          SubProtocolIdentifier oldPick = pickedCapabilities.get(cap.name());
           if (oldPick == null || oldPick.version() < cap.version()) {
-            pickedCapabilities.put(cap.name(), cap);
+            pickedCapabilities.put(cap.name(), sp);
           }
         }
       }
     }
 
     for (Capability cap : capabilities) {
-      if (!pickedCapabilities.containsValue(cap)) {
+      SubProtocolIdentifier capSp = SubProtocolIdentifier.of(cap.name(), cap.version());
+      if (!pickedCapabilities.get(cap.name()).equals(capSp)) {
         continue;
       }
-      for (SubProtocol sp : subprotocols.keySet()) {
-        if (sp.supports(SubProtocolIdentifier.of(cap.name(), cap.version()))) {
-          int numberOfMessageTypes = sp.versionRange(cap.version());
+      for (SubProtocolIdentifier sp : subprotocols.keySet()) {
+        if (sp.equals(capSp)) {
+          int numberOfMessageTypes = sp.versionRange();
           subprotocolRangeMap.put(Range.closedOpen(startRange, startRange + numberOfMessageTypes), sp);
           startRange += numberOfMessageTypes;
           break;
@@ -273,8 +287,6 @@ public final class DefaultWireConnection implements WireConnection {
             subprotocols
                 .keySet()
                 .stream()
-                .map(SubProtocol::getCapabilities)
-                .flatMap(subProtocolIdentifiers -> subProtocolIdentifiers.stream())
                 .map(
                     subProtocolIdentifier -> new Capability(
                         subProtocolIdentifier.name(),
@@ -286,8 +298,8 @@ public final class DefaultWireConnection implements WireConnection {
 
   @Override
   public boolean supports(SubProtocolIdentifier subProtocolIdentifier) {
-    for (SubProtocol sp : subprotocolRangeMap.asMapOfRanges().values()) {
-      if (sp.supports(subProtocolIdentifier)) {
+    for (SubProtocolIdentifier sp : subprotocolRangeMap.asMapOfRanges().values()) {
+      if (sp.equals(subProtocolIdentifier)) {
         return true;
       }
     }
@@ -297,8 +309,8 @@ public final class DefaultWireConnection implements WireConnection {
   @Override
   public Collection<SubProtocolIdentifier> agreedSubprotocols() {
     List<SubProtocolIdentifier> identifiers = new ArrayList<>();
-    for (SubProtocol sp : subprotocolRangeMap.asMapOfRanges().values()) {
-      identifiers.addAll(sp.getCapabilities());
+    for (SubProtocolIdentifier sp : subprotocolRangeMap.asMapOfRanges().values()) {
+      identifiers.add(sp);
     }
     return identifiers;
   }
@@ -306,8 +318,8 @@ public final class DefaultWireConnection implements WireConnection {
   public void sendMessage(SubProtocolIdentifier subProtocolIdentifier, int messageType, Bytes message) {
     logger.trace("Sending sub-protocol message {} {}", messageType, message);
     Integer offset = null;
-    for (Map.Entry<Range<Integer>, SubProtocol> entry : subprotocolRangeMap.asMapOfRanges().entrySet()) {
-      if (entry.getValue().supports(subProtocolIdentifier)) {
+    for (Map.Entry<Range<Integer>, SubProtocolIdentifier> entry : subprotocolRangeMap.asMapOfRanges().entrySet()) {
+      if (entry.getValue().equals(subProtocolIdentifier)) {
         offset = entry.getKey().lowerEndpoint();
         break;
       }

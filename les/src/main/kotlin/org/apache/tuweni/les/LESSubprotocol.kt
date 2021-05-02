@@ -68,48 +68,18 @@ class LESSubprotocol(
   private val listener: (WireConnection, Status) -> Unit = { _, _ -> }
 ) : SubProtocol {
 
-  /**
-   * Creates a new client for the subprotocol.
-   *
-   * @param service the rlpx service that will use the handler
-   * @return a new client for the subprotocol, bound to the service.
-   */
-  override fun createClient(service: RLPxService): SubProtocolClient {
+  override fun createClient(service: RLPxService, subProtocolIdentifier: SubProtocolIdentifier): SubProtocolClient {
     return EthClient(service, pendingTransactionsPool, connectionSelectionStrategy)
   }
 
-  /**
-   * @return the identifier of the subprotocol
-   */
   override fun id(): SubProtocolIdentifier {
     return LES_ID
   }
 
-  /**
-   * @param subProtocolIdentifier the identifier of the subprotocol
-   * @return true if the subprotocol ID and version are supported, false otherwise
-   */
   override fun supports(subProtocolIdentifier: SubProtocolIdentifier): Boolean {
     return "les" == subProtocolIdentifier.name() && subProtocolIdentifier.version() == 2
   }
 
-  /**
-   * Provides the length of the range of message types supported by the subprotocol for a given version
-   *
-   * @param version the version of the subprotocol to associate with the range
-   * @return the length of the range of message types supported by the subprotocol for a given version
-   */
-  override fun versionRange(version: Int): Int {
-    return 21
-  }
-
-  /**
-   * Creates a new handler for the subprotocol.
-   *
-   * @param service the rlpx service that will use the handler
-   * @param client the subprotocol client
-   * @return a new handler for the subprotocol, bound to the service.
-   */
   override fun createHandler(service: RLPxService, client: SubProtocolClient): SubProtocolHandler {
     val controller = EthController(repo, pendingTransactionsPool, client as EthRequestsManager, listener)
     return LESSubProtocolHandler(
@@ -128,6 +98,6 @@ class LESSubprotocol(
   }
 
   companion object {
-    internal val LES_ID = SubProtocolIdentifier.of("les", 2)
+    internal val LES_ID = SubProtocolIdentifier.of("les", 2, 21)
   }
 }

@@ -19,7 +19,7 @@ package org.apache.tuweni.ethclient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
-import org.apache.tuweni.devp2p.eth.EthClient
+import org.apache.tuweni.devp2p.eth.EthRequestsManager
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.repository.BlockchainRepository
@@ -34,7 +34,7 @@ abstract class Synchronizer(
   val executor: ExecutorService = Executors.newFixedThreadPool(1),
   override val coroutineContext: CoroutineContext = executor.asCoroutineDispatcher(),
   val repository: BlockchainRepository,
-  val client: EthClient,
+  val client: EthRequestsManager,
   val peerRepository: EthereumPeerRepository
 ) : CoroutineScope {
   abstract fun start()

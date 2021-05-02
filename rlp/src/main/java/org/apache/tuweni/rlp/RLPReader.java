@@ -406,4 +406,11 @@ public interface RLPReader {
    * @return current reader position
    */
   int position();
+
+  /**
+   * Provides the remainder of the bytes that have not been read yet.
+   * 
+   * @return the remainder of the input at current position
+   */
+  Bytes readRemaining();
 }

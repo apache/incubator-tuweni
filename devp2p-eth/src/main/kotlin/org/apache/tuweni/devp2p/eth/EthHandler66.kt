@@ -20,20 +20,21 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
-import org.apache.tuweni.concurrent.CompletableAsyncCompletion
 import org.apache.tuweni.concurrent.coroutines.asyncCompletion
 import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.wire.DisconnectReason
 import org.apache.tuweni.rlpx.wire.SubProtocolHandler
 import org.apache.tuweni.rlpx.wire.WireConnection
+import org.apache.tuweni.units.bigints.UInt64
 import org.slf4j.LoggerFactory
 import java.util.WeakHashMap
 import kotlin.collections.ArrayList
 import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
 
-internal class EthHandler(
+internal class EthHandler66(
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
   private val blockchainInfo: BlockchainInformation,
   private val service: RLPxService,
@@ -48,32 +49,37 @@ internal class EthHandler(
     val MAX_POOLED_TX = 256
   }
 
-  override fun handle(connection: WireConnection, messageType: Int, message: Bytes) = asyncCompletion {
+  override fun handle(connection: WireConnection, messageType: Int, payload: Bytes) = asyncCompletion {
     logger.debug("Receiving message of type {}", messageType)
+    val pair = RLP.decode(payload) {
+      Pair(it.readValue(), it.readRemaining())
+    }
+    val requestIdentifier = pair.first
+    val message = pair.second
+
     when (messageType) {
       MessageType.Status.code -> handleStatus(connection, StatusMessage.read(message))
       MessageType.NewBlockHashes.code -> handleNewBlockHashes(NewBlockHashes.read(message))
       MessageType.Transactions.code -> handleTransactions(Transactions.read(message))
-      MessageType.GetBlockHeaders.code -> handleGetBlockHeaders(connection, GetBlockHeaders.read(message))
-      MessageType.BlockHeaders.code -> handleHeaders(connection, BlockHeaders.read(message))
-      MessageType.GetBlockBodies.code -> handleGetBlockBodies(connection, GetBlockBodies.read(message))
-      MessageType.BlockBodies.code -> handleBlockBodies(connection, BlockBodies.read(message))
+      MessageType.GetBlockHeaders.code -> handleGetBlockHeaders(connection, requestIdentifier, GetBlockHeaders.read(message))
+      MessageType.BlockHeaders.code -> handleHeaders(connection, requestIdentifier, BlockHeaders.read(message))
+      MessageType.GetBlockBodies.code -> handleGetBlockBodies(connection, requestIdentifier, GetBlockBodies.read(message))
+      MessageType.BlockBodies.code -> handleBlockBodies(connection, requestIdentifier, BlockBodies.read(message))
       MessageType.NewBlock.code -> handleNewBlock(NewBlock.read(message))
-      MessageType.GetNodeData.code -> handleGetNodeData(connection, GetNodeData.read(message))
-      MessageType.NodeData.code -> handleNodeData(connection, NodeData.read(message))
-      MessageType.GetReceipts.code -> handleGetReceipts(connection, GetReceipts.read(message))
-      MessageType.Receipts.code -> handleReceipts(connection, Receipts.read(message))
+      MessageType.GetNodeData.code -> handleGetNodeData(connection, requestIdentifier, GetNodeData.read(message))
+      MessageType.NodeData.code -> handleNodeData(connection, requestIdentifier, NodeData.read(message))
+      MessageType.GetReceipts.code -> handleGetReceipts(connection, requestIdentifier, GetReceipts.read(message))
+      MessageType.Receipts.code -> handleReceipts(connection, requestIdentifier, Receipts.read(message))
       MessageType.NewPooledTransactionHashes.code -> handleNewPooledTransactionHashes(
-        connection,
-        NewPooledTransactionHashes.read(message)
+        connection, NewPooledTransactionHashes.read(message)
       )
       MessageType.GetPooledTransactions.code -> handleGetPooledTransactions(
-        connection,
+        connection, requestIdentifier,
         GetPooledTransactions.read(message)
       )
       MessageType.PooledTransactions.code -> handlePooledTransactions(PooledTransactions.read(message))
       else -> {
-        logger.warn("Unknown message type {}", messageType)
+        logger.warn("Unknown message type {} with request identifier {}", messageType, requestIdentifier)
         service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
       }
     }
@@ -83,14 +89,17 @@ internal class EthHandler(
     controller.addNewPooledTransactions(read.transactions)
   }
 
-  private suspend fun handleGetPooledTransactions(connection: WireConnection, read: GetPooledTransactions) {
+  private suspend fun handleGetPooledTransactions(connection: WireConnection, requestIdentifier: Bytes, read: GetPooledTransactions) {
     val tx = controller.findPooledTransactions(read.hashes)
     logger.debug("Responding to GetPooledTransactions with {} transactions", tx.size)
     service.send(
-      EthSubprotocol.ETH65,
+      EthSubprotocol.ETH66,
       MessageType.PooledTransactions.code,
       connection,
-      PooledTransactions(tx).toBytes()
+      RLP.encodeList {
+        it.writeValue(requestIdentifier)
+        it.writeRLP(PooledTransactions(tx).toBytes())
+      }
     )
   }
 
@@ -98,8 +107,8 @@ internal class EthHandler(
     controller.addNewTransactions(transactions.transactions)
   }
 
-  private suspend fun handleNodeData(connection: WireConnection, read: NodeData) {
-    controller.addNewNodeData(connection, null, read.elements)
+  private suspend fun handleNodeData(connection: WireConnection, requestIdentifier: Bytes, read: NodeData) {
+    controller.addNewNodeData(connection, requestIdentifier, read.elements)
   }
 
   private suspend fun handleStatus(connection: WireConnection, status: StatusMessage) {
@@ -133,10 +142,13 @@ internal class EthHandler(
       }
       if (missingTx.size == MAX_POOLED_TX) {
         service.send(
-          EthSubprotocol.ETH65,
+          EthSubprotocol.ETH66,
           MessageType.GetPooledTransactions.code,
           connection,
-          message.toBytes()
+          RLP.encodeList {
+            it.writeValue(UInt64.random().toBytes())
+            it.writeRLP(message.toBytes())
+          }
         )
         missingTx = ArrayList()
         message = GetPooledTransactions(missingTx)
@@ -144,34 +156,44 @@ internal class EthHandler(
     }
     if (!missingTx.isEmpty()) {
       service.send(
-        EthSubprotocol.ETH65,
+        EthSubprotocol.ETH66,
         MessageType.GetPooledTransactions.code,
         connection,
-        message.toBytes()
+        RLP.encodeList {
+          it.writeValue(UInt64.random().toBytes())
+          it.writeRLP(message.toBytes())
+        }
       )
     }
   }
 
-  private suspend fun handleReceipts(connection: WireConnection, receipts: Receipts) {
-    controller.addNewTransactionReceipts(connection, null, receipts.transactionReceipts)
+  private suspend fun handleReceipts(connection: WireConnection, requestIdentifier: Bytes, receipts: Receipts) {
+    controller.addNewTransactionReceipts(connection, requestIdentifier, receipts.transactionReceipts)
   }
 
-  private suspend fun handleGetReceipts(connection: WireConnection, getReceipts: GetReceipts) {
-
+  private suspend fun handleGetReceipts(connection: WireConnection, requestIdentifier: Bytes, getReceipts: GetReceipts) {
+    val receipts = controller.findTransactionReceipts(getReceipts.hashes)
     service.send(
-      EthSubprotocol.ETH64,
+      EthSubprotocol.ETH66,
       MessageType.Receipts.code,
       connection,
-      Receipts(controller.findTransactionReceipts(getReceipts.hashes)).toBytes()
+      RLP.encodeList {
+        it.writeValue(requestIdentifier)
+        it.writeRLP(Receipts(receipts).toBytes())
+      }
     )
   }
 
-  private suspend fun handleGetNodeData(connection: WireConnection, nodeData: GetNodeData) {
+  private suspend fun handleGetNodeData(connection: WireConnection, requestIdentifier: Bytes, nodeData: GetNodeData) {
+    val data = controller.findNodeData(nodeData.hashes)
     service.send(
-      EthSubprotocol.ETH64,
+      EthSubprotocol.ETH66,
       MessageType.NodeData.code,
       connection,
-      NodeData(controller.findNodeData(nodeData.hashes)).toBytes()
+      RLP.encodeList {
+        it.writeValue(requestIdentifier)
+        it.writeRLP(NodeData(data).toBytes())
+      }
     )
   }
 
@@ -179,31 +201,41 @@ internal class EthHandler(
     controller.addNewBlock(read.block)
   }
 
-  private suspend fun handleBlockBodies(connection: WireConnection, message: BlockBodies) {
-    controller.addNewBlockBodies(connection, null, message.bodies)
+  private suspend fun handleBlockBodies(connection: WireConnection, requestIdentifier: Bytes, message: BlockBodies) {
+    controller.addNewBlockBodies(connection, requestIdentifier, message.bodies)
   }
 
-  private suspend fun handleGetBlockBodies(connection: WireConnection, message: GetBlockBodies) {
+  private suspend fun handleGetBlockBodies(connection: WireConnection, requestIdentifier: Bytes, message: GetBlockBodies) {
+    val bodies = BlockBodies(controller.findBlockBodies(message.hashes))
     service.send(
-      EthSubprotocol.ETH64,
+      EthSubprotocol.ETH66,
       MessageType.BlockBodies.code,
       connection,
-      BlockBodies(controller.findBlockBodies(message.hashes)).toBytes()
+      RLP.encodeList {
+        it.writeValue(requestIdentifier)
+        it.writeRLP(bodies.toBytes())
+      }
     )
   }
 
-  private suspend fun handleHeaders(connection: WireConnection, headers: BlockHeaders) {
-    controller.addNewBlockHeaders(connection, null, headers.headers)
+  private suspend fun handleHeaders(connection: WireConnection, requestIdentifier: Bytes, headers: BlockHeaders) {
+    controller.addNewBlockHeaders(connection, requestIdentifier, headers.headers)
   }
 
-  private suspend fun handleGetBlockHeaders(connection: WireConnection, blockHeaderRequest: GetBlockHeaders) {
+  private suspend fun handleGetBlockHeaders(connection: WireConnection, requestIdentifier: Bytes, blockHeaderRequest: GetBlockHeaders) {
     val headers = controller.findHeaders(
       blockHeaderRequest.block,
       blockHeaderRequest.maxHeaders,
       blockHeaderRequest.skip,
       blockHeaderRequest.reverse
     )
-    service.send(EthSubprotocol.ETH64, MessageType.BlockHeaders.code, connection, BlockHeaders(headers).toBytes())
+    service.send(
+      EthSubprotocol.ETH66, MessageType.BlockHeaders.code, connection,
+      RLP.encodeList {
+        it.writeValue(requestIdentifier)
+        it.writeRLP(BlockHeaders(headers).toBytes())
+      }
+    )
   }
 
   private suspend fun handleNewBlockHashes(message: NewBlockHashes) {
@@ -214,31 +246,23 @@ internal class EthHandler(
     val newPeer = PeerInfo()
     pendingStatus[connection.uri()] = newPeer
     service.send(
-      EthSubprotocol.ETH64, MessageType.Status.code, connection,
-      StatusMessage(
-        EthSubprotocol.ETH65.version(),
-        blockchainInfo.networkID(), blockchainInfo.totalDifficulty(),
-        blockchainInfo.bestHash(), blockchainInfo.genesisHash(), blockchainInfo.getLatestForkHash(),
-        blockchainInfo.getLatestFork()
-      ).toBytes()
+      EthSubprotocol.ETH66, MessageType.Status.code, connection,
+      RLP.encodeList {
+        it.writeValue(UInt64.random().toBytes())
+        it.writeRLP(
+          StatusMessage(
+            EthSubprotocol.ETH66.version(),
+            blockchainInfo.networkID(), blockchainInfo.totalDifficulty(),
+            blockchainInfo.bestHash(), blockchainInfo.genesisHash(), blockchainInfo.getLatestForkHash(),
+            blockchainInfo.getLatestFork()
+          ).toBytes()
+        )
+      }
     )
 
     return newPeer.ready
   }
 
   override fun stop() = asyncCompletion {
-  }
-}
-
-internal class PeerInfo {
-
-  val ready: CompletableAsyncCompletion = AsyncCompletion.incomplete()
-
-  fun connect() {
-    ready.complete()
-  }
-
-  fun cancel() {
-    ready.cancel()
   }
 }

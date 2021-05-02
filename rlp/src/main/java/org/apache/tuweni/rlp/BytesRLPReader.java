@@ -33,6 +33,15 @@ final class BytesRLPReader implements RLPReader {
   }
 
   @Override
+  public Bytes readRemaining() {
+    int remaining = content.size() - index;
+    if (remaining == 0) {
+      return Bytes.EMPTY;
+    }
+    return content.slice(remaining);
+  }
+
+  @Override
   public Bytes readValue(boolean lenient) {
     int remaining = content.size() - index;
     if (remaining == 0) {

@@ -39,38 +39,43 @@ class EthSubprotocol(
 ) : SubProtocol {
 
   companion object {
-    val ETH62 = SubProtocolIdentifier.of("eth", 62)
-    val ETH63 = SubProtocolIdentifier.of("eth", 63)
-    val ETH64 = SubProtocolIdentifier.of("eth", 64)
-    val ETH65 = SubProtocolIdentifier.of("eth", 65)
+    val ETH62 = SubProtocolIdentifier.of("eth", 62, 8)
+    val ETH63 = SubProtocolIdentifier.of("eth", 63, 17)
+    val ETH64 = SubProtocolIdentifier.of("eth", 64, 17)
+    val ETH65 = SubProtocolIdentifier.of("eth", 65, 17)
+    val ETH66 = SubProtocolIdentifier.of("eth", 66, 17)
   }
 
-  override fun id(): SubProtocolIdentifier = ETH65
+  override fun id(): SubProtocolIdentifier = ETH66
 
   override fun supports(subProtocolIdentifier: SubProtocolIdentifier): Boolean {
     return "eth".equals(subProtocolIdentifier.name()) && (
       subProtocolIdentifier.version() == ETH62.version() ||
         subProtocolIdentifier.version() == ETH63.version() || subProtocolIdentifier.version() == ETH64.version() ||
-        subProtocolIdentifier.version() == ETH65.version()
+        subProtocolIdentifier.version() == ETH65.version() || subProtocolIdentifier.version() == ETH66.version()
       )
-  }
-
-  override fun versionRange(version: Int): Int {
-    return if (version == ETH62.version()) {
-      8
-    } else {
-      17
-    }
   }
 
   override fun createHandler(service: RLPxService, client: SubProtocolClient): SubProtocolHandler {
     val controller = EthController(repository, pendingTransactionsPool, client as EthRequestsManager, listener)
-    return EthHandler(coroutineContext, blockchainInfo, service, controller)
+    if (client is EthClient66) {
+      return EthHandler66(coroutineContext, blockchainInfo, service, controller)
+    } else {
+      return EthHandler(coroutineContext, blockchainInfo, service, controller)
+    }
   }
 
-  override fun getCapabilities() = mutableListOf(ETH62, ETH63, ETH64, ETH65)
+  override fun getCapabilities() = mutableListOf(ETH62, ETH63, ETH64, ETH65, ETH66)
 
-  override fun createClient(service: RLPxService): SubProtocolClient {
-    return EthClient(service, pendingTransactionsPool, selectionStrategy(service.repository()))
+  override fun createClient(service: RLPxService, identifier: SubProtocolIdentifier): SubProtocolClient {
+    if (identifier == ETH66) {
+      return EthClient66(
+        service,
+        pendingTransactionsPool,
+        selectionStrategy(service.repository())
+      )
+    } else {
+      return EthClient(service, pendingTransactionsPool, selectionStrategy(service.repository()))
+    }
   }
 }

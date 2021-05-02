@@ -128,11 +128,11 @@ internal class LESSubProtocolHandler(
     conn: WireConnection,
     blockBodiesMessage: BlockBodiesMessage
   ) {
-    controller.addNewBlockBodies(conn, blockBodiesMessage.blockBodies)
+    controller.addNewBlockBodies(conn, null, blockBodiesMessage.blockBodies)
   }
 
   private suspend fun handleBlockHeadersMessage(connection: WireConnection, blockHeadersMessage: BlockHeadersMessage) {
-    controller.addNewBlockHeaders(connection, blockHeadersMessage.blockHeaders)
+    controller.addNewBlockHeaders(connection, null, blockHeadersMessage.blockHeaders)
   }
 
   private suspend fun handleGetBlockHeaders(

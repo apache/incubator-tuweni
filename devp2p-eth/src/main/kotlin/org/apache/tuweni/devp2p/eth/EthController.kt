@@ -34,7 +34,7 @@ class EthController(
   val repository: BlockchainRepository,
   val pendingTransactionsPool: TransactionPool,
   val requestsManager: EthRequestsManager,
-  val connectionsListener: (WireConnection, Status) -> Unit = { _, _ -> }
+  val connectionsListener: (WireConnection, Status) -> Unit = { _, _ -> },
 ) {
 
   suspend fun findTransactionReceipts(hashes: List<Hash>): List<List<TransactionReceipt>> {
@@ -104,15 +104,33 @@ class EthController(
     requestsManager.requestBlockBodies(listOf(blockHash))
   }
 
-  suspend fun addNewBlockHeaders(connection: WireConnection, headers: List<BlockHeader>) {
-    val request = requestsManager.wasRequested(connection, headers)
-    if (request != null) {
-      request.complete(headers)
+  suspend fun addNewBlockHeaders(connection: WireConnection, requestIdentifier: Bytes?, headers: List<BlockHeader>) {
+    val request = when (requestsManager) {
+      is EthClient -> {
+        requestsManager.wasRequested(connection, headers)
+      }
+      is EthClient66 -> {
+        requestsManager.headersRequested(requestIdentifier!!)
+      }
+      else -> {
+        throw IllegalArgumentException("Unsupported requestsManager")
+      }
     }
+    request?.complete(headers)
   }
 
-  suspend fun addNewBlockBodies(connection: WireConnection, bodies: List<BlockBody>) {
-    val request = requestsManager.wasRequested(connection, bodies)
+  suspend fun addNewBlockBodies(connection: WireConnection, requestIdentifier: Bytes?, bodies: List<BlockBody>) {
+    val request = when (requestsManager) {
+      is EthClient -> {
+        requestsManager.wasRequested(connection)
+      }
+      is EthClient66 -> {
+        requestsManager.bodiesRequested(requestIdentifier!!)
+      }
+      else -> {
+        throw IllegalArgumentException("Unsupported requestsManager")
+      }
+    }
     if (request != null) {
       val hashes = request.data as List<*>
       for (i in 0..hashes.size) {
@@ -128,8 +146,18 @@ class EthController(
 
   suspend fun findNodeData(hashes: List<Hash>) = repository.retrieveNodeData(hashes)
 
-  suspend fun addNewNodeData(connection: WireConnection, elements: List<Bytes?>) {
-    val request = requestsManager.nodeDataWasRequested(connection, elements)
+  suspend fun addNewNodeData(connection: WireConnection, requestIdentifier: Bytes?, elements: List<Bytes?>) {
+    val request = when (requestsManager) {
+      is EthClient -> {
+        requestsManager.nodeDataWasRequested(connection)
+      }
+      is EthClient66 -> {
+        requestsManager.nodeDataWasRequested(requestIdentifier!!)
+      }
+      else -> {
+        throw IllegalArgumentException("Unsupported requestsManager")
+      }
+    }
     if (request != null) {
       val hashes = request.data as List<*>
       for (i in 0..hashes.size) {
@@ -144,9 +172,20 @@ class EthController(
 
   suspend fun addNewTransactionReceipts(
     connection: WireConnection,
-    transactionReceipts: List<List<TransactionReceipt>>
+    requestIdentifier: Bytes?,
+    transactionReceipts: List<List<TransactionReceipt>>,
   ) {
-    val request = requestsManager.transactionReceiptsRequested(connection, transactionReceipts)
+    val request = when (requestsManager) {
+      is EthClient -> {
+        requestsManager.transactionReceiptsRequested(connection)
+      }
+      is EthClient66 -> {
+        requestsManager.transactionReceiptsRequested(requestIdentifier!!)
+      }
+      else -> {
+        throw IllegalArgumentException("Unsupported requestsManager")
+      }
+    }
     if (request != null) {
       val hashes = request.data as List<*>
       for (i in 0..hashes.size) {

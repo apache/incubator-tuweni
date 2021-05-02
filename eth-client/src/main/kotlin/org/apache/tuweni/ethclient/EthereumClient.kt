@@ -27,8 +27,9 @@ import org.apache.lucene.store.NIOFSDirectory
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
-import org.apache.tuweni.devp2p.eth.EthClient
+import org.apache.tuweni.devp2p.eth.EthRequestsManager
 import org.apache.tuweni.devp2p.eth.EthSubprotocol
+import org.apache.tuweni.devp2p.eth.EthSubprotocol.Companion.ETH66
 import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
 import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.eth.repository.BlockchainIndex
@@ -163,36 +164,37 @@ class EthereumClient(
           adapter
         )
         services[rlpxConfig.getName()] = service
-        peerRepository.addIdentityListener {
-          service.connectTo(
-            it.publicKey(),
-            InetSocketAddress(it.networkInterface(), it.port())
+        service.start().thenRun {
+          logger.info("Started Ethereum client ${rlpxConfig.getName()}")
+          peerRepository.addIdentityListener {
+            service.connectTo(
+              it.publicKey(),
+              InetSocketAddress(it.networkInterface(), it.port())
+            )
+          }
+          val synchronizer = PeerStatusEthSynchronizer(
+            repository = repository,
+            client = service.getClient(ETH66) as EthRequestsManager,
+            peerRepository = peerRepository,
+            adapter = adapter
           )
+          synchronizers[rlpxConfig.getName() + "status"] = synchronizer
+          synchronizer.start()
+          val parentSynchronizer = FromUnknownParentSynchronizer(
+            repository = repository,
+            client = service.getClient(ETH66) as EthRequestsManager,
+            peerRepository = peerRepository
+          )
+          synchronizers[rlpxConfig.getName() + "parent"] = parentSynchronizer
+          parentSynchronizer.start()
+          val bestSynchronizer = FromBestBlockSynchronizer(
+            repository = repository,
+            client = service.getClient(ETH66) as EthRequestsManager,
+            peerRepository = peerRepository
+          )
+          synchronizers[rlpxConfig.getName() + "best"] = bestSynchronizer
+          bestSynchronizer.start()
         }
-        val synchronizer = PeerStatusEthSynchronizer(
-          repository = repository,
-          client = ethSubprotocol.createClient(service) as EthClient,
-          peerRepository = peerRepository,
-          adapter = adapter
-        )
-        synchronizers[rlpxConfig.getName() + "status"] = synchronizer
-        synchronizer.start()
-        val parentSynchronizer = FromUnknownParentSynchronizer(
-          repository = repository,
-          client = ethSubprotocol.createClient(service) as EthClient,
-          peerRepository = peerRepository
-        )
-        synchronizers[rlpxConfig.getName() + "parent"] = parentSynchronizer
-        parentSynchronizer.start()
-        val bestSynchronizer = FromBestBlockSynchronizer(
-          repository = repository,
-          client = ethSubprotocol.createClient(service) as EthClient,
-          peerRepository = peerRepository
-        )
-        synchronizers[rlpxConfig.getName() + "best"] = bestSynchronizer
-        bestSynchronizer.start()
-        logger.info("Started Ethereum client ${rlpxConfig.getName()}")
-        service.start()
       }
     ).await()
 

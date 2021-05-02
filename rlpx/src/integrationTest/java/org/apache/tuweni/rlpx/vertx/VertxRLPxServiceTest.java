@@ -37,8 +37,10 @@ import org.apache.tuweni.rlpx.wire.WireConnection;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.vertx.core.Vertx;
@@ -112,7 +114,7 @@ class VertxRLPxServiceTest {
   }
 
   @Test
-  void connectToOtherPeer(@VertxInstance Vertx vertx) throws Exception {
+  void connectToOtherPeerWithNoSubProtocols(@VertxInstance Vertx vertx) throws Exception {
     SECP256K1.KeyPair ourPair = SECP256K1.KeyPair.random();
     SECP256K1.KeyPair peerPair = SECP256K1.KeyPair.random();
     VertxRLPxService service = new VertxRLPxService(vertx, 0, "localhost", 10000, ourPair, new ArrayList<>(), "abc");
@@ -122,23 +124,23 @@ class VertxRLPxServiceTest {
         new VertxRLPxService(vertx, 0, "localhost", 10000, peerPair, new ArrayList<>(), "abc");
     peerService.start().join();
 
-    try {
+    assertThrows(CancellationException.class, () -> {
       service.connectTo(peerPair.publicKey(), new InetSocketAddress("127.0.0.1", peerService.actualPort())).get();
-    } finally {
-      service.stop();
-      peerService.stop();
-    }
+    });
+    service.stop();
+    peerService.stop();
   }
 
   @Test
   void disconnectAfterStop(@VertxInstance Vertx vertx) throws Exception {
     SECP256K1.KeyPair ourPair = SECP256K1.KeyPair.random();
     SECP256K1.KeyPair peerPair = SECP256K1.KeyPair.random();
-    VertxRLPxService service = new VertxRLPxService(vertx, 0, "localhost", 10000, ourPair, new ArrayList<>(), "abc");
+    List<SubProtocol> protocols = Arrays.asList(new VertxAcceptanceTest.MyCustomSubProtocol());
+    VertxRLPxService service = new VertxRLPxService(vertx, 0, "localhost", 10000, ourPair, protocols, "abc");
     service.start().join();
 
-    VertxRLPxService peerService =
-        new VertxRLPxService(vertx, 0, "localhost", 10000, peerPair, new ArrayList<>(), "abc");
+
+    VertxRLPxService peerService = new VertxRLPxService(vertx, 0, "localhost", 10000, peerPair, protocols, "abc");
     peerService.start().join();
 
     WireConnection conn = null;
@@ -166,7 +168,7 @@ class VertxRLPxServiceTest {
     List<SubProtocol> protocols = Collections.singletonList(new SubProtocol() {
       @Override
       public SubProtocolIdentifier id() {
-        return SubProtocolIdentifier.of("eth", 63);
+        return SubProtocolIdentifier.of("eth", 63, 17);
       }
 
       @Override
@@ -175,19 +177,15 @@ class VertxRLPxServiceTest {
       }
 
       @Override
-      public int versionRange(int version) {
-        return 0;
-      }
-
-      @Override
       public SubProtocolHandler createHandler(RLPxService service, SubProtocolClient client) {
         SubProtocolHandler handler = mock(SubProtocolHandler.class);
+        when(handler.handleNewPeerConnection(any())).thenReturn(AsyncCompletion.COMPLETED);
         when(handler.stop()).thenReturn(AsyncCompletion.COMPLETED);
         return handler;
       }
 
       @Override
-      public SubProtocolClient createClient(RLPxService service) {
+      public SubProtocolClient createClient(RLPxService service, SubProtocolIdentifier identifier) {
         return mock(SubProtocolClient.class);
       }
     });
@@ -232,8 +230,9 @@ class VertxRLPxServiceTest {
   void getClientWeCreate(@VertxInstance Vertx vertx) throws Exception {
     SubProtocol sp = mock(SubProtocol.class);
     SubProtocolClient client = mock(SubProtocolClient.class);
-    when(sp.id()).thenReturn(SubProtocolIdentifier.of("foo", 1));
-    when(sp.createClient(any())).thenReturn(client);
+    when(sp.id()).thenReturn(SubProtocolIdentifier.of("foo", 1, 2));
+    when(sp.getCapabilities()).thenReturn(Arrays.asList(SubProtocolIdentifier.of("foo", 1, 2)));
+    when(sp.createClient(any(), any())).thenReturn(client);
     MemoryWireConnectionsRepository peerRepository = new MemoryWireConnectionsRepository();
     VertxRLPxService peerService = new VertxRLPxService(
         vertx,

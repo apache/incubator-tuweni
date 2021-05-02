@@ -13,6 +13,7 @@
 package org.apache.tuweni.rlpx.wire;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.concurrent.AsyncResult;
@@ -20,8 +21,10 @@ import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.junit.BouncyCastleExtension;
 import org.apache.tuweni.rlpx.RLPxMessage;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
@@ -169,5 +172,19 @@ class DefaultWireConnectionTest {
     DisconnectMessage msg = DisconnectMessage.read(capturedDisconnect.get().content());
 
     assertEquals(DisconnectReason.INCOMPATIBLE_DEVP2P_VERSION.code, msg.reason());
+  }
+
+  @Test
+  void testCapabilitiesNegotiation() {
+    SubProtocolIdentifier cus = SubProtocolIdentifier.of("cus", 1, 1);
+    LinkedHashMap<SubProtocolIdentifier, SubProtocolHandler> subprotocols = new LinkedHashMap<>();
+    subprotocols.put(cus, mock(SubProtocolHandler.class));
+    DefaultWireConnection conn = new DefaultWireConnection(nodeId, peerNodeId, disconnect -> {
+    }, helloMessage -> {
+    }, () -> {
+    }, subprotocols, 5, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
+    List<Capability> capabilityList = Arrays.asList(new Capability("cus", 1));
+    conn.initSupportedRange(capabilityList);
+    assertEquals(1, conn.agreedSubprotocols().size());
   }
 }

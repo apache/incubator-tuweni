@@ -13,6 +13,7 @@
 package org.apache.tuweni.rlpx.vertx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -79,23 +80,18 @@ class VertxAcceptanceTest {
     }
   }
 
-  private static class MyCustomSubProtocol implements SubProtocol {
+  static class MyCustomSubProtocol implements SubProtocol {
 
     public MyCustomSubProtocolHandler handler;
 
     @Override
     public SubProtocolIdentifier id() {
-      return SubProtocolIdentifier.of("cus", 1);
+      return SubProtocolIdentifier.of("cus", 1, 1);
     }
 
     @Override
     public boolean supports(SubProtocolIdentifier subProtocolIdentifier) {
       return "cus".equals(subProtocolIdentifier.name()) && 1 == subProtocolIdentifier.version();
-    }
-
-    @Override
-    public int versionRange(int version) {
-      return 1;
     }
 
     @Override
@@ -105,7 +101,7 @@ class VertxAcceptanceTest {
     }
 
     @Override
-    public SubProtocolClient createClient(RLPxService service) {
+    public SubProtocolClient createClient(RLPxService service, SubProtocolIdentifier identifier) {
       return null;
     }
   }
@@ -134,12 +130,14 @@ class VertxAcceptanceTest {
     secondService.start().join();
 
     try {
-      service.connectTo(secondKp.publicKey(), new InetSocketAddress("localhost", secondService.actualPort()));
-
-      Thread.sleep(3000);
+      WireConnection conn =
+          service.connectTo(secondKp.publicKey(), new InetSocketAddress("localhost", secondService.actualPort())).get();
+      assertNotNull(conn);
+      assertEquals(1, conn.agreedSubprotocols().size());
       assertEquals(1, repository.asMap().size());
       assertEquals(1, secondRepository.asMap().size());
 
+      Thread.sleep(1000);
       assertEquals(1, sp.handler.messages.size());
       assertEquals(1, secondSp.handler.messages.size());
 
@@ -176,11 +174,13 @@ class VertxAcceptanceTest {
     secondService.start().join();
 
     try {
-      service.connectTo(secondKp.publicKey(), new InetSocketAddress("localhost", secondService.actualPort()));
-
-      Thread.sleep(3000);
+      WireConnection conn =
+          service.connectTo(secondKp.publicKey(), new InetSocketAddress("localhost", secondService.actualPort())).get();
+      assertNotNull(conn);
+      assertEquals(1, conn.agreedSubprotocols().size());
       assertEquals(1, repository.asMap().size());
       assertEquals(1, secondRepository.asMap().size());
+      Thread.sleep(1000);
 
       assertEquals(1, sp.handler.messages.size());
       assertEquals(1, secondSp.handler.messages.size());
@@ -238,6 +238,11 @@ class VertxAcceptanceTest {
               public int version() {
                 return 63;
               }
+
+              @Override
+              public int versionRange() {
+                return 8;
+              }
             };
           }
 
@@ -247,17 +252,12 @@ class VertxAcceptanceTest {
           }
 
           @Override
-          public int versionRange(int version) {
-            return 0;
-          }
-
-          @Override
           public SubProtocolHandler createHandler(RLPxService service, SubProtocolClient client) {
             return null;
           }
 
           @Override
-          public SubProtocolClient createClient(RLPxService service) {
+          public SubProtocolClient createClient(RLPxService service, SubProtocolIdentifier identifier) {
             return null;
           }
         }), "Client 1", repository);
