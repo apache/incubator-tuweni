@@ -32,10 +32,10 @@ class EthHelloSubprotocol(
 ) : SubProtocol {
 
   companion object {
-    val ETH62 = SubProtocolIdentifier.of("eth", 62)
-    val ETH63 = SubProtocolIdentifier.of("eth", 63)
-    val ETH64 = SubProtocolIdentifier.of("eth", 64)
-    val ETH65 = SubProtocolIdentifier.of("eth", 65)
+    val ETH62 = SubProtocolIdentifier.of("eth", 62, 8)
+    val ETH63 = SubProtocolIdentifier.of("eth", 63, 17)
+    val ETH64 = SubProtocolIdentifier.of("eth", 64, 17)
+    val ETH65 = SubProtocolIdentifier.of("eth", 65, 17)
   }
 
   override fun id(): SubProtocolIdentifier = ETH65
@@ -48,14 +48,6 @@ class EthHelloSubprotocol(
       )
   }
 
-  override fun versionRange(version: Int): Int {
-    return if (version == ETH62.version()) {
-      8
-    } else {
-      17
-    }
-  }
-
   override fun createHandler(service: RLPxService, client: SubProtocolClient): SubProtocolHandler {
     val controller = EthHelloController(listener)
     return EthHelloHandler(coroutineContext, blockchainInfo, service, controller)
@@ -63,7 +55,7 @@ class EthHelloSubprotocol(
 
   override fun getCapabilities() = mutableListOf(ETH62, ETH63, ETH64, ETH65)
 
-  override fun createClient(service: RLPxService): SubProtocolClient {
+  override fun createClient(service: RLPxService, identifier: SubProtocolIdentifier): SubProtocolClient {
     return EthHelloClient(service)
   }
 }

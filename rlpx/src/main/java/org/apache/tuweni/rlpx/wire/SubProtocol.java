@@ -39,14 +39,6 @@ public interface SubProtocol {
   boolean supports(SubProtocolIdentifier subProtocolIdentifier);
 
   /**
-   * Provides the length of the range of message types supported by the subprotocol for a given version
-   *
-   * @param version the version of the subprotocol to associate with the range
-   * @return the length of the range of message types supported by the subprotocol for a given version
-   */
-  int versionRange(int version);
-
-  /**
    * Creates a new handler for the subprotocol.
    *
    * @param service the rlpx service that will use the handler
@@ -59,9 +51,10 @@ public interface SubProtocol {
    * Creates a new client for the subprotocol.
    *
    * @param service the rlpx service that will use the handler
+   * @param identifier the version of the subprotocol
    * @return a new client for the subprotocol, bound to the service.
    */
-  SubProtocolClient createClient(RLPxService service);
+  SubProtocolClient createClient(RLPxService service, SubProtocolIdentifier identifier);
 
   /**
    * Provides the capabilities supported by the subprotocol.

@@ -18,7 +18,7 @@ package org.apache.tuweni.ethclient
 
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
-import org.apache.tuweni.devp2p.eth.EthClient
+import org.apache.tuweni.devp2p.eth.EthRequestsManager
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import java.util.concurrent.ExecutorService
@@ -37,7 +37,7 @@ class PeerStatusEthSynchronizer(
   executor: ExecutorService = Executors.newSingleThreadExecutor(),
   coroutineContext: CoroutineContext = executor.asCoroutineDispatcher(),
   repository: BlockchainRepository,
-  client: EthClient,
+  client: EthRequestsManager,
   peerRepository: EthereumPeerRepository,
   private val adapter: WireConnectionPeerRepositoryAdapter
 ) : Synchronizer(executor, coroutineContext, repository, client, peerRepository) {

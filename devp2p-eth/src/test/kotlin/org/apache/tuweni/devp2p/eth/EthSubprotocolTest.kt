@@ -17,6 +17,11 @@
 package org.apache.tuweni.devp2p.eth
 
 import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.devp2p.eth.EthHelloSubprotocol.Companion.ETH63
+import org.apache.tuweni.devp2p.eth.EthHelloSubprotocol.Companion.ETH64
+import org.apache.tuweni.devp2p.eth.EthSubprotocol.Companion.ETH62
+import org.apache.tuweni.devp2p.eth.EthSubprotocol.Companion.ETH65
+import org.apache.tuweni.devp2p.eth.EthSubprotocol.Companion.ETH66
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.MemoryTransactionPool
@@ -49,7 +54,7 @@ class EthSubprotocolTest {
       repository = repository,
       pendingTransactionsPool = MemoryTransactionPool()
     )
-    assertEquals(SubProtocolIdentifier.of("eth", 65), eth.id())
+    assertEquals(SubProtocolIdentifier.of("eth", 66), eth.id())
   }
 
   @Test
@@ -60,6 +65,7 @@ class EthSubprotocolTest {
       repository = repository,
       pendingTransactionsPool = MemoryTransactionPool()
     )
+    assertTrue(eth.supports(SubProtocolIdentifier.of("eth", 66)))
     assertTrue(eth.supports(SubProtocolIdentifier.of("eth", 65)))
     assertTrue(eth.supports(SubProtocolIdentifier.of("eth", 64)))
     assertTrue(eth.supports(SubProtocolIdentifier.of("eth", 63)))
@@ -70,15 +76,10 @@ class EthSubprotocolTest {
 
   @Test
   fun rangeCheck() {
-    val repository = BlockchainRepository.inMemory()
-    val eth = EthSubprotocol(
-      blockchainInfo = blockchainInfo,
-      repository = repository,
-      pendingTransactionsPool = MemoryTransactionPool()
-    )
-    assertEquals(8, eth.versionRange(62))
-    assertEquals(17, eth.versionRange(63))
-    assertEquals(17, eth.versionRange(64))
-    assertEquals(17, eth.versionRange(65))
+    assertEquals(8, ETH62.versionRange())
+    assertEquals(17, ETH63.versionRange())
+    assertEquals(17, ETH64.versionRange())
+    assertEquals(17, ETH65.versionRange())
+    assertEquals(17, ETH66.versionRange())
   }
 }

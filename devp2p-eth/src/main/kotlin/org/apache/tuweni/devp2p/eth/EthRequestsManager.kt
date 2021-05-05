@@ -16,7 +16,6 @@
  */
 package org.apache.tuweni.devp2p.eth
 
-import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.CompletableAsyncResult
 import org.apache.tuweni.eth.Block
@@ -126,41 +125,6 @@ interface EthRequestsManager {
     blockHashes: List<Hash>,
     connection: WireConnection? = connectionSelectionStrategy().selectConnection()
   ): AsyncResult<List<List<TransactionReceipt>>>
-
-  /**
-   * Checks if a request was made to get block headers
-   * @param connection the wire connection sending data
-   * @params headers list of block headers just received
-   * @return a handle to the completion of the operation, or null if no such request was placed
-   */
-  fun wasRequested(connection: WireConnection, headers: List<BlockHeader>): CompletableAsyncResult<List<BlockHeader>>?
-
-  /**
-   * Checks if a request was made to get block bodies
-   * @param connection the wire connection sending data
-   * @param bodies the bodies just received
-   * @return a handle to the completion of the operation, with metadata, or null if no such request was placed
-   */
-  fun wasRequested(connection: WireConnection, bodies: List<BlockBody>): Request<List<BlockBody>>?
-
-  /**
-   * Checks if a request was made to get node data
-   * @param connection the wire connection sending data
-   * @param elements the data just received
-   * @return a handle to the completion of the operation, with metadata, or null if no such request was placed
-   */
-  fun nodeDataWasRequested(connection: WireConnection, elements: List<Bytes?>): Request<List<Bytes?>>?
-
-  /**
-   * Checks if a request was made to get transaction receipts
-   * @param connection the wire connection sending data
-   * @param transactionReceipts the transaction receipts just received
-   * @return a handle to the completion of the operation, with metadata, or null if no such request was placed
-   */
-  fun transactionReceiptsRequested(
-    connection: WireConnection,
-    transactionReceipts: List<List<TransactionReceipt>>
-  ): Request<List<List<TransactionReceipt>>>?
 
   /**
    * Submits a new pending transaction to the transaction pool to be gossiped to peers.

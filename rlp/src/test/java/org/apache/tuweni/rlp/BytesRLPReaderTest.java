@@ -219,4 +219,15 @@ class BytesRLPReaderTest {
     });
     assertEquals(expected, result);
   }
+
+  @Test
+  void shouldReadRemaining() {
+    Bytes input = Bytes.fromHexString("83646f6783646f67");
+    RLP.decode(input, reader -> {
+      reader.readValue();
+      assertEquals(4, reader.position());
+      assertEquals(Bytes.fromHexString("83646f67"), reader.readRemaining());
+      return null;
+    });
+  }
 }

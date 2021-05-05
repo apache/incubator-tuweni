@@ -39,7 +39,6 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -72,8 +71,8 @@ public final class VertxRLPxService implements RLPxService {
   private final String clientId;
   private final WireConnectionRepository repository;
 
-  private LinkedHashMap<SubProtocol, SubProtocolHandler> handlers;
-  private LinkedHashMap<SubProtocol, SubProtocolClient> clients;
+  private LinkedHashMap<SubProtocolIdentifier, SubProtocolHandler> handlers;
+  private LinkedHashMap<SubProtocolIdentifier, SubProtocolClient> clients;
   private NetClient client;
   private NetServer server;
 
@@ -175,9 +174,14 @@ public final class VertxRLPxService implements RLPxService {
       clients = new LinkedHashMap<>();
 
       for (SubProtocol subProtocol : subProtocols) {
-        SubProtocolClient client = subProtocol.createClient(this);
-        clients.put(subProtocol, client);
-        handlers.put(subProtocol, subProtocol.createHandler(this, client));
+        for (SubProtocolIdentifier identifier : subProtocol.getCapabilities()) {
+          if (identifier.versionRange() == 0) {
+            throw new IllegalArgumentException("Invalid subprotocol " + identifier.toString());
+          }
+          SubProtocolClient client = subProtocol.createClient(this, identifier);
+          clients.put(identifier, client);
+          handlers.put(identifier, subProtocol.createHandler(this, client));
+        }
       }
 
       client = vertx.createNetClient(new NetClientOptions());
@@ -303,12 +307,7 @@ public final class VertxRLPxService implements RLPxService {
     if (!started.get()) {
       throw new IllegalStateException("The RLPx service is not active");
     }
-    for (Map.Entry<SubProtocol, SubProtocolClient> clientEntry : clients.entrySet()) {
-      if (clientEntry.getKey().id().equals(subProtocolIdentifier)) {
-        return clientEntry.getValue();
-      }
-    }
-    return null;
+    return clients.get(subProtocolIdentifier);
   }
 
   @Override
