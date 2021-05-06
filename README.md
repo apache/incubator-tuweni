@@ -2,8 +2,8 @@
 
 [![Discord](https://user-images.githubusercontent.com/7288322/34471967-1df7808a-efbb-11e7-9088-ed0b04151291.png)](https://discord.gg/zHHPRpT)
 [![Slack](https://img.shields.io/badge/slack-%23tuweni-72eff8?logo=slack)](https://s.apache.org/slack-invite)
-[![Github build](https://github.com/apache/incubator-tuweni/workflows/master%20pr%20build/badge.svg)](https://github.com/apache/incubator-tuweni/actions?query=workflow%3A%22master+pr+build%22)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/incubator-tuweni/blob/master/LICENSE)
+[![Github build](https://github.com/apache/incubator-tuweni/workflows/main%20pr%20build/badge.svg)](https://github.com/apache/incubator-tuweni/actions?query=workflow%3A%22main+pr+build%22)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/incubator-tuweni/blob/main/LICENSE)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.apache.tuweni/tuweni/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/org.apache.tuweni/tuweni)
 [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/repository.apache.org/org.apache.tuweni/tuweni.svg)](https://repository.apache.org/content/repositories/snapshots/org/apache/tuweni/tuweni/)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/ApacheTuweni.svg?style=social&label=Follow%20%40ApacheTuweni)](https://twitter.com/ApacheTuweni)
