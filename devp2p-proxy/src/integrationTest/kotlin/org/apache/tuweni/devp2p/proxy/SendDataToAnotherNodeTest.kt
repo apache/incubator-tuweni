@@ -67,12 +67,12 @@ class SendDataToAnotherNodeTest {
     val client = service.getClient(ProxySubprotocol.ID) as ProxyClient
     client.registeredSites["datasink"] = recorder
 
-    var conn : WireConnection? = null
+    var conn: WireConnection? = null
     for (i in 1..5) {
       try {
         conn = service.connectTo(service2kp.publicKey(), InetSocketAddress("127.0.0.1", service2.actualPort())).get()
         break
-      } catch(e: Exception) {
+      } catch (e: Exception) {
         delay(100)
       }
     }
