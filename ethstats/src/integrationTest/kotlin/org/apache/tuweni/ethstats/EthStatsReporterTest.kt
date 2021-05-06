@@ -32,8 +32,11 @@ import java.time.Instant
 import java.util.Collections
 
 import io.vertx.core.Vertx
+import kotlinx.coroutines.delay
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.util.concurrent.atomic.AtomicReference
 
 @ExtendWith(VertxExtension::class)
 public class EthStatsReporterTest {
@@ -94,6 +97,66 @@ public class EthStatsReporterTest {
     assertTrue(server.messagesContain("{\"emit\":[\"block\","), server.getResults().joinToString("\n"))
     assertTrue(server.messagesContain("\"stats\":{\"pending\":42}"), server.getResults().joinToString("\n"))
     assertTrue(server.messagesContain("{\"emit\":[\"stats\",{\"id\":\"foo\",\"stats\":"), server.getResults().joinToString("\n"))
+
+    reporter.stop()
+  }
+
+  @Test
+  fun testServer(@VertxInstance vertx: Vertx) = runBlocking {
+
+    val now = Instant.EPOCH
+    val nodeInfoReference = AtomicReference<NodeInfo>()
+    val server = EthStatsServer(
+      vertx, "127.0.0.1", 33030, "wat", { now },
+      { _, info -> nodeInfoReference.set(info) },
+      { _, _, _ -> },
+      { _, _ -> },
+      { _, _ -> },
+      { },
+      { _, _ -> },
+    )
+    server.start()
+    val reporter = EthStatsReporter(
+      vertx,
+      "foo",
+      Collections.singletonList(URI.create("ws://localhost:" + server.port + "/api")),
+      "wat",
+      "name",
+      "node",
+      33030,
+      "10",
+      "eth/63",
+      "Windoz",
+      "64",
+      { },
+      { now }
+    )
+
+    reporter.start()
+
+    reporter
+      .sendNewHead(
+        BlockStats(
+          UInt256.ONE,
+          Hash.fromBytes(Bytes32.random()),
+          Hash.fromBytes(Bytes32.random()),
+          3L,
+          Address.fromBytes(Bytes.random(20)),
+          42L,
+          43,
+          UInt256.valueOf(42L),
+          UInt256.valueOf(84L),
+          Collections.emptyList(),
+          Hash.fromBytes(Bytes32.random()),
+          Hash.fromBytes(Bytes32.random()),
+          Collections.emptyList()
+        )
+      )
+
+    reporter.sendNewNodeStats(NodeStats(true, false, true, 42, 9, 4000, 100))
+    reporter.sendNewPendingTransactionCount(42)
+    delay(5000)
+    assertNotNull(nodeInfoReference.get())
 
     reporter.stop()
   }
