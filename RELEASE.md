@@ -28,7 +28,7 @@ For patch releases, use the existing release branch.
 
 ## Prepare the release
 
-Change the version number in the master branch in a commit and push.
+Change the version number in the main branch in a commit and push.
 
 Example: https://github.com/apache/incubator-tuweni/commit/0330d134f579034b9d943870ea31316899632a11
 
