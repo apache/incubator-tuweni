@@ -113,14 +113,14 @@ public class EthStatsReporterTest {
 
     val now = Instant.EPOCH
     val nodeInfoReference = AtomicReference<NodeInfo>()
+    val controller = object : EthStatsServerController {
+      override fun readNodeInfo(remoteAddress: String, id: String, nodeInfo: NodeInfo) {
+        nodeInfoReference.set(nodeInfo)
+      }
+    }
     val server = EthStatsServer(
       vertx, "127.0.0.1", 33030, "wat", { now },
-      { _, info -> nodeInfoReference.set(info) },
-      { _, _, _ -> },
-      { _, _ -> },
-      { _, _ -> },
-      { },
-      { _, _ -> },
+      controller
     )
     server.start()
     val reporter = EthStatsReporter(

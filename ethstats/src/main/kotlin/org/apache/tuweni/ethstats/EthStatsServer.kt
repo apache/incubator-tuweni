@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServer
 import io.vertx.core.http.ServerWebSocket
-import io.vertx.core.net.SocketAddress
 import io.vertx.kotlin.core.http.closeAwait
 import io.vertx.kotlin.core.http.listenAwait
 import kotlinx.coroutines.CoroutineScope
@@ -38,13 +37,8 @@ class EthStatsServer(
   val networkInterface: String,
   var port: Int,
   val secret: String,
-  private val timeSupplier: () -> Instant,
-  private val nodeInfoReader: (String, NodeInfo) -> Unit,
-  private val latencyReader: (String, SocketAddress, Long) -> Unit,
-  private val pendingTxReader: (String, Long) -> Unit,
-  private val nodeStatsReader: (String, NodeStats) -> Unit,
-  private val disconnectionReader: (String) -> Unit,
-  private val blockReader: (String, BlockStats) -> Unit,
+  private val timeSupplier: () -> Instant = Instant::now,
+  private val controller: EthStatsServerController,
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope {
 
@@ -107,7 +101,7 @@ class EthStatsServer(
         websocket.writeTextMessage("{\"emit\":[\"ready\"]}")
         val id = event.get(1).get("id").textValue()
         val nodeInfo = mapper.readerFor(NodeInfo::class.java).readValue<NodeInfo>(event.get(1).get("info"))
-        nodeInfoReader(id, nodeInfo)
+        controller.readNodeInfo(websocket.remoteAddress().toString(), id, nodeInfo)
       }
       ("node-ping") -> {
         logger.debug("Received a ping {}", event.get(1))
@@ -121,26 +115,26 @@ class EthStatsServer(
       ("latency") -> {
         val id = event.get(1).get("id").textValue()
         val latency = event.get(1).get("latency").longValue()
-        latencyReader(id, websocket.remoteAddress(), latency)
+        controller.readLatency(websocket.remoteAddress().toString(), id, websocket.remoteAddress(), latency)
       }
       ("end") -> {
         val id = event.get(1).get("id").textValue()
-        disconnectionReader(id)
+        controller.readDisconnect(websocket.remoteAddress().toString(), id)
       }
       ("stats") -> {
         val id = event.get(1).get("id").textValue()
         val nodeStats = mapper.readerFor(NodeStats::class.java).readValue<NodeStats>(event.get(1).get("stats"))
-        nodeStatsReader(id, nodeStats)
+        controller.readNodeStats(websocket.remoteAddress().toString(), id, nodeStats)
       }
       ("pending") -> {
         val id = event.get(1).get("id").textValue()
         val pendingTx = event.get(1).get("stats").get("pending").longValue()
-        pendingTxReader(id, pendingTx)
+        controller.readPendingTx(websocket.remoteAddress().toString(), id, pendingTx)
       }
       ("block") -> {
         val id = event.get(1).get("id").textValue()
         val block = mapper.readerFor(BlockStats::class.java).readValue<BlockStats>(event.get(1).get("block"))
-        blockReader(id, block)
+        controller.readBlock(websocket.remoteAddress().toString(), id, block)
       }
       ("update") -> {
         // TODO implement
