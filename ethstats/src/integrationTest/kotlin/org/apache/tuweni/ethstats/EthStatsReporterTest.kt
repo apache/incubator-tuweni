@@ -62,7 +62,14 @@ public class EthStatsReporterTest {
       { now }
     )
 
-    reporter.start()
+    for (i in 1..3) {
+      try {
+        reporter.start()
+        break
+      } catch (e: Exception) {
+        delay(100)
+      }
+    }
 
     reporter
       .sendNewHead(
