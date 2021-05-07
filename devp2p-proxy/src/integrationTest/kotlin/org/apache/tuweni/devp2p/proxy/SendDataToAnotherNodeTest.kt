@@ -27,6 +27,7 @@ import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.junit.VertxInstance
 import org.apache.tuweni.rlpx.vertx.VertxRLPxService
+import org.apache.tuweni.rlpx.wire.WireConnection
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -65,10 +66,19 @@ class SendDataToAnotherNodeTest {
     AsyncCompletion.allOf(service.start(), service2.start()).await()
     val client = service.getClient(ProxySubprotocol.ID) as ProxyClient
     client.registeredSites["datasink"] = recorder
-    val conn = service.connectTo(service2kp.publicKey(), InetSocketAddress("127.0.0.1", service2.actualPort())).await()
+
+    var conn: WireConnection? = null
+    for (i in 1..5) {
+      try {
+        conn = service.connectTo(service2kp.publicKey(), InetSocketAddress("127.0.0.1", service2.actualPort())).get()
+        break
+      } catch (e: Exception) {
+        delay(100)
+      }
+    }
     assertNotNull(conn)
     delay(100)
-    assertTrue(conn.agreedSubprotocols().contains(ProxySubprotocol.ID))
+    assertTrue(conn!!.agreedSubprotocols().contains(ProxySubprotocol.ID))
     val client2 = service2.getClient(ProxySubprotocol.ID) as ProxyClient
     assertTrue(client2.knownSites().contains("datasink"))
     client2.request("datasink", Bytes.wrap("Hello world".toByteArray()))
