@@ -19,6 +19,7 @@ package org.apache.tuweni.eth.crawler
 import com.zaxxer.hikari.HikariDataSource
 import io.vertx.core.Vertx
 import io.vertx.core.net.SocketAddress
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -29,6 +30,7 @@ import org.apache.tuweni.devp2p.eth.EthHelloSubprotocol
 import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
 import org.apache.tuweni.devp2p.eth.logger
 import org.apache.tuweni.eth.genesis.GenesisFile
+import org.apache.tuweni.ethstats.EthStatsServer
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.vertx.VertxRLPxService
 import org.apache.tuweni.rlpx.wire.DisconnectReason
@@ -104,6 +106,14 @@ object CrawlerApp {
     }
     val restService = CrawlerRESTService(port = config.restPort(), networkInterface = config.restNetworkInterface(), repository = repo)
     val refreshLoop = AtomicBoolean(true)
+    val ethstatsDataRepository = EthstatsDataRepository(ds)
+    val ethstatsServer = EthStatsServer(
+      vertx,
+      config.ethstatsNetworkInterface(),
+      config.ethstatsPort(),
+      config.ethstatsSecret(),
+      controller = CrawlerEthstatsController(ethstatsDataRepository)
+    )
 
     Runtime.getRuntime().addShutdownHook(
       Thread {
@@ -112,6 +122,9 @@ object CrawlerApp {
           scraper.stop().await()
           rlpxService.stop().await()
           restService.stop().await()
+          async {
+            ethstatsServer.stop()
+          }.await()
         }
       }
     )
@@ -131,6 +144,7 @@ object CrawlerApp {
       }
       rlpxService.start().await()
       scraper.start()
+      ethstatsServer.start()
       launch {
         while (refreshLoop.get()) {
           try {

@@ -102,6 +102,9 @@ class EthStatsServer(
         val id = event.get(1).get("id").textValue()
         val nodeInfo = mapper.readerFor(NodeInfo::class.java).readValue<NodeInfo>(event.get(1).get("info"))
         controller.readNodeInfo(websocket.remoteAddress().toString(), id, nodeInfo)
+        websocket.closeHandler {
+          controller.readDisconnect(websocket.remoteAddress().toString(), id)
+        }
       }
       ("node-ping") -> {
         logger.debug("Received a ping {}", event.get(1))
@@ -115,7 +118,7 @@ class EthStatsServer(
       ("latency") -> {
         val id = event.get(1).get("id").textValue()
         val latency = event.get(1).get("latency").longValue()
-        controller.readLatency(websocket.remoteAddress().toString(), id, websocket.remoteAddress(), latency)
+        controller.readLatency(websocket.remoteAddress().toString(), id, latency)
       }
       ("end") -> {
         val id = event.get(1).get("id").textValue()
