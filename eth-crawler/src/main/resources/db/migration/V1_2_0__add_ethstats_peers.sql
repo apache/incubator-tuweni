@@ -67,3 +67,26 @@ CREATE TABLE IF NOT EXISTS ethstats_nodestats(
 );
 
 CREATE UNIQUE INDEX ethstats_nodestats_createdAt ON ethstats_nodestats(createdAt);
+
+CREATE TABLE IF NOT EXISTS ethstats_block(
+    address varchar(255) not null,
+    id varchar(255) not null,
+    number bytea(32),
+    hash bytea(32),
+    parentHash bytea(32),
+    timestamp long,
+    gasUsed long,
+    gasLimit long,
+    miner bytea(20),
+    difficulty bytea(32),
+    totalDifficulty bytea(32),
+    transactions array,
+    transactionsRoot bytea(32),
+    stateRoot bytea(32),
+    uncles array,
+    createdAt timestamp DEFAULT now(),
+    PRIMARY KEY(address, id)
+);
+
+CREATE UNIQUE INDEX ethstats_block_createdAt ON ethstats_block(createdAt);
+

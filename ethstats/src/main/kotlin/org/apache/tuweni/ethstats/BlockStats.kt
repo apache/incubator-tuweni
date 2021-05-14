@@ -17,7 +17,6 @@
 package org.apache.tuweni.ethstats
 
 import org.apache.tuweni.eth.Address
-import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.units.bigints.UInt256
 
@@ -53,7 +52,7 @@ data class BlockStats(
   val transactions: List<TxStats>,
   val transactionsRoot: Hash,
   val stateRoot: Hash,
-  val uncles: List<BlockHeader>
+  val uncles: List<Hash>
 ) {
 
   @JsonGetter("number")

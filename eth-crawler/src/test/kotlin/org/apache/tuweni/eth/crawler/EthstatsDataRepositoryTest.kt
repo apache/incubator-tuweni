@@ -18,8 +18,15 @@ package org.apache.tuweni.eth.crawler
 
 import com.zaxxer.hikari.HikariDataSource
 import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.eth.Address
+import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.ethstats.BlockStats
 import org.apache.tuweni.ethstats.NodeInfo
 import org.apache.tuweni.ethstats.NodeStats
+import org.apache.tuweni.ethstats.TxStats
+import org.apache.tuweni.units.bigints.UInt256
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -75,6 +82,30 @@ class EthstatsDataRepositoryTest {
       repository!!.storeNodeStats("foo", "bar", nodeStats).await()
       val peerData = repository!!.getPeerData("bar").await()
       assertEquals(nodeStats, peerData?.nodeStats)
+    }
+  }
+
+  @Test
+  fun testStoreBlock() {
+    runBlocking {
+      val blockStats = BlockStats(
+        UInt256.valueOf(33),
+        Hash.fromBytes(Bytes32.random()),
+        Hash.fromBytes(Bytes32.random()),
+        42,
+        Address.fromBytes(Bytes.random(20)),
+        42,
+        400,
+        UInt256.valueOf(400),
+        UInt256.valueOf(1600),
+        listOf(TxStats(Hash.fromBytes(Bytes32.random())), TxStats(Hash.fromBytes(Bytes32.random()))),
+        Hash.fromBytes(Bytes32.random()),
+        Hash.fromBytes(Bytes32.random()),
+        listOf()
+      )
+      repository!!.storeBlock("foo", "bar", blockStats).await()
+      val block = repository!!.getLatestBlock("bar").await()
+      assertEquals(blockStats, block)
     }
   }
 }

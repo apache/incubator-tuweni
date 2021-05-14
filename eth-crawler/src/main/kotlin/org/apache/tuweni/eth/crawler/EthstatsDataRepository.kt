@@ -20,9 +20,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.eth.Address
+import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.ethstats.NodeStats
 import org.apache.tuweni.ethstats.NodeInfo
 import org.apache.tuweni.ethstats.BlockStats
+import org.apache.tuweni.ethstats.TxStats
+import org.apache.tuweni.units.bigints.UInt256
 import javax.sql.DataSource
 import kotlin.coroutines.CoroutineContext
 
@@ -54,8 +59,33 @@ class EthstatsDataRepository(
   }
 
   fun storeBlock(remoteAddress: String, id: String, block: BlockStats) = async {
-    println(remoteAddress + id + block)
-    TODO()
+    ds.connection.use { conn ->
+      val stmt =
+        conn.prepareStatement(
+          "insert into ethstats_block(address, id, number, hash, parentHash, timestamp, miner, gasUsed, gasLimit, difficulty, totalDifficulty, transactions, transactionsRoot, stateRoot, uncles) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+        )
+      stmt.use {
+        val txArray = conn.createArrayOf("bytea(32)", block.transactions.map { it.hash.toArrayUnsafe() }.toTypedArray())
+
+        val unclesArray = conn.createArrayOf("bytea(32)", block.uncles.map { it.toArrayUnsafe() }.toTypedArray())
+        it.setString(1, remoteAddress)
+        it.setString(2, id)
+        it.setBytes(3, block.number.toArrayUnsafe())
+        it.setBytes(4, block.hash.toArrayUnsafe())
+        it.setBytes(5, block.parentHash.toArrayUnsafe())
+        it.setLong(6, block.timestamp)
+        it.setBytes(7, block.miner.toArrayUnsafe())
+        it.setLong(8, block.gasUsed)
+        it.setLong(9, block.gasLimit)
+        it.setBytes(10, block.difficulty.toArrayUnsafe())
+        it.setBytes(11, block.totalDifficulty.toArrayUnsafe())
+        it.setArray(12, txArray)
+        it.setBytes(13, block.transactionsRoot.toArrayUnsafe())
+        it.setBytes(14, block.stateRoot.toArrayUnsafe())
+        it.setArray(15, unclesArray)
+        it.execute()
+      }
+    }
   }
 
   fun storeLatency(remoteAddress: String, id: String, latency: Long) = async {
@@ -119,6 +149,38 @@ class EthstatsDataRepository(
         it.setString(1, remoteAddress)
         it.setString(2, id)
         it.execute()
+      }
+    }
+  }
+
+  fun getLatestBlock(id: String): Deferred<BlockStats?> = async {
+    return@async ds.connection.use { conn ->
+      val stmt =
+        conn.prepareStatement(
+          "select number, hash, parentHash, timestamp, miner, gasUsed, gasLimit, difficulty, totalDifficulty, transactions, transactionsRoot, stateRoot, uncles from ethstats_block where id=? order by createdAt desc limit 1"
+        )
+      stmt.use {
+        it.setString(1, id)
+        val rs = it.executeQuery()
+        if (rs.next()) {
+          BlockStats(
+            UInt256.fromBytes(Bytes.wrap(rs.getBytes(1))),
+            Hash.fromBytes(Bytes.wrap(rs.getBytes(2))),
+            Hash.fromBytes(Bytes.wrap(rs.getBytes(3))),
+            rs.getLong(4),
+            Address.fromBytes(Bytes.wrap(rs.getBytes(5))),
+            rs.getLong(6),
+            rs.getLong(7),
+            UInt256.fromBytes(Bytes.wrap(rs.getBytes(8))),
+            UInt256.fromBytes(Bytes.wrap(rs.getBytes(9))),
+            (rs.getArray(10).array as Array<*>).map { TxStats(Hash.fromBytes(Bytes.wrap(it as ByteArray))) },
+            Hash.fromBytes(Bytes.wrap(rs.getBytes(11))),
+            Hash.fromBytes(Bytes.wrap(rs.getBytes(12))),
+            (rs.getArray(13).array as Array<*>).map { Hash.fromBytes(Bytes.wrap(it as ByteArray)) },
+          )
+        } else {
+          null
+        }
       }
     }
   }
