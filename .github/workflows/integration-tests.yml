@@ -66,8 +66,3 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       - name: gradle integrationTest
         run: gradle integrationTest
-      - name: Publish Test Report
-        if: always()
-        uses: mikepenz/action-junit-report@7ed4eed
-        with:
-          report_paths: '**/build/test-results/test/TEST-*.xml'
