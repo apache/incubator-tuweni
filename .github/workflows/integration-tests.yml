@@ -68,6 +68,6 @@ jobs:
         run: gradle integrationTest
       - name: Publish Test Report
         if: always()
-        uses: mikepenz/action-junit-report@7ed4eed
+        uses: mikepenz/action-junit-report@7ed4eedebf7073502e98489d6694fd4fe5259554
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'
