@@ -66,8 +66,8 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       - name: gradle integrationTest
         run: gradle integrationTest
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1
+      - name: Publish Test Report
         if: always()
+        uses: mikepenz/action-junit-report@v2
         with:
-          files: "**/test-results/**/*.xml"
+          report_paths: '**/build/test-results/test/TEST-*.xml'
