@@ -20,7 +20,6 @@ import io.vertx.core.Vertx
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.junit.BouncyCastleExtension
@@ -63,7 +62,8 @@ class SendDataToAnotherNodeTest {
       "Tuweni Experiment 0.1"
     )
     val recorder = RecordingClientHandler()
-    AsyncCompletion.allOf(service.start(), service2.start()).await()
+    service.start().await()
+    service2.start().await()
     val client = service.getClient(ProxySubprotocol.ID) as ProxyClient
     client.registeredSites["datasink"] = recorder
 
