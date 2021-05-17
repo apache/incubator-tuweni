@@ -93,7 +93,6 @@ public class EthStatsReporterTest {
     reporter.sendNewNodeStats(NodeStats(true, false, true, 42, 9, 4000, 100))
     reporter.sendNewPendingTransactionCount(42)
     server.waitForMessages(4)
-    assertTrue(4 <= server.getResults().size)
     assertTrue(
       server
         .messagesContain(
