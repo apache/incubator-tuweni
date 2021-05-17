@@ -111,4 +111,14 @@ class GenesisFileTest {
         file.toBlock().getHeader().getHash());
   }
 
+  @Test
+  void testAstorGenesis() throws IOException {
+    InputStream input = GenesisFileTest.class.getResourceAsStream("/astor.json");
+    byte[] contents = input.readAllBytes();
+    GenesisFile file = GenesisFile.read(contents);
+    assertEquals(
+        Hash.fromHexString("0xf9c534ad514bc380e23a74e788c3d1f2446f9ad1cb74f0dbb48ea56c0315f5bc"),
+        file.toBlock().getHeader().getHash());
+  }
+
 }
