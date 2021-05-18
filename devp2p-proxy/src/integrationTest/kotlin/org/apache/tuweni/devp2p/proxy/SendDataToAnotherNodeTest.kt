@@ -30,10 +30,12 @@ import org.apache.tuweni.rlpx.wire.WireConnection
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetSocketAddress
 
+@Disabled("flaky")
 @ExtendWith(VertxExtension::class, BouncyCastleExtension::class)
 class SendDataToAnotherNodeTest {
 
