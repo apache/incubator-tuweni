@@ -52,19 +52,18 @@ class BlockStatsTest {
     val mapper = ObjectMapper()
     mapper.registerModule(EthJsonModule())
     assertEquals(
-      "{\"number\":1,\"hash\":\"" +
-        stats.hash +
-        "\",\"parentHash\":\"" +
-        stats.parentHash +
-        "\",\"timestamp\":32,\"miner\":\"" +
-        stats.miner.toHexString() +
-        "\",\"gasUsed\":23,\"gasLimit\":4000,\"difficulty\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"totalDifficulty\":\"0x0000000000000000000000000000000000000000000000000000000000000001\",\"transactions\":[{\"hash\":\"" +
-        stats.transactions.get(0).hash.toHexString() +
-        "\"}],\"transactionsRoot\":\"" +
-        stats.transactionsRoot +
-        "\",\"stateRoot\":\"" +
-        stats.stateRoot +
-        "\",\"uncles\":[]}",
+      "{\"difficulty\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"," +
+        "\"gasLimit\":4000," +
+        "\"gasUsed\":23," +
+        "\"hash\":\"" + stats.hash + "\"," +
+        "\"miner\":\"" + stats.miner.toHexString() + "\"," +
+        "\"number\":1," +
+        "\"parentHash\":\"" + stats.parentHash.toHexString() + "\"," +
+        "\"stateRoot\":\"" + stats.stateRoot + "\"," +
+        "\"timestamp\":32," +
+        "\"totalDifficulty\":\"0x0000000000000000000000000000000000000000000000000000000000000001\"," +
+        "\"transactions\":[{\"hash\":\"" + stats.transactions.get(0).hash.toHexString() + "\"}]," +
+        "\"transactionsRoot\":\"" + stats.transactionsRoot + "\",\"uncles\":[]}",
       mapper.writeValueAsString(stats)
     )
   }
