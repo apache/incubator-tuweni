@@ -16,6 +16,9 @@
  */
 package org.apache.tuweni.ethstats
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder
+
+@JsonPropertyOrder(alphabetic = true)
 data class NodeStats(
   val active: Boolean,
   val syncing: Boolean,
