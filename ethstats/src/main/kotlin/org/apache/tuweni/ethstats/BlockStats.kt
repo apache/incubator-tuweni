@@ -17,11 +17,11 @@
 package org.apache.tuweni.ethstats
 
 import org.apache.tuweni.eth.Address
-import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.units.bigints.UInt256
 
 import com.fasterxml.jackson.annotation.JsonGetter
+import com.fasterxml.jackson.annotation.JsonPropertyOrder
 
 /**
  * Block statistics reported to ethnetstats.
@@ -40,6 +40,7 @@ import com.fasterxml.jackson.annotation.JsonGetter
  * @param stateRoot the hash root of the state
  * @param uncles the block ommers associated with this block
  */
+@JsonPropertyOrder(alphabetic = true)
 data class BlockStats(
   val number: UInt256,
   val hash: Hash,
@@ -53,7 +54,7 @@ data class BlockStats(
   val transactions: List<TxStats>,
   val transactionsRoot: Hash,
   val stateRoot: Hash,
-  val uncles: List<BlockHeader>
+  val uncles: List<Hash>
 ) {
 
   @JsonGetter("number")

@@ -59,6 +59,9 @@ class CrawlerConfig(val filePath: Path) {
       .addString("genesisFile", "", "Genesis file to use in hello", null)
       .addInteger("restPort", 1337, "REST port", null)
       .addString("restNetworkInterface", "0.0.0.0", "REST network interface", null)
+      .addString("ethstatsNetworkInterface", "0.0.0.0", "Ethstats network interface", null)
+      .addInteger("ethstatsPort", 1338, "Ethstats port", null)
+      .addString("ethstatsSecret", "changeme", "Ethstats shared secret", null)
       .toSchema()
   }
 
@@ -76,4 +79,8 @@ class CrawlerConfig(val filePath: Path) {
   fun network() = config.getString("network")
   fun restPort() = config.getInteger("restPort")
   fun restNetworkInterface() = config.getString("restNetworkInterface")
+
+  fun ethstatsPort() = config.getInteger("ethstatsPort")
+  fun ethstatsNetworkInterface() = config.getString("ethstatsNetworkInterface")
+  fun ethstatsSecret() = config.getString("ethstatsSecret")
 }

@@ -20,7 +20,6 @@ import io.vertx.core.Vertx
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.junit.BouncyCastleExtension
@@ -31,10 +30,12 @@ import org.apache.tuweni.rlpx.wire.WireConnection
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetSocketAddress
 
+@Disabled("flaky")
 @ExtendWith(VertxExtension::class, BouncyCastleExtension::class)
 class SendDataToAnotherNodeTest {
 
@@ -63,7 +64,8 @@ class SendDataToAnotherNodeTest {
       "Tuweni Experiment 0.1"
     )
     val recorder = RecordingClientHandler()
-    AsyncCompletion.allOf(service.start(), service2.start()).await()
+    service.start().await()
+    service2.start().await()
     val client = service.getClient(ProxySubprotocol.ID) as ProxyClient
     client.registeredSites["datasink"] = recorder
 

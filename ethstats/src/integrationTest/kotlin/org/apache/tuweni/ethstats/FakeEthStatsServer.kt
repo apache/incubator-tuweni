@@ -47,7 +47,7 @@ class FakeEthStatsServer(val vertx: Vertx, val networkInterface: String, var por
   }
 
   fun waitForMessages(numberOfMessages: Int) {
-    for (i in 0..100) {
+    for (i in 0..1000) {
       if (getResults().size >= numberOfMessages) {
         return
       }
