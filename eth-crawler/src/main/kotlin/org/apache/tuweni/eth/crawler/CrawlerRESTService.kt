@@ -20,7 +20,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.servlet.ServletContextHandler
+import org.eclipse.jetty.util.resource.Resource
 import org.glassfish.jersey.servlet.ServletContainer
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
@@ -56,6 +58,11 @@ class CrawlerRESTService(
       "jersey.config.server.provider.packages",
       "org.apache.tuweni.eth.crawler.rest"
     )
+
+    ctx.setBaseResource(Resource.newResource(CrawlerRESTService::class.java.getResource("/webapp")))
+    val staticContent = ctx.addServlet(DefaultServlet::class.java, "/*")
+    ctx.setWelcomeFiles(arrayOf("index.html"))
+    staticContent.initOrder = 10
 
     newServer.stopAtShutdown = true
     newServer.start()
