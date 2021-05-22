@@ -18,13 +18,15 @@ package org.apache.tuweni.jsonrpc
 
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
-import io.vertx.core.http.HttpServerRequest
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.eth.Address
+import org.apache.tuweni.eth.JSONRPCRequest
+import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.VertxExtension
@@ -39,29 +41,34 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.ConnectException
-import java.nio.charset.StandardCharsets
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 
 @ExtendWith(BouncyCastleExtension::class, VertxExtension::class)
 class JSONRPCClientTest {
 
   companion object {
-    val handler = AtomicReference<Handler<HttpServerRequest>>()
+    val handler = AtomicReference<Handler<JSONRPCRequest>>()
     var server: JSONRPCServer? = null
 
     @JvmStatic
     @BeforeAll
-    fun runServer(@VertxInstance vertx: Vertx) = runBlocking {
-      server = JSONRPCServer(vertx) {
-        handler.get().handle(it)
-      }
-      server!!.start()
+    fun runServer(@VertxInstance vertx: Vertx): Unit = runBlocking {
+      server = JSONRPCServer(
+        vertx, port = 0,
+        methodHandler = {
+          handler.get().handle(it)
+          JSONRPCResponse(3, "")
+        },
+        coroutineContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+      )
+      server!!.start().await()
     }
 
     @JvmStatic
     @AfterAll
-    fun stopServer() = runBlocking {
-      server!!.stop()
+    fun stopServer(): Unit = runBlocking {
+      server!!.stop().await()
     }
   }
 
@@ -82,19 +89,16 @@ class JSONRPCClientTest {
       )
       val sent = CompletableDeferred<String>()
       handler.set { request ->
-        request.bodyHandler {
-          sent.complete(it.toString(StandardCharsets.UTF_8))
-        }
-        request.response().end("{\"result\":\"\"}")
+        sent.complete(request.params.get(0))
+        JSONRPCResponse(request.id, "")
       }
 
       val hash = it.sendRawTransaction(tx)
       assertEquals("", hash)
       assertEquals(
-        "{\"jsonrpc\":\"2.0\",\"method\":\"eth_sendRawTransaction\",\"id\":1,\"params\":" +
-          "[\"0xf85d01020d940102030405060708090a0b0c0d0e0f01020304052a801ba01356bce3ee0043871c3bb" +
+        "0xf85d01020d940102030405060708090a0b0c0d0e0f01020304052a801ba01356bce3ee0043871c3bb" +
           "289597a903985d6f0235446283069031a613b286aeca02f7cf0fa0e4b160bc4d48fb256b4989f067de773b" +
-          "0ac4c721d5222e4e38cc6ca\"]}",
+          "0ac4c721d5222e4e38cc6ca",
         sent.await()
       )
     }

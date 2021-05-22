@@ -14,26 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.jsonrpc
+package org.apache.tuweni.jsonrpc.methods
 
-import io.vertx.core.Vertx
-import io.vertx.core.http.HttpServerRequest
-import io.vertx.kotlin.core.http.closeAwait
-import io.vertx.kotlin.core.http.listenAwait
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.JSONRPCRequest
+import org.apache.tuweni.eth.JSONRPCResponse
+import org.apache.tuweni.eth.invalidParams
 
-class JSONRPCServer(val vertx: Vertx, private val callback: (HttpServerRequest) -> Unit) {
-
-  var server = vertx.createHttpServer()
-
-  suspend fun start() {
-    server.requestHandler(callback).listenAwait(0)
+fun sha3(request: JSONRPCRequest): JSONRPCResponse {
+  if (request.params.size != 1) {
+    return invalidParams.copy(id = request.id)
   }
-
-  fun port(): Int {
-    return server.actualPort()
-  }
-
-  suspend fun stop() {
-    server.closeAwait()
+  try {
+    val input = Bytes.fromHexString(request.params[0])
+    return JSONRPCResponse(id = request.id, result = Hash.hash(input).toHexString())
+  } catch (e: IllegalArgumentException) {
+    return invalidParams.copy(id = request.id)
   }
 }
