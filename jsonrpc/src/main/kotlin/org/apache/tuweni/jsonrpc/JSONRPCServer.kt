@@ -31,6 +31,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
+import org.apache.tuweni.eth.internalError
+import org.apache.tuweni.eth.parseError
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import kotlin.coroutines.CoroutineContext
@@ -54,18 +56,20 @@ class JSONRPCServer(val vertx: Vertx, val port: Int, val networkInterface: Strin
     httpServer?.requestHandler { httpRequest ->
       httpRequest.exceptionHandler {
         logger.error(it.message, it)
+        httpRequest.response().end(mapper.writeValueAsString(internalError))
       }
       httpRequest.bodyHandler {
         val responses = mutableListOf<Deferred<JSONRPCResponse>>()
+        val requests: Array<JSONRPCRequest>
         try {
-          val requests = mapper.readerFor(Array<JSONRPCRequest>::class.java).readValue<Array<JSONRPCRequest>>(it.bytes)
-
-          for (request in requests) {
-            responses.add(handleRequest(request))
-          }
+          requests = mapper.readerFor(Array<JSONRPCRequest>::class.java).readValue(it.bytes)
         } catch (e: IOException) {
           logger.warn("Invalid request", e)
-          // TODO respond with a JSON-RPC error.
+          httpRequest.response().end(mapper.writeValueAsString(parseError))
+          return@bodyHandler
+        }
+        for (request in requests) {
+          responses.add(handleRequest(request))
         }
         // TODO replace with launch.
         runBlocking {

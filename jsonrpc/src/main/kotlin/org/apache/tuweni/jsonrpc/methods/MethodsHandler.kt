@@ -16,26 +16,23 @@
  */
 package org.apache.tuweni.jsonrpc.methods
 
-import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
-import org.apache.tuweni.eth.invalidParams
+import org.apache.tuweni.eth.methodNotFound
 
-fun sha3(request: JSONRPCRequest): JSONRPCResponse {
-  if (request.params.size != 1) {
-    return invalidParams.copy(id = request.id)
-  }
-  try {
-    val input = Bytes.fromHexString(request.params[0])
-    return JSONRPCResponse(id = request.id, result = Hash.hash(input).toHexString())
-  } catch (e: IllegalArgumentException) {
-    return invalidParams.copy(id = request.id)
+class MethodsRouter(val methodsMap: Map<String, (JSONRPCRequest) -> JSONRPCResponse>) {
+
+  fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
+    val methodHandler = methodsMap[request.method]
+    if (methodHandler == null) {
+      return methodNotFound
+    } else {
+      return methodHandler(request)
+    }
   }
 }
 
-class ClientVersion(val clientId: String) {
-  fun handle(request: JSONRPCRequest): JSONRPCResponse {
-    return JSONRPCResponse(id = request.id, result = clientId)
-  }
-}
+// TODO DelegateHandler - choose from a number of handlers to see which to delegate to.
+// TODO MeteredHandler - count number of responses, error responses
+// TODO FilterHandler - filter incoming requests per allowlist
+// TODO CachingHandler - cache some incoming requests

@@ -16,26 +16,26 @@
  */
 package org.apache.tuweni.jsonrpc.methods
 
-import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
-import org.apache.tuweni.eth.invalidParams
+import org.apache.tuweni.eth.methodNotFound
+import org.apache.tuweni.junit.BouncyCastleExtension
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-fun sha3(request: JSONRPCRequest): JSONRPCResponse {
-  if (request.params.size != 1) {
-    return invalidParams.copy(id = request.id)
-  }
-  try {
-    val input = Bytes.fromHexString(request.params[0])
-    return JSONRPCResponse(id = request.id, result = Hash.hash(input).toHexString())
-  } catch (e: IllegalArgumentException) {
-    return invalidParams.copy(id = request.id)
-  }
-}
+@ExtendWith(BouncyCastleExtension::class)
+class MethodsHandlerTest {
 
-class ClientVersion(val clientId: String) {
-  fun handle(request: JSONRPCRequest): JSONRPCResponse {
-    return JSONRPCResponse(id = request.id, result = clientId)
+  @Test
+  fun testMissingMethod() {
+    val methodsRouter = MethodsRouter(emptyMap())
+    assertEquals(methodNotFound, methodsRouter.handleRequest(JSONRPCRequest(1, "web3_sha3", arrayOf("0xdeadbeef"))))
+  }
+
+  @Test
+  fun testRouteMethod() {
+    val methodsRouter = MethodsRouter(mapOf(Pair("web3_sha3", ::sha3)))
+    assertEquals(JSONRPCResponse(1, result = "0xd4fd4e189132273036449fc9e11198c739161b4c0116a9a2dccdfa1c492006f1"), methodsRouter.handleRequest(JSONRPCRequest(1, "web3_sha3", arrayOf("0xdeadbeef"))))
   }
 }

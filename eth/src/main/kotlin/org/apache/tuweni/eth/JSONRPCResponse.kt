@@ -20,4 +20,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class JSONRPCResponse(@JsonProperty("id") val id: Int, @JsonProperty("result") val result: Any? = null, @JsonProperty("error") val error: Any? = null)
 
-val invalidParams = JSONRPCResponse(id = 0, error = mapOf(Pair("code", -32602), Pair("message", "invalid params")))
+val parseError = JSONRPCResponse(id = 0, error = mapOf(Pair("code", -32700), Pair("message", "Parse error")))
+val invalidRequest = JSONRPCResponse(id = 0, error = mapOf(Pair("code", -32600), Pair("message", "Invalid Request")))
+val methodNotFound = JSONRPCResponse(id = 0, error = mapOf(Pair("code", -32601), Pair("message", "Method not found")))
+val invalidParams = JSONRPCResponse(id = 0, error = mapOf(Pair("code", -32602), Pair("message", "Invalid params")))
+val internalError = JSONRPCResponse(id = 0, error = mapOf(Pair("code", -32603), Pair("message", "Internal error")))
