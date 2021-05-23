@@ -16,8 +16,10 @@
  */
 package org.apache.tuweni.eth
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class JSONRPCResponse(@JsonProperty("id") val id: Int, @JsonProperty("result") val result: Any? = null, @JsonProperty("error") val error: Any? = null)
 
 val parseError = JSONRPCResponse(id = 0, error = mapOf(Pair("code", -32700), Pair("message", "Parse error")))

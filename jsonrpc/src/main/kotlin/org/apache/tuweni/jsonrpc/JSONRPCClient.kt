@@ -62,8 +62,8 @@ class JSONRPCClient(
           deferred.completeExceptionally(response.cause())
         } else {
           val jsonResponse = response.result().bodyAsJsonObject()
-          if (jsonResponse.containsKey("error")) {
-            val err = jsonResponse.getJsonObject("error")
+          val err = jsonResponse.getJsonObject("error")
+          if (err != null) {
             val errorMessage = "Code ${err.getInteger("code")}: ${err.getString("message")}"
             deferred.completeExceptionally(ClientRequestException(errorMessage))
           } else {
