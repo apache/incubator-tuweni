@@ -198,7 +198,7 @@ open class RelationalPeerRepository(
     dataSource.connection.use { conn ->
       val stmt =
         conn.prepareStatement(
-          "select distinct endpoint.host, endpoint.port, identity.publickey from endpoint inner " +
+          "select endpoint.host, endpoint.port, identity.publickey from endpoint inner " +
             "join identity on (endpoint.identity = identity.id) where endpoint.identity NOT IN (select identity from nodeinfo)"
         )
       stmt.use {
