@@ -187,4 +187,18 @@ class DefaultWireConnectionTest {
     conn.initSupportedRange(capabilityList);
     assertEquals(1, conn.agreedSubprotocols().size());
   }
+
+  @Test
+  void testCapabilitiesNegotiationNoMatch() {
+    SubProtocolIdentifier cus = SubProtocolIdentifier.of("auc", 1, 1);
+    LinkedHashMap<SubProtocolIdentifier, SubProtocolHandler> subprotocols = new LinkedHashMap<>();
+    subprotocols.put(cus, mock(SubProtocolHandler.class));
+    DefaultWireConnection conn = new DefaultWireConnection(nodeId, peerNodeId, disconnect -> {
+    }, helloMessage -> {
+    }, () -> {
+    }, subprotocols, 5, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
+    List<Capability> capabilityList = Arrays.asList(new Capability("cus", 1));
+    conn.initSupportedRange(capabilityList);
+    assertEquals(0, conn.agreedSubprotocols().size());
+  }
 }
