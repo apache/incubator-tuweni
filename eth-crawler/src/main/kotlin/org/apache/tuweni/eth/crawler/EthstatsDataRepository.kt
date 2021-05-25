@@ -65,9 +65,9 @@ class EthstatsDataRepository(
           "insert into ethstats_block(address, id, number, hash, parentHash, timestamp, miner, gasUsed, gasLimit, difficulty, totalDifficulty, transactions, transactionsRoot, stateRoot, uncles) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
         )
       stmt.use {
-        val txArray = conn.createArrayOf("bytea(32)", block.transactions.map { it.hash.toArrayUnsafe() }.toTypedArray())
+        val txArray = conn.createArrayOf("bytea", block.transactions.map { it.hash.toArrayUnsafe() }.toTypedArray())
 
-        val unclesArray = conn.createArrayOf("bytea(32)", block.uncles.map { it.toArrayUnsafe() }.toTypedArray())
+        val unclesArray = conn.createArrayOf("bytea", block.uncles.map { it.toArrayUnsafe() }.toTypedArray())
         it.setString(1, remoteAddress)
         it.setString(2, id)
         it.setBytes(3, block.number.toArrayUnsafe())

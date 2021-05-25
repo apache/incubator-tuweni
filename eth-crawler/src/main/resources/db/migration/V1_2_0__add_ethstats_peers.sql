@@ -18,7 +18,7 @@
 CREATE TABLE IF NOT EXISTS latency (
     address varchar(255) not null,
     id varchar(255) not null,
-    value long,
+    value int,
     createdAt timestamp DEFAULT now(),
     PRIMARY KEY(address, id)
 );
@@ -28,7 +28,7 @@ CREATE UNIQUE INDEX latency_createdAt ON latency(createdAt);
 CREATE TABLE IF NOT EXISTS pendingtx (
     address varchar(255) not null,
     id varchar(255) not null,
-    value long,
+    value int,
     createdAt timestamp DEFAULT now(),
     PRIMARY KEY(address, id)
 );
@@ -71,19 +71,19 @@ CREATE UNIQUE INDEX ethstats_nodestats_createdAt ON ethstats_nodestats(createdAt
 CREATE TABLE IF NOT EXISTS ethstats_block(
     address varchar(255) not null,
     id varchar(255) not null,
-    number bytea(32),
-    hash bytea(32),
-    parentHash bytea(32),
-    timestamp long,
-    gasUsed long,
-    gasLimit long,
-    miner bytea(20),
-    difficulty bytea(32),
-    totalDifficulty bytea(32),
-    transactions array,
-    transactionsRoot bytea(32),
-    stateRoot bytea(32),
-    uncles array,
+    number bytea,
+    hash bytea,
+    parentHash bytea,
+    timestamp bigint,
+    gasUsed bigint,
+    gasLimit bigint,
+    miner bytea,
+    difficulty bytea,
+    totalDifficulty bytea,
+    transactions bytea array,
+    transactionsRoot bytea,
+    stateRoot bytea,
+    uncles bytea array,
     createdAt timestamp DEFAULT now(),
     PRIMARY KEY(address, id)
 );

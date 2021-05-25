@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -232,7 +233,7 @@ public final class DefaultWireConnection implements WireConnection {
 
     for (Capability cap : capabilities) {
       SubProtocolIdentifier capSp = SubProtocolIdentifier.of(cap.name(), cap.version());
-      if (!pickedCapabilities.get(cap.name()).equals(capSp)) {
+      if (!Objects.equals(pickedCapabilities.get(cap.name()), capSp)) {
         continue;
       }
       for (SubProtocolIdentifier sp : subprotocols.keySet()) {
