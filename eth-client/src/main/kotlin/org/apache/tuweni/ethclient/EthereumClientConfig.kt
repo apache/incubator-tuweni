@@ -69,6 +69,21 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
     }
   }
 
+  fun proxies(): List<ProxyConfiguration> {
+    val proxySections = config.sections("proxy")
+    if (proxySections == null || proxySections.isEmpty()) {
+      return emptyList()
+    }
+    return proxySections.map { section ->
+      val sectionConfig = config.getConfigurationSection("proxy.$section")
+      ProxyConfigurationImpl(
+        sectionConfig.getString("name"),
+        sectionConfig.getString("upstream"),
+        sectionConfig.getString("downstream")
+      )
+    }
+  }
+
   companion object {
     fun createSchema(): Schema {
       val storageSection = SchemaBuilder.create()
@@ -79,9 +94,17 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       dnsSection.addString("enrLink", null, "DNS domain to query for records", null)
       dnsSection.addLong("pollingPeriod", 50000, "Polling period to refresh DNS records", null)
       dnsSection.addString("peerRepository", "default", "Peer repository to which records should go", null)
+
+      val proxiesSection = SchemaBuilder.create()
+      proxiesSection.addString("name", null, "Name of the site", null)
+      proxiesSection.addString("upstream", null, "Server and port to send data to, such as localhost:1234", null)
+      proxiesSection.addString("downstream", null, "Server and port to expose data on, such as localhost:1234", null)
+
       val builder = SchemaBuilder.create()
       builder.addSection("storage", storageSection.toSchema())
       builder.addSection("dns", dnsSection.toSchema())
+      builder.addSection("proxy", proxiesSection.toSchema())
+
       return builder.toSchema()
     }
 
@@ -136,6 +159,12 @@ interface DNSConfiguration {
   fun pollingPeriod(): Long
   fun getName(): String
   fun peerRepository(): String
+}
+
+interface ProxyConfiguration {
+  fun name(): String
+  fun upstream(): String
+  fun downstream(): String
 }
 
 interface PeerRepositoryConfiguration {
@@ -195,4 +224,11 @@ data class DNSConfigurationImpl(
   override fun enrLink() = enrLink
 
   override fun pollingPeriod(): Long = pollingPeriod
+}
+
+data class ProxyConfigurationImpl(private val name: String, private val upstream: String, private val downstream: String) : ProxyConfiguration {
+  override fun name() = name
+
+  override fun upstream() = upstream
+  override fun downstream() = upstream
 }

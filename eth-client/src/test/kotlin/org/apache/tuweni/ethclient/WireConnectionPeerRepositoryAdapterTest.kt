@@ -47,7 +47,7 @@ class WireConnectionPeerRepositoryAdapterTest {
       on { peerHost() } doReturn("example.com")
       on { peerPort() } doReturn(1234)
       on { peerPublicKey() } doReturn(pubKey)
-      on { uri() }.thenCallRealMethod()
+      on { uri() } doReturn("foo")
     }
 
     connRepo.add(conn)
@@ -69,7 +69,7 @@ class WireConnectionPeerRepositoryAdapterTest {
       on { peerHost() } doReturn("example.com")
       on { peerPort() } doReturn(1234)
       on { peerPublicKey() } doReturn(pubKey)
-      on { uri() }.thenCallRealMethod()
+      on { uri() } doReturn "foo"
     }
     val id = connRepo.add(conn)
     assertEquals(conn, connRepo[id])

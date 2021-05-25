@@ -31,6 +31,9 @@ import org.apache.tuweni.devp2p.eth.EthRequestsManager
 import org.apache.tuweni.devp2p.eth.EthSubprotocol
 import org.apache.tuweni.devp2p.eth.EthSubprotocol.Companion.ETH66
 import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
+import org.apache.tuweni.devp2p.proxy.ProxyClient
+import org.apache.tuweni.devp2p.proxy.ProxySubprotocol
+import org.apache.tuweni.devp2p.proxy.target.TcpEndpoint
 import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
@@ -42,6 +45,7 @@ import org.apache.tuweni.rlpx.vertx.VertxRLPxService
 import org.apache.tuweni.units.bigints.UInt256
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
+import java.net.URI
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -153,19 +157,27 @@ class EthereumClient(
           listener = adapter::listenToStatus,
           selectionStrategy = { ConnectionManagementStrategy(peerRepositoryAdapter = adapter) }
         )
+        val proxySubprotocol = ProxySubprotocol()
         val service = VertxRLPxService(
           vertx,
           rlpxConfig.port(),
           rlpxConfig.networkInterface(),
           rlpxConfig.advertisedPort(),
           SECP256K1.KeyPair.random(),
-          listOf(ethSubprotocol),
+          listOf(ethSubprotocol, proxySubprotocol),
           rlpxConfig.clientName(),
           adapter
         )
         services[rlpxConfig.getName()] = service
         service.start().thenRun {
           logger.info("Started Ethereum client ${rlpxConfig.getName()}")
+          val proxyClient = service.getClient(ProxySubprotocol.ID) as ProxyClient
+          for (proxyConfig in config.proxies()) {
+            val uri = URI.create(proxyConfig.upstream())
+            val target = TcpEndpoint(vertx, uri.host, uri.port)
+            target.start()
+            proxyClient.registeredSites[proxyConfig.name()] = target
+          }
           peerRepository.addIdentityListener {
             service.connectTo(
               it.publicKey(),
