@@ -54,11 +54,11 @@ dependencies {
   runtimeOnly 'org.bouncycastle:bcprov-jdk15on'
 
   testImplementation project(':junit')
-  testImplementation 'com.h2database:h2'
   testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin'
   testImplementation 'org.bouncycastle:bcprov-jdk15on'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.junit.jupiter:junit-jupiter-params'
+  testImplementation 'com.opentable.components:otj-pg-embedded'
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testRuntimeOnly 'ch.qos.logback:logback-classic'

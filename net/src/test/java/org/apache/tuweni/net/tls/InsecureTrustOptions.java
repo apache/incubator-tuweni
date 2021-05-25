@@ -12,6 +12,8 @@
  */
 package org.apache.tuweni.net.tls;
 
+import java.util.function.Function;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
@@ -25,6 +27,11 @@ final class InsecureTrustOptions implements TrustOptions {
   private InsecureTrustOptions() {}
 
   @Override
+  public TrustOptions copy() {
+    return clone();
+  }
+
+  @Override
   public TrustOptions clone() {
     return this;
   }
@@ -32,5 +39,10 @@ final class InsecureTrustOptions implements TrustOptions {
   @Override
   public TrustManagerFactory getTrustManagerFactory(Vertx vertx) {
     return InsecureTrustManagerFactory.INSTANCE;
+  }
+
+  @Override
+  public Function<String, TrustManager[]> trustManagerMapper(Vertx vertx) throws Exception {
+    return (server) -> getTrustManagerFactory(vertx).getTrustManagers();
   }
 }
