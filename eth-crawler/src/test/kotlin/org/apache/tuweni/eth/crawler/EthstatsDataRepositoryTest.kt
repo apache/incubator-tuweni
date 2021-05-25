@@ -16,7 +16,7 @@
  */
 package org.apache.tuweni.eth.crawler
 
-import com.zaxxer.hikari.HikariDataSource
+import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
@@ -37,14 +37,12 @@ class EthstatsDataRepositoryTest {
   private var repository: EthstatsDataRepository? = null
 
   @BeforeEach
-  fun setUpRepository() {
-    val ds = HikariDataSource()
-    ds.jdbcUrl = "jdbc:h2:mem:testdb"
-    val flyway = Flyway.configure()
-      .dataSource(ds)
-      .load()
+  fun before() {
+    val provider = EmbeddedPostgres.builder().start()
+    val dataSource = provider.postgresDatabase
+    val flyway = Flyway.configure().dataSource(dataSource).load()
     flyway.migrate()
-    repository = EthstatsDataRepository(ds)
+    repository = EthstatsDataRepository(dataSource)
   }
 
   @Test
