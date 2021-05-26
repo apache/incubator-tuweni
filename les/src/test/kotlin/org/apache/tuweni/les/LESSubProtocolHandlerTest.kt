@@ -178,7 +178,7 @@ internal class LESSubProtocolHandlerTest {
       on { peerHost() } doReturn UUID.randomUUID().toString()
       on { peerPort() } doReturn 1
       on { peerPublicKey() } doReturn key
-      on { uri() }.thenCallRealMethod()
+      on { uri() }.thenReturn("foo")
     }
   }
 
