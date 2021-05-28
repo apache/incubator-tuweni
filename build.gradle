@@ -429,7 +429,7 @@ allprojects {
             artifact sourcesJar { classifier 'sources' }
           }
           groupId 'org.apache.tuweni'
-          artifactId project.name
+          artifactId 'tuweni-' + project.name
           version project.version
 
           versionMapping {
