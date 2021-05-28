@@ -245,13 +245,18 @@ internal class EthHandler66(
   override fun handleNewPeerConnection(connection: WireConnection): AsyncCompletion {
     val newPeer = PeerInfo()
     pendingStatus[connection.uri()] = newPeer
+    val ethSubProtocol = connection.agreedSubprotocols().firstOrNull() { it.name() == EthSubprotocol.ETH65.name() }
+    if (ethSubProtocol == null) {
+      newPeer.cancel()
+      return newPeer.ready
+    }
     service.send(
-      EthSubprotocol.ETH66, MessageType.Status.code, connection,
+      ethSubProtocol, MessageType.Status.code, connection,
       RLP.encodeList {
         it.writeValue(UInt64.random().toBytes())
         it.writeRLP(
           StatusMessage(
-            EthSubprotocol.ETH66.version(),
+            ethSubProtocol.version(),
             blockchainInfo.networkID(), blockchainInfo.totalDifficulty(),
             blockchainInfo.bestHash(), blockchainInfo.genesisHash(), blockchainInfo.getLatestForkHash(),
             blockchainInfo.getLatestFork()
