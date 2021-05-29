@@ -16,6 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.apache.tuweni.units.bigints.UInt256;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -64,5 +67,22 @@ class WeiTest {
   @Test
   void testFromEth() {
     assertEquals(Wei.valueOf((long) Math.pow(10, 18)), Wei.fromEth(1));
+  }
+
+  @Test
+  void testToInt() {
+    assertTrue(Wei.valueOf(100L).fitsInt());
+    assertEquals(100, Wei.valueOf(100L).toInt());
+  }
+
+  @Test
+  void testToLong() {
+    assertTrue(Wei.valueOf(100L).fitsLong());
+    assertEquals(100L, Wei.valueOf(100L).toLong());
+  }
+
+  @Test
+  void toBigIntegerIsPositive() {
+    assertEquals(1, Wei.valueOf(UInt256.MAX_VALUE).toBigInteger().signum());
   }
 }

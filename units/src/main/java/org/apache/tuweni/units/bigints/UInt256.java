@@ -451,7 +451,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (divisor.isZero()) {
       return UInt256.ZERO;
     } else {
-      BigInteger result = this.toBigInteger().divide(divisor.toBigInteger());
+      BigInteger result = this.toSignedBigInteger().divide(divisor.toSignedBigInteger());
       Bytes resultBytes = Bytes.wrap(result.toByteArray());
       if (resultBytes.size() > 32) {
         resultBytes = resultBytes.slice(resultBytes.size() - 32, 32);
@@ -532,8 +532,8 @@ public final class UInt256 implements UInt256Value<UInt256> {
       return UInt256.ZERO;
     }
 
-    BigInteger bi = this.toBigInteger();
-    BigInteger result = bi.abs().mod(modulus.toBigInteger().abs());
+    BigInteger bi = this.toSignedBigInteger();
+    BigInteger result = bi.abs().mod(modulus.toSignedBigInteger().abs());
 
     if (bi.signum() < 0) {
       result = result.negate();

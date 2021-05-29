@@ -13,8 +13,13 @@
 package org.apache.tuweni.units.bigints;
 
 
+import static java.nio.ByteOrder.BIG_ENDIAN;
+
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
+
+import java.math.BigInteger;
+import java.nio.ByteOrder;
 
 
 /**
@@ -336,13 +341,33 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
    * @return True if this value fits a java {@code int} (i.e. is less or equal to {@code Integer.MAX_VALUE}).
    */
   default boolean fitsInt() {
-    // Ints are 4 bytes, so anything but the 4 last bytes must be zeroes
-    for (int i = 0; i < Bytes32.SIZE - 4; i++) {
-      if (get(i) != 0)
-        return false;
+    return fitsInt(ByteOrder.BIG_ENDIAN);
+  }
+
+  /**
+   * Returns true if the value can fit in an int according to the byte order.
+   *
+   * @param order the byte order, little or big endian
+   * @return True if this value fits a java {@code int} (i.e. is less or equal to {@code Integer.MAX_VALUE}).
+   */
+  default boolean fitsInt(ByteOrder order) {
+    if (order == ByteOrder.BIG_ENDIAN) {
+      // Ints are 4 bytes, so anything but the 4 last bytes must be zeroes
+      for (int i = 0; i < Bytes32.SIZE - 4; i++) {
+        if (get(i) != 0)
+          return false;
+      }
+      // Lastly, the left-most byte of the int must not start with a 1.
+      return get(Bytes32.SIZE - 4) >= 0;
+    } else {
+      // Ints are 4 bytes, so only the 4 first bytes must not be zeroes
+      for (int i = 4; i < Bytes32.SIZE - 4; i++) {
+        if (get(i) != 0)
+          return false;
+      }
+      // Lastly, the right-most byte of the int must not start with a 1.
+      return get(3) >= 0;
     }
-    // Lastly, the left-most byte of the int must not start with a 1.
-    return get(Bytes32.SIZE - 4) >= 0;
   }
 
   /**
@@ -358,19 +383,63 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
     return getInt(Bytes32.SIZE - 4);
   }
 
+  @Override
+  default int toInt(ByteOrder order) {
+    if (!fitsInt(order)) {
+      throw new ArithmeticException("Value does not fit a 4 byte int");
+    }
+    if (order == ByteOrder.BIG_ENDIAN) {
+      return getInt(Bytes32.SIZE - 4, order);
+    } else {
+      return getInt(0, order);
+    }
+  }
+
+  @Override
+  default long toLong(ByteOrder order) {
+    if (!fitsLong(order)) {
+      throw new ArithmeticException("Value does not fit a 8 byte long");
+    }
+    if (order == ByteOrder.BIG_ENDIAN) {
+      return getLong(Bytes32.SIZE - 8, order);
+    } else {
+      return getLong(0, order);
+    }
+  }
+
   /**
    * Returns true if the value can fit in a long.
    *
    * @return True if this value fits a java {@code long} (i.e. is less or equal to {@code Long.MAX_VALUE}).
    */
   default boolean fitsLong() {
-    // Longs are 8 bytes, so anything but the 8 last bytes must be zeroes
-    for (int i = 0; i < Bytes32.SIZE - 8; i++) {
-      if (get(i) != 0)
-        return false;
+    return fitsLong(ByteOrder.BIG_ENDIAN);
+  }
+
+  /**
+   * Returns true if the value can fit in a long.
+   *
+   * @param order byte order, little or big endian
+   * @return True if this value fits a java {@code long} (i.e. is less or equal to {@code Long.MAX_VALUE}).
+   */
+  default boolean fitsLong(ByteOrder order) {
+    if (order == ByteOrder.BIG_ENDIAN) {
+      // Longs are 8 bytes, so anything but the 8 last bytes must be zeroes
+      for (int i = 0; i < Bytes32.SIZE - 8; i++) {
+        if (get(i) != 0)
+          return false;
+      }
+      // Lastly, the left-most byte of the long must not start with a 1.
+      return get(Bytes32.SIZE - 8) >= 0;
+    } else {
+      // Longs are 8 bytes, so only the 8 first bytes may not be zeroes
+      for (int i = 8; i < Bytes32.SIZE; i++) {
+        if (get(i) != 0)
+          return false;
+      }
+      // Lastly, the left-most byte of the long must not start with a 1.
+      return get(7) >= 0;
     }
-    // Lastly, the left-most byte of the long must not start with a 1.
-    return get(Bytes32.SIZE - 8) >= 0;
   }
 
   /**
@@ -432,5 +501,57 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
    */
   default boolean lessOrEqualThan(UInt256Value<T> other) {
     return compareTo(other) <= 0;
+  }
+
+  /**
+   * Returns the decimal representation of this value as a String.
+   *
+   * @return the decimal representation of this value as a String.
+   */
+  default String toDecimalString() {
+    return toBigInteger().toString(10);
+  }
+
+  /**
+   * The BigInteger corresponding to interpreting these bytes as a two's-complement signed integer.
+   *
+   * @return A {@link BigInteger} corresponding to interpreting these bytes as a two's-complement signed integer.
+   */
+  default BigInteger toSignedBigInteger() {
+    return toSignedBigInteger(BIG_ENDIAN);
+  }
+
+  /**
+   * The BigInteger corresponding to interpreting these bytes as a two's-complement signed integer.
+   *
+   * @param order The byte-order for decoding the integer.
+   * @return A {@link BigInteger} corresponding to interpreting these bytes as a two's-complement signed integer.
+   */
+  default BigInteger toSignedBigInteger(ByteOrder order) {
+    if (size() == 0) {
+      return BigInteger.ZERO;
+    }
+    return new BigInteger((order == BIG_ENDIAN) ? toArrayUnsafe() : reverse().toArrayUnsafe());
+  }
+
+  /**
+   * The BigInteger corresponding to interpreting these bytes as an unsigned integer.
+   *
+   * @return A positive (or zero) {@link BigInteger} corresponding to interpreting these bytes as an unsigned integer.
+   */
+  @Override
+  default BigInteger toBigInteger() {
+    return toUnsignedBigInteger();
+  }
+
+  /**
+   * The BigInteger corresponding to interpreting these bytes as an unsigned integer.
+   *
+   * @param order The byte-order for decoding the integer.
+   * @return A positive (or zero) {@link BigInteger} corresponding to interpreting these bytes as an unsigned integer.
+   */
+  @Override
+  default BigInteger toBigInteger(ByteOrder order) {
+    return toUnsignedBigInteger(order);
   }
 }

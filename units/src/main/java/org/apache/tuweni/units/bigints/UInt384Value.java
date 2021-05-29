@@ -409,4 +409,13 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
   default int bitLength() {
     return toBytes().bitLength();
   }
+
+  /**
+   * Returns the decimal representation of this value as a String.
+   *
+   * @return the decimal representation of this value as a String.
+   */
+  default String toDecimalString() {
+    return toBigInteger().toString(10);
+  }
 }

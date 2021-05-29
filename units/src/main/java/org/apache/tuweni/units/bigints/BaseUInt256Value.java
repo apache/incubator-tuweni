@@ -19,6 +19,7 @@ import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.bytes.MutableBytes32;
 
 import java.math.BigInteger;
+import java.nio.ByteOrder;
 import java.util.function.Function;
 
 /**
@@ -380,5 +381,10 @@ public abstract class BaseUInt256Value<T extends UInt256Value<T>> implements UIn
   @Override
   public MutableBytes32 mutableCopy() {
     return MutableBytes32.wrap(value.toArrayUnsafe());
+  }
+
+  @Override
+  public long toLong(ByteOrder order) {
+    return value.toLong(order);
   }
 }

@@ -848,4 +848,9 @@ class UInt64Test {
     String msg = String.format("Expected %s but got %s", expected.toHexString(), actual.toHexString());
     assertEquals(expected, actual, msg);
   }
+
+  @Test
+  void testToDecimalString() {
+    assertEquals("3456", UInt64.valueOf(3456).toDecimalString());
+  }
 }
