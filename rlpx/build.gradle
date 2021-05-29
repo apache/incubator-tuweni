@@ -17,12 +17,15 @@ dependencies {
   implementation project(':rlp')
   implementation 'com.google.guava:guava'
   implementation 'org.slf4j:slf4j-api'
+  implementation 'io.opentelemetry:opentelemetry-api'
+  implementation 'io.opentelemetry:opentelemetry-api-metrics'
 
   compileOnly 'io.vertx:vertx-core'
   implementation 'org.xerial.snappy:snappy-java'
   implementation 'org.bouncycastle:bcprov-jdk15on'
 
   testImplementation project(':junit')
+  testImplementation 'io.opentelemetry:opentelemetry-sdk-metrics'
   testImplementation 'io.vertx:vertx-core'
   testImplementation 'org.bouncycastle:bcprov-jdk15on'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'

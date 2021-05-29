@@ -31,8 +31,8 @@ class EthereumClientRunTest {
 
   @Test
   fun startTwoClientsAndConnectThem(@VertxInstance vertx: Vertx) = runBlocking {
-    val config1 = EthereumClientConfig.fromString("[storage.default]\npath=\"data\"\ngenesis=\"default\"")
-    val config2 = EthereumClientConfig.fromString("[storage.default]\npath=\"data2\"\ngenesis=\"default\"")
+    val config1 = EthereumClientConfig.fromString("metricsPort=9091\n[storage.default]\npath=\"data\"\ngenesis=\"default\"")
+    val config2 = EthereumClientConfig.fromString("metricsPort=9092\n[storage.default]\npath=\"data2\"\ngenesis=\"default\"")
     val client1 = EthereumClient(vertx, config1)
     val client2 = EthereumClient(vertx, config2)
     client1.start()

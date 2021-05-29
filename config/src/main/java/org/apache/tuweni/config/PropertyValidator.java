@@ -193,6 +193,20 @@ public interface PropertyValidator<T> {
   }
 
   /**
+   * A validator that ensures a property, if present, is a well-formed port number.
+   *
+   * @return A validator that ensures a property, if present, is a well-formed number.
+   */
+  static PropertyValidator<Integer> isValidPort() {
+    return (key, position, value) -> {
+      if (value != null && (value <= 0 || value > 65535)) {
+        return singleError(position, "Value of property '" + key + "' is not a valid port");
+      }
+      return noErrors();
+    };
+  }
+
+  /**
    * Validate a configuration property.
    *
    * @param key The configuration property key.

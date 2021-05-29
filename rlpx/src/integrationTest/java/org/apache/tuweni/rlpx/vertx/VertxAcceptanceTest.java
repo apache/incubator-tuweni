@@ -42,6 +42,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.vertx.core.Vertx;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -49,6 +51,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith({VertxExtension.class, BouncyCastleExtension.class})
 class VertxAcceptanceTest {
+
+  private Meter meter = SdkMeterProvider.builder().build().get("vertxAcceptance");
 
   private static class MyCustomSubProtocolHandler implements SubProtocolHandler {
 
@@ -113,8 +117,16 @@ class VertxAcceptanceTest {
     MyCustomSubProtocol sp = new MyCustomSubProtocol();
     MyCustomSubProtocol secondSp = new MyCustomSubProtocol();
     MemoryWireConnectionsRepository repository = new MemoryWireConnectionsRepository();
-    VertxRLPxService service =
-        new VertxRLPxService(vertx, 0, "localhost", 10000, kp, Collections.singletonList(sp), "Client 1", repository);
+    VertxRLPxService service = new VertxRLPxService(
+        vertx,
+        0,
+        "localhost",
+        10000,
+        kp,
+        Collections.singletonList(sp),
+        "Client 1",
+        meter,
+        repository);
     MemoryWireConnectionsRepository secondRepository = new MemoryWireConnectionsRepository();
 
     VertxRLPxService secondService = new VertxRLPxService(
@@ -125,6 +137,7 @@ class VertxAcceptanceTest {
         secondKp,
         Collections.singletonList(secondSp),
         "Client 2",
+        meter,
         secondRepository);
     service.start().join();
     secondService.start().join();
@@ -159,8 +172,16 @@ class VertxAcceptanceTest {
     MemoryWireConnectionsRepository repository = new MemoryWireConnectionsRepository();
     MemoryWireConnectionsRepository secondRepository = new MemoryWireConnectionsRepository();
 
-    VertxRLPxService service =
-        new VertxRLPxService(vertx, 0, "localhost", 10000, kp, Collections.singletonList(sp), "Client 1", repository);
+    VertxRLPxService service = new VertxRLPxService(
+        vertx,
+        0,
+        "localhost",
+        10000,
+        kp,
+        Collections.singletonList(sp),
+        "Client 1",
+        meter,
+        repository);
     VertxRLPxService secondService = new VertxRLPxService(
         vertx,
         0,
@@ -169,6 +190,7 @@ class VertxAcceptanceTest {
         secondKp,
         Collections.singletonList(secondSp),
         "Client 2",
+        meter,
         secondRepository);
     service.start().join();
     secondService.start().join();
@@ -260,7 +282,7 @@ class VertxAcceptanceTest {
           public SubProtocolClient createClient(RLPxService service, SubProtocolIdentifier identifier) {
             return null;
           }
-        }), "Client 1", repository);
+        }), "Client 1", meter, repository);
     service.start().join();
 
     AsyncResult<WireConnection> completion = service

@@ -35,6 +35,7 @@ import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.MemoryTransactionPool
+import org.apache.tuweni.ethclient.metrics.MetricsService
 import org.apache.tuweni.kv.LevelDBKeyValueStore
 import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.rlpx.RLPxService
@@ -58,6 +59,7 @@ class EthereumClient(
     val logger = LoggerFactory.getLogger(EthereumClient::class.java)
   }
 
+  private var metricsService: MetricsService? = null
   private val genesisFiles = HashMap<String, GenesisFile>()
   private val services = HashMap<String, RLPxService>()
   private val storageRepositories = HashMap<String, BlockchainRepository>()
@@ -66,6 +68,8 @@ class EthereumClient(
   private val synchronizers = HashMap<String, Synchronizer>()
 
   suspend fun start() {
+    logger.info("Starting Ethereum client...")
+    metricsService = MetricsService("tuweni", port = config.metricsPort())
     config.peerRepositories().forEach {
       peerRepositories[it.getName()] = MemoryEthereumPeerRepository()
     }
@@ -76,7 +80,7 @@ class EthereumClient(
 
     val repoToGenesisFile = HashMap<BlockchainRepository, GenesisFile>()
 
-    config.dataStores().forEach() { dataStore ->
+    config.dataStores().forEach { dataStore ->
       val genesisFile = genesisFiles[dataStore.getGenesisFile()]
       val genesisBlock = genesisFile!!.toBlock()
       val dataStorage = dataStore.getStoragePath()
@@ -113,11 +117,12 @@ class EthereumClient(
       val dnsClient = DNSClient(it, MapKeyValueStore.open(), peerRepository)
       dnsClients[it.getName()] = dnsClient
       dnsClient.start()
-      logger.info("Started DNS client ${it.getName()}")
+      logger.info("Started DNS client ${it.getName()} for ${it.enrLink()}")
     }
 
     AsyncCompletion.allOf(
       config.rlpxServices().map { rlpxConfig ->
+        logger.info("Creating RLPx service ${rlpxConfig.getName()}")
         val peerRepository = peerRepositories[rlpxConfig.peerRepository()]
         if (peerRepository == null) {
           val message = (
@@ -153,6 +158,7 @@ class EthereumClient(
           listener = adapter::listenToStatus,
           selectionStrategy = { ConnectionManagementStrategy(peerRepositoryAdapter = adapter) }
         )
+        val meter = metricsService!!.meterSdkProvider["${rlpxConfig.getName()}_rlpx"]
         val service = VertxRLPxService(
           vertx,
           rlpxConfig.port(),
@@ -161,6 +167,7 @@ class EthereumClient(
           SECP256K1.KeyPair.random(),
           listOf(ethSubprotocol),
           rlpxConfig.clientName(),
+          meter,
           adapter
         )
         services[rlpxConfig.getName()] = service
@@ -201,6 +208,7 @@ class EthereumClient(
     Runtime.getRuntime().addShutdownHook(object : Thread() {
       override fun run() = this@EthereumClient.stop()
     })
+    logger.info("Started Ethereum client")
   }
 
   fun stop() = runBlocking {
@@ -211,5 +219,7 @@ class EthereumClient(
     }
     AsyncCompletion.allOf(services.values.map(RLPxService::stop)).await()
     storageRepositories.values.forEach(BlockchainRepository::close)
+    metricsService?.close()
+    Unit
   }
 }

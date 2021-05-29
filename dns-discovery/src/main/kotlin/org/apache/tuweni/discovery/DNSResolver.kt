@@ -93,6 +93,7 @@ class DNSResolver @JvmOverloads constructor(
       }
     }
     visitTree(enrLink, visitor)
+    logger.info("Resolved ${nodes.size} nodes")
     return nodes
   }
 

@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.devp2p.eth
 
+import io.opentelemetry.sdk.metrics.SdkMeterProvider
 import io.vertx.core.Vertx
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -54,6 +55,8 @@ import java.net.InetSocketAddress
 @ExtendWith(LuceneIndexWriterExtension::class, VertxExtension::class, BouncyCastleExtension::class)
 class SendPendingTransactionsTest {
 
+  private val meter = SdkMeterProvider.builder().build().get("connect")
+
   private val peerId = "b1c9e33ebfd9446151688f0abaf171dac6df31ea5205a200f2cbaf5f8be" +
     "d241c9f93732f25109e16badea1aa657a6078240657688cbbddb91a50aa8c7c34a9cc"
 
@@ -89,7 +92,8 @@ class SendPendingTransactionsTest {
           pendingTransactionsPool = MemoryTransactionPool()
         )
       ),
-      "Tuweni Experiment 0.1"
+      "Tuweni Experiment 0.1",
+      meter
     )
     service.start().await()
     service.connectTo(

@@ -17,6 +17,7 @@
 package org.apache.tuweni.ethclient
 
 import org.apache.tuweni.config.Configuration
+import org.apache.tuweni.config.PropertyValidator
 import org.apache.tuweni.config.Schema
 import org.apache.tuweni.config.SchemaBuilder
 import org.apache.tuweni.eth.genesis.GenesisFile
@@ -52,6 +53,8 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
   fun peerRepositories(): List<PeerRepositoryConfiguration> =
     listOf(PeerRepositoryConfigurationImpl("default"))
 
+  fun metricsPort(): Int = config.getInteger("metricsPort")
+
   fun toToml() = config.toToml()
   fun dnsClients(): List<DNSConfiguration> {
     val dnsSections = config.sections("dns")
@@ -80,6 +83,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       dnsSection.addLong("pollingPeriod", 50000, "Polling period to refresh DNS records", null)
       dnsSection.addString("peerRepository", "default", "Peer repository to which records should go", null)
       val builder = SchemaBuilder.create()
+      builder.addInteger("metricsPort", 9090, "Port to expose Prometheus metrics", PropertyValidator.isValidPort())
       builder.addSection("storage", storageSection.toSchema())
       builder.addSection("dns", dnsSection.toSchema())
       return builder.toSchema()

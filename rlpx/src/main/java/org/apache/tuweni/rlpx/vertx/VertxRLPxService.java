@@ -42,6 +42,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import io.opentelemetry.api.metrics.DoubleCounter;
+import io.opentelemetry.api.metrics.Meter;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -70,6 +72,8 @@ public final class VertxRLPxService implements RLPxService {
   private final List<SubProtocol> subProtocols;
   private final String clientId;
   private final WireConnectionRepository repository;
+  private final DoubleCounter connectionsCreatedCounter;
+  private final DoubleCounter connectionsDisconnectedCounter;
 
   private LinkedHashMap<SubProtocolIdentifier, SubProtocolHandler> handlers;
   private LinkedHashMap<SubProtocolIdentifier, SubProtocolClient> clients;
@@ -85,7 +89,7 @@ public final class VertxRLPxService implements RLPxService {
   }
 
   /**
-   * Default constructor.
+   * Constructor to build a RLPx service with a in-memory peer repository.
    *
    * @param vertx Vert.x object used to build the network components
    * @param listenPort the port to listen to
@@ -94,6 +98,7 @@ public final class VertxRLPxService implements RLPxService {
    * @param identityKeyPair the identity of this client
    * @param subProtocols subprotocols supported
    * @param clientId the client identifier, such as "RLPX 1.2/build 389"
+   * @param meter the metric service meter used to monitor useful metrics in the service
    */
   public VertxRLPxService(
       Vertx vertx,
@@ -102,7 +107,8 @@ public final class VertxRLPxService implements RLPxService {
       int advertisedPort,
       KeyPair identityKeyPair,
       List<SubProtocol> subProtocols,
-      String clientId) {
+      String clientId,
+      Meter meter) {
     this(
         vertx,
         listenPort,
@@ -111,11 +117,12 @@ public final class VertxRLPxService implements RLPxService {
         identityKeyPair,
         subProtocols,
         clientId,
+        meter,
         new MemoryWireConnectionsRepository());
   }
 
   /**
-   * Default constructor.
+   * Constructor to build a RLPx service with a peer repository provided.
    *
    * @param vertx Vert.x object used to build the network components
    * @param listenPort the port to listen to
@@ -124,6 +131,7 @@ public final class VertxRLPxService implements RLPxService {
    * @param identityKeyPair the identity of this client
    * @param subProtocols subprotocols supported
    * @param clientId the client identifier, such as "RLPX 1.2/build 389"
+   * @param meter the metric service meter used to monitor useful metrics in the service
    * @param repository a wire connection repository
    */
   public VertxRLPxService(
@@ -134,6 +142,7 @@ public final class VertxRLPxService implements RLPxService {
       KeyPair identityKeyPair,
       List<SubProtocol> subProtocols,
       String clientId,
+      Meter meter,
       WireConnectionRepository repository) {
     checkPort(listenPort);
     checkPort(advertisedPort);
@@ -154,6 +163,12 @@ public final class VertxRLPxService implements RLPxService {
         tryConnect(c.peerPublicKey(), new InetSocketAddress(c.peerHost(), c.peerPort()));
       }
     });
+    this.connectionsCreatedCounter =
+        meter.doubleCounterBuilder("connections_created").setDescription("Number of connections created").build();
+    this.connectionsDisconnectedCounter = meter
+        .doubleCounterBuilder("connections_disconnected")
+        .setDescription("Number of connections disconnected")
+        .build();
   }
 
   private void tryConnect(SECP256K1.PublicKey peerPublicKey, InetSocketAddress inetSocketAddress) {
@@ -170,6 +185,7 @@ public final class VertxRLPxService implements RLPxService {
   @Override
   public AsyncCompletion start() {
     if (started.compareAndSet(false, true)) {
+      logger.info("Starting rlpx service " + clientId);
       handlers = new LinkedHashMap<>();
       clients = new LinkedHashMap<>();
 
@@ -196,6 +212,7 @@ public final class VertxRLPxService implements RLPxService {
           complete.completeExceptionally(res.cause());
         }
       });
+      logger.info("Initialized rlpx service " + clientId);
       return complete;
     } else {
       return AsyncCompletion.completed();
@@ -223,6 +240,10 @@ public final class VertxRLPxService implements RLPxService {
   }
 
   private void receiveMessage(NetSocket netSocket) {
+    connectionsCreatedCounter.add(1);
+    netSocket.closeHandler((handler) -> {
+      connectionsDisconnectedCounter.add(1);
+    });
     netSocket.handler(new Handler<>() {
 
       private RLPxConnection conn;
@@ -316,7 +337,7 @@ public final class VertxRLPxService implements RLPxService {
       throw new IllegalStateException("The RLPx service is not active");
     }
     CompletableAsyncResult<WireConnection> connected = AsyncResult.incomplete();
-    logger.debug("Connecting to {} with public key {}", peerAddress, peerPublicKey);
+    logger.info("Connecting to {} with public key {}", peerAddress, peerPublicKey);
     client
         .connect(
             peerAddress.getPort(),

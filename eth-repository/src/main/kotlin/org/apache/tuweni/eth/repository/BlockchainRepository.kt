@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.eth.repository
 
+import io.opentelemetry.api.metrics.Meter
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.index.IndexWriter
 import org.apache.lucene.index.IndexWriterConfig
@@ -50,6 +51,7 @@ import java.util.UUID
  * @param transactionStore the key-value store to store transactions
  * @param stateStore the key-value store to store the global state
  * @param blockchainIndex the blockchain index to index values
+ * @param meter an optional metering provider to watch metrics in the repository
  */
 class BlockchainRepository(
   private val chainMetadata: KeyValueStore<Bytes, Bytes>,
@@ -58,7 +60,8 @@ class BlockchainRepository(
   private val transactionReceiptStore: KeyValueStore<Bytes, Bytes>,
   private val transactionStore: KeyValueStore<Bytes, Bytes>,
   private val stateStore: KeyValueStore<Bytes, Bytes>,
-  private val blockchainIndex: BlockchainIndex
+  private val blockchainIndex: BlockchainIndex,
+  private val meter: Meter? = null,
 ) {
 
   companion object {
@@ -82,7 +85,7 @@ class BlockchainRepository(
         MapKeyValueStore(),
         MapKeyValueStore(),
         MapKeyValueStore(),
-        BlockchainIndex(writer)
+        BlockchainIndex(writer),
       )
     }
 
@@ -99,7 +102,8 @@ class BlockchainRepository(
       transactionStore: KeyValueStore<Bytes, Bytes>,
       stateStore: KeyValueStore<Bytes, Bytes>,
       blockchainIndex: BlockchainIndex,
-      genesisBlock: Block
+      genesisBlock: Block,
+      meter: Meter? = null
     ): BlockchainRepository {
       val repo = BlockchainRepository(
         chainMetadata,
@@ -108,7 +112,8 @@ class BlockchainRepository(
         transactionReceiptsStore,
         transactionStore,
         stateStore,
-        blockchainIndex
+        blockchainIndex,
+        meter
       )
       repo.setGenesisBlock(genesisBlock)
       repo.storeBlock(genesisBlock)
@@ -117,6 +122,12 @@ class BlockchainRepository(
   }
 
   val blockHeaderListeners = mutableMapOf<String, (BlockHeader) -> Unit>()
+  val blocksStoredCounter =
+    meter?.longCounterBuilder("blocks_stored")?.setDescription("Number of blocks stored")?.build()
+  val blockHeadersStoredCounter =
+    meter?.longCounterBuilder("block_headers_stored")?.setDescription("Number of block headers stored")?.build()
+  val blockBodiesStoredCounter =
+    meter?.longCounterBuilder("blocks_bodies_stored")?.setDescription("Number of block bodies stored")?.build()
 
   /**
    * Stores a block body into the repository.
@@ -124,6 +135,7 @@ class BlockchainRepository(
    * @param blockBody the block body to store
    */
   suspend fun storeBlockBody(blockHash: Hash, blockBody: BlockBody) {
+    blockBodiesStoredCounter?.add(1)
     blockBodyStore.put(blockHash, blockBody.toBytes())
   }
 
@@ -144,6 +156,7 @@ class BlockchainRepository(
    * @return a handle to the storage operation completion
    */
   suspend fun storeBlock(block: Block) {
+    blocksStoredCounter?.add(1)
     storeBlockBody(block.getHeader().getHash(), block.getBody())
     blockHeaderStore.put(block.getHeader().getHash(), block.getHeader().toBytes())
     indexBlockHeader(block.getHeader())
@@ -174,6 +187,7 @@ class BlockchainRepository(
    * @return handle to the storage operation completion
    */
   suspend fun storeBlockHeader(header: BlockHeader) {
+    blockHeadersStoredCounter?.add(1)
     blockHeaderStore.put(header.hash, header.toBytes())
     indexBlockHeader(header)
     logger.debug("Stored header {} {}", header.number, header.hash)

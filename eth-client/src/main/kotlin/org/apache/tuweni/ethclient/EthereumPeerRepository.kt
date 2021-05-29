@@ -129,6 +129,7 @@ class MemoryEthereumPeerRepository : EthereumPeerRepository {
   override fun randomPeer(): Peer? = peerMap.values.firstOrNull()
 
   override fun storeIdentity(networkInterface: String, port: Int, publicKey: SECP256K1.PublicKey): Identity {
+    logger.info("New peer $publicKey@$networkInterface:$port")
     val identity = MemoryEthereumIdentity(networkInterface, port, publicKey)
     identities.add(identity)
     identityListeners.values.forEach {

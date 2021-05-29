@@ -17,6 +17,7 @@
 package org.apache.tuweni.discovery
 
 import org.apache.tuweni.devp2p.EthereumNodeRecord
+import org.slf4j.LoggerFactory
 import org.xbill.DNS.Resolver
 import org.xbill.DNS.SimpleResolver
 import java.util.Timer
@@ -40,6 +41,9 @@ class DNSDaemon @JvmOverloads constructor(
   private val dnsServer: String? = null,
   private val resolver: Resolver = SimpleResolver(dnsServer)
 ) {
+  companion object {
+    val logger = LoggerFactory.getLogger(DNSDaemon::class.java)
+  }
 
   val listeners = HashSet<DNSDaemonListener>()
 
@@ -56,6 +60,7 @@ class DNSDaemon @JvmOverloads constructor(
   }
 
   public fun start() {
+    logger.trace("Starting DNSDaemon for $enrLink")
     timer.scheduleAtFixedRate(DNSTimerTask(resolver, seq, enrLink, this::updateRecords), 0, period)
   }
 
@@ -75,7 +80,12 @@ internal class DNSTimerTask(
   private val dnsResolver: DNSResolver = DNSResolver(null, seq, resolver)
 ) : TimerTask() {
 
+  companion object {
+    val logger = LoggerFactory.getLogger(DNSTimerTask::class.java)
+  }
+
   override fun run() {
+    logger.info("Refreshing DNS records with $enrLink")
     records(dnsResolver.collectAll(enrLink))
   }
 }
