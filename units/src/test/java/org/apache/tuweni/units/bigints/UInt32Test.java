@@ -863,4 +863,8 @@ class UInt32Test {
     assertEquals(4294967295L, UInt32.MAX_VALUE.toLong());
   }
 
+  @Test
+  void testToDecimalString() {
+    assertEquals("3456", UInt32.valueOf(3456).toDecimalString());
+  }
 }

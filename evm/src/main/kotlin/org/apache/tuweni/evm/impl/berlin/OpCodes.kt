@@ -102,7 +102,7 @@ val slt = Opcode { gasManager, _, stack, _, _, _, _ ->
   if (null == item || null == item2) {
     Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   } else {
-    if (item.toBigInteger() < item2.toBigInteger()) {
+    if (item.toSignedBigInteger() < item2.toSignedBigInteger()) {
       stack.push(UInt256.ONE)
     } else {
       stack.push(UInt256.ZERO)
@@ -134,7 +134,7 @@ val sgt = Opcode { gasManager, _, stack, _, _, _, _ ->
   if (null == item || null == item2) {
     Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   } else {
-    if (item.toBigInteger() > item2.toBigInteger()) {
+    if (item.toSignedBigInteger() > item2.toSignedBigInteger()) {
       stack.push(UInt256.ONE)
     } else {
       stack.push(UInt256.ZERO)
