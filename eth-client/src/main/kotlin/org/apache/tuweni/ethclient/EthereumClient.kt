@@ -26,11 +26,11 @@ import org.apache.lucene.index.IndexWriterConfig
 import org.apache.lucene.store.NIOFSDirectory
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.coroutines.await
-import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.eth.EthRequestsManager
 import org.apache.tuweni.devp2p.eth.EthSubprotocol
 import org.apache.tuweni.devp2p.eth.EthSubprotocol.Companion.ETH66
 import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
+import org.apache.tuweni.devp2p.parseEnodeUri
 import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
@@ -43,6 +43,7 @@ import org.apache.tuweni.rlpx.vertx.VertxRLPxService
 import org.apache.tuweni.units.bigints.UInt256
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
+import java.net.URI
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -69,7 +70,7 @@ class EthereumClient(
 
   suspend fun start() {
     logger.info("Starting Ethereum client...")
-    metricsService = MetricsService("tuweni", port = config.metricsPort())
+    metricsService = MetricsService("tuweni", port = config.metricsPort(), networkInterface = config.metricsNetworkInterface(), enableGrpcPush = config.metricsGrpcPushEnabled(), enablePrometheus = config.metricsPrometheusEnabled())
     config.peerRepositories().forEach {
       peerRepositories[it.getName()] = MemoryEthereumPeerRepository()
     }
@@ -164,7 +165,7 @@ class EthereumClient(
           rlpxConfig.port(),
           rlpxConfig.networkInterface(),
           rlpxConfig.advertisedPort(),
-          SECP256K1.KeyPair.random(),
+          rlpxConfig.keyPair(),
           listOf(ethSubprotocol),
           rlpxConfig.clientName(),
           meter,
@@ -204,6 +205,25 @@ class EthereumClient(
         }
       }
     ).await()
+
+    for (staticPeers in config.staticPeers()) {
+      val peerRepository = peerRepositories[staticPeers.peerRepository()]
+      if (peerRepository == null) {
+        val message = (
+          if (peerRepositories.isEmpty()) "none" else peerRepositories.keys.joinToString(
+            ","
+          )
+          ) + " defined"
+        throw IllegalArgumentException(
+          "Repository ${staticPeers.peerRepository()} not found, $message"
+        )
+      }
+      for (enode in staticPeers.enodes()) {
+        // TODO add config validation for enode uris
+        val uri = parseEnodeUri(URI.create(enode))
+        peerRepository.storeIdentity(uri.endpoint.address, uri.endpoint.tcpPort ?: uri.endpoint.udpPort, uri.nodeId)
+      }
+    }
 
     Runtime.getRuntime().addShutdownHook(object : Thread() {
       override fun run() = this@EthereumClient.stop()

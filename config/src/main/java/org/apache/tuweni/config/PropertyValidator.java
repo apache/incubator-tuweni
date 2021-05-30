@@ -193,6 +193,21 @@ public interface PropertyValidator<T> {
   }
 
   /**
+   * A validator that ensures a property, if present, is a well-formed port number, or zero - meaning it will be
+   * allocated at runtime.
+   *
+   * @return A validator that ensures a property, if present, is a well-formed number or zero.
+   */
+  static PropertyValidator<Integer> isValidPortOrZero() {
+    return (key, position, value) -> {
+      if (value != null && (value < 0 || value > 65535)) {
+        return singleError(position, "Value of property '" + key + "' is not a valid port");
+      }
+      return noErrors();
+    };
+  }
+
+  /**
    * A validator that ensures a property, if present, is a well-formed port number.
    *
    * @return A validator that ensures a property, if present, is a well-formed number.

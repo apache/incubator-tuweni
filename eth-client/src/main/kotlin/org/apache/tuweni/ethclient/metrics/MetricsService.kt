@@ -31,13 +31,13 @@ import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.HTTPServer
 import java.net.InetSocketAddress
 
-class MetricsService(jobName: String, reportingIntervalMillis: Long = 5000, port: Int = 9090) {
+class MetricsService(jobName: String, reportingIntervalMillis: Long = 5000, port: Int = 9090, networkInterface: String = "0.0.0.0", enablePrometheus: Boolean = true, enableGrpcPush: Boolean = true) {
 
-  private val server: HTTPServer
+  private val server: HTTPServer?
   val meterSdkProvider: SdkMeterProvider
   val openTelemetry: OpenTelemetrySdk
   private val spanProcessor: BatchSpanProcessor
-  private val periodicReader: IntervalMetricReader
+  private val periodicReader: IntervalMetricReader?
 
   init {
     val exporter = OtlpGrpcMetricExporter.getDefault()
@@ -48,27 +48,35 @@ class MetricsService(jobName: String, reportingIntervalMillis: Long = 5000, port
         )
       )
     meterSdkProvider = SdkMeterProvider.builder().setResource(resource).build()
-    val builder = IntervalMetricReader.builder()
-      .setExportIntervalMillis(reportingIntervalMillis)
-      .setMetricProducers(setOf(meterSdkProvider))
-      .setMetricExporter(exporter)
-    val prometheusRegistry = CollectorRegistry(true)
-    PrometheusCollector.builder()
-      .setMetricProducer(meterSdkProvider)
-      .build().register<PrometheusCollector>(prometheusRegistry)
-
-    periodicReader = builder.buildAndStart()
+    if (enableGrpcPush) {
+      val builder = IntervalMetricReader.builder()
+        .setExportIntervalMillis(reportingIntervalMillis)
+        .setMetricProducers(setOf(meterSdkProvider))
+        .setMetricExporter(exporter)
+      periodicReader = builder.buildAndStart()
+      periodicReader.start()
+    } else {
+      periodicReader = null
+    }
     spanProcessor = BatchSpanProcessor.builder(OtlpGrpcSpanExporter.builder().build()).build()
     openTelemetry = OpenTelemetrySdk.builder()
       .setTracerProvider(SdkTracerProvider.builder().addSpanProcessor(spanProcessor).build())
       .build()
-    periodicReader.start()
-    server = HTTPServer(InetSocketAddress("0.0.0.0", port), prometheusRegistry, true)
+
+    if (enablePrometheus) {
+      val prometheusRegistry = CollectorRegistry(true)
+      PrometheusCollector.builder()
+        .setMetricProducer(meterSdkProvider)
+        .build().register<PrometheusCollector>(prometheusRegistry)
+      server = HTTPServer(InetSocketAddress(networkInterface, port), prometheusRegistry, true)
+    } else {
+      server = null
+    }
   }
 
   fun close() {
-    periodicReader.shutdown()
+    periodicReader?.shutdown()
     spanProcessor.shutdown()
-    server.stop()
+    server?.stop()
   }
 }

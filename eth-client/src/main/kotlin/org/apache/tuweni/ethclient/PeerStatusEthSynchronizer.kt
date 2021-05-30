@@ -59,6 +59,7 @@ class PeerStatusEthSynchronizer(
     launch {
       val bestHash = ethereumConnection.status()!!.bestHash
       if (!repository.hasBlockHeader(bestHash)) {
+        logger.info("Requesting new best block header based on status")
         client.requestBlockHeaders(
           Hash.fromBytes(bestHash),
           HEADER_REQUEST_SIZE,

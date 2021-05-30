@@ -16,14 +16,19 @@
  */
 package org.apache.tuweni.ethclient
 
+import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.config.Configuration
+import org.apache.tuweni.config.ConfigurationError
+import org.apache.tuweni.config.DocumentPosition
 import org.apache.tuweni.config.PropertyValidator
 import org.apache.tuweni.config.Schema
 import org.apache.tuweni.config.SchemaBuilder
+import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.eth.genesis.GenesisFile
 import java.io.FileNotFoundException
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.Collections
 
 /**
  * Configuration of EthereumClient. Can be provided via file or over the wire.
@@ -45,17 +50,42 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
     }
   }
 
-  fun rlpxServices(): List<RLPxServiceConfiguration> =
-    listOf(RLPxServiceConfigurationImpl())
+  fun rlpxServices(): List<RLPxServiceConfiguration> {
+    val rlpxSections = config.sections("rlpx")
+    if (rlpxSections == null || rlpxSections.isEmpty()) {
+      return emptyList()
+    }
+    return rlpxSections.map { section ->
+      val sectionConfig = config.getConfigurationSection("rlpx.$section")
+      RLPxServiceConfigurationImpl(
+        section,
+        sectionConfig.getString("clientName"),
+        sectionConfig.getInteger("port"),
+        sectionConfig.getString("networkInterface"),
+        sectionConfig.getInteger("advertisedPort"),
+        sectionConfig.getString("repository"),
+        sectionConfig.getString("peerRepository"),
+      )
+    }
+  }
 
+  // TODO read this from toml
   fun genesisFiles(): List<GenesisFileConfiguration> = listOf(GenesisFileConfigurationImpl())
 
+  // TODO read this from toml
   fun peerRepositories(): List<PeerRepositoryConfiguration> =
     listOf(PeerRepositoryConfigurationImpl("default"))
 
-  fun metricsPort(): Int = config.getInteger("metricsPort")
+  fun metricsPort(): Int = config.getConfigurationSection("metrics").getInteger("port")
+
+  fun metricsNetworkInterface(): String = config.getConfigurationSection("metrics").getString("networkInterface")
+
+  fun metricsPrometheusEnabled(): Boolean = config.getConfigurationSection("metrics").getBoolean("enablePrometheus")
+
+  fun metricsGrpcPushEnabled(): Boolean = config.getConfigurationSection("metrics").getBoolean("enableGrpcPush")
 
   fun toToml() = config.toToml()
+
   fun dnsClients(): List<DNSConfiguration> {
     val dnsSections = config.sections("dns")
     if (dnsSections == null || dnsSections.isEmpty()) {
@@ -72,8 +102,28 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
     }
   }
 
+  fun staticPeers(): List<StaticPeersConfiguration> {
+    val staticPeersSections = config.sections("static")
+    if (staticPeersSections == null || staticPeersSections.isEmpty()) {
+      return emptyList()
+    }
+    return staticPeersSections.map { section ->
+      val sectionConfig = config.getConfigurationSection("static.$section")
+      StaticPeersConfigurationImpl(
+        sectionConfig.getListOfString("enodes"),
+        sectionConfig.getString("peerRepository"),
+      )
+    }
+  }
+
   companion object {
     fun createSchema(): Schema {
+      val metricsSection = SchemaBuilder.create()
+      metricsSection.addInteger("port", 9090, "Port to expose Prometheus metrics", PropertyValidator.isValidPort())
+      metricsSection.addString("networkInterface", "0.0.0.0", "Network interface to expose Prometheus metrics", null)
+      metricsSection.addBoolean("enablePrometheus", true, "Enable Prometheus metrics reporting", null)
+      metricsSection.addBoolean("enableGrpcPush", true, "Enable GRPC OpenTelemetry metrics reporting", null)
+
       val storageSection = SchemaBuilder.create()
       storageSection.addString("path", null, "File system path where data is stored", null)
       storageSection.addString("genesis", null, "Reference to a genesis configuration", null)
@@ -82,10 +132,42 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       dnsSection.addString("enrLink", null, "DNS domain to query for records", null)
       dnsSection.addLong("pollingPeriod", 50000, "Polling period to refresh DNS records", null)
       dnsSection.addString("peerRepository", "default", "Peer repository to which records should go", null)
+
+      val staticPeers = SchemaBuilder.create()
+      staticPeers.addListOfString("enodes", Collections.emptyList(), "Static enodes to connect to in enode://publickey@host:port format", null)
+      staticPeers.addString("peerRepository", "default", "Peer repository to which static nodes should go", null)
+
+      val rlpx = SchemaBuilder.create()
+      rlpx.addString("networkInterface", "127.0.0.1", "Network interface to bind", null)
+      rlpx.addString(
+        "keyPair", null, "Hex string representation of the private key used to represent the node",
+        object : PropertyValidator<String> {
+          override fun validate(
+            key: String,
+            position: DocumentPosition?,
+            value: String?,
+          ): MutableList<ConfigurationError> {
+            try {
+              SECP256K1.SecretKey.fromBytes(Bytes32.fromHexString(value ?: ""))
+            } catch (e: IllegalArgumentException) {
+              return mutableListOf(ConfigurationError("Invalid enode secret key"))
+            }
+            return mutableListOf()
+          }
+        }
+      )
+      rlpx.addInteger("port", 0, "Port to expose the RLPx service on", PropertyValidator.isValidPortOrZero())
+      rlpx.addInteger("advertisedPort", 30303, "Port to advertise in communications as the RLPx service port", PropertyValidator.isValidPort())
+      rlpx.addString("clientName", "Apache Tuweni", "Name of the Ethereum client", null)
+      rlpx.addString("repository", "default", "Name of the blockchain repository", null)
+      rlpx.addString("peerRepository", "default", "Peer repository to which records should go", null)
+
       val builder = SchemaBuilder.create()
-      builder.addInteger("metricsPort", 9090, "Port to expose Prometheus metrics", PropertyValidator.isValidPort())
+      builder.addSection("metrics", metricsSection.toSchema())
       builder.addSection("storage", storageSection.toSchema())
       builder.addSection("dns", dnsSection.toSchema())
+      builder.addSection("static", staticPeers.toSchema())
+      builder.addSection("rlpx", rlpx.toSchema())
       return builder.toSchema()
     }
 
@@ -129,6 +211,7 @@ interface RLPxServiceConfiguration {
   fun port(): Int
   fun networkInterface(): String
   fun advertisedPort(): Int
+  fun keyPair(): SECP256K1.KeyPair
   fun repository(): String
   fun getName(): String
   fun clientName(): String
@@ -142,6 +225,11 @@ interface DNSConfiguration {
   fun peerRepository(): String
 }
 
+interface StaticPeersConfiguration {
+  fun enodes(): List<String>
+  fun peerRepository(): String
+}
+
 interface PeerRepositoryConfiguration {
   fun getName(): String
 }
@@ -150,20 +238,22 @@ internal class PeerRepositoryConfigurationImpl(private val repoName: String) : P
   override fun getName(): String = repoName
 }
 
-internal class RLPxServiceConfigurationImpl() : RLPxServiceConfiguration {
-  override fun port(): Int = 0
+internal data class RLPxServiceConfigurationImpl(private val name: String, val clientName: String, val port: Int, val networkInterface: String, val advertisedPort: Int, val repository: String, val peerRepository: String) : RLPxServiceConfiguration {
+  override fun port(): Int = port
 
-  override fun networkInterface(): String = "127.0.0.1"
+  override fun networkInterface(): String = networkInterface
 
-  override fun advertisedPort(): Int = 0
+  override fun advertisedPort(): Int = advertisedPort
 
-  override fun repository(): String = "default"
+  override fun keyPair(): SECP256K1.KeyPair = SECP256K1.KeyPair.random()
 
-  override fun getName(): String = "default"
+  override fun repository(): String = repository
 
-  override fun clientName(): String = "Apache Tuweni 1.1"
+  override fun getName(): String = name
 
-  override fun peerRepository(): String = "default"
+  override fun clientName(): String = clientName
+
+  override fun peerRepository(): String = peerRepository
 }
 
 internal class GenesisFileConfigurationImpl() : GenesisFileConfiguration {
@@ -199,4 +289,11 @@ data class DNSConfigurationImpl(
   override fun enrLink() = enrLink
 
   override fun pollingPeriod(): Long = pollingPeriod
+}
+
+data class StaticPeersConfigurationImpl(private val enodes: List<String>, private val peerRepository: String) : StaticPeersConfiguration {
+
+  override fun enodes(): List<String> = enodes
+
+  override fun peerRepository() = peerRepository
 }

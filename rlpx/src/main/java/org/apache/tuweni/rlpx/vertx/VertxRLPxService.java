@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import io.opentelemetry.api.metrics.DoubleCounter;
+import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -72,8 +72,8 @@ public final class VertxRLPxService implements RLPxService {
   private final List<SubProtocol> subProtocols;
   private final String clientId;
   private final WireConnectionRepository repository;
-  private final DoubleCounter connectionsCreatedCounter;
-  private final DoubleCounter connectionsDisconnectedCounter;
+  private final LongCounter connectionsCreatedCounter;
+  private final LongCounter connectionsDisconnectedCounter;
 
   private LinkedHashMap<SubProtocolIdentifier, SubProtocolHandler> handlers;
   private LinkedHashMap<SubProtocolIdentifier, SubProtocolClient> clients;
@@ -164,9 +164,9 @@ public final class VertxRLPxService implements RLPxService {
       }
     });
     this.connectionsCreatedCounter =
-        meter.doubleCounterBuilder("connections_created").setDescription("Number of connections created").build();
+        meter.longCounterBuilder("connections_created").setDescription("Number of connections created").build();
     this.connectionsDisconnectedCounter = meter
-        .doubleCounterBuilder("connections_disconnected")
+        .longCounterBuilder("connections_disconnected")
         .setDescription("Number of connections disconnected")
         .build();
   }
@@ -343,6 +343,7 @@ public final class VertxRLPxService implements RLPxService {
             peerAddress.getPort(),
             peerAddress.getHostString(),
             netSocketFuture -> netSocketFuture.map(netSocket -> {
+              connectionsCreatedCounter.add(1);
               Bytes32 nonce = RLPxConnectionFactory.generateRandomBytes32();
               KeyPair ephemeralKeyPair = KeyPair.random();
               Bytes initHandshakeMessage = RLPxConnectionFactory.init(keyPair, peerPublicKey, ephemeralKeyPair, nonce);
@@ -350,6 +351,7 @@ public final class VertxRLPxService implements RLPxService {
               netSocket.write(Buffer.buffer(initHandshakeMessage.toArrayUnsafe()));
 
               netSocket.closeHandler(event -> {
+                connectionsDisconnectedCounter.add(1);
                 logger.debug("Connection {} closed", peerAddress);
                 if (!connected.isDone()) {
                   connected.cancel();
