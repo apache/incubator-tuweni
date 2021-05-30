@@ -46,7 +46,7 @@ class EthereumClientRunTest {
       [rlpx.default]
       networkInterface="127.0.0.1"
       port=30301
-      keyPair="${keyPair.secretKey().bytes().toHexString()}"
+      key="${keyPair.secretKey().bytes().toHexString()}"
       """.trimMargin()
     )
     val config2 = EthereumClientConfig.fromString(

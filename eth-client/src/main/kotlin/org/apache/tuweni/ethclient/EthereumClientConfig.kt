@@ -65,6 +65,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
         sectionConfig.getInteger("advertisedPort"),
         sectionConfig.getString("repository"),
         sectionConfig.getString("peerRepository"),
+        sectionConfig.getString("key"),
       )
     }
   }
@@ -140,7 +141,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       val rlpx = SchemaBuilder.create()
       rlpx.addString("networkInterface", "127.0.0.1", "Network interface to bind", null)
       rlpx.addString(
-        "keyPair", null, "Hex string representation of the private key used to represent the node",
+        "key", null, "Hex string representation of the private key used to represent the node",
         object : PropertyValidator<String> {
           override fun validate(
             key: String,
@@ -238,14 +239,24 @@ internal class PeerRepositoryConfigurationImpl(private val repoName: String) : P
   override fun getName(): String = repoName
 }
 
-internal data class RLPxServiceConfigurationImpl(private val name: String, val clientName: String, val port: Int, val networkInterface: String, val advertisedPort: Int, val repository: String, val peerRepository: String) : RLPxServiceConfiguration {
+internal data class RLPxServiceConfigurationImpl(private val name: String,
+                                                 val clientName: String,
+                                                 val port: Int,
+                                                 val networkInterface: String,
+                                                 val advertisedPort: Int,
+                                                 val repository: String,
+                                                 val peerRepository: String,
+                                                 val key: String) : RLPxServiceConfiguration {
+
+  private val keyPair = SECP256K1.KeyPair.fromSecretKey(SECP256K1.SecretKey.fromBytes(Bytes32.fromHexString(key)))
+
   override fun port(): Int = port
 
   override fun networkInterface(): String = networkInterface
 
   override fun advertisedPort(): Int = advertisedPort
 
-  override fun keyPair(): SECP256K1.KeyPair = SECP256K1.KeyPair.random()
+  override fun keyPair(): SECP256K1.KeyPair = keyPair
 
   override fun repository(): String = repository
 
