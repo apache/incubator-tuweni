@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.coroutines.asyncCompletion
+import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.rlpx.RLPxService
@@ -41,46 +42,60 @@ internal class EthHandler66(
   private val controller: EthController,
 ) : SubProtocolHandler, CoroutineScope {
 
+  private val ethHandler = EthHandler(coroutineContext, blockchainInfo, service, controller)
   private val pendingStatus = WeakHashMap<String, PeerInfo>()
 
   companion object {
-    val logger = LoggerFactory.getLogger(EthHandler::class.java)!!
+    val logger = LoggerFactory.getLogger(EthHandler66::class.java)!!
     val MAX_NEW_POOLED_TX_HASHES = 4096
     val MAX_POOLED_TX = 256
   }
 
-  override fun handle(connection: WireConnection, messageType: Int, payload: Bytes) = asyncCompletion {
-    logger.debug("Receiving message of type {}", messageType)
-    val pair = RLP.decode(payload) {
-      Pair(it.readValue(), it.readRemaining())
+  override fun handle(connection: WireConnection, messageType: Int, message: Bytes): AsyncCompletion {
+    if (connection.agreedSubprotocol(EthSubprotocol.ETH66) != EthSubprotocol.ETH66) {
+      return ethHandler.handle(connection, messageType, message)
     }
-    val requestIdentifier = pair.first
-    val message = pair.second
+    return asyncCompletion {
+      logger.debug("Receiving message of type {}", messageType)
+      val pair = RLP.decode(message) {
+        Pair(it.readValue(), it.readRemaining())
+      }
+      val requestIdentifier = pair.first
+      val payload = pair.second
 
-    when (messageType) {
-      MessageType.Status.code -> handleStatus(connection, StatusMessage.read(message))
-      MessageType.NewBlockHashes.code -> handleNewBlockHashes(NewBlockHashes.read(message))
-      MessageType.Transactions.code -> handleTransactions(Transactions.read(message))
-      MessageType.GetBlockHeaders.code -> handleGetBlockHeaders(connection, requestIdentifier, GetBlockHeaders.read(message))
-      MessageType.BlockHeaders.code -> handleHeaders(connection, requestIdentifier, BlockHeaders.read(message))
-      MessageType.GetBlockBodies.code -> handleGetBlockBodies(connection, requestIdentifier, GetBlockBodies.read(message))
-      MessageType.BlockBodies.code -> handleBlockBodies(connection, requestIdentifier, BlockBodies.read(message))
-      MessageType.NewBlock.code -> handleNewBlock(NewBlock.read(message))
-      MessageType.GetNodeData.code -> handleGetNodeData(connection, requestIdentifier, GetNodeData.read(message))
-      MessageType.NodeData.code -> handleNodeData(connection, requestIdentifier, NodeData.read(message))
-      MessageType.GetReceipts.code -> handleGetReceipts(connection, requestIdentifier, GetReceipts.read(message))
-      MessageType.Receipts.code -> handleReceipts(connection, requestIdentifier, Receipts.read(message))
-      MessageType.NewPooledTransactionHashes.code -> handleNewPooledTransactionHashes(
-        connection, NewPooledTransactionHashes.read(message)
-      )
-      MessageType.GetPooledTransactions.code -> handleGetPooledTransactions(
-        connection, requestIdentifier,
-        GetPooledTransactions.read(message)
-      )
-      MessageType.PooledTransactions.code -> handlePooledTransactions(PooledTransactions.read(message))
-      else -> {
-        logger.warn("Unknown message type {} with request identifier {}", messageType, requestIdentifier)
-        service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
+      when (messageType) {
+        MessageType.Status.code -> handleStatus(connection, StatusMessage.read(payload))
+        MessageType.NewBlockHashes.code -> handleNewBlockHashes(NewBlockHashes.read(payload))
+        MessageType.Transactions.code -> handleTransactions(Transactions.read(payload))
+        MessageType.GetBlockHeaders.code -> handleGetBlockHeaders(
+          connection,
+          requestIdentifier,
+          GetBlockHeaders.read(payload)
+        )
+        MessageType.BlockHeaders.code -> handleHeaders(connection, requestIdentifier, BlockHeaders.read(payload))
+        MessageType.GetBlockBodies.code -> handleGetBlockBodies(
+          connection,
+          requestIdentifier,
+          GetBlockBodies.read(payload)
+        )
+        MessageType.BlockBodies.code -> handleBlockBodies(connection, requestIdentifier, BlockBodies.read(payload))
+        MessageType.NewBlock.code -> handleNewBlock(NewBlock.read(payload))
+        MessageType.GetNodeData.code -> handleGetNodeData(connection, requestIdentifier, GetNodeData.read(payload))
+        MessageType.NodeData.code -> handleNodeData(connection, requestIdentifier, NodeData.read(payload))
+        MessageType.GetReceipts.code -> handleGetReceipts(connection, requestIdentifier, GetReceipts.read(payload))
+        MessageType.Receipts.code -> handleReceipts(connection, requestIdentifier, Receipts.read(payload))
+        MessageType.NewPooledTransactionHashes.code -> handleNewPooledTransactionHashes(
+          connection, NewPooledTransactionHashes.read(payload)
+        )
+        MessageType.GetPooledTransactions.code -> handleGetPooledTransactions(
+          connection, requestIdentifier,
+          GetPooledTransactions.read(payload)
+        )
+        MessageType.PooledTransactions.code -> handlePooledTransactions(PooledTransactions.read(payload))
+        else -> {
+          logger.warn("Unknown message type {} with request identifier {}", messageType, requestIdentifier)
+          service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
+        }
       }
     }
   }
@@ -112,13 +127,25 @@ internal class EthHandler66(
   }
 
   private suspend fun handleStatus(connection: WireConnection, status: StatusMessage) {
-    logger.debug("Received status message {}", status)
-    val peerInfo = pendingStatus.remove(connection.uri())
-    if (!status.networkID.equals(blockchainInfo.networkID()) ||
-      !status.genesisHash.equals(blockchainInfo.genesisHash()) ||
-      peerInfo == null
-    ) {
-      peerInfo?.cancel()
+    EthHandler.logger.debug("Received status message {}", status)
+    var peerInfo = pendingStatus.remove(connection.uri())
+    var disconnect = false
+    if (status.networkID != blockchainInfo.networkID()) {
+      EthHandler.logger.info("Peer with different networkId ${status.networkID} (expected ${blockchainInfo.networkID()})")
+      disconnect = true
+    }
+    if (!status.genesisHash.equals(blockchainInfo.genesisHash())) {
+      EthHandler.logger.info("Peer with different genesisHash ${status.genesisHash} (expected ${blockchainInfo.genesisHash()})")
+      disconnect = true
+    }
+    if (peerInfo == null) {
+      EthHandler.logger.info("Unexpected status message ${connection.uri()}")
+      val newPeerInfo = PeerInfo()
+      pendingStatus.put(connection.uri(), newPeerInfo)
+      peerInfo = newPeerInfo
+    }
+    if (disconnect) {
+      peerInfo.cancel()
       service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
     } else {
       peerInfo.connect()
@@ -243,9 +270,11 @@ internal class EthHandler66(
   }
 
   override fun handleNewPeerConnection(connection: WireConnection): AsyncCompletion {
-    val newPeer = PeerInfo()
-    pendingStatus[connection.uri()] = newPeer
-    val ethSubProtocol = connection.agreedSubprotocols().firstOrNull() { it.name() == EthSubprotocol.ETH65.name() }
+    if (connection.agreedSubprotocol(EthSubprotocol.ETH66) != EthSubprotocol.ETH66) {
+      return ethHandler.handleNewPeerConnection(connection)
+    }
+    val newPeer = pendingStatus.computeIfAbsent(connection.uri()) { PeerInfo() }
+    val ethSubProtocol = connection.agreedSubprotocol(EthSubprotocol.ETH66)
     if (ethSubProtocol == null) {
       newPeer.cancel()
       return newPeer.ready
@@ -269,5 +298,6 @@ internal class EthHandler66(
   }
 
   override fun stop() = asyncCompletion {
+    ethHandler.stop().await()
   }
 }

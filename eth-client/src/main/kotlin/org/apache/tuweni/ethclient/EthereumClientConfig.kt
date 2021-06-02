@@ -26,6 +26,8 @@ import org.apache.tuweni.config.SchemaBuilder
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.eth.genesis.GenesisFile
 import java.io.FileNotFoundException
+import java.net.URI
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.Collections
@@ -70,8 +72,19 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
     }
   }
 
-  // TODO read this from toml
-  fun genesisFiles(): List<GenesisFileConfiguration> = listOf(GenesisFileConfigurationImpl())
+  fun genesisFiles(): List<GenesisFileConfiguration> {
+    val genesisSections = config.sections("genesis")
+    if (genesisSections == null || genesisSections.isEmpty()) {
+      return emptyList()
+    }
+    return genesisSections.map { section ->
+      val sectionConfig = config.getConfigurationSection("genesis.$section")
+      GenesisFileConfigurationImpl(
+        section,
+        URI.create(sectionConfig.getString("path")),
+      )
+    }
+  }
 
   // TODO read this from toml
   fun peerRepositories(): List<PeerRepositoryConfiguration> =
@@ -138,6 +151,9 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       staticPeers.addListOfString("enodes", Collections.emptyList(), "Static enodes to connect to in enode://publickey@host:port format", null)
       staticPeers.addString("peerRepository", "default", "Peer repository to which static nodes should go", null)
 
+      val genesis = SchemaBuilder.create()
+      genesis.addString("path", "classpath:/default.json", "Path to the genesis file", PropertyValidator.isURL())
+
       val rlpx = SchemaBuilder.create()
       rlpx.addString("networkInterface", "127.0.0.1", "Network interface to bind", null)
       rlpx.addString(
@@ -169,6 +185,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       builder.addSection("dns", dnsSection.toSchema())
       builder.addSection("static", staticPeers.toSchema())
       builder.addSection("rlpx", rlpx.toSchema())
+      builder.addSection("genesis", genesis.toSchema())
       return builder.toSchema()
     }
 
@@ -239,14 +256,16 @@ internal class PeerRepositoryConfigurationImpl(private val repoName: String) : P
   override fun getName(): String = repoName
 }
 
-internal data class RLPxServiceConfigurationImpl(private val name: String,
-                                                 val clientName: String,
-                                                 val port: Int,
-                                                 val networkInterface: String,
-                                                 val advertisedPort: Int,
-                                                 val repository: String,
-                                                 val peerRepository: String,
-                                                 val key: String) : RLPxServiceConfiguration {
+internal data class RLPxServiceConfigurationImpl(
+  private val name: String,
+  val clientName: String,
+  val port: Int,
+  val networkInterface: String,
+  val advertisedPort: Int,
+  val repository: String,
+  val peerRepository: String,
+  val key: String
+) : RLPxServiceConfiguration {
 
   private val keyPair = SECP256K1.KeyPair.fromSecretKey(SECP256K1.SecretKey.fromBytes(Bytes32.fromHexString(key)))
 
@@ -267,11 +286,17 @@ internal data class RLPxServiceConfigurationImpl(private val name: String,
   override fun peerRepository(): String = peerRepository
 }
 
-internal class GenesisFileConfigurationImpl() : GenesisFileConfiguration {
-  override fun getName(): String = "default"
+internal data class GenesisFileConfigurationImpl(private val name: String, private val genesisFilePath: URI) : GenesisFileConfiguration {
+  override fun getName(): String = name
 
   override fun genesisFile(): GenesisFile =
-    GenesisFile.read(GenesisFileConfigurationImpl::class.java.getResource("/default.json").readBytes())
+    GenesisFile.read(
+      if (genesisFilePath.scheme == "classpath") {
+        GenesisFileConfigurationImpl::class.java.getResource(genesisFilePath.path).readBytes()
+      } else {
+        Files.readAllBytes(Path.of(genesisFilePath))
+      }
+    )
 }
 
 internal data class DataStoreConfigurationImpl(

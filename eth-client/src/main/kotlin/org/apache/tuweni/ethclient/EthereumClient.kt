@@ -70,7 +70,8 @@ class EthereumClient(
 
   suspend fun start() {
     logger.info("Starting Ethereum client...")
-    metricsService = MetricsService("tuweni", port = config.metricsPort(), networkInterface = config.metricsNetworkInterface(), enableGrpcPush = config.metricsGrpcPushEnabled(), enablePrometheus = config.metricsPrometheusEnabled())
+    val metricsService = MetricsService("tuweni", port = config.metricsPort(), networkInterface = config.metricsNetworkInterface(), enableGrpcPush = config.metricsGrpcPushEnabled(), enablePrometheus = config.metricsPrometheusEnabled())
+    this.metricsService = metricsService
     config.peerRepositories().forEach {
       peerRepositories[it.getName()] = MemoryEthereumPeerRepository()
     }
@@ -97,7 +98,8 @@ class EthereumClient(
         LevelDBKeyValueStore.open(dataStorage.resolve("transactions")),
         LevelDBKeyValueStore.open(dataStorage.resolve("state")),
         BlockchainIndex(writer),
-        genesisBlock
+        genesisBlock,
+        metricsService.meterSdkProvider["${dataStore.getName()}_storage"]
       )
       storageRepositories[dataStore.getName()] = repository
       repoToGenesisFile[repository] = genesisFile
@@ -149,17 +151,19 @@ class EthereumClient(
         val genesisFile = repoToGenesisFile[repository]
         val genesisBlock = repository.retrieveGenesisBlock()
         val adapter = WireConnectionPeerRepositoryAdapter(peerRepository)
+        val blockchainInfo = SimpleBlockchainInformation(
+          UInt256.valueOf(genesisFile!!.chainId.toLong()), genesisBlock.header.difficulty,
+          genesisBlock.header.hash, genesisBlock.header.number, genesisBlock.header.hash, genesisFile.forks
+        )
+        logger.info("Initializing with blockchain information $blockchainInfo")
         val ethSubprotocol = EthSubprotocol(
           repository = repository,
-          blockchainInfo = SimpleBlockchainInformation(
-            UInt256.valueOf(genesisFile!!.chainId.toLong()), genesisBlock.header.difficulty,
-            genesisBlock.header.hash, genesisBlock.header.number, genesisBlock.header.hash, genesisFile.forks
-          ),
+          blockchainInfo = blockchainInfo,
           pendingTransactionsPool = MemoryTransactionPool(),
           listener = adapter::listenToStatus,
           selectionStrategy = { ConnectionManagementStrategy(peerRepositoryAdapter = adapter) }
         )
-        val meter = metricsService!!.meterSdkProvider["${rlpxConfig.getName()}_rlpx"]
+        val meter = metricsService.meterSdkProvider["${rlpxConfig.getName()}_rlpx"]
         val service = VertxRLPxService(
           vertx,
           rlpxConfig.port(),
@@ -194,7 +198,7 @@ class EthereumClient(
             peerRepository = peerRepository
           )
           synchronizers[rlpxConfig.getName() + "parent"] = parentSynchronizer
-          parentSynchronizer.start()
+          // parentSynchronizer.start()
           val bestSynchronizer = FromBestBlockSynchronizer(
             repository = repository,
             client = service.getClient(ETH66) as EthRequestsManager,

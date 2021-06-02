@@ -23,9 +23,9 @@ class ConnectionManagementStrategy(
   val maxConnections: Int = 25,
   val peerRepositoryAdapter: WireConnectionPeerRepositoryAdapter
 ) : ConnectionSelectionStrategy {
-  override fun selectConnection(): WireConnection? {
+  override fun selectConnection(): WireConnection {
     // TODO find better way to pick ideal peer.
     val conn = peerRepositoryAdapter.peerRepository.activeConnections().findFirst()
-    return conn.map { peerRepositoryAdapter.get(it) }.orElse(null)
+    return conn.map { peerRepositoryAdapter.get(it) }.get()
   }
 }

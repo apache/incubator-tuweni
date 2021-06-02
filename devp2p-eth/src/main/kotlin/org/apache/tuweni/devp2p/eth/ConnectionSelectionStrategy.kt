@@ -21,9 +21,9 @@ import org.apache.tuweni.rlpx.wire.WireConnection
 
 interface ConnectionSelectionStrategy {
 
-  fun selectConnection(): WireConnection?
+  fun selectConnection(): WireConnection
 }
 
 class RandomConnectionSelectionStrategy(val repository: WireConnectionRepository) : ConnectionSelectionStrategy {
-  override fun selectConnection(): WireConnection? = repository.asIterable().firstOrNull()
+  override fun selectConnection(): WireConnection = repository.asIterable().first()
 }

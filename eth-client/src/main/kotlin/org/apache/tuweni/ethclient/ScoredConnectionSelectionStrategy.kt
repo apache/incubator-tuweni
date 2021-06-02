@@ -22,7 +22,7 @@ import org.apache.tuweni.rlpx.wire.WireConnection
 class ScoredConnectionSelectionStrategy(val adapter: WireConnectionPeerRepositoryAdapter) :
   ConnectionSelectionStrategy {
 
-  override fun selectConnection(): WireConnection? {
+  override fun selectConnection(): WireConnection {
     TODO("Not yet implemented")
   }
 }

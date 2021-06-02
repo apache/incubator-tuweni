@@ -190,11 +190,11 @@ public final class VertxRLPxService implements RLPxService {
       clients = new LinkedHashMap<>();
 
       for (SubProtocol subProtocol : subProtocols) {
+        SubProtocolClient client = subProtocol.createClient(this, subProtocol.id());
         for (SubProtocolIdentifier identifier : subProtocol.getCapabilities()) {
           if (identifier.versionRange() == 0) {
             throw new IllegalArgumentException("Invalid subprotocol " + identifier.toString());
           }
-          SubProtocolClient client = subProtocol.createClient(this, identifier);
           clients.put(identifier, client);
           handlers.put(identifier, subProtocol.createHandler(this, client));
         }
@@ -336,6 +336,7 @@ public final class VertxRLPxService implements RLPxService {
     if (!started.get()) {
       throw new IllegalStateException("The RLPx service is not active");
     }
+
     CompletableAsyncResult<WireConnection> connected = AsyncResult.incomplete();
     logger.info("Connecting to {} with public key {}", peerAddress, peerPublicKey);
     client

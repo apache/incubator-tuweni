@@ -51,13 +51,15 @@ class FromUnknownParentSynchronizer(
   }
 
   private fun listenToBlockHeaders(header: BlockHeader) {
+    if (header.number.isZero) {
+      return
+    }
     val parentHash = header.parentHash ?: return
     launch {
       delay(DELAY)
       if (!repository.hasBlockHeader(parentHash)) {
-        client.requestBlockHeaders(parentHash, HEADER_PARENT_HEADER_REQUEST_SIZE, 1L, true).thenAccept(::addHeaders)
-        client.requestBlockHeaders(header.hash, HEADER_PARENT_HEADER_REQUEST_SIZE, 1L, true).thenAccept(::addHeaders)
-        client.requestBlockHeaders(parentHash, HEADER_PARENT_HEADER_REQUEST_SIZE, 5L, true).thenAccept(::addHeaders)
+        logger.info("Requesting parent headers from unknown parent header hash $parentHash")
+        client.requestBlockHeaders(parentHash, HEADER_PARENT_HEADER_REQUEST_SIZE, 0L, true).thenAccept(::addHeaders)
       }
     }
   }

@@ -19,7 +19,8 @@ package org.apache.tuweni.eth.repository
 import org.apache.lucene.document.Document
 import org.apache.lucene.document.Field
 import org.apache.lucene.document.NumericDocValuesField
-import org.apache.lucene.document.SortedDocValuesField
+import org.apache.lucene.document.SortedNumericDocValuesField
+import org.apache.lucene.document.StoredField
 import org.apache.lucene.document.StringField
 import org.apache.lucene.index.IndexWriter
 import org.apache.lucene.index.IndexableField
@@ -32,6 +33,7 @@ import org.apache.lucene.search.SearcherFactory
 import org.apache.lucene.search.SearcherManager
 import org.apache.lucene.search.Sort
 import org.apache.lucene.search.SortField
+import org.apache.lucene.search.SortedNumericSortField
 import org.apache.lucene.search.TermQuery
 import org.apache.lucene.search.TermRangeQuery
 import org.apache.lucene.util.BytesRef
@@ -352,13 +354,15 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
           val totalDifficulty = blockHeader.getDifficulty().add(UInt256.fromBytes(Bytes.wrap(it.binaryValue().bytes)))
           val diffBytes = toBytesRef(totalDifficulty.toBytes())
           document += StringField(TOTAL_DIFFICULTY.fieldName, diffBytes, Field.Store.YES)
-          document += SortedDocValuesField(TOTAL_DIFFICULTY.fieldName, diffBytes)
+          document += SortedNumericDocValuesField(TOTAL_DIFFICULTY.fieldName, totalDifficulty.toLong())
+          document += StoredField(TOTAL_DIFFICULTY.fieldName, totalDifficulty.toLong())
         }
       }
     } ?: run {
       val diffBytes = toBytesRef(blockHeader.getDifficulty().toBytes())
       document += StringField(TOTAL_DIFFICULTY.fieldName, diffBytes, Field.Store.YES)
-      document += SortedDocValuesField(TOTAL_DIFFICULTY.fieldName, diffBytes)
+      document += SortedNumericDocValuesField(TOTAL_DIFFICULTY.fieldName, blockHeader.difficulty.toLong())
+      document += StoredField(TOTAL_DIFFICULTY.fieldName, blockHeader.difficulty.toLong())
     }
     document += StringField(OMMERS_HASH.fieldName, toBytesRef(blockHeader.getOmmersHash()), Field.Store.NO)
     document += StringField(COINBASE.fieldName, toBytesRef(blockHeader.getCoinbase()), Field.Store.NO)
@@ -499,16 +503,16 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     var searcher: IndexSearcher? = null
     try {
       searcher = searcherManager.acquire()
+
       val topDocs = searcher!!.search(
         TermQuery(Term("_type", "block")),
-        HITS,
-        Sort(SortField.FIELD_SCORE, SortField(field.fieldName, SortField.Type.DOC, true))
+        10,
+        Sort(SortField.FIELD_SCORE, SortedNumericSortField(field.fieldName, SortField.Type.LONG, true))
       )
 
       for (hit in topDocs.scoreDocs) {
         val doc = searcher.doc(hit.doc, setOf("_id"))
         val bytes = doc.getBinaryValue("_id")
-
         return Hash.fromBytes(Bytes32.wrap(bytes.bytes))
       }
       return null

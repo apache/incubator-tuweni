@@ -496,4 +496,78 @@ internal class BlockchainRepositoryTest {
     assertEquals(listOf(txReceipt), repo.retrieveTransactionReceipts(blockHash))
     assertEquals(txReceipt, repo.retrieveTransactionReceipt(txHash))
   }
+
+  @Test
+  fun testChainHead(@LuceneIndexWriter writer: IndexWriter) = runBlocking {
+    val genesisHeader = BlockHeader(
+      null,
+      Hash.fromBytes(Bytes32.random()),
+      Address.fromBytes(Bytes.random(20)),
+      Hash.fromBytes(Bytes32.random()),
+      Hash.fromBytes(Bytes32.random()),
+      Hash.fromBytes(Bytes32.random()),
+      Bytes32.random(),
+      UInt256.valueOf(0),
+      UInt256.valueOf(0),
+      Gas.valueOf(3000),
+      Gas.valueOf(2000),
+      Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
+      Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
+      Hash.fromBytes(Bytes32.random()),
+      UInt64.random()
+    )
+    val genesisBlock = Block(genesisHeader, BlockBody(emptyList(), emptyList()))
+    val repo = BlockchainRepository.init(
+      MapKeyValueStore(),
+      MapKeyValueStore(),
+      MapKeyValueStore(),
+      MapKeyValueStore(),
+      MapKeyValueStore(),
+      MapKeyValueStore(),
+      BlockchainIndex(writer),
+      genesisBlock
+    )
+    assertEquals(genesisBlock.header.hash, repo.retrieveChainHead().header.hash)
+    val block2Header = BlockHeader(
+      genesisBlock.header.hash,
+      Hash.fromBytes(Bytes32.random()),
+      Address.fromBytes(Bytes.random(20)),
+      Hash.fromBytes(Bytes32.random()),
+      Hash.fromBytes(Bytes32.random()),
+      Hash.fromBytes(Bytes32.random()),
+      Bytes32.random(),
+      UInt256.valueOf(52),
+      UInt256.valueOf(1),
+      Gas.valueOf(3000),
+      Gas.valueOf(2000),
+      Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
+      Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
+      Hash.fromBytes(Bytes32.random()),
+      UInt64.random()
+    )
+    val block2 = Block(block2Header, BlockBody(emptyList(), emptyList()))
+    repo.storeBlock(block2)
+    assertEquals(block2.header.hash, repo.retrieveChainHead().header.hash)
+    // unrelated block
+    val unrelatedBlockHeader = BlockHeader(
+      Hash.fromBytes(Bytes32.random()),
+      Hash.fromBytes(Bytes32.random()),
+      Address.fromBytes(Bytes.random(20)),
+      Hash.fromBytes(Bytes32.random()),
+      Hash.fromBytes(Bytes32.random()),
+      Hash.fromBytes(Bytes32.random()),
+      Bytes32.random(),
+      UInt256.valueOf(0),
+      UInt256.valueOf(42),
+      Gas.valueOf(3000),
+      Gas.valueOf(2000),
+      Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
+      Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
+      Hash.fromBytes(Bytes32.random()),
+      UInt64.random()
+    )
+    val unrelatedBlock = Block(unrelatedBlockHeader, BlockBody(emptyList(), emptyList()))
+    repo.storeBlock(unrelatedBlock)
+    assertEquals(block2.header.hash, repo.retrieveChainHead().header.hash)
+  }
 }

@@ -26,6 +26,7 @@ import java.util.concurrent.Executors
 import kotlin.coroutines.CoroutineContext
 
 const val BEST_PEER_DELAY: Long = 5000
+const val HEADERS_RESPONSE_TIMEOUT: Long = 10000
 
 class FromBestBlockSynchronizer(
   executor: ExecutorService = Executors.newSingleThreadExecutor(),
@@ -36,7 +37,10 @@ class FromBestBlockSynchronizer(
 ) : Synchronizer(executor, coroutineContext, repository, client, peerRepository) {
 
   override fun start() {
-    askNextBestHeaders()
+    launch {
+      delay(BEST_PEER_DELAY)
+      askNextBestHeaders()
+    }
   }
 
   override fun stop() {
@@ -46,18 +50,26 @@ class FromBestBlockSynchronizer(
 
   private fun askNextBestHeaders() {
     launch {
-      delay(BEST_PEER_DELAY)
       if (peerRepository.activeConnections().count() == 0L) {
         askNextBestHeaders()
         return@launch
       }
       val bestHeader = repository.retrieveChainHeadHeader()
       bestHeader?.let { header ->
+        logger.info("Request headers away from best known header ${header.number.toLong()} ${header.hash}")
+        var replied = false
         client.requestBlockHeaders(header.hash, HEADER_REQUEST_SIZE, 0L, false).thenAccept {
+          replied = true
           addHeaders(it)
           if (it.isNotEmpty()) {
             askNextBestHeaders()
+          } else {
+            logger.info("Done requesting headers")
           }
+        }
+        delay(HEADERS_RESPONSE_TIMEOUT)
+        if (!replied) {
+          askNextBestHeaders()
         }
       }
     }

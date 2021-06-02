@@ -46,6 +46,7 @@ class EthController(
   }
 
   suspend fun addNewBlock(newBlock: Block) {
+    logger.info("Received new block ${newBlock.header}")
     repository.storeBlock(newBlock)
   }
 
@@ -105,39 +106,33 @@ class EthController(
   }
 
   suspend fun addNewBlockHeaders(connection: WireConnection, requestIdentifier: Bytes?, headers: List<BlockHeader>) {
-    val request = when (requestsManager) {
-      is EthClient -> {
-        requestsManager.wasRequested(connection, headers)
-      }
-      is EthClient66 -> {
-        requestsManager.headersRequested(requestIdentifier!!)
-      }
-      else -> {
-        throw IllegalArgumentException("Unsupported requestsManager")
-      }
+    val request = if (requestIdentifier == null) {
+      (requestsManager as EthClient).headersRequested(connection, headers.first())
+    } else {
+      (requestsManager as EthClient66).headersRequested(requestIdentifier)
     }
-    request?.complete(headers)
+    if (request == null) {
+      logger.warn("Received block headers but no request matches this response for ${connection.uri()}")
+      return
+    }
+    request.handle.complete(headers)
   }
 
   suspend fun addNewBlockBodies(connection: WireConnection, requestIdentifier: Bytes?, bodies: List<BlockBody>) {
-    val request = when (requestsManager) {
-      is EthClient -> {
-        requestsManager.wasRequested(connection)
-      }
-      is EthClient66 -> {
-        requestsManager.bodiesRequested(requestIdentifier!!)
-      }
-      else -> {
-        throw IllegalArgumentException("Unsupported requestsManager")
-      }
+    val request = if (requestIdentifier == null) {
+      (requestsManager as EthClient).wasRequested(connection)
+    } else {
+      (requestsManager as EthClient66).bodiesRequested(requestIdentifier)
     }
-    if (request != null) {
-      val hashes = request.data as List<*>
-      for (i in 0..hashes.size) {
-        repository.storeBlockBody(hashes[i] as Hash, bodies[i])
-      }
-      request.handle.complete(bodies)
+    if (request == null) {
+      logger.warn("Received block bodies but no request matches this response for ${connection.uri()}")
+      return
     }
+    val hashes = request.data as List<*>
+    for (i in 0..hashes.size) {
+      repository.storeBlockBody(hashes[i] as Hash, bodies[i])
+    }
+    request.handle.complete(bodies)
   }
 
   fun receiveStatus(connection: WireConnection, status: Status) {
@@ -147,16 +142,10 @@ class EthController(
   suspend fun findNodeData(hashes: List<Hash>) = repository.retrieveNodeData(hashes)
 
   suspend fun addNewNodeData(connection: WireConnection, requestIdentifier: Bytes?, elements: List<Bytes?>) {
-    val request = when (requestsManager) {
-      is EthClient -> {
-        requestsManager.nodeDataWasRequested(connection)
-      }
-      is EthClient66 -> {
-        requestsManager.nodeDataWasRequested(requestIdentifier!!)
-      }
-      else -> {
-        throw IllegalArgumentException("Unsupported requestsManager")
-      }
+    val request = if (requestIdentifier == null) {
+      (requestsManager as EthClient).nodeDataWasRequested(connection)
+    } else {
+      (requestsManager as EthClient66).nodeDataWasRequested(requestIdentifier)
     }
     if (request != null) {
       val hashes = request.data as List<*>
@@ -175,16 +164,10 @@ class EthController(
     requestIdentifier: Bytes?,
     transactionReceipts: List<List<TransactionReceipt>>,
   ) {
-    val request = when (requestsManager) {
-      is EthClient -> {
-        requestsManager.transactionReceiptsRequested(connection)
-      }
-      is EthClient66 -> {
-        requestsManager.transactionReceiptsRequested(requestIdentifier!!)
-      }
-      else -> {
-        throw IllegalArgumentException("Unsupported requestsManager")
-      }
+    val request = if (requestIdentifier == null) {
+      (requestsManager as EthClient).transactionReceiptsRequested(connection)
+    } else {
+      (requestsManager as EthClient66).transactionReceiptsRequested(requestIdentifier)
     }
     if (request != null) {
       val hashes = request.data as List<*>

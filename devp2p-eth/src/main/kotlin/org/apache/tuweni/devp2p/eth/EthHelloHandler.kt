@@ -68,7 +68,7 @@ internal class EthHelloHandler(
   override fun handleNewPeerConnection(connection: WireConnection): AsyncCompletion {
     val newPeer = PeerInfo()
     pendingStatus[connection.uri()] = newPeer
-    val ethSubProtocol = connection.agreedSubprotocols().firstOrNull() { it.name() == EthSubprotocol.ETH65.name() }
+    val ethSubProtocol = connection.agreedSubprotocols().firstOrNull() { it.name() == EthSubprotocol.ETH66.name() }
     if (ethSubProtocol == null) {
       newPeer.cancel()
       return newPeer.ready
