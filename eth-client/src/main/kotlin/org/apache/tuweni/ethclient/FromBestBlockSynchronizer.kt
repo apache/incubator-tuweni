@@ -20,6 +20,7 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.apache.tuweni.devp2p.eth.EthRequestsManager
+import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -33,13 +34,14 @@ class FromBestBlockSynchronizer(
   coroutineContext: CoroutineContext = executor.asCoroutineDispatcher(),
   repository: BlockchainRepository,
   client: EthRequestsManager,
-  peerRepository: EthereumPeerRepository
+  peerRepository: EthereumPeerRepository,
 ) : Synchronizer(executor, coroutineContext, repository, client, peerRepository) {
 
   override fun start() {
     launch {
+      repository.indexing = false
       delay(BEST_PEER_DELAY)
-      askNextBestHeaders()
+      askNextBestHeaders(repository.retrieveChainHeadHeader())
     }
   }
 
@@ -48,29 +50,30 @@ class FromBestBlockSynchronizer(
     executor.shutdown()
   }
 
-  private fun askNextBestHeaders() {
+  private fun askNextBestHeaders(header: BlockHeader) {
     launch {
       if (peerRepository.activeConnections().count() == 0L) {
-        askNextBestHeaders()
+        askNextBestHeaders(header)
         return@launch
       }
-      val bestHeader = repository.retrieveChainHeadHeader()
-      bestHeader?.let { header ->
-        logger.info("Request headers away from best known header ${header.number.toLong()} ${header.hash}")
-        var replied = false
-        client.requestBlockHeaders(header.hash, HEADER_REQUEST_SIZE, 0L, false).thenAccept {
-          replied = true
-          addHeaders(it)
-          if (it.isNotEmpty()) {
-            askNextBestHeaders()
-          } else {
-            logger.info("Done requesting headers")
+      logger.info("Request headers away from best known header ${header.number.toLong()} ${header.hash}")
+      var replied = false
+      client.requestBlockHeaders(header.hash, HEADER_REQUEST_SIZE, 0L, false).thenAccept { headers ->
+        replied = true
+        addHeaders(headers)
+        if (headers.size > 1) {
+          askNextBestHeaders(headers.last())
+        } else {
+          logger.info("Done requesting headers")
+          launch {
+            repository.indexing = true
+            repository.reIndexTotalDifficulty()
           }
         }
-        delay(HEADERS_RESPONSE_TIMEOUT)
-        if (!replied) {
-          askNextBestHeaders()
-        }
+      }
+      delay(HEADERS_RESPONSE_TIMEOUT)
+      if (!replied) {
+        askNextBestHeaders(header)
       }
     }
   }

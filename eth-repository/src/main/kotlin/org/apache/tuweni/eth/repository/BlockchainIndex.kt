@@ -263,7 +263,12 @@ interface BlockchainIndexWriter {
    *
    * @param blockHeader the block header to index
    */
-  fun indexBlockHeader(blockHeader: BlockHeader)
+  fun indexBlockHeader(blockHeader: BlockHeader, indexTotalDifficulty: Boolean = true)
+
+  /**
+   * Indexes the total difficulty of a block header based on its position in the chain.
+   */
+  fun indexTotalDifficulty(blockHeader: BlockHeader)
 
   /**
    * Indexes a transaction receipt.
@@ -337,11 +342,34 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     }
   }
 
-  override fun indexBlockHeader(blockHeader: BlockHeader) {
+  override fun indexBlockHeader(blockHeader: BlockHeader, indexTotalDifficulty: Boolean) {
     val document = mutableListOf<IndexableField>()
     val id = toBytesRef(blockHeader.getHash())
     document.add(StringField("_id", id, Field.Store.YES))
     document.add(StringField("_type", "block", Field.Store.NO))
+    document += StringField(OMMERS_HASH.fieldName, toBytesRef(blockHeader.getOmmersHash()), Field.Store.NO)
+    document += StringField(COINBASE.fieldName, toBytesRef(blockHeader.getCoinbase()), Field.Store.NO)
+    document += StringField(STATE_ROOT.fieldName, toBytesRef(blockHeader.getStateRoot()), Field.Store.NO)
+    document += StringField(DIFFICULTY.fieldName, toBytesRef(blockHeader.getDifficulty()), Field.Store.YES)
+    document += StringField(NUMBER.fieldName, toBytesRef(blockHeader.getNumber()), Field.Store.NO)
+    document += StringField(GAS_LIMIT.fieldName, toBytesRef(blockHeader.getGasLimit()), Field.Store.NO)
+    document += StringField(GAS_USED.fieldName, toBytesRef(blockHeader.getGasUsed()), Field.Store.NO)
+    document += StringField(EXTRA_DATA.fieldName, toBytesRef(blockHeader.getExtraData()), Field.Store.NO)
+    document += NumericDocValuesField(TIMESTAMP.fieldName, blockHeader.getTimestamp().toEpochMilli())
+
+    try {
+      indexWriter.updateDocument(Term("_id", id), document)
+    } catch (e: IOException) {
+      throw IndexWriteException(e)
+    }
+    indexTotalDifficulty(blockHeader)
+  }
+
+  override fun indexTotalDifficulty(blockHeader: BlockHeader) {
+    val document = mutableListOf<Field>()
+    val id = toBytesRef(blockHeader.getHash())
+    document.add(StringField("_id", id, Field.Store.YES))
+    document.add(StringField("_type", "difficulty", Field.Store.NO))
     blockHeader.getParentHash()?.let { hash ->
       val hashRef = toBytesRef(hash)
       document += StringField(
@@ -364,18 +392,13 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
       document += SortedNumericDocValuesField(TOTAL_DIFFICULTY.fieldName, blockHeader.difficulty.toLong())
       document += StoredField(TOTAL_DIFFICULTY.fieldName, blockHeader.difficulty.toLong())
     }
-    document += StringField(OMMERS_HASH.fieldName, toBytesRef(blockHeader.getOmmersHash()), Field.Store.NO)
-    document += StringField(COINBASE.fieldName, toBytesRef(blockHeader.getCoinbase()), Field.Store.NO)
-    document += StringField(STATE_ROOT.fieldName, toBytesRef(blockHeader.getStateRoot()), Field.Store.NO)
-    document += StringField(DIFFICULTY.fieldName, toBytesRef(blockHeader.getDifficulty()), Field.Store.NO)
-    document += StringField(NUMBER.fieldName, toBytesRef(blockHeader.getNumber()), Field.Store.NO)
-    document += StringField(GAS_LIMIT.fieldName, toBytesRef(blockHeader.getGasLimit()), Field.Store.NO)
-    document += StringField(GAS_USED.fieldName, toBytesRef(blockHeader.getGasUsed()), Field.Store.NO)
-    document += StringField(EXTRA_DATA.fieldName, toBytesRef(blockHeader.getExtraData()), Field.Store.NO)
-    document += NumericDocValuesField(TIMESTAMP.fieldName, blockHeader.getTimestamp().toEpochMilli())
-
     try {
-      indexWriter.updateDocument(Term("_id", id), document)
+      val query = BooleanQuery.Builder()
+        .add(TermQuery(Term("_id", id)), BooleanClause.Occur.MUST)
+        .add(TermQuery(Term("_type", "difficulty")), BooleanClause.Occur.MUST)
+
+      indexWriter.deleteDocuments(query.build())
+      indexWriter.addDocument(document)
     } catch (e: IOException) {
       throw IndexWriteException(e)
     }

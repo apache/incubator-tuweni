@@ -141,7 +141,9 @@ open class EthClient(
 
   override fun requestBlockBodies(blockHashes: List<Hash>, connection: WireConnection): AsyncResult<List<BlockBody>> {
     val handle = AsyncResult.incomplete<List<BlockBody>>()
-    bodiesRequests.computeIfAbsent(connection.uri()) {
+    var oldRequestPresent = true
+    val oldRequest = bodiesRequests.computeIfAbsent(connection.uri()) {
+      oldRequestPresent = false
       service.send(
         connection.agreedSubprotocol(EthSubprotocol.ETH65),
         MessageType.GetBlockBodies.code,
@@ -149,6 +151,13 @@ open class EthClient(
         GetBlockBodies(blockHashes).toBytes()
       )
       Request(connection.uri(), handle, blockHashes)
+    }
+    if (oldRequestPresent) {
+      oldRequest.handle.thenRun {
+        requestBlockBodies(blockHashes, connection).thenAccept() {
+          handle.complete(it)
+        }
+      }
     }
     return handle
   }
@@ -177,7 +186,7 @@ open class EthClient(
     ?: headerRequests.remove(connection.uri() + blockHeader.number.toHexString())
 
   fun wasRequested(connection: WireConnection): Request<List<BlockBody>>? =
-    bodiesRequests[connection.uri()]
+    bodiesRequests.remove(connection.uri())
 
   fun nodeDataWasRequested(connection: WireConnection): Request<List<Bytes?>>? =
     nodeDataRequests[connection.uri()]

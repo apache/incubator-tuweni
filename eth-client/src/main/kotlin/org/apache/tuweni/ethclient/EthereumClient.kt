@@ -24,6 +24,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.index.IndexWriter
 import org.apache.lucene.index.IndexWriterConfig
 import org.apache.lucene.store.NIOFSDirectory
+import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.devp2p.eth.EthRequestsManager
@@ -36,11 +37,17 @@ import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.MemoryTransactionPool
 import org.apache.tuweni.ethclient.metrics.MetricsService
+import org.apache.tuweni.kv.InfinispanKeyValueStore
 import org.apache.tuweni.kv.LevelDBKeyValueStore
 import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.vertx.VertxRLPxService
 import org.apache.tuweni.units.bigints.UInt256
+import org.infinispan.Cache
+import org.infinispan.configuration.cache.ConfigurationBuilder
+import org.infinispan.configuration.global.GlobalConfigurationBuilder
+import org.infinispan.manager.DefaultCacheManager
+import org.infinispan.persistence.rocksdb.configuration.RocksDBStoreConfigurationBuilder
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.net.URI
@@ -53,7 +60,7 @@ import kotlin.coroutines.CoroutineContext
 class EthereumClient(
   val vertx: Vertx,
   val config: EthereumClientConfig,
-  override val coroutineContext: CoroutineContext = Dispatchers.Unconfined
+  override val coroutineContext: CoroutineContext = Dispatchers.Unconfined,
 ) : CoroutineScope {
 
   companion object {
@@ -70,7 +77,13 @@ class EthereumClient(
 
   suspend fun start() {
     logger.info("Starting Ethereum client...")
-    val metricsService = MetricsService("tuweni", port = config.metricsPort(), networkInterface = config.metricsNetworkInterface(), enableGrpcPush = config.metricsGrpcPushEnabled(), enablePrometheus = config.metricsPrometheusEnabled())
+    val metricsService = MetricsService(
+      "tuweni",
+      port = config.metricsPort(),
+      networkInterface = config.metricsNetworkInterface(),
+      enableGrpcPush = config.metricsGrpcPushEnabled(),
+      enablePrometheus = config.metricsPrometheusEnabled()
+    )
     this.metricsService = metricsService
     config.peerRepositories().forEach {
       peerRepositories[it.getName()] = MemoryEthereumPeerRepository()
@@ -90,9 +103,18 @@ class EthereumClient(
       val analyzer = StandardAnalyzer()
       val config = IndexWriterConfig(analyzer)
       val writer = IndexWriter(index, config)
+      val builder = GlobalConfigurationBuilder().serialization().marshaller(PersistenceMarshaller())
+
+      val manager = DefaultCacheManager(builder.build())
+      val headersCache: Cache<Bytes, Bytes> = manager.createCache(
+        "headers",
+        ConfigurationBuilder().persistence().addStore(RocksDBStoreConfigurationBuilder::class.java)
+          .location(dataStorage.resolve("headers").toAbsolutePath().toString())
+          .expiredLocation(dataStorage.resolve("headers-expired").toAbsolutePath().toString()).build()
+      )
       val repository = BlockchainRepository.init(
         LevelDBKeyValueStore.open(dataStorage.resolve("bodies")),
-        LevelDBKeyValueStore.open(dataStorage.resolve("headers")),
+        InfinispanKeyValueStore.open(headersCache),
         LevelDBKeyValueStore.open(dataStorage.resolve("metadata")),
         LevelDBKeyValueStore.open(dataStorage.resolve("transactionReceipts")),
         LevelDBKeyValueStore.open(dataStorage.resolve("transactions")),
@@ -198,7 +220,7 @@ class EthereumClient(
             peerRepository = peerRepository
           )
           synchronizers[rlpxConfig.getName() + "parent"] = parentSynchronizer
-          // parentSynchronizer.start()
+          parentSynchronizer.start()
           val bestSynchronizer = FromBestBlockSynchronizer(
             repository = repository,
             client = service.getClient(ETH66) as EthRequestsManager,

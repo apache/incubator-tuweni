@@ -59,7 +59,9 @@ class FromUnknownParentSynchronizer(
       delay(DELAY)
       if (!repository.hasBlockHeader(parentHash)) {
         logger.info("Requesting parent headers from unknown parent header hash $parentHash")
-        client.requestBlockHeaders(parentHash, HEADER_PARENT_HEADER_REQUEST_SIZE, 0L, true).thenAccept(::addHeaders)
+        client.requestBlockHeaders(parentHash, HEADER_PARENT_HEADER_REQUEST_SIZE, 1L, true).thenAccept(::addHeaders)
+        client.requestBlockHeaders(header.hash, HEADER_PARENT_HEADER_REQUEST_SIZE, 1L, true).thenAccept(::addHeaders)
+        client.requestBlockHeaders(parentHash, HEADER_PARENT_HEADER_REQUEST_SIZE, 5L, true).thenAccept(::addHeaders)
       }
     }
   }
