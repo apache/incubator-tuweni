@@ -173,7 +173,7 @@ internal class EthHandler(
   private suspend fun handleGetReceipts(connection: WireConnection, getReceipts: GetReceipts) {
 
     service.send(
-      connection.agreedSubprotocol(ETH65),
+      connection.agreedSubprotocol(ETH62),
       MessageType.Receipts.code,
       connection,
       Receipts(controller.findTransactionReceipts(getReceipts.hashes)).toBytes()

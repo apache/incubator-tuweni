@@ -19,7 +19,7 @@ package org.apache.tuweni.eth.repository
 import org.apache.lucene.document.Document
 import org.apache.lucene.document.Field
 import org.apache.lucene.document.NumericDocValuesField
-import org.apache.lucene.document.SortedNumericDocValuesField
+import org.apache.lucene.document.SortedDocValuesField
 import org.apache.lucene.document.StoredField
 import org.apache.lucene.document.StringField
 import org.apache.lucene.index.IndexWriter
@@ -382,15 +382,15 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
           val totalDifficulty = blockHeader.getDifficulty().add(UInt256.fromBytes(Bytes.wrap(it.binaryValue().bytes)))
           val diffBytes = toBytesRef(totalDifficulty.toBytes())
           document += StringField(TOTAL_DIFFICULTY.fieldName, diffBytes, Field.Store.YES)
-          document += SortedNumericDocValuesField(TOTAL_DIFFICULTY.fieldName, totalDifficulty.toLong())
-          document += StoredField(TOTAL_DIFFICULTY.fieldName, totalDifficulty.toLong())
+          document += SortedDocValuesField(TOTAL_DIFFICULTY.fieldName, diffBytes)
+          document += StoredField(TOTAL_DIFFICULTY.fieldName, diffBytes)
         }
       }
     } ?: run {
       val diffBytes = toBytesRef(blockHeader.getDifficulty().toBytes())
       document += StringField(TOTAL_DIFFICULTY.fieldName, diffBytes, Field.Store.YES)
-      document += SortedNumericDocValuesField(TOTAL_DIFFICULTY.fieldName, blockHeader.difficulty.toLong())
-      document += StoredField(TOTAL_DIFFICULTY.fieldName, blockHeader.difficulty.toLong())
+      document += SortedDocValuesField(TOTAL_DIFFICULTY.fieldName, diffBytes)
+      document += StoredField(TOTAL_DIFFICULTY.fieldName, diffBytes)
     }
     try {
       val query = BooleanQuery.Builder()
