@@ -41,6 +41,8 @@ class EthereumClientRunTest {
       [storage.default]
       path="data"
       genesis="default"
+      [genesis.default]
+      path="classpath:/default.json"
       [static.default]
       peerRepository="default"
       [rlpx.default]
@@ -57,6 +59,8 @@ class EthereumClientRunTest {
       [storage.default]
       path="data2"
       genesis="default"
+      [genesis.default]
+      path="classpath:/default.json"
       [static.default]
       enodes=["enode://${keyPair.publicKey().toHexString()}@127.0.0.1:30301"]
       peerRepository="default"

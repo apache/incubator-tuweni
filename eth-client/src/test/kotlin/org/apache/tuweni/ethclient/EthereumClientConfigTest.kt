@@ -55,14 +55,6 @@ class EthereumClientConfigTest {
   }
 
   @Test
-  fun testEmptyConfigHasOneWireRepository() {
-    val config = EthereumClientConfig.fromString("")
-    assertEquals(1, config.rlpxServices().size)
-    val rlpx = config.rlpxServices()[0]
-    assertEquals("default", rlpx.getName())
-  }
-
-  @Test
   fun testEmptyConfigHasOneDataStorage() {
     val config = EthereumClientConfig.empty()
     assertEquals(1, config.dataStores().size)
@@ -84,7 +76,7 @@ class EthereumClientConfigTest {
   fun toToml() {
     val config = EthereumClientConfig.fromString("[storage.forui]\npath=\"data\"")
     assertEquals(
-      "## Port to expose Prometheus metrics\n#metricsPort = 9090\n\n[storage.forui]${System.lineSeparator()}path = \"data\"${System.lineSeparator()}",
+      "[storage.forui]\npath = \"data\"\n",
       config.toToml()
     )
   }
