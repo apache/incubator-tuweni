@@ -335,7 +335,7 @@ class BlockchainRepository(
    * @return the current chain head, or the genesis block if no chain head is present.
    */
   suspend fun retrieveChainHead(): Block {
-    return blockchainIndex.findByLargest(BlockHeaderFields.TOTAL_DIFFICULTY)
+    return blockchainIndex.findLargestTotalDifficulty()
       ?.let { retrieveBlock(it) } ?: retrieveGenesisBlock()
   }
 
@@ -345,7 +345,7 @@ class BlockchainRepository(
    * @return the current chain head header, or the genesis block if no chain head is present.
    */
   suspend fun retrieveChainHeadHeader(): BlockHeader {
-    return blockchainIndex.findByLargest(BlockHeaderFields.TOTAL_DIFFICULTY)
+    return blockchainIndex.findLargestTotalDifficulty()
       ?.let { retrieveBlockHeader(it) } ?: retrieveGenesisBlock().getHeader()
   }
 

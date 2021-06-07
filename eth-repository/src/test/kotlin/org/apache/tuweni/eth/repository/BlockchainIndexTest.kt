@@ -33,6 +33,8 @@ import org.apache.tuweni.units.ethereum.Gas
 import org.apache.lucene.index.DirectoryReader
 import org.apache.lucene.index.IndexWriter
 import org.apache.lucene.index.Term
+import org.apache.lucene.search.BooleanClause
+import org.apache.lucene.search.BooleanQuery
 import org.apache.lucene.search.IndexSearcher
 import org.apache.lucene.search.ScoreDoc
 import org.apache.lucene.search.TermQuery
@@ -53,6 +55,7 @@ internal class BlockchainIndexTest {
   @Test
   @Throws(IOException::class)
   fun testIndexBlockHeaderElements(@LuceneIndexWriter writer: IndexWriter) {
+    writer.deleteAll()
 
     val blockchainIndex = BlockchainIndex(writer)
     val header = BlockHeader(
@@ -77,7 +80,10 @@ internal class BlockchainIndexTest {
     val reader = DirectoryReader.open(writer)
     val searcher = IndexSearcher(reader)
     val collector = TopScoreDocCollector.create(10, ScoreDoc(1, 1.0f))
-    searcher.search(TermQuery(Term("_id", BytesRef(header.hash.toArrayUnsafe()))), collector)
+    val query = BooleanQuery.Builder()
+      .add(TermQuery(Term("_id", BytesRef(header.hash.toArrayUnsafe()))), BooleanClause.Occur.MUST)
+      .add(TermQuery(Term("_type", "block")), BooleanClause.Occur.MUST)
+    searcher.search(query.build(), collector)
     val hits = collector.topDocs().scoreDocs
     assertEquals(1, hits.size)
   }
@@ -85,7 +91,7 @@ internal class BlockchainIndexTest {
   @Test
   @Throws(IOException::class)
   fun testIndexCommit(@LuceneIndexWriter writer: IndexWriter, @LuceneIndex index: Directory) {
-
+    writer.deleteAll()
     val blockchainIndex = BlockchainIndex(writer)
     val header = BlockHeader(
       Hash.fromBytes(Bytes32.random()),
@@ -109,7 +115,10 @@ internal class BlockchainIndexTest {
     val reader = DirectoryReader.open(index)
     val searcher = IndexSearcher(reader)
     val collector = TopScoreDocCollector.create(10, ScoreDoc(1, 1.0f))
-    searcher.search(TermQuery(Term("_id", BytesRef(header.hash.toArrayUnsafe()))), collector)
+    val query = BooleanQuery.Builder()
+      .add(TermQuery(Term("_id", BytesRef(header.hash.toArrayUnsafe()))), BooleanClause.Occur.MUST)
+      .add(TermQuery(Term("_type", "block")), BooleanClause.Occur.MUST)
+    searcher.search(query.build(), collector)
     val hits = collector.topDocs().scoreDocs
     assertEquals(1, hits.size)
   }
@@ -117,6 +126,7 @@ internal class BlockchainIndexTest {
   @Test
   @Throws(IOException::class)
   fun queryBlockHeaderByField(@LuceneIndexWriter writer: IndexWriter) {
+    writer.deleteAll()
     val blockchainIndex = BlockchainIndex(writer)
     val header = BlockHeader(
       Hash.fromBytes(Bytes32.random()),
@@ -217,6 +227,7 @@ internal class BlockchainIndexTest {
 
   @Test
   fun testTotalDifficulty(@LuceneIndexWriter writer: IndexWriter) {
+    writer.deleteAll()
     val blockchainIndex = BlockchainIndex(writer)
     val header = BlockHeader(
       null,
@@ -263,6 +274,7 @@ internal class BlockchainIndexTest {
 
   @Test
   fun queryTransactionReceiptByField(@LuceneIndexWriter writer: IndexWriter) {
+    writer.deleteAll()
     val blockchainIndex = BlockchainIndex(writer)
 
     val txReceipt = TransactionReceipt(

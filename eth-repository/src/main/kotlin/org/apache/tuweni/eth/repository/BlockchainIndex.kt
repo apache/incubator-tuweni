@@ -33,7 +33,6 @@ import org.apache.lucene.search.SearcherFactory
 import org.apache.lucene.search.SearcherManager
 import org.apache.lucene.search.Sort
 import org.apache.lucene.search.SortField
-import org.apache.lucene.search.SortedNumericSortField
 import org.apache.lucene.search.TermQuery
 import org.apache.lucene.search.TermRangeQuery
 import org.apache.lucene.util.BytesRef
@@ -139,6 +138,14 @@ interface BlockchainIndexReader {
    * @return the matching hash with the largest field value.
    */
   fun findByLargest(field: BlockHeaderFields): Hash?
+
+  /**
+   * Find the hash of the block header with the largest total difficulty.
+   *
+   * @param field the field to query on
+   * @return the matching hash with the largest field value.
+   */
+  fun findLargestTotalDifficulty(): Hash?
 
   /**
    * Finds hashes of blocks by hash or number.
@@ -347,6 +354,10 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     val id = toBytesRef(blockHeader.getHash())
     document.add(StringField("_id", id, Field.Store.YES))
     document.add(StringField("_type", "block", Field.Store.NO))
+    val parentHash = blockHeader.parentHash
+    if (null != parentHash) {
+      document += StringField(PARENT_HASH.fieldName, toBytesRef(parentHash), Field.Store.NO)
+    }
     document += StringField(OMMERS_HASH.fieldName, toBytesRef(blockHeader.getOmmersHash()), Field.Store.NO)
     document += StringField(COINBASE.fieldName, toBytesRef(blockHeader.getCoinbase()), Field.Store.NO)
     document += StringField(STATE_ROOT.fieldName, toBytesRef(blockHeader.getStateRoot()), Field.Store.NO)
@@ -358,7 +369,11 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     document += NumericDocValuesField(TIMESTAMP.fieldName, blockHeader.getTimestamp().toEpochMilli())
 
     try {
-      indexWriter.updateDocument(Term("_id", id), document)
+      val query = BooleanQuery.Builder()
+        .add(TermQuery(Term("_id", id)), BooleanClause.Occur.MUST)
+        .add(TermQuery(Term("_type", "block")), BooleanClause.Occur.MUST)
+      indexWriter.deleteDocuments(query.build())
+      indexWriter.addDocument(document)
     } catch (e: IOException) {
       throw IndexWriteException(e)
     }
@@ -367,7 +382,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
 
   override fun indexTotalDifficulty(blockHeader: BlockHeader) {
     val document = mutableListOf<Field>()
-    val id = toBytesRef(blockHeader.getHash())
+    val id = toBytesRef(blockHeader.hash)
     document.add(StringField("_id", id, Field.Store.YES))
     document.add(StringField("_type", "difficulty", Field.Store.NO))
     blockHeader.getParentHash()?.let { hash ->
@@ -377,17 +392,17 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
         hashRef,
         Field.Store.NO
       )
-      queryBlockDocs(TermQuery(Term("_id", hashRef)), listOf(TOTAL_DIFFICULTY)).firstOrNull()?.let {
+      queryDiffDocs(TermQuery(Term("_id", hashRef)), listOf(TOTAL_DIFFICULTY)).firstOrNull()?.let {
         it.getField(TOTAL_DIFFICULTY.fieldName)?.let {
           val totalDifficulty = blockHeader.getDifficulty().add(UInt256.fromBytes(Bytes.wrap(it.binaryValue().bytes)))
-          val diffBytes = toBytesRef(totalDifficulty.toBytes())
+          val diffBytes = toBytesRef(totalDifficulty)
           document += StringField(TOTAL_DIFFICULTY.fieldName, diffBytes, Field.Store.YES)
           document += SortedDocValuesField(TOTAL_DIFFICULTY.fieldName, diffBytes)
           document += StoredField(TOTAL_DIFFICULTY.fieldName, diffBytes)
         }
       }
     } ?: run {
-      val diffBytes = toBytesRef(blockHeader.getDifficulty().toBytes())
+      val diffBytes = toBytesRef(blockHeader.difficulty)
       document += StringField(TOTAL_DIFFICULTY.fieldName, diffBytes, Field.Store.YES)
       document += SortedDocValuesField(TOTAL_DIFFICULTY.fieldName, diffBytes)
       document += StoredField(TOTAL_DIFFICULTY.fieldName, diffBytes)
@@ -492,6 +507,15 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     return search(blockQuery, fields.map { it.fieldName })
   }
 
+  private fun queryDiffDocs(query: Query, fields: List<BlockHeaderFields>): List<Document> {
+    val blockQuery = BooleanQuery.Builder().add(
+      query, BooleanClause.Occur.MUST
+    )
+      .add(TermQuery(Term("_type", "difficulty")), BooleanClause.Occur.MUST).build()
+
+    return search(blockQuery, fields.map { it.fieldName })
+  }
+
   private fun queryBlocks(query: Query): List<Hash> {
     val hashes = mutableListOf<Hash>()
     for (doc in queryBlockDocs(query)) {
@@ -522,6 +546,33 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     return queryBlocks(NumericDocValuesField.newSlowExactQuery(field.fieldName, value))
   }
 
+  override fun findLargestTotalDifficulty(): Hash? {
+    var searcher: IndexSearcher? = null
+    try {
+      searcher = searcherManager.acquire()
+
+      val topDocs = searcher!!.search(
+        TermQuery(Term("_type", "difficulty")),
+        10,
+        Sort(SortField(TOTAL_DIFFICULTY.fieldName, SortField.Type.STRING, true))
+      )
+
+      for (hit in topDocs.scoreDocs) {
+        val doc = searcher.doc(hit.doc, setOf("_id"))
+        val bytes = doc.getBinaryValue("_id")
+        return Hash.fromBytes(Bytes32.wrap(bytes.bytes))
+      }
+      return null
+    } catch (e: IOException) {
+      throw IndexReadException(e)
+    } finally {
+      try {
+        searcherManager.release(searcher)
+      } catch (e: IOException) {
+      }
+    }
+  }
+
   override fun findByLargest(field: BlockHeaderFields): Hash? {
     var searcher: IndexSearcher? = null
     try {
@@ -530,7 +581,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
       val topDocs = searcher!!.search(
         TermQuery(Term("_type", "block")),
         10,
-        Sort(SortField.FIELD_SCORE, SortedNumericSortField(field.fieldName, SortField.Type.LONG, true))
+        Sort(SortField.FIELD_SCORE, SortField(field.fieldName, SortField.Type.DOC, true))
       )
 
       for (hit in topDocs.scoreDocs) {
@@ -616,7 +667,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
       val topDocs = searcher!!.search(
         TermQuery(Term("_type", "txReceipt")),
         HITS,
-        Sort(SortField.FIELD_SCORE, SortField(field.fieldName, SortField.Type.DOC, true))
+        Sort(SortField.FIELD_SCORE, SortField(field.fieldName, SortField.Type.DOC, false))
       )
 
       for (hit in topDocs.scoreDocs) {
@@ -681,7 +732,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
   }
 
   override fun totalDifficulty(hash: Bytes): UInt256? =
-    queryBlockDocs(TermQuery(Term("_id", toBytesRef(hash))), listOf(TOTAL_DIFFICULTY)).firstOrNull()?.let {
+    queryDiffDocs(TermQuery(Term("_id", toBytesRef(hash))), listOf(TOTAL_DIFFICULTY)).firstOrNull()?.let {
       it.getField(TOTAL_DIFFICULTY.fieldName)?.binaryValue()?.bytes?.let { bytes ->
         UInt256.fromBytes(Bytes.wrap(bytes))
       }
