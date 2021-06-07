@@ -18,6 +18,8 @@ package org.apache.tuweni.ethclient
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import org.apache.tuweni.devp2p.eth.EthRequestsManager
 import org.apache.tuweni.eth.BlockHeader
@@ -42,14 +44,16 @@ abstract class Synchronizer(
 
   fun addHeaders(result: List<BlockHeader>) {
     launch {
-      logger.info("Receiving headers - first ${result.firstOrNull()?.hash}")
+      logger.info("Receiving ${result.size} headers - first ${result.firstOrNull()?.hash}")
       val bodiesToRequest = mutableListOf<Hash>()
-      for (header in result) {
-        repository.storeBlockHeader(header)
-        if (!repository.hasBlockBody(header.hash)) {
-          bodiesToRequest.add(header.hash)
+      result.map { header ->
+        async {
+          repository.storeBlockHeader(header)
+          if (!repository.hasBlockBody(header.hash)) {
+            bodiesToRequest.add(header.hash)
+          }
         }
-      }
+      }.awaitAll()
       client.requestBlockBodies(bodiesToRequest)
     }
   }

@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.devp2p.proxy
 
+import io.opentelemetry.sdk.metrics.SdkMeterProvider
 import io.vertx.core.Vertx
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -39,6 +40,8 @@ import java.net.InetSocketAddress
 @ExtendWith(VertxExtension::class, BouncyCastleExtension::class)
 class SendDataToAnotherNodeTest {
 
+  private val meter = SdkMeterProvider.builder().build().get("connect")
+
   @Test
   fun testConnectTwoProxyNodes(@VertxInstance vertx: Vertx) = runBlocking {
     val service = VertxRLPxService(
@@ -50,7 +53,8 @@ class SendDataToAnotherNodeTest {
       listOf(
         ProxySubprotocol()
       ),
-      "Tuweni Experiment 0.1"
+      "Tuweni Experiment 0.1",
+      meter
     )
 
     val service2kp = SECP256K1.KeyPair.random()
@@ -61,7 +65,8 @@ class SendDataToAnotherNodeTest {
       0,
       service2kp,
       listOf(ProxySubprotocol()),
-      "Tuweni Experiment 0.1"
+      "Tuweni Experiment 0.1",
+      meter
     )
     val recorder = RecordingClientHandler()
     service.start().await()

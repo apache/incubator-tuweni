@@ -55,14 +55,6 @@ class EthereumClientConfigTest {
   }
 
   @Test
-  fun testEmptyConfigHasOneWireRepository() {
-    val config = EthereumClientConfig.fromString("")
-    assertEquals(1, config.rlpxServices().size)
-    val rlpx = config.rlpxServices()[0]
-    assertEquals("default", rlpx.getName())
-  }
-
-  @Test
   fun testEmptyConfigHasOneDataStorage() {
     val config = EthereumClientConfig.empty()
     assertEquals(1, config.dataStores().size)

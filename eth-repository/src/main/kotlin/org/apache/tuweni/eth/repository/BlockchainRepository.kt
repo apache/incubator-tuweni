@@ -16,6 +16,13 @@
  */
 package org.apache.tuweni.eth.repository
 
+import io.opentelemetry.api.metrics.Meter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.index.IndexWriter
 import org.apache.lucene.index.IndexWriterConfig
@@ -36,6 +43,7 @@ import org.apache.tuweni.trie.MerkleStorage
 import org.apache.tuweni.trie.StoredMerklePatriciaTrie
 import org.slf4j.LoggerFactory
 import java.util.UUID
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Repository housing blockchain information.
@@ -50,6 +58,7 @@ import java.util.UUID
  * @param transactionStore the key-value store to store transactions
  * @param stateStore the key-value store to store the global state
  * @param blockchainIndex the blockchain index to index values
+ * @param meter an optional metering provider to watch metrics in the repository
  */
 class BlockchainRepository(
   private val chainMetadata: KeyValueStore<Bytes, Bytes>,
@@ -58,8 +67,10 @@ class BlockchainRepository(
   private val transactionReceiptStore: KeyValueStore<Bytes, Bytes>,
   private val transactionStore: KeyValueStore<Bytes, Bytes>,
   private val stateStore: KeyValueStore<Bytes, Bytes>,
-  private val blockchainIndex: BlockchainIndex
-) {
+  private val blockchainIndex: BlockchainIndex,
+  private val meter: Meter? = null,
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
+) : CoroutineScope {
 
   companion object {
 
@@ -82,7 +93,7 @@ class BlockchainRepository(
         MapKeyValueStore(),
         MapKeyValueStore(),
         MapKeyValueStore(),
-        BlockchainIndex(writer)
+        BlockchainIndex(writer),
       )
     }
 
@@ -99,7 +110,8 @@ class BlockchainRepository(
       transactionStore: KeyValueStore<Bytes, Bytes>,
       stateStore: KeyValueStore<Bytes, Bytes>,
       blockchainIndex: BlockchainIndex,
-      genesisBlock: Block
+      genesisBlock: Block,
+      meter: Meter? = null,
     ): BlockchainRepository {
       val repo = BlockchainRepository(
         chainMetadata,
@@ -108,7 +120,8 @@ class BlockchainRepository(
         transactionReceiptsStore,
         transactionStore,
         stateStore,
-        blockchainIndex
+        blockchainIndex,
+        meter
       )
       repo.setGenesisBlock(genesisBlock)
       repo.storeBlock(genesisBlock)
@@ -117,6 +130,13 @@ class BlockchainRepository(
   }
 
   val blockHeaderListeners = mutableMapOf<String, (BlockHeader) -> Unit>()
+  val blocksStoredCounter =
+    meter?.longCounterBuilder("blocks_stored")?.setDescription("Number of blocks stored")?.build()
+  val blockHeadersStoredCounter =
+    meter?.longCounterBuilder("block_headers_stored")?.setDescription("Number of block headers stored")?.build()
+  val blockBodiesStoredCounter =
+    meter?.longCounterBuilder("blocks_bodies_stored")?.setDescription("Number of block bodies stored")?.build()
+  var indexing = true
 
   /**
    * Stores a block body into the repository.
@@ -124,6 +144,7 @@ class BlockchainRepository(
    * @param blockBody the block body to store
    */
   suspend fun storeBlockBody(blockHash: Hash, blockBody: BlockBody) {
+    blockBodiesStoredCounter?.add(1)
     blockBodyStore.put(blockHash, blockBody.toBytes())
   }
 
@@ -144,6 +165,7 @@ class BlockchainRepository(
    * @return a handle to the storage operation completion
    */
   suspend fun storeBlock(block: Block) {
+    blocksStoredCounter?.add(1)
     storeBlockBody(block.getHeader().getHash(), block.getBody())
     blockHeaderStore.put(block.getHeader().getHash(), block.getHeader().toBytes())
     indexBlockHeader(block.getHeader())
@@ -161,7 +183,7 @@ class BlockchainRepository(
     transactionReceipt: TransactionReceipt,
     txIndex: Int,
     txHash: Bytes,
-    blockHash: Bytes
+    blockHash: Bytes,
   ) {
     transactionReceiptStore.put(txHash, transactionReceipt.toBytes())
     indexTransactionReceipt(transactionReceipt, txIndex, txHash, blockHash)
@@ -174,8 +196,11 @@ class BlockchainRepository(
    * @return handle to the storage operation completion
    */
   suspend fun storeBlockHeader(header: BlockHeader) {
+    blockHeadersStoredCounter?.add(1)
     blockHeaderStore.put(header.hash, header.toBytes())
-    indexBlockHeader(header)
+    if (indexing) {
+      indexBlockHeader(header)
+    }
     logger.debug("Stored header {} {}", header.number, header.hash)
     blockHeaderListeners.values.forEach {
       it(header)
@@ -192,20 +217,39 @@ class BlockchainRepository(
     blockHeaderListeners.remove(listenerId)
   }
 
-  private suspend fun indexBlockHeader(header: BlockHeader) {
-    blockchainIndex.index { writer -> writer.indexBlockHeader(header) }
-    for (hash in findBlocksByParentHash(header.getHash())) {
-      blockHeaderStore.get(hash)?.let { bytes ->
-        indexBlockHeader(BlockHeader.fromBytes(bytes))
+  suspend fun indexBlockHeader(header: BlockHeader) {
+    logger.info("Indexing ${header.number} ${header.hash}")
+    blockchainIndex.index { writer -> writer.indexBlockHeader(header, indexing) }
+  }
+
+  suspend fun reIndexTotalDifficulty() {
+    val header = retrieveGenesisBlock().header
+    blockchainIndex.index { writer ->
+      runBlocking {
+        reIndexTotalDifficultyInternal(writer, header)
       }
     }
+  }
+
+  private suspend fun reIndexTotalDifficultyInternal(writer: BlockchainIndexWriter, header: BlockHeader) {
+    writer.indexTotalDifficulty(header)
+
+    findBlocksByParentHash(header.getHash()).map { hash ->
+      coroutineScope {
+        async {
+          blockHeaderStore.get(hash)?.let { bytes ->
+            reIndexTotalDifficultyInternal(writer, BlockHeader.fromBytes(bytes))
+          }
+        }
+      }
+    }.awaitAll()
   }
 
   private suspend fun indexTransactionReceipt(
     txReceipt: TransactionReceipt,
     txIndex: Int,
     txHash: Bytes,
-    blockHash: Bytes
+    blockHash: Bytes,
   ) {
     blockchainIndex.index {
       it.indexTransactionReceipt(txReceipt, txIndex, txHash, blockHash)
@@ -291,7 +335,7 @@ class BlockchainRepository(
    * @return the current chain head, or the genesis block if no chain head is present.
    */
   suspend fun retrieveChainHead(): Block {
-    return blockchainIndex.findByLargest(BlockHeaderFields.TOTAL_DIFFICULTY)
+    return blockchainIndex.findLargestTotalDifficulty()
       ?.let { retrieveBlock(it) } ?: retrieveGenesisBlock()
   }
 
@@ -300,8 +344,8 @@ class BlockchainRepository(
    *
    * @return the current chain head header, or the genesis block if no chain head is present.
    */
-  suspend fun retrieveChainHeadHeader(): BlockHeader? {
-    return blockchainIndex.findByLargest(BlockHeaderFields.TOTAL_DIFFICULTY)
+  suspend fun retrieveChainHeadHeader(): BlockHeader {
+    return blockchainIndex.findLargestTotalDifficulty()
       ?.let { retrieveBlockHeader(it) } ?: retrieveGenesisBlock().getHeader()
   }
 

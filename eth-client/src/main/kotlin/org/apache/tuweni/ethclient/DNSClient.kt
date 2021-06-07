@@ -56,6 +56,7 @@ class DNSClient(
    * Start the client
    */
   suspend fun start() {
+    logger.info("Starting DNSClient with ${config.enrLink()}")
     config.enrLink().let { link ->
       val daemon = DNSDaemon(
         seq = seq(),

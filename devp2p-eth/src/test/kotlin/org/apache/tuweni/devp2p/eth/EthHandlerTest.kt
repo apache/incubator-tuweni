@@ -22,6 +22,7 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
+import org.apache.tuweni.devp2p.eth.EthSubprotocol.Companion.ETH62
 import org.apache.tuweni.devp2p.eth.EthSubprotocol.Companion.ETH64
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.Block
@@ -52,6 +53,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.eq
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import java.time.Instant
@@ -183,6 +185,7 @@ class EthHandlerTest {
   @Test
   fun testGetHeaders() = runBlocking {
     val conn = mock(WireConnection::class.java)
+    `when`(conn.agreedSubprotocol(eq(ETH62))).thenReturn(ETH64)
     handler.handle(
       conn,
       MessageType.GetBlockHeaders.code,
@@ -202,6 +205,7 @@ class EthHandlerTest {
   @Test
   fun testGetHeadersTooMany() = runBlocking {
     val conn = mock(WireConnection::class.java)
+    `when`(conn.agreedSubprotocol(eq(ETH62))).thenReturn(ETH64)
     handler.handle(
       conn,
       MessageType.GetBlockHeaders.code,
@@ -218,6 +222,7 @@ class EthHandlerTest {
   @Test
   fun testGetHeadersDifferentSkip() = runBlocking {
     val conn = mock(WireConnection::class.java)
+    `when`(conn.agreedSubprotocol(eq(ETH62))).thenReturn(ETH64)
     handler.handle(
       conn,
       MessageType.GetBlockHeaders.code,
@@ -237,6 +242,7 @@ class EthHandlerTest {
   @Test
   fun testGetBodies() = runBlocking {
     val conn = mock(WireConnection::class.java)
+    `when`(conn.agreedSubprotocol(eq(ETH62))).thenReturn(ETH64)
     handler.handle(
       conn,
       MessageType.GetBlockBodies.code,
@@ -254,6 +260,8 @@ class EthHandlerTest {
   @Test
   fun testGetReceipts() = runBlocking {
     val conn = mock(WireConnection::class.java)
+    `when`(conn.agreedSubprotocol(eq(ETH62))).thenReturn(ETH64)
+    `when`(conn.agreedSubprotocol(eq(ETH62))).thenReturn(ETH64)
     val hashes = repository.findBlockByHashOrNumber(UInt256.valueOf(7).toBytes())
     val block7 = repository.retrieveBlock(hashes[0])
     val txReceipt = repository.retrieveTransactionReceipt(hashes[0], 0)

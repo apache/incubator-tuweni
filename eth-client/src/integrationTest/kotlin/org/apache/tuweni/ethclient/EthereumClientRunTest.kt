@@ -19,6 +19,7 @@ package org.apache.tuweni.ethclient
 import io.vertx.core.Vertx
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.junit.VertxInstance
@@ -31,15 +32,47 @@ class EthereumClientRunTest {
 
   @Test
   fun startTwoClientsAndConnectThem(@VertxInstance vertx: Vertx) = runBlocking {
-    val config1 = EthereumClientConfig.fromString("[storage.default]\npath=\"data\"\ngenesis=\"default\"")
-    val config2 = EthereumClientConfig.fromString("[storage.default]\npath=\"data2\"\ngenesis=\"default\"")
+    val keyPair = SECP256K1.KeyPair.random()
+    val config1 = EthereumClientConfig.fromString(
+      """
+      [metrics]
+      networkInterface="127.0.0.1"
+      port=9091
+      [storage.default]
+      path="data"
+      genesis="default"
+      [genesis.default]
+      path="classpath:/default.json"
+      [static.default]
+      peerRepository="default"
+      [rlpx.default]
+      networkInterface="127.0.0.1"
+      port=30301
+      key="${keyPair.secretKey().bytes().toHexString()}"
+      """.trimMargin()
+    )
+    val config2 = EthereumClientConfig.fromString(
+      """
+      [metrics]
+      networkInterface="127.0.0.1"
+      port=9092
+      [storage.default]
+      path="data2"
+      genesis="default"
+      [genesis.default]
+      path="classpath:/default.json"
+      [static.default]
+      enodes=["enode://${keyPair.publicKey().toHexString()}@127.0.0.1:30301"]
+      peerRepository="default"
+      """.trimMargin()
+    )
     val client1 = EthereumClient(vertx, config1)
     val client2 = EthereumClient(vertx, config2)
     client1.start()
     client2.start()
+    // TODO make sure the connection happens!
     client1.stop()
     client2.stop()
-    // TODO connect the rlpx servers
   }
 
   // this actually connects the client to mainnet!

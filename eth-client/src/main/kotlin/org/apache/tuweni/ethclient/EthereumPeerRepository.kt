@@ -130,9 +130,10 @@ class MemoryEthereumPeerRepository : EthereumPeerRepository {
 
   override fun storeIdentity(networkInterface: String, port: Int, publicKey: SECP256K1.PublicKey): Identity {
     val identity = MemoryEthereumIdentity(networkInterface, port, publicKey)
-    identities.add(identity)
-    identityListeners.values.forEach {
-      it(identity)
+    if (identities.add(identity)) {
+      identityListeners.values.forEach {
+        it(identity)
+      }
     }
     return identity
   }

@@ -22,6 +22,8 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion
 import org.apache.tuweni.concurrent.coroutines.asyncCompletion
+import org.apache.tuweni.devp2p.eth.EthSubprotocol.Companion.ETH62
+import org.apache.tuweni.devp2p.eth.EthSubprotocol.Companion.ETH65
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.wire.DisconnectReason
@@ -104,12 +106,24 @@ internal class EthHandler(
 
   private suspend fun handleStatus(connection: WireConnection, status: StatusMessage) {
     logger.debug("Received status message {}", status)
-    val peerInfo = pendingStatus.remove(connection.uri())
-    if (!status.networkID.equals(blockchainInfo.networkID()) ||
-      !status.genesisHash.equals(blockchainInfo.genesisHash()) ||
-      peerInfo == null
-    ) {
-      peerInfo?.cancel()
+    var peerInfo = pendingStatus.remove(connection.uri())
+    var disconnect = false
+    if (status.networkID != blockchainInfo.networkID()) {
+      logger.info("Peer with different networkId ${status.networkID} (expected ${blockchainInfo.networkID()})")
+      disconnect = true
+    }
+    if (!status.genesisHash.equals(blockchainInfo.genesisHash())) {
+      logger.info("Peer with different genesisHash ${status.genesisHash} (expected ${blockchainInfo.genesisHash()})")
+      disconnect = true
+    }
+    if (peerInfo == null) {
+      logger.info("Unexpected status message ${connection.uri()}")
+      val newPeerInfo = PeerInfo()
+      pendingStatus.put(connection.uri(), newPeerInfo)
+      peerInfo = newPeerInfo
+    }
+    if (disconnect) {
+      peerInfo.cancel()
       service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
     } else {
       peerInfo.connect()
@@ -133,7 +147,7 @@ internal class EthHandler(
       }
       if (missingTx.size == MAX_POOLED_TX) {
         service.send(
-          EthSubprotocol.ETH65,
+          connection.agreedSubprotocol(ETH65),
           MessageType.GetPooledTransactions.code,
           connection,
           message.toBytes()
@@ -144,7 +158,7 @@ internal class EthHandler(
     }
     if (!missingTx.isEmpty()) {
       service.send(
-        EthSubprotocol.ETH65,
+        connection.agreedSubprotocol(ETH65),
         MessageType.GetPooledTransactions.code,
         connection,
         message.toBytes()
@@ -159,7 +173,7 @@ internal class EthHandler(
   private suspend fun handleGetReceipts(connection: WireConnection, getReceipts: GetReceipts) {
 
     service.send(
-      EthSubprotocol.ETH64,
+      connection.agreedSubprotocol(ETH62),
       MessageType.Receipts.code,
       connection,
       Receipts(controller.findTransactionReceipts(getReceipts.hashes)).toBytes()
@@ -168,7 +182,7 @@ internal class EthHandler(
 
   private suspend fun handleGetNodeData(connection: WireConnection, nodeData: GetNodeData) {
     service.send(
-      EthSubprotocol.ETH64,
+      connection.agreedSubprotocol(ETH65),
       MessageType.NodeData.code,
       connection,
       NodeData(controller.findNodeData(nodeData.hashes)).toBytes()
@@ -185,7 +199,7 @@ internal class EthHandler(
 
   private suspend fun handleGetBlockBodies(connection: WireConnection, message: GetBlockBodies) {
     service.send(
-      EthSubprotocol.ETH64,
+      connection.agreedSubprotocol(ETH62),
       MessageType.BlockBodies.code,
       connection,
       BlockBodies(controller.findBlockBodies(message.hashes)).toBytes()
@@ -203,7 +217,7 @@ internal class EthHandler(
       blockHeaderRequest.skip,
       blockHeaderRequest.reverse
     )
-    service.send(EthSubprotocol.ETH64, MessageType.BlockHeaders.code, connection, BlockHeaders(headers).toBytes())
+    service.send(connection.agreedSubprotocol(ETH62), MessageType.BlockHeaders.code, connection, BlockHeaders(headers).toBytes())
   }
 
   private suspend fun handleNewBlockHashes(message: NewBlockHashes) {
@@ -211,13 +225,13 @@ internal class EthHandler(
   }
 
   override fun handleNewPeerConnection(connection: WireConnection): AsyncCompletion {
-    val newPeer = PeerInfo()
-    pendingStatus[connection.uri()] = newPeer
-    val ethSubProtocol = connection.agreedSubprotocols().firstOrNull() { it.name() == EthSubprotocol.ETH65.name() }
+    val newPeer = pendingStatus.computeIfAbsent(connection.uri()) { PeerInfo() }
+    val ethSubProtocol = connection.agreedSubprotocol(EthSubprotocol.ETH65)
     if (ethSubProtocol == null) {
       newPeer.cancel()
       return newPeer.ready
     }
+    logger.info("Sending status message to ${connection.uri()}")
     service.send(
       ethSubProtocol, MessageType.Status.code, connection,
       StatusMessage(

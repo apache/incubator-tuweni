@@ -55,6 +55,20 @@ public interface WireConnection {
   Collection<SubProtocolIdentifier> agreedSubprotocols();
 
   /**
+   * Finds the subprotocol with the latest version that was agreed upon.
+   * 
+   * @return the subprotocol, or null if no such subprotocol was present.
+   */
+  default SubProtocolIdentifier agreedSubprotocol(SubProtocolIdentifier subProtocolIdentifier) {
+    for (SubProtocolIdentifier sp : agreedSubprotocols()) {
+      if (sp.name().equals(subProtocolIdentifier.name())) {
+        return sp;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Whether the peer asked to disconnect
    * 
    * @return true if the peer asked to disconnect

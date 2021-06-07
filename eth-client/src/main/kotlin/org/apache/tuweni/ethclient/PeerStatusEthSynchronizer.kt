@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.coroutines.CoroutineContext
 
-const val HEADER_REQUEST_SIZE = 1024L
+const val HEADER_REQUEST_SIZE = 192L
 
 /**
  * Synchronizer responsible for pulling blocks until such time the highest known block is met, or close enough.
@@ -57,8 +57,10 @@ class PeerStatusEthSynchronizer(
 
   private fun listenToStatus(ethereumConnection: EthereumConnection) {
     launch {
+      logger.info("Triggering status synchronizer for ${ethereumConnection.identity()}")
       val bestHash = ethereumConnection.status()!!.bestHash
       if (!repository.hasBlockHeader(bestHash)) {
+        logger.info("Requesting new best block header based on status $bestHash")
         client.requestBlockHeaders(
           Hash.fromBytes(bestHash),
           HEADER_REQUEST_SIZE,

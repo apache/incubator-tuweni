@@ -17,9 +17,7 @@
 package org.apache.tuweni.devp2p.eth
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.concurrent.AsyncResult
-import org.apache.tuweni.concurrent.CompletableAsyncResult
 import org.apache.tuweni.eth.Block
 import org.apache.tuweni.eth.BlockBody
 import org.apache.tuweni.eth.BlockHeader
@@ -37,14 +35,14 @@ val logger = LoggerFactory.getLogger(EthClient::class.java)
 /**
  * Client of the ETH subprotocol, allowing to request block and node data
  */
-class EthClient(
+open class EthClient(
   private val service: RLPxService,
   private val pendingTransactionsPool: TransactionPool,
   private val connectionSelectionStrategy: ConnectionSelectionStrategy
 ) :
   EthRequestsManager, SubProtocolClient {
 
-  private val headerRequests = mutableMapOf<Bytes32, Request<List<BlockHeader>>>()
+  private val headerRequests = HashMap<String, Request<List<BlockHeader>>>()
   private val bodiesRequests = HashMap<String, Request<List<BlockBody>>>()
   private val nodeDataRequests = HashMap<String, Request<List<Bytes?>>>()
   private val transactionReceiptRequests = HashMap<String, Request<List<List<TransactionReceipt>>>>()
@@ -53,7 +51,7 @@ class EthClient(
 
   override fun requestTransactionReceipts(
     blockHashes: List<Hash>,
-    connection: WireConnection?
+    connection: WireConnection
   ): AsyncResult<List<List<TransactionReceipt>>> {
     val conns = service.repository().asIterable(EthSubprotocol.ETH62)
     val handle = AsyncResult.incomplete<List<List<TransactionReceipt>>>()
@@ -62,7 +60,7 @@ class EthClient(
 
       transactionReceiptRequests.computeIfAbsent(conn.uri()) {
         service.send(
-          EthSubprotocol.ETH62,
+          conn.agreedSubprotocol(EthSubprotocol.ETH65),
           MessageType.GetReceipts.code,
           conn,
           GetReceipts(blockHashes).toBytes()
@@ -82,16 +80,16 @@ class EthClient(
     maxHeaders: Long,
     skip: Long,
     reverse: Boolean,
-    connection: WireConnection?
+    connection: WireConnection
   ): AsyncResult<List<BlockHeader>> {
-    logger.info("Requesting headers hash: $blockHash maxHeaders: $maxHeaders skip: $skip reverse: $reverse")
+    logger.info("Requesting headers hash: $blockHash maxHeaders: $maxHeaders skip: $skip reverse: $reverse with uri ${connection.uri()}")
     val conn = connectionSelectionStrategy.selectConnection()
     val completion = AsyncResult.incomplete<List<BlockHeader>>()
-    headerRequests.computeIfAbsent(blockHash) {
+    headerRequests.computeIfAbsent(connection.uri() + blockHash.toHexString()) {
       service.send(
-        EthSubprotocol.ETH62,
+        conn.agreedSubprotocol(EthSubprotocol.ETH65),
         MessageType.GetBlockHeaders.code,
-        conn!!,
+        conn,
         GetBlockHeaders(blockHash, maxHeaders, skip, reverse).toBytes()
       )
       Request(connectionId = conn.uri(), handle = completion, data = blockHash)
@@ -104,15 +102,15 @@ class EthClient(
     maxHeaders: Long,
     skip: Long,
     reverse: Boolean,
-    connection: WireConnection?
+    connection: WireConnection
   ): AsyncResult<List<BlockHeader>> {
     val blockNumberBytes = UInt256.valueOf(blockNumber).toBytes()
     val completion = AsyncResult.incomplete<List<BlockHeader>>()
-    headerRequests.computeIfAbsent(blockNumberBytes) {
+    headerRequests.computeIfAbsent(connection.uri() + blockNumberBytes.toHexString()) {
       service.send(
-        EthSubprotocol.ETH62,
+        connection.agreedSubprotocol(EthSubprotocol.ETH65),
         MessageType.GetBlockHeaders.code,
-        connection!!,
+        connection,
         GetBlockHeaders(blockNumberBytes, maxHeaders, skip, reverse).toBytes()
       )
       Request(connectionId = connection.uri(), handle = completion, data = blockNumber)
@@ -122,17 +120,17 @@ class EthClient(
 
   override fun requestBlockHeaders(
     blockHashes: List<Hash>,
-    connection: WireConnection?
+    connection: WireConnection
   ): AsyncResult<List<BlockHeader>> {
     return AsyncResult.combine(blockHashes.stream().map { requestBlockHeader(it) })
   }
 
-  override fun requestBlockHeader(blockHash: Hash, connection: WireConnection?): AsyncResult<BlockHeader> {
-    val request = headerRequests.computeIfAbsent(blockHash) {
+  override fun requestBlockHeader(blockHash: Hash, connection: WireConnection): AsyncResult<BlockHeader> {
+    val request = headerRequests.computeIfAbsent(connection.uri() + blockHash.toHexString()) {
       service.send(
-        EthSubprotocol.ETH62,
+        connection.agreedSubprotocol(EthSubprotocol.ETH62),
         MessageType.GetBlockHeaders.code,
-        connection!!,
+        connection,
         GetBlockHeaders(blockHash, 1, 0, false).toBytes()
       )
       val completion = AsyncResult.incomplete<List<BlockHeader>>()
@@ -141,21 +139,30 @@ class EthClient(
     return request.handle.thenApply { it?.firstOrNull() }
   }
 
-  override fun requestBlockBodies(blockHashes: List<Hash>, connection: WireConnection?): AsyncResult<List<BlockBody>> {
+  override fun requestBlockBodies(blockHashes: List<Hash>, connection: WireConnection): AsyncResult<List<BlockBody>> {
     val handle = AsyncResult.incomplete<List<BlockBody>>()
-    bodiesRequests.computeIfAbsent(connection!!.uri()) {
+    var oldRequestPresent = true
+    val oldRequest = bodiesRequests.computeIfAbsent(connection.uri()) {
+      oldRequestPresent = false
       service.send(
-        EthSubprotocol.ETH62,
+        connection.agreedSubprotocol(EthSubprotocol.ETH65),
         MessageType.GetBlockBodies.code,
         connection,
         GetBlockBodies(blockHashes).toBytes()
       )
       Request(connection.uri(), handle, blockHashes)
     }
+    if (oldRequestPresent) {
+      oldRequest.handle.thenRun {
+        requestBlockBodies(blockHashes, connection).thenAccept() {
+          handle.complete(it)
+        }
+      }
+    }
     return handle
   }
 
-  override fun requestBlock(blockHash: Hash, connection: WireConnection?): AsyncResult<Block> {
+  override fun requestBlock(blockHash: Hash, connection: WireConnection): AsyncResult<Block> {
     val headerRequest = requestBlockHeader(blockHash)
     val bodyRequest = requestBlockBodies(listOf(blockHash))
 
@@ -172,20 +179,14 @@ class EthClient(
   }
 
   @Suppress("TYPE_INFERENCE_ONLY_INPUT_TYPES_WARNING")
-  fun wasRequested(
+  fun headersRequested(
     connection: WireConnection,
-    headers: List<BlockHeader>
-  ): CompletableAsyncResult<List<BlockHeader>>? {
-    val request = headerRequests.remove(headers) ?: return null
-    if (request.connectionId == connection.uri()) {
-      return request.handle
-    } else {
-      return null
-    }
-  }
+    blockHeader: BlockHeader,
+  ): Request<List<BlockHeader>>? = headerRequests.remove(connection.uri() + blockHeader.hash.toHexString())
+    ?: headerRequests.remove(connection.uri() + blockHeader.number.toHexString())
 
   fun wasRequested(connection: WireConnection): Request<List<BlockBody>>? =
-    bodiesRequests[connection.uri()]
+    bodiesRequests.remove(connection.uri())
 
   fun nodeDataWasRequested(connection: WireConnection): Request<List<Bytes?>>? =
     nodeDataRequests[connection.uri()]
@@ -200,7 +201,7 @@ class EthClient(
     val conns = service.repository().asIterable(EthSubprotocol.ETH65)
     conns.forEach { conn ->
       service.send(
-        EthSubprotocol.ETH65,
+        conn.agreedSubprotocol(EthSubprotocol.ETH65),
         MessageType.NewPooledTransactionHashes.code,
         conn,
         GetBlockBodies(hashes).toBytes()

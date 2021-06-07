@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.devp2p.eth
 
+import io.opentelemetry.sdk.metrics.SdkMeterProvider
 import io.vertx.core.Vertx
 import kotlinx.coroutines.runBlocking
 import org.apache.lucene.index.IndexWriter
@@ -42,6 +43,8 @@ import java.net.InetSocketAddress
 
 @ExtendWith(LuceneIndexWriterExtension::class, VertxExtension::class, BouncyCastleExtension::class)
 class ConnectToAnotherNodeTest {
+
+  private val meter = SdkMeterProvider.builder().build().get("connect")
 
   /**
    * To run this test, run an Ethereum mainnet node at home and point this test to it.
@@ -80,7 +83,8 @@ class ConnectToAnotherNodeTest {
           pendingTransactionsPool = MemoryTransactionPool()
         )
       ),
-      "Tuweni Experiment 0.1"
+      "Tuweni Experiment 0.1",
+      meter
     )
     service.start().await()
     service.connectTo(
@@ -140,7 +144,8 @@ class ConnectToAnotherNodeTest {
           pendingTransactionsPool = MemoryTransactionPool()
         )
       ),
-      "Tuweni Experiment 0.1"
+      "Tuweni Experiment 0.1",
+      meter
     )
 
     val repository2 = BlockchainRepository.init(
@@ -173,7 +178,8 @@ class ConnectToAnotherNodeTest {
           pendingTransactionsPool = MemoryTransactionPool()
         )
       ),
-      "Tuweni Experiment 0.1"
+      "Tuweni Experiment 0.1",
+      meter
     )
     val result = AsyncCompletion.allOf(service.start(), service2.start()).then {
       service.connectTo(service2kp.publicKey(), InetSocketAddress("127.0.0.1", service2.actualPort()))

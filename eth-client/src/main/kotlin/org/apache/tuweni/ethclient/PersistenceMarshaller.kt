@@ -16,13 +16,19 @@
  */
 package org.apache.tuweni.ethclient
 
-import org.apache.tuweni.devp2p.eth.ConnectionSelectionStrategy
-import org.apache.tuweni.rlpx.wire.WireConnection
+import org.apache.tuweni.bytes.Bytes
+import org.infinispan.commons.dataconversion.MediaType
+import org.infinispan.commons.io.ByteBuffer
+import org.infinispan.commons.io.ByteBufferImpl
+import org.infinispan.commons.marshall.AbstractMarshaller
 
-class ScoredConnectionSelectionStrategy(val adapter: WireConnectionPeerRepositoryAdapter) :
-  ConnectionSelectionStrategy {
+class PersistenceMarshaller : AbstractMarshaller() {
 
-  override fun selectConnection(): WireConnection {
-    TODO("Not yet implemented")
-  }
+  override fun objectFromByteBuffer(buf: ByteArray?, offset: Int, length: Int) = Bytes.wrap(buf!!, offset, length)
+
+  override fun objectToBuffer(o: Any?, estimatedSize: Int): ByteBuffer = ByteBufferImpl.create((o as Bytes).toArrayUnsafe())
+
+  override fun isMarshallable(o: Any?): Boolean = o is Bytes
+
+  override fun mediaType(): MediaType = MediaType.APPLICATION_OCTET_STREAM
 }

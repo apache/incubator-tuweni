@@ -77,7 +77,10 @@ class WireConnectionPeerRepositoryAdapter(val peerRepository: EthereumPeerReposi
     wireConnectionToIdentities.clear()
   }
 
-  fun get(ethereumConnection: EthereumConnection): WireConnection? = connections[ethereumConnection.identity().id()]
+  fun get(ethereumConnection: EthereumConnection): WireConnection {
+    val conn = connections[ethereumConnection.identity().id()] ?: throw NoSuchElementException("No connection available")
+    return conn
+  }
 
   fun listenToStatus(conn: WireConnection, status: Status) {
     wireConnectionToIdentities[conn.uri()]?.let { peerRepository.storeStatus(it, status) }

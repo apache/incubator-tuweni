@@ -17,6 +17,7 @@
 package org.apache.tuweni.eth.crawler
 
 import com.zaxxer.hikari.HikariDataSource
+import io.opentelemetry.sdk.metrics.SdkMeterProvider
 import io.vertx.core.Vertx
 import io.vertx.core.net.SocketAddress
 import kotlinx.coroutines.async
@@ -99,8 +100,9 @@ object CrawlerApp {
         repo.recordInfo(conn, status)
       }
     )
+    val meter = SdkMeterProvider.builder().build().get("eth-crawler")
 
-    val rlpxService = VertxRLPxService(vertx, 0, "127.0.0.1", 0, SECP256K1.KeyPair.random(), listOf(ethHelloProtocol), "Apache Tuweni network crawler")
+    val rlpxService = VertxRLPxService(vertx, 0, "127.0.0.1", 0, SECP256K1.KeyPair.random(), listOf(ethHelloProtocol), "Apache Tuweni network crawler", meter)
     repo.addListener {
       connect(rlpxService, it.nodeId, InetSocketAddress(it.endpoint.address, it.endpoint.tcpPort ?: 30303))
     }
