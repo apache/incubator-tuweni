@@ -76,7 +76,7 @@ class EthereumClientConfigTest {
   fun toToml() {
     val config = EthereumClientConfig.fromString("[storage.forui]\npath=\"data\"")
     assertEquals(
-      "[storage.forui]\npath = \"data\"\n",
+      "[storage.forui]${System.lineSeparator()}path = \"data\"${System.lineSeparator()}",
       config.toToml()
     )
   }
