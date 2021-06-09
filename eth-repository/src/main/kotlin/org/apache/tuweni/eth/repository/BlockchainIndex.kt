@@ -483,10 +483,8 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
       val topDocs = searcher!!.search(query, HITS)
 
       val docs = mutableListOf<Document>()
-      for (hit in topDocs.scoreDocs) {
-        val doc = searcher.doc(hit.doc, setOf("_id") + fields)
-        docs += doc
-      }
+      val doc = searcher.doc(topDocs.scoreDocs.elementAt(0).doc, setOf("_id") + fields)
+      docs += doc
       return docs
     } catch (e: IOException) {
       throw IndexReadException(e)
@@ -669,14 +667,13 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
         HITS,
         Sort(SortField.FIELD_SCORE, SortField(field.fieldName, SortField.Type.DOC, false))
       )
-
-      for (hit in topDocs.scoreDocs) {
-        val doc = searcher.doc(hit.doc, setOf("_id"))
-        val bytes = doc.getBinaryValue("_id")
-
+      val doc = searcher.doc(topDocs.scoreDocs.elementAt(0).doc, setOf("_id"))
+      val bytes = doc.getBinaryValue("_id")
+      if (bytes != null) {
         return Hash.fromBytes(Bytes32.wrap(bytes.bytes))
+      } else {
+        return null
       }
-      return null
     } catch (e: IOException) {
       throw IndexReadException(e)
     } finally {
@@ -760,6 +757,6 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
 
   companion object {
 
-    private val HITS = 10
+    private val HITS = 1
   }
 }
