@@ -128,22 +128,22 @@ class EthHandlerTest {
         controller = EthController(repository, MemoryTransactionPool(), requestsManager)
       )
 
-      for (i in 1..10) {
-        val newBlock = createChildBlock(header)
-        repository.storeBlock(newBlock)
-        var txIndex = 0
-        for (tx in newBlock.body.transactions) {
-          repository.storeTransactionReceipt(
-            TransactionReceipt(
-              Bytes32.random(),
-              32L, LogsBloomFilter(), emptyList()
-            ),
-            txIndex, tx.hash, newBlock.header.hash
-          )
-          txIndex++
-        }
-        header = newBlock.header
-      }
+
+      val newBlock = createChildBlock(header)
+      repository.storeBlock(newBlock)
+      var txIndex = 0
+
+      repository.storeTransactionReceipt(
+        TransactionReceipt(
+          Bytes32.random(),
+          32L, LogsBloomFilter(), emptyList()
+        ),
+        txIndex, newBlock.body.transactions.hash, newBlock.header.hash
+      )
+
+
+      header = newBlock.header
+
     }
 
     private fun createChildBlock(parentBlock: BlockHeader): Block {
