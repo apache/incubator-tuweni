@@ -64,10 +64,9 @@ open class RelationalPeerRepository(
       stmt.setBytes(1, nodeId.bytes().toArrayUnsafe())
       try {
         val rs = stmt.executeQuery()
-        logger.info("Results")
         rs.use {
           if (!rs.next()) {
-            logger.info("Creating new peer with public key ${nodeId.toHexString()}")
+            logger.debug("Creating new peer with public key ${nodeId.toHexString()}")
             val id = UUID.randomUUID().toString()
             val insert = conn.prepareStatement("insert into identity(id, publickey) values(?, ?)")
             insert.setString(1, id)
@@ -83,7 +82,7 @@ open class RelationalPeerRepository(
             }
             return newPeer
           } else {
-            logger.info("Found existing peer with public key ${nodeId.toHexString()}")
+            logger.debug("Found existing peer with public key ${nodeId.toHexString()}")
             val id = rs.getString(1)
             val pubKey = rs.getBytes(2)
             return RepositoryPeer(SECP256K1.PublicKey.fromBytes(Bytes.wrap(pubKey)), id, endpoint, dataSource)
