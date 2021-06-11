@@ -24,6 +24,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.concurrent.ExpiringSet
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.Scraper
@@ -32,6 +33,7 @@ import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
 import org.apache.tuweni.devp2p.eth.logger
 import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.ethstats.EthStatsServer
+import org.apache.tuweni.rlpx.MemoryWireConnectionsRepository
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.vertx.VertxRLPxService
 import org.apache.tuweni.rlpx.wire.DisconnectReason
@@ -93,14 +95,22 @@ object CrawlerApp {
       UInt256.valueOf(genesisFile.chainId.toLong()), genesisBlock.header.difficulty,
       genesisBlock.header.hash, UInt256.valueOf(42L), genesisBlock.header.hash, genesisFile.forks
     )
+    val expiringConnectionIds = ExpiringSet<String>()
 
     val ethHelloProtocol = EthHelloSubprotocol(
       blockchainInfo = blockchainInformation,
       listener = { conn, status ->
+        expiringConnectionIds.add(conn.uri())
         repo.recordInfo(conn, status)
       }
     )
     val meter = SdkMeterProvider.builder().build().get("eth-crawler")
+    val wireConnectionsRepository = MemoryWireConnectionsRepository()
+    wireConnectionsRepository.addDisconnectionListener {
+      if (expiringConnectionIds.add(it.uri())) {
+        repo.recordInfo(it, null)
+      }
+    }
 
     val rlpxService = VertxRLPxService(vertx, 0, "127.0.0.1", 0, SECP256K1.KeyPair.random(), listOf(ethHelloProtocol), "Apache Tuweni network crawler", meter)
     repo.addListener {

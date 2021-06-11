@@ -108,12 +108,12 @@ open class RelationalPeerRepository(
     return asyncResult { get(uri) }
   }
 
-  fun recordInfo(wireConnection: WireConnection, status: Status) {
+  fun recordInfo(wireConnection: WireConnection, status: Status?) {
     dataSource.connection.use { conn ->
       val peer = get(wireConnection.peerPublicKey(), Endpoint(wireConnection.peerHost(), wireConnection.peerPort())) as RepositoryPeer
       val stmt =
         conn.prepareStatement(
-          "insert into nodeInfo(id, createdAt, host, port, publickey, p2pVersion, clientId, capabilities, genesisHash, bestHash, totalDifficulty, identity) values(?,?,?,?,?,?,?,?,?,?,?,?)"
+          "insert into nodeInfo(id, createdAt, host, port, publickey, p2pVersion, clientId, capabilities, genesisHash, bestHash, totalDifficulty, identity, disconnectReason) values(?,?,?,?,?,?,?,?,?,?,?,?,?)"
         )
       stmt.use {
         val peerHello = wireConnection.peerHello!!
@@ -125,10 +125,11 @@ open class RelationalPeerRepository(
         it.setInt(6, peerHello.p2pVersion())
         it.setString(7, peerHello.clientId())
         it.setString(8, peerHello.capabilities().map { it.name() + "/" + it.version() }.joinToString(","))
-        it.setString(9, status.genesisHash.toHexString())
-        it.setString(10, status.bestHash.toHexString())
-        it.setString(11, status.totalDifficulty.toHexString())
+        it.setString(9, status?.genesisHash?.toHexString())
+        it.setString(10, status?.bestHash?.toHexString())
+        it.setString(11, status?.totalDifficulty?.toHexString())
         it.setString(12, peer.id)
+        it.setString(13, wireConnection.disconnectReason.text)
 
         it.execute()
       }
