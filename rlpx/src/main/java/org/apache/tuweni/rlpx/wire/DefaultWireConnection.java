@@ -177,7 +177,7 @@ public final class DefaultWireConnection implements WireConnection {
       disconnectReason = DisconnectReason.valueOf(disconnect.reason());
       disconnectHandler.run();
       if (!ready.isDone()) {
-        ready.cancel();
+        ready.complete(this); // Return the connection as is.
       }
       eventListener.onEvent(Event.DISCONNECTED);
       return;

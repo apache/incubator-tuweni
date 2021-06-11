@@ -32,7 +32,6 @@ import org.apache.tuweni.units.bigints.UInt64
 import org.slf4j.LoggerFactory
 import java.util.WeakHashMap
 import kotlin.collections.ArrayList
-import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
 
 internal class EthHandler66(
@@ -127,30 +126,30 @@ internal class EthHandler66(
   }
 
   private suspend fun handleStatus(connection: WireConnection, status: StatusMessage) {
-    EthHandler.logger.debug("Received status message {}", status)
+    logger.debug("Received status message {}", status)
     var peerInfo = pendingStatus.remove(connection.uri())
+    if (peerInfo == null) {
+      logger.info("Unexpected status message ${connection.uri()}")
+      val newPeerInfo = PeerInfo()
+      pendingStatus.put(connection.uri(), newPeerInfo)
+      peerInfo = newPeerInfo
+    }
+
     var disconnect = false
     if (status.networkID != blockchainInfo.networkID()) {
-      EthHandler.logger.info("Peer with different networkId ${status.networkID} (expected ${blockchainInfo.networkID()})")
+      logger.info("Peer with different networkId ${status.networkID} (expected ${blockchainInfo.networkID()})")
       disconnect = true
     }
     if (!status.genesisHash.equals(blockchainInfo.genesisHash())) {
       EthHandler.logger.info("Peer with different genesisHash ${status.genesisHash} (expected ${blockchainInfo.genesisHash()})")
       disconnect = true
     }
-    if (peerInfo == null) {
-      EthHandler.logger.info("Unexpected status message ${connection.uri()}")
-      val newPeerInfo = PeerInfo()
-      pendingStatus.put(connection.uri(), newPeerInfo)
-      peerInfo = newPeerInfo
-    }
+
     if (disconnect) {
-      peerInfo.cancel()
       service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
-    } else {
-      peerInfo.connect()
-      controller.receiveStatus(connection, status.toStatus())
     }
+    peerInfo.complete()
+    controller.receiveStatus(connection, status.toStatus())
   }
 
   private suspend fun handleNewPooledTransactionHashes(
