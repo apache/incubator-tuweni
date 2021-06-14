@@ -60,7 +60,7 @@ internal class EthHelloHandler(
       peerInfo?.cancel()
       service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
     } else {
-      peerInfo.connect()
+      peerInfo.complete()
       controller.receiveStatus(connection, status.toStatus())
     }
   }
