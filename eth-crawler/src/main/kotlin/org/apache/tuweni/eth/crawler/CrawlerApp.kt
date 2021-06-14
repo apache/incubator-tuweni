@@ -20,10 +20,15 @@ import com.zaxxer.hikari.HikariDataSource
 import io.opentelemetry.sdk.metrics.SdkMeterProvider
 import io.vertx.core.Vertx
 import io.vertx.core.net.SocketAddress
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.ExpiringSet
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
@@ -44,6 +49,7 @@ import java.net.InetSocketAddress
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.security.Security
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -63,8 +69,12 @@ object CrawlerApp {
       }
       System.exit(1)
     }
-    run(vertx, config)
+    val app = CrawlerApplication()
+    app.run(vertx, config)
   }
+}
+
+class CrawlerApplication(override val coroutineContext: CoroutineDispatcher = Executors.newFixedThreadPool(20).asCoroutineDispatcher()) : CoroutineScope {
 
   fun run(vertx: Vertx, config: CrawlerConfig) {
     val ds = HikariDataSource()
@@ -81,7 +91,8 @@ object CrawlerApp {
       vertx = vertx,
       initialURIs = config.bootNodes(),
       bindAddress = SocketAddress.inetSocketAddress(config.discoveryPort(), config.discoveryNetworkInterface()),
-      repository = repo
+      repository = repo,
+
     )
     val contents = if (config.network() == null) {
       Files.readAllBytes(Paths.get(config.genesisFile()))
@@ -112,11 +123,23 @@ object CrawlerApp {
       }
     }
 
-    val rlpxService = VertxRLPxService(vertx, 0, "127.0.0.1", 0, SECP256K1.KeyPair.random(), listOf(ethHelloProtocol), "Apache Tuweni network crawler", meter)
+    val rlpxService = VertxRLPxService(
+      vertx,
+      30303,
+      "127.0.0.1",
+      30303,
+      SECP256K1.KeyPair.random(),
+      listOf(ethHelloProtocol),
+      "Apache Tuweni network crawler",
+      meter
+    )
     repo.addListener {
-      connect(rlpxService, it.nodeId, InetSocketAddress(it.endpoint.address, it.endpoint.tcpPort ?: 30303))
+      runBlocking {
+        connect(rlpxService, it.nodeId, InetSocketAddress(it.endpoint.address, it.endpoint.tcpPort ?: 30303))
+      }
     }
-    val restService = CrawlerRESTService(port = config.restPort(), networkInterface = config.restNetworkInterface(), repository = repo)
+    val restService =
+      CrawlerRESTService(port = config.restPort(), networkInterface = config.restNetworkInterface(), repository = repo)
     val refreshLoop = AtomicBoolean(true)
     val ethstatsDataRepository = EthstatsDataRepository(ds)
     val ethstatsServer = EthStatsServer(
@@ -146,21 +169,6 @@ object CrawlerApp {
         while (refreshLoop.get()) {
           try {
             for (connectionInfo in repo.getPeers(System.currentTimeMillis() - 60 * 60 * 1000)) {
-              connect(rlpxService, connectionInfo.nodeId, InetSocketAddress(connectionInfo.host, if (connectionInfo.port == 0) 30303 else connectionInfo.port))
-            }
-          } catch (e: Exception) {
-            logger.error("Error connecting to pending peers", e)
-          }
-          delay(5 * 60 * 1000)
-        }
-      }
-      rlpxService.start().await()
-      scraper.start()
-      ethstatsServer.start()
-      launch {
-        while (refreshLoop.get()) {
-          try {
-            for (connectionInfo in repo.getPendingPeers()) {
               connect(
                 rlpxService,
                 connectionInfo.nodeId,
@@ -168,17 +176,49 @@ object CrawlerApp {
               )
             }
           } catch (e: Exception) {
+            logger.error("Error connecting to peers", e)
+          }
+          delay(5 * 60 * 1000)
+        }
+      }
+      rlpxService.start().await()
+      scraper.start()
+      ethstatsServer.start()
+      val peerSeen = ExpiringSet<PeerConnectionInfo>(5 * 60 * 1000)
+      launch {
+        while (refreshLoop.get()) {
+          try {
+            launch {
+              logger.info("Requesting pending peers")
+              val pendingPeers = repo.getPendingPeers(1000)
+              logger.info("Requesting connections to ${pendingPeers.size} peers")
+              pendingPeers.map { connectionInfo ->
+                async {
+                  if (peerSeen.add(connectionInfo)) {
+                    connect(
+                      rlpxService,
+                      connectionInfo.nodeId,
+                      InetSocketAddress(
+                        connectionInfo.host,
+                        if (connectionInfo.port == 0) 30303 else connectionInfo.port
+                      )
+                    ).await()
+                  }
+                }
+              }.awaitAll()
+            }
+          } catch (e: Exception) {
             logger.error("Error connecting to pending peers", e)
           }
-          delay(2 * 60 * 1000)
+          delay(10 * 1000)
         }
       }
     }
   }
-}
 
-fun connect(rlpxService: RLPxService, key: SECP256K1.PublicKey, address: InetSocketAddress) {
-  rlpxService.connectTo(key, address).thenAccept {
-    rlpxService.disconnect(it, DisconnectReason.CLIENT_QUITTING)
+  fun connect(rlpxService: RLPxService, key: SECP256K1.PublicKey, address: InetSocketAddress): AsyncCompletion {
+    return rlpxService.connectTo(key, address).thenAccept {
+      rlpxService.disconnect(it, DisconnectReason.CLIENT_QUITTING)
+    }
   }
 }

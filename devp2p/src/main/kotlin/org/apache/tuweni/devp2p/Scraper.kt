@@ -126,7 +126,7 @@ class Scraper(
       }
     }
 
-    for (i in 1..10) {
+    while (started.get()) {
       service?.lookupAsync(SECP256K1.KeyPair.random().publicKey())?.thenAccept {
         for (newNode in it) {
           if (nodes.add(newNode)) {

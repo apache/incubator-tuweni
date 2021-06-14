@@ -59,7 +59,7 @@ open class RelationalPeerRepository(
 
   fun get(nodeId: SECP256K1.PublicKey, endpoint: Endpoint): Peer {
     dataSource.connection.use { conn ->
-      logger.info("Get peer with $nodeId")
+      logger.trace("Get peer with $nodeId")
       val stmt = conn.prepareStatement("select id,publickey from identity where publickey=?")
       stmt.setBytes(1, nodeId.bytes().toArrayUnsafe())
       try {
@@ -82,7 +82,7 @@ open class RelationalPeerRepository(
             }
             return newPeer
           } else {
-            logger.debug("Found existing peer with public key ${nodeId.toHexString()}")
+            logger.trace("Found existing peer with public key ${nodeId.toHexString()}")
             val id = rs.getString(1)
             val pubKey = rs.getBytes(2)
             return RepositoryPeer(SECP256K1.PublicKey.fromBytes(Bytes.wrap(pubKey)), id, endpoint, dataSource)
@@ -194,17 +194,17 @@ open class RelationalPeerRepository(
     }
   }
 
-  internal fun getPendingPeers(): Set<PeerConnectionInfo> {
+  internal fun getPendingPeers(from: Int = 0, limit: Int = 100): List<PeerConnectionInfo> {
     dataSource.connection.use { conn ->
       val stmt =
         conn.prepareStatement(
           "select endpoint.host, endpoint.port, identity.publickey from endpoint inner " +
-            "join identity on (endpoint.identity = identity.id) where endpoint.identity NOT IN (select identity from nodeinfo)"
+            "join identity on (endpoint.identity = identity.id) where endpoint.identity NOT IN (select identity from nodeinfo) order by endpoint.lastSeen desc limit $limit offset $from"
         )
       stmt.use {
         // map results.
         val rs = stmt.executeQuery()
-        val result = mutableSetOf<PeerConnectionInfo>()
+        val result = mutableListOf<PeerConnectionInfo>()
         while (rs.next()) {
           val pubkey = SECP256K1.PublicKey.fromBytes(Bytes.wrap(rs.getBytes(3)))
           val port = rs.getInt(2)
