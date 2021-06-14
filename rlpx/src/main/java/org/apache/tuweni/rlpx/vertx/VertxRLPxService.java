@@ -74,13 +74,14 @@ public final class VertxRLPxService implements RLPxService {
   private final WireConnectionRepository repository;
   private final LongCounter connectionsCreatedCounter;
   private final LongCounter connectionsDisconnectedCounter;
+  private final List<SECP256K1.PublicKey> keepAliveList = new ArrayList<>();
+  private final int connectTimeout = 5 * 1000;
+  private final int idleTimeout = 30 * 1000;
 
   private LinkedHashMap<SubProtocolIdentifier, SubProtocolHandler> handlers;
   private LinkedHashMap<SubProtocolIdentifier, SubProtocolClient> clients;
   private NetClient client;
   private NetServer server;
-
-  private List<SECP256K1.PublicKey> keepAliveList = new ArrayList<>();
 
   private static void checkPort(int port) {
     if (port < 0 || port > 65536) {
@@ -200,9 +201,19 @@ public final class VertxRLPxService implements RLPxService {
         }
       }
 
-      client = vertx.createNetClient(new NetClientOptions());
+      client = vertx
+          .createNetClient(
+              new NetClientOptions()
+                  .setTcpKeepAlive(true)
+                  .setConnectTimeout(connectTimeout)
+                  .setIdleTimeout(idleTimeout));
       server = vertx
-          .createNetServer(new NetServerOptions().setPort(listenPort).setHost(networkInterface).setTcpKeepAlive(true))
+          .createNetServer(
+              new NetServerOptions()
+                  .setPort(listenPort)
+                  .setHost(networkInterface)
+                  .setTcpKeepAlive(true)
+                  .setIdleTimeout(idleTimeout))
           .connectHandler(this::receiveMessage);
       CompletableAsyncCompletion complete = AsyncCompletion.incomplete();
       server.listen(res -> {
