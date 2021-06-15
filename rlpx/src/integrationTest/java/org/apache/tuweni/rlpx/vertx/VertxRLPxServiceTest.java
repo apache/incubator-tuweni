@@ -168,9 +168,8 @@ class VertxRLPxServiceTest {
         new VertxRLPxService(vertx, 0, "localhost", 10000, peerPair, new ArrayList<>(), "abc", meter);
     peerService.start().join();
 
-    assertThrows(CancellationException.class, () -> {
-      service.connectTo(peerPair.publicKey(), new InetSocketAddress("127.0.0.1", peerService.actualPort())).get();
-    });
+    WireConnection conn = service.connectTo(peerPair.publicKey(), new InetSocketAddress("127.0.0.1", peerService.actualPort())).get();
+    assertEquals(DisconnectReason.USELESS_PEER, conn.getDisconnectReason());
     service.stop();
     peerService.stop();
   }
