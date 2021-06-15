@@ -53,6 +53,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.security.Security
 import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -77,7 +78,12 @@ object CrawlerApp {
   }
 }
 
-class CrawlerApplication(override val coroutineContext: CoroutineDispatcher = Executors.newFixedThreadPool(20).asCoroutineDispatcher()) : CoroutineScope {
+class CrawlerApplication(override val coroutineContext: CoroutineDispatcher =
+  Executors.newFixedThreadPool(20, ThreadFactory {
+    val thread = Thread("crawler")
+    thread.isDaemon = true
+    thread
+  }).asCoroutineDispatcher()) : CoroutineScope {
 
   fun run(vertx: Vertx, config: CrawlerConfig) {
     val ds = HikariDataSource()
