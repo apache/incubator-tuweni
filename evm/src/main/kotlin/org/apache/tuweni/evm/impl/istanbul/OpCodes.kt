@@ -587,6 +587,14 @@ val extcodesize = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
   }
 }
 
+val extcodehash = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
+  gasManager.add(700)
+  runBlocking {
+    stack.push(Hash.keccak256(hostContext.getCode(msg.destination)))
+    Result()
+  }
+}
+
 val msize = Opcode { gasManager, _, stack, _, _, _, memory ->
   gasManager.add(2)
   stack.push(memory.allocatedBytes())

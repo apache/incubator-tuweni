@@ -40,6 +40,7 @@ import org.apache.tuweni.evm.impl.berlin.div
 import org.apache.tuweni.evm.impl.berlin.dup
 import org.apache.tuweni.evm.impl.berlin.eq
 import org.apache.tuweni.evm.impl.berlin.exp
+import org.apache.tuweni.evm.impl.berlin.extcodehash
 import org.apache.tuweni.evm.impl.berlin.extcodesize
 import org.apache.tuweni.evm.impl.berlin.gas
 import org.apache.tuweni.evm.impl.berlin.gasLimit
@@ -138,6 +139,8 @@ class OpcodeRegistry(val opcodes: Map<HardFork, Map<Byte, Opcode>>) {
       berlinOpcodes[0x39] = codecopy
       berlinOpcodes[0x3a] = gasPrice
       berlinOpcodes[0x3b] = extcodesize
+      berlinOpcodes[0x3f] = extcodehash
+
       berlinOpcodes[0x40] = blockhash
       berlinOpcodes[0x41] = coinbase
       berlinOpcodes[0x42] = timestamp
@@ -211,6 +214,7 @@ class OpcodeRegistry(val opcodes: Map<HardFork, Map<Byte, Opcode>>) {
       istanbulOpcodes[0x39] = org.apache.tuweni.evm.impl.istanbul.codecopy
       istanbulOpcodes[0x3a] = org.apache.tuweni.evm.impl.istanbul.gasPrice
       istanbulOpcodes[0x3b] = org.apache.tuweni.evm.impl.istanbul.extcodesize
+      istanbulOpcodes[0x3f] = org.apache.tuweni.evm.impl.istanbul.extcodehash
       istanbulOpcodes[0x40] = org.apache.tuweni.evm.impl.istanbul.blockhash
       istanbulOpcodes[0x41] = org.apache.tuweni.evm.impl.istanbul.coinbase
       istanbulOpcodes[0x42] = org.apache.tuweni.evm.impl.istanbul.timestamp
