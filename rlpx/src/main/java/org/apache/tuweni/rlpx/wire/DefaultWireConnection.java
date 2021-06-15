@@ -115,25 +115,25 @@ public final class DefaultWireConnection implements WireConnection {
       initSupportedRange(peerHelloMessage.capabilities());
       if (peerHelloMessage.nodeId() == null || peerHelloMessage.nodeId().isEmpty()) {
         disconnect(DisconnectReason.NULL_NODE_IDENTITY_RECEIVED);
-        ready.cancel();
+        ready.complete(this);
         return;
       }
 
       if (!peerHelloMessage.nodeId().equals(peerNodeId)) {
         disconnect(DisconnectReason.UNEXPECTED_IDENTITY);
-        ready.cancel();
+        ready.complete(this);
         return;
       }
 
       if (peerHelloMessage.nodeId().equals(nodeId)) {
         disconnect(DisconnectReason.CONNECTED_TO_SELF);
-        ready.cancel();
+        ready.complete(this);
         return;
       }
 
       if (peerHelloMessage.p2pVersion() > p2pVersion) {
         disconnect(DisconnectReason.INCOMPATIBLE_DEVP2P_VERSION);
-        ready.cancel();
+        ready.complete(this);
         return;
       }
 
@@ -144,7 +144,7 @@ public final class DefaultWireConnection implements WireConnection {
                 peerHelloMessage.capabilities(),
                 subprotocols.keySet());
         disconnect(DisconnectReason.USELESS_PEER);
-        ready.cancel();
+        ready.complete(this);
         return;
       }
 
@@ -153,9 +153,6 @@ public final class DefaultWireConnection implements WireConnection {
       }
 
       afterHandshakeListener.accept(peerHelloMessage);
-      if (subprotocolRangeMap.asMapOfRanges().isEmpty()) {
-        ready.complete(this);
-      }
 
       AsyncCompletion allSubProtocols = AsyncCompletion
           .allOf(
@@ -201,7 +198,7 @@ public final class DefaultWireConnection implements WireConnection {
         logger.debug("Unknown message received {}", message.messageId());
         disconnect(DisconnectReason.PROTOCOL_BREACH);
         if (!ready.isDone()) {
-          ready.cancel();
+          ready.complete(this);
         }
       } else {
         int offset = subProtocolEntry.getKey().lowerEndpoint();
