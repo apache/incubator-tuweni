@@ -81,7 +81,6 @@ class CrawlerConfig(val filePath: Path) {
 
   fun discoveryDNSPollingPeriod() = config.getLong("discoveryDNSPollingPeriod")
 
-
   fun jdbcUrl() = config.getString("jdbcUrl")
 
   fun genesisFile() = config.getString("genesisFile")
