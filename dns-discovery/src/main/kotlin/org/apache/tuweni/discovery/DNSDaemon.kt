@@ -59,7 +59,7 @@ class DNSDaemon @JvmOverloads constructor(
     listeners.forEach { it.newRecords(seq, records) }
   }
 
-  public fun start() {
+  fun start() {
     logger.trace("Starting DNSDaemon for $enrLink")
     timer.scheduleAtFixedRate(DNSTimerTask(resolver, seq, enrLink, this::updateRecords), 0, period)
   }

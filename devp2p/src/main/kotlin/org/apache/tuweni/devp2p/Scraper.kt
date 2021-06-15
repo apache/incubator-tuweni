@@ -138,6 +138,7 @@ class Scraper(
           }
         }
       }
+      delay(20 * 1000)
     }
   }
 
