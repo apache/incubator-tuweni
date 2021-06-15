@@ -344,6 +344,10 @@ val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
     if (null == key || null == value) {
       return@runBlocking Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
     }
+    val remainingGas = gasManager.gasLeft()
+    if (remainingGas <= 2300) {
+      return@runBlocking Result(EVMExecutionStatusCode.OUT_OF_GAS)
+    }
 
     val address = msg.destination
     val slotIsWarm = hostContext.warmUpStorage(address, key)
@@ -362,11 +366,6 @@ val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
       }
     }.add(if (slotIsWarm) Gas.ZERO else Gas.valueOf(2100))
     gasManager.add(cost)
-
-    val remainingGas = gasManager.gasLeft()
-    if (remainingGas <= 2300) {
-      return@runBlocking Result(EVMExecutionStatusCode.OUT_OF_GAS)
-    }
 
     // frame.incrementGasRefund(gasCalculator().calculateStorageRefundAmount(account, key, value))
 
@@ -389,7 +388,8 @@ val sload = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
   Result()
 }
 
-val stop = Opcode { _, _, _, _, _, _, _ ->
+val stop = Opcode { gasManager, _, _, _, _, _, _ ->
+  gasManager.add(0L)
   Result(EVMExecutionStatusCode.SUCCESS)
 }
 
@@ -590,6 +590,14 @@ val extcodesize = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
   gasManager.add(700)
   runBlocking {
     stack.push(UInt256.valueOf(hostContext.getCode(msg.destination).size().toLong()))
+    Result()
+  }
+}
+
+val extcodehash = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
+  gasManager.add(700)
+  runBlocking {
+    stack.push(Hash.keccak256(hostContext.getCode(msg.destination)))
     Result()
   }
 }

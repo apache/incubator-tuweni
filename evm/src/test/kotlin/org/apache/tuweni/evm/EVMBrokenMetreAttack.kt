@@ -38,31 +38,31 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
-@Disabled
 @ExtendWith(LuceneIndexWriterExtension::class, BouncyCastleExtension::class)
 class EVMBrokenMetreAttack {
 
   @Test
   fun testBrokenMetreAttackBalance(@LuceneIndexWriter writer: IndexWriter) = runBlocking {
-    runAttack("31", writer)
+    runAttack("31", writer, EVMExecutionStatusCode.OUT_OF_GAS)
   }
 
   @Test
   fun testBrokenMetreAttackExtcodeSize(@LuceneIndexWriter writer: IndexWriter) = runBlocking {
-    runAttack("3B", writer)
+    runAttack("3B", writer, EVMExecutionStatusCode.STACK_OVERFLOW)
   }
 
   @Test
   fun testBrokenMetreAttackExtcodeHash(@LuceneIndexWriter writer: IndexWriter) = runBlocking {
-    runAttack("3F", writer)
+    runAttack("3F", writer, EVMExecutionStatusCode.STACK_OVERFLOW)
   }
 
+  @Disabled("Not implemented yet")
   @Test
   fun testBrokenMetreAttackStaticCall(@LuceneIndexWriter writer: IndexWriter) = runBlocking {
-    runAttack("FA", writer)
+    runAttack("FA", writer, EVMExecutionStatusCode.STACK_OVERFLOW)
   }
 
-  private suspend fun runAttack(opcode: String, writer: IndexWriter) {
+  private suspend fun runAttack(opcode: String, writer: IndexWriter, expectedStatusCode: EVMExecutionStatusCode) {
     val address = Address.fromHexString("0x5a31505a31505a31505a31505a31505a31505a31")
     val code = createAttack(opcode)
     val stateStore = MapKeyValueStore<Bytes, Bytes>()
@@ -89,16 +89,16 @@ class EVMBrokenMetreAttack {
       Bytes.fromHexString("0x"),
       code,
       Bytes.fromHexString("0x"),
-      Gas.valueOf(10000000),
+      Gas.valueOf(10_000_000),
       Wei.valueOf(1),
       address,
       123L,
       123L,
-      100000000,
+      10_000_000,
       UInt256.valueOf(1234),
       revision = HardFork.ISTANBUL,
     )
-    assertEquals(EVMExecutionStatusCode.OUT_OF_GAS, result.statusCode)
+    assertEquals(expectedStatusCode, result.statusCode)
   }
 
   private fun createAttack(opcode: String): Bytes {
