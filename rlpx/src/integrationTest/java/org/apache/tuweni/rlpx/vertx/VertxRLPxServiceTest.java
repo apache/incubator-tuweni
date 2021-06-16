@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.opentelemetry.api.metrics.Meter;
@@ -168,9 +167,9 @@ class VertxRLPxServiceTest {
         new VertxRLPxService(vertx, 0, "localhost", 10000, peerPair, new ArrayList<>(), "abc", meter);
     peerService.start().join();
 
-    assertThrows(CancellationException.class, () -> {
-      service.connectTo(peerPair.publicKey(), new InetSocketAddress("127.0.0.1", peerService.actualPort())).get();
-    });
+    WireConnection conn =
+        service.connectTo(peerPair.publicKey(), new InetSocketAddress("127.0.0.1", peerService.actualPort())).get();
+    assertEquals(DisconnectReason.USELESS_PEER, conn.getDisconnectReason());
     service.stop();
     peerService.stop();
   }

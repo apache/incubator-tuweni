@@ -31,7 +31,8 @@ public interface RLPxService extends SubprotocolService {
    *
    * @param peerPublicKey the peer public key
    * @param peerAddress the peer host and port
-   * @return a handle that completes if the peer connects successfully, providing the connection.
+   * @return a handle that completes when the connection has occurred. The connection itself may be marked as
+   *         disconnected as it was deemed invalid or useless.
    */
   AsyncResult<WireConnection> connectTo(SECP256K1.PublicKey peerPublicKey, InetSocketAddress peerAddress);
 

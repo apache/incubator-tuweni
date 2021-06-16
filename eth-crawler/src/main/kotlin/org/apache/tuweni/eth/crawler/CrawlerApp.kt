@@ -32,10 +32,13 @@ import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.ExpiringSet
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
+import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.Scraper
 import org.apache.tuweni.devp2p.eth.EthHelloSubprotocol
 import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
 import org.apache.tuweni.devp2p.eth.logger
+import org.apache.tuweni.discovery.DNSDaemon
+import org.apache.tuweni.discovery.DNSDaemonListener
 import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.ethstats.EthStatsServer
 import org.apache.tuweni.rlpx.MemoryWireConnectionsRepository
@@ -50,6 +53,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.security.Security
 import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -74,7 +78,17 @@ object CrawlerApp {
   }
 }
 
-class CrawlerApplication(override val coroutineContext: CoroutineDispatcher = Executors.newFixedThreadPool(20).asCoroutineDispatcher()) : CoroutineScope {
+class CrawlerApplication(
+  override val coroutineContext: CoroutineDispatcher =
+    Executors.newFixedThreadPool(
+      20,
+      ThreadFactory {
+        val thread = Thread("crawler")
+        thread.isDaemon = true
+        thread
+      }
+    ).asCoroutineDispatcher()
+) : CoroutineScope {
 
   fun run(vertx: Vertx, config: CrawlerConfig) {
     val ds = HikariDataSource()
@@ -92,8 +106,23 @@ class CrawlerApplication(override val coroutineContext: CoroutineDispatcher = Ex
       initialURIs = config.bootNodes(),
       bindAddress = SocketAddress.inetSocketAddress(config.discoveryPort(), config.discoveryNetworkInterface()),
       repository = repo,
-
     )
+
+    val dnsDaemon = DNSDaemon(
+      seq = 0L,
+      enrLink = config.discoveryDNS(),
+      period = config.discoveryDNSPollingPeriod(),
+      listener = object : DNSDaemonListener {
+        override fun newRecords(seq: Long, records: List<EthereumNodeRecord>) {
+          launch {
+            records.forEach {
+              repo.get(it.ip().hostAddress, it.tcp()!!, it.publicKey())
+            }
+          }
+        }
+      }
+    )
+
     val contents = if (config.network() == null) {
       Files.readAllBytes(Paths.get(config.genesisFile()))
     } else {
@@ -104,7 +133,7 @@ class CrawlerApplication(override val coroutineContext: CoroutineDispatcher = Ex
     val genesisBlock = genesisFile.toBlock()
     val blockchainInformation = SimpleBlockchainInformation(
       UInt256.valueOf(genesisFile.chainId.toLong()), genesisBlock.header.difficulty,
-      genesisBlock.header.hash, UInt256.valueOf(42L), genesisBlock.header.hash, genesisFile.forks
+      genesisBlock.header.hash, UInt256.ZERO, genesisBlock.header.hash, genesisFile.forks
     )
     val expiringConnectionIds = ExpiringSet<String>()
 
@@ -155,6 +184,7 @@ class CrawlerApplication(override val coroutineContext: CoroutineDispatcher = Ex
         runBlocking {
           refreshLoop.set(false)
           scraper.stop().await()
+          dnsDaemon.close()
           rlpxService.stop().await()
           restService.stop().await()
           async {
@@ -182,6 +212,7 @@ class CrawlerApplication(override val coroutineContext: CoroutineDispatcher = Ex
         }
       }
       rlpxService.start().await()
+      dnsDaemon.start()
       scraper.start()
       ethstatsServer.start()
       val peerSeen = ExpiringSet<PeerConnectionInfo>(5 * 60 * 1000)

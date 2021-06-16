@@ -46,12 +46,16 @@ class CrawlerConfig(val filePath: Path) {
       "enode://979b7fa28feeb35a4741660a16076f1943202cb72b6af70d327f053e248bab9ba81760f39d0701ef1d8f89cc1fbd2cacba0710a12cd5314d5e0c9021aa3637f9@5.1.83.226:30303" // DE
     )
 
+    val mainnetDiscoveryDNS = "enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@all.mainnet.ethdisco.net"
+
     fun schema() = SchemaBuilder.create()
       .addInteger("discoveryPort", 11000, "Discovery service port", PropertyValidator.inRange(1, 65536))
       .addString("discoveryNetworkInterface", "127.0.0.1", "Discovery network interface", null)
       .addInteger("rlpxPort", 11000, "RLPx service port", PropertyValidator.inRange(1, 65536))
       .addString("rlpxNetworkInterface", "127.0.0.1", "RLPx network interface", null)
       .addListOfString("bootnodes", mainnetEthereumBootnodes, "Bootnodes to discover other peers from", null)
+      .addString("discoveryDNS", mainnetDiscoveryDNS, "DNS discovery crawler", null)
+      .addLong("discoveryDNSPollingPeriod", 60 * 1000, "DNS Discovery Polling Period in milliseconds", null)
       .addString(
         "jdbcUrl", System.getProperty("DATABASE_URL", System.getenv("DATABASE_URL")),
         "JDBC URL of the form jdbc:posgresql://localhost:5432", PropertyValidator.isPresent()
@@ -72,6 +76,10 @@ class CrawlerConfig(val filePath: Path) {
   fun discoveryPort() = config.getInteger("discoveryPort")
 
   fun discoveryNetworkInterface() = config.getString("discoveryNetworkInterface")
+
+  fun discoveryDNS() = config.getString("discoveryDNS")
+
+  fun discoveryDNSPollingPeriod() = config.getLong("discoveryDNSPollingPeriod")
 
   fun jdbcUrl() = config.getString("jdbcUrl")
 
