@@ -164,9 +164,9 @@ open class RelationalPeerRepository(
 
   internal fun getPeersWithInfo(infoCollected: Long, from: Int? = null, limit: Int? = null): List<PeerConnectionInfoDetails> {
     dataSource.connection.use { conn ->
-      var query = "select distinct nodeinfo.host, nodeinfo.port, nodeinfo.publickey, nodeinfo.p2pversion, nodeinfo.clientId, nodeinfo.capabilities, nodeinfo.genesisHash, nodeinfo.besthash, nodeinfo.totalDifficulty from nodeinfo \n" +
-        "  inner join (select id, max(createdAt) as maxCreatedAt from nodeinfo group by id) maxSeen \n" +
-        "  on nodeinfo.id = maxSeen.id and nodeinfo.createdAt = maxSeen.maxCreatedAt where createdAt < ?"
+      var query = "select distinct nodeinfo.createdAt, nodeinfo.publickey, nodeinfo.p2pversion, nodeinfo.clientId, nodeinfo.capabilities, nodeinfo.genesisHash, nodeinfo.besthash, nodeinfo.totalDifficulty from nodeinfo " +
+        "  inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen " +
+        "  on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt where createdAt < ? order by nodeInfo.createdAt desc"
       if (from != null && limit != null) {
         query += " limit $limit offset $from"
       }
@@ -178,16 +178,15 @@ open class RelationalPeerRepository(
         val rs = stmt.executeQuery()
         val result = mutableListOf<PeerConnectionInfoDetails>()
         while (rs.next()) {
-          val pubkey = SECP256K1.PublicKey.fromBytes(Bytes.wrap(rs.getBytes(3)))
-          val port = rs.getInt(2)
-          val host = rs.getString(1)
-          val p2pVersion = rs.getInt(4)
-          val clientId = rs.getString(5)
-          val capabilities = rs.getString(6)
-          val genesisHash = rs.getString(7)
-          val bestHash = rs.getString(8)
-          val totalDifficulty = rs.getString(9)
-          result.add(PeerConnectionInfoDetails(pubkey, host, port, p2pVersion, clientId, capabilities, genesisHash, bestHash, totalDifficulty))
+          val createdAt = rs.getTimestamp(1).toInstant().toEpochMilli()
+          val pubkey = SECP256K1.PublicKey.fromBytes(Bytes.wrap(rs.getBytes(2)))
+          val p2pVersion = rs.getInt(3)
+          val clientId = rs.getString(4)
+          val capabilities = rs.getString(5)
+          val genesisHash = rs.getString(6)
+          val bestHash = rs.getString(7)
+          val totalDifficulty = rs.getString(8)
+          result.add(PeerConnectionInfoDetails(createdAt, pubkey, p2pVersion, clientId, capabilities, genesisHash, bestHash, totalDifficulty))
         }
         return result
       }
@@ -215,10 +214,30 @@ open class RelationalPeerRepository(
       }
     }
   }
-}
 
+  internal fun getClientIds(): List<ClientInfo> {
+    dataSource.connection.use { conn ->
+      val stmt =
+        conn.prepareStatement(
+          "select clients.clientId, count(clients.clientId) from (select nodeinfo.clientId from nodeinfo inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt) as clients group by clients.clientId"
+        )
+      stmt.use {
+        // map results.
+        val rs = stmt.executeQuery()
+        val result = mutableListOf<ClientInfo>()
+        while (rs.next()) {
+          val clientId = rs.getString(1)
+          val count = rs.getInt(2)
+          result.add(ClientInfo(clientId, count))
+        }
+        return result
+      }
+    }
+  }
+}
+internal data class ClientInfo(val clientId: String, val count: Int)
 internal data class PeerConnectionInfo(val nodeId: SECP256K1.PublicKey, val host: String, val port: Int)
-internal data class PeerConnectionInfoDetails(val nodeId: SECP256K1.PublicKey, val host: String, val port: Int, val p2pVersion: Int, val clientId: String, val capabilities: String, val genesisHash: String, val bestHash: String, val totalDifficulty: String)
+internal data class PeerConnectionInfoDetails(val createdAt: Long, val nodeId: SECP256K1.PublicKey, val p2pVersion: Int, val clientId: String, val capabilities: String, val genesisHash: String, val bestHash: String, val totalDifficulty: String)
 
 internal class RepositoryPeer(
   override val nodeId: SECP256K1.PublicKey,

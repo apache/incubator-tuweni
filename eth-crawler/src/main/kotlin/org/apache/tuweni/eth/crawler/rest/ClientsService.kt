@@ -24,12 +24,11 @@ import javax.servlet.ServletContext
 import javax.ws.rs.GET
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
-import javax.ws.rs.QueryParam
 import javax.ws.rs.core.MediaType
 
 @Api
-@Path("peers")
-class PeersService {
+@Path("clients")
+class ClientsService {
 
   companion object {
     val mapper = ObjectMapper()
@@ -43,9 +42,9 @@ class PeersService {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  fun getPeers(@QueryParam("from") from: Int = 0, @QueryParam("limit") limit: Int = 10): String {
+  fun getClientIds(): String {
     val repo = context!!.getAttribute("repo") as RelationalPeerRepository
-    val peers = repo.getPeersWithInfo(System.currentTimeMillis(), from, limit)
+    val peers = repo.getClientIds()
     val result = mapper.writeValueAsString(peers)
     return result
   }

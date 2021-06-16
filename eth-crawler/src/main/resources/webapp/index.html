@@ -21,11 +21,18 @@ specific language governing permissions and limitations under the License.
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
           integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
 
+    <!-- Boostrap add-on -->
+    <link rel="stylesheet" href="bootstrap-nightfall.css">
+
+    <!-- Fork with Github -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
+
     <title>Apache Tuweni Network Crawler</title>
 </head>
 <body>
+<a class="github-fork-ribbon" href="https://www.github.com/apache/incubator-tuweni" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
 <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-    <a class="navbar-brand col-md-3 col-lg-2 mr-0 px-3" href="#">Tuweni</a>
+    <a class="navbar-brand col-md-3 col-lg-2 mr-0 px-3" href="#">Apache Tuweni Network Crawler</a>
     <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse"
             data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -37,15 +44,90 @@ specific language governing permissions and limitations under the License.
     </ul>
 </nav>
 <div class="container-fluid">
-    <div class="row">
+    <div class="row" id="app">
 
         <main role="main" class="col-md-12 ml-sm-auto col-lg-12 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Configuration</h1>
+                <h1 class="h2">Ethereum network crawler</h1>
+                <p>This application runs a discovery process using Discv4 and DNS nodes, and contacts individually all nodes on a given Ethereum network to report their state.</p>
             </div>
-            <div id="app">
-                <pre><code>{{ config }}</code></pre>
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Recent peers</h1>
+                <p>Showing our most recently contacted 10 peers.</p>
             </div>
+            <div v-if="recent == null">
+                <h1>⏳</h1>
+            </div>
+            <div v-else id="recent">
+                <table>
+                    <thead>
+                     <tr>
+                         <th>
+                           Contacted
+                         </th>
+                         <th>
+                             Public Key
+                         </th>
+                         <th>
+                             P2P Version
+                         </th>
+                         <th>
+                             Client ID
+                         </th>
+                         <th>
+                             Capabilities
+                         </th>
+                         <th>
+                             Genesis Hash
+                         </th>
+                         <th>
+                             Best Hash
+                         </th>
+                         <th>
+                             Total Difficulty
+                         </th>
+                     </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="item in recent">
+                          <td>
+                            {{ item.createdAt }}
+                          </td>
+                          <td>
+                              {{ item.publicKey }}
+                          </td>
+                          <td>
+                              {{ item.p2pVersion }}
+                          </td>
+                          <td>
+                              {{ item.clientId }}
+                          </td>
+                          <td>
+                              {{ item.capabilities }}
+                          </td>
+                          <td>
+                              {{ item.genesisHash }}
+                          </td>
+                          <td>
+                              {{ item.bestHash }}
+                          </td>
+                      </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1>Check my peer</h1>
+                <p>Enter your enode or public key to check if we know about your peer.</p>
+                <form method="get" action="/node.html">
+                    <div class="form-group">
+                        <label for="publickey">Enode or public key</label>
+                        <input type="text" class="form-control" id="publickey" placeholder="0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Check</button>
+                </form>
+            </div>
+
         </main>
     </div>
 </div>
