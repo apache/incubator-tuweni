@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -54,13 +55,13 @@ public final class DefaultWireConnection implements WireConnection {
   private final CompletableAsyncResult<WireConnection> ready;
   private final String peerHost;
   private final int peerPort;
+  private final AtomicBoolean disconnectRequested = new AtomicBoolean(false);
 
   private CompletableAsyncCompletion awaitingPong;
   private HelloMessage myHelloMessage;
   private HelloMessage peerHelloMessage;
   private RangeMap<Integer, SubProtocolIdentifier> subprotocolRangeMap = TreeRangeMap.create();
   private DisconnectReason disconnectReason;
-  private boolean disconnectRequested;
   private boolean disconnectReceived;
   private EventListener eventListener;
 
@@ -252,13 +253,15 @@ public final class DefaultWireConnection implements WireConnection {
    *
    * @param reason the reason for disconnection
    */
+  @Override
   public void disconnect(DisconnectReason reason) {
-    logger.debug("Sending disconnect message with reason {}", reason);
-    writer.accept(new RLPxMessage(1, new DisconnectMessage(reason).toBytes()));
-    disconnectRequested = true;
-    disconnectReason = reason;
-    disconnectHandler.run();
-    eventListener.onEvent(Event.DISCONNECTED);
+    if (disconnectRequested.compareAndExchange(false, true)) {
+      logger.debug("Sending disconnect message with reason {}", reason);
+      writer.accept(new RLPxMessage(1, new DisconnectMessage(reason).toBytes()));
+      disconnectReason = reason;
+      disconnectHandler.run();
+      eventListener.onEvent(Event.DISCONNECTED);
+    }
   }
 
   /**
@@ -347,7 +350,7 @@ public final class DefaultWireConnection implements WireConnection {
 
   @Override
   public boolean isDisconnectRequested() {
-    return disconnectRequested;
+    return disconnectRequested.get();
   }
 
   @Override

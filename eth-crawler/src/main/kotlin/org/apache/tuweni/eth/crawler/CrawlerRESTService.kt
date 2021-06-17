@@ -16,7 +16,7 @@
  */
 package org.apache.tuweni.eth.crawler
 
-import io.swagger.jersey.config.JerseyJaxrsConfig
+import io.swagger.v3.jaxrs2.integration.OpenApiServlet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -61,12 +61,11 @@ class CrawlerRESTService(
     serHol.initOrder = 1
     serHol.setInitParameter(
       "jersey.config.server.provider.packages",
-      "io.swagger.jaxrs.listing,org.apache.tuweni.eth.crawler.rest"
+      "org.apache.tuweni.eth.crawler.rest"
     )
 
-    val apiServlet = ctx.addServlet(JerseyJaxrsConfig::class.java, "/api/*")
-    apiServlet.setInitParameter("api.version", "1.0.0")
-    apiServlet.setInitParameter("swagger.api.basepath", "/api")
+    val apiServlet = ctx.addServlet(OpenApiServlet::class.java, "/api/*")
+    apiServlet.setInitParameter("openApi.configuration.resourcePackages", "org.apache.tuweni.eth.crawler.rest")
     apiServlet.initOrder = 2
 
     ctx.setBaseResource(Resource.newResource(CrawlerRESTService::class.java.getResource("/webapp")))

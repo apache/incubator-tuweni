@@ -17,7 +17,6 @@
 package org.apache.tuweni.eth.crawler.rest
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.swagger.annotations.Api
 import org.apache.tuweni.eth.EthJsonModule
 import org.apache.tuweni.eth.crawler.RelationalPeerRepository
 import javax.servlet.ServletContext
@@ -27,7 +26,6 @@ import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
 import javax.ws.rs.core.MediaType
 
-@Api
 @Path("peers")
 class PeersService {
 

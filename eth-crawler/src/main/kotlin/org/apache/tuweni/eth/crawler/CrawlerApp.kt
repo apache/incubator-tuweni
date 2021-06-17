@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.eth.crawler
 
+import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.opentelemetry.sdk.metrics.SdkMeterProvider
 import io.vertx.core.Vertx
@@ -77,8 +78,10 @@ object CrawlerApp {
 class CrawlerApplication(override val coroutineContext: CoroutineDispatcher = Executors.newFixedThreadPool(20).asCoroutineDispatcher()) : CoroutineScope {
 
   fun run(vertx: Vertx, config: CrawlerConfig) {
-    val ds = HikariDataSource()
-    ds.jdbcUrl = config.jdbcUrl()
+    val dbConfig = HikariConfig()
+    dbConfig.maximumPoolSize = 25 // TODO make this a config setting.
+    dbConfig.jdbcUrl = config.jdbcUrl()
+    val ds = HikariDataSource(dbConfig)
     val flyway = Flyway.configure()
       .dataSource(ds)
       .load()
@@ -122,6 +125,12 @@ class CrawlerApplication(override val coroutineContext: CoroutineDispatcher = Ex
         repo.recordInfo(it, null)
       }
     }
+    wireConnectionsRepository.addConnectionListener {
+      launch {
+        delay(10 * 1000) // TODO this delay can be made configurable.
+        it.disconnect(DisconnectReason.CLIENT_QUITTING)
+      }
+    }
 
     val rlpxService = VertxRLPxService(
       vertx,
@@ -131,10 +140,11 @@ class CrawlerApplication(override val coroutineContext: CoroutineDispatcher = Ex
       SECP256K1.KeyPair.random(),
       listOf(ethHelloProtocol),
       "Apache Tuweni network crawler",
-      meter
+      meter,
+      wireConnectionsRepository
     )
     repo.addListener {
-      runBlocking {
+      launch {
         connect(rlpxService, it.nodeId, InetSocketAddress(it.endpoint.address, it.endpoint.tcpPort ?: 30303))
       }
     }
@@ -190,7 +200,7 @@ class CrawlerApplication(override val coroutineContext: CoroutineDispatcher = Ex
           try {
             launch {
               logger.info("Requesting pending peers")
-              val pendingPeers = repo.getPendingPeers(1000)
+              val pendingPeers = repo.getPendingPeers(100)
               logger.info("Requesting connections to ${pendingPeers.size} peers")
               pendingPeers.map { connectionInfo ->
                 async {
