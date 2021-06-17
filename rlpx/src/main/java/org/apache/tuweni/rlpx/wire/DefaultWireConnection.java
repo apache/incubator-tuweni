@@ -255,7 +255,7 @@ public final class DefaultWireConnection implements WireConnection {
    */
   @Override
   public void disconnect(DisconnectReason reason) {
-    if (disconnectRequested.compareAndExchange(false, true)) {
+    if (disconnectRequested.compareAndSet(false, true)) {
       logger.debug("Sending disconnect message with reason {}", reason);
       writer.accept(new RLPxMessage(1, new DisconnectMessage(reason).toBytes()));
       disconnectReason = reason;

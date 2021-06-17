@@ -24,6 +24,7 @@ import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.servlet.FilterHolder
 import org.eclipse.jetty.servlet.ServletContextHandler
+import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.servlets.DoSFilter
 import org.eclipse.jetty.util.resource.Resource
 import org.glassfish.jersey.servlet.ServletContainer
@@ -38,7 +39,7 @@ class CrawlerRESTService(
   val networkInterface: String = "127.0.0.1",
   val path: String = "/",
   val repository: RelationalPeerRepository,
-  override val coroutineContext: CoroutineContext = Dispatchers.Default
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope {
 
   companion object {
@@ -72,6 +73,14 @@ class CrawlerRESTService(
     val staticContent = ctx.addServlet(DefaultServlet::class.java, "/*")
     ctx.setWelcomeFiles(arrayOf("index.html"))
     staticContent.initOrder = 10
+
+    val swagger = ServletHolder("swagger-ui", DefaultServlet::class.java)
+    swagger.setInitParameter(
+      "resourceBase",
+      CrawlerRESTService::class.java.getClassLoader().getResource("META-INF/resources/webjars/swagger-ui/3.50.0/").toString()
+    )
+    swagger.setInitParameter("pathInfoOnly", "true")
+    ctx.addServlet(swagger, "/swagger-ui/*")
 
     val filter = DoSFilter()
     // TODO make it a config setting. Change for REST vs UI.
