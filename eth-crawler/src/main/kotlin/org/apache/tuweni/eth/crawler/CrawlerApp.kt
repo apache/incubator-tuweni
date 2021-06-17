@@ -163,6 +163,7 @@ class CrawlerApplication(override val coroutineContext: CoroutineDispatcher = Ex
     Runtime.getRuntime().addShutdownHook(
       Thread {
         runBlocking {
+          repo.stop()
           refreshLoop.set(false)
           scraper.stop().await()
           rlpxService.stop().await()
@@ -174,6 +175,7 @@ class CrawlerApplication(override val coroutineContext: CoroutineDispatcher = Ex
       }
     )
     runBlocking {
+      repo.start()
       restService.start().await()
       launch {
         while (refreshLoop.get()) {

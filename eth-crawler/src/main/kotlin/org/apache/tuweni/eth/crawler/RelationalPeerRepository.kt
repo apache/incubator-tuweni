@@ -18,6 +18,7 @@ package org.apache.tuweni.eth.crawler
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncResult
@@ -35,6 +36,7 @@ import java.lang.RuntimeException
 import java.net.URI
 import java.sql.Timestamp
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.sql.DataSource
 import kotlin.coroutines.CoroutineContext
 
@@ -215,7 +217,26 @@ open class RelationalPeerRepository(
     }
   }
 
-  internal fun getClientIds(): List<ClientInfo> {
+  private var clientIds: List<ClientInfo>? = null
+  private val started = AtomicBoolean(false)
+
+  fun start() {
+    launch {
+      started.set(true)
+      while (started.get()) {
+        clientIds = getClientIdsInternal()
+        delay(30 * 1000)
+      }
+    }
+  }
+
+  suspend fun stop() {
+    started.set(false)
+  }
+
+  internal fun getClientIds(): List<ClientInfo> = clientIds ?: listOf()
+
+  internal fun getClientIdsInternal(): List<ClientInfo> {
     dataSource.connection.use { conn ->
       val stmt =
         conn.prepareStatement(
