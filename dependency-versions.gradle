@@ -54,16 +54,23 @@ dependencyManagement {
     dependency('io.prometheus:simpleclient:0.8.1')
     dependency('io.prometheus:simpleclient_httpserver:0.8.1')
     dependency('io.lettuce:lettuce-core:5.1.3.RELEASE')
+    dependency('io.swagger.core.v3:swagger-jaxrs2:2.1.9')
+    dependency('org.webjars:swagger-ui:3.50.0')
+
+
     dependency('io.vertx:vertx-core:3.9.7')
     dependency('io.vertx:vertx-web-client:3.9.7')
     dependency('io.vertx:vertx-lang-kotlin:3.9.7')
     dependency('io.vertx:vertx-lang-kotlin-coroutines:3.9.7')
     dependency('io.vertx:vertx-web:3.9.7')
+    dependency('javax.servlet:javax.servlet-api:4.0.1')
     dependency('javax.persistence:javax.persistence-api:2.2')
     dependencySet(group: 'org.antlr', version: '4.7.1') {
       entry 'antlr4'
       entry 'antlr4-runtime'
     }
+    dependency('javax.ws.rs:javax.ws.rs-api:2.1.1')
+    dependency('javax.servlet:javax.servlet-api:4.0.1')
     dependency('org.apache.lucene:lucene-core:7.6.0')
     dependency('org.apache.openjpa:openjpa:3.1.0')
     dependency('org.assertj:assertj-core:3.11.1')
@@ -71,17 +78,18 @@ dependencyManagement {
       entry 'bcpkix-jdk15on'
       entry 'bcprov-jdk15on'
     }
-    dependencySet(group: 'org.eclipse.jetty', version: '9.4.0.v20161208') {
+    dependencySet(group: 'org.eclipse.jetty', version: '10.0.5') {
       entry 'jetty-server'
       entry 'jetty-servlet'
+      entry 'jetty-servlets'
       entry 'jetty-util'
     }
-    dependencySet(group: 'org.glassfish.jersey.core', version: '2.31') {
+    dependencySet(group: 'org.glassfish.jersey.core', version: '2.34') {
       entry 'jersey-server'
       entry 'jersey-client'
     }
-    dependency('org.glassfish.jersey.containers:jersey-container-servlet:2.31')
-    dependency('org.glassfish.jersey.inject:jersey-hk2:2.31')
+    dependency('org.glassfish.jersey.containers:jersey-container-servlet:2.34')
+    dependency('org.glassfish.jersey.inject:jersey-hk2:2.34')
     dependency('javax.xml.bind:jaxb-api:2.3.1')
     dependency('org.flywaydb:flyway-core:7.8.1')
 

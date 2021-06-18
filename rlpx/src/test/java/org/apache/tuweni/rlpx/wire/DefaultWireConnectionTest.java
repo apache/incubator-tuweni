@@ -13,9 +13,12 @@
 package org.apache.tuweni.rlpx.wire;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.concurrent.AsyncCompletion;
 import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.junit.BouncyCastleExtension;
@@ -72,10 +75,14 @@ class DefaultWireConnectionTest {
   @Test
   void disconnectIfNoMapping() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
+    LinkedHashMap<SubProtocolIdentifier, SubProtocolHandler> subProtocols = new LinkedHashMap<>();
+    SubProtocolHandler handler = mock(SubProtocolHandler.class);
+    when(handler.handleNewPeerConnection(any())).thenReturn(AsyncCompletion.COMPLETED);
+    subProtocols.put(SubProtocolIdentifier.of("foo", 1, 1), handler);
     DefaultWireConnection conn =
         new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
         }, () -> {
-        }, new LinkedHashMap<>(), 28, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
+        }, subProtocols, 28, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
     conn.registerListener(event -> {
     });
     conn.sendHello();
@@ -84,7 +91,7 @@ class DefaultWireConnectionTest {
             new RLPxMessage(
                 0,
                 HelloMessage
-                    .create(Bytes.fromHexString("deadbeef"), 30303, 3, "blah", Collections.emptyList())
+                    .create(peerNodeId, 30303, 3, "blah", Collections.singletonList(new Capability("foo", 1)))
                     .toBytes()));
     conn.messageReceived(new RLPxMessage(45, Bytes.EMPTY));
     assertEquals(1, capturedDisconnect.get().messageId());

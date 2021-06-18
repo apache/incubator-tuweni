@@ -69,6 +69,13 @@ public interface WireConnection {
   }
 
   /**
+   * Sends a message to the peer explaining that we are about to disconnect.
+   *
+   * @param reason the reason for disconnection
+   */
+  public void disconnect(DisconnectReason reason);
+
+  /**
    * Whether the peer asked to disconnect
    * 
    * @return true if the peer asked to disconnect

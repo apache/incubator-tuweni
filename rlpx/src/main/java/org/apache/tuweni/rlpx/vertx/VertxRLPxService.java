@@ -247,7 +247,7 @@ public final class VertxRLPxService implements RLPxService {
     if (!started.get()) {
       throw new IllegalStateException("The RLPx service is not active");
     }
-    ((DefaultWireConnection) connection).disconnect(disconnectReason);
+    connection.disconnect(disconnectReason);
   }
 
   private void receiveMessage(NetSocket netSocket) {
