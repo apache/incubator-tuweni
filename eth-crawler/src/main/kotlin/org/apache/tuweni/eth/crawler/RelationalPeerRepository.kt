@@ -183,11 +183,11 @@ open class RelationalPeerRepository(
           val createdAt = rs.getTimestamp(1).toInstant().toEpochMilli()
           val pubkey = SECP256K1.PublicKey.fromBytes(Bytes.wrap(rs.getBytes(2)))
           val p2pVersion = rs.getInt(3)
-          val clientId = rs.getString(4)
-          val capabilities = rs.getString(5)
-          val genesisHash = rs.getString(6)
-          val bestHash = rs.getString(7)
-          val totalDifficulty = rs.getString(8)
+          val clientId = rs.getString(4) ?: ""
+          val capabilities = rs.getString(5) ?: ""
+          val genesisHash = rs.getString(6) ?: ""
+          val bestHash = rs.getString(7) ?: ""
+          val totalDifficulty = rs.getString(8) ?: ""
           result.add(PeerConnectionInfoDetails(createdAt, pubkey, p2pVersion, clientId, capabilities, genesisHash, bestHash, totalDifficulty))
         }
         return result

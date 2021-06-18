@@ -266,9 +266,13 @@ public final class ExpiringMap<K, V> implements Map<K, V> {
 
   @Override
   public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+    return computeIfAbsent(key, Long.MAX_VALUE, mappingFunction);
+  }
+
+  public V computeIfAbsent(K key, long expiration, Function<? super K, ? extends V> mappingFunction) {
     ExpiringEntry<K, V> newEntry = storage.computeIfAbsent(key, k -> {
       V newValue = mappingFunction.apply(k);
-      return (newValue == null) ? null : new ExpiringEntry<>(k, newValue, Long.MAX_VALUE, null);
+      return (newValue == null) ? null : new ExpiringEntry<>(k, newValue, expiration, null);
     });
     return (newEntry == null) ? null : newEntry.value;
   }
