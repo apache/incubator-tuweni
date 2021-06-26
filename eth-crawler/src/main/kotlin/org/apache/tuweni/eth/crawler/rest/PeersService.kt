@@ -40,13 +40,13 @@ class PeersService {
 
   private val localCache = ExpiringMap<String, String>()
 
-    @javax.ws.rs.core.Context
+  @javax.ws.rs.core.Context
   var context: ServletContext? = null
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   fun getPeers(@QueryParam("from") from: Int = 0, @QueryParam("limit") limit: Int = 10): String {
-    val key = "from${from}limit${limit}"
+    val key = "from${from}limit$limit"
     return localCache.computeIfAbsent(key, 30 * 1000) {
       val repo = context!!.getAttribute("repo") as RelationalPeerRepository
       val peers = repo.getPeersWithInfo(System.currentTimeMillis(), from, limit)

@@ -22,6 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncResult
+import org.apache.tuweni.concurrent.ExpiringMap
 import org.apache.tuweni.concurrent.coroutines.asyncResult
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.Endpoint
@@ -32,7 +33,6 @@ import org.apache.tuweni.devp2p.eth.Status
 import org.apache.tuweni.devp2p.parseEnodeUri
 import org.apache.tuweni.rlpx.wire.WireConnection
 import org.slf4j.LoggerFactory
-import java.lang.RuntimeException
 import java.net.URI
 import java.sql.Timestamp
 import java.util.UUID
@@ -50,6 +50,7 @@ open class RelationalPeerRepository(
   }
 
   private val listeners = mutableListOf<(Peer) -> Unit>()
+  private val peerCache = ExpiringMap<SECP256K1.PublicKey, String>()
 
   override fun addListener(listener: (Peer) -> Unit) {
     listeners.add(listener)
@@ -60,11 +61,11 @@ open class RelationalPeerRepository(
   }
 
   fun get(nodeId: SECP256K1.PublicKey, endpoint: Endpoint): Peer {
-    dataSource.connection.use { conn ->
-      logger.trace("Get peer with $nodeId")
-      val stmt = conn.prepareStatement("select id,publickey from identity where publickey=?")
-      stmt.setBytes(1, nodeId.bytes().toArrayUnsafe())
-      try {
+    val id = peerCache.computeIfAbsent(nodeId, 5 * 60 * 60) { // 5 minutes, TODO configure.
+      dataSource.connection.use { conn ->
+        logger.trace("Get peer with $nodeId")
+        val stmt = conn.prepareStatement("select id,publickey from identity where publickey=?")
+        stmt.setBytes(1, nodeId.bytes().toArrayUnsafe())
         val rs = stmt.executeQuery()
         rs.use {
           if (!rs.next()) {
@@ -74,27 +75,16 @@ open class RelationalPeerRepository(
             insert.setString(1, id)
             insert.setBytes(2, nodeId.bytes().toArrayUnsafe())
             insert.execute()
-            val newPeer = RepositoryPeer(nodeId, id, endpoint, dataSource)
-            listeners.let {
-              for (listener in listeners) {
-                launch {
-                  listener(newPeer)
-                }
-              }
-            }
-            return newPeer
+            id
           } else {
             logger.trace("Found existing peer with public key ${nodeId.toHexString()}")
             val id = rs.getString(1)
-            val pubKey = rs.getBytes(2)
-            return RepositoryPeer(SECP256K1.PublicKey.fromBytes(Bytes.wrap(pubKey)), id, endpoint, dataSource)
+            id
           }
         }
-      } catch (e: Exception) {
-        logger.error(e.message, e)
-        throw RuntimeException(e)
       }
     }
+    return RepositoryPeer(nodeId, id, endpoint, dataSource)
   }
 
   override suspend fun get(uri: URI): Peer {
