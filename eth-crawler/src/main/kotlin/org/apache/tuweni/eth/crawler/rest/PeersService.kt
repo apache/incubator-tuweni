@@ -17,6 +17,7 @@
 package org.apache.tuweni.eth.crawler.rest
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.apache.tuweni.concurrent.ExpiringMap
 import org.apache.tuweni.eth.EthJsonModule
 import org.apache.tuweni.eth.crawler.RelationalPeerRepository
 import javax.servlet.ServletContext
@@ -36,15 +37,20 @@ class PeersService {
       mapper.registerModule(EthJsonModule())
     }
   }
+
+  private val localCache = ExpiringMap<String, String>()
+
   @javax.ws.rs.core.Context
   var context: ServletContext? = null
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   fun getPeers(@QueryParam("from") from: Int = 0, @QueryParam("limit") limit: Int = 10): String {
-    val repo = context!!.getAttribute("repo") as RelationalPeerRepository
-    val peers = repo.getPeersWithInfo(System.currentTimeMillis(), from, limit)
-    val result = mapper.writeValueAsString(peers)
-    return result
+    val key = "from${from}limit$limit"
+    return localCache.computeIfAbsent(key, 30 * 1000) {
+      val repo = context!!.getAttribute("repo") as RelationalPeerRepository
+      val peers = repo.getPeersWithInfo(System.currentTimeMillis(), from, limit)
+      mapper.writeValueAsString(peers)
+    }
   }
 }
