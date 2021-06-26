@@ -31,6 +31,7 @@ import org.apache.tuweni.devp2p.Peer
 import org.apache.tuweni.devp2p.PeerRepository
 import org.apache.tuweni.devp2p.eth.Status
 import org.apache.tuweni.devp2p.parseEnodeUri
+import org.apache.tuweni.eth.crawler.rest.ClientVersion
 import org.apache.tuweni.rlpx.wire.WireConnection
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -47,8 +48,19 @@ open class RelationalPeerRepository(
 
   companion object {
     internal val logger = LoggerFactory.getLogger(RelationalPeerRepository::class.java)
-  }
 
+    // TODO make this configurable
+    val londonClientVersions = mutableMapOf(
+      Pair("geth", "v1.10.4"),
+      Pair("nethermind", "v1.10.73"),
+      Pair("turbogeth", "v2021.06.04-alpha"),
+      Pair("turbo-geth", "v2021.06.04-alpha"),
+      Pair("erigon", "v2021.06.04-alpha"),
+      Pair("besu", "v21.7.0-RC1"),
+      Pair("openethereum", "v3.3.0-rc2"),
+      Pair("ethereumjs", "v5.4.1")
+    )
+  }
   private val listeners = mutableListOf<(Peer) -> Unit>()
   private val peerCache = ExpiringMap<SECP256K1.PublicKey, String>()
 
@@ -108,15 +120,15 @@ open class RelationalPeerRepository(
           "insert into nodeInfo(id, createdAt, host, port, publickey, p2pVersion, clientId, capabilities, genesisHash, bestHash, totalDifficulty, identity, disconnectReason) values(?,?,?,?,?,?,?,?,?,?,?,?,?)"
         )
       stmt.use {
-        val peerHello = wireConnection.peerHello!!
+        val peerHello = wireConnection.peerHello
         it.setString(1, UUID.randomUUID().toString())
         it.setTimestamp(2, Timestamp(System.currentTimeMillis()))
         it.setString(3, wireConnection.peerHost())
         it.setInt(4, wireConnection.peerPort())
         it.setBytes(5, wireConnection.peerPublicKey().bytesArray())
-        it.setInt(6, peerHello.p2pVersion())
-        it.setString(7, peerHello.clientId())
-        it.setString(8, peerHello.capabilities().map { it.name() + "/" + it.version() }.joinToString(","))
+        it.setInt(6, peerHello?.p2pVersion() ?: 0)
+        it.setString(7, peerHello?.clientId() ?: "")
+        it.setString(8, peerHello?.capabilities()?.joinToString(",") { it.name() + "/" + it.version() } ?: "")
         it.setString(9, status?.genesisHash?.toHexString())
         it.setString(10, status?.bestHash?.toHexString())
         it.setString(11, status?.totalDifficulty?.toHexString())
@@ -208,13 +220,27 @@ open class RelationalPeerRepository(
   }
 
   private var clientIds: List<ClientInfo>? = null
+  private var londonStats: ClientReadyStats? = null
   private val started = AtomicBoolean(false)
 
   fun start() {
     launch {
       started.set(true)
       while (started.get()) {
-        clientIds = getClientIdsInternal()
+        val newClientIds = getClientIdsInternal()
+        clientIds = newClientIds
+        var londonReady = 0
+        var total = 0
+        newClientIds.forEach { newClientCount ->
+          total += newClientCount.count
+          val clientVersion = ClientVersion(newClientCount.clientId)
+          londonClientVersions[clientVersion.name().toLowerCase()]?.let { londonVersion ->
+            if (clientVersion >= londonVersion) {
+              londonReady += newClientCount.count
+            }
+          }
+        }
+        londonStats = ClientReadyStats(total, londonReady)
         delay(30 * 1000)
       }
     }
@@ -224,15 +250,18 @@ open class RelationalPeerRepository(
     started.set(false)
   }
 
+  internal fun getLondonStats() = londonStats
+
   internal fun getClientIds(): List<ClientInfo> = clientIds ?: listOf()
 
   internal fun getClientIdsInternal(): List<ClientInfo> {
     dataSource.connection.use { conn ->
       val stmt =
         conn.prepareStatement(
-          "select clients.clientId, count(clients.clientId) from (select nodeinfo.clientId from nodeinfo inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt) as clients group by clients.clientId"
+          "select clients.clientId, count(clients.clientId) from (select nodeinfo.clientId, nodeInfo.createdAt from nodeinfo inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt) as clients where clients.createdAt > ? group by clients.clientId"
         )
       stmt.use {
+        it.setTimestamp(1, Timestamp(System.currentTimeMillis() - 24 * 60 * 60 * 1000 * 2)) // TODO configure right now, it's clients from up to 2 days ago.
         // map results.
         val rs = stmt.executeQuery()
         val result = mutableListOf<ClientInfo>()
@@ -246,6 +275,7 @@ open class RelationalPeerRepository(
     }
   }
 }
+internal data class ClientReadyStats(val total: Int, val ready: Int)
 internal data class ClientInfo(val clientId: String, val count: Int)
 internal data class PeerConnectionInfo(val nodeId: SECP256K1.PublicKey, val host: String, val port: Int)
 internal data class PeerConnectionInfoDetails(val createdAt: Long, val nodeId: SECP256K1.PublicKey, val p2pVersion: Int, val clientId: String, val capabilities: String, val genesisHash: String, val bestHash: String, val totalDifficulty: String)

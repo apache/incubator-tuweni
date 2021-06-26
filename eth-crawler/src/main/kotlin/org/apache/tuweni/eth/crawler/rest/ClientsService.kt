@@ -40,9 +40,20 @@ class ClientsService {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
+  @Path("all")
   fun getClientIds(): String {
     val repo = context!!.getAttribute("repo") as RelationalPeerRepository
     val peers = repo.getClientIds()
+    val result = mapper.writeValueAsString(peers)
+    return result
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("london/stats")
+  fun getClientStats(): String {
+    val repo = context!!.getAttribute("repo") as RelationalPeerRepository
+    val peers = repo.getLondonStats()
     val result = mapper.writeValueAsString(peers)
     return result
   }

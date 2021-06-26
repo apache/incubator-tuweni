@@ -889,6 +889,11 @@ internal class CoroutineDiscoveryService constructor(
           logger.warn("{}: findNode state for {} has been replaced")
           close()
         }
+      } catch (e: TimeoutCancellationException) {
+        logger.debug(
+          "$serviceDescriptor: Timeout while sending FindNode requests for peer ${peer.nodeId}",
+          e
+        )
       } catch (e: Exception) {
         logger.error(
           "$serviceDescriptor: Error while sending FindNode requests for peer ${peer.nodeId}",
