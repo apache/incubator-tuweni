@@ -82,7 +82,7 @@ object CrawlerApp {
 class CrawlerApplication(
   override val coroutineContext: CoroutineDispatcher =
     Executors.newFixedThreadPool(
-      20,
+      50,
       ThreadFactory {
         val thread = Thread("crawler")
         thread.isDaemon = true
@@ -109,6 +109,7 @@ class CrawlerApplication(
       initialURIs = config.bootNodes(),
       bindAddress = SocketAddress.inetSocketAddress(config.discoveryPort(), config.discoveryNetworkInterface()),
       repository = repo,
+      coroutineContext = coroutineContext,
     )
 
     val dnsDaemon = DNSDaemon(
