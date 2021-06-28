@@ -266,7 +266,9 @@ class EthereumClient(
     synchronizers.values.forEach {
       it.stop()
     }
-    managerHandler.forEach{ it.stop() }
+    managerHandler.forEach{
+      it.stop()
+    }
     AsyncCompletion.allOf(services.values.map(RLPxService::stop)).await()
     storageRepositories.values.forEach(BlockchainRepository::close)
     metricsService?.close()
