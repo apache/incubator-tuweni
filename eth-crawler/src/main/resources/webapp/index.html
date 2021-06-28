@@ -91,10 +91,10 @@ specific language governing permissions and limitations under the License.
                     <tbody>
                       <tr v-for="item in recent">
                           <td>
-                            {{ item.createdAt }}
+                            {{ (new Date(item.createdAt)).toLocaleDateString() + " " + (new Date(item.createdAt)).toLocaleTimeString() }}
                           </td>
                           <td>
-                              {{ item.nodeId.substr(0,4) }}...{{ item.nodeId.substr(-4,4) }}
+                              {{ item.nodeId.substr(0,8) }}...{{ item.nodeId.substr(-8,8) }}
                           </td>
                           <td>
                               {{ item.p2pVersion }}
@@ -106,10 +106,10 @@ specific language governing permissions and limitations under the License.
                               {{ item.capabilities }}
                           </td>
                           <td>
-                              {{ item.genesisHash }}
+                              {{ item.genesisHash.substr(0,8) }}...{{ item.genesisHash.substr(-8,8) }}
                           </td>
                           <td>
-                              {{ item.bestHash }}
+                              {{ item.bestHash.substr(0,8) }}...{{ item.bestHash.substr(-8,8) }}
                           </td>
                       </tr>
                     </tbody>
