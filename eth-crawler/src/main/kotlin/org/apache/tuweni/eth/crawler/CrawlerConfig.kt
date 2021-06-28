@@ -55,17 +55,23 @@ class CrawlerConfig(val filePath: Path) {
       .addString("rlpxNetworkInterface", "127.0.0.1", "RLPx network interface", null)
       .addListOfString("bootnodes", mainnetEthereumBootnodes, "Bootnodes to discover other peers from", null)
       .addString("discoveryDNS", mainnetDiscoveryDNS, "DNS discovery crawler", null)
-      .addLong("discoveryDNSPollingPeriod", 60 * 1000, "DNS Discovery Polling Period in milliseconds", null)
+      .addLong("discoveryDNSPollingPeriod", 60 * 1000L, "DNS Discovery Polling Period in milliseconds", null)
       .addString(
         "jdbcUrl", System.getProperty("DATABASE_URL", System.getenv("DATABASE_URL")),
         "JDBC URL of the form jdbc:posgresql://localhost:5432", PropertyValidator.isPresent()
-      ).addString("network", "mainnet", "Network to use instead of providing a genesis file.", null)
+      )
+      .addInteger("jdbcConnections", 25, "Number of JDBC connections for the connections pool", null)
+      .addString("network", "mainnet", "Network to use instead of providing a genesis file.", null)
       .addString("genesisFile", "", "Genesis file to use in hello", null)
       .addInteger("restPort", 1337, "REST port", null)
       .addString("restNetworkInterface", "0.0.0.0", "REST network interface", null)
       .addString("ethstatsNetworkInterface", "0.0.0.0", "Ethstats network interface", null)
       .addInteger("ethstatsPort", 1338, "Ethstats port", null)
       .addString("ethstatsSecret", "changeme", "Ethstats shared secret", null)
+      .addLong("peerCacheExpiration", 5 * 60 * 1000L, "Peer data cache expiration", null)
+      .addLong("clientIdsInterval", 24 * 60 * 60 * 1000 * 2L, "Client IDs Interval - number of milliseconds to go back in time", null)
+      .addLong("rlpxDisconnectionDelay", 10 * 1000L, "RLPx connections disconnection delay", null)
+      .addInteger("maxRequestsPerSec", 30, "Number of requests per second over HTTP", null)
       .toSchema()
   }
 
@@ -91,4 +97,11 @@ class CrawlerConfig(val filePath: Path) {
   fun ethstatsPort() = config.getInteger("ethstatsPort")
   fun ethstatsNetworkInterface() = config.getString("ethstatsNetworkInterface")
   fun ethstatsSecret() = config.getString("ethstatsSecret")
+
+  fun peerCacheExpiration() = config.getLong("peerCacheExpiration")
+  fun clientIdsInterval() = config.getLong("clientIdsInterval")
+
+  fun jdbcConnections() = config.getInteger("jdbcConnections")
+  fun rlpxDisconnectionDelay() = config.getLong("rlpxDisconnectionsDelay")
+  fun maxRequestsPerSec() = config.getInteger("maxRequestsPerSec")
 }

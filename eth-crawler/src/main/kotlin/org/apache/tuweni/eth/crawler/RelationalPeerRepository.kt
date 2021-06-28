@@ -43,6 +43,8 @@ import kotlin.coroutines.CoroutineContext
 
 open class RelationalPeerRepository(
   private val dataSource: DataSource,
+  private val expiration: Long = 5 * 60 * 1000,
+  private val clientIdsInterval: Long = 24 * 60 * 60 * 1000 * 2,
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope, PeerRepository {
 
@@ -73,7 +75,7 @@ open class RelationalPeerRepository(
   }
 
   fun get(nodeId: SECP256K1.PublicKey, endpoint: Endpoint): Peer {
-    val id = peerCache.computeIfAbsent(nodeId, 5 * 60 * 60) { // 5 minutes, TODO configure.
+    val id = peerCache.computeIfAbsent(nodeId, expiration) {
       dataSource.connection.use { conn ->
         logger.trace("Get peer with $nodeId")
         val stmt = conn.prepareStatement("select id,publickey from identity where publickey=?")
@@ -261,7 +263,7 @@ open class RelationalPeerRepository(
           "select clients.clientId, count(clients.clientId) from (select nodeinfo.clientId, nodeInfo.createdAt from nodeinfo inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt) as clients where clients.createdAt > ? group by clients.clientId"
         )
       stmt.use {
-        it.setTimestamp(1, Timestamp(System.currentTimeMillis() - 24 * 60 * 60 * 1000 * 2)) // TODO configure right now, it's clients from up to 2 days ago.
+        it.setTimestamp(1, Timestamp(System.currentTimeMillis() - clientIdsInterval))
         // map results.
         val rs = stmt.executeQuery()
         val result = mutableListOf<ClientInfo>()
