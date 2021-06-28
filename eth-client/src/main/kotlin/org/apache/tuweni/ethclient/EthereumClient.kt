@@ -125,6 +125,7 @@ class EthereumClient(
       )
       storageRepositories[dataStore.getName()] = repository
       repoToGenesisFile[repository] = genesisFile
+    manager.stop()
     }
 
     config.dnsClients().forEach {
