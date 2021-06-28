@@ -75,6 +75,8 @@ class EthereumClient(
   private val dnsClients = HashMap<String, DNSClient>()
   private val synchronizers = HashMap<String, Synchronizer>()
 
+  private val managerHandler = mutableListOf<DefaultCacheManager>()
+
   suspend fun start() {
     logger.info("Starting Ethereum client...")
     val metricsService = MetricsService(
@@ -106,6 +108,7 @@ class EthereumClient(
       val builder = GlobalConfigurationBuilder().serialization().marshaller(PersistenceMarshaller())
 
       val manager = DefaultCacheManager(builder.build())
+      managerHandler.add(manager)
       val headersCache: Cache<Bytes, Bytes> = manager.createCache(
         "headers",
         ConfigurationBuilder().persistence().addStore(RocksDBStoreConfigurationBuilder::class.java)
@@ -125,7 +128,6 @@ class EthereumClient(
       )
       storageRepositories[dataStore.getName()] = repository
       repoToGenesisFile[repository] = genesisFile
-      manager.stop()
     }
 
     config.dnsClients().forEach {
@@ -264,6 +266,7 @@ class EthereumClient(
     synchronizers.values.forEach {
       it.stop()
     }
+    managerHandler.forEach{ it.stop() }
     AsyncCompletion.allOf(services.values.map(RLPxService::stop)).await()
     storageRepositories.values.forEach(BlockchainRepository::close)
     metricsService?.close()
