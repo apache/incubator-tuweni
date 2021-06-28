@@ -266,7 +266,7 @@ class EthereumClient(
     synchronizers.values.forEach {
       it.stop()
     }
-    managerHandler.forEach{
+    managerHandler.forEach {
       it.stop()
     }
     AsyncCompletion.allOf(services.values.map(RLPxService::stop)).await()
