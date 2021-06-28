@@ -93,7 +93,7 @@ class CrawlerApplication(
 
   fun run(vertx: Vertx, config: CrawlerConfig) {
     val dbConfig = HikariConfig()
-    dbConfig.maximumPoolSize = 25 // TODO make this a config setting.
+    dbConfig.maximumPoolSize = config.jdbcConnections()
     dbConfig.jdbcUrl = config.jdbcUrl()
     val ds = HikariDataSource(dbConfig)
     val flyway = Flyway.configure()
@@ -101,7 +101,7 @@ class CrawlerApplication(
       .load()
     flyway.migrate()
 
-    val repo = RelationalPeerRepository(ds)
+    val repo = RelationalPeerRepository(ds, config.peerCacheExpiration(), config.clientIdsInterval(), coroutineContext)
 
     logger.info("Initial bootnodes: ${config.bootNodes()}")
     val scraper = Scraper(
@@ -156,7 +156,7 @@ class CrawlerApplication(
     }
     wireConnectionsRepository.addConnectionListener {
       launch {
-        delay(10 * 1000) // TODO this delay can be made configurable.
+        delay(config.rlpxDisconnectionDelay())
         it.disconnect(DisconnectReason.CLIENT_QUITTING)
       }
     }
@@ -178,7 +178,7 @@ class CrawlerApplication(
       }
     }
     val restService =
-      CrawlerRESTService(port = config.restPort(), networkInterface = config.restNetworkInterface(), repository = repo)
+      CrawlerRESTService(port = config.restPort(), networkInterface = config.restNetworkInterface(), repository = repo, maxRequestsPerSec = config.maxRequestsPerSec())
     val refreshLoop = AtomicBoolean(true)
     val ethstatsDataRepository = EthstatsDataRepository(ds)
     val ethstatsServer = EthStatsServer(

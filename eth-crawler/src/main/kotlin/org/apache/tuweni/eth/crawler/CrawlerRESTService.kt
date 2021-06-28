@@ -38,6 +38,7 @@ class CrawlerRESTService(
   val port: Int = 0,
   val networkInterface: String = "127.0.0.1",
   val path: String = "/",
+  val maxRequestsPerSec: Int = 30,
   val repository: RelationalPeerRepository,
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope {
@@ -83,8 +84,7 @@ class CrawlerRESTService(
     ctx.addServlet(swagger, "/swagger-ui/*")
 
     val filter = DoSFilter()
-    // TODO make it a config setting. Change for REST vs UI.
-    filter.maxRequestsPerSec = 30
+    filter.maxRequestsPerSec = maxRequestsPerSec
     ctx.addFilter(FilterHolder(filter), "/*", EnumSet.of(DispatcherType.REQUEST))
 
     newServer.stopAtShutdown = true
