@@ -94,7 +94,7 @@ specific language governing permissions and limitations under the License.
                             {{ item.createdAt }}
                           </td>
                           <td>
-                              {{ item.publicKey }}
+                              {{ item.nodeId.substr(0,4) }}...{{ item.nodeId.substr(-4,4) }}
                           </td>
                           <td>
                               {{ item.p2pVersion }}
