@@ -226,10 +226,13 @@ open class RelationalPeerRepository(
   private val started = AtomicBoolean(false)
 
   fun start() {
+    logger.info("Starting repo")
     launch {
       started.set(true)
       while (started.get()) {
+        logger.info("Finding client ids")
         val newClientIds = getClientIdsInternal()
+        logger.info("Found client ids ${newClientIds.size}")
         clientIds = newClientIds
         var londonReady = 0
         var total = 0
@@ -258,12 +261,13 @@ open class RelationalPeerRepository(
 
   internal fun getClientIdsInternal(): List<ClientInfo> {
     dataSource.connection.use { conn ->
+      val sql = "select clients.clientId, count(clients.clientId) from (select nodeinfo.clientId, nodeInfo.createdAt from nodeinfo inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt) as clients where clients.createdAt > ? group by clients.clientId"
       val stmt =
-        conn.prepareStatement(
-          "select clients.clientId, count(clients.clientId) from (select nodeinfo.clientId, nodeInfo.createdAt from nodeinfo inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt) as clients where clients.createdAt > ? group by clients.clientId"
-        )
+        conn.prepareStatement(sql)
       stmt.use {
-        it.setTimestamp(1, Timestamp(System.currentTimeMillis() - clientIdsInterval))
+        val time = System.currentTimeMillis() - clientIdsInterval
+        logger.info("Logging client ids query: $sql with $time")
+        it.setTimestamp(1, Timestamp(time))
         // map results.
         val rs = stmt.executeQuery()
         val result = mutableListOf<ClientInfo>()
