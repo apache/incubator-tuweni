@@ -101,7 +101,7 @@ class CrawlerApplication(
       .load()
     flyway.migrate()
 
-    val repo = RelationalPeerRepository(ds, config.peerCacheExpiration(), config.clientIdsInterval(), coroutineContext)
+    val repo = RelationalPeerRepository(ds, config.peerCacheExpiration(), config.clientIdsInterval())
 
     logger.info("Initial bootnodes: ${config.bootNodes()}")
     val scraper = Scraper(
@@ -109,7 +109,6 @@ class CrawlerApplication(
       initialURIs = config.bootNodes(),
       bindAddress = SocketAddress.inetSocketAddress(config.discoveryPort(), config.discoveryNetworkInterface()),
       repository = repo,
-      coroutineContext = coroutineContext,
     )
 
     val dnsDaemon = DNSDaemon(
