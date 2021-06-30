@@ -41,7 +41,24 @@ specific language governing permissions and limitations under the License.
 <div class="container-fluid">
     <div class="row">
 
-        <main role="main" class="col-md-12 ml-sm-auto col-lg-12 px-md-4">
+        <main role="main" class="col-md-12 ml-sm-auto col-lg-12 px-md-4" id="app">
+            <div v-if="waiting">
+                <h1>⏳</h1>
+            </div>
+            <div v-else>
+                <div v-if="publickey == null || publickey == ''">
+                    <p>TODO do something if no public key is passed in.</p>
+                </div>
+                <div v-else>
+                    <div v-if="peerInfo == null">
+                        <p>We don't know this peer - TODO work on offering to add peer.</p>
+                    </div>
+                    <div v-else>
+                        {{ peerInfo }}
+                    </div>
+                </div>
+            </div>
+
             <pre><code>TODO
 
             Add dialog to provide a validation error message back if enode passed in as query parameter is invalid.

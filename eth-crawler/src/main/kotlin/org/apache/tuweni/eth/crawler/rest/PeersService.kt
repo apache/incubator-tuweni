@@ -23,9 +23,11 @@ import org.apache.tuweni.eth.crawler.RelationalPeerRepository
 import javax.servlet.ServletContext
 import javax.ws.rs.GET
 import javax.ws.rs.Path
+import javax.ws.rs.PathParam
 import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
 import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response
 
 @Path("peers")
 class PeersService {
@@ -51,6 +53,19 @@ class PeersService {
       val repo = context!!.getAttribute("repo") as RelationalPeerRepository
       val peers = repo.getPeersWithInfo(System.currentTimeMillis(), from, limit)
       mapper.writeValueAsString(peers)
+    }
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("/{publickey}")
+  fun getPeers(@PathParam("publickey") publicKey: String): Response {
+    val repo = context!!.getAttribute("repo") as RelationalPeerRepository
+    val peer = repo.getPeerWithInfo(System.currentTimeMillis(), publicKey)
+    if (peer != null) {
+      return Response.ok(mapper.writeValueAsString(peer)).build()
+    } else {
+      return Response.status(Response.Status.NOT_FOUND).build()
     }
   }
 }
