@@ -116,17 +116,19 @@ specific language governing permissions and limitations under the License.
                 </table>
             </div>
 
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1>Check my peer</h1>
-                <p>Enter your enode or public key to check if we know about your peer.</p>
-                <form method="get" action="/node.html">
-                    <div class="form-group">
-                        <label for="publickey">Enode or public key</label>
-                        <input type="text" class="form-control" id="publickey" placeholder="0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Check</button>
-                </form>
-            </div>
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Check my peer</h1>
+                    <p>Enter your enode or public key to check if we know about your peer.</p>
+                </div>
+                <div class="w-50">
+                    <form method="get" action="/node.html">
+                        <div class="form-group">
+                            <label for="publickey">Enode or public key</label>
+                            <input type="text" class="form-control" id="publickey" name="publickey" placeholder="0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Check</button>
+                    </form>
+                </div>
 
         </main>
     </div>

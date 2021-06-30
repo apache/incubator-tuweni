@@ -280,6 +280,35 @@ open class RelationalPeerRepository(
       }
     }
   }
+
+  internal fun getPeerWithInfo(infoCollected: Long, publicKey: String): PeerConnectionInfoDetails? {
+    dataSource.connection.use { conn ->
+      var query = "select distinct nodeinfo.createdAt, nodeinfo.publickey, nodeinfo.p2pversion, nodeinfo.clientId, nodeinfo.capabilities, nodeinfo.genesisHash, nodeinfo.besthash, nodeinfo.totalDifficulty from nodeinfo " +
+        "  inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen " +
+        "  on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt where createdAt < ? and nodeinfo.publickey = ? order by nodeInfo.createdAt desc"
+      val stmt =
+        conn.prepareStatement(query)
+      stmt.use {
+        it.setTimestamp(1, Timestamp(infoCollected))
+        it.setBytes(2, Bytes.fromHexString(publicKey).toArrayUnsafe())
+        // map results.
+        val rs = stmt.executeQuery()
+        if (rs.next()) {
+          val createdAt = rs.getTimestamp(1).toInstant().toEpochMilli()
+          val pubkey = SECP256K1.PublicKey.fromBytes(Bytes.wrap(rs.getBytes(2)))
+          val p2pVersion = rs.getInt(3)
+          val clientId = rs.getString(4) ?: ""
+          val capabilities = rs.getString(5) ?: ""
+          val genesisHash = rs.getString(6) ?: ""
+          val bestHash = rs.getString(7) ?: ""
+          val totalDifficulty = rs.getString(8) ?: ""
+          return PeerConnectionInfoDetails(createdAt, pubkey, p2pVersion, clientId, capabilities, genesisHash, bestHash, totalDifficulty)
+        } else {
+          return null
+        }
+      }
+    }
+  }
 }
 internal data class ClientReadyStats(val total: Int, val ready: Int)
 internal data class ClientInfo(val clientId: String, val count: Int)
