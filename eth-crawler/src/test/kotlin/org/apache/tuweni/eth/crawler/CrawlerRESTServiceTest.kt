@@ -17,6 +17,7 @@
 package org.apache.tuweni.eth.crawler
 
 import com.nhaarman.mockitokotlin2.mock
+import io.opentelemetry.sdk.metrics.SdkMeterProvider
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 
@@ -25,7 +26,9 @@ class CrawlerRESTServiceTest {
   @Test
   fun startAndStop() = runBlocking {
     val repo = mock<RelationalPeerRepository>()
-    val service = CrawlerRESTService(repository = repo)
+    val meter = SdkMeterProvider.builder().build().get("crawler")
+
+    val service = CrawlerRESTService(repository = repo, meter = meter)
     service.start().await()
     service.stop().await()
     Unit
