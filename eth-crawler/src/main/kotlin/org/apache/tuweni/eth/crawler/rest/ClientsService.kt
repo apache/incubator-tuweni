@@ -18,6 +18,7 @@ package org.apache.tuweni.eth.crawler.rest
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.tuweni.eth.EthJsonModule
+import org.apache.tuweni.eth.crawler.RESTMetrics
 import org.apache.tuweni.eth.crawler.RelationalPeerRepository
 import javax.servlet.ServletContext
 import javax.ws.rs.GET
@@ -43,6 +44,8 @@ class ClientsService {
   @Path("all")
   fun getClientIds(): String {
     val repo = context!!.getAttribute("repo") as RelationalPeerRepository
+    val metrics = context!!.getAttribute("metrics") as RESTMetrics
+    metrics.clientsCounter.add(1)
     val peers = repo.getClientIds()
     val result = mapper.writeValueAsString(peers)
     return result

@@ -18,7 +18,6 @@ package org.apache.tuweni.eth.crawler
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.opentelemetry.sdk.metrics.SdkMeterProvider
 import io.vertx.core.Vertx
 import io.vertx.core.net.SocketAddress
 import kotlinx.coroutines.CoroutineDispatcher
@@ -118,8 +117,8 @@ class CrawlerApplication(
       .dataSource(ds)
       .load()
     flyway.migrate()
-
-    val repo = RelationalPeerRepository(ds, config.peerCacheExpiration(), config.clientIdsInterval())
+    val crawlerMeter = metricsService.meterSdkProvider["crawler"]
+    val repo = RelationalPeerRepository(ds, config.peerCacheExpiration(), config.clientIdsInterval(), config.clientsStatsDelay(), crawlerMeter, createCoroutineContext())
 
     logger.info("Initial bootnodes: ${config.bootNodes()}")
     val scraper = Scraper(
@@ -166,7 +165,7 @@ class CrawlerApplication(
         repo.recordInfo(conn, status)
       }
     )
-    val meter = SdkMeterProvider.builder().build().get("eth-crawler")
+    val meter = metricsService.meterSdkProvider.get("rlpx-crawler")
     val wireConnectionsRepository = MemoryWireConnectionsRepository()
     wireConnectionsRepository.addDisconnectionListener {
       if (expiringConnectionIds.add(it.uri())) {
@@ -197,7 +196,7 @@ class CrawlerApplication(
       }
     }
     val restService =
-      CrawlerRESTService(port = config.restPort(), networkInterface = config.restNetworkInterface(), repository = repo, maxRequestsPerSec = config.maxRequestsPerSec())
+      CrawlerRESTService(port = config.restPort(), networkInterface = config.restNetworkInterface(), repository = repo, maxRequestsPerSec = config.maxRequestsPerSec(), meter = meter, allowedOrigins = config.corsAllowedOrigins())
     val refreshLoop = AtomicBoolean(true)
     val ethstatsDataRepository = EthstatsDataRepository(ds)
     val ethstatsServer = EthStatsServer(
@@ -221,6 +220,7 @@ class CrawlerApplication(
           async {
             ethstatsServer.stop()
           }.await()
+          metricsService.close()
         }
       }
     )
