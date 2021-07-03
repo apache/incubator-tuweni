@@ -36,7 +36,7 @@ import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.MemoryTransactionPool
-import org.apache.tuweni.ethclient.metrics.MetricsService
+import org.apache.tuweni.metrics.MetricsService
 import org.apache.tuweni.kv.InfinispanKeyValueStore
 import org.apache.tuweni.kv.LevelDBKeyValueStore
 import org.apache.tuweni.kv.MapKeyValueStore

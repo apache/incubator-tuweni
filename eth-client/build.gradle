@@ -15,21 +15,13 @@ description = 'Ethereum client'
 dependencies {
   implementation 'com.fasterxml.jackson.core:jackson-databind'
   implementation 'dnsjava:dnsjava'
+  implementation 'io.opentelemetry:opentelemetry-api'
+  implementation 'io.opentelemetry:opentelemetry-sdk'
+  implementation 'io.opentelemetry:opentelemetry-sdk-metrics'
   implementation 'io.vertx:vertx-core'
   implementation 'org.fusesource.leveldbjni:leveldbjni-all'
   implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
   implementation 'org.apache.lucene:lucene-core'
-  implementation 'io.grpc:grpc-netty-shaded'
-  implementation 'io.opentelemetry:opentelemetry-api'
-  implementation 'io.opentelemetry:opentelemetry-exporter-prometheus'
-  implementation 'io.opentelemetry:opentelemetry-sdk'
-  implementation 'io.opentelemetry:opentelemetry-semconv'
-  implementation 'io.opentelemetry:opentelemetry-sdk-trace'
-  implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
-  implementation 'io.opentelemetry:opentelemetry-exporter-otlp-metrics'
-  implementation 'io.opentelemetry:opentelemetry-proto'
-  implementation 'io.prometheus:simpleclient'
-  implementation 'io.prometheus:simpleclient_httpserver'
   implementation 'org.infinispan:infinispan-core'
   implementation 'org.infinispan:infinispan-cachestore-rocksdb'
 
@@ -44,6 +36,7 @@ dependencies {
   implementation project(':eth')
   implementation project(':eth-repository')
   implementation project(':kv')
+  implementation project(':metrics')
   implementation project(':rlp')
   implementation project(':rlpx')
   implementation project(':units')
