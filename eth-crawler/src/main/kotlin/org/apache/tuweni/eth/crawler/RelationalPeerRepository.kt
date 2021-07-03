@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.eth.crawler
 
+import io.opentelemetry.api.metrics.Meter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -45,6 +46,8 @@ open class RelationalPeerRepository(
   private val dataSource: DataSource,
   private val expiration: Long = 5 * 60 * 1000,
   private val clientIdsInterval: Long = 24 * 60 * 60 * 1000 * 2,
+  private val clientsStatsDelay: Long = 30 * 1000,
+  private val meter: Meter,
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope, PeerRepository {
 
@@ -65,6 +68,8 @@ open class RelationalPeerRepository(
   }
   private val listeners = mutableListOf<(Peer) -> Unit>()
   private val peerCache = ExpiringMap<SECP256K1.PublicKey, String>()
+  private val totalClientsGauge = meter.longValueRecorderBuilder("totalClients").setDescription("Number of nodes used to compute client stats").build()
+  private val clientCalculationsCounter = meter.longCounterBuilder("clients").setDescription("Number of times clients were computed").build()
 
   override fun addListener(listener: (Peer) -> Unit) {
     listeners.add(listener)
@@ -246,7 +251,9 @@ open class RelationalPeerRepository(
           }
         }
         londonStats = ClientReadyStats(total, londonReady)
-        delay(30 * 1000)
+        totalClientsGauge.record(total.toLong())
+        clientCalculationsCounter.add(1)
+        delay(clientsStatsDelay)
       }
     }
   }

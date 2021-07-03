@@ -21,6 +21,7 @@ import org.apache.tuweni.concurrent.ExpiringMap
 import org.apache.tuweni.devp2p.eth.logger
 import org.apache.tuweni.devp2p.parseEnodeUri
 import org.apache.tuweni.eth.EthJsonModule
+import org.apache.tuweni.eth.crawler.RESTMetrics
 import org.apache.tuweni.eth.crawler.RelationalPeerRepository
 import java.net.URI
 import javax.servlet.ServletContext
@@ -56,6 +57,8 @@ class PeersService {
     val key = "from${from}limit$limit"
     return localCache.computeIfAbsent(key, 30 * 1000) {
       val repo = context!!.getAttribute("repo") as RelationalPeerRepository
+      val metrics = context!!.getAttribute("metrics") as RESTMetrics
+      metrics.peersCounter.add(1)
       val peers = repo.getPeersWithInfo(System.currentTimeMillis(), from, limit)
       mapper.writeValueAsString(peers)
     }

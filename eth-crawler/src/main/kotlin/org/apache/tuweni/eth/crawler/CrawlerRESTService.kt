@@ -16,6 +16,8 @@
  */
 package org.apache.tuweni.eth.crawler
 
+import io.opentelemetry.api.metrics.LongCounter
+import io.opentelemetry.api.metrics.Meter
 import io.swagger.v3.jaxrs2.integration.OpenApiServlet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,6 +46,7 @@ class CrawlerRESTService(
   val allowedMethods: String = "*",
   val allowedHeaders: String = "*",
   val repository: RelationalPeerRepository,
+  val meter: Meter,
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope {
 
@@ -100,6 +103,11 @@ class CrawlerRESTService(
     newServer.stopAtShutdown = true
     newServer.start()
     serHol.servlet.servletConfig.servletContext.setAttribute("repo", repository)
+    val restMetrics = RESTMetrics(
+      meter.longCounterBuilder("peers").setDescription("Number of times peers have been requested").build(),
+      meter.longCounterBuilder("clients").setDescription("Number of times client stats have been requested").build()
+    )
+    serHol.servlet.servletConfig.servletContext.setAttribute("metrics", restMetrics)
     server = newServer
     actualPort = newServer.uri.port
     logger.info("REST service started on ${newServer.uri}")
@@ -109,3 +117,5 @@ class CrawlerRESTService(
     server?.stop()
   }
 }
+
+data class RESTMetrics(val peersCounter: LongCounter, val clientsCounter: LongCounter)
