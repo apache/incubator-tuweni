@@ -25,6 +25,7 @@ import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.servlet.FilterHolder
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
+import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.eclipse.jetty.servlets.DoSFilter
 import org.eclipse.jetty.util.resource.Resource
 import org.glassfish.jersey.servlet.ServletContainer
@@ -39,6 +40,9 @@ class CrawlerRESTService(
   val networkInterface: String = "127.0.0.1",
   val path: String = "/",
   val maxRequestsPerSec: Int = 30,
+  val allowedOrigins: String = "*",
+  val allowedMethods: String = "*",
+  val allowedHeaders: String = "*",
   val repository: RelationalPeerRepository,
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope {
@@ -86,6 +90,12 @@ class CrawlerRESTService(
     val filter = DoSFilter()
     filter.maxRequestsPerSec = maxRequestsPerSec
     ctx.addFilter(FilterHolder(filter), "/*", EnumSet.of(DispatcherType.REQUEST))
+    val corsFilter = CrossOriginFilter()
+    val corsFilterHolder = FilterHolder(corsFilter)
+    corsFilterHolder.setInitParameter("allowedOrigins", allowedOrigins)
+    corsFilterHolder.setInitParameter("allowedMethods", allowedMethods)
+    corsFilterHolder.setInitParameter("allowedHeaders", allowedHeaders)
+    ctx.addFilter(corsFilterHolder, "/*", EnumSet.of(DispatcherType.REQUEST))
 
     newServer.stopAtShutdown = true
     newServer.start()
