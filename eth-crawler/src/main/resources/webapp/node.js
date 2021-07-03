@@ -16,11 +16,11 @@ new Vue({
         return {
             waiting: true,
             publickey: null,
-            peerInfo: null
+            peerInfo: null,
+            enode: null,
         }
     },
     mounted () {
-
         let urlParams = new URLSearchParams(window.location.search);
         this.publickey = urlParams.get('publickey');
         axios.get('/rest/peers/' + this.publickey)
@@ -31,5 +31,15 @@ new Vue({
             console.log(err);
             this.waiting = false;
         });
-    }
+    },
+    addPeer() {
+        axios.post('/rest/peers/' + this.enode)
+            .then(response => {
+            window.location.href = "/index.html"
+        }).catch(err => {
+            console.log(err);
+            // TODO manage error.
+            window.location.href = "/index.html"
+        });
+    },
 })
