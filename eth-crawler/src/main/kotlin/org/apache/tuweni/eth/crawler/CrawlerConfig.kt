@@ -77,6 +77,7 @@ class CrawlerConfig(val filePath: Path) {
       .addString("metricsNetworkInterface", "localhost", "Metric service network interface", null)
       .addBoolean("metricsGrpcPushEnabled", false, "Enable pushing metrics to gRPC service", null)
       .addBoolean("metricsPrometheusEnabled", false, "Enable exposing metrics on the Prometheus endpoint", null)
+      .addString("corsAllowedOrigins", "*", "CORS allowed domains filter for REST service", null)
       .toSchema()
   }
 
@@ -114,4 +115,5 @@ class CrawlerConfig(val filePath: Path) {
   fun metricsNetworkInterface() = config.getString("metricsNetworkInterface")
   fun metricsGrpcPushEnabled() = config.getBoolean("metricsGrpcPushEnabled")
   fun metricsPrometheusEnabled() = config.getBoolean("metricsPrometheusEnabled")
+  fun corsAllowedOrigins() = config.getString("corsAllowedOrigins")
 }
