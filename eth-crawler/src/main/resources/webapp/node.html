@@ -47,11 +47,26 @@ specific language governing permissions and limitations under the License.
             </div>
             <div v-else>
                 <div v-if="publickey == null || publickey == ''">
-                    <p>TODO do something if no public key is passed in.</p>
+                    <div class="w-50">
+                        <form method="get" action="/node.html">
+                            <div class="form-group">
+                                <label for="publickey">Please enter an enode address or a public key.</label>
+                                <input type="text" class="form-control" id="publickey" name="publickey" placeholder="0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Check</button>
+                        </form>
+                    </div>
                 </div>
                 <div v-else>
-                    <div v-if="peerInfo == null">
-                        <p>We don't know this peer - TODO work on offering to add peer.</p>
+                    <div v-if="peerInfo == null" class="w-50">
+                        <p>Unknown peer. Would you like to add your peer to the crawler?</p>
+                        <form method="get" >
+                            <div class="form-group">
+                                <label for="enode">Please enter your enode address.</label>
+                                <input type="text" class="form-control" id="enode" name="enode" placeholder="enode://0xdeadbeef@1.2.3.4:30303" v-model="enode">
+                            </div>
+                            <button type="submit" class="btn btn-primary" v-on:click="addPeer">Add peer</button>
+                        </form>
                     </div>
                     <div v-else>
                         {{ peerInfo }}

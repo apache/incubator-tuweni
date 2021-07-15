@@ -17,6 +17,7 @@
 package org.apache.tuweni.eth.crawler
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
+import io.opentelemetry.sdk.metrics.SdkMeterProvider
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.Endpoint
@@ -37,6 +38,8 @@ class RelationalPeerRepositoryTest {
 
   var dataSource: DataSource? = null
 
+  val meter = SdkMeterProvider.builder().build()["test"]
+
   @BeforeEach
   fun before() {
     val provider = EmbeddedPostgres.builder().start()
@@ -52,15 +55,15 @@ class RelationalPeerRepositoryTest {
 
   @Test
   fun testGetNewPeer() = runBlocking {
-    val repository = RelationalPeerRepository(dataSource!!)
+    val repository = RelationalPeerRepository(dataSource!!, meter = meter)
     val peer = repository.get("localhost", 30303, SECP256K1.KeyPair.random().publicKey())
     assertNotNull(peer)
   }
 
   @Test
   fun testUpdateEndpoint() = runBlocking {
-    val repository = RelationalPeerRepository(dataSource!!)
-    val repository2 = RelationalPeerRepository(dataSource!!)
+    val repository = RelationalPeerRepository(dataSource!!, meter = meter)
+    val repository2 = RelationalPeerRepository(dataSource!!, meter = meter)
     val peer = repository.get("localhost", 30303, SECP256K1.KeyPair.random().publicKey())
     assertNotNull(peer)
     val lastSeen = 32L

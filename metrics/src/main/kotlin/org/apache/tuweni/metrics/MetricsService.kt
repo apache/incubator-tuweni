@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.ethclient.metrics
+package org.apache.tuweni.metrics
 
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter

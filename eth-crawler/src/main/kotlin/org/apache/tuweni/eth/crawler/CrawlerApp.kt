@@ -18,7 +18,6 @@ package org.apache.tuweni.eth.crawler
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.opentelemetry.sdk.metrics.SdkMeterProvider
 import io.vertx.core.Vertx
 import io.vertx.core.net.SocketAddress
 import kotlinx.coroutines.CoroutineDispatcher
@@ -42,6 +41,7 @@ import org.apache.tuweni.discovery.DNSDaemon
 import org.apache.tuweni.discovery.DNSDaemonListener
 import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.ethstats.EthStatsServer
+import org.apache.tuweni.metrics.MetricsService
 import org.apache.tuweni.rlpx.MemoryWireConnectionsRepository
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.vertx.VertxRLPxService
@@ -54,7 +54,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.security.Security
 import java.util.concurrent.Executors
-import java.util.concurrent.ThreadFactory
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -74,24 +73,42 @@ object CrawlerApp {
       }
       System.exit(1)
     }
-    val app = CrawlerApplication()
-    app.run(vertx, config)
+    val app = CrawlerApplication(vertx, config)
+    app.run()
   }
 }
 
 class CrawlerApplication(
+  val vertx: Vertx,
+  val config: CrawlerConfig,
   override val coroutineContext: CoroutineDispatcher =
     Executors.newFixedThreadPool(
-      50,
-      ThreadFactory {
-        val thread = Thread("crawler")
-        thread.isDaemon = true
-        thread
-      }
-    ).asCoroutineDispatcher()
+      config.numberOfThreads()
+    ) {
+      val thread = Thread("crawler")
+      thread.isDaemon = true
+      thread
+    }.asCoroutineDispatcher()
 ) : CoroutineScope {
 
-  fun run(vertx: Vertx, config: CrawlerConfig) {
+  private val metricsService = MetricsService(
+    "eth-crawler",
+    port = config.metricsPort(),
+    networkInterface = config.metricsNetworkInterface(),
+    enableGrpcPush = config.metricsGrpcPushEnabled(),
+    enablePrometheus = config.metricsPrometheusEnabled()
+  )
+
+  fun createCoroutineContext() = Executors.newFixedThreadPool(
+    config.numberOfThreads()
+  ) {
+    val thread = Thread("crawler")
+    thread.isDaemon = true
+    thread
+  }.asCoroutineDispatcher()
+
+  fun run() {
+
     val dbConfig = HikariConfig()
     dbConfig.maximumPoolSize = config.jdbcConnections()
     dbConfig.jdbcUrl = config.jdbcUrl()
@@ -100,8 +117,8 @@ class CrawlerApplication(
       .dataSource(ds)
       .load()
     flyway.migrate()
-
-    val repo = RelationalPeerRepository(ds, config.peerCacheExpiration(), config.clientIdsInterval())
+    val crawlerMeter = metricsService.meterSdkProvider["crawler"]
+    val repo = RelationalPeerRepository(ds, config.peerCacheExpiration(), config.clientIdsInterval(), config.clientsStatsDelay(), crawlerMeter, createCoroutineContext())
 
     logger.info("Initial bootnodes: ${config.bootNodes()}")
     val scraper = Scraper(
@@ -109,6 +126,7 @@ class CrawlerApplication(
       initialURIs = config.bootNodes(),
       bindAddress = SocketAddress.inetSocketAddress(config.discoveryPort(), config.discoveryNetworkInterface()),
       repository = repo,
+      coroutineContext = createCoroutineContext()
     )
 
     val dnsDaemon = DNSDaemon(
@@ -147,7 +165,7 @@ class CrawlerApplication(
         repo.recordInfo(conn, status)
       }
     )
-    val meter = SdkMeterProvider.builder().build().get("eth-crawler")
+    val meter = metricsService.meterSdkProvider.get("rlpx-crawler")
     val wireConnectionsRepository = MemoryWireConnectionsRepository()
     wireConnectionsRepository.addDisconnectionListener {
       if (expiringConnectionIds.add(it.uri())) {
@@ -178,7 +196,7 @@ class CrawlerApplication(
       }
     }
     val restService =
-      CrawlerRESTService(port = config.restPort(), networkInterface = config.restNetworkInterface(), repository = repo, maxRequestsPerSec = config.maxRequestsPerSec())
+      CrawlerRESTService(port = config.restPort(), networkInterface = config.restNetworkInterface(), repository = repo, maxRequestsPerSec = config.maxRequestsPerSec(), meter = meter, allowedOrigins = config.corsAllowedOrigins())
     val refreshLoop = AtomicBoolean(true)
     val ethstatsDataRepository = EthstatsDataRepository(ds)
     val ethstatsServer = EthStatsServer(
@@ -186,7 +204,8 @@ class CrawlerApplication(
       config.ethstatsNetworkInterface(),
       config.ethstatsPort(),
       config.ethstatsSecret(),
-      controller = CrawlerEthstatsController(ethstatsDataRepository)
+      controller = CrawlerEthstatsController(ethstatsDataRepository),
+      coroutineContext = createCoroutineContext()
     )
 
     Runtime.getRuntime().addShutdownHook(
@@ -201,6 +220,7 @@ class CrawlerApplication(
           async {
             ethstatsServer.stop()
           }.await()
+          metricsService.close()
         }
       }
     )

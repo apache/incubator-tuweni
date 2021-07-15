@@ -49,7 +49,7 @@ class CrawlerConfig(val filePath: Path) {
     val mainnetDiscoveryDNS = "enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@all.mainnet.ethdisco.net"
 
     fun schema() = SchemaBuilder.create()
-      .addInteger("discoveryPort", 11000, "Discovery service port", PropertyValidator.inRange(1, 65536))
+      .addInteger("discoveryPort", 11000, "Discovery service port", PropertyValidator.isValidPort())
       .addString("discoveryNetworkInterface", "127.0.0.1", "Discovery network interface", null)
       .addInteger("rlpxPort", 11000, "RLPx service port", PropertyValidator.inRange(1, 65536))
       .addString("rlpxNetworkInterface", "127.0.0.1", "RLPx network interface", null)
@@ -70,8 +70,15 @@ class CrawlerConfig(val filePath: Path) {
       .addString("ethstatsSecret", "changeme", "Ethstats shared secret", null)
       .addLong("peerCacheExpiration", 5 * 60 * 1000L, "Peer data cache expiration", null)
       .addLong("clientIdsInterval", 24 * 60 * 60 * 1000 * 2L, "Client IDs Interval - number of milliseconds to go back in time", null)
+      .addLong("clientsStatsDelay", 30 * 1000, "Delay between client stats calculations", null)
       .addLong("rlpxDisconnectionDelay", 10 * 1000L, "RLPx connections disconnection delay", null)
       .addInteger("maxRequestsPerSec", 30, "Number of requests per second over HTTP", null)
+      .addInteger("numberOfThreads", 10, "Number of Threads for each thread pool", null)
+      .addInteger("metricsPort", 9090, "Metric service port", PropertyValidator.isValidPort())
+      .addString("metricsNetworkInterface", "localhost", "Metric service network interface", null)
+      .addBoolean("metricsGrpcPushEnabled", false, "Enable pushing metrics to gRPC service", null)
+      .addBoolean("metricsPrometheusEnabled", false, "Enable exposing metrics on the Prometheus endpoint", null)
+      .addString("corsAllowedOrigins", "*", "CORS allowed domains filter for REST service", null)
       .toSchema()
   }
 
@@ -100,8 +107,15 @@ class CrawlerConfig(val filePath: Path) {
 
   fun peerCacheExpiration() = config.getLong("peerCacheExpiration")
   fun clientIdsInterval() = config.getLong("clientIdsInterval")
+  fun clientsStatsDelay() = config.getLong("clientsStatsDelay")
 
   fun jdbcConnections() = config.getInteger("jdbcConnections")
   fun rlpxDisconnectionDelay() = config.getLong("rlpxDisconnectionsDelay")
   fun maxRequestsPerSec() = config.getInteger("maxRequestsPerSec")
+  fun numberOfThreads() = config.getInteger("numberOfThreads")
+  fun metricsPort() = config.getInteger("metricsPort")
+  fun metricsNetworkInterface() = config.getString("metricsNetworkInterface")
+  fun metricsGrpcPushEnabled() = config.getBoolean("metricsGrpcPushEnabled")
+  fun metricsPrometheusEnabled() = config.getBoolean("metricsPrometheusEnabled")
+  fun corsAllowedOrigins() = config.getString("corsAllowedOrigins")
 }
