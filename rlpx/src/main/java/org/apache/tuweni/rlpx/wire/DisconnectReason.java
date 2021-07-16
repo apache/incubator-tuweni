@@ -68,7 +68,11 @@ public enum DisconnectReason {
   /**
    * A subprotocol has reason to request a disconnection
    */
-  SUBPROTOCOL_REASON(16, "Subprotocol reason");
+  SUBPROTOCOL_REASON(16, "Subprotocol reason"),
+  /**
+   * No reason was provided for the disconnection
+   */
+  NOT_PROVIDED(99, "No reason provided");
 
   /**
    * Get a disconnect reason for a number code
