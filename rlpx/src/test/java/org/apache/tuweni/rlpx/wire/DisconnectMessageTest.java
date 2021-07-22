@@ -28,4 +28,25 @@ class DisconnectMessageTest {
     assertEquals(msg.messageType(), read.messageType());
     assertEquals(msg.reason(), read.reason());
   }
+
+  @Test
+  void testEmptyDisconnect() {
+    DisconnectMessage read = DisconnectMessage.read(Bytes.EMPTY);
+    assertEquals(1, read.messageType());
+    assertEquals(DisconnectReason.NOT_PROVIDED.code, read.reason());
+  }
+
+  @Test
+  void testWeirdValue() {
+    DisconnectMessage read = DisconnectMessage.read(Bytes.fromHexString("0x01adbeef"));
+    assertEquals(1, read.messageType());
+    assertEquals(DisconnectReason.NOT_PROVIDED.code, read.reason());
+  }
+
+  @Test
+  void testEmptyList() {
+    DisconnectMessage read = DisconnectMessage.read(Bytes.fromHexString("0xc0"));
+    assertEquals(1, read.messageType());
+    assertEquals(DisconnectReason.NOT_PROVIDED.code, read.reason());
+  }
 }
