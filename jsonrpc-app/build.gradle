@@ -1,0 +1,59 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
+ * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
+ * to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+description = 'Ethereum JSON-RPC client application'
+
+dependencies {
+  implementation project(':bytes')
+  implementation project(':config')
+  implementation project(':crypto')
+  implementation project(':concurrent')
+  implementation project(':eth')
+  implementation project(':jsonrpc')
+  implementation project(':metrics')
+  implementation project(':units')
+
+  implementation 'com.fasterxml.jackson.core:jackson-databind'
+  implementation 'com.google.guava:guava'
+  implementation 'com.zaxxer:HikariCP'
+  implementation 'dnsjava:dnsjava'
+  implementation 'org.flywaydb:flyway-core'
+  implementation 'io.swagger.core.v3:swagger-jaxrs2'
+  implementation 'org.webjars:swagger-ui'
+  implementation 'io.vertx:vertx-core'
+  implementation 'io.vertx:vertx-lang-kotlin-coroutines'
+  implementation 'io.vertx:vertx-lang-kotlin'
+  implementation 'io.opentelemetry:opentelemetry-sdk-metrics'
+  implementation 'javax.servlet:javax.servlet-api'
+  implementation 'org.bouncycastle:bcprov-jdk15on'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+  implementation 'org.slf4j:slf4j-api'
+  implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+  implementation 'org.postgresql:postgresql'
+  implementation 'org.eclipse.jetty:jetty-server'
+  implementation 'org.eclipse.jetty:jetty-servlet'
+  implementation 'org.eclipse.jetty:jetty-servlets'
+  implementation 'org.eclipse.jetty:jetty-util'
+  implementation 'org.glassfish.jersey.core:jersey-server'
+  implementation 'org.glassfish.jersey.containers:jersey-container-servlet'
+  implementation 'org.glassfish.jersey.inject:jersey-hk2'
+  implementation 'javax.xml.bind:jaxb-api'
+  implementation 'javax.ws.rs:javax.ws.rs-api'
+
+  testImplementation project(':junit')
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testImplementation 'org.junit.jupiter:junit-jupiter-params'
+
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+  runtimeOnly 'ch.qos.logback:logback-classic'
+}
