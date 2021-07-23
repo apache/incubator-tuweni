@@ -91,6 +91,7 @@ class JSONRPCApplication(
   }
 
   private fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
+    logger.info("Received request {}", request)
     return JSONRPCResponse(1) // TODO implement
   }
 }
