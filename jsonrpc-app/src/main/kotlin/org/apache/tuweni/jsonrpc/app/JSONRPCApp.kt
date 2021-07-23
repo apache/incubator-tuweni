@@ -23,6 +23,7 @@ import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.jsonrpc.JSONRPCServer
 import org.apache.tuweni.metrics.MetricsService
+import org.apache.tuweni.net.tls.VertxTrustOptions
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.slf4j.LoggerFactory
 import java.nio.file.Paths
@@ -67,8 +68,17 @@ class JSONRPCApplication(
   )
 
   fun run() {
+    // TODO allow more options such as allowlist of certificates, enforce client authentication.
+    val trustOptions = VertxTrustOptions.recordClientFingerprints(config.clientFingerprintsFile())
     val server = JSONRPCServer(
-      vertx, config.port(), config.networkInterface(), this::handleRequest,
+      vertx, config.port(), config.networkInterface(),
+      config.ssl(),
+      trustOptions,
+      config.useBasicAuthentication(),
+      config.basicAuthUsername(),
+      config.basicAuthPassword(),
+      config.basicAuthRealm(),
+      this::handleRequest,
       Executors.newFixedThreadPool(
         config.numberOfThreads()
       ) {
@@ -78,7 +88,7 @@ class JSONRPCApplication(
       }.asCoroutineDispatcher()
     )
     Runtime.getRuntime().addShutdownHook(
-      Thread() {
+      Thread {
         runBlocking {
           server.stop().await()
         }

@@ -20,6 +20,7 @@ import org.apache.tuweni.config.Configuration
 import org.apache.tuweni.config.PropertyValidator
 import org.apache.tuweni.config.SchemaBuilder
 import java.nio.file.Path
+import java.nio.file.Paths
 
 /**
  * Configuration of the JSON-RPC server as a TOML-based file.
@@ -36,6 +37,12 @@ class JSONRPCConfig(val filePath: Path) {
       .addBoolean("metricsPrometheusEnabled", false, "Enable exposing metrics on the Prometheus endpoint", null)
       .addInteger("port", 8845, "JSON-RPC server port", PropertyValidator.isValidPort())
       .addString("networkInterface", "127.0.0.1", "JSON-RPC server network interface", null)
+      .addString("clientFingerprintsFile", "fingerprints.txt", "File recording client connection fingerprints", null)
+      .addBoolean("ssl", false, "Whether the JSON-RPC server should serve data over SSL", null)
+      .addBoolean("basicAuth", false, "Whether the JSON-RPC server should authenticate incoming requests with HTTP Basic Authentication", null)
+      .addString("basicAuthUsername", null, "HTTP Basic Auth username", null)
+      .addString("basicAuthPassword", null, "HTTP Basic Auth password", null)
+      .addString("basicAuthRealm", null, "HTTP Basic Auth realm", null)
       .toSchema()
   }
 
@@ -49,4 +56,10 @@ class JSONRPCConfig(val filePath: Path) {
 
   fun port() = config.getInteger("port")
   fun networkInterface() = config.getString("networkInterface")
+  fun clientFingerprintsFile(): Path = Paths.get(config.getString("clientFingerprintsFile"))
+  fun ssl() = config.getBoolean("ssl")
+  fun useBasicAuthentication() = config.getBoolean("basicAuth")
+  fun basicAuthUsername() = config.getString("basicAuthUsername")
+  fun basicAuthPassword() = config.getString("basicAuthPassword")
+  fun basicAuthRealm() = config.getString("basicAuthRealm")
 }
