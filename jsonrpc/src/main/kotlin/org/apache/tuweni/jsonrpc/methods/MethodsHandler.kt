@@ -16,6 +16,8 @@
  */
 package org.apache.tuweni.jsonrpc.methods
 
+import io.opentelemetry.api.metrics.LongCounter
+import io.opentelemetry.api.metrics.common.Labels
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.eth.methodNotFound
@@ -32,7 +34,20 @@ class MethodsRouter(val methodsMap: Map<String, (JSONRPCRequest) -> JSONRPCRespo
   }
 }
 
+class MeteredHandler(private val successCounter: LongCounter, private val failCounter: LongCounter, private val delegateHandler: (JSONRPCRequest) -> JSONRPCResponse) {
+
+  fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
+    val resp = delegateHandler(request)
+    val labels = Labels.of("method", request.method)
+    if (resp.error != null) {
+      failCounter.add(1, labels)
+    } else {
+      successCounter.add(1, labels)
+    }
+    return resp
+  }
+}
+
 // TODO DelegateHandler - choose from a number of handlers to see which to delegate to.
-// TODO MeteredHandler - count number of responses, error responses
 // TODO FilterHandler - filter incoming requests per allowlist
 // TODO CachingHandler - cache some incoming requests
