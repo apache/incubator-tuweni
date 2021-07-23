@@ -18,9 +18,20 @@ package org.apache.tuweni.jsonrpc
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.vertx.core.AsyncResult
+import io.vertx.core.Future
+import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerOptions
+import io.vertx.core.json.JsonObject
+import io.vertx.core.net.TrustOptions
+import io.vertx.ext.auth.AuthProvider
+import io.vertx.ext.auth.User
+import io.vertx.ext.web.Router
+import io.vertx.ext.web.handler.BasicAuthHandler
+import io.vertx.ext.web.handler.SessionHandler
+import io.vertx.ext.web.sstore.LocalSessionStore
 import io.vertx.kotlin.core.http.closeAwait
 import io.vertx.kotlin.core.http.listenAwait
 import kotlinx.coroutines.CoroutineScope
@@ -35,25 +46,74 @@ import org.apache.tuweni.eth.internalError
 import org.apache.tuweni.eth.parseError
 import org.slf4j.LoggerFactory
 import java.io.IOException
+import java.lang.IllegalArgumentException
 import kotlin.coroutines.CoroutineContext
 
-class JSONRPCServer(val vertx: Vertx, val port: Int, val networkInterface: String = "127.0.0.1", val methodHandler: (JSONRPCRequest) -> JSONRPCResponse, override val coroutineContext: CoroutineContext = Dispatchers.Default) : CoroutineScope {
+class JSONRPCServer(
+  val vertx: Vertx,
+  private val port: Int,
+  val networkInterface: String = "127.0.0.1",
+  val ssl: Boolean = false,
+  val trustOptions: TrustOptions? = null,
+  val useBasicAuthentication: Boolean = false,
+  val basicAuthenticationUsername: String? = null,
+  val basicAuthenticationPassword: String? = null,
+  val basicAuthRealm: String = "Apache Tuweni JSON-RPC proxy",
+  val methodHandler: (JSONRPCRequest) -> JSONRPCResponse,
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
+) : CoroutineScope {
 
   companion object {
     val logger = LoggerFactory.getLogger(JSONRPCServer::class.java)
     val mapper = ObjectMapper()
+
     init {
       mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
     }
   }
+
   private var httpServer: HttpServer? = null
 
+  init {
+    if (useBasicAuthentication) {
+      if (basicAuthenticationUsername == null) {
+        throw IllegalArgumentException("Cannot use basic authentication without specifying a username")
+      }
+      if (basicAuthenticationPassword == null) {
+        throw IllegalArgumentException("Cannot use basic authentication without specifying a password")
+      }
+    }
+  }
+
   fun start() = async {
-    httpServer = vertx.createHttpServer(HttpServerOptions().setPort(port).setHost(networkInterface))
+    val serverOptions = HttpServerOptions().setPort(port).setHost(networkInterface).setSsl(ssl)
+    trustOptions?.let {
+      serverOptions.setTrustOptions(it)
+    }
+    httpServer = vertx.createHttpServer()
     httpServer?.exceptionHandler {
       logger.error(it.message, it)
     }
-    httpServer?.requestHandler { httpRequest ->
+    val router = Router.router(vertx)
+    if (useBasicAuthentication) {
+      router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)))
+      val basicAuthHandler = BasicAuthHandler.create(
+        { authInfo, resultHandler ->
+          if (basicAuthenticationUsername == authInfo.getString("username") && basicAuthenticationPassword == authInfo.getString(
+              "password"
+            )
+          ) {
+            resultHandler.handle(Future.succeededFuture(JSONRPCUser(authInfo)))
+          } else {
+            resultHandler.handle(Future.failedFuture("Invalid credentials"))
+          }
+        },
+        basicAuthRealm
+      )
+      router.route().handler(basicAuthHandler)
+    }
+    router.route().handler { context ->
+      val httpRequest = context.request()
       httpRequest.exceptionHandler {
         logger.error(it.message, it)
         httpRequest.response().end(mapper.writeValueAsString(internalError))
@@ -82,6 +142,7 @@ class JSONRPCServer(val vertx: Vertx, val port: Int, val networkInterface: Strin
         }
       }
     }
+    httpServer?.requestHandler(router)
     httpServer?.listenAwait()
   }
 
@@ -94,4 +155,20 @@ class JSONRPCServer(val vertx: Vertx, val port: Int, val networkInterface: Strin
   }
 
   fun port(): Int = httpServer?.actualPort() ?: port
+}
+
+private class JSONRPCUser(val principal: JsonObject) : User {
+  override fun isAuthorized(authority: String?, resultHandler: Handler<AsyncResult<Boolean>>?): User {
+    resultHandler?.handle(Future.succeededFuture(true))
+    return this
+  }
+
+  override fun clearCache(): User {
+    return this
+  }
+
+  override fun principal(): JsonObject = principal
+
+  override fun setAuthProvider(authProvider: AuthProvider?) {
+  }
 }
