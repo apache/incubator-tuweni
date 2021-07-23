@@ -17,6 +17,8 @@ dependencies {
   implementation 'com.fasterxml.jackson.core:jackson-databind'
   implementation "com.google.guava:guava"
   implementation "org.jetbrains.kotlin:kotlin-stdlib"
+  implementation 'io.opentelemetry:opentelemetry-api-metrics'
+  implementation 'io.opentelemetry:opentelemetry-sdk-metrics'
   implementation 'io.vertx:vertx-core'
   implementation 'io.vertx:vertx-web-client'
   implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
@@ -32,6 +34,7 @@ dependencies {
   testImplementation 'org.bouncycastle:bcprov-jdk15on'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.junit.jupiter:junit-jupiter-params'
+  testImplementation 'io.opentelemetry:opentelemetry-sdk'
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
