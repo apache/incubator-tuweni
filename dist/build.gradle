@@ -125,6 +125,7 @@ distributions {
         from { project(':devp2p').startScripts.outputs.files }
         from { project(':eth-faucet').startScripts.outputs.files }
         from { project(':eth-crawler').startScripts.outputs.files }
+        from { project(':jsonrpc-app').startScripts.outputs.files }
         fileMode = 0755
       }
     }
