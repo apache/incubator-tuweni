@@ -23,8 +23,7 @@ import io.vertx.core.net.NetServer
 import io.vertx.core.net.NetServerOptions
 import io.vertx.core.net.NetSocket
 import io.vertx.core.net.SelfSignedCertificate
-import io.vertx.kotlin.core.net.closeAwait
-import io.vertx.kotlin.core.net.listenAwait
+import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
@@ -86,7 +85,7 @@ class StratumServer(
       val server = vertx.createNetServer(options)
       server.exceptionHandler { e -> logger.error(e.message, e) }
       server.connectHandler(this::handleConnection)
-      server.listenAwait()
+      server.listen().await()
       tcpServer = server
     }
   }
@@ -105,7 +104,7 @@ class StratumServer(
 
   suspend fun stop() {
     if (started.compareAndSet(true, false)) {
-      tcpServer?.closeAwait()
+      tcpServer?.close()?.await()
     }
   }
 

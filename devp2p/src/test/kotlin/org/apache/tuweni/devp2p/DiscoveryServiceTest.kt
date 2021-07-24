@@ -19,8 +19,7 @@ package org.apache.tuweni.devp2p
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.net.SocketAddress
-import io.vertx.kotlin.core.datagram.listenAwait
-import io.vertx.kotlin.core.datagram.sendAwait
+import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
@@ -76,7 +75,7 @@ internal class DiscoveryServiceTest {
     val reference = AsyncResult.incomplete<Buffer>()
     val client = vertx.createDatagramSocket().handler { res ->
       reference.complete(res.data())
-    }.listenAwait(0, "localhost")
+    }.listen(0, "localhost").await()
     val clientEndpoint = Endpoint("192.168.1.1", 5678, 7654)
     val ping = PingPacket.create(
       clientKeyPair,
@@ -85,7 +84,7 @@ internal class DiscoveryServiceTest {
       Endpoint(address),
       null
     )
-    client.sendAwait(Buffer.buffer(ping.encode().toArrayUnsafe()), address.port(), address.host())
+    client.send(Buffer.buffer(ping.encode().toArrayUnsafe()), address.port(), address.host()).await()
     val datagram = reference.await()
     val buffer = ByteBuffer.allocate(datagram.length())
     datagram.byteBuf.readBytes(buffer)
@@ -107,7 +106,7 @@ internal class DiscoveryServiceTest {
     reference.set(AsyncResult.incomplete())
     val bootstrapClient = vertx.createDatagramSocket().handler { res ->
       reference.get().complete(res.data())
-    }.listenAwait(0, "127.0.0.1")
+    }.listen(0, "127.0.0.1").await()
 
     val serviceKeyPair = SECP256K1.KeyPair.random()
     val peerRepository = EphemeralPeerRepository()
@@ -147,7 +146,7 @@ internal class DiscoveryServiceTest {
     )
     reference.set(AsyncResult.incomplete())
     val address = SocketAddress.inetSocketAddress(discoveryService.localPort, "127.0.0.1")
-    bootstrapClient.sendAwait(Buffer.buffer(pong.encode().toArrayUnsafe()), address.port(), address.host())
+    bootstrapClient.send(Buffer.buffer(pong.encode().toArrayUnsafe()), address.port(), address.host()).await()
 
     val findNodesDatagram = reference.get().await()
 
@@ -179,7 +178,7 @@ internal class DiscoveryServiceTest {
     val reference = AsyncResult.incomplete<Buffer>()
     val bootstrapClient = vertx.createDatagramSocket().handler { res ->
       reference.complete(res.data())
-    }.listenAwait(0, "localhost")
+    }.listen(0, "localhost").await()
 
     val serviceKeyPair = SECP256K1.KeyPair.random()
     val peerRepository = EphemeralPeerRepository()
@@ -217,7 +216,7 @@ internal class DiscoveryServiceTest {
       null
     )
     val address = SocketAddress.inetSocketAddress(discoveryService.localPort, "127.0.0.1")
-    bootstrapClient.sendAwait(Buffer.buffer(pong.encode().toArrayUnsafe()), address.port(), address.host())
+    bootstrapClient.send(Buffer.buffer(pong.encode().toArrayUnsafe()), address.port(), address.host()).await()
 
     delay(1000)
     val bootstrapPeer =
@@ -240,7 +239,7 @@ internal class DiscoveryServiceTest {
     val reference = AsyncResult.incomplete<Buffer>()
     val bootstrapClient = vertx.createDatagramSocket().handler { res ->
       reference.complete(res.data())
-    }.listenAwait(0, "localhost")
+    }.listen(0, "localhost").await()
 
     val discoveryService = DiscoveryService.open(
       vertx,
@@ -279,7 +278,7 @@ internal class DiscoveryServiceTest {
     reference.set(AsyncResult.incomplete())
     val bootstrapClient = vertx.createDatagramSocket().handler { res ->
       reference.get().complete(res.data())
-    }.listenAwait(0, "localhost")
+    }.listen(0, "localhost").await()
 
     val discoveryService = DiscoveryService.open(
       vertx,
@@ -343,14 +342,14 @@ internal class DiscoveryServiceTest {
     reference.set(AsyncResult.incomplete())
     val client = vertx.createDatagramSocket().handler { res ->
       reference.get().complete(res.data())
-    }.listenAwait(0, "localhost")
+    }.listen(0, "localhost").await()
     val findNodes =
       FindNodePacket.create(
         clientKeyPair,
         System.currentTimeMillis(),
         SECP256K1.KeyPair.random().publicKey()
       )
-    client.sendAwait(Buffer.buffer(findNodes.encode().toArrayUnsafe()), address.port(), address.host())
+    client.send(Buffer.buffer(findNodes.encode().toArrayUnsafe()), address.port(), address.host()).await()
 
     val datagram = reference.get().await()
     val buffer = ByteBuffer.allocate(datagram.length())
@@ -370,7 +369,7 @@ internal class DiscoveryServiceTest {
     )
 
     reference.set(AsyncResult.incomplete())
-    client.sendAwait(Buffer.buffer(pong.encode().toArrayUnsafe()), address.port(), address.host())
+    client.send(Buffer.buffer(pong.encode().toArrayUnsafe()), address.port(), address.host()).await()
 
     val datagram2 = reference.get().await()
     val buffer2 = ByteBuffer.allocate(datagram2.length())

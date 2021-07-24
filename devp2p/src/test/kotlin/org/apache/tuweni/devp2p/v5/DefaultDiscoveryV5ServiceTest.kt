@@ -18,7 +18,7 @@ package org.apache.tuweni.devp2p.v5
 
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
-import io.vertx.kotlin.core.datagram.listenAwait
+import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncResult
@@ -66,7 +66,7 @@ class DefaultDiscoveryV5ServiceTest {
     val reference = AsyncResult.incomplete<Buffer>()
     val client = vertx.createDatagramSocket().handler { res ->
       reference.complete(res.data())
-    }.listenAwait(19001, "localhost")
+    }.listen(19001, "localhost").await()
     val discoveryV5Service: DiscoveryV5Service =
       DiscoveryService.open(
         vertx,

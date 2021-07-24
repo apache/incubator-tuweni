@@ -17,11 +17,10 @@
 package org.apache.tuweni.jsonrpc
 
 import io.vertx.core.Vertx
-import io.vertx.core.http.HttpClientResponse
 import io.vertx.core.http.HttpMethod
+import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
-import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.io.Base64
@@ -61,12 +60,8 @@ class JSONRPCServerTest {
     server.start().await()
     try {
       val client = vertx.createHttpClient()
-      val result = AsyncResult.incomplete<HttpClientResponse>()
-      val request = client.request(HttpMethod.POST, server.port(), server.networkInterface, "/") {
-        result.complete(it)
-      }
-      request.end("{\"id\":1,\"method\":\"eth_client\",\"params\":[]}")
-      val response = result.await()
+      val request = client.request(HttpMethod.POST, server.port(), server.networkInterface, "/").await()
+      val response = request.send("{\"id\":1,\"method\":\"eth_client\",\"params\":[]}").await()
       assertEquals(200, response.statusCode())
     } finally {
       server.stop().await()
@@ -89,35 +84,22 @@ class JSONRPCServerTest {
     server.start().await()
     try {
       val client = vertx.createHttpClient()
-      val result = AsyncResult.incomplete<HttpClientResponse>()
-      val request = client.request(HttpMethod.POST, server.port(), server.networkInterface, "/") {
-        result.complete(it)
-      }
-      request.end("{\"id\":1,\"method\":\"eth_client\",\"params\":[]}")
-      val response = result.await()
+      val request = client.request(HttpMethod.POST, server.port(), server.networkInterface, "/").await()
+      val response = request.send("{\"id\":1,\"method\":\"eth_client\",\"params\":[]}").await()
       assertEquals(401, response.statusCode())
       runBlocking {
-        val authenticatedResult = AsyncResult.incomplete<HttpClientResponse>()
-        val authedRequest = client.request(HttpMethod.POST, server.port(), server.networkInterface, "/") {
-          authenticatedResult.complete(it)
-        }
+        val authedRequest = client.request(HttpMethod.POST, server.port(), server.networkInterface, "/").await()
         authedRequest.putHeader("Authorization", "Basic " + Base64.encodeBytes("user:pass".toByteArray()))
-        authedRequest.end("{\"id\":1,\"method\":\"eth_client\",\"params\":[]}")
-        val authedResponse = authenticatedResult.await()
+        val authedResponse = authedRequest.send("{\"id\":1,\"method\":\"eth_client\",\"params\":[]}").await()
         assertEquals(200, authedResponse.statusCode())
       }
       runBlocking {
-        val authenticatedResult = AsyncResult.incomplete<io.vertx.core.http.HttpClientResponse>()
-        val authedRequest =
-          client.request(HttpMethod.POST, server.port(), server.networkInterface, "/") {
-            authenticatedResult.complete(it)
-          }
+        val authedRequest = client.request(HttpMethod.POST, server.port(), server.networkInterface, "/").await()
         authedRequest.putHeader(
           "Authorization",
           "Basic " + Base64.encodeBytes("user:passbad".toByteArray())
         )
-        authedRequest.end("{\"id\":1,\"method\":\"eth_client\",\"params\":[]}")
-        val authedResponse = authenticatedResult.await()
+        val authedResponse = authedRequest.send("{\"id\":1,\"method\":\"eth_client\",\"params\":[]}").await()
         assertEquals(401, authedResponse.statusCode())
       }
     } finally {

@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:Suppress("DEPRECATION")
+
 package org.apache.tuweni.jsonrpc
 
 import com.fasterxml.jackson.databind.DeserializationFeature
@@ -28,12 +30,12 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.net.TrustOptions
 import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.auth.User
+import io.vertx.ext.auth.authorization.Authorization
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BasicAuthHandler
 import io.vertx.ext.web.handler.SessionHandler
 import io.vertx.ext.web.sstore.LocalSessionStore
-import io.vertx.kotlin.core.http.closeAwait
-import io.vertx.kotlin.core.http.listenAwait
+import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -143,7 +145,7 @@ class JSONRPCServer(
       }
     }
     httpServer?.requestHandler(router)
-    httpServer?.listenAwait()
+    httpServer?.listen()?.await()
   }
 
   private fun handleRequest(request: JSONRPCRequest): Deferred<JSONRPCResponse> = async {
@@ -151,14 +153,18 @@ class JSONRPCServer(
   }
 
   fun stop() = async {
-    httpServer?.closeAwait()
+    httpServer?.close()?.await()
   }
 
   fun port(): Int = httpServer?.actualPort() ?: port
 }
 
 private class JSONRPCUser(val principal: JsonObject) : User {
-  override fun isAuthorized(authority: String?, resultHandler: Handler<AsyncResult<Boolean>>?): User {
+  override fun attributes(): JsonObject {
+    return JsonObject()
+  }
+
+  override fun isAuthorized(authority: Authorization?, resultHandler: Handler<AsyncResult<Boolean>>?): User {
     resultHandler?.handle(Future.succeededFuture(true))
     return this
   }
