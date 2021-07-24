@@ -36,6 +36,7 @@ import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -54,8 +55,9 @@ class JSONRPCClientTest {
     @JvmStatic
     @BeforeAll
     fun runServer(@VertxInstance vertx: Vertx): Unit = runBlocking {
+      Assumptions.assumeTrue(!System.getProperty("os.name").toLowerCase().contains("win"), "Server ports cannot bind on Windows")
       server = JSONRPCServer(
-        vertx, port = 35554,
+        vertx, port = 0,
         methodHandler = {
           handler.get().handle(it)
           JSONRPCResponse(3, "")
