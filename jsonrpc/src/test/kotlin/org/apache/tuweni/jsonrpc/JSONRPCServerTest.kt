@@ -28,6 +28,8 @@ import org.apache.tuweni.io.Base64
 import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.junit.VertxInstance
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assumptions
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.concurrent.Executors
@@ -36,10 +38,21 @@ import java.util.concurrent.Executors
 @ExtendWith(VertxExtension::class)
 class JSONRPCServerTest {
 
+  companion object {
+    @JvmStatic
+    @BeforeAll
+    fun checkNotWindows() {
+      Assumptions.assumeTrue(
+        !System.getProperty("os.name").toLowerCase().contains("win"),
+        "Server ports cannot bind on Windows"
+      )
+    }
+  }
+
   @Test
   fun testNoAuth(@VertxInstance vertx: Vertx): Unit = runBlocking {
     val server = JSONRPCServer(
-      vertx, port = 35555,
+      vertx, port = 0,
       methodHandler = {
         JSONRPCResponse(3, "")
       },
@@ -63,7 +76,7 @@ class JSONRPCServerTest {
   @Test
   fun testBasicAuth(@VertxInstance vertx: Vertx): Unit = runBlocking {
     val server = JSONRPCServer(
-      vertx, port = 35556,
+      vertx, port = 0,
       methodHandler = {
         JSONRPCResponse(3, "")
       },
