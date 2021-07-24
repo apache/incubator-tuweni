@@ -55,7 +55,7 @@ class JSONRPCClientTest {
     @BeforeAll
     fun runServer(@VertxInstance vertx: Vertx): Unit = runBlocking {
       server = JSONRPCServer(
-        vertx, port = 0,
+        vertx, port = 5554,
         methodHandler = {
           handler.get().handle(it)
           JSONRPCResponse(3, "")
