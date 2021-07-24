@@ -54,3 +54,10 @@ jobs:
           java-version: 11
       - name: gradle test
         run: gradle test
+      - name: Archive Junit Report
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: junit-report
+          path: '**/build/reports/tests/**'
+          retention-days: 5
