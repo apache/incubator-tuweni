@@ -70,7 +70,7 @@ class JSONRPCClientTest {
     @JvmStatic
     @AfterAll
     fun stopServer(): Unit = runBlocking {
-      server!!.stop().await()
+      server?.stop()?.await()
     }
   }
 
