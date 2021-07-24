@@ -26,14 +26,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.ClientAuth;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.SelfSignedCertificate;
@@ -143,10 +144,9 @@ class ServerRecordTest {
 
   @Test
   void shouldNotValidateUsingCertificate() throws Exception {
-    HttpClientRequest req = caClient.get(httpServer.actualPort(), "localhost", "/upcheck");
-    CompletableFuture<HttpClientResponse> respFuture = new CompletableFuture<>();
-    req.handler(respFuture::complete).exceptionHandler(respFuture::completeExceptionally).end();
-    HttpClientResponse resp = respFuture.join();
+    HttpClientRequest req = caClient.request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck").result();
+    Future<HttpClientResponse> respFuture = req.send();
+    HttpClientResponse resp = respFuture.result();
     assertEquals(200, resp.statusCode());
 
     List<String> knownClients = Files.readAllLines(knownClientsFile);
@@ -158,10 +158,10 @@ class ServerRecordTest {
 
   @Test
   void shouldRecordMultipleFingerprints() throws Exception {
-    HttpClientRequest req = fooClient.get(httpServer.actualPort(), "localhost", "/upcheck");
-    CompletableFuture<HttpClientResponse> respFuture = new CompletableFuture<>();
-    req.handler(respFuture::complete).exceptionHandler(respFuture::completeExceptionally).end();
-    HttpClientResponse resp = respFuture.join();
+    HttpClientRequest req =
+        fooClient.request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck").result();
+    Future<HttpClientResponse> respFuture = req.send();
+    HttpClientResponse resp = respFuture.result();
     assertEquals(200, resp.statusCode());
 
     List<String> knownClients = Files.readAllLines(knownClientsFile);
@@ -170,10 +170,9 @@ class ServerRecordTest {
     assertEquals("foobar.com " + DUMMY_FINGERPRINT, knownClients.get(1));
     assertEquals("foo.com " + fooFingerprint, knownClients.get(2));
 
-    req = barClient.get(httpServer.actualPort(), "localhost", "/upcheck");
-    respFuture = new CompletableFuture<>();
-    req.handler(respFuture::complete).exceptionHandler(respFuture::completeExceptionally).end();
-    resp = respFuture.join();
+    req = barClient.request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck").result();
+    respFuture = req.send();
+    resp = respFuture.result();
     assertEquals(200, resp.statusCode());
 
     knownClients = Files.readAllLines(knownClientsFile);
@@ -186,10 +185,10 @@ class ServerRecordTest {
 
   @Test
   void shouldReplaceFingerprint() throws Exception {
-    HttpClientRequest req = fooClient.get(httpServer.actualPort(), "localhost", "/upcheck");
-    CompletableFuture<HttpClientResponse> respFuture = new CompletableFuture<>();
-    req.handler(respFuture::complete).exceptionHandler(respFuture::completeExceptionally).end();
-    HttpClientResponse resp = respFuture.join();
+    HttpClientRequest req =
+        fooClient.request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck").result();
+    Future<HttpClientResponse> respFuture = req.send();
+    HttpClientResponse resp = respFuture.result();
     assertEquals(200, resp.statusCode());
 
     List<String> knownClients = Files.readAllLines(knownClientsFile);
@@ -198,10 +197,9 @@ class ServerRecordTest {
     assertEquals("foobar.com " + DUMMY_FINGERPRINT, knownClients.get(1));
     assertEquals("foo.com " + fooFingerprint, knownClients.get(2));
 
-    req = foobarClient.get(httpServer.actualPort(), "localhost", "/upcheck");
-    respFuture = new CompletableFuture<>();
-    req.handler(respFuture::complete).exceptionHandler(respFuture::completeExceptionally).end();
-    resp = respFuture.join();
+    req = foobarClient.request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck").result();
+    respFuture = req.send();
+    resp = respFuture.result();
     assertEquals(200, resp.statusCode());
 
     knownClients = Files.readAllLines(knownClientsFile);

@@ -28,15 +28,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.ClientAuth;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.SelfSignedCertificate;
@@ -127,10 +128,9 @@ class ServerCaOrTofaTest {
 
   @Test
   void shouldValidateUsingCertificate() throws Exception {
-    HttpClientRequest req = caClient.get(httpServer.actualPort(), "localhost", "/upcheck");
-    CompletableFuture<HttpClientResponse> respFuture = new CompletableFuture<>();
-    req.handler(respFuture::complete).exceptionHandler(respFuture::completeExceptionally).end();
-    HttpClientResponse resp = respFuture.join();
+    HttpClientRequest req = caClient.request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck").result();
+    Future<HttpClientResponse> respFuture = req.send();
+    HttpClientResponse resp = respFuture.result();
     assertEquals(200, resp.statusCode());
 
     List<String> knownClients = Files.readAllLines(knownClientsFile);
@@ -141,10 +141,10 @@ class ServerCaOrTofaTest {
 
   @Test
   void shouldValidateOnFirstUse() throws Exception {
-    HttpClientRequest req = fooClient.get(httpServer.actualPort(), "localhost", "/upcheck");
-    CompletableFuture<HttpClientResponse> respFuture = new CompletableFuture<>();
-    req.handler(respFuture::complete).exceptionHandler(respFuture::completeExceptionally).end();
-    HttpClientResponse resp = respFuture.join();
+    HttpClientRequest req =
+        fooClient.request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck").result();
+    Future<HttpClientResponse> respFuture = req.send();
+    HttpClientResponse resp = respFuture.result();
     assertEquals(200, resp.statusCode());
 
     List<String> knownClients = Files.readAllLines(knownClientsFile);
@@ -156,10 +156,10 @@ class ServerCaOrTofaTest {
 
   @Test
   void shouldRejectDifferentCertificate() {
-    HttpClientRequest req = foobarClient.get(httpServer.actualPort(), "localhost", "/upcheck");
-    CompletableFuture<HttpClientResponse> respFuture = new CompletableFuture<>();
-    req.handler(respFuture::complete).exceptionHandler(respFuture::completeExceptionally).end();
-    Throwable e = assertThrows(CompletionException.class, respFuture::join);
+    HttpClientRequest req =
+        foobarClient.request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck").result();
+    Future<HttpClientResponse> respFuture = req.send();
+    Throwable e = assertThrows(CompletionException.class, respFuture::result);
     e = e.getCause().getCause();
     assertTrue(e.getMessage().contains("certificate_unknown"));
   }
