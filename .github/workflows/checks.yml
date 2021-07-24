@@ -25,6 +25,7 @@ on:
 
 jobs:
   checks:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     container:
       image: tmio/tuweni-build:1.1
