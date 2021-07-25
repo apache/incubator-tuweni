@@ -35,8 +35,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.ClientAuth;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.SelfSignedCertificate;
@@ -129,11 +129,12 @@ class ServerTofaTest {
 
   @Test
   void shouldNotValidateUsingCertificate() throws Exception {
-    HttpClientRequest req = caClient.get(httpServer.actualPort(), "localhost", "/upcheck");
     CompletableFuture<HttpClientResponse> respFuture = new CompletableFuture<>();
-    req.handler(respFuture::complete).exceptionHandler(respFuture::completeExceptionally).end();
-    HttpClientResponse resp = respFuture.join();
-    assertEquals(200, resp.statusCode());
+    caClient
+        .request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck")
+        .onSuccess((req) -> req.send().onSuccess(respFuture::complete));
+    respFuture.join();
+
 
     List<String> knownClients = Files.readAllLines(knownClientsFile);
     assertEquals(3, knownClients.size());
@@ -144,9 +145,10 @@ class ServerTofaTest {
 
   @Test
   void shouldValidateOnFirstUse() throws Exception {
-    HttpClientRequest req = fooClient.get(httpServer.actualPort(), "localhost", "/upcheck");
     CompletableFuture<HttpClientResponse> respFuture = new CompletableFuture<>();
-    req.handler(respFuture::complete).exceptionHandler(respFuture::completeExceptionally).end();
+    fooClient
+        .request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck")
+        .onSuccess((req) -> req.send().onSuccess(respFuture::complete));
     HttpClientResponse resp = respFuture.join();
     assertEquals(200, resp.statusCode());
 
@@ -159,9 +161,11 @@ class ServerTofaTest {
 
   @Test
   void shouldRejectDifferentCertificate() {
-    HttpClientRequest req = foobarClient.get(httpServer.actualPort(), "localhost", "/upcheck");
     CompletableFuture<HttpClientResponse> respFuture = new CompletableFuture<>();
-    req.handler(respFuture::complete).exceptionHandler(respFuture::completeExceptionally).end();
+    foobarClient
+        .request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck")
+        .onFailure(respFuture::completeExceptionally)
+        .onSuccess((req) -> req.send().onFailure(respFuture::completeExceptionally).onSuccess(respFuture::complete));
     Throwable e = assertThrows(CompletionException.class, respFuture::join);
     e = e.getCause().getCause();
     assertTrue(e.getMessage().contains("certificate_unknown"));

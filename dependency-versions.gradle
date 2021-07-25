@@ -57,13 +57,14 @@ dependencyManagement {
     dependency('io.swagger.core.v3:swagger-jaxrs2:2.1.9')
     dependency('org.webjars:swagger-ui:3.50.0')
 
+    dependencySet(group: 'io.vertx', version: '4.1.2') {
+      entry 'vertx-core'
+      entry 'vertx-web'
+      entry 'vertx-web-client'
+      entry 'vertx-lang-kotlin'
+      entry 'vertx-lang-kotlin-coroutines'
+    }
 
-    dependency('io.vertx:vertx-core:3.9.7')
-    dependency('io.vertx:vertx-web:3.9.7')
-    dependency('io.vertx:vertx-web-client:3.9.7')
-    dependency('io.vertx:vertx-lang-kotlin:3.9.7')
-    dependency('io.vertx:vertx-lang-kotlin-coroutines:3.9.7')
-    dependency('io.vertx:vertx-web:3.9.7')
     dependency('javax.servlet:javax.servlet-api:4.0.1')
     dependency('javax.persistence:javax.persistence-api:2.2')
     dependencySet(group: 'org.antlr', version: '4.7.1') {

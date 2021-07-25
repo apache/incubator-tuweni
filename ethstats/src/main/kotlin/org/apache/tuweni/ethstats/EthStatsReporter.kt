@@ -26,7 +26,7 @@ import io.vertx.core.http.HttpClient
 import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.http.WebSocket
 import io.vertx.core.http.WebSocketConnectOptions
-import io.vertx.kotlin.core.http.webSocketAwait
+import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -158,7 +158,7 @@ class EthStatsReporter(
     val result = AsyncResult.incomplete<Boolean>()
     val options = WebSocketConnectOptions().setHost(uri.host).setPort(uri.port)
       .setHeaders(MultiMap.caseInsensitiveMultiMap().add("origin", "http://localhost"))
-    val ws = client!!.webSocketAwait(options)
+    val ws = client!!.webSocket(options).await()
     ws.closeHandler { launch { attemptConnect(uri) } }
     ws.exceptionHandler { e ->
       logger.debug("Error while communicating with ethnetstats", e)

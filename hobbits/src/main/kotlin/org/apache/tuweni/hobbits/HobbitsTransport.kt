@@ -24,6 +24,7 @@ import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
 import io.vertx.core.net.NetClient
 import io.vertx.core.net.NetServer
+import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.apache.tuweni.bytes.Bytes
@@ -166,16 +167,14 @@ class HobbitsTransport(
     val completion = AsyncCompletion.incomplete()
     when (transport) {
       Transport.HTTP -> {
-        @Suppress("DEPRECATION")
-        val req = httpClient!!.request(HttpMethod.POST, port, host, requestURI)
-          .exceptionHandler(exceptionHandler).handler {
-            if (it.statusCode() == 200) {
-              completion.complete()
-            } else {
-              completion.completeExceptionally(RuntimeException("${it.statusCode()}"))
-            }
-          }
-        req.end(Buffer.buffer(message.toBytes().toArrayUnsafe()))
+        val req = httpClient!!.request(HttpMethod.POST, port, host, requestURI).await()
+          .exceptionHandler(exceptionHandler)
+        val response = req.send(Buffer.buffer(message.toBytes().toArrayUnsafe())).await()
+        if (response.statusCode() == 200) {
+          completion.complete()
+        } else {
+          completion.completeExceptionally(RuntimeException("${response.statusCode()}"))
+        }
       }
       Transport.TCP -> {
         tcpClient!!.connect(port, host) { res ->
@@ -197,18 +196,17 @@ class HobbitsTransport(
         }
       }
       Transport.WS -> {
-        @Suppress("DEPRECATION")
-        httpClient!!.websocket(
-          port, host, requestURI,
-          { handler ->
-            handler.exceptionHandler(exceptionHandler)
-              .writeBinaryMessage(Buffer.buffer(message.toBytes().toArrayUnsafe())).end()
-            completion.complete()
-          },
-          { exception ->
-            completion.completeExceptionally(exception)
-          }
-        )
+        try {
+          val websocket = httpClient!!.webSocket(
+            port, host, requestURI
+          ).await()
+          websocket.exceptionHandler(exceptionHandler)
+          websocket.writeBinaryMessage(Buffer.buffer(message.toBytes().toArrayUnsafe())).await()
+          websocket.end().await()
+          completion.complete()
+        } catch (e: Exception) {
+          completion.completeExceptionally(e)
+        }
       }
     }
     completion.await()
@@ -349,7 +347,7 @@ class HobbitsTransport(
         wsServers[id] = httpServer
 
         @Suppress("DEPRECATION")
-        httpServer.websocketHandler {
+        httpServer.webSocketHandler {
           if (endpoint.requestURI == null || it.path().startsWith(endpoint.requestURI)) {
             it.accept()
 

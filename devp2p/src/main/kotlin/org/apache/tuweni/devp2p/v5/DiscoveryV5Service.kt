@@ -20,9 +20,7 @@ import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.datagram.DatagramPacket
 import io.vertx.core.net.SocketAddress
-import io.vertx.kotlin.core.datagram.closeAwait
-import io.vertx.kotlin.core.datagram.listenAwait
-import io.vertx.kotlin.core.datagram.sendAwait
+import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -192,14 +190,14 @@ internal class DefaultDiscoveryV5Service(
   private lateinit var receiveJob: Job
 
   override suspend fun start(): AsyncCompletion {
-    server.handler(this::receiveDatagram).listenAwait(bindAddress.port, bindAddress.hostString)
+    server.handler(this::receiveDatagram).listen(bindAddress.port, bindAddress.hostString).await()
     return bootstrap()
   }
 
   override suspend fun terminate() {
     if (started.compareAndSet(true, false)) {
       receiveJob.cancel()
-      server.closeAwait()
+      server.close().await()
     }
   }
 
@@ -223,7 +221,7 @@ internal class DefaultDiscoveryV5Service(
 
   private fun send(addr: SocketAddress, message: Bytes) {
     launch {
-      server.sendAwait(Buffer.buffer(message.toArrayUnsafe()), addr.port(), addr.host())
+      server.send(Buffer.buffer(message.toArrayUnsafe()), addr.port(), addr.host()).await()
     }
   }
 

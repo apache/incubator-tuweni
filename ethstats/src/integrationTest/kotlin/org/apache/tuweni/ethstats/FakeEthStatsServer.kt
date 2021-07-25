@@ -18,7 +18,7 @@ package org.apache.tuweni.ethstats
 
 import io.vertx.core.Vertx
 import io.vertx.core.http.ServerWebSocket
-import io.vertx.kotlin.core.http.listenAwait
+import io.vertx.kotlin.coroutines.await
 import kotlinx.coroutines.runBlocking
 
 class FakeEthStatsServer(val vertx: Vertx, val networkInterface: String, var port: Int) {
@@ -27,7 +27,7 @@ class FakeEthStatsServer(val vertx: Vertx, val networkInterface: String, var por
   init {
     server.webSocketHandler(this::connect)
     runBlocking {
-      server.listenAwait(port, networkInterface)
+      server.listen(port, networkInterface).await()
       port = server.actualPort()
     }
   }

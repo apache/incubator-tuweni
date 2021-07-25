@@ -70,6 +70,7 @@ class EthereumClientRunTest {
     val client2 = EthereumClient(vertx, config2)
     client1.start()
     client2.start()
+    delay(1000)
     // TODO make sure the connection happens!
     client1.stop()
     client2.stop()
