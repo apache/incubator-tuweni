@@ -28,6 +28,7 @@ import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.TrustOptions
+import io.vertx.core.tracing.TracingPolicy
 import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.auth.User
 import io.vertx.ext.auth.authorization.Authorization
@@ -88,7 +89,7 @@ class JSONRPCServer(
   }
 
   fun start() = async {
-    val serverOptions = HttpServerOptions().setPort(port).setHost(networkInterface).setSsl(ssl)
+    val serverOptions = HttpServerOptions().setPort(port).setHost(networkInterface).setSsl(ssl).setTracingPolicy(TracingPolicy.ALWAYS)
     trustOptions?.let {
       serverOptions.setTrustOptions(it)
     }
