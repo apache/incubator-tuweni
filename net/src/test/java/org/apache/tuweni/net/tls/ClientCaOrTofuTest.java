@@ -123,11 +123,10 @@ class ClientCaOrTofuTest {
   @Test
   void shouldValidateUsingCertificate() throws Exception {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
-    client.request(HttpMethod.POST, caValidServer.actualPort(), "localhost", "/sample", request -> {
-      HttpClientRequest req = request.result();
-      req.exceptionHandler(statusCode::completeExceptionally);
-      statusCode.complete(req.send().result().statusCode());
-    });
+    client
+        .request(HttpMethod.POST, caValidServer.actualPort(), "localhost", "/sample")
+        .onSuccess((req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
+        .onFailure(statusCode::completeExceptionally);
     assertEquals((Integer) 200, statusCode.join());
 
     List<String> knownServers = Files.readAllLines(knownServersFile);
@@ -141,8 +140,11 @@ class ClientCaOrTofuTest {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
     client.request(HttpMethod.POST, caValidServer.actualPort(), "127.0.0.1", "/sample", request -> {
       HttpClientRequest req = request.result();
-      req.exceptionHandler(statusCode::completeExceptionally);
-      statusCode.complete(req.send().result().statusCode());
+      req
+          .send()
+          .onSuccess((response) -> statusCode.complete(response.statusCode()))
+          .onFailure(statusCode::completeExceptionally);
+
     });
     assertEquals((Integer) 200, statusCode.join());
 
@@ -156,11 +158,10 @@ class ClientCaOrTofuTest {
   @Test
   void shouldValidateOnFirstUse() throws Exception {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
-    client.request(HttpMethod.POST, fooServer.actualPort(), "localhost", "/sample", request -> {
-      HttpClientRequest req = request.result();
-      req.exceptionHandler(statusCode::completeExceptionally);
-      statusCode.complete(req.send().result().statusCode());
-    });
+    client
+        .request(HttpMethod.POST, fooServer.actualPort(), "localhost", "/sample")
+        .onSuccess((req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
+        .onFailure(statusCode::completeExceptionally);
     assertEquals((Integer) 200, statusCode.join());
 
     List<String> knownServers = Files.readAllLines(knownServersFile);
@@ -173,11 +174,10 @@ class ClientCaOrTofuTest {
   @Test
   void shouldRejectDifferentCertificate() {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
-    client.request(HttpMethod.POST, foobarServer.actualPort(), "localhost", "/sample", request -> {
-      HttpClientRequest req = request.result();
-      req.exceptionHandler(statusCode::completeExceptionally);
-      statusCode.complete(req.send().result().statusCode());
-    });
+    client
+        .request(HttpMethod.POST, foobarServer.actualPort(), "localhost", "/sample")
+        .onSuccess((req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
+        .onFailure(statusCode::completeExceptionally);
     Throwable e = assertThrows(CompletionException.class, statusCode::join);
     e = e.getCause();
     while (!(e instanceof CertificateException)) {

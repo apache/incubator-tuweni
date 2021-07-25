@@ -36,7 +36,6 @@ import javax.net.ssl.SSLException;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -127,11 +126,10 @@ class ClientAllowlistTest {
   @Test
   void shouldNotValidateUsingCertificate() {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
-    client.request(HttpMethod.POST, caValidServer.actualPort(), "localhost", "/sample", request -> {
-      HttpClientRequest req = request.result();
-      req.exceptionHandler(statusCode::completeExceptionally);
-      statusCode.complete(req.send().result().statusCode());
-    });
+    client
+        .request(HttpMethod.POST, caValidServer.actualPort(), "localhost", "/sample")
+        .onSuccess((req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
+        .onFailure(statusCode::completeExceptionally);
     Throwable e = assertThrows(CompletionException.class, statusCode::join);
     e = e.getCause();
     while (!(e instanceof CertificateException)) {
@@ -144,22 +142,20 @@ class ClientAllowlistTest {
   @Test
   void shouldValidateAllowlisted() {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
-    client.request(HttpMethod.POST, fooServer.actualPort(), "localhost", "/sample", request -> {
-      HttpClientRequest req = request.result();
-      req.exceptionHandler(statusCode::completeExceptionally);
-      statusCode.complete(req.send().result().statusCode());
-    });
+    client
+        .request(HttpMethod.POST, fooServer.actualPort(), "localhost", "/sample")
+        .onSuccess((req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
+        .onFailure(statusCode::completeExceptionally);
     assertEquals((Integer) 200, statusCode.join());
   }
 
   @Test
   void shouldRejectNonAllowlisted() {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
-    client.request(HttpMethod.POST, barServer.actualPort(), "localhost", "/sample", request -> {
-      HttpClientRequest req = request.result();
-      req.exceptionHandler(statusCode::completeExceptionally);
-      statusCode.complete(req.send().result().statusCode());
-    });
+    client
+        .request(HttpMethod.POST, barServer.actualPort(), "localhost", "/sample")
+        .onSuccess((req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
+        .onFailure(statusCode::completeExceptionally);
     Throwable e = assertThrows(CompletionException.class, statusCode::join);
     e = e.getCause();
     while (!(e instanceof CertificateException)) {
