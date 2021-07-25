@@ -261,7 +261,6 @@ class EthereumClient(
   }
 
   fun stop() = runBlocking {
-    vertx.close()
     dnsClients.values.forEach(DNSClient::stop)
     synchronizers.values.forEach {
       it.stop()

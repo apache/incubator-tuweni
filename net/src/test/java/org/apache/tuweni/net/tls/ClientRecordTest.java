@@ -32,7 +32,6 @@ import java.util.concurrent.CompletableFuture;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -128,11 +127,10 @@ class ClientRecordTest {
   @Test
   void shouldNotValidateUsingCertificate() throws Exception {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
-    client.request(HttpMethod.POST, caValidServer.actualPort(), "localhost", "/sample", request -> {
-      HttpClientRequest req = request.result();
-      req.exceptionHandler(statusCode::completeExceptionally);
-      statusCode.complete(req.send().result().statusCode());
-    });
+    client
+        .request(HttpMethod.POST, caValidServer.actualPort(), "localhost", "/sample")
+        .onSuccess((req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
+        .onFailure(statusCode::completeExceptionally);
     assertEquals((Integer) 200, statusCode.join());
 
     List<String> knownServers = Files.readAllLines(knownServersFile);
@@ -145,11 +143,10 @@ class ClientRecordTest {
   @Test
   void shouldRecordMultipleHosts() throws Exception {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
-    client.request(HttpMethod.POST, fooServer.actualPort(), "localhost", "/sample", request -> {
-      HttpClientRequest req = request.result();
-      req.exceptionHandler(statusCode::completeExceptionally);
-      statusCode.complete(req.send().result().statusCode());
-    });
+    client
+        .request(HttpMethod.POST, fooServer.actualPort(), "localhost", "/sample")
+        .onSuccess((req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
+        .onFailure(statusCode::completeExceptionally);;
     assertEquals((Integer) 200, statusCode.join());
 
     List<String> knownServers = Files.readAllLines(knownServersFile);
@@ -159,11 +156,10 @@ class ClientRecordTest {
     assertEquals("localhost:" + fooServer.actualPort() + " " + fooFingerprint, knownServers.get(2));
 
     CompletableFuture<Integer> secondStatusCode = new CompletableFuture<>();
-    client.request(HttpMethod.POST, barServer.actualPort(), "localhost", "/sample", request -> {
-      HttpClientRequest req = request.result();
-      req.exceptionHandler(statusCode::completeExceptionally);
-      statusCode.complete(req.send().result().statusCode());
-    });
+    client
+        .request(HttpMethod.POST, barServer.actualPort(), "localhost", "/sample")
+        .onSuccess((req) -> req.send().onSuccess((response) -> secondStatusCode.complete(response.statusCode())))
+        .onFailure(secondStatusCode::completeExceptionally);
     assertEquals((Integer) 200, secondStatusCode.join());
 
     knownServers = Files.readAllLines(knownServersFile);
@@ -177,11 +173,10 @@ class ClientRecordTest {
   @Test
   void shouldReplaceFingerprint() throws Exception {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
-    client.request(HttpMethod.POST, fooServer.actualPort(), "localhost", "/sample", request -> {
-      HttpClientRequest req = request.result();
-      req.exceptionHandler(statusCode::completeExceptionally);
-      statusCode.complete(req.send().result().statusCode());
-    });
+    client
+        .request(HttpMethod.POST, fooServer.actualPort(), "localhost", "/sample")
+        .onSuccess((req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
+        .onFailure(statusCode::completeExceptionally);
     assertEquals((Integer) 200, statusCode.join());
 
     List<String> knownServers = Files.readAllLines(knownServersFile);
@@ -191,11 +186,10 @@ class ClientRecordTest {
     assertEquals("localhost:" + fooServer.actualPort() + " " + fooFingerprint, knownServers.get(2));
 
     CompletableFuture<Integer> secondStatusCode = new CompletableFuture<>();
-    client.request(HttpMethod.POST, foobarServer.actualPort(), "localhost", "/sample", request -> {
-      HttpClientRequest req = request.result();
-      req.exceptionHandler(statusCode::completeExceptionally);
-      statusCode.complete(req.send().result().statusCode());
-    });
+    client
+        .request(HttpMethod.POST, foobarServer.actualPort(), "localhost", "/sample")
+        .onSuccess((req) -> req.send().onSuccess((response) -> secondStatusCode.complete(response.statusCode())))
+        .onFailure(secondStatusCode::completeExceptionally);;
     assertEquals((Integer) 200, secondStatusCode.join());
 
     knownServers = Files.readAllLines(knownServersFile);

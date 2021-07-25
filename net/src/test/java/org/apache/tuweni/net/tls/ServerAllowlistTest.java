@@ -27,14 +27,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.ClientAuth;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
@@ -132,28 +131,34 @@ class ServerAllowlistTest {
 
   @Test
   void shouldNotValidateUsingCertificate() {
-    HttpClientRequest req = caClient.request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck").result();
-    Future<HttpClientResponse> respFuture = req.send();
-    Throwable e = assertThrows(CompletionException.class, respFuture::result);
+    CompletableFuture<HttpClientResponse> respFuture = new CompletableFuture<>();
+    caClient
+        .request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck")
+        .onFailure(respFuture::completeExceptionally)
+        .onSuccess((req) -> req.send().onFailure(respFuture::completeExceptionally).onSuccess(respFuture::complete));
+    Throwable e = assertThrows(CompletionException.class, respFuture::join);
     e = e.getCause().getCause();
     assertTrue(e.getMessage().contains("certificate_unknown"));
   }
 
   @Test
   void shouldValidateAllowlisted() {
-    HttpClientRequest req =
-        fooClient.request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck").result();
-    Future<HttpClientResponse> respFuture = req.send();
-    HttpClientResponse resp = respFuture.result();
+    CompletableFuture<HttpClientResponse> respFuture = new CompletableFuture<>();
+    fooClient
+        .request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck")
+        .onSuccess((req) -> req.send().onSuccess(respFuture::complete));
+    HttpClientResponse resp = respFuture.join();
     assertEquals(200, resp.statusCode());
   }
 
   @Test
   void shouldRejectNonAllowlisted() {
-    HttpClientRequest req =
-        barClient.request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck").result();
-    Future<HttpClientResponse> respFuture = req.send();
-    Throwable e = assertThrows(CompletionException.class, respFuture::result);
+    CompletableFuture<HttpClientResponse> respFuture = new CompletableFuture<>();
+    barClient
+        .request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck")
+        .onFailure(respFuture::completeExceptionally)
+        .onSuccess((req) -> req.send().onFailure(respFuture::completeExceptionally).onSuccess(respFuture::complete));
+    Throwable e = assertThrows(CompletionException.class, respFuture::join);
     e = e.getCause().getCause();
     assertTrue(e.getMessage().contains("certificate_unknown"));
   }
