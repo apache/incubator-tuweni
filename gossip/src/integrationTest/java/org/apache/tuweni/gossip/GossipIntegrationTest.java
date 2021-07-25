@@ -117,11 +117,11 @@ class GossipIntegrationTest {
       sent.add(message.toHexString());
 
       Thread.sleep(100);
-      client.request(HttpMethod.POST, 10000, "127.0.0.1", "/publish").exceptionHandler(thr -> {
-        throw new RuntimeException(thr);
-      }).handler(resp -> {
-
-      }).end(Buffer.buffer(message.toArrayUnsafe()));
+      client.request(HttpMethod.POST, 10000, "127.0.0.1", "/publish").onSuccess((request) -> {
+        request.exceptionHandler(thr -> {
+          throw new RuntimeException(thr);
+        }).end(Buffer.buffer(message.toArrayUnsafe()));
+      });
     }
 
     List<String> receiver1 = Collections.emptyList();
