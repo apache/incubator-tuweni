@@ -17,6 +17,8 @@
 package org.apache.tuweni.jsonrpc.app
 
 import io.vertx.core.Vertx
+import io.vertx.core.VertxOptions
+import io.vertx.tracing.opentelemetry.OpenTelemetryOptions
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.eth.JSONRPCRequest
@@ -41,7 +43,7 @@ object JSONRPCApp {
   fun main(args: Array<String>) {
     val configFile = Paths.get(if (args.isNotEmpty()) args[0] else "config.toml")
     Security.addProvider(BouncyCastleProvider())
-    val vertx = Vertx.vertx()
+
     val config = JSONRPCConfig(configFile)
     if (config.config.hasErrors()) {
       for (error in config.config.errors()) {
@@ -49,23 +51,24 @@ object JSONRPCApp {
       }
       System.exit(1)
     }
-    val app = JSONRPCApplication(vertx, config)
+    val metricsService = MetricsService(
+      "json-rpc",
+      port = config.metricsPort(),
+      networkInterface = config.metricsNetworkInterface(),
+      enableGrpcPush = config.metricsGrpcPushEnabled(),
+      enablePrometheus = config.metricsPrometheusEnabled()
+    )
+    val vertx = Vertx.vertx(VertxOptions().setTracingOptions(OpenTelemetryOptions(metricsService.openTelemetry)))
+    val app = JSONRPCApplication(vertx, config, metricsService)
     app.run()
   }
 }
 
 class JSONRPCApplication(
   val vertx: Vertx,
-  val config: JSONRPCConfig
+  val config: JSONRPCConfig,
+  val metricsService: MetricsService
 ) {
-
-  private val metricsService = MetricsService(
-    "json-rpc",
-    port = config.metricsPort(),
-    networkInterface = config.metricsNetworkInterface(),
-    enableGrpcPush = config.metricsGrpcPushEnabled(),
-    enablePrometheus = config.metricsPrometheusEnabled()
-  )
 
   fun run() {
     // TODO allow more options such as allowlist of certificates, enforce client authentication.
