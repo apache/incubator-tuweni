@@ -201,10 +201,9 @@ class HobbitsTransport(
             port, host, requestURI
           ).await()
           websocket.exceptionHandler(exceptionHandler)
-          websocket.handler { handler ->
-            handler.appendBuffer(Buffer.buffer(message.toBytes().toArrayUnsafe()))
-            completion.complete()
-          }
+          websocket.writeBinaryMessage(Buffer.buffer(message.toBytes().toArrayUnsafe())).await()
+          websocket.end().await()
+          completion.complete()
         } catch (e: Exception) {
           completion.completeExceptionally(e)
         }
