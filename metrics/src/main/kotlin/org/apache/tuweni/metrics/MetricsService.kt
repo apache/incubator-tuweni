@@ -31,7 +31,14 @@ import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.HTTPServer
 import java.net.InetSocketAddress
 
-class MetricsService(jobName: String, reportingIntervalMillis: Long = 5000, port: Int = 9090, networkInterface: String = "0.0.0.0", enablePrometheus: Boolean = true, enableGrpcPush: Boolean = true) {
+class MetricsService(
+  jobName: String,
+  reportingIntervalMillis: Long = 5000,
+  port: Int = 9090,
+  networkInterface: String = "0.0.0.0",
+  enablePrometheus: Boolean = true,
+  enableGrpcPush: Boolean = true,
+) {
 
   private val server: HTTPServer?
   val meterSdkProvider: SdkMeterProvider

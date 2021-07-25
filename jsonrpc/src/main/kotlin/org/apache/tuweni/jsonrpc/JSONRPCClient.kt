@@ -19,7 +19,9 @@ package org.apache.tuweni.jsonrpc
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
+import io.vertx.core.tracing.TracingPolicy
 import io.vertx.ext.web.client.WebClient
+import io.vertx.ext.web.client.WebClientOptions
 import kotlinx.coroutines.CompletableDeferred
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.Transaction
@@ -34,10 +36,11 @@ val mapper = ObjectMapper()
 class JSONRPCClient(
   vertx: Vertx,
   val serverPort: Int,
-  val serverHost: String
+  val serverHost: String,
+  val userAgent: String = "Apache Tuweni JSON-RPC Client",
 ) : Closeable {
 
-  val client = WebClient.create(vertx)
+  val client = WebClient.create(vertx, WebClientOptions().setUserAgent(userAgent).setTryUseCompression(true).setTracingPolicy(TracingPolicy.ALWAYS) as WebClientOptions)
 
   /**
    * Sends a signed transaction to the Ethereum network.
