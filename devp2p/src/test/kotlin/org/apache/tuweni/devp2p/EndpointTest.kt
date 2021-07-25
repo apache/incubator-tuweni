@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.net.InetAddress
 
 internal class EndpointTest {
 
@@ -95,5 +96,17 @@ internal class EndpointTest {
 
     val endpoint4: Endpoint = RLP.decode(encoding2) { reader -> Endpoint.readFrom(reader) }
     assertEquals(endpoint3, endpoint4)
+  }
+
+  @Test
+  fun shouldChangePortZeroToDefaultPort() {
+    val encoding1 = RLP.encode { writer ->
+      writer.writeByteArray(InetAddress.getByName("127.0.0.1").address)
+      writer.writeInt(0)
+      writer.writeInt(0)
+    }
+
+    val endpoint: Endpoint = RLP.decode(encoding1) { reader -> Endpoint.readFrom(reader) }
+    assertEquals(30303, endpoint.udpPort)
   }
 }
