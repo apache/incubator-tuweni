@@ -77,8 +77,10 @@ data class Endpoint(
         throw RLPException(e)
       }
 
-      val udpPort = reader.readInt()
-
+      var udpPort = reader.readInt()
+      if (udpPort == 0) { // this is an invalid port number we see in the wild. Use DEFAULT_PORT instead.
+        udpPort = DEFAULT_PORT
+      }
       // Some implementations seem to send packets that either do not have the TCP port field, or to have an
       // RLP NULL value for it.
       var tcpPort: Int? = null
