@@ -22,6 +22,8 @@ import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.jsonrpc.JSONRPCServer
+import org.apache.tuweni.jsonrpc.methods.MeteredHandler
+import org.apache.tuweni.jsonrpc.methods.MethodAllowListHandler
 import org.apache.tuweni.metrics.MetricsService
 import org.apache.tuweni.net.tls.VertxTrustOptions
 import org.bouncycastle.jce.provider.BouncyCastleProvider
@@ -70,6 +72,13 @@ class JSONRPCApplication(
   fun run() {
     // TODO allow more options such as allowlist of certificates, enforce client authentication.
     val trustOptions = VertxTrustOptions.recordClientFingerprints(config.clientFingerprintsFile())
+
+    val allowListHandler = MethodAllowListHandler(config.allowedMethods(), this::handleRequest)
+
+    val meter = metricsService.meterSdkProvider.get("jsonrpc")
+    val successCounter = meter.longCounterBuilder("success").build()
+    val failureCounter = meter.longCounterBuilder("failure").build()
+    val handler = MeteredHandler(successCounter, failureCounter, allowListHandler::handleRequest)
     val server = JSONRPCServer(
       vertx, config.port(), config.networkInterface(),
       config.ssl(),
@@ -78,7 +87,7 @@ class JSONRPCApplication(
       config.basicAuthUsername(),
       config.basicAuthPassword(),
       config.basicAuthRealm(),
-      this::handleRequest,
+      methodHandler = handler::handleRequest,
       Executors.newFixedThreadPool(
         config.numberOfThreads()
       ) {

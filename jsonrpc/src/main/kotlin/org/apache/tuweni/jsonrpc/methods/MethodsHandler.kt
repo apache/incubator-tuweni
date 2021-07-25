@@ -48,6 +48,23 @@ class MeteredHandler(private val successCounter: LongCounter, private val failCo
   }
 }
 
+class MethodAllowListHandler(private val allowedMethods: List<String>, private val delegateHandler: (JSONRPCRequest) -> JSONRPCResponse) {
+
+  fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
+    var found = false
+    for (method in allowedMethods) {
+      if (request.method.startsWith(method)) {
+        found = true
+        break
+      }
+    }
+    if (!found) {
+      return JSONRPCResponse(request.id, null, mapOf(Pair("code", -32604), Pair("message", "Method not enabled")))
+    }
+    return delegateHandler(request)
+  }
+}
+
 // TODO DelegateHandler - choose from a number of handlers to see which to delegate to.
 // TODO FilterHandler - filter incoming requests per allowlist
 // TODO CachingHandler - cache some incoming requests
