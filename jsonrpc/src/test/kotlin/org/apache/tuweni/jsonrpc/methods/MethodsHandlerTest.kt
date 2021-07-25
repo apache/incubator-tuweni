@@ -25,6 +25,8 @@ import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.eth.methodNotFound
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.Collections
@@ -98,5 +100,25 @@ class MethodsHandlerTest {
       }
     }
     assertEquals(1L, metricValue)
+  }
+}
+
+class MethodAllowListHandlerTest {
+
+  @Test
+  fun testAllowedMethod() {
+    val filter = MethodAllowListHandler(listOf("eth_")) { JSONRPCResponse(1, "foo") }
+    val resp = filter.handleRequest(JSONRPCRequest(1, "eth_client", emptyArray()))
+    assertNull(resp.error)
+  }
+
+  @Test
+  fun testForbiddenMethod() {
+    val filter = MethodAllowListHandler(listOf("eth_")) { JSONRPCResponse(1, "foo") }
+    val resp = filter.handleRequest(JSONRPCRequest(1, "foo_client", emptyArray()))
+    assertNotNull(resp.error)
+    val respContents = resp.error as Map<*, *>
+    assertEquals(-32604, respContents["code"])
+    assertEquals("Method not enabled", respContents["message"])
   }
 }

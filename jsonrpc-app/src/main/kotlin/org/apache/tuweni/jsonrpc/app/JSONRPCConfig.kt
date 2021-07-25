@@ -21,6 +21,7 @@ import org.apache.tuweni.config.PropertyValidator
 import org.apache.tuweni.config.SchemaBuilder
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.Collections
 
 /**
  * Configuration of the JSON-RPC server as a TOML-based file.
@@ -43,6 +44,7 @@ class JSONRPCConfig(val filePath: Path) {
       .addString("basicAuthUsername", null, "HTTP Basic Auth username", null)
       .addString("basicAuthPassword", null, "HTTP Basic Auth password", null)
       .addString("basicAuthRealm", null, "HTTP Basic Auth realm", null)
+      .addListOfString("allowedMethods", Collections.emptyList(), "Allowed JSON-RPC methods", null)
       .toSchema()
   }
 
@@ -62,4 +64,5 @@ class JSONRPCConfig(val filePath: Path) {
   fun basicAuthUsername() = config.getString("basicAuthUsername")
   fun basicAuthPassword() = config.getString("basicAuthPassword")
   fun basicAuthRealm() = config.getString("basicAuthRealm")
+  fun allowedMethods() = config.getListOfString("allowedMethods")
 }
