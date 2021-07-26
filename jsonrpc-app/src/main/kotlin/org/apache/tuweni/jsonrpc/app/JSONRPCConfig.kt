@@ -45,6 +45,8 @@ class JSONRPCConfig(val filePath: Path) {
       .addString("basicAuthPassword", null, "HTTP Basic Auth password", null)
       .addString("basicAuthRealm", null, "HTTP Basic Auth realm", null)
       .addListOfString("allowedMethods", Collections.emptyList(), "Allowed JSON-RPC methods", null)
+      .addListOfString("allowedRanges", Collections.singletonList("0.0.0.0/0"), "Allowed IP ranges", null)
+      .addListOfString("rejectedRanges", Collections.emptyList(), "Rejected IP ranges", null)
       .toSchema()
   }
 
@@ -65,4 +67,6 @@ class JSONRPCConfig(val filePath: Path) {
   fun basicAuthPassword() = config.getString("basicAuthPassword")
   fun basicAuthRealm() = config.getString("basicAuthRealm")
   fun allowedMethods() = config.getListOfString("allowedMethods")
+  fun allowedRanges() = config.getListOfString("allowedRanges")
+  fun rejectedRanges() = config.getListOfString("rejectedRanges")
 }
