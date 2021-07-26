@@ -47,6 +47,7 @@ import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.eth.internalError
 import org.apache.tuweni.eth.parseError
+import org.apache.tuweni.net.ip.IPRangeChecker
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.lang.IllegalArgumentException
@@ -62,8 +63,9 @@ class JSONRPCServer(
   val basicAuthenticationUsername: String? = null,
   val basicAuthenticationPassword: String? = null,
   val basicAuthRealm: String = "Apache Tuweni JSON-RPC proxy",
-  val methodHandler: (JSONRPCRequest) -> JSONRPCResponse,
+  val ipRangeChecker: IPRangeChecker = IPRangeChecker.allowAll(),
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
+  val methodHandler: (JSONRPCRequest) -> JSONRPCResponse,
 ) : CoroutineScope {
 
   companion object {
@@ -94,6 +96,13 @@ class JSONRPCServer(
       serverOptions.setTrustOptions(it)
     }
     httpServer = vertx.createHttpServer()
+    httpServer?.connectionHandler {
+      val remoteAddress = it.remoteAddress().hostAddress()
+      if (!ipRangeChecker.check(remoteAddress)) {
+        logger.debug("Rejecting IP {}", remoteAddress)
+        it.close()
+      }
+    }
     httpServer?.exceptionHandler {
       logger.error(it.message, it)
     }

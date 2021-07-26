@@ -27,6 +27,7 @@ import org.apache.tuweni.jsonrpc.JSONRPCServer
 import org.apache.tuweni.jsonrpc.methods.MeteredHandler
 import org.apache.tuweni.jsonrpc.methods.MethodAllowListHandler
 import org.apache.tuweni.metrics.MetricsService
+import org.apache.tuweni.net.ip.IPRangeChecker
 import org.apache.tuweni.net.tls.VertxTrustOptions
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.slf4j.LoggerFactory
@@ -90,14 +91,15 @@ class JSONRPCApplication(
       config.basicAuthUsername(),
       config.basicAuthPassword(),
       config.basicAuthRealm(),
-      methodHandler = handler::handleRequest,
+      IPRangeChecker.create(config.allowedRanges(), config.rejectedRanges()),
       Executors.newFixedThreadPool(
         config.numberOfThreads()
       ) {
         val thread = Thread("jsonrpc")
         thread.isDaemon = true
         thread
-      }.asCoroutineDispatcher()
+      }.asCoroutineDispatcher(),
+      handler::handleRequest
     )
     Runtime.getRuntime().addShutdownHook(
       Thread {
