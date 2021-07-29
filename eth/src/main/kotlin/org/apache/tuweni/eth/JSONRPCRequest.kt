@@ -23,5 +23,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 data class JSONRPCRequest(
   @JsonProperty("id") val id: Int,
   @JsonProperty("method") val method: String,
-  @JsonProperty("params") val params: Array<String>
+  @JsonProperty("params") val params: Array<String>,
+  @JsonProperty("jsonrpc") val jsonrpc: String = "2.0"
 )
