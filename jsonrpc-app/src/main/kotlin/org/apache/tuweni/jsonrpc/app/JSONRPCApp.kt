@@ -21,8 +21,7 @@ import io.vertx.core.VertxOptions
 import io.vertx.tracing.opentelemetry.OpenTelemetryOptions
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
-import org.apache.tuweni.eth.JSONRPCRequest
-import org.apache.tuweni.eth.JSONRPCResponse
+import org.apache.tuweni.jsonrpc.JSONRPCClient
 import org.apache.tuweni.jsonrpc.JSONRPCServer
 import org.apache.tuweni.jsonrpc.methods.MeteredHandler
 import org.apache.tuweni.jsonrpc.methods.MethodAllowListHandler
@@ -74,14 +73,20 @@ class JSONRPCApplication(
 ) {
 
   fun run() {
+    val client = JSONRPCClient(vertx, config.endpointPort(), config.endpointHost())
     // TODO allow more options such as allowlist of certificates, enforce client authentication.
     val trustOptions = VertxTrustOptions.recordClientFingerprints(config.clientFingerprintsFile())
 
-    val allowListHandler = MethodAllowListHandler(config.allowedMethods(), this::handleRequest)
+    val allowListHandler = MethodAllowListHandler(config.allowedMethods()) { req ->
+      runBlocking {
+        client.sendRequest(req).await()
+      }
+    }
 
     val meter = metricsService.meterSdkProvider.get("jsonrpc")
     val successCounter = meter.longCounterBuilder("success").build()
     val failureCounter = meter.longCounterBuilder("failure").build()
+
     val handler = MeteredHandler(successCounter, failureCounter, allowListHandler::handleRequest)
     val server = JSONRPCServer(
       vertx, config.port(), config.networkInterface(),
@@ -105,6 +110,7 @@ class JSONRPCApplication(
       Thread {
         runBlocking {
           server.stop().await()
+          client.close()
         }
       }
     )
@@ -112,10 +118,5 @@ class JSONRPCApplication(
       server.start().await()
       logger.info("JSON-RPC server started")
     }
-  }
-
-  private fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
-    logger.info("Received request {}", request)
-    return JSONRPCResponse(1) // TODO implement
   }
 }

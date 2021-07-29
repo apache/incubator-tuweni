@@ -20,10 +20,12 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class JSONRPCResponse(@JsonProperty("id") val id: Int, @JsonProperty("result") val result: Any? = null, @JsonProperty("error") val error: Any? = null)
+data class JSONRPCResponse(@JsonProperty("id") val id: Int, @JsonProperty("result") val result: Any? = null, @JsonProperty("error") val error: JSONRPCError? = null)
 
-val parseError = JSONRPCResponse(id = 0, error = mapOf(Pair("code", -32700), Pair("message", "Parse error")))
-val invalidRequest = JSONRPCResponse(id = 0, error = mapOf(Pair("code", -32600), Pair("message", "Invalid Request")))
-val methodNotFound = JSONRPCResponse(id = 0, error = mapOf(Pair("code", -32601), Pair("message", "Method not found")))
-val invalidParams = JSONRPCResponse(id = 0, error = mapOf(Pair("code", -32602), Pair("message", "Invalid params")))
-val internalError = JSONRPCResponse(id = 0, error = mapOf(Pair("code", -32603), Pair("message", "Internal error")))
+data class JSONRPCError(@JsonProperty("code") val code: Int, @JsonProperty("message") val message: String)
+
+val parseError = JSONRPCResponse(id = 0, error = JSONRPCError(-32700, "Parse error"))
+val invalidRequest = JSONRPCResponse(id = 0, error = JSONRPCError(-32600, "Invalid Request"))
+val methodNotFound = JSONRPCResponse(id = 0, error = JSONRPCError(-32601, "Method not found"))
+val invalidParams = JSONRPCResponse(id = 0, error = JSONRPCError(-32602, "Invalid params"))
+val internalError = JSONRPCResponse(id = 0, error = JSONRPCError(-32603, "Internal error"))
