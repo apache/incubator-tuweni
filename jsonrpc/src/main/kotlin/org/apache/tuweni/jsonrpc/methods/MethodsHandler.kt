@@ -16,6 +16,8 @@
  */
 package org.apache.tuweni.jsonrpc.methods
 
+import com.netflix.concurrency.limits.limit.FixedLimit
+import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import io.opentelemetry.api.metrics.LongCounter
 import io.opentelemetry.api.metrics.common.Labels
 import org.apache.tuweni.eth.JSONRPCError
@@ -63,6 +65,30 @@ class MethodAllowListHandler(private val allowedMethods: List<String>, private v
       return JSONRPCResponse(request.id, null, JSONRPCError(-32604, "Method not enabled"))
     }
     return delegateHandler(request)
+  }
+}
+
+class ThrottlingHandler(private val threshold: Int, private val delegateHandler: (JSONRPCRequest) -> JSONRPCResponse) {
+
+  private val limiter: SimpleLimiter<Void> = SimpleLimiter
+    .newBuilder()
+    .limit(FixedLimit.of(threshold))
+    .build()
+
+  fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
+    val listener = limiter.acquire(null)
+    if (listener.isEmpty) {
+      return JSONRPCResponse(id = request.id, error = JSONRPCError(code = -32000, message = "Too many requests"))
+    } else {
+      try {
+        val response = delegateHandler(request)
+        listener.get().onSuccess()
+        return response
+      } catch (t: Throwable) {
+        listener.get().onDropped()
+        throw RuntimeException(t)
+      }
+    }
   }
 }
 
