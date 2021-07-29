@@ -20,6 +20,9 @@ import io.opentelemetry.sdk.metrics.SdkMeterProvider
 import io.opentelemetry.sdk.metrics.export.IntervalMetricReader
 import io.opentelemetry.sdk.metrics.export.MetricProducer
 import io.opentelemetry.sdk.metrics.testing.InMemoryMetricExporter
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.eth.JSONRPCError
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
@@ -121,5 +124,44 @@ class MethodAllowListHandlerTest {
     val respContents = resp.error as JSONRPCError
     assertEquals(-32604, respContents.code)
     assertEquals("Method not enabled", respContents.message)
+  }
+}
+
+class ThrottlingHandlerTest {
+
+  @Test
+  fun testThrottling(): Unit = runBlocking {
+    val handler = ThrottlingHandler(4) {
+      runBlocking {
+        delay(500)
+        JSONRPCResponse(id = 1)
+      }
+    }
+    async {
+      val response = handler.handleRequest(JSONRPCRequest(2, "foo", arrayOf()))
+      assertEquals(1, response.id)
+    }
+    async {
+      val response = handler.handleRequest(JSONRPCRequest(3, "foo", arrayOf()))
+      assertEquals(1, response.id)
+    }
+    async {
+      val response = handler.handleRequest(JSONRPCRequest(4, "foo", arrayOf()))
+      assertEquals(1, response.id)
+    }
+    async {
+      val response = handler.handleRequest(JSONRPCRequest(5, "foo", arrayOf()))
+      assertEquals(1, response.id)
+    }
+    async {
+      delay(200)
+      val response = handler.handleRequest(JSONRPCRequest(6, "foo", arrayOf()))
+      assertEquals(-32000, response.error?.code)
+    }
+    async {
+      delay(1000)
+      val response = handler.handleRequest(JSONRPCRequest(7, "foo", arrayOf()))
+      assertEquals(1, response.id)
+    }
   }
 }
