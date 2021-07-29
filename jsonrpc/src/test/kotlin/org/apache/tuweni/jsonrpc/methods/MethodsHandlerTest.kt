@@ -20,6 +20,7 @@ import io.opentelemetry.sdk.metrics.SdkMeterProvider
 import io.opentelemetry.sdk.metrics.export.IntervalMetricReader
 import io.opentelemetry.sdk.metrics.export.MetricProducer
 import io.opentelemetry.sdk.metrics.testing.InMemoryMetricExporter
+import org.apache.tuweni.eth.JSONRPCError
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.eth.methodNotFound
@@ -89,7 +90,7 @@ class MethodsHandlerTest {
     val successCounter = meter.longCounterBuilder("success").build()
     val failCounter = meter.longCounterBuilder("fail").build()
     val meteredHandler = MeteredHandler(successCounter, failCounter) {
-      JSONRPCResponse(1, error = "foo")
+      JSONRPCResponse(1, error = JSONRPCError(123, "foo"))
     }
     meteredHandler.handleRequest(JSONRPCRequest(1, "foo", emptyArray()))
     Thread.sleep(1200)
@@ -117,8 +118,8 @@ class MethodAllowListHandlerTest {
     val filter = MethodAllowListHandler(listOf("eth_")) { JSONRPCResponse(1, "foo") }
     val resp = filter.handleRequest(JSONRPCRequest(1, "foo_client", emptyArray()))
     assertNotNull(resp.error)
-    val respContents = resp.error as Map<*, *>
-    assertEquals(-32604, respContents["code"])
-    assertEquals("Method not enabled", respContents["message"])
+    val respContents = resp.error as JSONRPCError
+    assertEquals(-32604, respContents.code)
+    assertEquals("Method not enabled", respContents.message)
   }
 }

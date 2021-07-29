@@ -18,6 +18,7 @@ package org.apache.tuweni.jsonrpc.methods
 
 import io.opentelemetry.api.metrics.LongCounter
 import io.opentelemetry.api.metrics.common.Labels
+import org.apache.tuweni.eth.JSONRPCError
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.eth.methodNotFound
@@ -59,7 +60,7 @@ class MethodAllowListHandler(private val allowedMethods: List<String>, private v
       }
     }
     if (!found) {
-      return JSONRPCResponse(request.id, null, mapOf(Pair("code", -32604), Pair("message", "Method not enabled")))
+      return JSONRPCResponse(request.id, null, JSONRPCError(-32604, "Method not enabled"))
     }
     return delegateHandler(request)
   }

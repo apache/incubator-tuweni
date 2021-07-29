@@ -23,10 +23,14 @@ import io.vertx.core.tracing.TracingPolicy
 import io.vertx.ext.web.client.WebClient
 import io.vertx.ext.web.client.WebClientOptions
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
 import org.apache.tuweni.eth.Address
+import org.apache.tuweni.eth.JSONRPCRequest
+import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.units.bigints.UInt256
 import java.io.Closeable
+import java.util.concurrent.atomic.AtomicInteger
 
 val mapper = ObjectMapper()
 
@@ -40,7 +44,25 @@ class JSONRPCClient(
   val userAgent: String = "Apache Tuweni JSON-RPC Client",
 ) : Closeable {
 
+  val requestCounter = AtomicInteger(1)
   val client = WebClient.create(vertx, WebClientOptions().setUserAgent(userAgent).setTryUseCompression(true).setTracingPolicy(TracingPolicy.ALWAYS) as WebClientOptions)
+
+  suspend fun sendRequest(request: JSONRPCRequest): Deferred<JSONRPCResponse> {
+    val deferred = CompletableDeferred<JSONRPCResponse>()
+
+    client.post(serverPort, serverHost, "/")
+      .putHeader("Content-Type", "application/json")
+      .sendBuffer(Buffer.buffer(mapper.writeValueAsBytes(request))) { response ->
+        if (response.failed()) {
+          deferred.completeExceptionally(response.cause())
+        } else {
+          val jsonResponse = response.result().bodyAsJson(JSONRPCResponse::class.java)
+          deferred.complete(jsonResponse)
+        }
+      }
+
+    return deferred
+  }
 
   /**
    * Sends a signed transaction to the Ethereum network.
@@ -50,32 +72,15 @@ class JSONRPCClient(
    * @throws ConnectException if it cannot dial the remote client
    */
   suspend fun sendRawTransaction(tx: Transaction): String {
-    val body = mapOf(
-      Pair("jsonrpc", "2.0"),
-      Pair("method", "eth_sendRawTransaction"),
-      Pair("id", 1),
-      Pair("params", listOf(tx.toBytes().toHexString()))
-    )
-    val deferred = CompletableDeferred<String>()
-
-    client.post(serverPort, serverHost, "/")
-      .putHeader("Content-Type", "application/json")
-      .sendBuffer(Buffer.buffer(mapper.writeValueAsBytes(body))) { response ->
-        if (response.failed()) {
-          deferred.completeExceptionally(response.cause())
-        } else {
-          val jsonResponse = response.result().bodyAsJsonObject()
-          val err = jsonResponse.getJsonObject("error")
-          if (err != null) {
-            val errorMessage = "Code ${err.getInteger("code")}: ${err.getString("message")}"
-            deferred.completeExceptionally(ClientRequestException(errorMessage))
-          } else {
-            deferred.complete(jsonResponse.getString("result"))
-          }
-        }
-      }
-
-    return deferred.await()
+    val body = JSONRPCRequest(nextId(), "eth_sendRawTransaction", arrayOf(tx.toBytes().toHexString()))
+    val jsonResponse = sendRequest(body).await()
+    val err = jsonResponse.error
+    if (err != null) {
+      val errorMessage = "Code ${err.code}: ${err.message}"
+      throw ClientRequestException(errorMessage)
+    } else {
+      return jsonResponse.result.toString()
+    }
   }
 
   /**
@@ -116,29 +121,26 @@ class JSONRPCClient(
    * @throws ConnectException if it cannot dial the remote client
    */
   suspend fun getTransactionCount_latest(address: Address): UInt256 {
-    val body = mapOf(
-      Pair("jsonrpc", "2.0"),
-      Pair("method", "eth_getTransactionCount"),
-      Pair("id", 1),
-      Pair("params", listOf(address.toHexString(), "latest"))
-    )
-    val deferred = CompletableDeferred<UInt256>()
-
-    client.post(serverPort, serverHost, "/")
-      .putHeader("Content-Type", "application/json")
-      .sendBuffer(Buffer.buffer(mapper.writeValueAsBytes(body))) { response ->
-        if (response.failed()) {
-          deferred.completeExceptionally(response.cause())
-        } else {
-          val jsonResponse = response.result().bodyAsJsonObject()
-          deferred.complete(UInt256.fromHexString(jsonResponse.getString("result")))
-        }
-      }
-
-    return deferred.await()
+    val body = JSONRPCRequest(nextId(), "eth_getTransactionCount", arrayOf(address.toHexString(), "latest"))
+    val jsonResponse = sendRequest(body).await()
+    val err = jsonResponse.error
+    if (err != null) {
+      val errorMessage = "Code ${err.code}: ${err.message}"
+      throw ClientRequestException(errorMessage)
+    } else {
+      return UInt256.fromHexString(jsonResponse.result.toString())
+    }
   }
 
   override fun close() {
     client.close()
+  }
+
+  private fun nextId(): Int {
+    val next = requestCounter.incrementAndGet()
+    if (next == Int.MAX_VALUE) {
+      requestCounter.set(1)
+    }
+    return next
   }
 }

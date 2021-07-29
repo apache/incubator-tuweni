@@ -47,6 +47,8 @@ class JSONRPCConfig(val filePath: Path) {
       .addListOfString("allowedMethods", Collections.emptyList(), "Allowed JSON-RPC methods", null)
       .addListOfString("allowedRanges", Collections.singletonList("0.0.0.0/0"), "Allowed IP ranges", null)
       .addListOfString("rejectedRanges", Collections.emptyList(), "Rejected IP ranges", null)
+      .addInteger("endpointPort", 8545, "JSON-RPC endpoint port", PropertyValidator.isValidPort())
+      .addString("endpointHost", "localhost", "JSON-RPC endpoint host", null)
       .toSchema()
   }
 
@@ -69,4 +71,7 @@ class JSONRPCConfig(val filePath: Path) {
   fun allowedMethods() = config.getListOfString("allowedMethods")
   fun allowedRanges() = config.getListOfString("allowedRanges")
   fun rejectedRanges() = config.getListOfString("rejectedRanges")
+
+  fun endpointPort() = config.getInteger("endpointPort")
+  fun endpointHost() = config.getString("endpointHost")
 }
