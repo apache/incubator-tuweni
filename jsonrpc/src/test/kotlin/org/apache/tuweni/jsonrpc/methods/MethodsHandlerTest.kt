@@ -133,7 +133,7 @@ class ThrottlingHandlerTest {
   fun testThrottling(): Unit = runBlocking {
     val handler = ThrottlingHandler(4) {
       runBlocking {
-        delay(500)
+        delay(1000)
         JSONRPCResponse(id = 1)
       }
     }
@@ -159,7 +159,7 @@ class ThrottlingHandlerTest {
       assertEquals(-32000, response.error?.code)
     }
     async {
-      delay(1000)
+      delay(2000)
       val response = handler.handleRequest(JSONRPCRequest(7, "foo", arrayOf()))
       assertEquals(1, response.id)
     }
