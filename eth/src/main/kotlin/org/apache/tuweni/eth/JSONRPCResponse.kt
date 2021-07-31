@@ -29,5 +29,5 @@ val invalidRequest = JSONRPCResponse(id = 0, error = JSONRPCError(-32600, "Inval
 val methodNotFound = JSONRPCResponse(id = 0, error = JSONRPCError(-32601, "Method not found"))
 val invalidParams = JSONRPCResponse(id = 0, error = JSONRPCError(-32602, "Invalid params"))
 val internalError = JSONRPCResponse(id = 0, error = JSONRPCError(-32603, "Internal error"))
-val tooManyRequests = JSONRPCResponse(id = 0, JSONRPCError(code = -32000, message = "Too many requests"))
-val methodNotEnabled = JSONRPCResponse(id = 0, JSONRPCError(-32604, "Method not enabled"))
+val tooManyRequests = JSONRPCResponse(id = 0, error = JSONRPCError(code = -32000, message = "Too many requests"))
+val methodNotEnabled = JSONRPCResponse(id = 0, error = JSONRPCError(-32604, "Method not enabled"))
