@@ -30,6 +30,7 @@ import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.units.bigints.UInt256
 import java.io.Closeable
+import java.util.Base64
 import java.util.concurrent.atomic.AtomicInteger
 
 val mapper = ObjectMapper()
@@ -42,24 +43,32 @@ class JSONRPCClient(
   val serverPort: Int,
   val serverHost: String,
   val userAgent: String = "Apache Tuweni JSON-RPC Client",
+  val basicAuthenticationEnabled: Boolean = false,
+  val basicAuthenticationUsername: String = "",
+  val basicAuthenticationPassword: String = ""
 ) : Closeable {
 
   val requestCounter = AtomicInteger(1)
   val client = WebClient.create(vertx, WebClientOptions().setUserAgent(userAgent).setTryUseCompression(true).setTracingPolicy(TracingPolicy.ALWAYS) as WebClientOptions)
+  val authorizationHeader = "Basic " + Base64.getEncoder().encode((basicAuthenticationUsername + ":" + basicAuthenticationPassword).toByteArray())
 
   suspend fun sendRequest(request: JSONRPCRequest): Deferred<JSONRPCResponse> {
     val deferred = CompletableDeferred<JSONRPCResponse>()
-
-    client.post(serverPort, serverHost, "/")
+    val httpRequest = client.post(serverPort, serverHost, "/")
       .putHeader("Content-Type", "application/json")
-      .sendBuffer(Buffer.buffer(mapper.writeValueAsBytes(request))) { response ->
-        if (response.failed()) {
-          deferred.completeExceptionally(response.cause())
-        } else {
-          val jsonResponse = response.result().bodyAsJson(JSONRPCResponse::class.java)
-          deferred.complete(jsonResponse)
-        }
+
+    if (basicAuthenticationEnabled) {
+      httpRequest.putHeader("authorization", authorizationHeader)
+    }
+
+    httpRequest.sendBuffer(Buffer.buffer(mapper.writeValueAsBytes(request))) { response ->
+      if (response.failed()) {
+        deferred.completeExceptionally(response.cause())
+      } else {
+        val jsonResponse = response.result().bodyAsJson(JSONRPCResponse::class.java)
+        deferred.complete(jsonResponse)
       }
+    }
 
     return deferred
   }
