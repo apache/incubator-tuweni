@@ -28,6 +28,7 @@ import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.eth.methodNotFound
 import org.apache.tuweni.junit.BouncyCastleExtension
+import org.apache.tuweni.kv.MapKeyValueStore
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -163,5 +164,30 @@ class ThrottlingHandlerTest {
       val response = handler.handleRequest(JSONRPCRequest(7, "foo", arrayOf()))
       assertEquals(1, response.id)
     }
+  }
+}
+
+class CachingHandlerTest {
+
+  @Test
+  fun testCache() {
+    val map = HashMap<String, JSONRPCResponse>()
+    val kv = MapKeyValueStore.open(map)
+    val handler = CachingHandler(listOf("foo"), kv) {
+      if (it.params.size > 0) {
+        JSONRPCResponse(id = 1, error = JSONRPCError(1234, ""))
+      } else {
+        JSONRPCResponse(id = 1)
+      }
+    }
+    assertEquals(0, map.size)
+    handler.handleRequest(JSONRPCRequest(id = 1, method = "foo", params = arrayOf()))
+    assertEquals(1, map.size)
+    handler.handleRequest(JSONRPCRequest(id = 1, method = "bar", params = arrayOf()))
+    assertEquals(1, map.size)
+    handler.handleRequest(JSONRPCRequest(id = 1, method = "foo", params = arrayOf()))
+    assertEquals(1, map.size)
+    handler.handleRequest(JSONRPCRequest(id = 1, method = "foo", params = arrayOf("bleh")))
+    assertEquals(1, map.size)
   }
 }
