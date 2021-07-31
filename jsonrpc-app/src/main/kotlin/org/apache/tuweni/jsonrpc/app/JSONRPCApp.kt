@@ -16,20 +16,36 @@
  */
 package org.apache.tuweni.jsonrpc.app
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.vertx.core.Vertx
 import io.vertx.core.VertxOptions
 import io.vertx.tracing.opentelemetry.OpenTelemetryOptions
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.eth.internalError
+import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.jsonrpc.JSONRPCClient
 import org.apache.tuweni.jsonrpc.JSONRPCServer
+import org.apache.tuweni.jsonrpc.methods.CachingHandler
 import org.apache.tuweni.jsonrpc.methods.MeteredHandler
 import org.apache.tuweni.jsonrpc.methods.MethodAllowListHandler
+import org.apache.tuweni.jsonrpc.methods.ThrottlingHandler
+import org.apache.tuweni.kv.InfinispanKeyValueStore
 import org.apache.tuweni.metrics.MetricsService
 import org.apache.tuweni.net.ip.IPRangeChecker
 import org.apache.tuweni.net.tls.VertxTrustOptions
 import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.infinispan.Cache
+import org.infinispan.commons.dataconversion.MediaType
+import org.infinispan.commons.io.ByteBuffer
+import org.infinispan.commons.io.ByteBufferImpl
+import org.infinispan.commons.marshall.AbstractMarshaller
+import org.infinispan.configuration.cache.ConfigurationBuilder
+import org.infinispan.configuration.global.GlobalConfigurationBuilder
+import org.infinispan.manager.DefaultCacheManager
+import org.infinispan.marshall.persistence.PersistenceMarshaller
+import org.infinispan.persistence.rocksdb.configuration.RocksDBStoreConfigurationBuilder
 import org.slf4j.LoggerFactory
 import java.nio.file.Paths
 import java.security.Security
@@ -93,7 +109,26 @@ class JSONRPCApplication(
     val successCounter = meter.longCounterBuilder("success").build()
     val failureCounter = meter.longCounterBuilder("failure").build()
 
-    val handler = MeteredHandler(successCounter, failureCounter, allowListHandler::handleRequest)
+    val nextHandler = if (config.cacheEnabled()) {
+
+      val builder = GlobalConfigurationBuilder().serialization().marshaller(PersistenceMarshaller())
+      val manager = DefaultCacheManager(builder.build())
+      val cache: Cache<String, JSONRPCResponse> = manager.createCache(
+        "responses",
+        ConfigurationBuilder().persistence().addStore(RocksDBStoreConfigurationBuilder::class.java)
+          .location(config.cacheStoragePath()).build()
+      )
+
+      val cachingHandler =
+        CachingHandler(config.cachedMethods(), InfinispanKeyValueStore(cache), allowListHandler::handleRequest)
+      cachingHandler::handleRequest
+    } else {
+      allowListHandler::handleRequest
+    }
+
+    val throttlingHandler = ThrottlingHandler(config.maxConcurrentRequests(), nextHandler)
+
+    val handler = MeteredHandler(successCounter, failureCounter, throttlingHandler::handleRequest)
     val server = JSONRPCServer(
       vertx, config.port(), config.networkInterface(),
       config.ssl(),
@@ -125,4 +160,19 @@ class JSONRPCApplication(
       logger.info("JSON-RPC server started")
     }
   }
+}
+
+class PersistenceMarshaller : AbstractMarshaller() {
+
+  companion object {
+    val mapper = ObjectMapper()
+  }
+
+  override fun objectFromByteBuffer(buf: ByteArray?, offset: Int, length: Int) = mapper.readValue(Bytes.wrap(buf!!, offset, length).toArrayUnsafe(), JSONRPCResponse::class.java)
+
+  override fun objectToBuffer(o: Any?, estimatedSize: Int): ByteBuffer = ByteBufferImpl.create(mapper.writeValueAsBytes(o))
+
+  override fun isMarshallable(o: Any?): Boolean = o is JSONRPCResponse
+
+  override fun mediaType(): MediaType = MediaType.APPLICATION_OCTET_STREAM
 }

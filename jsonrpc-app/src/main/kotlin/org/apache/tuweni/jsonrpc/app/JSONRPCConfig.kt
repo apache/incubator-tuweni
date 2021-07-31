@@ -52,6 +52,10 @@ class JSONRPCConfig(val filePath: Path) {
       .addBoolean("endpointBasicAuthEnabled", false, "Enable basic authentication for the endpoint", null)
       .addString("endpointBasicAuthUsername", "", "Basic authentication username for the endpoint", null)
       .addString("endpointBasicAuthPassword", "", "Basic authentication password for the endpoint", null)
+      .addListOfString("cachedMethods", Collections.emptyList(), "Cached JSON-RPC methods", null)
+      .addBoolean("cacheEnabled", false, "Enable caching", null)
+      .addString("cacheStoragePath", "", "Location of cache storage", null)
+      .addInteger("maxConcurrentRequests", 30, "Maximum concurrent requests", null)
       .toSchema()
   }
 
@@ -81,4 +85,8 @@ class JSONRPCConfig(val filePath: Path) {
   fun endpointBasicAuthEnabled() = config.getBoolean("endpointBasicAuthEnabled")
   fun endpointBasicAuthUsername() = config.getString("endpointBasicAuthUsername")
   fun endpointBasicAuthPassword() = config.getString("endpointBasicAuthPassword")
+  fun cachedMethods() = config.getListOfString("cachedMethods")
+  fun cacheEnabled() = config.getBoolean("cacheEnabled")
+  fun cacheStoragePath() = config.getString("cacheStoragePath")
+  fun maxConcurrentRequests() = config.getInteger("maxConcurrentRequests")
 }

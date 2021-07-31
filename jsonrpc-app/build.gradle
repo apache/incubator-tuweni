@@ -21,6 +21,7 @@ dependencies {
   implementation project(':concurrent')
   implementation project(':eth')
   implementation project(':jsonrpc')
+  implementation project(':kv')
   implementation project(':metrics')
   implementation project(':net')
   implementation project(':units')
@@ -40,6 +41,8 @@ dependencies {
   implementation 'io.opentelemetry:opentelemetry-sdk-metrics'
   implementation 'javax.servlet:javax.servlet-api'
   implementation 'org.bouncycastle:bcprov-jdk15on'
+  implementation 'org.infinispan:infinispan-core'
+  implementation 'org.infinispan:infinispan-cachestore-rocksdb'
   implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
   implementation 'org.slf4j:slf4j-api'
   implementation 'org.jetbrains.kotlin:kotlin-stdlib'
