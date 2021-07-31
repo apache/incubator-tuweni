@@ -20,11 +20,13 @@ import com.netflix.concurrency.limits.limit.FixedLimit
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import io.opentelemetry.api.metrics.LongCounter
 import io.opentelemetry.api.metrics.common.Labels
+import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.eth.methodNotEnabled
 import org.apache.tuweni.eth.methodNotFound
 import org.apache.tuweni.eth.tooManyRequests
+import org.apache.tuweni.kv.KeyValueStore
 
 class MethodsRouter(val methodsMap: Map<String, (JSONRPCRequest) -> JSONRPCResponse>) {
 
@@ -93,6 +95,36 @@ class ThrottlingHandler(private val threshold: Int, private val delegateHandler:
   }
 }
 
-// TODO DelegateHandler - choose from a number of handlers to see which to delegate to.
-// TODO FilterHandler - filter incoming requests per allowlist
-// TODO CachingHandler - cache some incoming requests
+class CachingHandler(private val allowedMethods: List<String>, private val cacheStore: KeyValueStore<String, JSONRPCResponse>, private val delegateHandler: (JSONRPCRequest) -> JSONRPCResponse) {
+
+  fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
+    var found = false
+    for (method in allowedMethods) {
+      if (request.method.startsWith(method)) {
+        found = true
+        break
+      }
+    }
+    if (!found) {
+      return delegateHandler(request)
+    } else {
+      val serializedRequest = serializeRequest(request)
+      return runBlocking {
+        var response = cacheStore.get(serializedRequest)
+        if (response == null) {
+          response = delegateHandler(request)
+          if (response.error == null) {
+            cacheStore.put(serializedRequest, response)
+          }
+          response
+        } else {
+          return@runBlocking response.copy(id = request.id)
+        }
+      }
+    }
+  }
+
+  private fun serializeRequest(request: JSONRPCRequest): String {
+    return request.method + "|" + request.params.joinToString(",")
+  }
+}
