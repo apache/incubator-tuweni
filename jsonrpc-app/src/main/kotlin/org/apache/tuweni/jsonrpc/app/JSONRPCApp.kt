@@ -74,7 +74,7 @@ class JSONRPCApplication(
 ) {
 
   fun run() {
-    val client = JSONRPCClient(vertx, config.endpointPort(), config.endpointHost())
+    val client = JSONRPCClient(vertx, config.endpointPort(), config.endpointHost(), basicAuthenticationEnabled = config.endpointBasicAuthEnabled(), basicAuthenticationUsername = config.endpointBasicAuthUsername(), basicAuthenticationPassword = config.endpointBasicAuthPassword())
     // TODO allow more options such as allowlist of certificates, enforce client authentication.
     val trustOptions = VertxTrustOptions.recordClientFingerprints(config.clientFingerprintsFile())
 

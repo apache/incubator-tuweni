@@ -49,6 +49,9 @@ class JSONRPCConfig(val filePath: Path) {
       .addListOfString("rejectedRanges", Collections.emptyList(), "Rejected IP ranges", null)
       .addInteger("endpointPort", 8545, "JSON-RPC endpoint port", PropertyValidator.isValidPort())
       .addString("endpointHost", "localhost", "JSON-RPC endpoint host", null)
+      .addBoolean("endpointBasicAuthEnabled", false, "Enable basic authentication for the endpoint", null)
+      .addString("endpointBasicAuthUsername", "", "Basic authentication username for the endpoint", null)
+      .addString("endpointBasicAuthPassword", "", "Basic authentication password for the endpoint", null)
       .toSchema()
   }
 
@@ -74,4 +77,8 @@ class JSONRPCConfig(val filePath: Path) {
 
   fun endpointPort() = config.getInteger("endpointPort")
   fun endpointHost() = config.getString("endpointHost")
+
+  fun endpointBasicAuthEnabled() = config.getBoolean("endpointBasicAuthEnabled")
+  fun endpointBasicAuthUsername() = config.getString("endpointBasicAuthUsername")
+  fun endpointBasicAuthPassword() = config.getString("endpointBasicAuthPassword")
 }
