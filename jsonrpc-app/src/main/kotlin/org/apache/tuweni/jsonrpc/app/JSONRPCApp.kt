@@ -21,6 +21,7 @@ import io.vertx.core.VertxOptions
 import io.vertx.tracing.opentelemetry.OpenTelemetryOptions
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.eth.internalError
 import org.apache.tuweni.jsonrpc.JSONRPCClient
 import org.apache.tuweni.jsonrpc.JSONRPCServer
 import org.apache.tuweni.jsonrpc.methods.MeteredHandler
@@ -79,7 +80,12 @@ class JSONRPCApplication(
 
     val allowListHandler = MethodAllowListHandler(config.allowedMethods()) { req ->
       runBlocking {
-        client.sendRequest(req).await()
+        try {
+          client.sendRequest(req).await()
+        } catch (e: Exception) {
+          logger.error("Error sending JSON-RPC request", e)
+          internalError.copy(id = req.id)
+        }
       }
     }
 

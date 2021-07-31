@@ -91,26 +91,15 @@ class JSONRPCClient(
    * @throws ConnectException if it cannot dial the remote client
    */
   suspend fun getBalance_latest(address: Address): UInt256 {
-    val body = mapOf(
-      Pair("jsonrpc", "2.0"),
-      Pair("method", "eth_getBalance"),
-      Pair("id", 1),
-      Pair("params", listOf(address.toHexString(), "latest"))
-    )
-    val deferred = CompletableDeferred<UInt256>()
-
-    client.post(serverPort, serverHost, "/")
-      .putHeader("Content-Type", "application/json")
-      .sendBuffer(Buffer.buffer(mapper.writeValueAsBytes(body))) { response ->
-        if (response.failed()) {
-          deferred.completeExceptionally(response.cause())
-        } else {
-          val jsonResponse = response.result().bodyAsJsonObject()
-          deferred.complete(UInt256.fromHexString(jsonResponse.getString("result")))
-        }
-      }
-
-    return deferred.await()
+    val body = JSONRPCRequest(nextId(), "eth_getBalance", arrayOf(address.toHexString(), "latest"))
+    val jsonResponse = sendRequest(body).await()
+    val err = jsonResponse.error
+    if (err != null) {
+      val errorMessage = "Code ${err.code}: ${err.message}"
+      throw ClientRequestException(errorMessage)
+    } else {
+      return UInt256.fromHexString(jsonResponse.result.toString())
+    }
   }
 
   /**
