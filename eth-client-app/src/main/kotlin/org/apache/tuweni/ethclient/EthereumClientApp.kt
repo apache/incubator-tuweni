@@ -18,32 +18,25 @@ package org.apache.tuweni.ethclient
 
 import io.vertx.core.Vertx
 import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.app.commons.ApplicationUtils
 import org.apache.tuweni.ethclientui.UI
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import picocli.CommandLine
-import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import java.security.Security
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) = runBlocking {
-  val asciiart =
-    AppOptions::class.java.getResourceAsStream("/tuweni.txt").readAllBytes().toString(StandardCharsets.UTF_8)
-  if (System.console() != null) {
-    asciiart.split("\n").forEachIndexed { lineNo, line ->
-      if (lineNo % 2 == 0) {
-        println("\u001b[5;37m$line\u001b[0m")
-      } else {
-        println(line)
-      }
-    }
-    println("Apache Tuweni client loading")
-  }
+  ApplicationUtils.renderBanner("Apache Tuweni client loading")
   Security.addProvider(BouncyCastleProvider())
   val opts = CommandLine.populateCommand(AppOptions(), *args)
 
   if (opts.help) {
     CommandLine(opts).usage(System.out)
+    exitProcess(0)
+  }
+  if (opts.version) {
+    println("Apache Tuweni #{ApplicationUtils.version}")
     exitProcess(0)
   }
 
@@ -63,6 +56,9 @@ class AppOptions {
 
   @CommandLine.Option(names = ["-h", "--help"], description = ["Prints usage prompt"])
   var help: Boolean = false
+
+  @CommandLine.Option(names = ["-v", "--version"], description = ["Prints version"])
+  var version: Boolean = false
 
   @CommandLine.Option(names = ["-w", "--web"], description = ["Web console host:port"], defaultValue = "127.0.0.1:8080")
   var web: String? = null
