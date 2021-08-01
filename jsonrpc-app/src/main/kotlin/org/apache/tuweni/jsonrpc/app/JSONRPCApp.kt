@@ -22,6 +22,7 @@ import io.vertx.core.VertxOptions
 import io.vertx.tracing.opentelemetry.OpenTelemetryOptions
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.app.commons.ApplicationUtils
 import org.apache.tuweni.eth.internalError
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.eth.JSONRPCResponse
@@ -50,6 +51,7 @@ import org.slf4j.LoggerFactory
 import java.nio.file.Paths
 import java.security.Security
 import java.util.concurrent.Executors
+import kotlin.system.exitProcess
 
 val logger = LoggerFactory.getLogger(JSONRPCApp::class.java)
 
@@ -60,6 +62,15 @@ object JSONRPCApp {
 
   @JvmStatic
   fun main(args: Array<String>) {
+    if (args.contains("--version")) {
+      println("Apache Tuweni JSON-RPC proxy ${ApplicationUtils.version}")
+      exitProcess(0)
+    }
+    if (args.contains("--help") || args.contains("-h")) {
+      println("USAGE: jsonrpc <config file>")
+      exitProcess(0)
+    }
+    ApplicationUtils.renderBanner("Loading JSON-RPC proxy")
     val configFile = Paths.get(if (args.isNotEmpty()) args[0] else "config.toml")
     Security.addProvider(BouncyCastleProvider())
 

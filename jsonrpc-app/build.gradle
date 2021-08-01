@@ -15,6 +15,7 @@ plugins { id 'application' }
 description = 'Ethereum JSON-RPC client application'
 
 dependencies {
+  implementation project(':app-commons')
   implementation project(':bytes')
   implementation project(':config')
   implementation project(':crypto')
