@@ -64,13 +64,13 @@ class JSONRPCClientTest {
         },
         coroutineContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
       )
-      server!!.start().await()
+      server!!.start()
     }
 
     @JvmStatic
     @AfterAll
     fun stopServer(): Unit = runBlocking {
-      server?.stop()?.await()
+      server?.stop()
     }
   }
 
@@ -78,7 +78,7 @@ class JSONRPCClientTest {
   fun testSendTransaction(@VertxInstance vertx: Vertx) = runBlocking {
     val keyPair =
       SECP256K1.KeyPair.fromSecretKey(SECP256K1.SecretKey.fromBytes(Bytes32.rightPad(Bytes.fromHexString("0102"))))
-    JSONRPCClient(vertx, server!!.port(), "localhost").use {
+    JSONRPCClient(vertx, "http://localhost:" + server!!.port()).use {
       val tx = Transaction(
         UInt256.ONE,
         Wei.valueOf(2),
@@ -108,7 +108,7 @@ class JSONRPCClientTest {
 
   @Test
   fun testGetBalanceToMissingClient(@VertxInstance vertx: Vertx) {
-    JSONRPCClient(vertx, 1234, "localhost").use {
+    JSONRPCClient(vertx, "http://localhost:1234").use {
       assertThrows<ConnectException> {
         runBlocking { it.getBalance_latest(Address.fromHexString("0x0102030405060708090a0b0c0d0e0f0102030405")) }
       }

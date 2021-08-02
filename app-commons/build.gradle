@@ -33,10 +33,10 @@ def copyrightHeader = """
 """
 
 processResources {
-  doFirst {
+  doLast {
     def resourcesDir = sourceSets.main.output.resourcesDir
     resourcesDir.mkdirs()
-    def contents = "copyrightHeader\r\nversion=$rootProject.version"
+    def contents = "$copyrightHeader\r\nversion=$rootProject.version"
     new File(resourcesDir, "project-info.properties").text = contents
   }
 }

@@ -20,6 +20,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.vertx.core.Vertx
 import io.vertx.core.VertxOptions
 import io.vertx.tracing.opentelemetry.OpenTelemetryOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.app.commons.ApplicationUtils
@@ -51,6 +53,7 @@ import org.slf4j.LoggerFactory
 import java.nio.file.Paths
 import java.security.Security
 import java.util.concurrent.Executors
+import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess
 
 val logger = LoggerFactory.getLogger(JSONRPCApp::class.java)
@@ -97,22 +100,22 @@ object JSONRPCApp {
 class JSONRPCApplication(
   val vertx: Vertx,
   val config: JSONRPCConfig,
-  val metricsService: MetricsService
-) {
+  val metricsService: MetricsService,
+  override val coroutineContext: CoroutineContext = Dispatchers.Unconfined,
+) : CoroutineScope {
 
   fun run() {
-    val client = JSONRPCClient(vertx, config.endpointPort(), config.endpointHost(), basicAuthenticationEnabled = config.endpointBasicAuthEnabled(), basicAuthenticationUsername = config.endpointBasicAuthUsername(), basicAuthenticationPassword = config.endpointBasicAuthPassword())
+    logger.info("JSON-RPC proxy starting")
+    val client = JSONRPCClient(vertx, config.endpointUrl(), basicAuthenticationEnabled = config.endpointBasicAuthEnabled(), basicAuthenticationUsername = config.endpointBasicAuthUsername(), basicAuthenticationPassword = config.endpointBasicAuthPassword())
     // TODO allow more options such as allowlist of certificates, enforce client authentication.
     val trustOptions = VertxTrustOptions.recordClientFingerprints(config.clientFingerprintsFile())
 
     val allowListHandler = MethodAllowListHandler(config.allowedMethods()) { req ->
-      runBlocking {
-        try {
-          client.sendRequest(req).await()
-        } catch (e: Exception) {
-          logger.error("Error sending JSON-RPC request", e)
-          internalError.copy(id = req.id)
-        }
+      try {
+        client.sendRequest(req).await()
+      } catch (e: Exception) {
+        logger.error("Error sending JSON-RPC request", e)
+        internalError.copy(id = req.id)
       }
     }
 
@@ -127,7 +130,8 @@ class JSONRPCApplication(
       val cache: Cache<String, JSONRPCResponse> = manager.createCache(
         "responses",
         ConfigurationBuilder().persistence().addStore(RocksDBStoreConfigurationBuilder::class.java)
-          .location(config.cacheStoragePath()).build()
+          .location(Paths.get(config.cacheStoragePath(), "storage").toAbsolutePath().toString())
+          .expiredLocation(Paths.get(config.cacheStoragePath(), "expired").toAbsolutePath().toString()).build()
       )
 
       val cachingHandler =
@@ -161,13 +165,13 @@ class JSONRPCApplication(
     Runtime.getRuntime().addShutdownHook(
       Thread {
         runBlocking {
-          server.stop().await()
+          server.stop()
           client.close()
         }
       }
     )
     runBlocking {
-      server.start().await()
+      server.start()
       logger.info("JSON-RPC server started")
     }
   }
