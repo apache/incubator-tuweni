@@ -57,14 +57,14 @@ class JSONRPCServerTest {
       },
       coroutineContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     )
-    server.start().await()
+    server.start()
     try {
       val client = vertx.createHttpClient()
       val request = client.request(HttpMethod.POST, server.port(), server.networkInterface, "/").await()
       val response = request.send("{\"id\":1,\"method\":\"eth_client\",\"params\":[]}").await()
       assertEquals(200, response.statusCode())
     } finally {
-      server.stop().await()
+      server.stop()
     }
   }
 
@@ -81,7 +81,7 @@ class JSONRPCServerTest {
       basicAuthRealm = "my realm",
       coroutineContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     )
-    server.start().await()
+    server.start()
     try {
       val client = vertx.createHttpClient()
       val request = client.request(HttpMethod.POST, server.port(), server.networkInterface, "/").await()
@@ -103,7 +103,7 @@ class JSONRPCServerTest {
         assertEquals(401, authedResponse.statusCode())
       }
     } finally {
-      server.stop().await()
+      server.stop()
     }
   }
 }

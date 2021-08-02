@@ -37,12 +37,14 @@ import io.vertx.ext.web.handler.BasicAuthHandler
 import io.vertx.ext.web.handler.SessionHandler
 import io.vertx.ext.web.sstore.LocalSessionStore
 import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.eth.internalError
@@ -65,7 +67,7 @@ class JSONRPCServer(
   val basicAuthRealm: String = "Apache Tuweni JSON-RPC proxy",
   val ipRangeChecker: IPRangeChecker = IPRangeChecker.allowAll(),
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
-  val methodHandler: (JSONRPCRequest) -> JSONRPCResponse,
+  val methodHandler: suspend (JSONRPCRequest) -> JSONRPCResponse,
 ) : CoroutineScope {
 
   companion object {
@@ -90,12 +92,12 @@ class JSONRPCServer(
     }
   }
 
-  fun start() = async {
+  suspend fun start() {
     val serverOptions = HttpServerOptions().setPort(port).setHost(networkInterface).setSsl(ssl).setTracingPolicy(TracingPolicy.ALWAYS)
     trustOptions?.let {
       serverOptions.setTrustOptions(it)
     }
-    httpServer = vertx.createHttpServer()
+    httpServer = vertx.createHttpServer(serverOptions)
     httpServer?.connectionHandler {
       val remoteAddress = it.remoteAddress().hostAddress()
       if (!ipRangeChecker.check(remoteAddress)) {
@@ -131,20 +133,25 @@ class JSONRPCServer(
         httpRequest.response().end(mapper.writeValueAsString(internalError))
       }
       httpRequest.bodyHandler {
-        val responses = mutableListOf<Deferred<JSONRPCResponse>>()
-        val requests: Array<JSONRPCRequest>
+        var requests: Array<JSONRPCRequest>
         try {
           requests = mapper.readerFor(Array<JSONRPCRequest>::class.java).readValue(it.bytes)
         } catch (e: IOException) {
-          logger.warn("Invalid request", e)
-          httpRequest.response().end(mapper.writeValueAsString(parseError))
-          return@bodyHandler
+          try {
+            requests = arrayOf(mapper.readerFor(JSONRPCRequest::class.java).readValue(it.bytes))
+          } catch (e: IOException) {
+            logger.warn("Invalid request", e)
+            httpRequest.response().end(mapper.writeValueAsString(parseError))
+            return@bodyHandler
+          }
         }
-        for (request in requests) {
-          responses.add(handleRequest(request))
-        }
-        // TODO replace with launch.
-        runBlocking {
+
+        launch(vertx.dispatcher()) {
+          val responses = mutableListOf<Deferred<JSONRPCResponse>>()
+          for (request in requests) {
+            logger.trace("Request {}", request)
+            responses.add(handleRequest(request))
+          }
           val readyResponses = responses.awaitAll()
           if (readyResponses.size == 1) {
             httpRequest.response().end(mapper.writeValueAsString(readyResponses.get(0)))
@@ -156,13 +163,17 @@ class JSONRPCServer(
     }
     httpServer?.requestHandler(router)
     httpServer?.listen()?.await()
+    logger.info("Started JSON-RPC server on $networkInterface:${port()}")
   }
 
-  private fun handleRequest(request: JSONRPCRequest): Deferred<JSONRPCResponse> = async {
-    methodHandler(request)
-  }
+  private suspend fun handleRequest(request: JSONRPCRequest): Deferred<JSONRPCResponse> =
+    coroutineScope {
+      async {
+        methodHandler(request)
+      }
+    }
 
-  fun stop() = async {
+  suspend fun stop() {
     httpServer?.close()?.await()
   }
 

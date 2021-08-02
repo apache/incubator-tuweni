@@ -63,7 +63,7 @@ class FaucetController(@Autowired val vertx: Vertx, @Autowired val wallet: Walle
 
   @PostConstruct
   fun createClient() {
-    jsonrpcClient = JSONRPCClient(vertx, rpcPort!!, rpcHost!!)
+    jsonrpcClient = JSONRPCClient(vertx, "http://$rpcHost:$rpcPort")
   }
 
   @GetMapping("/")

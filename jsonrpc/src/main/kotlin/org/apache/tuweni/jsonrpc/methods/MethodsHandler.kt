@@ -20,7 +20,6 @@ import com.netflix.concurrency.limits.limit.FixedLimit
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import io.opentelemetry.api.metrics.LongCounter
 import io.opentelemetry.api.metrics.common.Labels
-import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.eth.methodNotEnabled
@@ -28,9 +27,9 @@ import org.apache.tuweni.eth.methodNotFound
 import org.apache.tuweni.eth.tooManyRequests
 import org.apache.tuweni.kv.KeyValueStore
 
-class MethodsRouter(val methodsMap: Map<String, (JSONRPCRequest) -> JSONRPCResponse>) {
+class MethodsRouter(val methodsMap: Map<String, suspend (JSONRPCRequest) -> JSONRPCResponse>) {
 
-  fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
+  suspend fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
     val methodHandler = methodsMap[request.method]
     if (methodHandler == null) {
       return methodNotFound
@@ -40,9 +39,13 @@ class MethodsRouter(val methodsMap: Map<String, (JSONRPCRequest) -> JSONRPCRespo
   }
 }
 
-class MeteredHandler(private val successCounter: LongCounter, private val failCounter: LongCounter, private val delegateHandler: (JSONRPCRequest) -> JSONRPCResponse) {
+class MeteredHandler(
+  private val successCounter: LongCounter,
+  private val failCounter: LongCounter,
+  private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse,
+) {
 
-  fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
+  suspend fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
     val resp = delegateHandler(request)
     val labels = Labels.of("method", request.method)
     if (resp.error != null) {
@@ -54,9 +57,12 @@ class MeteredHandler(private val successCounter: LongCounter, private val failCo
   }
 }
 
-class MethodAllowListHandler(private val allowedMethods: List<String>, private val delegateHandler: (JSONRPCRequest) -> JSONRPCResponse) {
+class MethodAllowListHandler(
+  private val allowedMethods: List<String>,
+  private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse,
+) {
 
-  fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
+  suspend fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
     var found = false
     for (method in allowedMethods) {
       if (request.method.startsWith(method)) {
@@ -71,14 +77,17 @@ class MethodAllowListHandler(private val allowedMethods: List<String>, private v
   }
 }
 
-class ThrottlingHandler(private val threshold: Int, private val delegateHandler: (JSONRPCRequest) -> JSONRPCResponse) {
+class ThrottlingHandler(
+  private val threshold: Int,
+  private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse,
+) {
 
   private val limiter: SimpleLimiter<Void> = SimpleLimiter
     .newBuilder()
     .limit(FixedLimit.of(threshold))
     .build()
 
-  fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
+  suspend fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
     val listener = limiter.acquire(null)
     if (listener.isEmpty) {
       return tooManyRequests.copy(id = request.id)
@@ -95,9 +104,13 @@ class ThrottlingHandler(private val threshold: Int, private val delegateHandler:
   }
 }
 
-class CachingHandler(private val allowedMethods: List<String>, private val cacheStore: KeyValueStore<String, JSONRPCResponse>, private val delegateHandler: (JSONRPCRequest) -> JSONRPCResponse) {
+class CachingHandler(
+  private val allowedMethods: List<String>,
+  private val cacheStore: KeyValueStore<String, JSONRPCResponse>,
+  private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse,
+) {
 
-  fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
+  suspend fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
     var found = false
     for (method in allowedMethods) {
       if (request.method.startsWith(method)) {
@@ -109,17 +122,15 @@ class CachingHandler(private val allowedMethods: List<String>, private val cache
       return delegateHandler(request)
     } else {
       val serializedRequest = serializeRequest(request)
-      return runBlocking {
-        var response = cacheStore.get(serializedRequest)
-        if (response == null) {
-          response = delegateHandler(request)
-          if (response.error == null) {
-            cacheStore.put(serializedRequest, response)
-          }
-          response
-        } else {
-          return@runBlocking response.copy(id = request.id)
+      val response = cacheStore.get(serializedRequest)
+      return if (response == null) {
+        val newResponse = delegateHandler(request)
+        if (newResponse.error == null) {
+          cacheStore.put(serializedRequest, newResponse)
         }
+        newResponse
+      } else {
+        response.copy(id = request.id)
       }
     }
   }

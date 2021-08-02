@@ -22,7 +22,7 @@ import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.eth.invalidParams
 
-fun sha3(request: JSONRPCRequest): JSONRPCResponse {
+suspend fun sha3(request: JSONRPCRequest): JSONRPCResponse {
   if (request.params.size != 1) {
     return invalidParams.copy(id = request.id)
   }
@@ -35,7 +35,7 @@ fun sha3(request: JSONRPCRequest): JSONRPCResponse {
 }
 
 class ClientVersion(val clientId: String) {
-  fun handle(request: JSONRPCRequest): JSONRPCResponse {
+  suspend fun handle(request: JSONRPCRequest): JSONRPCResponse {
     return JSONRPCResponse(id = request.id, result = clientId)
   }
 }

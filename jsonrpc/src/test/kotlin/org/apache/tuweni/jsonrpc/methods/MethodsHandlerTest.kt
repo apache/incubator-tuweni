@@ -40,19 +40,19 @@ import java.util.Collections
 class MethodsHandlerTest {
 
   @Test
-  fun testMissingMethod() {
+  fun testMissingMethod() = runBlocking {
     val methodsRouter = MethodsRouter(emptyMap())
     assertEquals(methodNotFound, methodsRouter.handleRequest(JSONRPCRequest(1, "web3_sha3", arrayOf("0xdeadbeef"))))
   }
 
   @Test
-  fun testRouteMethod() {
+  fun testRouteMethod() = runBlocking {
     val methodsRouter = MethodsRouter(mapOf(Pair("web3_sha3", ::sha3)))
     assertEquals(JSONRPCResponse(1, result = "0xd4fd4e189132273036449fc9e11198c739161b4c0116a9a2dccdfa1c492006f1"), methodsRouter.handleRequest(JSONRPCRequest(1, "web3_sha3", arrayOf("0xdeadbeef"))))
   }
 
   @Test
-  fun testCountSuccess() {
+  fun testCountSuccess() = runBlocking {
     val exporter = InMemoryMetricExporter.create()
     val meterSdk = SdkMeterProvider.builder().build()
     val meter = meterSdk.get("handler")
@@ -80,7 +80,7 @@ class MethodsHandlerTest {
   }
 
   @Test
-  fun testFailMeter() {
+  fun testFailMeter() = runBlocking {
     val exporter = InMemoryMetricExporter.create()
     val meterSdk = SdkMeterProvider.builder().build()
     val meter = meterSdk.get("handler")
@@ -111,14 +111,14 @@ class MethodsHandlerTest {
 class MethodAllowListHandlerTest {
 
   @Test
-  fun testAllowedMethod() {
+  fun testAllowedMethod() = runBlocking {
     val filter = MethodAllowListHandler(listOf("eth_")) { JSONRPCResponse(1, "foo") }
     val resp = filter.handleRequest(JSONRPCRequest(1, "eth_client", emptyArray()))
     assertNull(resp.error)
   }
 
   @Test
-  fun testForbiddenMethod() {
+  fun testForbiddenMethod() = runBlocking {
     val filter = MethodAllowListHandler(listOf("eth_")) { JSONRPCResponse(1, "foo") }
     val resp = filter.handleRequest(JSONRPCRequest(1, "foo_client", emptyArray()))
     assertNotNull(resp.error)
@@ -170,7 +170,7 @@ class ThrottlingHandlerTest {
 class CachingHandlerTest {
 
   @Test
-  fun testCache() {
+  fun testCache() = runBlocking {
     val map = HashMap<String, JSONRPCResponse>()
     val kv = MapKeyValueStore.open(map)
     val handler = CachingHandler(listOf("foo"), kv) {
