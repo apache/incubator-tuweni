@@ -32,7 +32,7 @@ import org.apache.tuweni.devp2p.Peer
 import org.apache.tuweni.devp2p.PeerRepository
 import org.apache.tuweni.devp2p.eth.Status
 import org.apache.tuweni.devp2p.parseEnodeUri
-import org.apache.tuweni.eth.crawler.rest.ClientVersion
+import org.apache.tuweni.eth.crawler.rest.ClientIdInfo
 import org.apache.tuweni.rlpx.wire.WireConnection
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -228,6 +228,7 @@ open class RelationalPeerRepository(
 
   private var clientIds: List<ClientInfo>? = null
   private var londonStats: ClientReadyStats? = null
+  private var clientsStats: Map<String, Map<String, Long>>? = null
   private val started = AtomicBoolean(false)
 
   fun start() {
@@ -241,18 +242,24 @@ open class RelationalPeerRepository(
         clientIds = newClientIds
         var londonReady = 0
         var total = 0
+        val newClientsStats = mutableMapOf<String, MutableMap<String, Long>>()
         newClientIds.forEach { newClientCount ->
           total += newClientCount.count
-          val clientVersion = ClientVersion(newClientCount.clientId)
+          val clientVersion = ClientIdInfo(newClientCount.clientId)
+          val versionStats = newClientsStats.computeIfAbsent(clientVersion.name) { mutableMapOf() }
+          val statsCount = versionStats[clientVersion.version] ?: 0
+          versionStats[clientVersion.version] = statsCount + newClientCount.count
           londonClientVersions[clientVersion.name().toLowerCase()]?.let { londonVersion ->
             if (clientVersion >= londonVersion) {
               londonReady += newClientCount.count
             }
           }
         }
+        clientsStats = newClientsStats
         londonStats = ClientReadyStats(total, londonReady)
         totalClientsGauge.record(total.toLong())
         clientCalculationsCounter.add(1)
+
         delay(clientsStatsDelay)
       }
     }
@@ -265,6 +272,8 @@ open class RelationalPeerRepository(
   internal fun getLondonStats() = londonStats
 
   internal fun getClientIds(): List<ClientInfo> = clientIds ?: listOf()
+
+  internal fun getClientStats(): Map<String, Map<String, Long>> = clientsStats ?: mapOf()
 
   internal fun getClientIdsInternal(): List<ClientInfo> {
     dataSource.connection.use { conn ->
