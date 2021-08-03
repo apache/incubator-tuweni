@@ -11,7 +11,9 @@
 
 FROM openjdk:11.0.3-jre-stretch
 
-RUN apt-get update && apt-get install -y libsodium-dev
+RUN apt-get update \
+ && apt-get install -y libsodium-dev \
+ && rm -rf /var/lib/apt/lists/*
 
 COPY build/distributions/tuweni-bin-*.tgz /usr/tuweni.tgz
 RUN cd /usr \
