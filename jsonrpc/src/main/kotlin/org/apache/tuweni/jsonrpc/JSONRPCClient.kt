@@ -40,8 +40,7 @@ val mapper = ObjectMapper()
  */
 class JSONRPCClient(
   vertx: Vertx,
-  val serverPort: Int,
-  val serverHost: String,
+  val endpointUrl: String,
   val userAgent: String = "Apache Tuweni JSON-RPC Client",
   val basicAuthenticationEnabled: Boolean = false,
   val basicAuthenticationUsername: String = "",
@@ -54,7 +53,7 @@ class JSONRPCClient(
 
   suspend fun sendRequest(request: JSONRPCRequest): Deferred<JSONRPCResponse> {
     val deferred = CompletableDeferred<JSONRPCResponse>()
-    val httpRequest = client.post(serverPort, serverHost, "/")
+    val httpRequest = client.postAbs(endpointUrl)
       .putHeader("Content-Type", "application/json")
 
     if (basicAuthenticationEnabled) {

@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class JSONRPCResponse(@JsonProperty("id") val id: Int, @JsonProperty("result") val result: Any? = null, @JsonProperty("error") val error: JSONRPCError? = null)
+data class JSONRPCResponse(@JsonProperty("id") val id: Int, @JsonProperty("result") val result: Any? = null, @JsonProperty("error") val error: JSONRPCError? = null, @JsonProperty("jsonrpc") val jsonrpc: String = "2.0")
 
 data class JSONRPCError(@JsonProperty("code") val code: Int, @JsonProperty("message") val message: String)
 
