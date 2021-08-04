@@ -23,6 +23,7 @@ import org.apache.tuweni.eth.crawler.RelationalPeerRepository
 import javax.servlet.ServletContext
 import javax.ws.rs.GET
 import javax.ws.rs.Path
+import javax.ws.rs.PathParam
 import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
 
@@ -51,12 +52,10 @@ class ClientsService {
     return result
   }
 
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("london/stats")
-  fun getLondonStats(): String {
+  @Path("{upgrade}/stats")
+  fun getClientStats(@PathParam("upgrade") upgrade: String): String {
     val repo = context!!.getAttribute("repo") as RelationalPeerRepository
-    val peers = repo.getLondonStats()
+    val peers = repo.getUpgradeStats()[upgrade]
     val result = mapper.writeValueAsString(peers)
     return result
   }

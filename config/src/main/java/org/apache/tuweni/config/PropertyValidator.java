@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
+import com.google.common.base.Strings;
+
 /**
  * A validator associated with a specific configuration property.
  */
@@ -208,9 +210,9 @@ public interface PropertyValidator<T> {
   }
 
   /**
-   * A validator that ensures a property, if present, is a well-formed port number.
+   * A validator that ensures a property, if present, is a valid port number.
    *
-   * @return A validator that ensures a property, if present, is a well-formed number.
+   * @return A validator that ensures a property, if present, is a valid port number.
    */
   static PropertyValidator<Integer> isValidPort() {
     return (key, position, value) -> {
@@ -220,6 +222,21 @@ public interface PropertyValidator<T> {
       return noErrors();
     };
   }
+
+  /**
+   * A validator that ensures a property, if present, is not blank.
+   *
+   * @return A validator that ensures a property, if present, is not blank.
+   */
+  static PropertyValidator<String> isNotBlank() {
+    return (key, position, value) -> {
+      if (value != null && !Strings.isNullOrEmpty(value)) {
+        return singleError(position, "Value of property '" + key + "' is blank");
+      }
+      return noErrors();
+    };
+  }
+
 
   /**
    * Validate a configuration property.
