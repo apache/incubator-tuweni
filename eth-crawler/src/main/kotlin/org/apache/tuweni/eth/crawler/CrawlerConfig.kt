@@ -18,6 +18,7 @@ package org.apache.tuweni.eth.crawler
 
 import org.apache.tuweni.config.Configuration
 import org.apache.tuweni.config.PropertyValidator
+import org.apache.tuweni.config.Schema
 import org.apache.tuweni.config.SchemaBuilder
 import java.net.URI
 import java.nio.file.Path
@@ -48,38 +49,46 @@ class CrawlerConfig(val filePath: Path) {
 
     val mainnetDiscoveryDNS = "enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@all.mainnet.ethdisco.net"
 
-    fun schema() = SchemaBuilder.create()
-      .addInteger("discoveryPort", 11000, "Discovery service port", PropertyValidator.isValidPort())
-      .addString("discoveryNetworkInterface", "127.0.0.1", "Discovery network interface", null)
-      .addInteger("rlpxPort", 11000, "RLPx service port", PropertyValidator.inRange(1, 65536))
-      .addString("rlpxNetworkInterface", "127.0.0.1", "RLPx network interface", null)
-      .addListOfString("bootnodes", mainnetEthereumBootnodes, "Bootnodes to discover other peers from", null)
-      .addString("discoveryDNS", mainnetDiscoveryDNS, "DNS discovery crawler", null)
-      .addLong("discoveryDNSPollingPeriod", 60 * 1000L, "DNS Discovery Polling Period in milliseconds", null)
-      .addString(
-        "jdbcUrl", System.getProperty("DATABASE_URL", System.getenv("DATABASE_URL")),
-        "JDBC URL of the form jdbc:posgresql://localhost:5432", PropertyValidator.isPresent()
-      )
-      .addInteger("jdbcConnections", 25, "Number of JDBC connections for the connections pool", null)
-      .addString("network", "mainnet", "Network to use instead of providing a genesis file.", null)
-      .addString("genesisFile", "", "Genesis file to use in hello", null)
-      .addInteger("restPort", 1337, "REST port", null)
-      .addString("restNetworkInterface", "0.0.0.0", "REST network interface", null)
-      .addString("ethstatsNetworkInterface", "0.0.0.0", "Ethstats network interface", null)
-      .addInteger("ethstatsPort", 1338, "Ethstats port", null)
-      .addString("ethstatsSecret", "changeme", "Ethstats shared secret", null)
-      .addLong("peerCacheExpiration", 5 * 60 * 1000L, "Peer data cache expiration", null)
-      .addLong("clientIdsInterval", 24 * 60 * 60 * 1000 * 2L, "Client IDs Interval - number of milliseconds to go back in time", null)
-      .addLong("clientsStatsDelay", 30 * 1000, "Delay between client stats calculations", null)
-      .addLong("rlpxDisconnectionDelay", 10 * 1000L, "RLPx connections disconnection delay", null)
-      .addInteger("maxRequestsPerSec", 30, "Number of requests per second over HTTP", null)
-      .addInteger("numberOfThreads", 10, "Number of Threads for each thread pool", null)
-      .addInteger("metricsPort", 9090, "Metric service port", PropertyValidator.isValidPort())
-      .addString("metricsNetworkInterface", "localhost", "Metric service network interface", null)
-      .addBoolean("metricsGrpcPushEnabled", false, "Enable pushing metrics to gRPC service", null)
-      .addBoolean("metricsPrometheusEnabled", false, "Enable exposing metrics on the Prometheus endpoint", null)
-      .addString("corsAllowedOrigins", "*", "CORS allowed domains filter for REST service", null)
-      .toSchema()
+    fun schema(): Schema {
+      val schema = SchemaBuilder.create()
+        .addInteger("discoveryPort", 11000, "Discovery service port", PropertyValidator.isValidPort())
+        .addString("discoveryNetworkInterface", "127.0.0.1", "Discovery network interface", null)
+        .addInteger("rlpxPort", 11000, "RLPx service port", PropertyValidator.inRange(1, 65536))
+        .addString("rlpxNetworkInterface", "127.0.0.1", "RLPx network interface", null)
+        .addListOfString("bootnodes", mainnetEthereumBootnodes, "Bootnodes to discover other peers from", null)
+        .addString("discoveryDNS", mainnetDiscoveryDNS, "DNS discovery crawler", null)
+        .addLong("discoveryDNSPollingPeriod", 60 * 1000L, "DNS Discovery Polling Period in milliseconds", null)
+        .addString(
+          "jdbcUrl", System.getProperty("DATABASE_URL", System.getenv("DATABASE_URL")),
+          "JDBC URL of the form jdbc:posgresql://localhost:5432", PropertyValidator.isPresent()
+        )
+        .addInteger("jdbcConnections", 25, "Number of JDBC connections for the connections pool", null)
+        .addString("network", "mainnet", "Network to use instead of providing a genesis file.", null)
+        .addString("genesisFile", "", "Genesis file to use in hello", null)
+        .addInteger("restPort", 1337, "REST port", null)
+        .addString("restNetworkInterface", "0.0.0.0", "REST network interface", null)
+        .addString("ethstatsNetworkInterface", "0.0.0.0", "Ethstats network interface", null)
+        .addInteger("ethstatsPort", 1338, "Ethstats port", null)
+        .addString("ethstatsSecret", "changeme", "Ethstats shared secret", null)
+        .addLong("peerCacheExpiration", 5 * 60 * 1000L, "Peer data cache expiration", null)
+        .addLong("clientIdsInterval", 24 * 60 * 60 * 1000 * 2L, "Client IDs Interval - number of milliseconds to go back in time", null)
+        .addLong("clientsStatsDelay", 30 * 1000, "Delay between client stats calculations", null)
+        .addLong("rlpxDisconnectionDelay", 10 * 1000L, "RLPx connections disconnection delay", null)
+        .addInteger("maxRequestsPerSec", 30, "Number of requests per second over HTTP", null)
+        .addInteger("numberOfThreads", 10, "Number of Threads for each thread pool", null)
+        .addInteger("metricsPort", 9090, "Metric service port", PropertyValidator.isValidPort())
+        .addString("metricsNetworkInterface", "localhost", "Metric service network interface", null)
+        .addBoolean("metricsGrpcPushEnabled", false, "Enable pushing metrics to gRPC service", null)
+        .addBoolean("metricsPrometheusEnabled", false, "Enable exposing metrics on the Prometheus endpoint", null)
+        .addString("corsAllowedOrigins", "*", "CORS allowed domains filter for REST service", null)
+
+      val upgradesSection = SchemaBuilder.create()
+        .addString("name", null, "Upgrade name, eg London or Magneto", PropertyValidator.isNotBlank())
+        .addListOfMap("versions", listOf(), "List of minimum version mappings for the upgrade", null)
+        .toSchema()
+      schema.addSection("upgrades", upgradesSection)
+      return schema.toSchema()
+    }
   }
 
   val config = Configuration.fromToml(filePath, schema())
@@ -118,4 +127,24 @@ class CrawlerConfig(val filePath: Path) {
   fun metricsGrpcPushEnabled() = config.getBoolean("metricsGrpcPushEnabled")
   fun metricsPrometheusEnabled() = config.getBoolean("metricsPrometheusEnabled")
   fun corsAllowedOrigins() = config.getString("corsAllowedOrigins")
+
+  fun upgradesVersions(): List<UpgradeConfig> {
+    val upgrades = config.sections("upgrades")
+    val result = mutableListOf<UpgradeConfig>()
+    for (upgrade in upgrades) {
+      val section = config.getConfigurationSection(upgrade)
+      val versions = mutableMapOf<String, String>()
+      for (map in section.getListOfMap("versions")) {
+        for (entry in map.entries) {
+          versions.put(entry.key.toLowerCase(), entry.value.toString())
+        }
+      }
+
+      val upgradeConfig = UpgradeConfig(section.getString("name"), versions)
+      result.add(upgradeConfig)
+    }
+    return result
+  }
 }
+
+data class UpgradeConfig(val name: String, val versions: Map<String, String>)

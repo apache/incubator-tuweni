@@ -118,7 +118,7 @@ class CrawlerApplication(
       .load()
     flyway.migrate()
     val crawlerMeter = metricsService.meterSdkProvider["crawler"]
-    val repo = RelationalPeerRepository(ds, config.peerCacheExpiration(), config.clientIdsInterval(), config.clientsStatsDelay(), crawlerMeter, createCoroutineContext())
+    val repo = RelationalPeerRepository(ds, config.peerCacheExpiration(), config.clientIdsInterval(), config.clientsStatsDelay(), crawlerMeter, config.upgradesVersions(), createCoroutineContext())
 
     logger.info("Initial bootnodes: ${config.bootNodes()}")
     val scraper = Scraper(
