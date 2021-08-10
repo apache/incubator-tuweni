@@ -1,0 +1,45 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+version: "3"
+services:
+  jsonrpc:
+    container_name: jsonrpc
+    image: apache-tuweni/tuweni:2.1.0-SNAPSHOT
+    volumes:
+      - ./config.toml:/etc/config.toml
+      - ./logback.xml:/usr/tuweni/bin/logback.xml
+    entrypoint: /usr/tuweni/bin/jsonrpc
+    command: /etc/config.toml
+    environment:
+      - JAVA_OPTS="-Dlogback.configurationFile=/usr/tuweni/bin/logback.xml"
+    ports:
+      - 8545:8545
+  otelcollector:
+    container_name: otelcollector
+    image: otel/opentelemetry-collector-contrib:0.31.0
+    command: ["--config=/etc/otel-collector-config.yml", "--log-level=DEBUG"]
+    volumes:
+      - ./otel-collector-config.yml:/etc/otel-collector-config.yml
+  metricsviewer:
+    image: docker.io/tmio/metrics-ui
+    container_name: metricsviewer
+    ports:
+      - 8080:8080
+  # Zipkin
+  zipkin:
+    container_name: zipkin
+    image: openzipkin/zipkin
+    ports:
+      - 9411:9411

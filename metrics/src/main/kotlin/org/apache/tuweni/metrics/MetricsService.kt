@@ -29,7 +29,9 @@ import io.opentelemetry.sdk.trace.export.BatchSpanProcessor
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.HTTPServer
+import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
+import java.util.concurrent.TimeUnit
 
 class MetricsService(
   jobName: String,
@@ -38,7 +40,13 @@ class MetricsService(
   networkInterface: String = "0.0.0.0",
   enablePrometheus: Boolean = true,
   enableGrpcPush: Boolean = true,
+  grpcEndpoint: String = "localhost:4317",
+  grpcTimeout: Long = 2000,
 ) {
+
+  companion object {
+    private val logger = LoggerFactory.getLogger(MetricsService::class.java)
+  }
 
   private val server: HTTPServer?
   val meterSdkProvider: SdkMeterProvider
@@ -47,7 +55,8 @@ class MetricsService(
   private val periodicReader: IntervalMetricReader?
 
   init {
-    val exporter = OtlpGrpcMetricExporter.getDefault()
+    val exporter = OtlpGrpcMetricExporter.builder().setEndpoint(grpcEndpoint).setTimeout(grpcTimeout, TimeUnit.MILLISECONDS).build()
+    logger.info("Starting metrics service")
     val resource = Resource.getDefault()
       .merge(
         Resource.create(
@@ -56,21 +65,25 @@ class MetricsService(
       )
     meterSdkProvider = SdkMeterProvider.builder().setResource(resource).build()
     if (enableGrpcPush) {
+      logger.info("Starting GRPC push metrics service")
       val builder = IntervalMetricReader.builder()
         .setExportIntervalMillis(reportingIntervalMillis)
         .setMetricProducers(setOf(meterSdkProvider))
         .setMetricExporter(exporter)
       periodicReader = builder.buildAndStart()
-      periodicReader.start()
     } else {
       periodicReader = null
     }
-    spanProcessor = BatchSpanProcessor.builder(OtlpGrpcSpanExporter.builder().build()).build()
+    spanProcessor = BatchSpanProcessor.builder(
+      OtlpGrpcSpanExporter.builder().setEndpoint(grpcEndpoint)
+        .setTimeout(grpcTimeout, TimeUnit.MILLISECONDS).build()
+    ).build()
     openTelemetry = OpenTelemetrySdk.builder()
       .setTracerProvider(SdkTracerProvider.builder().addSpanProcessor(spanProcessor).build())
       .build()
 
     if (enablePrometheus) {
+      logger.info("Starting Prometheus metrics service")
       val prometheusRegistry = CollectorRegistry(true)
       PrometheusCollector.builder()
         .setMetricProducer(meterSdkProvider)

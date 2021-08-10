@@ -89,7 +89,9 @@ object JSONRPCApp {
       port = config.metricsPort(),
       networkInterface = config.metricsNetworkInterface(),
       enableGrpcPush = config.metricsGrpcPushEnabled(),
-      enablePrometheus = config.metricsPrometheusEnabled()
+      enablePrometheus = config.metricsPrometheusEnabled(),
+      grpcEndpoint = config.metricsGrpcEndpoint(),
+      grpcTimeout = config.metricsGrpcTimeout(),
     )
     val vertx = Vertx.vertx(VertxOptions().setTracingOptions(OpenTelemetryOptions(metricsService.openTelemetry)))
     val app = JSONRPCApplication(vertx, config, metricsService)
