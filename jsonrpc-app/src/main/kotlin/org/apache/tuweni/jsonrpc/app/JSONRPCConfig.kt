@@ -55,6 +55,8 @@ class JSONRPCConfig(val filePath: Path) {
       .addBoolean("cacheEnabled", false, "Enable caching", null)
       .addString("cacheStoragePath", "", "Location of cache storage", null)
       .addInteger("maxConcurrentRequests", 30, "Maximum concurrent requests", null)
+      .addString("metricsGrpcEndpoint", "http://localhost:4317", "Metrics GRPC push endpoint", null)
+      .addLong("metricsGrpcTimeout", 2000, "Metrics GRPC push timeout", null)
       .toSchema()
   }
 
@@ -87,4 +89,6 @@ class JSONRPCConfig(val filePath: Path) {
   fun cacheEnabled() = config.getBoolean("cacheEnabled")
   fun cacheStoragePath() = config.getString("cacheStoragePath")
   fun maxConcurrentRequests() = config.getInteger("maxConcurrentRequests")
+  fun metricsGrpcEndpoint() = config.getString("metricsGrpcEndpoint")
+  fun metricsGrpcTimeout() = config.getLong("metricsGrpcTimeout")
 }
