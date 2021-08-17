@@ -107,6 +107,8 @@ class ThrottlingHandler(
 class CachingHandler(
   private val allowedMethods: List<String>,
   private val cacheStore: KeyValueStore<String, JSONRPCResponse>,
+  private val cacheHitCounter: LongCounter,
+  private val cacheMissCounter: LongCounter,
   private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse,
 ) {
 
@@ -124,12 +126,16 @@ class CachingHandler(
       val serializedRequest = serializeRequest(request)
       val response = cacheStore.get(serializedRequest)
       return if (response == null) {
+        cacheMissCounter.add(1)
         val newResponse = delegateHandler(request)
         if (newResponse.error == null) {
           cacheStore.put(serializedRequest, newResponse)
         }
         newResponse
       } else {
+        cacheHitCounter.add(1)
+        // reset the expiry on the entry:
+        cacheStore.put(serializedRequest, response)
         response.copy(id = request.id)
       }
     }
