@@ -133,7 +133,7 @@ class JSONRPCApplication(
         "responses",
         ConfigurationBuilder().persistence().addStore(RocksDBStoreConfigurationBuilder::class.java)
           .location(Paths.get(config.cacheStoragePath(), "storage").toAbsolutePath().toString())
-          .expiredLocation(Paths.get(config.cacheStoragePath(), "expired").toAbsolutePath().toString()).build()
+          .expiredLocation(Paths.get(config.cacheStoragePath(), "expired").toAbsolutePath().toString()).expiration().lifespan(config.cacheLifespan()).maxIdle(config.cacheMaxIdle()).build()
       )
 
       val cachingHandler =
