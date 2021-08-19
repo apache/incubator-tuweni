@@ -173,7 +173,9 @@ class CachingHandlerTest {
   fun testCache() = runBlocking {
     val map = HashMap<String, JSONRPCResponse>()
     val kv = MapKeyValueStore.open(map)
-    val handler = CachingHandler(listOf("foo"), kv) {
+    val meterSdk = SdkMeterProvider.builder().build()
+    val meter = meterSdk.get("handler")
+    val handler = CachingHandler(listOf("foo"), kv, meter.longCounterBuilder("foo").build(), meter.longCounterBuilder("bar").build()) {
       if (it.params.size > 0) {
         JSONRPCResponse(id = 1, error = JSONRPCError(1234, ""))
       } else {
