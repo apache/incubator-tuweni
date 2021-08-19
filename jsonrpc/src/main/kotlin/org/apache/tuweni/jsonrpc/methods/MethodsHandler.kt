@@ -134,8 +134,6 @@ class CachingHandler(
         newResponse
       } else {
         cacheHitCounter.add(1)
-        // reset the expiry on the entry:
-        cacheStore.put(serializedRequest, response)
         response.copy(id = request.id)
       }
     }
