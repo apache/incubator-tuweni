@@ -137,10 +137,12 @@ class JSONRPCApplication(
       )
 
       val cachingHandler =
-        CachingHandler(config.cachedMethods(), InfinispanKeyValueStore(cache),
+        CachingHandler(
+          config.cachedMethods(), InfinispanKeyValueStore(cache),
           meter.longCounterBuilder("cacheHits").build(),
           meter.longCounterBuilder("cacheMisses").build(),
-          allowListHandler::handleRequest)
+          allowListHandler::handleRequest
+        )
       cachingHandler::handleRequest
     } else {
       allowListHandler::handleRequest
