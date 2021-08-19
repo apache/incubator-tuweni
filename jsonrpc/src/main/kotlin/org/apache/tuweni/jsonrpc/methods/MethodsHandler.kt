@@ -20,12 +20,18 @@ import com.netflix.concurrency.limits.limit.FixedLimit
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
 import io.opentelemetry.api.metrics.LongCounter
 import io.opentelemetry.api.metrics.common.Labels
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.eth.methodNotEnabled
 import org.apache.tuweni.eth.methodNotFound
 import org.apache.tuweni.eth.tooManyRequests
 import org.apache.tuweni.kv.KeyValueStore
+import org.slf4j.LoggerFactory
+import kotlin.coroutines.CoroutineContext
 
 class MethodsRouter(val methodsMap: Map<String, suspend (JSONRPCRequest) -> JSONRPCResponse>) {
 
@@ -123,7 +129,7 @@ class CachingHandler(
     if (!found) {
       return delegateHandler(request)
     } else {
-      val serializedRequest = serializeRequest(request)
+      val serializedRequest = request.serializeRequest()
       val response = cacheStore.get(serializedRequest)
       return if (response == null) {
         cacheMissCounter.add(1)
@@ -138,8 +144,67 @@ class CachingHandler(
       }
     }
   }
+}
 
-  private fun serializeRequest(request: JSONRPCRequest): String {
-    return request.method + "|" + request.params.joinToString(",")
+class CachingPollingHandler(
+  private val cachedRequests: List<JSONRPCRequest>,
+  private val pollPeriodMillis: Long,
+  private val cacheStore: KeyValueStore<JSONRPCRequest, JSONRPCResponse>,
+  private val cacheHitCounter: LongCounter,
+  private val cacheMissCounter: LongCounter,
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
+  private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse,
+) : CoroutineScope {
+
+  companion object {
+    private val logger = LoggerFactory.getLogger(CachingPollingHandler::class.java)
+  }
+
+  init {
+    poll()
+  }
+
+  private fun poll() {
+    launch {
+      try {
+        var id = 1337
+        for (cachedRequest in cachedRequests) {
+          val newResponse = delegateHandler(cachedRequest.copy(id = id))
+          id++
+          if (newResponse.error == null) {
+            cacheStore.put(cachedRequest, newResponse)
+          } else {
+            logger.warn("{}, got error:\n{}", cachedRequest, newResponse.error)
+          }
+        }
+      } catch (e: Exception) {
+        logger.error("Error polling JSON-RPC endpoint", e)
+      }
+      delay(pollPeriodMillis)
+      poll()
+    }
+  }
+
+  suspend fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
+    var found = false
+    if (cachedRequests.contains(request)) {
+      found = true
+    }
+    if (!found) {
+      return delegateHandler(request)
+    } else {
+      val response = cacheStore.get(request)
+      if (response == null) {
+        cacheMissCounter.add(1)
+        val newResponse = delegateHandler(request)
+        if (newResponse.error == null) {
+          cacheStore.put(request, newResponse)
+        }
+        return newResponse
+      } else {
+        cacheHitCounter.add(1)
+        return response.copy(id = request.id)
+      }
+    }
   }
 }

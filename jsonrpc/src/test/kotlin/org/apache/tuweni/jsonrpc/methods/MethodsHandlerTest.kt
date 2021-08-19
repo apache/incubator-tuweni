@@ -176,7 +176,7 @@ class CachingHandlerTest {
     val meterSdk = SdkMeterProvider.builder().build()
     val meter = meterSdk.get("handler")
     val handler = CachingHandler(listOf("foo"), kv, meter.longCounterBuilder("foo").build(), meter.longCounterBuilder("bar").build()) {
-      if (it.params.size > 0) {
+      if (it.params.isNotEmpty()) {
         JSONRPCResponse(id = 1, error = JSONRPCError(1234, ""))
       } else {
         JSONRPCResponse(id = 1)
@@ -191,5 +191,34 @@ class CachingHandlerTest {
     assertEquals(1, map.size)
     handler.handleRequest(JSONRPCRequest(id = 1, method = "foo", params = arrayOf("bleh")))
     assertEquals(1, map.size)
+  }
+}
+
+class CachingPollingHandlerTest {
+
+  @Test
+  fun testCache() = runBlocking {
+    val map = HashMap<JSONRPCRequest, JSONRPCResponse>()
+    val kv = MapKeyValueStore.open(map)
+    val meterSdk = SdkMeterProvider.builder().build()
+    val meter = meterSdk.get("handler")
+    val handler = CachingPollingHandler(listOf(JSONRPCRequest(1, "foo", arrayOf())), 1000, kv, meter.longCounterBuilder("foo").build(), meter.longCounterBuilder("bar").build()) {
+      if (it.params.isNotEmpty()) {
+        JSONRPCResponse(id = 1, error = JSONRPCError(1234, ""))
+      } else {
+        JSONRPCResponse(id = 1)
+      }
+    }
+    delay(500)
+    assertEquals(1, map.size)
+    handler.handleRequest(JSONRPCRequest(id = 1, method = "foo", params = arrayOf()))
+    assertEquals(1, map.size)
+    handler.handleRequest(JSONRPCRequest(id = 1, method = "bar", params = arrayOf()))
+    assertEquals(1, map.size)
+    handler.handleRequest(JSONRPCRequest(id = 1, method = "foo", params = arrayOf()))
+    assertEquals(1, map.size)
+    val errorResp = handler.handleRequest(JSONRPCRequest(id = 1, method = "foo", params = arrayOf("bleh")))
+    assertEquals(1, map.size)
+    assertNotNull(errorResp.error)
   }
 }
