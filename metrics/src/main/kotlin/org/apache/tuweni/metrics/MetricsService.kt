@@ -79,7 +79,7 @@ class MetricsService(
         .setTimeout(grpcTimeout, TimeUnit.MILLISECONDS).build()
     ).build()
     openTelemetry = OpenTelemetrySdk.builder()
-      .setTracerProvider(SdkTracerProvider.builder().addSpanProcessor(spanProcessor).build())
+      .setTracerProvider(SdkTracerProvider.builder().setResource(resource).addSpanProcessor(spanProcessor).build())
       .build()
 
     if (enablePrometheus) {

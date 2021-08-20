@@ -152,7 +152,8 @@ class JSONRPCApplication(
 
     val handler = MeteredHandler(successCounter, failureCounter, throttlingHandler::handleRequest)
     val server = JSONRPCServer(
-      vertx, config.port(), config.networkInterface(),
+      vertx,
+      config.port(), config.networkInterface(),
       config.ssl(),
       trustOptions,
       config.useBasicAuthentication(),
@@ -160,6 +161,7 @@ class JSONRPCApplication(
       config.basicAuthPassword(),
       config.basicAuthRealm(),
       IPRangeChecker.create(config.allowedRanges(), config.rejectedRanges()),
+      metricsService.openTelemetry,
       Executors.newFixedThreadPool(
         config.numberOfThreads()
       ) {
