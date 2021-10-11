@@ -20,12 +20,14 @@ import org.apache.tuweni.bytes.Bytes
 import org.bouncycastle.crypto.digests.SHA256Digest
 import org.bouncycastle.crypto.generators.HKDFBytesGenerator
 import org.bouncycastle.crypto.params.HKDFParameters
+import org.slf4j.LoggerFactory
 
 /**
  * Generates session keys on handshake, using HKDF key derivation function
  */
 internal object SessionKeyGenerator {
 
+  private val logger = LoggerFactory.getLogger(SessionKeyGenerator::class.java)
   private const val DERIVED_KEY_SIZE: Int = 16
   private val INFO_PREFIX = Bytes.wrap("discovery v5 key agreement".toByteArray())
 
@@ -38,6 +40,7 @@ internal object SessionKeyGenerator {
    * @param idNonce nonce used as salt
    */
   fun generate(srcNodeId: Bytes, destNodeId: Bytes, secret: Bytes, idNonce: Bytes): SessionKey {
+    logger.trace("$srcNodeId $destNodeId $secret $idNonce")
     val info = Bytes.concatenate(INFO_PREFIX, srcNodeId, destNodeId)
 
     val hkdf = HKDFBytesGenerator(SHA256Digest())

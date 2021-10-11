@@ -28,6 +28,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.ExpiringMap
@@ -289,7 +290,7 @@ internal class DefaultDiscoveryV5Service(
       receivedEnr,
       keyPair,
       newSession.nodeId,
-      newSession.tag(),
+      Bytes32.random(), // replace!
       sessionKey,
       address,
       this::send,

@@ -27,6 +27,7 @@ internal interface Message {
 
   companion object {
 
+    const val MIN_UDP_MESSAGE_SIZE = 63
     const val MAX_UDP_MESSAGE_SIZE = 1280
     const val TAG_LENGTH: Int = 32
     const val AUTH_TAG_LENGTH: Int = 12
@@ -65,14 +66,16 @@ internal interface Message {
 internal enum class MessageType(val code: Int) {
   RANDOM(0),
   WHOAREYOU(0),
-  FINDNODE(3),
-  NODES(4),
   PING(1),
   PONG(2),
-  REGTOPIC(5),
-  REGCONFIRM(7),
-  TICKET(6),
-  TOPICQUERY(8);
+  FINDNODE(3),
+  NODES(4),
+  TALKREQ(5),
+  TALKRESP(6),
+  REGTOPIC(7),
+  TICKET(8),
+  REGCONFIRMATION(9),
+  TOPICQUERY(10);
 
   fun byte(): Byte = code.toByte()
 

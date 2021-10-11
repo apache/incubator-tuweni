@@ -36,6 +36,6 @@ class FindNodeMessageTest {
     val decodingResult = FindNodeMessage.create(encodingResult)
 
     assertEquals(decodingResult.requestId, requestId)
-    assertEquals(decodingResult.distance, 0)
+    assertEquals(decodingResult.distances, listOf(0))
   }
 }

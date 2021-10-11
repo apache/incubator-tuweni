@@ -40,6 +40,7 @@ import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.rlp.RLPReader
 import org.slf4j.LoggerFactory
 import java.lang.UnsupportedOperationException
+import java.net.InetSocketAddress
 import kotlin.coroutines.CoroutineContext
 
 private const val MAX_NODES_IN_RESPONSE: Int = 4
@@ -56,7 +57,7 @@ internal class Session(
   private val tag: Bytes32,
   private val sessionKey: SessionKey,
   private val address: SocketAddress,
-  private val sendFn: (SocketAddress, Bytes) -> Unit,
+  private val sendFn: (address: SocketAddress, message: Bytes) -> Unit,
   private val ourENR: () -> EthereumNodeRecord,
   private val routingTable: RoutingTable,
   private val topicTable: TopicTable,
@@ -107,7 +108,7 @@ internal class Session(
   }
 
   suspend fun sendFindNodes(distance: Int): AsyncResult<List<EthereumNodeRecord>> {
-    val message = FindNodeMessage(distance = distance)
+    val message = FindNodeMessage(distances = listOf(distance))
     val result: CompletableAsyncResult<List<EthereumNodeRecord>> = AsyncResult.incomplete()
     activeFindNodes[message.requestId] = result
     send(message)
@@ -134,10 +135,12 @@ internal class Session(
       MessageType.NODES -> handleNodes(message as NodesMessage)
       MessageType.PING -> handlePing(message as PingMessage)
       MessageType.PONG -> handlePong(message as PongMessage)
+      MessageType.TALKREQ -> TODO("Not supported yet")
+      MessageType.TALKRESP -> TODO("Not supported yet")
       MessageType.REGTOPIC -> handleRegTopic(
         message as RegTopicMessage
       )
-      MessageType.REGCONFIRM -> handleRegConfirmation(
+      MessageType.REGCONFIRMATION -> handleRegConfirmation(
         message as RegConfirmationMessage
       )
       MessageType.TICKET -> handleTicket(message as TicketMessage)
@@ -174,8 +177,9 @@ internal class Session(
     message: PingMessage
   ) {
     activePing = AsyncCompletion.incomplete()
+    val nativeAddress = InetSocketAddress.createUnresolved(address.host(), address.port())
     val response =
-      PongMessage(message.requestId, ourENR().seq(), address.host(), address.port())
+      PongMessage(message.requestId, ourENR().seq(), nativeAddress.address, address.port())
     send(response)
   }
 
@@ -211,29 +215,32 @@ internal class Session(
   }
 
   private suspend fun handleRegTopic(
-    message: RegTopicMessage
+    reqMessage: RegTopicMessage
   ) {
-    val topic = Topic(message.topic.toHexString())
+    val topic = Topic(reqMessage.topic.toHexString())
 
-    val existingTicket = if (!message.ticket.isEmpty) {
-      val ticket = Ticket.decrypt(message.ticket, sessionKey.initiatorKey)
-      ticket.validate(nodeId, address.host(), now(), message.topic)
+    val existingTicket = if (!reqMessage.ticket.isEmpty) {
+      val ticket = Ticket.decrypt(reqMessage.ticket, sessionKey.initiatorKey)
+      val nativeAddress = InetSocketAddress.createUnresolved(address.host(), address.port())
+      ticket.validate(nodeId, nativeAddress.address.address, now(), reqMessage.topic)
       ticket
     } else null
 
     // Create new ticket
-    val waitTime = topicTable.put(topic, message.nodeRecord)
+    val waitTime = topicTable.put(topic, reqMessage.nodeRecord)
     val cumTime = (existingTicket?.cumTime ?: waitTime) + waitTime
-    val ticket = Ticket(message.topic, nodeId, address.host(), now(), waitTime, cumTime)
+    val nativeAddress = InetSocketAddress.createUnresolved(address.host(), address.port())
+
+    val ticket = Ticket(reqMessage.topic, nodeId, nativeAddress.address.address, now(), waitTime, cumTime)
     val encryptedTicket = ticket.encrypt(sessionKey.initiatorKey)
 
     // Send ticket
-    val response = TicketMessage(message.requestId, encryptedTicket, waitTime)
+    val response = TicketMessage(reqMessage.requestId, encryptedTicket, waitTime)
     sendFn(address, response.toRLP())
 
     // Send confirmation if topic was placed
     if (waitTime == 0L) {
-      val confirmation = RegConfirmationMessage(message.requestId, message.topic)
+      val confirmation = RegConfirmationMessage(reqMessage.requestId, reqMessage.topic)
       send(confirmation)
     }
   }
@@ -252,17 +259,13 @@ internal class Session(
   }
 
   private suspend fun handleFindNode(message: FindNodeMessage) {
-    if (0 == message.distance) {
-      val response = NodesMessage(message.requestId, 1, listOf(ourENR()))
-      send(response)
-      return
-    }
+    for (distance in message.distances) {
+      val nodes = routingTable.nodesOfDistance(distance)
 
-    val nodes = routingTable.nodesOfDistance(message.distance)
-
-    for (chunk in nodes.chunked(MAX_NODES_IN_RESPONSE)) {
-      val response = NodesMessage(message.requestId, nodes.size, chunk)
-      send(response)
+      for (chunk in nodes.chunked(MAX_NODES_IN_RESPONSE)) {
+        val response = NodesMessage(message.requestId, nodes.size, chunk)
+        send(response)
+      }
     }
   }
 
@@ -294,7 +297,7 @@ internal class Session(
       MessageType.NODES -> NodesMessage.create(message)
       MessageType.REGTOPIC -> RegTopicMessage.create(message)
       MessageType.TICKET -> TicketMessage.create(message)
-      MessageType.REGCONFIRM -> RegConfirmationMessage.create(message)
+      MessageType.REGCONFIRMATION -> RegConfirmationMessage.create(message)
       MessageType.TOPICQUERY -> TopicQueryMessage.create(message)
       else -> throw IllegalArgumentException("Unsupported message type $messageType")
     }

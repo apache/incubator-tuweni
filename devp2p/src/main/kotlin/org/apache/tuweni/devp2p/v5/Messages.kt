@@ -23,7 +23,7 @@ import java.net.InetAddress
 
 internal class FindNodeMessage(
   val requestId: Bytes = Message.requestId(),
-  val distance: Int = 0
+  val distances: List<Int> = listOf(0)
 ) : Message {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x03")
@@ -31,7 +31,9 @@ internal class FindNodeMessage(
   override fun toRLP(): Bytes {
     return RLP.encodeList { writer ->
       writer.writeValue(requestId)
-      writer.writeInt(distance)
+      for (distance in distances) {
+        writer.writeInt(distance)
+      }
     }
   }
 
@@ -41,8 +43,11 @@ internal class FindNodeMessage(
     fun create(content: Bytes): FindNodeMessage {
       return RLP.decodeList(content) { reader ->
         val requestId = reader.readValue()
-        val distance = reader.readInt()
-        return@decodeList FindNodeMessage(requestId, distance)
+        val distances = ArrayList<Int>()
+        while (!reader.isComplete) {
+          distances.add(reader.readInt())
+        }
+        return@decodeList FindNodeMessage(requestId, distances)
       }
     }
   }
@@ -219,16 +224,113 @@ internal class TopicQueryMessage(
 }
 
 /**
+ * An application-level request.
+ */
+internal class TalkReqMessage(
+  val requestId: Bytes = Message.requestId(),
+  val protocol: List<Bytes>,
+  val request: List<Bytes>
+) : Message {
+
+  override fun type(): MessageType = MessageType.REGTOPIC
+
+  override fun toRLP(): Bytes {
+    return RLP.encodeList { writer ->
+      writer.writeValue(requestId)
+      writer.writeList(protocol) { pw, value -> pw.writeValue(value) }
+      writer.writeList(request) { pw, req -> pw.writeValue(req) }
+    }
+  }
+
+  companion object {
+    fun create(content: Bytes): TalkReqMessage {
+      return RLP.decodeList(content) { reader ->
+        val requestId = reader.readValue()
+        val protocol = ArrayList<Bytes>()
+        reader.readList { pr ->
+          protocol.add(pr.readValue())
+        }
+        val request = ArrayList<Bytes>()
+        reader.readList { rr ->
+          request.add(rr.readValue())
+        }
+        return@decodeList TalkReqMessage(requestId, protocol, request)
+      }
+    }
+  }
+}
+
+internal class PongMessage(
+  val requestId: Bytes = Message.requestId(),
+  val enrSeq: Long = 0,
+  val recipientIp: InetAddress,
+  val recipientPort: Int
+) : Message {
+
+  private val encodedMessageType: Bytes = Bytes.fromHexString("0x02")
+
+  override fun type(): MessageType = MessageType.PONG
+
+  override fun toRLP(): Bytes {
+    return RLP.encodeList { writer ->
+      writer.writeValue(requestId)
+      writer.writeLong(enrSeq)
+
+      val bytesIp = Bytes.wrap(recipientIp.address)
+      writer.writeValue(bytesIp)
+      writer.writeInt(recipientPort)
+    }
+  }
+
+  companion object {
+    fun create(content: Bytes): PongMessage {
+      return RLP.decodeList(content) { reader ->
+        val requestId = reader.readValue()
+        val enrSeq = reader.readLong()
+        val address = InetAddress.getByAddress(reader.readValue().toArray())
+        val recipientPort = reader.readInt()
+        return@decodeList PongMessage(requestId, enrSeq, address, recipientPort)
+      }
+    }
+  }
+}
+
+internal class RegConfirmationMessage(
+  val requestId: Bytes = Message.requestId(),
+  val topic: Bytes
+) : Message {
+
+  private val encodedMessageType: Bytes = Bytes.fromHexString("0x07")
+
+  override fun type(): MessageType = MessageType.REGCONFIRMATION
+
+  override fun toRLP(): Bytes {
+    return RLP.encodeList { writer ->
+      writer.writeValue(requestId)
+      writer.writeValue(topic)
+    }
+  }
+
+  companion object {
+    fun create(content: Bytes): RegConfirmationMessage {
+      return RLP.decodeList(content) { reader ->
+        val requestId = reader.readValue()
+        val topic = reader.readValue()
+        return@decodeList RegConfirmationMessage(requestId, topic)
+      }
+    }
+  }
+}
+
+/**
  * Message to register a topic.
  */
 internal class RegTopicMessage(
-  val requestId: Bytes = Message.requestId(),
+  val requestId: Bytes = org.apache.tuweni.devp2p.v5.Message.requestId(),
   val nodeRecord: EthereumNodeRecord,
   val topic: Bytes,
   val ticket: Bytes
 ) : Message {
-
-  private val encodedMessageType: Bytes = Bytes.fromHexString("0x05")
 
   override fun type(): MessageType = MessageType.REGTOPIC
 
@@ -251,68 +353,6 @@ internal class RegTopicMessage(
         val topic = reader.readValue()
         val ticket = reader.readValue()
         return@decodeList RegTopicMessage(requestId, nodeRecord, topic, ticket)
-      }
-    }
-  }
-}
-
-internal class PongMessage(
-  val requestId: Bytes = Message.requestId(),
-  val enrSeq: Long = 0,
-  val recipientIp: String,
-  val recipientPort: Int
-) : Message {
-
-  private val encodedMessageType: Bytes = Bytes.fromHexString("0x02")
-
-  override fun type(): MessageType = MessageType.PONG
-
-  override fun toRLP(): Bytes {
-    return RLP.encodeList { writer ->
-      writer.writeValue(requestId)
-      writer.writeLong(enrSeq)
-
-      val bytesIp = Bytes.wrap(InetAddress.getByName(recipientIp).address)
-      writer.writeValue(bytesIp)
-      writer.writeInt(recipientPort)
-    }
-  }
-
-  companion object {
-    fun create(content: Bytes): PongMessage {
-      return RLP.decodeList(content) { reader ->
-        val requestId = reader.readValue()
-        val enrSeq = reader.readLong()
-        val address = InetAddress.getByAddress(reader.readValue().toArray())
-        val recipientPort = reader.readInt()
-        return@decodeList PongMessage(requestId, enrSeq, address.hostAddress, recipientPort)
-      }
-    }
-  }
-}
-
-internal class RegConfirmationMessage(
-  val requestId: Bytes = Message.requestId(),
-  val topic: Bytes
-) : Message {
-
-  private val encodedMessageType: Bytes = Bytes.fromHexString("0x07")
-
-  override fun type(): MessageType = MessageType.REGCONFIRM
-
-  override fun toRLP(): Bytes {
-    return RLP.encodeList { writer ->
-      writer.writeValue(requestId)
-      writer.writeValue(topic)
-    }
-  }
-
-  companion object {
-    fun create(content: Bytes): RegConfirmationMessage {
-      return RLP.decodeList(content) { reader ->
-        val requestId = reader.readValue()
-        val topic = reader.readValue()
-        return@decodeList RegConfirmationMessage(requestId, topic)
       }
     }
   }

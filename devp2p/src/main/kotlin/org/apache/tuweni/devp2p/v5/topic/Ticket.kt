@@ -19,12 +19,11 @@ package org.apache.tuweni.devp2p.v5.topic
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
 import org.apache.tuweni.rlp.RLP
-import java.net.InetAddress
 
 internal data class Ticket(
   val topic: Bytes,
   val srcNodeId: Bytes,
-  val srcIp: String,
+  val srcIp: ByteArray,
   val requestTime: Long,
   val waitTime: Long,
   val cumTime: Long
@@ -39,11 +38,11 @@ internal data class Ticket(
       return RLP.decodeList(content) { reader ->
         val topic = reader.readValue()
         val srcNodeId = reader.readValue()
-        val srcIp = InetAddress.getByAddress(reader.readValue().toArray())
+        val srcIp = reader.readValue().toArrayUnsafe()
         val requestTime = reader.readLong()
         val waitTime = reader.readLong()
         val cumTime = reader.readLong()
-        return@decodeList Ticket(topic, srcNodeId, srcIp.hostAddress, requestTime, waitTime, cumTime)
+        return@decodeList Ticket(topic, srcNodeId, srcIp, requestTime, waitTime, cumTime)
       }
     }
 
@@ -57,7 +56,7 @@ internal data class Ticket(
     return RLP.encodeList { writer ->
       writer.writeValue(topic)
       writer.writeValue(srcNodeId)
-      writer.writeValue(Bytes.wrap(InetAddress.getByName(srcIp).address))
+      writer.writeValue(Bytes.wrap(srcIp))
       writer.writeLong(requestTime)
       writer.writeLong(waitTime)
       writer.writeLong(cumTime)
@@ -71,12 +70,12 @@ internal data class Ticket(
 
   fun validate(
     srcNodeId: Bytes,
-    srcIp: String,
+    srcIp: ByteArray,
     now: Long,
     topic: Bytes
   ) {
     require(this.srcNodeId == srcNodeId) { TICKET_INVALID_MSG }
-    require(this.srcIp == srcIp) { TICKET_INVALID_MSG }
+    require(this.srcIp.equals(srcIp)) { TICKET_INVALID_MSG }
     require(this.topic == topic) { TICKET_INVALID_MSG }
     val windowStart = this.requestTime + this.waitTime
     require(now >= windowStart && now <= windowStart + TIME_WINDOW_MS) { TICKET_INVALID_MSG }
