@@ -23,7 +23,7 @@ import org.apache.tuweni.rlp.RLP
 internal data class Ticket(
   val topic: Bytes,
   val srcNodeId: Bytes,
-  val srcIp: ByteArray,
+  val srcIp: Bytes,
   val requestTime: Long,
   val waitTime: Long,
   val cumTime: Long
@@ -38,7 +38,7 @@ internal data class Ticket(
       return RLP.decodeList(content) { reader ->
         val topic = reader.readValue()
         val srcNodeId = reader.readValue()
-        val srcIp = reader.readValue().toArrayUnsafe()
+        val srcIp = reader.readValue()
         val requestTime = reader.readLong()
         val waitTime = reader.readLong()
         val cumTime = reader.readLong()

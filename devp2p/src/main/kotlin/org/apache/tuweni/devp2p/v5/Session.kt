@@ -231,7 +231,7 @@ internal class Session(
     val cumTime = (existingTicket?.cumTime ?: waitTime) + waitTime
     val nativeAddress = InetSocketAddress.createUnresolved(address.host(), address.port())
 
-    val ticket = Ticket(reqMessage.topic, nodeId, nativeAddress.address.address, now(), waitTime, cumTime)
+    val ticket = Ticket(reqMessage.topic, nodeId, Bytes.wrap(nativeAddress.address.address), now(), waitTime, cumTime)
     val encryptedTicket = ticket.encrypt(sessionKey.initiatorKey)
 
     // Send ticket
