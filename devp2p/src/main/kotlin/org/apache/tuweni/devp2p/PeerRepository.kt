@@ -16,12 +16,14 @@
  */
 package org.apache.tuweni.devp2p
 
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.coroutines.asyncResult
 import org.apache.tuweni.crypto.SECP256K1
 import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A repository of peers in an Ethereum network.
@@ -103,8 +105,11 @@ interface PeerRepository {
  *
  * Note: as the storage is in-memory, no retrieval methods in this implementation will suspend.
  */
-class EphemeralPeerRepository(private val peers: MutableMap<SECP256K1.PublicKey, Peer> = ConcurrentHashMap()) :
-  PeerRepository {
+class EphemeralPeerRepository(
+  private val peers: MutableMap<SECP256K1.PublicKey, Peer> = ConcurrentHashMap(),
+  override val coroutineContext: CoroutineContext = Dispatchers.Default
+) :
+  PeerRepository, CoroutineScope {
 
   private val listeners = mutableListOf<(Peer) -> Unit>()
 
@@ -142,9 +147,9 @@ class EphemeralPeerRepository(private val peers: MutableMap<SECP256K1.PublicKey,
     return get(nodeId, endpoint)
   }
 
-  override fun getAsync(uri: URI): AsyncResult<Peer> = GlobalScope.asyncResult { get(uri) }
+  override fun getAsync(uri: URI): AsyncResult<Peer> = asyncResult { get(uri) }
 
-  override fun getAsync(uri: String): AsyncResult<Peer> = GlobalScope.asyncResult { get(uri) }
+  override fun getAsync(uri: String): AsyncResult<Peer> = asyncResult { get(uri) }
 
   private inner class EphemeralPeer(
     override val nodeId: SECP256K1.PublicKey,

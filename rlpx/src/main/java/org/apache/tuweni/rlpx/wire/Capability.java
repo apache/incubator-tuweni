@@ -41,7 +41,7 @@ public final class Capability {
     if (o == null || getClass() != o.getClass())
       return false;
     Capability that = (Capability) o;
-    return Objects.equals(name, that.name) && Objects.equals(version, that.version);
+    return Objects.equals(name, that.name) && version == that.version;
   }
 
   @Override

@@ -55,7 +55,7 @@ class PeersService {
   @Produces(MediaType.APPLICATION_JSON)
   fun getPeers(@QueryParam("from") from: Int = 0, @QueryParam("limit") limit: Int = 10): String {
     val key = "from${from}limit$limit"
-    return localCache.computeIfAbsent(key, 30 * 1000) {
+    return localCache.computeIfAbsent(key, 30 * 1000L) {
       val repo = context!!.getAttribute("repo") as RelationalPeerRepository
       val metrics = context!!.getAttribute("metrics") as RESTMetrics
       metrics.peersCounter.add(1)

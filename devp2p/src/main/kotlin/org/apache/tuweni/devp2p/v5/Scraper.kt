@@ -88,8 +88,8 @@ class Scraper(
   val initialENRs: List<EthereumNodeRecord>,
   val bindAddress: InetSocketAddress,
   val listeners: List<(EthereumNodeRecord, List<EthereumNodeRecord>) -> Unit>,
-  val maxWaitForNewPeers: Long = 20,
-  val waitBetweenScrapes: Long = 5 * 60
+  val maxWaitForNewPeers: Long = 20L,
+  val waitBetweenScrapes: Long = (5 * 60).toLong()
 ) : CoroutineScope {
 
   private var service: DiscoveryV5Service? = null
@@ -118,7 +118,7 @@ class Scraper(
 
   fun discover(maxWaitForNewPeers: Long) = async {
     var newPeersDetected = true
-    val nodes = ExpiringSet<EthereumNodeRecord>(24 * 60 * 60 * 1000)
+    val nodes = ExpiringSet<EthereumNodeRecord>(24 * 60 * 60 * 1000L)
     while (newPeersDetected) {
       newPeersDetected = false
       for (i in 1..255) {

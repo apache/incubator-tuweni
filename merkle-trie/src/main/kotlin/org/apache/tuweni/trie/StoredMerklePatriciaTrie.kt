@@ -16,11 +16,13 @@
  */
 package org.apache.tuweni.trie
 
+import kotlinx.coroutines.Dispatchers
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.trie.CompactEncoding.bytesToPath
 import org.apache.tuweni.trie.MerkleTrie.Companion.EMPTY_TRIE_ROOT_HASH
 import java.util.function.Function
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A [MerkleTrie] that persists trie nodes to a [MerkleStorage] key/value store.
@@ -126,6 +128,7 @@ class StoredMerklePatriciaTrie<V> : MerkleTrie<Bytes, V> {
   private val storage: MerkleStorage
   private val nodeFactory: StoredNodeFactory<V>
   private var root: Node<V>
+  override val coroutineContext: CoroutineContext = Dispatchers.Default
 
   /**
    * Create a trie.
@@ -152,7 +155,7 @@ class StoredMerklePatriciaTrie<V> : MerkleTrie<Bytes, V> {
     storage: MerkleStorage,
     rootHash: Bytes32,
     valueSerializer: (V) -> Bytes,
-    valueDeserializer: (Bytes) -> V
+    valueDeserializer: (Bytes) -> V,
   ) {
     this.storage = storage
     this.nodeFactory = StoredNodeFactory(storage, valueSerializer, valueDeserializer)

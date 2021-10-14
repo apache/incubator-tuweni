@@ -79,7 +79,7 @@ fun <T> CoroutineScope.asyncResult(
  * Converts this deferred value to an [AsyncResult].
  * The deferred value is cancelled when the returned [AsyncResult] is cancelled or otherwise completed.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
+@ExperimentalCoroutinesApi
 fun <T> Deferred<T>.asAsyncResult(): AsyncResult<T> {
   val asyncResult = AsyncResult.incomplete<T>()
   asyncResult.whenComplete { _, _ -> cancel() }

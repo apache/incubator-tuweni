@@ -16,10 +16,10 @@
  */
 package org.apache.tuweni.trie
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
@@ -27,7 +27,7 @@ import org.apache.tuweni.rlp.RLP
 import java.lang.ref.SoftReference
 import java.util.concurrent.atomic.AtomicReference
 
-internal class StoredNode<V> : Node<V> {
+internal class StoredNode<V> : Node<V>, CoroutineScope {
   private val nodeFactory: StoredNodeFactory<V>
   private val hash: Bytes32
   @Volatile
@@ -80,7 +80,7 @@ internal class StoredNode<V> : Node<V> {
       return loadedNode
     }
 
-    val deferred: Deferred<Node<V>> = GlobalScope.async(Dispatchers.IO, start = CoroutineStart.LAZY) {
+    val deferred: Deferred<Node<V>> = async(start = CoroutineStart.LAZY) {
       val node = nodeFactory.retrieve(hash)
       loaded = SoftReference(node)
       loader.set(null)
@@ -113,4 +113,6 @@ internal class StoredNode<V> : Node<V> {
     deferred?.cancel()
     loaded = null
   }
+
+  override val coroutineContext = Dispatchers.IO
 }
