@@ -359,8 +359,8 @@ val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
       val originalValue = hostContext.getRepositoryStorage(address, key)
       if (originalValue.equals(currentValue)) {
         if (originalValue.isZero) {
-          Gas.valueOf(20000 - 2100)
-        } else Gas.valueOf(5000 - 2100)
+          Gas.valueOf(20000L - 2100)
+        } else Gas.valueOf(5000L - 2100)
       } else {
         Gas.valueOf(100)
       }

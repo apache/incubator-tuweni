@@ -383,19 +383,19 @@ final class DefaultCompletableAsyncResult<T> implements CompletableAsyncResult<T
   @Override
   public AsyncResult<T> exceptionally(Function<Throwable, ? extends T> fn) {
     requireNonNull(fn);
-    return new DefaultCompletableAsyncResult<>(future.exceptionally(fn::apply));
+    return new DefaultCompletableAsyncResult<>(future.exceptionally(fn));
   }
 
   @Override
   public AsyncResult<T> whenComplete(BiConsumer<? super T, ? super Throwable> action) {
     requireNonNull(action);
-    return new DefaultCompletableAsyncResult<>(future.whenComplete(action::accept));
+    return new DefaultCompletableAsyncResult<>(future.whenComplete(action));
   }
 
   @Override
   public <U> AsyncResult<U> handle(BiFunction<? super T, Throwable, ? extends U> fn) {
     requireNonNull(fn);
-    return new DefaultCompletableAsyncResult<>(future.handle(fn::apply));
+    return new DefaultCompletableAsyncResult<>(future.handle(fn));
   }
 
   @Override

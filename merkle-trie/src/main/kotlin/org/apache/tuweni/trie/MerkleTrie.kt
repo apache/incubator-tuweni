@@ -17,8 +17,8 @@
 package org.apache.tuweni.trie
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.concurrent.AsyncCompletion
@@ -28,21 +28,10 @@ import org.apache.tuweni.concurrent.coroutines.asyncResult
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.rlp.RLP
 
-// Workaround for a javadoc generation issue - extracting these method bodies out of the default method and into
-// private funcs appears to resolve it. It would be good to remove this workaround one day.
-private fun <K, V> getAsync(dispatcher: CoroutineDispatcher, key: K, trie: MerkleTrie<K, V>): AsyncResult<V?> =
-  GlobalScope.asyncResult(dispatcher) { trie.get(key) }
-private fun <K, V> putAsync(
-  dispatcher: CoroutineDispatcher,
-  key: K,
-  value: V?,
-  trie: MerkleTrie<K, V>
-): AsyncCompletion = GlobalScope.asyncCompletion(dispatcher) { trie.put(key, value) }
-
 /**
  * A Merkle Trie.
  */
-interface MerkleTrie<in K, V> {
+interface MerkleTrie<in K, V> : CoroutineScope {
   companion object {
     /**
      * The root hash of an empty tree.
@@ -74,7 +63,7 @@ interface MerkleTrie<in K, V> {
    * @param dispatcher The co-routine dispatcher for asynchronous tasks.
    * @return A value that corresponds to the specified key, or {@code null} if no such value exists.
    */
-  fun getAsync(dispatcher: CoroutineDispatcher, key: K): AsyncResult<V?> = getAsync(dispatcher, key, this)
+  fun getAsync(dispatcher: CoroutineDispatcher, key: K): AsyncResult<V?> = asyncResult { get(key) }
 
   /**
    * Updates the value that corresponds to the specified key, creating the value if one does not already exist.
@@ -109,7 +98,7 @@ interface MerkleTrie<in K, V> {
    * @return A completion that will complete when the value has been put into the trie.
    */
   fun putAsync(dispatcher: CoroutineDispatcher, key: K, value: V?): AsyncCompletion =
-    putAsync(dispatcher, key, value, this)
+    asyncCompletion { put(key, value) }
 
   /**
    * Deletes the value that corresponds to the specified key, if such a value exists.
@@ -134,8 +123,7 @@ interface MerkleTrie<in K, V> {
    * @param dispatcher The co-routine dispatcher for asynchronous tasks.
    * @return A completion that will complete when the value has been removed.
    */
-  fun removeAsync(dispatcher: CoroutineDispatcher, key: K): AsyncCompletion =
-    GlobalScope.asyncCompletion(dispatcher) { remove(key) }
+  fun removeAsync(dispatcher: CoroutineDispatcher, key: K): AsyncCompletion = asyncCompletion { remove(key) }
 
   /**
    * Returns the KECCAK256 hash of the root node of the trie.

@@ -16,7 +16,8 @@
  */
 package org.apache.tuweni.ethclient
 
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.coroutines.asyncResult
 import org.apache.tuweni.crypto.SECP256K1
@@ -28,9 +29,11 @@ import org.apache.tuweni.devp2p.parseEnodeUri
 import java.net.URI
 import java.time.Instant
 import java.util.Objects
+import kotlin.coroutines.CoroutineContext
 
 class DiscoveryPeerRepository(private val repository: org.apache.tuweni.peer.repository.PeerRepository) :
-  PeerRepository {
+  PeerRepository, CoroutineScope {
+  override val coroutineContext: CoroutineContext = Dispatchers.Default
 
   override fun addListener(listener: (Peer) -> Unit) {
     TODO("Unsupported")
@@ -47,9 +50,9 @@ class DiscoveryPeerRepository(private val repository: org.apache.tuweni.peer.rep
     return get(endpoint.address, endpoint.udpPort, nodeId)
   }
 
-  override fun getAsync(uri: URI): AsyncResult<Peer> = GlobalScope.asyncResult { get(uri) }
+  override fun getAsync(uri: URI): AsyncResult<Peer> = asyncResult { get(uri) }
 
-  override fun getAsync(uri: String): AsyncResult<Peer> = GlobalScope.asyncResult { get(uri) }
+  override fun getAsync(uri: String): AsyncResult<Peer> = asyncResult { get(uri) }
 }
 
 internal class DelegatePeer(

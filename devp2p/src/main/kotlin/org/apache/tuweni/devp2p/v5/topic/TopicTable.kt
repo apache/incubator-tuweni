@@ -100,7 +100,7 @@ internal class TopicTable(
   companion object {
     internal const val MAX_ENTRIES_PER_TOPIC: Int = 100
     private const val MAX_TABLE_CAPACITY: Int = 500
-    private const val TARGET_AD_LIFETIME_MS: Long = 15 * 60 * 1000 // 15 min
+    private const val TARGET_AD_LIFETIME_MS = (15 * 60 * 1000).toLong() // 15 min
 
     private const val QUEUE_EMPTY_MSG = "Queue is empty."
   }

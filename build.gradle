@@ -24,14 +24,14 @@ buildscript {
 }
 
 plugins {
-  id 'com.diffplug.spotless' version '5.8.2'
-  id 'net.ltgt.errorprone' version '1.2.1'
+  id 'com.diffplug.spotless' version '5.17.0'
+  id 'net.ltgt.errorprone' version '2.0.2'
   id 'org.springframework.boot' version '2.4.3'
   id 'io.spring.dependency-management' version '1.0.6.RELEASE'
   id 'com.github.hierynomus.license' version '0.15.0'
   id 'org.gradle.crypto.checksum' version '1.1.0'
-  id 'org.jetbrains.kotlin.jvm' version '1.4.20'
-  id 'org.jetbrains.kotlin.plugin.spring' version '1.4.20'
+  id 'org.jetbrains.kotlin.jvm' version '1.5.31'
+  id 'org.jetbrains.kotlin.plugin.spring' version '1.5.31'
   id 'org.jetbrains.dokka' version "0.10.1"
   id 'maven-publish'
   id 'com.jfrog.bintray' version '1.8.3'
@@ -263,8 +263,8 @@ allprojects {
   //////
   // Compiler arguments
 
-  sourceCompatibility = '1.11'
-  targetCompatibility = '1.11'
+  sourceCompatibility = '1.17'
+  targetCompatibility = '1.17'
 
   dependencies {
     errorprone 'com.google.errorprone:error_prone_core'
@@ -302,8 +302,7 @@ allprojects {
       allWarningsAsErrors = true
       freeCompilerArgs = [
         '-Xjsr305=strict',
-        '-Xjvm-default=enable',
-        '-Xuse-experimental=kotlin.Experimental'
+        '-Xjvm-default=enable'
       ]
     }
   }

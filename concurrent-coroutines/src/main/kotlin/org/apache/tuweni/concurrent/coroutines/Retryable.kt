@@ -31,7 +31,7 @@ import kotlinx.coroutines.withTimeoutOrNull
  * @param block the suspending block to be executed
  * @return the first non-null result
  */
-@OptIn(ExperimentalCoroutinesApi::class)
+@ExperimentalCoroutinesApi
 suspend fun <R> CoroutineScope.retry(
   retryDelay: Long,
   block: suspend (Int) -> R?
@@ -45,7 +45,7 @@ suspend fun <R> CoroutineScope.retry(
  * @param block the suspending block to be executed
  * @return the first non-null result, or `null` if all attempts fail
  */
-@OptIn(ExperimentalCoroutinesApi::class)
+@ExperimentalCoroutinesApi
 suspend fun <R> CoroutineScope.retry(
   retryDelay: Long,
   maxRetries: Int,
@@ -60,7 +60,7 @@ suspend fun <R> CoroutineScope.retry(
  * @param block the suspending block to be executed
  * @return the first non-null result, or `null` if all attempts fail
  */
-@OptIn(ExperimentalCoroutinesApi::class)
+@ExperimentalCoroutinesApi
 suspend fun <R> CoroutineScope.retry(
   retryDelay: (Int) -> Long?,
   block: suspend (Int) -> R?

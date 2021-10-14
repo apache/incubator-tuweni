@@ -17,6 +17,7 @@
 package org.apache.tuweni.concurrent.coroutines
 
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -28,6 +29,7 @@ import java.lang.RuntimeException
 
 private val NOOP_EXCEPTION_HANDLER = CoroutineExceptionHandler { _, _ -> }
 
+@ExperimentalCoroutinesApi
 internal class RetryableTest {
 
   @Test

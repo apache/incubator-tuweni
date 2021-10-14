@@ -29,10 +29,10 @@ class RatTask extends DefaultTask {
   @Input
   Closure<List<String>> excludes
 
-  def reportDir = project.file('build/rat')
-  def stylesheet = project.file('gradle/resources/rat-output-to-html.xsl').getAbsolutePath()
-  def xmlReport = new File(reportDir, 'rat-report.xml')
-  def htmlReport = new File(reportDir, 'rat-report.html')
+  @OutputFile
+  def xmlReport = new File(project.file('build/rat'), 'rat-report.xml')
+  @OutputFile
+  def htmlReport = new File(project.file('build/rat'), 'rat-report.html')
 
   def generateXmlReport(File reportDir) {
     def excludeList = excludes()
@@ -67,6 +67,7 @@ class RatTask extends DefaultTask {
   }
 
   def generateHtmlReport() {
+    def stylesheet = project.file('gradle/resources/rat-output-to-html.xsl').getAbsolutePath()
     def antBuilder = services.get(IsolatedAntBuilder)
     def ratClasspath = project.configurations.rat
     antBuilder.withClasspath(ratClasspath).execute {
@@ -81,6 +82,7 @@ class RatTask extends DefaultTask {
 
   @TaskAction
   def rat() {
+    def reportDir = project.file('build/rat')
     if (!reportDir.exists()) {
       reportDir.mkdirs()
     }

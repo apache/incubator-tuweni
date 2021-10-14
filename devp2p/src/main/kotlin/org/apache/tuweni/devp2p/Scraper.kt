@@ -83,7 +83,7 @@ class Scraper(
 
   private var service: DiscoveryService? = null
   private val started = AtomicBoolean(false)
-  private val nodes = ExpiringSet<Peer>(24 * 60 * 60 * 1000)
+  private val nodes = ExpiringSet<Peer>(24 * 60 * 60 * 1000L)
 
   fun start() = async {
     repository.addListener {
@@ -138,7 +138,7 @@ class Scraper(
           }
         }
       }
-      delay(20 * 1000)
+      delay(20 * 1000L)
     }
   }
 
