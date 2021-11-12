@@ -28,7 +28,7 @@ plugins {
   id 'net.ltgt.errorprone' version '2.0.2'
   id 'org.springframework.boot' version '2.4.3'
   id 'io.spring.dependency-management' version '1.0.6.RELEASE'
-  id 'com.github.hierynomus.license' version '0.15.0'
+  id 'com.github.hierynomus.license' version '0.16.1'
   id 'org.gradle.crypto.checksum' version '1.1.0'
   id 'org.jetbrains.kotlin.jvm' version '1.5.31'
   id 'org.jetbrains.kotlin.plugin.spring' version '1.5.31'
@@ -298,7 +298,7 @@ allprojects {
 
   tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
-      jvmTarget = "11"
+      jvmTarget = "17"
       allWarningsAsErrors = true
       freeCompilerArgs = [
         '-Xjsr305=strict',
