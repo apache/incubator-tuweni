@@ -159,9 +159,9 @@ class DNSResolver @JvmOverloads constructor(
       }
     } catch (e: IOException) {
       if (resolver is SimpleResolver) {
-        logger.warn("I/O exception contacting remote DNS server ${resolver.address}", e)
+        logger.warn("I/O exception contacting remote DNS server ${resolver.address} when resolving $domainName", e)
       } else {
-        logger.warn("I/O exception contacting remote DNS server", e)
+        logger.warn("I/O exception contacting remote DNS server when resolving $domainName", e)
       }
       return null
     } catch (e: WireParseException) {
