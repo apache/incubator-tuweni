@@ -20,7 +20,6 @@ import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.slf4j.LoggerFactory
 import org.xbill.DNS.ExtendedResolver
 import org.xbill.DNS.Resolver
-import org.xbill.DNS.SimpleResolver
 import java.util.Timer
 import java.util.TimerTask
 
