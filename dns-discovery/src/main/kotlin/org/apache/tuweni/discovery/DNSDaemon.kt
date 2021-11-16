@@ -18,8 +18,8 @@ package org.apache.tuweni.discovery
 
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.slf4j.LoggerFactory
+import org.xbill.DNS.ExtendedResolver
 import org.xbill.DNS.Resolver
-import org.xbill.DNS.SimpleResolver
 import java.util.Timer
 import java.util.TimerTask
 
@@ -39,7 +39,7 @@ class DNSDaemon @JvmOverloads constructor(
   private val seq: Long = 0,
   private val period: Long = 60000L,
   private val dnsServer: String? = null,
-  private val resolver: Resolver = SimpleResolver(dnsServer)
+  private val resolver: Resolver = if (dnsServer != null) ExtendedResolver(arrayOf(dnsServer)) else ExtendedResolver()
 ) {
   companion object {
     val logger = LoggerFactory.getLogger(DNSDaemon::class.java)

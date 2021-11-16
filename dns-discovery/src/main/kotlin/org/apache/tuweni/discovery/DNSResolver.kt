@@ -37,12 +37,12 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.slf4j.LoggerFactory
 import org.xbill.DNS.DClass
+import org.xbill.DNS.ExtendedResolver
 import org.xbill.DNS.Message
 import org.xbill.DNS.Name
 import org.xbill.DNS.Record
 import org.xbill.DNS.Resolver
 import org.xbill.DNS.Section
-import org.xbill.DNS.SimpleResolver
 import org.xbill.DNS.Type
 import org.xbill.DNS.WireParseException
 import java.io.IOException
@@ -56,7 +56,7 @@ import java.io.IOException
 class DNSResolver @JvmOverloads constructor(
   private val dnsServer: String? = null,
   var seq: Long = 0,
-  private val resolver: Resolver = SimpleResolver(dnsServer)
+  private val resolver: Resolver = if (dnsServer != null) ExtendedResolver(arrayOf(dnsServer)) else ExtendedResolver(),
 ) {
 
   companion object {
@@ -158,11 +158,7 @@ class DNSResolver @JvmOverloads constructor(
         return null
       }
     } catch (e: IOException) {
-      if (resolver is SimpleResolver) {
-        logger.warn("I/O exception contacting remote DNS server ${resolver.address}", e)
-      } else {
-        logger.warn("I/O exception contacting remote DNS server", e)
-      }
+      logger.warn("I/O exception contacting remote DNS server when resolving $domainName", e)
       return null
     } catch (e: WireParseException) {
       logger.error("Error reading TXT record", e)
