@@ -175,15 +175,9 @@ downloadLicenses {
   ]
 }
 
-task lazyDownloadLicenses() {
-  if (!file("$rootProject.buildDir/reports/license/license-dependency.xml").exists()) {
-    dependsOn ':downloadLicenses'
-  }
-}
-
 task checkLicenses {
   description "Verify that all dependencies use accepted licenses."
-  dependsOn ':lazyDownloadLicenses'
+  dependsOn ':downloadLicenses'
 
   def bads = ""
   doLast {
