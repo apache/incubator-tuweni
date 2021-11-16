@@ -40,7 +40,7 @@ class MetricsService(
   networkInterface: String = "0.0.0.0",
   enablePrometheus: Boolean = true,
   enableGrpcPush: Boolean = true,
-  grpcEndpoint: String = "localhost:4317",
+  grpcEndpoint: String = "http://localhost:4317",
   grpcTimeout: Long = 2000,
 ) {
 
