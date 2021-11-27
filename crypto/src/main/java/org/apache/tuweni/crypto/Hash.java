@@ -29,7 +29,7 @@ import java.security.NoSuchAlgorithmException;
  * https://www.bouncycastle.org/wiki/display/JA1/Provider+Installation for detail.
  */
 public final class Hash {
-  static boolean USE_SODIUM = true;
+  static boolean USE_SODIUM = Boolean.parseBoolean(System.getProperty("org.apahce.tuweni.crypto.useSodium", "true"));
 
   private Hash() {}
 
@@ -83,7 +83,7 @@ public final class Hash {
    * @return A digest.
    */
   public static byte[] sha2_256(byte[] input) {
-    if (USE_SODIUM && Sodium.isAvailable()) {
+    if (isSodiumAvailable()) {
       SHA256Hash.Input shaInput = SHA256Hash.Input.fromBytes(input);
       try {
         SHA256Hash.Hash result = SHA256Hash.hash(shaInput);
@@ -110,7 +110,7 @@ public final class Hash {
    * @return A digest.
    */
   public static Bytes32 sha2_256(Bytes input) {
-    if (USE_SODIUM && Sodium.isAvailable()) {
+    if (isSodiumAvailable()) {
       SHA256Hash.Input shaInput = SHA256Hash.Input.fromBytes(input);
       try {
         SHA256Hash.Hash result = SHA256Hash.hash(shaInput);
@@ -128,6 +128,14 @@ public final class Hash {
     } catch (NoSuchAlgorithmException e) {
       throw new IllegalStateException("Algorithm should be available but was not", e);
     }
+  }
+
+  private static boolean isSodiumAvailable() {
+    if (!USE_SODIUM) {
+      return false;
+    }
+    USE_SODIUM = Sodium.isAvailable();
+    return USE_SODIUM;
   }
 
   /**
