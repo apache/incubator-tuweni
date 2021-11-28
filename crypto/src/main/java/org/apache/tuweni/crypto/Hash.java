@@ -12,6 +12,8 @@
  */
 package org.apache.tuweni.crypto;
 
+import static java.util.Objects.requireNonNull;
+
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.crypto.sodium.SHA256Hash;
@@ -19,8 +21,6 @@ import org.apache.tuweni.crypto.sodium.Sodium;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Various utilities for providing hashes (digests) of arbitrary data.
