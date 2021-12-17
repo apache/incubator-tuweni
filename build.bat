@@ -10,4 +10,4 @@ REM Unless required by applicable law or agreed to in writing, software distribu
 REM an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 REM specific language governing permissions and limitations under the License.
 @echo on
-call ./gradlew assemble
+call gradlew assemble
