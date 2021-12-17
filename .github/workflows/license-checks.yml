@@ -38,6 +38,6 @@ jobs:
         with:
           submodules: true
       - name: gradle downloadLicenses
-        run: gradle downloadLicenses
+        run: ./gradlew downloadLicenses
       - name: gradle checkLicenses
-        run: gradle checkLicenses
+        run: ./gradlew checkLicenses

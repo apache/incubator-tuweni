@@ -54,7 +54,7 @@ jobs:
         with:
           java-version: 11
       - name: gradle test
-        run: gradle test
+        run: ./gradlew test
       - name: Archive Junit Report
         if: always()
         uses: actions/upload-artifact@v2

@@ -32,15 +32,9 @@ Install [Docker](https://docs.docker.com/get-docker/).
 Requires Docker:
     ./build.sh
 #### With Gradle and Java ####
-Install Gradle >6 and JDK 11.
+Install JDK 11.
 
 Run:
-
-`$>gradle setup`
-
-It will install the Gradle wrapper with the correct version.
-
-Then build:
 
 `$>./gradlew build`
 
