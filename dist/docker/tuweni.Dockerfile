@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-FROM openjdk:11.0.3-jre-stretch
+FROM openjdk:17.0.1-slim
 
 RUN apt-get update \
  && apt-get install -y libsodium-dev \
