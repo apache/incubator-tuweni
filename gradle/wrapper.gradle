@@ -23,8 +23,8 @@
 // and not the version installed on the machine running the task.
 // Read more about the wrapper here: https://docs.gradle.org/current/userguide/gradle_wrapper.html
 wrapper {
-    gradleVersion = project.gradleVersion
-    distributionType = Wrapper.DistributionType.ALL
+  gradleVersion = project.gradleVersion
+  distributionType = Wrapper.DistributionType.ALL
 }
 
 // Custom task to inject support for downloading the gradle wrapper jar if it doesn't exist.
@@ -60,7 +60,7 @@ task bootstrapWrapper() {
       done
       """.stripIndent()
 
-      def bootstrapWindowsString = """
+    def bootstrapWindowsString = """
     if not exist "$wrapperJarPath" (
       bitsadmin /transfer myDownloadJob "$wrapperJarUrl"
       mv gradle-wrapper.jar "$wrapperJarPath"
@@ -82,20 +82,20 @@ task bootstrapWrapper() {
       }
     }
 
-      def windowsWrapperScript = new File(wrapper.scriptFile.toString() + '.bat')
-      def windowsWrapperLines = windowsWrapperScript.readLines()
-      windowsWrapperScript.withPrintWriter { out ->
-        def bootstrapWritten = false
-        windowsWrapperLines.each { line ->
-          // Print the wrapper bootstrap before the first usage of the wrapper jar.
-          if (!bootstrapWritten && line.contains("gradle-wrapper.jar")) {
-            out.println(bootstrapWindowsString)
-            bootstrapWritten = true
-          }
-          out.print(line)
-          out.println()
+    def windowsWrapperScript = new File(wrapper.scriptFile.toString() + '.bat')
+    def windowsWrapperLines = windowsWrapperScript.readLines()
+    windowsWrapperScript.withPrintWriter { out ->
+      def bootstrapWritten = false
+      windowsWrapperLines.each { line ->
+        // Print the wrapper bootstrap before the first usage of the wrapper jar.
+        if (!bootstrapWritten && line.contains("gradle-wrapper.jar")) {
+          out.println(bootstrapWindowsString)
+          bootstrapWritten = true
         }
+        out.print(line)
+        out.println()
       }
+    }
   }
 }
 wrapper.finalizedBy bootstrapWrapper
