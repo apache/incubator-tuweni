@@ -28,9 +28,6 @@ Install [Docker](https://docs.docker.com/get-docker/).
     git submodule update --init --recursive
 
 ### Build the project ###
-#### One step build ####
-Requires Docker:
-    ./build.sh
 #### With Gradle and Java ####
 Install JDK 11.
 
