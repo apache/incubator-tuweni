@@ -153,6 +153,7 @@ distributions {
         include 'dist/NOTICE-binary'
         include 'gradle/*'
         include 'gradle/docker/*'
+        include 'gradle/wrapper/gradle-wrapper.properties'
       }
       rootProject.subprojects.each { s ->
         def sPath = rootProject.projectDir.toPath().relativize(s.projectDir.toPath()).toString()
