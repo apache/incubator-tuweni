@@ -35,6 +35,7 @@ task bootstrapWrapper() {
   doLast {
     def wrapperBasePath = "\$APP_HOME/gradle/wrapper"
     def wrapperJarPath = wrapperBasePath + "/gradle-wrapper.jar"
+    def windowsWrapperJarPath = "%APP_HOME%/gradle/wrapper/gradle-wrapper.jar"
 
     // Add a trailing zero to the version if needed.
     def fullVersion = project.gradleVersion.count(".") == 1 ? "${project.gradleVersion}.0" : versions.gradle
@@ -61,8 +62,8 @@ task bootstrapWrapper() {
       """.stripIndent()
 
     def bootstrapWindowsString = """
-    if not exist "$wrapperJarPath" (
-      curl -q -o "$wrapperJarPath" "$wrapperJarUrl" 
+    if not exist "$windowsWrapperJarPath" (
+      curl -q -o "$windowsWrapperJarPath" "$wrapperJarUrl" 
     )
     """.stripIndent()
 

@@ -68,8 +68,8 @@ goto fail
 @rem Setup the command line
 
 
-if not exist "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" (
-  curl -q -o "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" "https://raw.githubusercontent.com/gradle/gradle/v6.3.0/gradle/wrapper/gradle-wrapper.jar" 
+if not exist "%APP_HOME%/gradle/wrapper/gradle-wrapper.jar" (
+  curl -q -o "%APP_HOME%/gradle/wrapper/gradle-wrapper.jar" "https://raw.githubusercontent.com/gradle/gradle/v6.3.0/gradle/wrapper/gradle-wrapper.jar" 
 )
 
 set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
