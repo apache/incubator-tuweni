@@ -92,4 +92,4 @@ jobs:
           java-version: 11
       - name: Build from source
         if: ${{ matrix.os == 'windows-latest' }}
-        run: cd distunzipped/tuweni && ./build.bat
+        run: cd distunzipped/tuweni && ./gradlew.bat
