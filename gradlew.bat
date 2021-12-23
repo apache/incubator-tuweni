@@ -69,7 +69,7 @@ goto fail
 
 
 if not exist "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" (
-  bitsadmin /transfer gradleWrapper /download /priority FOREGROUND "https://raw.githubusercontent.com/gradle/gradle/v6.3.0/gradle/wrapper/gradle-wrapper.jar" "$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
+  curl -q -o "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" "https://raw.githubusercontent.com/gradle/gradle/v6.3.0/gradle/wrapper/gradle-wrapper.jar" 
 )
 
 set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar

@@ -62,7 +62,7 @@ task bootstrapWrapper() {
 
     def bootstrapWindowsString = """
     if not exist "$wrapperJarPath" (
-      bitsadmin /transfer gradleWrapper /download /priority FOREGROUND "$wrapperJarUrl" "$wrapperJarPath"
+      curl -q -o "$wrapperJarPath" "$wrapperJarUrl" 
     )
     """.stripIndent()
 
