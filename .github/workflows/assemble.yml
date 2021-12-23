@@ -54,7 +54,7 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
           restore-keys: ${{ runner.os }}-m2
       - name: gradle assemble
-        run: gradle assemble -x test -Psignatory.keyId=38F6C7215DD49C32 -Psigning.gnupg.keyName=38F6C7215DD49C32 -Psigning.gnupg.executable=gpg
+        run: ./gradlew assemble -x test -Psignatory.keyId=38F6C7215DD49C32 -Psigning.gnupg.keyName=38F6C7215DD49C32 -Psigning.gnupg.executable=gpg
         env:
           ENABLE_SIGNING: true
       - name: Upload source distrib
@@ -84,7 +84,7 @@ jobs:
         run: mv distunzipped/tuweni-src-* distunzipped/tuweni
       - name: Build from source
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: cd distunzipped/tuweni && ./build.sh
+        run: cd distunzipped/tuweni && ./gradlew assemble
       - name: Set up JDK 11
         if: ${{ matrix.os == 'windows-latest' }}
         uses: actions/setup-java@v1
@@ -92,4 +92,4 @@ jobs:
           java-version: 11
       - name: Build from source
         if: ${{ matrix.os == 'windows-latest' }}
-        run: cd distunzipped/tuweni && ./build.bat
+        run: cd distunzipped/tuweni && ./gradlew.bat assemble

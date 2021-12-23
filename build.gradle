@@ -75,7 +75,11 @@ gradle.startParameter.taskNames.each {
 }
 gradle.startParameter.taskNames = expandedTaskList.flatten()
 
-apply from: "${rootDir}/wrapper.gradle"
+ext {
+  gradleVersion = '6.3'
+}
+
+apply from: "${rootDir}/gradle/wrapper.gradle"
 
 apply from: "${rootDir}/gradle/stage.gradle"
 
@@ -102,6 +106,7 @@ if (file('.git').exists()) {
         '.idea/**',
         'gradlew.bat',
         'gradlew',
+        'gradle/wrapper/gradle-wrapper.properties',
         'toml/src/test/resources/**',
         '.gitattributes',
         '.*\\.kotlin_module',
