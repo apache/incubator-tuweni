@@ -84,7 +84,7 @@ jobs:
         run: mv distunzipped/tuweni-src-* distunzipped/tuweni
       - name: Build from source
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: cd distunzipped/tuweni && ./gradlew
+        run: cd distunzipped/tuweni && ./gradlew assemble
       - name: Set up JDK 11
         if: ${{ matrix.os == 'windows-latest' }}
         uses: actions/setup-java@v1
@@ -92,4 +92,4 @@ jobs:
           java-version: 11
       - name: Build from source
         if: ${{ matrix.os == 'windows-latest' }}
-        run: cd distunzipped/tuweni && ./gradlew.bat
+        run: cd distunzipped/tuweni && ./gradlew.bat assemble
