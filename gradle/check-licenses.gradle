@@ -38,7 +38,9 @@ licenseReport {
   excludeOwnGroup = true
   allowedLicensesFile = new File("$projectDir/gradle/allowed-licenses.json")
   filters = fs
-  excludes = ['org.jetbrains.kotlinx:kotlinx-coroutines-core']
+  excludes = [
+    'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+  ]
   excludeBoms = true
   def rs = new ArrayList<ReportRenderer>();
   def xml = new XmlReportRenderer() as ReportRenderer
