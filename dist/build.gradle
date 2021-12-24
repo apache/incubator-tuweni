@@ -83,6 +83,7 @@ distributions {
   main {
     distributionBaseName = 'tuweni-bin'
     contents {
+      duplicatesStrategy = DuplicatesStrategy.EXCLUDE
       mandatoryFiles(it)
       into('') {
         from ".."
@@ -133,6 +134,7 @@ distributions {
   sources {
     distributionBaseName = 'tuweni-src'
     contents {
+      duplicatesStrategy = DuplicatesStrategy.EXCLUDE
       into('') {
         from 'build'
         include 'gradle.properties'
