@@ -10,35 +10,42 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-/**
- * Check that the licenses of our 3rd parties are in our acceptedLicenses list.
- *
- * run it with "gradle checkLicenses"
- *
- * To add new accepted licenses you need to update this script.
- * Some products may be available with multiple licenses. In this case you must update
- *  this script to add it in the downloadLicenses#licenses.
- */
 
-/**
- * The lists of the license we accept.
- */
-ext.acceptedLicenses = [
-  'Apache License, Version 2.0',
-  'Bouncy Castle Licence',
-  'CC0',
-  'The 2-Clause BSD License',
-  'The 3-Clause BSD License',
-  'Common Development and Distribution License 1.0',
-  'Eclipse Distribution License - v 1.0',
-  'Eclipse Public License 1.0',
-  'Eclipse Public License 2.0',
-  'The MIT License',
-  'Unicode/ICU License',
-  'Public Domain',
-]*.toLowerCase()
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath 'com.github.jk1.dependency-license-report:com.github.jk1.dependency-license-report.gradle.plugin:2.0'
+  }
+}
+
+apply plugin: LicenseReportPlugin
+
+import com.github.jk1.license.LicenseReportPlugin
+import com.github.jk1.license.filter.*
+import com.github.jk1.license.render.*
+
+
+def filter = new LicenseBundleNormalizer( ) as DependencyFilter
+def fs = new ArrayList<DependencyFilter>()
+fs.add(filter)
 
 licenseReport {
   configurations = ['compileClasspath']
   excludeOwnGroup = true
+  allowedLicensesFile = new File("$projectDir/gradle/allowed-licenses.json")
+  filters = fs
+  excludes = ['org.jetbrains.kotlinx:kotlinx-coroutines-core']
+  excludeBoms = true
+  def rs = new ArrayList<ReportRenderer>();
+  def xml = new XmlReportRenderer() as ReportRenderer
+  def csv = new CsvReportRenderer() as ReportRenderer
+  def inventory = new InventoryHtmlReportRenderer() as ReportRenderer
+  rs.add(xml)
+  rs.add(csv)
+  rs.add(inventory)
+  renderers = rs
 }
