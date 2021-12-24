@@ -265,8 +265,8 @@ allprojects {
   //////
   // Compiler arguments
 
-  sourceCompatibility = '1.17'
-  targetCompatibility = '1.17'
+  sourceCompatibility = '1.11'
+  targetCompatibility = '1.11'
 
   dependencies {
     errorprone 'com.google.errorprone:error_prone_core'
@@ -300,7 +300,7 @@ allprojects {
 
   tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
-      jvmTarget = "17"
+      jvmTarget = "11"
       allWarningsAsErrors = true
       freeCompilerArgs = [
         '-Xjsr305=strict',
@@ -681,7 +681,7 @@ dokka {
     }
 
     // Used for linking to JDK documentation
-    jdkVersion = 17
+    jdkVersion = 11
 
     // Disable linking to online kotlin-stdlib documentation
     noStdlibLink = true
