@@ -28,16 +28,8 @@ jobs:
     container:
       image: tmio/tuweni-build:1.2
     steps:
-      - name: Cache Licenses
-        uses: actions/cache@v1
-        with:
-          path: reports/license/license-dependency.xml
-          key: licenses-${{ hashFiles('**/reports/license/license-dependency.xml') }}
-          restore-keys: license-dependency.xml
       - uses: actions/checkout@v1
         with:
           submodules: true
-      - name: gradle downloadLicenses
-        run: ./gradlew downloadLicenses
-      - name: gradle checkLicenses
-        run: ./gradlew checkLicenses
+      - name: gradle checkLicense
+        run: ./gradlew checkLicense
