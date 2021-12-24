@@ -79,7 +79,7 @@ jobs:
         with:
           name: distsrc
       - name: Unzip source
-        run: unzip -o distsrc/tuweni-src-*.zip -d distunzipped
+        run: unzip -q -o distsrc/tuweni-src-*.zip -d distunzipped
       - name: Rename folder
         run: mv distunzipped/tuweni-src-* distunzipped/tuweni
       - name: Set up JDK 17
