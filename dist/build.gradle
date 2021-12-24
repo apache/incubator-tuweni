@@ -113,7 +113,7 @@ distributions {
       into('lib') {
         from rootProject.jar
         from rootProject.signArchives.signatureFiles[0]
-        from libs
+        from libs.unique(false)
       }
       into('site') {
         from rootProject.dokka.outputDirectory
