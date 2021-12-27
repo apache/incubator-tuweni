@@ -31,12 +31,6 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: true
-      - name: Cache Licenses
-        uses: actions/cache@v1
-        with:
-          path: reports/license/license-dependency.xml
-          key: licenses-${{ hashFiles('**/reports/license/license-dependency.xml') }}
-          restore-keys: license-dependency.xml
       - name: Cache Gradle packages
         uses: actions/cache@v1
         with:
@@ -49,10 +43,10 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: Set up JDK 17
+      - name: Set up JDK 11
         uses: actions/setup-java@v1
         with:
-          java-version: 17
+          java-version: 11
       - name: gradle test
         run: ./gradlew.bat test
       - name: Archive Junit Report
