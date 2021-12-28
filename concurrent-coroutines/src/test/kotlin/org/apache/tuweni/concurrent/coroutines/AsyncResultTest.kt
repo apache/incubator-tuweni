@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.concurrent.coroutines
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
+@ExperimentalCoroutinesApi
 class AsyncResultTest {
 
   @Test

@@ -44,9 +44,9 @@ import kotlin.coroutines.CoroutineContext
 
 open class RelationalPeerRepository(
   private val dataSource: DataSource,
-  private val expiration: Long = 5 * 60 * 1000,
-  private val clientIdsInterval: Long = 24 * 60 * 60 * 1000 * 2,
-  private val clientsStatsDelay: Long = 30 * 1000,
+  private val expiration: Long = 5 * 60 * 1000L,
+  private val clientIdsInterval: Long = 24 * 60 * 60 * 1000 * 2L,
+  private val clientsStatsDelay: Long = 30 * 1000L,
   private val meter: Meter,
   private val upgradeConfigs: List<UpgradeConfig> = listOf(),
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
@@ -265,7 +265,7 @@ open class RelationalPeerRepository(
           var upgradeReady = 0
           newClientIds.forEach { newClientCount ->
             val clientIdInfo = ClientIdInfo(newClientCount.clientId)
-            upgradeConfig.versions.get(clientIdInfo.name().toLowerCase())?.let { upgradeVersion ->
+            upgradeConfig.versions.get(clientIdInfo.name().lowercase())?.let { upgradeVersion ->
               if (clientIdInfo >= upgradeVersion) {
                 upgradeReady += newClientCount.count
               }

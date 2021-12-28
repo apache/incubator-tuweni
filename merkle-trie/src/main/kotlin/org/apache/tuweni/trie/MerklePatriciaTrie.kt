@@ -17,7 +17,6 @@
 package org.apache.tuweni.trie
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
@@ -25,6 +24,7 @@ import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.trie.CompactEncoding.bytesToPath
 import java.util.function.Function
+import kotlin.coroutines.CoroutineContext
 import kotlin.text.Charsets.UTF_8
 
 internal fun bytes32Identity(b: Bytes32): Bytes32 = b
@@ -39,7 +39,8 @@ internal fun stringDeserializer(b: Bytes): String = String(b.toArrayUnsafe(), UT
  * @param valueSerializer A function for serializing values to bytes.
  * @constructor Creates an empty trie.
  */
-class MerklePatriciaTrie<V>(valueSerializer: (V) -> Bytes) : MerkleTrie<Bytes, V> {
+
+class MerklePatriciaTrie<V> @JvmOverloads constructor(valueSerializer: (V) -> Bytes, override val coroutineContext: CoroutineContext = Dispatchers.Default) : MerkleTrie<Bytes, V> {
 
   companion object {
     /**
@@ -78,7 +79,6 @@ class MerklePatriciaTrie<V>(valueSerializer: (V) -> Bytes) : MerkleTrie<Bytes, V
   override suspend fun get(key: Bytes): V? = root.accept(getVisitor, bytesToPath(key)).value()
 
   // This implementation does not suspend, so we can use the unconfined context
-  @OptIn(ExperimentalCoroutinesApi::class)
   override fun getAsync(key: Bytes): AsyncResult<V?> = runBlocking(Dispatchers.Unconfined) {
     AsyncResult.completed(get(key))
   }
@@ -91,8 +91,7 @@ class MerklePatriciaTrie<V>(valueSerializer: (V) -> Bytes) : MerkleTrie<Bytes, V
   }
 
   // This implementation does not suspend, so we can use the unconfined context
-  @OptIn(ExperimentalCoroutinesApi::class)
-  override fun putAsync(key: Bytes, value: V?): AsyncCompletion = runBlocking(Dispatchers.Unconfined) {
+  override fun putAsync(key: Bytes, value: V?): AsyncCompletion = runBlocking {
     put(key, value)
     AsyncCompletion.completed()
   }
@@ -102,8 +101,7 @@ class MerklePatriciaTrie<V>(valueSerializer: (V) -> Bytes) : MerkleTrie<Bytes, V
   }
 
   // This implementation does not suspend, so we can use the unconfined context
-  @OptIn(ExperimentalCoroutinesApi::class)
-  override fun removeAsync(key: Bytes): AsyncCompletion = runBlocking(Dispatchers.Unconfined) {
+  override fun removeAsync(key: Bytes): AsyncCompletion = runBlocking {
     remove(key)
     AsyncCompletion.completed()
   }

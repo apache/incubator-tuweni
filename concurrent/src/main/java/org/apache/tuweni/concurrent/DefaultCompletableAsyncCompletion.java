@@ -290,7 +290,7 @@ final class DefaultCompletableAsyncCompletion implements CompletableAsyncComplet
   public <U> AsyncCompletion thenConsume(AsyncResult<? extends U> other, Consumer<? super U> consumer) {
     requireNonNull(other);
     requireNonNull(consumer);
-    return new DefaultCompletableAsyncCompletion(future.thenAccept(v -> other.thenAccept(consumer::accept)));
+    return new DefaultCompletableAsyncCompletion(future.thenAccept(v -> other.thenAccept(consumer)));
   }
 
   @Override

@@ -56,7 +56,6 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Top-level class to run an Ethereum client.
  */
-@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class EthereumClient(
   val vertx: Vertx,
   val config: EthereumClientConfig,

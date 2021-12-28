@@ -72,7 +72,7 @@ class CrawlerConfig(val filePath: Path) {
         .addString("ethstatsSecret", "changeme", "Ethstats shared secret", null)
         .addLong("peerCacheExpiration", 5 * 60 * 1000L, "Peer data cache expiration", null)
         .addLong("clientIdsInterval", 24 * 60 * 60 * 1000 * 2L, "Client IDs Interval - number of milliseconds to go back in time", null)
-        .addLong("clientsStatsDelay", 30 * 1000, "Delay between client stats calculations", null)
+        .addLong("clientsStatsDelay", 30 * 1000L, "Delay between client stats calculations", null)
         .addLong("rlpxDisconnectionDelay", 10 * 1000L, "RLPx connections disconnection delay", null)
         .addInteger("maxRequestsPerSec", 30, "Number of requests per second over HTTP", null)
         .addInteger("numberOfThreads", 10, "Number of Threads for each thread pool", null)
@@ -136,7 +136,7 @@ class CrawlerConfig(val filePath: Path) {
       val versions = mutableMapOf<String, String>()
       for (map in section.getListOfMap("versions")) {
         for (entry in map.entries) {
-          versions.put(entry.key.toLowerCase(), entry.value.toString())
+          versions.put(entry.key.lowercase(), entry.value.toString())
         }
       }
 

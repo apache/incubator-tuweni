@@ -20,8 +20,8 @@ dependencyManagement {
     dependency('com.github.jnr:jnr-ffi:2.1.9')
     dependency('com.github.kstyrc:embedded-redis:0.6')
     dependency('com.google.code.findbugs:jsr305:3.0.2')
-    dependency('com.google.errorprone:error_prone_core:2.4.0')
-    dependency('com.google.guava:guava:27.0.1-jre')
+    dependency('com.google.errorprone:error_prone_core:2.9.0')
+    dependency('com.google.guava:guava:31.0.1-jre')
     dependency('com.h2database:h2:1.4.197')
     dependency('com.jolbox:bonecp:0.8.0.RELEASE')
     dependency('com.netflix.concurrency-limits:concurrency-limits-core:0.3.6')
@@ -110,12 +110,12 @@ dependencyManagement {
 
 
     dependency('org.jetbrains:annotations:16.0.3')
-    dependencySet(group: 'org.jetbrains.kotlin', version: '1.4.20') {
+    dependencySet(group: 'org.jetbrains.kotlin', version: '1.5.31') {
       entry 'kotlin-reflect'
       entry 'kotlin-stdlib'
       entry 'kotlin-stdlib-jdk8'
     }
-    dependencySet(group: 'org.jetbrains.kotlinx', version: '1.4.2') {
+    dependencySet(group: 'org.jetbrains.kotlinx', version: '1.5.2') {
       entry 'kotlinx-coroutines-core'
       entry 'kotlinx-coroutines-guava'
       entry 'kotlinx-coroutines-jdk8'

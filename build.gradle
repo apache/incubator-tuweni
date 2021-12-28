@@ -20,18 +20,19 @@ buildscript {
     mavenCentral()
   }
 
-  dependencies { classpath "org.ajoberstar.grgit:grgit-core:3.1.1" }
+  dependencies {
+    classpath "org.ajoberstar.grgit:grgit-core:3.1.1"
+  }
 }
 
 plugins {
-  id 'com.diffplug.spotless' version '5.8.2'
-  id 'net.ltgt.errorprone' version '1.2.1'
+  id 'com.diffplug.spotless' version '5.17.0'
+  id 'net.ltgt.errorprone' version '2.0.2'
   id 'org.springframework.boot' version '2.4.3'
   id 'io.spring.dependency-management' version '1.0.6.RELEASE'
-  id 'com.github.hierynomus.license' version '0.15.0'
   id 'org.gradle.crypto.checksum' version '1.1.0'
-  id 'org.jetbrains.kotlin.jvm' version '1.4.20'
-  id 'org.jetbrains.kotlin.plugin.spring' version '1.4.20'
+  id 'org.jetbrains.kotlin.jvm' version '1.6.10'
+  id 'org.jetbrains.kotlin.plugin.spring' version '1.6.10'
   id 'org.jetbrains.dokka' version "0.10.1"
   id 'maven-publish'
   id 'com.jfrog.bintray' version '1.8.3'
@@ -76,12 +77,14 @@ gradle.startParameter.taskNames.each {
 gradle.startParameter.taskNames = expandedTaskList.flatten()
 
 ext {
-  gradleVersion = '6.3'
+  gradleVersion = '7.3'
 }
 
 apply from: "${rootDir}/gradle/wrapper.gradle"
 
 apply from: "${rootDir}/gradle/stage.gradle"
+
+apply from: "${rootDir}/gradle/check-licenses.gradle"
 
 //////
 // RAT checks
@@ -174,7 +177,7 @@ subprojects {
     }
     kotlin {
       licenseHeaderFile rootProject.file('gradle/spotless.license.txt')
-      ktlint("0.40.0").userData(['indent_size': '2', 'continuation_indent_size' : '2', 'disabled_rules': 'import-ordering'])
+      ktlint("0.43.0").userData(['indent_size': '2', 'continuation_indent_size' : '2', 'disabled_rules': 'import-ordering'])
       endWithNewline()
     }
   }
@@ -243,7 +246,6 @@ allprojects {
   apply plugin: 'maven-publish'
   apply plugin: 'signing'
   apply from: "${rootDir}/dependency-versions.gradle"
-  apply from: "${rootDir}/gradle/check-licenses.gradle"
 
   bootJar {
     enabled = false
@@ -302,8 +304,7 @@ allprojects {
       allWarningsAsErrors = true
       freeCompilerArgs = [
         '-Xjsr305=strict',
-        '-Xjvm-default=enable',
-        '-Xuse-experimental=kotlin.Experimental'
+        '-Xjvm-default=enable'
       ]
     }
   }

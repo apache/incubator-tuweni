@@ -27,10 +27,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -60,22 +57,22 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.CoroutineContext
 
-internal const val PACKET_EXPIRATION_PERIOD_MS: Long = (20 * 1000) // 20 seconds
-internal const val PACKET_EXPIRATION_CHECK_GRACE_MS: Long = (5 * 1000) // 5 seconds
-internal const val PEER_VERIFICATION_TIMEOUT_MS: Long = (22 * 1000) // 22 seconds (packet expiration + a little)
-internal const val ENR_REQUEST_TIMEOUT_MS: Long = (22 * 1000) // 22 seconds (packet expiration + a little)
-internal const val PEER_VERIFICATION_RETRY_DELAY_MS: Long = (5 * 60 * 1000) // 5 minutes
-internal const val ENR_REQUEST_RETRY_DELAY_MS: Long = (5 * 60 * 1000) // 5 minutes
-internal const val BOOTSTRAP_PEER_VERIFICATION_TIMEOUT_MS: Long = (2 * 60 * 1000) // 2 minutes
-internal const val REFRESH_INTERVAL_MS: Long = (60 * 1000) // 1 minute
+internal const val PACKET_EXPIRATION_PERIOD_MS = (20 * 1000).toLong() // 20 seconds
+internal const val PACKET_EXPIRATION_CHECK_GRACE_MS = (5 * 1000).toLong() // 5 seconds
+internal const val PEER_VERIFICATION_TIMEOUT_MS = (22 * 1000).toLong() // 22 seconds (packet expiration + a little)
+internal const val ENR_REQUEST_TIMEOUT_MS = (22 * 1000).toLong() // 22 seconds (packet expiration + a little)
+internal const val PEER_VERIFICATION_RETRY_DELAY_MS = (5 * 60 * 1000).toLong() // 5 minutes
+internal const val ENR_REQUEST_RETRY_DELAY_MS = (5 * 60 * 1000).toLong() // 5 minutes
+internal const val BOOTSTRAP_PEER_VERIFICATION_TIMEOUT_MS = (2 * 60 * 1000).toLong() // 2 minutes
+internal const val REFRESH_INTERVAL_MS = (60 * 1000).toLong() // 1 minute
 internal const val PING_RETRIES: Int = 20
-internal const val RESEND_DELAY_MS: Long = 1000 // 1 second
-internal const val RESEND_DELAY_INCREASE_MS: Long = 500 // 500 milliseconds
-internal const val RESEND_MAX_DELAY_MS: Long = (30 * 1000) // 30 seconds
-internal const val ENDPOINT_PROOF_LONGEVITY_MS: Long = (12 * 60 * 60 * 1000) // 12 hours
-internal const val FIND_NODES_CACHE_EXPIRY: Long = (3 * 60 * 1000) // 3 minutes
-internal const val FIND_NODES_QUERY_GAP_MS: Long = (30 * 1000) // 30 seconds
-internal const val LOOKUP_RESPONSE_TIMEOUT_MS: Long = 500 // 500 milliseconds
+internal const val RESEND_DELAY_MS = 1000.toLong() // 1 second
+internal const val RESEND_DELAY_INCREASE_MS = 500.toLong() // 500 milliseconds
+internal const val RESEND_MAX_DELAY_MS = (30 * 1000).toLong() // 30 seconds
+internal const val ENDPOINT_PROOF_LONGEVITY_MS = (12 * 60 * 60 * 1000).toLong() // 12 hours
+internal const val FIND_NODES_CACHE_EXPIRY = (3 * 60 * 1000).toLong() // 3 minutes
+internal const val FIND_NODES_QUERY_GAP_MS = (30 * 1000).toLong() // 30 seconds
+internal const val LOOKUP_RESPONSE_TIMEOUT_MS = 500.toLong() // 500 milliseconds
 
 /**
  * An Ethereum ÐΞVp2p discovery service.
@@ -284,7 +281,6 @@ interface DiscoveryService {
   val unexpectedENRResponses: Long
 }
 
-@OptIn(ObsoleteCoroutinesApi::class)
 internal class CoroutineDiscoveryService constructor(
   vertx: Vertx,
   private val keyPair: SECP256K1.KeyPair,
@@ -333,7 +329,7 @@ internal class CoroutineDiscoveryService constructor(
   private val awaitingENRs = ConcurrentHashMap<Bytes32, ENRRequest>()
   private val findNodeStates: Cache<SECP256K1.PublicKey, FindNodeState> =
     CacheBuilder.newBuilder().expireAfterAccess(FIND_NODES_CACHE_EXPIRY, TimeUnit.MILLISECONDS)
-      .removalListener<SECP256K1.PublicKey, FindNodeState> { it.value.close() }
+      .removalListener<SECP256K1.PublicKey, FindNodeState> { it.value?.close() }
       .build()
 
   override var invalidPackets: Long by AtomicLong(0)
@@ -452,7 +448,6 @@ internal class CoroutineDiscoveryService constructor(
 
   override fun shutdownAsync(): AsyncCompletion = asyncCompletion { shutdown() }
 
-  @OptIn(ObsoleteCoroutinesApi::class, InternalCoroutinesApi::class)
   override suspend fun lookup(target: SECP256K1.PublicKey): List<Peer> {
     val targetId = target.bytesArray()
     val results = neighbors(target).toMutableList()
@@ -480,10 +475,8 @@ internal class CoroutineDiscoveryService constructor(
     return results
   }
 
-  @ObsoleteCoroutinesApi
   override fun lookupAsync(target: SECP256K1.PublicKey) = asyncResult { lookup(target) }
 
-  @ObsoleteCoroutinesApi
   private suspend fun refresh() {
     logger.debug("{}: table refresh triggered", serviceDescriptor)
     // TODO: instead of a random target, choose a target to optimally fill the peer table
@@ -871,7 +864,6 @@ internal class CoroutineDiscoveryService constructor(
     @Volatile
     private var lastReceive: Long = 0
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun send(request: FindNodeRequest) {
       try {
         val endpoint = peer.endpoint

@@ -79,17 +79,16 @@ jobs:
         with:
           name: distsrc
       - name: Unzip source
-        run: unzip -o distsrc/tuweni-src-*.zip -d distunzipped
+        run: unzip -q -o distsrc/tuweni-src-*.zip -d distunzipped
       - name: Rename folder
         run: mv distunzipped/tuweni-src-* distunzipped/tuweni
-      - name: Build from source
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: cd distunzipped/tuweni && ./gradlew assemble
       - name: Set up JDK 11
-        if: ${{ matrix.os == 'windows-latest' }}
         uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: Build from source
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: cd distunzipped/tuweni && ./gradlew assemble
       - name: Build from source
         if: ${{ matrix.os == 'windows-latest' }}
         run: cd distunzipped/tuweni && ./gradlew.bat assemble

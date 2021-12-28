@@ -240,14 +240,14 @@ class CrawlerApplication(
           } catch (e: Exception) {
             logger.error("Error connecting to peers", e)
           }
-          delay(5 * 60 * 1000)
+          delay(5 * 60 * 1000L)
         }
       }
       rlpxService.start().await()
       dnsDaemon.start()
       scraper.start()
       ethstatsServer.start()
-      val peerSeen = ExpiringSet<PeerConnectionInfo>(5 * 60 * 1000)
+      val peerSeen = ExpiringSet<PeerConnectionInfo>(5 * 60 * 1000L)
       launch {
         while (refreshLoop.get()) {
           try {
@@ -273,7 +273,7 @@ class CrawlerApplication(
           } catch (e: Exception) {
             logger.error("Error connecting to pending peers", e)
           }
-          delay(10 * 1000)
+          delay(10 * 1000L)
         }
       }
     }

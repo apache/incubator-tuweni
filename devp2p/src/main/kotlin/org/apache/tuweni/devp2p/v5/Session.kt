@@ -39,6 +39,7 @@ import org.apache.tuweni.rlp.InvalidRLPTypeException
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.rlp.RLPReader
 import org.slf4j.LoggerFactory
+import java.lang.UnsupportedOperationException
 import kotlin.coroutines.CoroutineContext
 
 private const val MAX_NODES_IN_RESPONSE: Int = 4
@@ -141,7 +142,8 @@ internal class Session(
       )
       MessageType.TICKET -> handleTicket(message as TicketMessage)
       MessageType.TOPICQUERY -> handleTopicQuery(message as TopicQueryMessage)
-      else -> throw TODO("Random or WHOAREYOU")
+      MessageType.RANDOM -> throw UnsupportedOperationException("random")
+      MessageType.WHOAREYOU -> throw UnsupportedOperationException("whoareyou")
     }
   }
 

@@ -34,12 +34,6 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: true
-      - name: Cache Licenses
-        uses: actions/cache@v1
-        with:
-          path: reports/license/license-dependency.xml
-          key: licenses-${{ hashFiles('**/reports/license/license-dependency.xml') }}
-          restore-keys: license-dependency.xml
       - name: Cache Gradle packages
         uses: actions/cache@v1
         with:
