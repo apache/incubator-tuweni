@@ -16,6 +16,8 @@ package org.apache.tuweni.bytes;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkElementIndex;
 
+import java.security.MessageDigest;
+
 final class ConcatenatedBytes extends AbstractBytes {
 
   private final Bytes[] values;
@@ -181,6 +183,13 @@ final class ConcatenatedBytes extends AbstractBytes {
         destinationOffset);
 
     copyToUnchecked(destination, destinationOffset);
+  }
+
+  @Override
+  public void update(MessageDigest digest) {
+    for (Bytes value : values) {
+      value.update(digest);
+    }
   }
 
   @Override
