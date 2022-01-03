@@ -33,7 +33,7 @@ plugins {
   id 'org.gradle.crypto.checksum' version '1.1.0'
   id 'org.jetbrains.kotlin.jvm' version '1.6.10'
   id 'org.jetbrains.kotlin.plugin.spring' version '1.6.10'
-  id 'org.jetbrains.dokka' version "0.10.1"
+  id 'org.jetbrains.dokka' version '1.6.10'
   id 'maven-publish'
   id 'com.jfrog.bintray' version '1.8.3'
 }
@@ -328,26 +328,6 @@ allprojects {
 
 
   //////
-  // Documentation
-
-  dokka {
-    outputFormat = 'html'
-    configuration {
-      noStdlibLink = true
-      noJdkLink = true
-      jdkVersion = 11
-      includeNonPublic = false
-      def relativePath = rootDir.toPath().relativize(projectDir.toPath()).toString()
-      sourceLink {
-        path = projectDir.toString()
-        url = "https://github.com/apache/incubator-tuweni/blob/main/$relativePath"
-        lineSuffix = "#L"
-      }
-    }
-  }
-
-
-  //////
   // Artifact locations
 
   jar {
@@ -627,84 +607,39 @@ dependencies {
 apply plugin: 'kotlin'
 apply plugin: 'org.jetbrains.dokka'
 
-dokka {
-  outputDirectory = "$rootProject.buildDir/docs"
-  // In case of a Gradle multiproject build, you can include subprojects here to get merged documentation
-  // Note however, that you have to have the Kotlin plugin available in the root project and in the subprojects
-  subProjects = project.subprojects.collect { it.name }
+tasks.dokkaHtmlMultiModule.configure {
+  outputDirectory.set(file("$rootProject.buildDir/docs"))
+}
 
-  // Used for disabling auto extraction of sources and platforms in both multi-platform and single-platform modes
-  // When set to true, subProject and kotlinTasks are also omitted
-  disableAutoconfiguration = false
+tasks.register("docs") {
+  dependsOn dokkaHtmlMultiModule
+}
 
-  // Use default or set to custom path to cache directory
-  // to enable package-list caching
-  // When this is set to default, caches are stored in $USER_HOME/.cache/dokka
-  cacheRoot = 'default'
+dokkaHtml {
+  moduleName = 'tuweni'
 
-  configuration {
-    moduleName = 'tuweni'
+  dokkaSourceSets {
+    configureEach {
 
-    // Use to include or exclude non public members.
-    includeNonPublic = false
+      // Use to include or exclude non public members.
+      includeNonPublic.set(false)
 
-    // Do not output deprecated members. Applies globally, can be overridden by packageOptions
-    skipDeprecated = false
+      // Do not output deprecated members. Applies globally, can be overridden by packageOptions
+      skipDeprecated.set(false)
 
-    // Emit warnings about not documented members. Applies globally, also can be overridden by packageOptions
-    reportUndocumented = true
-    // will come out in next version
-    // failOnWarning = true
+      // Emit warnings about not documented members. Applies globally, also can be overridden by packageOptions
+      reportUndocumented.set(true)
 
-    // Do not create index pages for empty packages
-    skipEmptyPackages = true
+      // Do not create index pages for empty packages
+      skipEmptyPackages.set(true)
 
-    // Platform used for code analysis. See the "Platforms" section of this readme
-    platform = "JVM"
+      // Platform used for code analysis. See the "Platforms" section of this readme
+      platform.set(org.jetbrains.dokka.Platform.jvm)
 
-    // List of files with module and package documentation
-    // https://kotlinlang.org/docs/reference/kotlin-doc.html#module-and-package-documentation
-    includes = ['docs.md']
+      // List of files with module and package documentation
+      // https://kotlinlang.org/docs/reference/kotlin-doc.html#module-and-package-documentation
+      includes.from('docs.md')
 
-    // Specifies the location of the project source code on the Web.
-    // If provided, Dokka generates "source" links for each declaration.
-    // Repeat for multiple mappings
-    sourceLink {
-      // Unix based directory relative path to the root of the project (where you execute gradle respectively).
-      path = rootDir.toString()
-
-      // URL showing where the source code can be accessed through the web browser
-      url = "https://github.com/apache/incubator-tuweni" //remove src/main/kotlin if you use "./" above
-
-      // Suffix which is used to append the line number to the URL. Use #L for GitHub
-      lineSuffix = "#L"
-    }
-
-    // Used for linking to JDK documentation
-    jdkVersion = 11
-
-    // Disable linking to online kotlin-stdlib documentation
-    noStdlibLink = true
-
-    // Disable linking to online JDK documentation
-    noJdkLink = true
-
-    // Those packages are not ready yet, skipping their docs.
-    perPackageOption {
-      prefix = "org.apache.tuweni.peer.repository"
-      reportUndocumented = false
-    }
-    perPackageOption {
-      prefix = "org.apache.tuweni.ethclientui"
-      reportUndocumented = false
-    }
-    perPackageOption {
-      prefix = "org.apache.tuweni.ethclient"
-      reportUndocumented = false
-    }
-    perPackageOption {
-      prefix = "org.apache.tuweni.devp2p.eth"
-      reportUndocumented = false
     }
   }
 }

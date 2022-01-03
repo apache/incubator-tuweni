@@ -74,6 +74,7 @@ asfNexusPassword=
   }
 }
 
+assemble.dependsOn rootProject.tasks.docs
 assemble.dependsOn builtGradleProperties
 assemble.dependsOn rootProject.generateLicenseReport
 assemble.dependsOn createBinaryLicense
@@ -117,7 +118,7 @@ distributions {
         from libs.unique(false)
       }
       into('site') {
-        from rootProject.dokka.outputDirectory
+        from file("$rootProject.buildDir/docs")
       }
       into('bin') {
         from { project(':gossip').startScripts.outputs.files }
