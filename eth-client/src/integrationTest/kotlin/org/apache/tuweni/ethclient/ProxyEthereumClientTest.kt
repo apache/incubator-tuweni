@@ -36,13 +36,39 @@ class ProxyEthereumClientTest {
       it.write("Hello World!")
     }
 
-    val config1 = EthereumClientConfig.fromString("[storage.default]\npath=\"data\"\ngenesis=\"default\"\n[proxy.foo]\nupstream=localhost:14000")
+    val config1 = EthereumClientConfig.fromString(
+      """
+      [metrics]
+      networkInterface="127.0.0.1"
+      port=9091
+      [storage.default]
+      path="data"
+      genesis="default"
+      [genesis.default]
+      path="classpath:/default.json"
+      [static.default]
+      peerRepository="default"
+      [proxy.foo]
+      downstream=localhost:14000
+      """.trimMargin()
+    )
     val config2 = EthereumClientConfig.fromString(
-      "[storage.default]\npath=\"data2\"\ngenesis=\"default\"\n" +
-        "[proxy.bar]\n" +
-        "upstream=localhost:14001\n" +
-        "[proxy.foo]\n" +
-        "downstream=localhost:15000\n"
+      """
+      [metrics]
+      networkInterface="127.0.0.1"
+      port=9092
+      [storage.default]
+      path="data2"
+      genesis="default"
+      [genesis.default]
+      path="classpath:/default.json"
+      [static.default]
+      peerRepository="default"
+      [proxy.bar]
+      upstream=localhost:14001
+      [proxy.foo]
+      downstream=localhost:15000
+      """.trimMargin()
     )
     val client1 = EthereumClient(vertx, config1)
     val client2 = EthereumClient(vertx, config2)
