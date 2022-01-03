@@ -26,7 +26,6 @@ import kotlinx.coroutines.async
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.coroutines.await
-import org.apache.tuweni.devp2p.proxy.ClientHandler
 import kotlin.coroutines.CoroutineContext
 
 class TcpEndpoint(
