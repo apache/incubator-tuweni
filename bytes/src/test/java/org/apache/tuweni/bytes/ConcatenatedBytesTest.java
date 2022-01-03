@@ -17,7 +17,10 @@ import static org.apache.tuweni.bytes.Bytes.wrap;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 
+import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -25,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InOrder;
 
 class ConcatenatedBytesTest {
 
@@ -122,5 +126,20 @@ class ConcatenatedBytesTest {
     int hashCode = bytes.hashCode();
     dest.set(1, (byte) 123);
     assertNotEquals(hashCode, bytes.hashCode());
+  }
+
+  @Test
+  void shouldUpdateMessageDigest() {
+    Bytes value1 = fromHexString("0x01234567");
+    Bytes value2 = fromHexString("0x89ABCDEF");
+    Bytes value3 = fromHexString("0x01234567");
+    Bytes bytes = wrap(value1, value2, value3);
+    MessageDigest digest = mock(MessageDigest.class);
+    bytes.update(digest);
+
+    final InOrder inOrder = inOrder(digest);
+    inOrder.verify(digest).update(value1.toArrayUnsafe(), 0, 4);
+    inOrder.verify(digest).update(value2.toArrayUnsafe(), 0, 4);
+    inOrder.verify(digest).update(value3.toArrayUnsafe(), 0, 4);
   }
 }
