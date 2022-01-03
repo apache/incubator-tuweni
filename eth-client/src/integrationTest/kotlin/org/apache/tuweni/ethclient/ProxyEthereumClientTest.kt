@@ -42,7 +42,7 @@ class ProxyEthereumClientTest {
       networkInterface="127.0.0.1"
       port=9091
       [storage.default]
-      path="data"
+      path="proxydata"
       genesis="default"
       [genesis.default]
       path="classpath:/default.json"
@@ -58,7 +58,7 @@ class ProxyEthereumClientTest {
       networkInterface="127.0.0.1"
       port=9092
       [storage.default]
-      path="data2"
+      path="proxydata2"
       genesis="default"
       [genesis.default]
       path="classpath:/default.json"
