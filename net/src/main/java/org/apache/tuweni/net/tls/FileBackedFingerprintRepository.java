@@ -158,7 +158,7 @@ final class FileBackedFingerprintRepository implements FingerprintRepository {
     if (segments.length != 2) {
       throw new IOException("Invalid line");
     }
-    String identifier = segments[0].toLowerCase();
+    String identifier = segments[0];
     String fingerprintString = segments[1].trim().replace(":", "");
     Bytes fingerprint;
     try {
