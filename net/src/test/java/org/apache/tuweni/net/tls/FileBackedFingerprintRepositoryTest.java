@@ -52,6 +52,23 @@ class FileBackedFingerprintRepositoryTest {
   }
 
   @Test
+  void testCaseSensitiveIdentifier(@TempDirectory Path tempFolder) throws IOException {
+    Path repoFile = tempFolder.resolve("repo");
+    String identifier1 = "foo";
+    String identifier2 = "Foo";
+
+    Bytes fingerprint1 = generateFingerprint();
+    Bytes fingerprint2 = generateFingerprint();
+
+    String content = String.format("%s %s%n%s %s", identifier1, fingerprint1, identifier2, fingerprint2);
+    Files.writeString(repoFile, content);
+
+    FileBackedFingerprintRepository repo = new FileBackedFingerprintRepository(repoFile);
+    assertTrue(repo.contains(identifier1, fingerprint1));
+    assertTrue(repo.contains(identifier2, fingerprint2));
+  }
+
+  @Test
   FileBackedFingerprintRepository testAddingNewFingerprint(@TempDirectory Path tempFolder) throws IOException {
     FileBackedFingerprintRepository repo = new FileBackedFingerprintRepository(tempFolder.resolve("repo"));
     Bytes fingerprint = generateFingerprint();
