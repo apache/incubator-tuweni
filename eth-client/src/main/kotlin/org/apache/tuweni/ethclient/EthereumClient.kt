@@ -32,6 +32,9 @@ import org.apache.tuweni.devp2p.eth.EthSubprotocol
 import org.apache.tuweni.devp2p.eth.EthSubprotocol.Companion.ETH66
 import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
 import org.apache.tuweni.devp2p.parseEnodeUri
+import org.apache.tuweni.devp2p.proxy.ProxyClient
+import org.apache.tuweni.devp2p.proxy.ProxySubprotocol
+import org.apache.tuweni.devp2p.proxy.TcpEndpoint
 import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
@@ -188,13 +191,14 @@ class EthereumClient(
           selectionStrategy = { ConnectionManagementStrategy(peerRepositoryAdapter = adapter) }
         )
         val meter = metricsService.meterSdkProvider["${rlpxConfig.getName()}_rlpx"]
+        val proxySubprotocol = ProxySubprotocol()
         val service = VertxRLPxService(
           vertx,
           rlpxConfig.port(),
           rlpxConfig.networkInterface(),
           rlpxConfig.advertisedPort(),
           rlpxConfig.keyPair(),
-          listOf(ethSubprotocol),
+          listOf(ethSubprotocol, proxySubprotocol),
           rlpxConfig.clientName(),
           meter,
           adapter
@@ -202,6 +206,13 @@ class EthereumClient(
         services[rlpxConfig.getName()] = service
         service.start().thenRun {
           logger.info("Started Ethereum client ${rlpxConfig.getName()}")
+          val proxyClient = service.getClient(ProxySubprotocol.ID) as ProxyClient
+          for (proxyConfig in config.proxies()) {
+            val uri = URI.create(proxyConfig.upstream())
+            val target = TcpEndpoint(vertx, uri.host, uri.port)
+            target.start()
+            proxyClient.registeredSites[proxyConfig.name()] = target
+          }
           peerRepository.addIdentityListener {
             service.connectTo(
               it.publicKey(),
