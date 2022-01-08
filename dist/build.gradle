@@ -80,7 +80,6 @@ org.gradle.jvmargs=-Xmx2048m -XX:MaxPermSize=1g \
   }
 }
 
-assemble.dependsOn rootProject.tasks.docs
 assemble.dependsOn builtGradleProperties
 assemble.dependsOn rootProject.generateLicenseReport
 assemble.dependsOn createBinaryLicense
@@ -123,9 +122,7 @@ distributions {
         from rootProject.signArchives.signatureFiles[0]
         from libs.unique(false)
       }
-      into('site') {
-        from file("$rootProject.buildDir/docs")
-      }
+
       into('bin') {
         from { project(':gossip').startScripts.outputs.files }
         from { project(':hobbits-relayer').startScripts.outputs.files }
