@@ -23,10 +23,10 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.datagram.DatagramPacket
 import io.vertx.core.net.SocketAddress
 import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
@@ -295,8 +295,7 @@ internal class CoroutineDiscoveryService constructor(
   private val routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
   private val packetFilter: ((SECP256K1.PublicKey, SocketAddress) -> Boolean)? = null,
   private val timeSupplier: () -> Long = DiscoveryService.CURRENT_TIME_SUPPLIER,
-  private val job: Job = Job(),
-  override val coroutineContext: CoroutineContext = job + Dispatchers.Default + CoroutineExceptionHandler { _, _ -> },
+  override val coroutineContext: CoroutineContext = vertx.dispatcher() + CoroutineExceptionHandler { _, _ -> },
 ) : DiscoveryService, CoroutineScope {
 
   companion object {
