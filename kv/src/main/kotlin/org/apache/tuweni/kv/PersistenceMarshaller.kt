@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.ethclient
+package org.apache.tuweni.kv
 
 import org.apache.tuweni.bytes.Bytes
 import org.infinispan.commons.dataconversion.MediaType
@@ -22,6 +22,9 @@ import org.infinispan.commons.io.ByteBuffer
 import org.infinispan.commons.io.ByteBufferImpl
 import org.infinispan.commons.marshall.AbstractMarshaller
 
+/**
+ * Utility class to store Bytes objects in Infinispan key-value stores.
+ */
 class PersistenceMarshaller : AbstractMarshaller() {
 
   override fun objectFromByteBuffer(buf: ByteArray?, offset: Int, length: Int) = Bytes.wrap(buf!!, offset, length)
