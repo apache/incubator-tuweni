@@ -43,6 +43,7 @@ import org.apache.tuweni.metrics.MetricsService
 import org.apache.tuweni.kv.InfinispanKeyValueStore
 import org.apache.tuweni.kv.LevelDBKeyValueStore
 import org.apache.tuweni.kv.MapKeyValueStore
+import org.apache.tuweni.kv.PersistenceMarshaller
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.vertx.VertxRLPxService
 import org.apache.tuweni.units.bigints.UInt256
