@@ -25,6 +25,7 @@ import org.apache.tuweni.config.Schema
 import org.apache.tuweni.config.SchemaBuilder
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.eth.genesis.GenesisFile
+import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
 import java.net.URI
 import java.nio.file.Files
@@ -116,6 +117,32 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
     }
   }
 
+  fun discoveryServices(): List<DiscoveryConfiguration> {
+    val discoverySections = config.sections("discovery")
+    if (discoverySections == null || discoverySections.isEmpty()) {
+      return emptyList()
+    }
+    return discoverySections.map { section ->
+      val sectionConfig = config.getConfigurationSection("discovery.$section")
+
+      val secretKey = sectionConfig.getString("identity")
+      val keypair = if (secretKey == "") {
+        SECP256K1.KeyPair.random()
+      } else {
+        SECP256K1.KeyPair.fromSecretKey(SECP256K1.SecretKey.fromBytes(Bytes32.fromHexString(secretKey)))
+      }
+      logger.info("Using () for discovery ()", keypair.publicKey().toHexString(), section)
+
+      DiscoveryConfigurationImpl(
+        section,
+        sectionConfig.getString("peerRepository"),
+        sectionConfig.getInteger("port"),
+        sectionConfig.getString("networkInterface"),
+        keypair
+      )
+    }
+  }
+
   fun staticPeers(): List<StaticPeersConfiguration> {
     val staticPeersSections = config.sections("static")
     if (staticPeersSections == null || staticPeersSections.isEmpty()) {
@@ -146,6 +173,9 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
   }
 
   companion object {
+
+    val logger = LoggerFactory.getLogger(EthereumClientConfig::class.java)
+
     fun createSchema(): Schema {
       val metricsSection = SchemaBuilder.create()
       metricsSection.addInteger("port", 9090, "Port to expose Prometheus metrics", PropertyValidator.isValidPort())
@@ -165,6 +195,12 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       val staticPeers = SchemaBuilder.create()
       staticPeers.addListOfString("enodes", Collections.emptyList(), "Static enodes to connect to in enode://publickey@host:port format", null)
       staticPeers.addString("peerRepository", "default", "Peer repository to which static nodes should go", null)
+
+      val discoverySection = SchemaBuilder.create()
+      discoverySection.addString("identity", "", "Node identity", null)
+      discoverySection.addString("networkInterface", "127.0.0.1", "Network interface to bind", null)
+      discoverySection.addInteger("port", 0, "Port to expose the discovery service on", PropertyValidator.isValidPortOrZero())
+      discoverySection.addString("peerRepository", "default", "Peer repository to which records should go", null)
 
       val genesis = SchemaBuilder.create()
       genesis.addString("path", "classpath:/default.json", "Path to the genesis file", PropertyValidator.isURL())
@@ -203,6 +239,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       builder.addSection("storage", storageSection.toSchema())
       builder.addSection("dns", dnsSection.toSchema())
       builder.addSection("static", staticPeers.toSchema())
+      builder.addSection("discovery", discoverySection.toSchema())
       builder.addSection("rlpx", rlpx.toSchema())
       builder.addSection("genesis", genesis.toSchema())
       builder.addSection("proxy", proxiesSection.toSchema())
@@ -262,6 +299,14 @@ interface DNSConfiguration {
   fun pollingPeriod(): Long
   fun getName(): String
   fun peerRepository(): String
+}
+
+interface DiscoveryConfiguration {
+  fun getName(): String
+  fun getIdentity(): SECP256K1.KeyPair
+  fun getNetworkInterface(): String
+  fun getPort(): Int
+  fun getPeerRepository(): String
 }
 
 interface StaticPeersConfiguration {
@@ -352,6 +397,21 @@ data class DNSConfigurationImpl(
   override fun enrLink() = enrLink
 
   override fun pollingPeriod(): Long = pollingPeriod
+}
+
+data class DiscoveryConfigurationImpl(
+  private val name: String,
+  private val peerRepository: String,
+  private val port: Int,
+  private val networkInterface: String,
+  private val identity: SECP256K1.KeyPair
+) :
+  DiscoveryConfiguration {
+  override fun getName() = name
+  override fun getIdentity() = identity
+  override fun getNetworkInterface() = networkInterface
+  override fun getPeerRepository() = peerRepository
+  override fun getPort() = port
 }
 
 data class StaticPeersConfigurationImpl(private val enodes: List<String>, private val peerRepository: String) : StaticPeersConfiguration {
