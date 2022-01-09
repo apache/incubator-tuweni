@@ -76,7 +76,8 @@ class EvmVmImpl : EvmVm {
       }
       val currentOpcodeByte = code.get(current)
       current++
-      val result = opcode.execute(gasManager, hostContext, stack, msg, code, current, memory)
+      // TODO implement call and pass result
+      val result = opcode.execute(gasManager, hostContext, stack, msg, code, current, memory, null)
       logger.trace(
         ">> OPCODE: ${opcodes[currentOpcodeByte] ?: currentOpcodeByte.toString(16)} " +
           "gas: ${gasManager.gasLeft()} cost: ${gasManager.lastGasCost()}"
