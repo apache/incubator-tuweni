@@ -27,7 +27,7 @@ import org.apache.tuweni.evm.impl.Result
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 
-val add = Opcode { gasManager, _, stack, _, _, _, _ ->
+val add = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(3L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -39,7 +39,7 @@ val add = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val addmod = Opcode { gasManager, _, stack, _, _, _, _ ->
+val addmod = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(8L)
   val operand1 = stack.pop()
   val operand2 = stack.pop()
@@ -52,7 +52,7 @@ val addmod = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val not = Opcode { gasManager, _, stack, _, _, _, _ ->
+val not = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(3L)
   val item = stack.pop()
   if (null == item) {
@@ -63,7 +63,7 @@ val not = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val eq = Opcode { gasManager, _, stack, _, _, _, _ ->
+val eq = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(3L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -79,7 +79,7 @@ val eq = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val lt = Opcode { gasManager, _, stack, _, _, _, _ ->
+val lt = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(3L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -95,7 +95,7 @@ val lt = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val slt = Opcode { gasManager, _, stack, _, _, _, _ ->
+val slt = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(3L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -111,7 +111,7 @@ val slt = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val gt = Opcode { gasManager, _, stack, _, _, _, _ ->
+val gt = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(3L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -127,7 +127,7 @@ val gt = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val sgt = Opcode { gasManager, _, stack, _, _, _, _ ->
+val sgt = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(3L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -143,7 +143,7 @@ val sgt = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val isZero = Opcode { gasManager, _, stack, _, _, _, _ ->
+val isZero = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(3L)
   val item = stack.pop()
   if (null == item) {
@@ -154,7 +154,7 @@ val isZero = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val and = Opcode { gasManager, _, stack, _, _, _, _ ->
+val and = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(3L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -166,13 +166,13 @@ val and = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val pop = Opcode { gasManager, _, stack, _, _, _, _ ->
+val pop = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(2L)
   stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   Result()
 }
 
-val or = Opcode { gasManager, _, stack, _, _, _, _ ->
+val or = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(3L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -184,7 +184,7 @@ val or = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val xor = Opcode { gasManager, _, stack, _, _, _, _ ->
+val xor = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(3L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -196,7 +196,7 @@ val xor = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val byte = Opcode { gasManager, _, stack, _, _, _, _ ->
+val byte = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(3L)
   val offset = stack.pop()
   val stackElement = stack.pop()
@@ -212,7 +212,7 @@ val byte = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val mul = Opcode { gasManager, _, stack, _, _, _, _ ->
+val mul = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(5L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -224,7 +224,7 @@ val mul = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val mod = Opcode { gasManager, _, stack, _, _, _, _ ->
+val mod = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(5L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -236,7 +236,7 @@ val mod = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val smod = Opcode { gasManager, _, stack, _, _, _, _ ->
+val smod = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(5L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -248,7 +248,7 @@ val smod = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val mulmod = Opcode { gasManager, _, stack, _, _, _, _ ->
+val mulmod = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(8L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -265,7 +265,7 @@ val mulmod = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val sub = Opcode { gasManager, _, stack, _, _, _, _ ->
+val sub = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(3L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -277,7 +277,7 @@ val sub = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val exp = Opcode { gasManager, _, stack, _, _, _, _ ->
+val exp = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   val number = stack.pop()
   val power = stack.pop()
   if (null == number || null == power) {
@@ -296,7 +296,7 @@ val exp = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val div = Opcode { gasManager, _, stack, _, _, _, _ ->
+val div = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(5L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -309,7 +309,7 @@ val div = Opcode { gasManager, _, stack, _, _, _, _ ->
 }
 
 fun push(length: Int): Opcode {
-  return Opcode { gasManager, _, stack, _, code, currentIndex, _ ->
+  return Opcode { gasManager, _, stack, _, code, currentIndex, _, _ ->
     gasManager.add(3)
     val minLength = Math.min(length, code.size() - currentIndex)
     stack.push(Bytes32.leftPad(code.slice(currentIndex, minLength)))
@@ -318,7 +318,7 @@ fun push(length: Int): Opcode {
 }
 
 fun dup(index: Int): Opcode {
-  return Opcode { gasManager, _, stack, _, _, _, _ ->
+  return Opcode { gasManager, _, stack, _, _, _, _, _ ->
     gasManager.add(3)
     val value = stack.get(index - 1) ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
     stack.push(value)
@@ -327,7 +327,7 @@ fun dup(index: Int): Opcode {
 }
 
 fun swap(index: Int): Opcode {
-  return Opcode { gasManager, _, stack, _, _, _, _ ->
+  return Opcode { gasManager, _, stack, _, _, _, _, _ ->
     gasManager.add(3L)
     val eltN = stack.get(index) ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
     val elt0 = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
@@ -337,7 +337,7 @@ fun swap(index: Int): Opcode {
   }
 }
 
-val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
+val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   runBlocking {
     val key = stack.pop()
     val value = stack.pop()
@@ -375,7 +375,7 @@ val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
   }
 }
 
-val sload = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
+val sload = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   val key = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
 
   val address = msg.destination
@@ -387,15 +387,15 @@ val sload = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
   Result()
 }
 
-val stop = Opcode { _, _, _, _, _, _, _ ->
+val stop = Opcode { _, _, _, _, _, _, _, _ ->
   Result(EVMExecutionStatusCode.SUCCESS)
 }
 
-val invalid = Opcode { _, _, _, _, _, _, _ ->
+val invalid = Opcode { _, _, _, _, _, _, _, _ ->
   Result(EVMExecutionStatusCode.INVALID_INSTRUCTION)
 }
 
-val retuRn = Opcode { gasManager, _, stack, _, _, _, memory ->
+val retuRn = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
   val location = stack.pop()
   val length = stack.pop()
   if (null == location || null == length) {
@@ -408,31 +408,31 @@ val retuRn = Opcode { gasManager, _, stack, _, _, _, memory ->
   Result(EVMExecutionStatusCode.SUCCESS, output = output)
 }
 
-val address = Opcode { gasManager, _, stack, msg, _, _, _ ->
+val address = Opcode { gasManager, _, stack, msg, _, _, _, _ ->
   gasManager.add(2)
   stack.push(Bytes32.leftPad(msg.destination))
   Result()
 }
 
-val origin = Opcode { gasManager, _, stack, msg, _, _, _ ->
+val origin = Opcode { gasManager, _, stack, msg, _, _, _, _ ->
   gasManager.add(2)
   stack.push(Bytes32.leftPad(msg.sender))
   Result()
 }
 
-val caller = Opcode { gasManager, _, stack, msg, _, _, _ ->
+val caller = Opcode { gasManager, _, stack, msg, _, _, _, _ ->
   gasManager.add(2)
   stack.push(Bytes32.leftPad(msg.sender))
   Result()
 }
 
-val callvalue = Opcode { gasManager, _, stack, msg, _, _, _ ->
+val callvalue = Opcode { gasManager, _, stack, msg, _, _, _, _ ->
   gasManager.add(2)
   stack.push(Bytes32.leftPad(msg.value))
   Result()
 }
 
-val balance = Opcode { gasManager, hostContext, stack, _, _, _, _ ->
+val balance = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
 
   val address = stack.pop()?.slice(12, 20)?.let { Address.fromBytes(it) }
     ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
@@ -444,49 +444,49 @@ val balance = Opcode { gasManager, hostContext, stack, _, _, _, _ ->
   Result()
 }
 
-val pc = Opcode { gasManager, _, stack, _, _, currentIndex, _ ->
+val pc = Opcode { gasManager, _, stack, _, _, currentIndex, _, _ ->
   gasManager.add(2)
   stack.push(UInt256.valueOf(currentIndex.toLong() - 1))
   Result()
 }
 
-val gasPrice = Opcode { gasManager, hostContext, stack, _, _, _, _ ->
+val gasPrice = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
   gasManager.add(2)
   stack.push(Bytes32.leftPad(hostContext.getGasPrice()))
   Result()
 }
 
-val gas = Opcode { gasManager, _, stack, _, _, _, _ ->
+val gas = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(2)
   stack.push(UInt256.valueOf(gasManager.gasLeft().toLong()))
   Result()
 }
 
-val coinbase = Opcode { gasManager, hostContext, stack, _, _, _, _ ->
+val coinbase = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
   gasManager.add(2)
   stack.push(Bytes32.leftPad(hostContext.getCoinbase()))
   Result()
 }
 
-val gasLimit = Opcode { gasManager, hostContext, stack, _, _, _, _ ->
+val gasLimit = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
   gasManager.add(2)
   stack.push(UInt256.valueOf(hostContext.getGasLimit()))
   Result()
 }
 
-val difficulty = Opcode { gasManager, hostContext, stack, _, _, _, _ ->
+val difficulty = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
   gasManager.add(2)
   stack.push(hostContext.getDifficulty())
   Result()
 }
 
-val number = Opcode { gasManager, hostContext, stack, _, _, _, _ ->
+val number = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
   gasManager.add(2)
   stack.push(UInt256.valueOf(hostContext.getBlockNumber()))
   Result()
 }
 
-val blockhash = Opcode { gasManager, hostContext, stack, _, _, _, _ ->
+val blockhash = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
   gasManager.add(20)
   val number = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   if (!number.fitsLong() || number.toLong() < hostContext.getBlockNumber() - 256) {
@@ -497,13 +497,13 @@ val blockhash = Opcode { gasManager, hostContext, stack, _, _, _, _ ->
   Result()
 }
 
-val codesize = Opcode { gasManager, _, stack, _, code, _, _ ->
+val codesize = Opcode { gasManager, _, stack, _, code, _, _, _ ->
   gasManager.add(2)
   stack.push(UInt256.valueOf(code.size().toLong()))
   Result()
 }
 
-val timestamp = Opcode { gasManager, hostContext, stack, _, _, _, _ ->
+val timestamp = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
   gasManager.add(2)
   stack.push(hostContext.timestamp())
   Result()
@@ -518,7 +518,7 @@ fun memoryCost(length: UInt256): Gas {
   return Gas.valueOf(3).multiply(len).add(base)
 }
 
-val codecopy = Opcode { gasManager, _, stack, _, code, _, memory ->
+val codecopy = Opcode { gasManager, _, stack, _, code, _, memory, _ ->
   val memOffset = stack.pop()
   val sourceOffset = stack.pop()
   val length = stack.pop()
@@ -538,7 +538,58 @@ val codecopy = Opcode { gasManager, _, stack, _, code, _, memory ->
   Result()
 }
 
-val mstore = Opcode { gasManager, _, stack, _, _, _, memory ->
+val extcodecopy = Opcode { gasManager, hostContext, stack, _, _, _, memory, _ ->
+  val address = stack.pop()
+  val memOffset = stack.pop()
+  val sourceOffset = stack.pop()
+  val length = stack.pop()
+  if (null == address || null == memOffset || null == sourceOffset || null == length) {
+    return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  }
+  val numWords: UInt256 = length.divideCeil(Bytes32.SIZE.toLong())
+  val copyCost = Gas.valueOf(3).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(3))
+  val pre = memoryCost(memory.size())
+  val post: Gas = memoryCost(memory.newSize(memOffset, length))
+  val memoryCost = post.subtract(pre)
+
+  gasManager.add(copyCost.add(memoryCost))
+
+  runBlocking {
+    val code = hostContext.getCode(Address.fromBytes(address.slice(12, 20)))
+    memory.write(memOffset, sourceOffset, length, code)
+  }
+
+  Result()
+}
+
+val returndatasize = Opcode { gasManager, _, stack, _, _, _, _, callResult ->
+  gasManager.add(3)
+  stack.push(UInt256.valueOf(callResult?.output?.size()?.toLong() ?: 0L))
+  Result()
+}
+
+val returndatacopy = Opcode { gasManager, _, stack, _, _, _, memory, callResult ->
+  val memOffset = stack.pop()
+  val sourceOffset = stack.pop()
+  val length = stack.pop()
+  val returnData = callResult?.output ?: Bytes.EMPTY
+  if (null == memOffset || null == sourceOffset || null == length) {
+    return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  }
+  val numWords: UInt256 = length.divideCeil(Bytes32.SIZE.toLong())
+  val copyCost = Gas.valueOf(3).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(3))
+  val pre = memoryCost(memory.size())
+  val post = memoryCost(memory.newSize(memOffset, length))
+  val memoryCost = post.subtract(pre)
+
+  gasManager.add(copyCost.add(memoryCost))
+
+  memory.write(memOffset, sourceOffset, length, returnData)
+
+  Result()
+}
+
+val mstore = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
   val location = stack.pop()
   val value = stack.pop()
   if (null == location || null == value) {
@@ -553,7 +604,7 @@ val mstore = Opcode { gasManager, _, stack, _, _, _, memory ->
   Result()
 }
 
-val mstore8 = Opcode { gasManager, _, stack, _, _, _, memory ->
+val mstore8 = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
   val location = stack.pop()
   val value = stack.pop()
   if (null == location || null == value) {
@@ -568,7 +619,7 @@ val mstore8 = Opcode { gasManager, _, stack, _, _, _, memory ->
   Result()
 }
 
-val mload = Opcode { gasManager, _, stack, _, _, _, memory ->
+val mload = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
   val location = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   val pre = memoryCost(memory.size())
   val post: Gas = memoryCost(memory.newSize(location, UInt256.valueOf(32)))
@@ -579,7 +630,7 @@ val mload = Opcode { gasManager, _, stack, _, _, _, memory ->
   Result()
 }
 
-val extcodesize = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
+val extcodesize = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   gasManager.add(700)
   runBlocking {
     stack.push(UInt256.valueOf(hostContext.getCode(msg.destination).size().toLong()))
@@ -587,7 +638,7 @@ val extcodesize = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
   }
 }
 
-val extcodehash = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
+val extcodehash = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   gasManager.add(700)
   runBlocking {
     stack.push(Hash.keccak256(hostContext.getCode(msg.destination)))
@@ -595,19 +646,19 @@ val extcodehash = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
   }
 }
 
-val msize = Opcode { gasManager, _, stack, _, _, _, memory ->
+val msize = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
   gasManager.add(2)
   stack.push(memory.allocatedBytes())
   Result()
 }
 
-val calldatasize = Opcode { gasManager, _, stack, msg, _, _, _ ->
+val calldatasize = Opcode { gasManager, _, stack, msg, _, _, _, _ ->
   gasManager.add(2)
   stack.push(UInt256.valueOf(msg.inputData.size().toLong()))
   Result()
 }
 
-val calldatacopy = Opcode { gasManager, _, stack, msg, _, _, memory ->
+val calldatacopy = Opcode { gasManager, _, stack, msg, _, _, memory, _ ->
   val memOffset = stack.pop()
   val sourceOffset = stack.pop()
   val length = stack.pop()
@@ -627,7 +678,7 @@ val calldatacopy = Opcode { gasManager, _, stack, msg, _, _, memory ->
   Result()
 }
 
-val calldataload = Opcode { gasManager, _, stack, msg, _, _, _ ->
+val calldataload = Opcode { gasManager, _, stack, msg, _, _, _, _ ->
   gasManager.add(3)
   val start = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   var set = false
@@ -650,7 +701,7 @@ val calldataload = Opcode { gasManager, _, stack, msg, _, _, _ ->
   Result()
 }
 
-val sha3 = Opcode { gasManager, _, stack, _, _, _, memory ->
+val sha3 = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
   val from = stack.pop()
   val length = stack.pop()
   if (null == from || null == length) {
@@ -684,7 +735,7 @@ fun computeValidJumpDestinations(code: Bytes): Set<Int> {
   return destinations
 }
 
-val jump = Opcode { gasManager, _, stack, _, code, _, _ ->
+val jump = Opcode { gasManager, _, stack, _, code, _, _, _ ->
   gasManager.add(8)
   val jumpDest = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   if (!jumpDest.fitsInt() || jumpDest.intValue() >= code.size()) {
@@ -697,7 +748,7 @@ val jump = Opcode { gasManager, _, stack, _, code, _, _ ->
   Result(newCodePosition = jumpDest.intValue())
 }
 
-val jumpi = Opcode { gasManager, _, stack, _, code, _, _ ->
+val jumpi = Opcode { gasManager, _, stack, _, code, _, _, _ ->
   gasManager.add(10)
   val jumpDest = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   val condition = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
@@ -714,13 +765,13 @@ val jumpi = Opcode { gasManager, _, stack, _, code, _, _ ->
   Result(newCodePosition = jumpDest.intValue())
 }
 
-val jumpdest = Opcode { gasManager, _, _, _, _, _, _ ->
+val jumpdest = Opcode { gasManager, _, _, _, _, _, _, _ ->
   gasManager.add(1)
   Result()
 }
 
 fun log(topics: Int): Opcode {
-  return Opcode { gasManager, hostContext, stack, msg, _, _, memory ->
+  return Opcode { gasManager, hostContext, stack, msg, _, _, memory, _ ->
     val location = stack.pop()
     val length = stack.pop()
     if (null == location || null == length) {
@@ -757,7 +808,7 @@ fun log(topics: Int): Opcode {
   }
 }
 
-val sdiv = Opcode { gasManager, _, stack, _, _, _, _ ->
+val sdiv = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(5L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -769,7 +820,7 @@ val sdiv = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val signextend = Opcode { gasManager, _, stack, _, _, _, _ ->
+val signextend = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(5L)
   val item = stack.pop()
   val item2 = stack.pop()
@@ -794,7 +845,7 @@ val signextend = Opcode { gasManager, _, stack, _, _, _, _ ->
   }
 }
 
-val selfdestruct = Opcode { gasManager, hostContext, stack, msg, _, _, _ ->
+val selfdestruct = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   val recipientAddress = stack.pop()?.slice(12, 20)?.let { Address.fromBytes(it) } ?: return@Opcode Result(
     EVMExecutionStatusCode.STACK_UNDERFLOW
   )

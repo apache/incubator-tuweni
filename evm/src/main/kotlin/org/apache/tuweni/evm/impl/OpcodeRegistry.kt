@@ -68,6 +68,7 @@ import org.apache.tuweni.evm.impl.berlin.pc
 import org.apache.tuweni.evm.impl.berlin.pop
 import org.apache.tuweni.evm.impl.berlin.push
 import org.apache.tuweni.evm.impl.berlin.retuRn
+import org.apache.tuweni.evm.impl.berlin.returndatacopy
 import org.apache.tuweni.evm.impl.berlin.sdiv
 import org.apache.tuweni.evm.impl.berlin.selfdestruct
 import org.apache.tuweni.evm.impl.berlin.sgt
@@ -82,6 +83,8 @@ import org.apache.tuweni.evm.impl.berlin.sub
 import org.apache.tuweni.evm.impl.berlin.swap
 import org.apache.tuweni.evm.impl.berlin.timestamp
 import org.apache.tuweni.evm.impl.berlin.xor
+import org.apache.tuweni.evm.impl.berlin.extcodecopy
+import org.apache.tuweni.evm.impl.berlin.returndatasize
 
 fun interface Opcode {
   fun execute(
@@ -91,7 +94,8 @@ fun interface Opcode {
     msg: EVMMessage,
     code: Bytes,
     currentIndex: Int,
-    memory: Memory
+    memory: Memory,
+    callResult: Result?,
   ): Result?
 }
 
@@ -139,6 +143,9 @@ class OpcodeRegistry(val opcodes: Map<HardFork, Map<Byte, Opcode>>) {
       berlinOpcodes[0x39] = codecopy
       berlinOpcodes[0x3a] = gasPrice
       berlinOpcodes[0x3b] = extcodesize
+      berlinOpcodes[0x3c] = extcodecopy
+      berlinOpcodes[0x3d] = returndatasize
+      berlinOpcodes[0x3e] = returndatacopy
       berlinOpcodes[0x3f] = extcodehash
 
       berlinOpcodes[0x40] = blockhash
@@ -214,6 +221,9 @@ class OpcodeRegistry(val opcodes: Map<HardFork, Map<Byte, Opcode>>) {
       istanbulOpcodes[0x39] = org.apache.tuweni.evm.impl.istanbul.codecopy
       istanbulOpcodes[0x3a] = org.apache.tuweni.evm.impl.istanbul.gasPrice
       istanbulOpcodes[0x3b] = org.apache.tuweni.evm.impl.istanbul.extcodesize
+      istanbulOpcodes[0x3c] = org.apache.tuweni.evm.impl.istanbul.extcodecopy
+      istanbulOpcodes[0x3d] = org.apache.tuweni.evm.impl.istanbul.returndatasize
+      istanbulOpcodes[0x3e] = org.apache.tuweni.evm.impl.istanbul.returndatacopy
       istanbulOpcodes[0x3f] = org.apache.tuweni.evm.impl.istanbul.extcodehash
       istanbulOpcodes[0x40] = org.apache.tuweni.evm.impl.istanbul.blockhash
       istanbulOpcodes[0x41] = org.apache.tuweni.evm.impl.istanbul.coinbase
