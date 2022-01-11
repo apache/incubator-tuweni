@@ -38,6 +38,8 @@ class ProxyEthereumClientTest {
 
     val config1 = EthereumClientConfig.fromString(
       """
+      [peerRepository.default]
+      type="memory"
       [metrics]
       networkInterface="127.0.0.1"
       port=9091
@@ -54,6 +56,8 @@ class ProxyEthereumClientTest {
     )
     val config2 = EthereumClientConfig.fromString(
       """
+      [peerRepository.default]
+      type="memory"
       [metrics]
       networkInterface="127.0.0.1"
       port=9092

@@ -35,6 +35,8 @@ class EthereumClientRunTest {
     val keyPair = SECP256K1.KeyPair.random()
     val config1 = EthereumClientConfig.fromString(
       """
+      [peerRepository.default]
+      type="memory"
       [metrics]
       networkInterface="127.0.0.1"
       port=9091
@@ -53,6 +55,8 @@ class EthereumClientRunTest {
     )
     val config2 = EthereumClientConfig.fromString(
       """
+      [peerRepository.default]
+      type="memory"
       [metrics]
       networkInterface="127.0.0.1"
       port=9092
@@ -82,6 +86,8 @@ class EthereumClientRunTest {
   fun connectToMainnet(@VertxInstance vertx: Vertx) = runBlocking {
     val config = EthereumClientConfig.fromString(
       "" +
+        "[peerRepository.default]\n" +
+        "type=\"memory\"\n" +
         "[storage.default]\n" +
         "genesis=\"default\"\n" +
         "path=\"mainnet\"\n" +
