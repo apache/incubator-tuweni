@@ -27,6 +27,7 @@ import org.apache.lucene.store.NIOFSDirectory
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.coroutines.await
+import org.apache.tuweni.devp2p.DiscoveryService
 import org.apache.tuweni.devp2p.eth.EthRequestsManager
 import org.apache.tuweni.devp2p.eth.EthSubprotocol
 import org.apache.tuweni.devp2p.eth.EthSubprotocol.Companion.ETH66
@@ -39,11 +40,11 @@ import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.MemoryTransactionPool
-import org.apache.tuweni.metrics.MetricsService
 import org.apache.tuweni.kv.InfinispanKeyValueStore
 import org.apache.tuweni.kv.LevelDBKeyValueStore
 import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.kv.PersistenceMarshaller
+import org.apache.tuweni.metrics.MetricsService
 import org.apache.tuweni.rlpx.RLPxService
 import org.apache.tuweni.rlpx.vertx.VertxRLPxService
 import org.apache.tuweni.units.bigints.UInt256
@@ -76,6 +77,7 @@ class EthereumClient(
   private val storageRepositories = HashMap<String, BlockchainRepository>()
   val peerRepositories = HashMap<String, EthereumPeerRepository>()
   private val dnsClients = HashMap<String, DNSClient>()
+  private val discoveryServices = HashMap<String, DiscoveryService>()
   private val synchronizers = HashMap<String, Synchronizer>()
 
   private val managerHandler = mutableListOf<DefaultCacheManager>()
@@ -149,6 +151,29 @@ class EthereumClient(
       dnsClients[it.getName()] = dnsClient
       dnsClient.start()
       logger.info("Started DNS client ${it.getName()} for ${it.enrLink()}")
+    }
+
+    config.discoveryServices().forEach {
+      val peerRepository = peerRepositories[it.getPeerRepository()]
+      if (peerRepository == null) {
+        val message = (
+          if (peerRepositories.isEmpty()) "none" else peerRepositories.keys.joinToString(
+            ","
+          )
+          ) + " defined"
+        throw IllegalArgumentException(
+          "Repository $peerRepository not found, $message"
+        )
+      }
+      // TODO right now this doesn't use the peer repository since there is no impl satisfying both libraries.
+      val discoveryService = DiscoveryService.open(
+        vertx,
+        keyPair = it.getIdentity(),
+        port = it.getPort(),
+        host = it.getNetworkInterface()
+      )
+      discoveryServices[it.getName()] = discoveryService
+      logger.info("Started discovery service ${it.getName()}")
     }
 
     AsyncCompletion.allOf(
@@ -273,6 +298,7 @@ class EthereumClient(
 
   fun stop() = runBlocking {
     dnsClients.values.forEach(DNSClient::stop)
+    AsyncCompletion.allOf(discoveryServices.values.map(DiscoveryService::shutdownAsync)).await()
     synchronizers.values.forEach {
       it.stop()
     }

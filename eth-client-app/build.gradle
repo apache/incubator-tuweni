@@ -39,3 +39,12 @@ application {
   mainClassName = 'org.apache.tuweni.ethclient.EthereumClientAppKt'
   applicationName = 'tuweni'
 }
+
+tasks.register("bootnode", CreateStartScripts) {
+  applicationName = "bootnode"
+  outputDir = file("build/scripts")
+  mainClassName = 'org.apache.tuweni.ethclient.BootnodeAppKt'
+  classpath = project.tasks.getAt(JavaPlugin.JAR_TASK_NAME).outputs.files.plus(project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME))
+}
+
+assemble.dependsOn "bootnode"
