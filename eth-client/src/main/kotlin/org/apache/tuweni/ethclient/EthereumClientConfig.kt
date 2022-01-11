@@ -32,6 +32,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.Collections
+import java.util.stream.Stream
 
 /**
  * Configuration of EthereumClient. Can be provided via file or over the wire.
@@ -87,9 +88,19 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
     }
   }
 
-  // TODO read this from toml
-  fun peerRepositories(): List<PeerRepositoryConfiguration> =
-    listOf(PeerRepositoryConfigurationImpl("default"))
+  fun peerRepositories(): List<PeerRepositoryConfiguration> {
+    val peerRepositories = config.sections("peerRepository")
+    if (peerRepositories == null || peerRepositories.isEmpty()) {
+      return emptyList()
+    }
+    return peerRepositories.map { section ->
+      val sectionConfig = config.getConfigurationSection("peerRepository.$section")
+      PeerRepositoryConfigurationImpl(
+        section,
+        sectionConfig.getString("type"),
+      )
+    }
+  }
 
   fun metricsPort(): Int = config.getConfigurationSection("metrics").getInteger("port")
 
@@ -172,6 +183,30 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
     }
   }
 
+  fun validate(): Stream<ConfigurationError> {
+    val schema = createSchema()
+    var errors = schema.validate(this.config)
+
+    errors = Stream.concat(errors, validateSubsection("metrics", schema))
+    errors = Stream.concat(errors, validateSubsection("storage", schema))
+    errors = Stream.concat(errors, validateSubsection("dns", schema))
+    errors = Stream.concat(errors, validateSubsection("static", schema))
+    errors = Stream.concat(errors, validateSubsection("discovery", schema))
+    errors = Stream.concat(errors, validateSubsection("rlpx", schema))
+    errors = Stream.concat(errors, validateSubsection("proxy", schema))
+    errors = Stream.concat(errors, validateSubsection("peerRepository", schema))
+
+    return errors
+  }
+
+  private fun validateSubsection(name: String, schema: Schema): Stream<ConfigurationError> {
+    var errors = listOf<ConfigurationError>().stream()
+    for (subSection in this.config.sections(name)) {
+      errors = Stream.concat(errors, schema.getSubSection(name).validate(this.config.getConfigurationSection("$name.$subSection")))
+    }
+    return errors
+  }
+
   companion object {
 
     val logger = LoggerFactory.getLogger(EthereumClientConfig::class.java)
@@ -234,6 +269,8 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       proxiesSection.addString("upstream", null, "Server and port to send data to, such as localhost:1234", null)
       proxiesSection.addString("downstream", null, "Server and port to expose data on, such as localhost:1234", null)
 
+      val peerRepositoriesSection = SchemaBuilder.create()
+      peerRepositoriesSection.addString("type", "memory", "Peer repository type", PropertyValidator.anyOf("memory"))
       val builder = SchemaBuilder.create()
       builder.addSection("metrics", metricsSection.toSchema())
       builder.addSection("storage", storageSection.toSchema())
@@ -243,6 +280,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       builder.addSection("rlpx", rlpx.toSchema())
       builder.addSection("genesis", genesis.toSchema())
       builder.addSection("proxy", proxiesSection.toSchema())
+      builder.addSection("peerRepository", peerRepositoriesSection.toSchema())
 
       return builder.toSchema()
     }
@@ -322,10 +360,12 @@ interface ProxyConfiguration {
 
 interface PeerRepositoryConfiguration {
   fun getName(): String
+  fun getType(): String
 }
 
-internal class PeerRepositoryConfigurationImpl(private val repoName: String) : PeerRepositoryConfiguration {
+internal class PeerRepositoryConfigurationImpl(private val repoName: String, private val type: String) : PeerRepositoryConfiguration {
   override fun getName(): String = repoName
+  override fun getType(): String = type
 }
 
 internal data class RLPxServiceConfigurationImpl(
@@ -336,7 +376,7 @@ internal data class RLPxServiceConfigurationImpl(
   val advertisedPort: Int,
   val repository: String,
   val peerRepository: String,
-  val key: String
+  val key: String,
 ) : RLPxServiceConfiguration {
 
   private val keyPair = SECP256K1.KeyPair.fromSecretKey(SECP256K1.SecretKey.fromBytes(Bytes32.fromHexString(key)))
@@ -374,7 +414,7 @@ internal data class GenesisFileConfigurationImpl(private val name: String, priva
 internal data class DataStoreConfigurationImpl(
   private val name: String,
   private val storagePath: Path,
-  private val genesisFile: String
+  private val genesisFile: String,
 ) : DataStoreConfiguration {
   override fun getName(): String = name
 
@@ -387,7 +427,7 @@ data class DNSConfigurationImpl(
   private val name: String,
   private val peerRepository: String,
   private val enrLink: String,
-  private val pollingPeriod: Long
+  private val pollingPeriod: Long,
 ) :
   DNSConfiguration {
   override fun getName() = name
@@ -404,7 +444,7 @@ data class DiscoveryConfigurationImpl(
   private val peerRepository: String,
   private val port: Int,
   private val networkInterface: String,
-  private val identity: SECP256K1.KeyPair
+  private val identity: SECP256K1.KeyPair,
 ) :
   DiscoveryConfiguration {
   override fun getName() = name
