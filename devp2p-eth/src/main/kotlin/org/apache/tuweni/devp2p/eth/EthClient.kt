@@ -18,6 +18,7 @@ package org.apache.tuweni.devp2p.eth
 
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncResult
+import org.apache.tuweni.concurrent.ExpiringMap
 import org.apache.tuweni.eth.Block
 import org.apache.tuweni.eth.BlockBody
 import org.apache.tuweni.eth.BlockHeader
@@ -42,10 +43,10 @@ open class EthClient(
 ) :
   EthRequestsManager, SubProtocolClient {
 
-  private val headerRequests = HashMap<String, Request<List<BlockHeader>>>()
-  private val bodiesRequests = HashMap<String, Request<List<BlockBody>>>()
-  private val nodeDataRequests = HashMap<String, Request<List<Bytes?>>>()
-  private val transactionReceiptRequests = HashMap<String, Request<List<List<TransactionReceipt>>>>()
+  private val headerRequests = ExpiringMap<String, Request<List<BlockHeader>>>(600000)
+  private val bodiesRequests = ExpiringMap<String, Request<List<BlockBody>>>(600000)
+  private val nodeDataRequests = ExpiringMap<String, Request<List<Bytes?>>>(600000)
+  private val transactionReceiptRequests = ExpiringMap<String, Request<List<List<TransactionReceipt>>>>(600000)
 
   override fun connectionSelectionStrategy() = connectionSelectionStrategy
 
