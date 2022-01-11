@@ -32,7 +32,7 @@ class ExpiringMapTest {
   @BeforeEach
   void setup() {
     currentTime = Instant.now();
-    map = new ExpiringMap<>(() -> currentTime.toEpochMilli());
+    map = new ExpiringMap<>(() -> currentTime.toEpochMilli(), Long.MAX_VALUE);
   }
 
   @Test
@@ -167,5 +167,13 @@ class ExpiringMapTest {
     map.forEach((k, v) -> called.set(true));
     assertTrue(called.get());
     assertEquals(new ExpiringMap<Integer, String>(), new ExpiringMap<Integer, String>());
+  }
+
+  @Test
+  void testUsesDefaultTimeout() throws InterruptedException {
+    ExpiringMap<String, String> map = new ExpiringMap<>(10L);
+    map.put("foo", "bar");
+    Thread.sleep(11);
+    assertEquals("bar", map.get("foo"));
   }
 }
