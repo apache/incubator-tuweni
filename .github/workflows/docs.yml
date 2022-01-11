@@ -48,9 +48,7 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
           restore-keys: ${{ runner.os }}-m2
       - name: gradle docs
-        run: bash -c "./gradlew dokka | tee >( grep -i 'No documentation for' | grep -v DisconnectReason | grep -v RPCFlag | grep -v RPCRequestType | grep -v TomlVersion | grep -v PasswordHash | grep -v MessageSender | grep -v 'Identity.Curve' > docs_warning)"
-#      - name: Fail if warnings
-#        run: bash -c '[ -s docs_warning ] && cat docs_warning && exit 1'
+        run: ./gradlew docs
       - name: Upload docs
         uses: actions/upload-artifact@v2
         with:
