@@ -93,7 +93,11 @@ class EthereumClient(
     )
     this.metricsService = metricsService
     config.peerRepositories().forEach {
-      peerRepositories[it.getName()] = MemoryEthereumPeerRepository()
+      peerRepositories[it.getName()] =
+        when (it.getType()) {
+          "memory" -> MemoryEthereumPeerRepository()
+          else -> TODO()
+        }
     }
 
     config.genesisFiles().forEach {

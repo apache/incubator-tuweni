@@ -47,11 +47,26 @@ class EthereumClientConfigTest {
   }
 
   @Test
-  fun testEmptyConfigHasOnePeerRepository() {
+  fun testEmptyConfigHasNoPeerRepository() {
     val config = EthereumClientConfig.fromString("")
+    assertEquals(0, config.peerRepositories().size)
+  }
+
+  @Test
+  fun testConfigHasMemoryPeerRepository() {
+    val config = EthereumClientConfig.fromString("[peerRepository.default]\ntype=\"memory\"")
     assertEquals(1, config.peerRepositories().size)
-    val peerRepo = config.peerRepositories()[0]
-    assertEquals("default", peerRepo.getName())
+    assertEquals("memory", config.peerRepositories().get(0).getType())
+    val errors = config.validate()
+    assertEquals(0, errors.count())
+  }
+
+  @Test
+  fun testConfigInvalidPeerRepository() {
+    val config = EthereumClientConfig.fromString("[peerRepository.default]\ntype=\"foo\"")
+    assertEquals(1, config.peerRepositories().size)
+    val errors = config.validate()
+    assertEquals(1, errors.count())
   }
 
   @Test
