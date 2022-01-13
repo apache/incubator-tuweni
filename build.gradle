@@ -512,9 +512,6 @@ allprojects {
             configurations.implementation.allDependencies.each { dep ->
               addDependencyNode(dep, false, null)
             }
-            configurations.compile.allDependencies.each { dep ->
-              addDependencyNode(dep, false, null)
-            }
             configurations.compileOnly.allDependencies.each { dep ->
               addDependencyNode(dep, true, null)
             }
