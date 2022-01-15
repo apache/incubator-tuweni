@@ -51,7 +51,7 @@ internal class EthHandler66(
   }
 
   override fun handle(connection: WireConnection, messageType: Int, message: Bytes): AsyncCompletion {
-    if (connection.agreedSubprotocol(EthSubprotocol.ETH66) != EthSubprotocol.ETH66) {
+    if (connection.agreedSubprotocolVersion(EthSubprotocol.ETH66.name()) != EthSubprotocol.ETH66) {
       return ethHandler.handle(connection, messageType, message)
     }
     return asyncCompletion {
@@ -269,11 +269,11 @@ internal class EthHandler66(
   }
 
   override fun handleNewPeerConnection(connection: WireConnection): AsyncCompletion {
-    if (connection.agreedSubprotocol(EthSubprotocol.ETH66) != EthSubprotocol.ETH66) {
+    if (connection.agreedSubprotocolVersion(EthSubprotocol.ETH66.name()) != EthSubprotocol.ETH66) {
       return ethHandler.handleNewPeerConnection(connection)
     }
     val newPeer = pendingStatus.computeIfAbsent(connection.uri()) { PeerInfo() }
-    val ethSubProtocol = connection.agreedSubprotocol(EthSubprotocol.ETH66)
+    val ethSubProtocol = connection.agreedSubprotocolVersion(EthSubprotocol.ETH66.name())
     if (ethSubProtocol == null) {
       newPeer.cancel()
       return newPeer.ready

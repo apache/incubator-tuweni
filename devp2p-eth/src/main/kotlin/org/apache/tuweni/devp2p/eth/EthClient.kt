@@ -61,7 +61,7 @@ open class EthClient(
 
       transactionReceiptRequests.computeIfAbsent(conn.uri()) {
         service.send(
-          conn.agreedSubprotocol(EthSubprotocol.ETH65),
+          conn.agreedSubprotocolVersion(EthSubprotocol.ETH65.name()),
           MessageType.GetReceipts.code,
           conn,
           GetReceipts(blockHashes).toBytes()
@@ -88,7 +88,7 @@ open class EthClient(
     val completion = AsyncResult.incomplete<List<BlockHeader>>()
     headerRequests.computeIfAbsent(connection.uri() + blockHash.toHexString()) {
       service.send(
-        conn.agreedSubprotocol(EthSubprotocol.ETH65),
+        conn.agreedSubprotocolVersion(EthSubprotocol.ETH65.name()),
         MessageType.GetBlockHeaders.code,
         conn,
         GetBlockHeaders(blockHash, maxHeaders, skip, reverse).toBytes()
@@ -109,7 +109,7 @@ open class EthClient(
     val completion = AsyncResult.incomplete<List<BlockHeader>>()
     headerRequests.computeIfAbsent(connection.uri() + blockNumberBytes.toHexString()) {
       service.send(
-        connection.agreedSubprotocol(EthSubprotocol.ETH65),
+        connection.agreedSubprotocolVersion(EthSubprotocol.ETH65.name()),
         MessageType.GetBlockHeaders.code,
         connection,
         GetBlockHeaders(blockNumberBytes, maxHeaders, skip, reverse).toBytes()
@@ -129,7 +129,7 @@ open class EthClient(
   override fun requestBlockHeader(blockHash: Hash, connection: WireConnection): AsyncResult<BlockHeader> {
     val request = headerRequests.computeIfAbsent(connection.uri() + blockHash.toHexString()) {
       service.send(
-        connection.agreedSubprotocol(EthSubprotocol.ETH62),
+        connection.agreedSubprotocolVersion(EthSubprotocol.ETH62.name()),
         MessageType.GetBlockHeaders.code,
         connection,
         GetBlockHeaders(blockHash, 1, 0, false).toBytes()
@@ -146,7 +146,7 @@ open class EthClient(
     val oldRequest = bodiesRequests.computeIfAbsent(connection.uri()) {
       oldRequestPresent = false
       service.send(
-        connection.agreedSubprotocol(EthSubprotocol.ETH65),
+        connection.agreedSubprotocolVersion(EthSubprotocol.ETH65.name()),
         MessageType.GetBlockBodies.code,
         connection,
         GetBlockBodies(blockHashes).toBytes()
@@ -202,7 +202,7 @@ open class EthClient(
     val conns = service.repository().asIterable(EthSubprotocol.ETH65)
     conns.forEach { conn ->
       service.send(
-        conn.agreedSubprotocol(EthSubprotocol.ETH65),
+        conn.agreedSubprotocolVersion(EthSubprotocol.ETH65.name()),
         MessageType.NewPooledTransactionHashes.code,
         conn,
         GetBlockBodies(hashes).toBytes()

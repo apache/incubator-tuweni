@@ -185,7 +185,7 @@ class EthHandlerTest {
   @Test
   fun testGetHeaders() = runBlocking {
     val conn = mock(WireConnection::class.java)
-    `when`(conn.agreedSubprotocol(eq(ETH62))).thenReturn(ETH64)
+    `when`(conn.agreedSubprotocolVersion(eq(ETH62.name()))).thenReturn(ETH64)
     handler.handle(
       conn,
       MessageType.GetBlockHeaders.code,
@@ -205,7 +205,7 @@ class EthHandlerTest {
   @Test
   fun testGetHeadersTooMany() = runBlocking {
     val conn = mock(WireConnection::class.java)
-    `when`(conn.agreedSubprotocol(eq(ETH62))).thenReturn(ETH64)
+    `when`(conn.agreedSubprotocolVersion(eq(ETH62.name()))).thenReturn(ETH64)
     handler.handle(
       conn,
       MessageType.GetBlockHeaders.code,
@@ -222,7 +222,7 @@ class EthHandlerTest {
   @Test
   fun testGetHeadersDifferentSkip() = runBlocking {
     val conn = mock(WireConnection::class.java)
-    `when`(conn.agreedSubprotocol(eq(ETH62))).thenReturn(ETH64)
+    `when`(conn.agreedSubprotocolVersion(eq(ETH62.name()))).thenReturn(ETH64)
     handler.handle(
       conn,
       MessageType.GetBlockHeaders.code,
@@ -242,7 +242,7 @@ class EthHandlerTest {
   @Test
   fun testGetBodies() = runBlocking {
     val conn = mock(WireConnection::class.java)
-    `when`(conn.agreedSubprotocol(eq(ETH62))).thenReturn(ETH64)
+    `when`(conn.agreedSubprotocolVersion(eq(ETH62.name()))).thenReturn(ETH64)
     handler.handle(
       conn,
       MessageType.GetBlockBodies.code,
@@ -260,8 +260,8 @@ class EthHandlerTest {
   @Test
   fun testGetReceipts() = runBlocking {
     val conn = mock(WireConnection::class.java)
-    `when`(conn.agreedSubprotocol(eq(ETH62))).thenReturn(ETH64)
-    `when`(conn.agreedSubprotocol(eq(ETH62))).thenReturn(ETH64)
+    `when`(conn.agreedSubprotocolVersion(eq(ETH62.name()))).thenReturn(ETH64)
+    `when`(conn.agreedSubprotocolVersion(eq(ETH62.name()))).thenReturn(ETH64)
     val hashes = repository.findBlockByHashOrNumber(UInt256.valueOf(7).toBytes())
     val block7 = repository.retrieveBlock(hashes[0])
     val txReceipt = repository.retrieveTransactionReceipt(hashes[0], 0)
