@@ -41,7 +41,7 @@ import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.MemoryTransactionPool
 import org.apache.tuweni.kv.InfinispanKeyValueStore
-import org.apache.tuweni.kv.LevelDBKeyValueStore
+import org.apache.tuweni.kv.KeyValueStore
 import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.kv.PersistenceMarshaller
 import org.apache.tuweni.metrics.MetricsService
@@ -56,6 +56,7 @@ import org.infinispan.persistence.rocksdb.configuration.RocksDBStoreConfiguratio
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.net.URI
+import java.nio.file.Path
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -81,6 +82,16 @@ class EthereumClient(
   private val synchronizers = HashMap<String, Synchronizer>()
 
   private val managerHandler = mutableListOf<DefaultCacheManager>()
+
+  private fun createStore(dataStorage: Path, manager: DefaultCacheManager, name: String): KeyValueStore<Bytes, Bytes> {
+    val headersCache: Cache<Bytes, Bytes> = manager.createCache(
+      name,
+      ConfigurationBuilder().persistence().addStore(RocksDBStoreConfigurationBuilder::class.java)
+        .location(dataStorage.resolve(name).toAbsolutePath().toString())
+        .expiredLocation(dataStorage.resolve("$name-expired").toAbsolutePath().toString()).build()
+    )
+    return InfinispanKeyValueStore.open(headersCache)
+  }
 
   suspend fun start() {
     logger.info("Starting Ethereum client...")
@@ -118,19 +129,14 @@ class EthereumClient(
 
       val manager = DefaultCacheManager(builder.build())
       managerHandler.add(manager)
-      val headersCache: Cache<Bytes, Bytes> = manager.createCache(
-        "headers",
-        ConfigurationBuilder().persistence().addStore(RocksDBStoreConfigurationBuilder::class.java)
-          .location(dataStorage.resolve("headers").toAbsolutePath().toString())
-          .expiredLocation(dataStorage.resolve("headers-expired").toAbsolutePath().toString()).build()
-      )
+
       val repository = BlockchainRepository.init(
-        LevelDBKeyValueStore.open(dataStorage.resolve("bodies")),
-        InfinispanKeyValueStore.open(headersCache),
-        LevelDBKeyValueStore.open(dataStorage.resolve("metadata")),
-        LevelDBKeyValueStore.open(dataStorage.resolve("transactionReceipts")),
-        LevelDBKeyValueStore.open(dataStorage.resolve("transactions")),
-        LevelDBKeyValueStore.open(dataStorage.resolve("state")),
+        createStore(dataStorage, manager, "bodies"),
+        createStore(dataStorage, manager, "headers"),
+        createStore(dataStorage, manager, "metadata"),
+        createStore(dataStorage, manager, "transactionReceipts"),
+        createStore(dataStorage, manager, "transactions"),
+        createStore(dataStorage, manager, "state"),
         BlockchainIndex(writer),
         genesisBlock,
         metricsService.meterSdkProvider["${dataStore.getName()}_storage"]
