@@ -33,5 +33,5 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: true
-      - name: gradle rat spotlessCheck
-        run: ./gradlew rat spotlessCheck
+      - name: gradle rat spotlessCheck checkNotice
+        run: ./gradlew rat spotlessCheck checkNotice

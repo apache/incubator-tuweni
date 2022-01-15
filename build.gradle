@@ -640,3 +640,14 @@ dokkaHtml {
     }
   }
 }
+
+project.task("checkNotice") {
+  def lines = file("NOTICE").readLines()
+  def expected = "Copyright 2019-${LocalDate.now().getYear()} The Apache Software Foundation"
+  for (line in lines) {
+    if (expected == line) {
+      return
+    }
+  }
+  throw new GradleException('NOTICE file is not up-to-date')
+}
