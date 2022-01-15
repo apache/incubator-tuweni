@@ -146,7 +146,7 @@ internal class EthHandler(
       }
       if (missingTx.size == MAX_POOLED_TX) {
         service.send(
-          connection.agreedSubprotocol(ETH65),
+          connection.agreedSubprotocolVersion(ETH65.name()),
           MessageType.GetPooledTransactions.code,
           connection,
           message.toBytes()
@@ -157,7 +157,7 @@ internal class EthHandler(
     }
     if (!missingTx.isEmpty()) {
       service.send(
-        connection.agreedSubprotocol(ETH65),
+        connection.agreedSubprotocolVersion(ETH65.name()),
         MessageType.GetPooledTransactions.code,
         connection,
         message.toBytes()
@@ -172,7 +172,7 @@ internal class EthHandler(
   private suspend fun handleGetReceipts(connection: WireConnection, getReceipts: GetReceipts) {
 
     service.send(
-      connection.agreedSubprotocol(ETH62),
+      connection.agreedSubprotocolVersion(ETH62.name()),
       MessageType.Receipts.code,
       connection,
       Receipts(controller.findTransactionReceipts(getReceipts.hashes)).toBytes()
@@ -181,7 +181,7 @@ internal class EthHandler(
 
   private suspend fun handleGetNodeData(connection: WireConnection, nodeData: GetNodeData) {
     service.send(
-      connection.agreedSubprotocol(ETH65),
+      connection.agreedSubprotocolVersion(ETH65.name()),
       MessageType.NodeData.code,
       connection,
       NodeData(controller.findNodeData(nodeData.hashes)).toBytes()
@@ -198,7 +198,7 @@ internal class EthHandler(
 
   private suspend fun handleGetBlockBodies(connection: WireConnection, message: GetBlockBodies) {
     service.send(
-      connection.agreedSubprotocol(ETH62),
+      connection.agreedSubprotocolVersion(ETH62.name()),
       MessageType.BlockBodies.code,
       connection,
       BlockBodies(controller.findBlockBodies(message.hashes)).toBytes()
@@ -216,7 +216,7 @@ internal class EthHandler(
       blockHeaderRequest.skip,
       blockHeaderRequest.reverse
     )
-    service.send(connection.agreedSubprotocol(ETH62), MessageType.BlockHeaders.code, connection, BlockHeaders(headers).toBytes())
+    service.send(connection.agreedSubprotocolVersion(ETH62.name()), MessageType.BlockHeaders.code, connection, BlockHeaders(headers).toBytes())
   }
 
   private suspend fun handleNewBlockHashes(message: NewBlockHashes) {
@@ -225,7 +225,7 @@ internal class EthHandler(
 
   override fun handleNewPeerConnection(connection: WireConnection): AsyncCompletion {
     val newPeer = pendingStatus.computeIfAbsent(connection.uri()) { PeerInfo() }
-    val ethSubProtocol = connection.agreedSubprotocol(EthSubprotocol.ETH65)
+    val ethSubProtocol = connection.agreedSubprotocolVersion(EthSubprotocol.ETH65.name())
     if (ethSubProtocol == null) {
       newPeer.cancel()
       return newPeer.ready

@@ -81,7 +81,7 @@ class EthClient66(
     connection: WireConnection,
   ): AsyncResult<List<BlockHeader>> {
     logger.info("Requesting headers hash: $blockHash maxHeaders: $maxHeaders skip: $skip reverse: $reverse")
-    if (connection.agreedSubprotocol(EthSubprotocol.ETH66) != EthSubprotocol.ETH66) {
+    if (connection.agreedSubprotocolVersion(EthSubprotocol.ETH66.name()) != EthSubprotocol.ETH66) {
       return super.requestBlockHeaders(blockHash, maxHeaders, skip, reverse, connection)
     }
     val completion = AsyncResult.incomplete<List<BlockHeader>>()
@@ -107,14 +107,14 @@ class EthClient66(
     reverse: Boolean,
     connection: WireConnection,
   ): AsyncResult<List<BlockHeader>> {
-    if (connection.agreedSubprotocol(EthSubprotocol.ETH66) != EthSubprotocol.ETH66) {
+    if (connection.agreedSubprotocolVersion(EthSubprotocol.ETH66.name()) != EthSubprotocol.ETH66) {
       return super.requestBlockHeaders(blockNumber, maxHeaders, skip, reverse, connection)
     }
     val blockNumberBytes = UInt256.valueOf(blockNumber)
     val completion = AsyncResult.incomplete<List<BlockHeader>>()
     headerRequests.computeIfAbsent(UInt64.random().toBytes()) { key ->
       service.send(
-        connection.agreedSubprotocol(EthSubprotocol.ETH62),
+        connection.agreedSubprotocolVersion(EthSubprotocol.ETH62.name()),
         MessageType.GetBlockHeaders.code,
         connection,
         RLP.encodeList {
@@ -132,19 +132,19 @@ class EthClient66(
     blockHashes: List<Hash>,
     connection: WireConnection,
   ): AsyncResult<List<BlockHeader>> {
-    if (connection.agreedSubprotocol(EthSubprotocol.ETH66) != EthSubprotocol.ETH66) {
+    if (connection.agreedSubprotocolVersion(EthSubprotocol.ETH66.name()) != EthSubprotocol.ETH66) {
       return super.requestBlockHeaders(blockHashes, connection)
     }
     return AsyncResult.combine(blockHashes.stream().map { requestBlockHeader(it) })
   }
 
   override fun requestBlockHeader(blockHash: Hash, connection: WireConnection): AsyncResult<BlockHeader> {
-    if (connection.agreedSubprotocol(EthSubprotocol.ETH66) != EthSubprotocol.ETH66) {
+    if (connection.agreedSubprotocolVersion(EthSubprotocol.ETH66.name()) != EthSubprotocol.ETH66) {
       return super.requestBlockHeader(blockHash, connection)
     }
     val request = headerRequests.computeIfAbsent(UInt64.random().toBytes()) { key ->
       service.send(
-        connection.agreedSubprotocol(EthSubprotocol.ETH62),
+        connection.agreedSubprotocolVersion(EthSubprotocol.ETH62.name()),
         MessageType.GetBlockHeaders.code,
         connection,
         RLP.encodeList {
@@ -159,13 +159,13 @@ class EthClient66(
   }
 
   override fun requestBlockBodies(blockHashes: List<Hash>, connection: WireConnection): AsyncResult<List<BlockBody>> {
-    if (connection.agreedSubprotocol(EthSubprotocol.ETH66) != EthSubprotocol.ETH66) {
+    if (connection.agreedSubprotocolVersion(EthSubprotocol.ETH66.name()) != EthSubprotocol.ETH66) {
       return super.requestBlockBodies(blockHashes, connection)
     }
     val handle = AsyncResult.incomplete<List<BlockBody>>()
     bodiesRequests.compute(UInt64.random().toBytes()) { key, _ ->
       service.send(
-        connection.agreedSubprotocol(EthSubprotocol.ETH62),
+        connection.agreedSubprotocolVersion(EthSubprotocol.ETH62.name()),
         MessageType.GetBlockBodies.code,
         connection,
         RLP.encodeList {
@@ -179,7 +179,7 @@ class EthClient66(
   }
 
   override fun requestBlock(blockHash: Hash, connection: WireConnection): AsyncResult<Block> {
-    if (connection.agreedSubprotocol(EthSubprotocol.ETH66) != EthSubprotocol.ETH66) {
+    if (connection.agreedSubprotocolVersion(EthSubprotocol.ETH66.name()) != EthSubprotocol.ETH66) {
       return super.requestBlock(blockHash, connection)
     }
     val headerRequest = requestBlockHeader(blockHash)
@@ -222,7 +222,7 @@ class EthClient66(
     val conns = service.repository().asIterable(EthSubprotocol.ETH66)
     conns.forEach { conn ->
       service.send(
-        conn.agreedSubprotocol(EthSubprotocol.ETH66),
+        conn.agreedSubprotocolVersion(EthSubprotocol.ETH66.name()),
         MessageType.NewPooledTransactionHashes.code,
         conn,
         RLP.encodeList {
@@ -235,7 +235,7 @@ class EthClient66(
     val conns65 = service.repository().asIterable(EthSubprotocol.ETH65)
     conns65.forEach { conn ->
       service.send(
-        conn.agreedSubprotocol(EthSubprotocol.ETH65),
+        conn.agreedSubprotocolVersion(EthSubprotocol.ETH65.name()),
         MessageType.NewPooledTransactionHashes.code,
         conn,
         GetBlockBodies(hashes).toBytes()

@@ -59,9 +59,9 @@ public interface WireConnection {
    * 
    * @return the subprotocol, or null if no such subprotocol was present.
    */
-  default SubProtocolIdentifier agreedSubprotocol(SubProtocolIdentifier subProtocolIdentifier) {
+  default SubProtocolIdentifier agreedSubprotocolVersion(String name) {
     for (SubProtocolIdentifier sp : agreedSubprotocols()) {
-      if (sp.name().equals(subProtocolIdentifier.name())) {
+      if (sp.name().equals(name)) {
         return sp;
       }
     }
