@@ -344,14 +344,17 @@ allprojects {
   // Packaging and deployment
 
   tasks.withType(Jar) {
+    def moduleName = rootProject.name
     if (rootProject == project) {
       archiveBaseName = project.name
     } else {
       archiveBaseName = rootProject.name + '-' + project.name
+      moduleName += ".${project.name}"
     }
     manifest {
       attributes('Implementation-Title': archiveBaseName,
-      'Implementation-Version': project.version)
+      'Implementation-Version': project.version,
+      'Automatic-Module-Name': moduleName.replaceAll("-","_"))
     }
     from(rootProject.projectDir) {
       include 'DISCLAIMER'
