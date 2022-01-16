@@ -35,7 +35,8 @@ import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
 import org.apache.tuweni.devp2p.parseEnodeUri
 import org.apache.tuweni.devp2p.proxy.ProxyClient
 import org.apache.tuweni.devp2p.proxy.ProxySubprotocol
-import org.apache.tuweni.devp2p.proxy.TcpEndpoint
+import org.apache.tuweni.devp2p.proxy.TcpDownstream
+import org.apache.tuweni.devp2p.proxy.TcpUpstream
 import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
@@ -95,14 +96,17 @@ class EthereumClient(
 
   suspend fun start() {
     logger.info("Starting Ethereum client...")
-    val metricsService = MetricsService(
-      "tuweni",
-      port = config.metricsPort(),
-      networkInterface = config.metricsNetworkInterface(),
-      enableGrpcPush = config.metricsGrpcPushEnabled(),
-      enablePrometheus = config.metricsPrometheusEnabled()
-    )
-    this.metricsService = metricsService
+    if (config.metricsEnabled()) {
+
+      val metricsService = MetricsService(
+        "tuweni",
+        port = config.metricsPort(),
+        networkInterface = config.metricsNetworkInterface(),
+        enableGrpcPush = config.metricsGrpcPushEnabled(),
+        enablePrometheus = config.metricsPrometheusEnabled()
+      )
+      this.metricsService = metricsService
+    }
     config.peerRepositories().forEach {
       peerRepositories[it.getName()] =
         when (it.getType()) {
@@ -139,7 +143,7 @@ class EthereumClient(
         createStore(dataStorage, manager, "state"),
         BlockchainIndex(writer),
         genesisBlock,
-        metricsService.meterSdkProvider["${dataStore.getName()}_storage"]
+        metricsService?.meterSdkProvider?.get("${dataStore.getName()}_storage")
       )
       storageRepositories[dataStore.getName()] = repository
       repoToGenesisFile[repository] = genesisFile
@@ -226,7 +230,7 @@ class EthereumClient(
           listener = adapter::listenToStatus,
           selectionStrategy = { ConnectionManagementStrategy(peerRepositoryAdapter = adapter) }
         )
-        val meter = metricsService.meterSdkProvider["${rlpxConfig.getName()}_rlpx"]
+        val meter = metricsService?.meterSdkProvider?.get("${rlpxConfig.getName()}_rlpx")
         val proxySubprotocol = ProxySubprotocol()
         val service = VertxRLPxService(
           vertx,
@@ -244,10 +248,22 @@ class EthereumClient(
           logger.info("Started Ethereum client ${rlpxConfig.getName()}")
           val proxyClient = service.getClient(ProxySubprotocol.ID) as ProxyClient
           for (proxyConfig in config.proxies()) {
-            val uri = URI.create(proxyConfig.upstream())
-            val target = TcpEndpoint(vertx, uri.host, uri.port)
-            target.start()
-            proxyClient.registeredSites[proxyConfig.name()] = target
+            if ("" != proxyConfig.upstream()) {
+              val uri = URI.create("tcp://${proxyConfig.upstream()}")
+              val target = TcpUpstream(vertx, uri.host, uri.port)
+              runBlocking {
+                target.start()
+              }
+              proxyClient.registeredSites[proxyConfig.name()] = target
+            }
+            if ("" != proxyConfig.downstream()) {
+              val uri = URI.create("tcp://${proxyConfig.downstream()}")
+              // TODO close downstream on exit
+              val target = TcpDownstream(vertx, proxyConfig.name(), uri.host, uri.port, proxyClient)
+              runBlocking {
+                target.start()
+              }
+            }
           }
           peerRepository.addIdentityListener {
             service.connectTo(

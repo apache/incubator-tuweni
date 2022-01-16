@@ -105,4 +105,12 @@ class EthereumClientConfigTest {
     assertEquals("default", config.dnsClients()[0].peerRepository())
     assertEquals("mine", config.dnsClients()[0].getName())
   }
+
+  @Test
+  fun testProxyConfig() {
+    val config = EthereumClientConfig.fromString("[proxy.foo]\nname=\"foo\"\nupstream=\"localhost:15000\"")
+    assertEquals(1, config.proxies().size)
+    assertEquals("localhost:15000", config.proxies()[0].upstream())
+    assertEquals("", config.proxies()[0].downstream())
+  }
 }

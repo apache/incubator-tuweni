@@ -102,6 +102,8 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
     }
   }
 
+  fun metricsEnabled(): Boolean = config.getConfigurationSection("metrics").getBoolean("enabled")
+
   fun metricsPort(): Int = config.getConfigurationSection("metrics").getInteger("port")
 
   fun metricsNetworkInterface(): String = config.getConfigurationSection("metrics").getString("networkInterface")
@@ -213,6 +215,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
 
     fun createSchema(): Schema {
       val metricsSection = SchemaBuilder.create()
+      metricsSection.addBoolean("enabled", false, "Enable telemetry", null)
       metricsSection.addInteger("port", 9090, "Port to expose Prometheus metrics", PropertyValidator.isValidPort())
       metricsSection.addString("networkInterface", "0.0.0.0", "Network interface to expose Prometheus metrics", null)
       metricsSection.addBoolean("enablePrometheus", true, "Enable Prometheus metrics reporting", null)
@@ -266,8 +269,8 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       rlpx.addString("peerRepository", "default", "Peer repository to which records should go", null)
       val proxiesSection = SchemaBuilder.create()
       proxiesSection.addString("name", null, "Name of the site", null)
-      proxiesSection.addString("upstream", null, "Server and port to send data to, such as localhost:1234", null)
-      proxiesSection.addString("downstream", null, "Server and port to expose data on, such as localhost:1234", null)
+      proxiesSection.addString("upstream", "", "Server and port to send data to, such as localhost:1234", null)
+      proxiesSection.addString("downstream", "", "Server and port to expose data on, such as localhost:1234", null)
 
       val peerRepositoriesSection = SchemaBuilder.create()
       peerRepositoriesSection.addString("type", "memory", "Peer repository type", PropertyValidator.anyOf("memory"))
@@ -465,5 +468,5 @@ data class ProxyConfigurationImpl(private val name: String, private val upstream
   override fun name() = name
 
   override fun upstream() = upstream
-  override fun downstream() = upstream
+  override fun downstream() = downstream
 }

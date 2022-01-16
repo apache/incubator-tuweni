@@ -41,6 +41,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
@@ -143,7 +144,7 @@ public final class VertxRLPxService implements RLPxService {
       KeyPair identityKeyPair,
       List<SubProtocol> subProtocols,
       String clientId,
-      Meter meter,
+      @Nullable Meter meter,
       WireConnectionRepository repository) {
     checkPort(listenPort);
     checkPort(advertisedPort);
@@ -164,12 +165,17 @@ public final class VertxRLPxService implements RLPxService {
         tryConnect(c.peerPublicKey(), new InetSocketAddress(c.peerHost(), c.peerPort()));
       }
     });
-    this.connectionsCreatedCounter =
-        meter.longCounterBuilder("connections_created").setDescription("Number of connections created").build();
-    this.connectionsDisconnectedCounter = meter
-        .longCounterBuilder("connections_disconnected")
-        .setDescription("Number of connections disconnected")
-        .build();
+    if (meter != null) {
+      this.connectionsCreatedCounter =
+          meter.longCounterBuilder("connections_created").setDescription("Number of connections created").build();
+      this.connectionsDisconnectedCounter = meter
+          .longCounterBuilder("connections_disconnected")
+          .setDescription("Number of connections disconnected")
+          .build();
+    } else {
+      this.connectionsCreatedCounter = null;
+      this.connectionsDisconnectedCounter = null;
+    }
   }
 
   private void tryConnect(SECP256K1.PublicKey peerPublicKey, InetSocketAddress inetSocketAddress) {
@@ -251,9 +257,13 @@ public final class VertxRLPxService implements RLPxService {
   }
 
   private void receiveMessage(NetSocket netSocket) {
-    connectionsCreatedCounter.add(1);
+    if (connectionsCreatedCounter != null) {
+      connectionsCreatedCounter.add(1);
+    }
     netSocket.closeHandler((handler) -> {
-      connectionsDisconnectedCounter.add(1);
+      if (connectionsDisconnectedCounter != null) {
+        connectionsDisconnectedCounter.add(1);
+      }
     });
     netSocket.handler(new Handler<>() {
 
@@ -355,7 +365,9 @@ public final class VertxRLPxService implements RLPxService {
             peerAddress.getPort(),
             peerAddress.getHostString(),
             netSocketFuture -> netSocketFuture.map(netSocket -> {
-              connectionsCreatedCounter.add(1);
+              if (connectionsCreatedCounter != null) {
+                connectionsCreatedCounter.add(1);
+              }
               Bytes32 nonce = RLPxConnectionFactory.generateRandomBytes32();
               KeyPair ephemeralKeyPair = KeyPair.random();
               Bytes initHandshakeMessage = RLPxConnectionFactory.init(keyPair, peerPublicKey, ephemeralKeyPair, nonce);
@@ -363,7 +375,9 @@ public final class VertxRLPxService implements RLPxService {
               netSocket.write(Buffer.buffer(initHandshakeMessage.toArrayUnsafe()));
 
               netSocket.closeHandler(event -> {
-                connectionsDisconnectedCounter.add(1);
+                if (connectionsDisconnectedCounter != null) {
+                  connectionsDisconnectedCounter.add(1);
+                }
                 logger.debug("Connection {} closed", peerAddress);
                 if (!connected.isDone()) {
                   connected.cancel();
