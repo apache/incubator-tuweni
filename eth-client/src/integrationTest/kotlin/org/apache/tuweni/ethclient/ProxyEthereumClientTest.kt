@@ -38,7 +38,7 @@ class ProxyEthereumClientTest {
   @Test
   fun proxyTalkingToEachOther(@VertxInstance vertx: Vertx) = runBlocking {
     // start a service saying hello on port 14000:
-    val server = vertx.createNetServer(NetServerOptions().setPort(14000))
+    val server = vertx.createNetServer(NetServerOptions().setPort(14000).setHost("127.0.0.1"))
     server.connectHandler { socket ->
       socket.handler {
         socket.write("Hello World!")
