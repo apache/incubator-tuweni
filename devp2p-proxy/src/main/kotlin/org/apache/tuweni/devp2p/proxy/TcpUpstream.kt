@@ -28,7 +28,7 @@ import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.coroutines.await
 import kotlin.coroutines.CoroutineContext
 
-class TcpEndpoint(
+class TcpUpstream(
   val vertx: Vertx,
   val host: String,
   val port: Int,
@@ -48,9 +48,11 @@ class TcpEndpoint(
 
   override suspend fun handleRequest(message: Bytes): Bytes {
     val socket = tcpclient!!.connect(port, host).await()
+
     val result = AsyncResult.incomplete<Bytes>()
     socket.handler {
       result.complete(Bytes.wrapBuffer(it))
+      socket.close()
     }.closeHandler {
       result.complete(Bytes.EMPTY)
     }.exceptionHandler {
