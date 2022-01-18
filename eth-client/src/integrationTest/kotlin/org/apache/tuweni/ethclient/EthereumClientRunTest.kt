@@ -19,10 +19,14 @@ package org.apache.tuweni.ethclient
 import io.vertx.core.Vertx
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.concurrent.AsyncResult
+import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.junit.VertxInstance
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -37,16 +41,11 @@ class EthereumClientRunTest {
       """
       [peerRepository.default]
       type="memory"
-      [metrics]
-      networkInterface="127.0.0.1"
-      port=9091
       [storage.default]
       path="data"
       genesis="default"
       [genesis.default]
       path="classpath:/default.json"
-      [static.default]
-      peerRepository="default"
       [rlpx.default]
       networkInterface="127.0.0.1"
       port=30301
@@ -57,9 +56,6 @@ class EthereumClientRunTest {
       """
       [peerRepository.default]
       type="memory"
-      [metrics]
-      networkInterface="127.0.0.1"
-      port=9092
       [storage.default]
       path="data2"
       genesis="default"
@@ -68,14 +64,23 @@ class EthereumClientRunTest {
       [static.default]
       enodes=["enode://${keyPair.publicKey().toHexString()}@127.0.0.1:30301"]
       peerRepository="default"
+      [rlpx.default]
+      networkInterface="127.0.0.1"
+      port=30304
+      key="${SECP256K1.KeyPair.random().secretKey().bytes().toHexString()}"
       """.trimMargin()
     )
     val client1 = EthereumClient(vertx, config1)
     val client2 = EthereumClient(vertx, config2)
     client1.start()
+    val connectionInfo = AsyncResult.incomplete<EthereumConnection>()
+    client1.peerRepositories["default"]!!.addStatusListener { connectionInfo.complete(it) }
     client2.start()
-    delay(1000)
-    // TODO make sure the connection happens!
+
+    val conn = connectionInfo.await()
+    assertNotNull(conn)
+    assertNotNull(conn.status())
+    assertEquals(client2.config.rlpxServices()[0].keyPair().publicKey(), conn.peer().id().publicKey())
     client1.stop()
     client2.stop()
   }

@@ -205,11 +205,9 @@ public final class DefaultWireConnection implements WireConnection {
         int offset = subProtocolEntry.getKey().lowerEndpoint();
         logger.trace("Received message of type {}", message.messageId() - offset);
         SubProtocolHandler handler = subprotocols.get(subProtocolEntry.getValue());
-        try {
-          handler.handle(this, message.messageId() - offset, message.content());
-        } catch (Throwable t) {
-          logger.error("Handler " + handler.toString() + " threw an exception", t);
-        }
+        handler
+            .handle(this, message.messageId() - offset, message.content())
+            .exceptionally(t -> logger.error("Handler " + handler.toString() + " threw an exception", t));
       }
     }
   }
@@ -263,7 +261,7 @@ public final class DefaultWireConnection implements WireConnection {
 
   /**
    * Sends a ping message to the remote peer.
-   * 
+   *
    * @return a handler marking completion when a pong response is received
    */
   public AsyncCompletion sendPing() {

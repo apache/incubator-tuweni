@@ -244,6 +244,12 @@ class EthereumClient(
           adapter
         )
         services[rlpxConfig.getName()] = service
+        peerRepository.addIdentityListener {
+          service.connectTo(
+            it.publicKey(),
+            InetSocketAddress(it.networkInterface(), it.port())
+          )
+        }
         service.start().thenRun {
           logger.info("Started Ethereum client ${rlpxConfig.getName()}")
           val proxyClient = service.getClient(ProxySubprotocol.ID) as ProxyClient
@@ -265,12 +271,7 @@ class EthereumClient(
               }
             }
           }
-          peerRepository.addIdentityListener {
-            service.connectTo(
-              it.publicKey(),
-              InetSocketAddress(it.networkInterface(), it.port())
-            )
-          }
+
           val synchronizer = PeerStatusEthSynchronizer(
             repository = repository,
             client = service.getClient(ETH66) as EthRequestsManager,
@@ -293,6 +294,7 @@ class EthereumClient(
           )
           synchronizers[rlpxConfig.getName() + "best"] = bestSynchronizer
           bestSynchronizer.start()
+          logger.info("Finished configuring Ethereum client ${rlpxConfig.getName()}")
         }
       }
     ).await()
