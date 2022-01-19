@@ -24,6 +24,7 @@ import org.apache.tuweni.config.PropertyValidator
 import org.apache.tuweni.config.Schema
 import org.apache.tuweni.config.SchemaBuilder
 import org.apache.tuweni.crypto.SECP256K1
+import org.apache.tuweni.devp2p.parseEnodeUri
 import org.apache.tuweni.eth.genesis.GenesisFile
 import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
@@ -231,7 +232,19 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       dnsSection.addString("peerRepository", "default", "Peer repository to which records should go", null)
 
       val staticPeers = SchemaBuilder.create()
-      staticPeers.addListOfString("enodes", Collections.emptyList(), "Static enodes to connect to in enode://publickey@host:port format", null)
+      staticPeers.addListOfString(
+        "enodes", Collections.emptyList(), "Static enodes to connect to in enode://publickey@host:port format"
+      ) { _, position, value ->
+        val errors = mutableListOf<ConfigurationError>()
+        for (enode in value!!) {
+          try {
+            parseEnodeUri(URI.create(enode))
+          } catch (e: IllegalArgumentException) {
+            errors.add(ConfigurationError(position, e.message ?: "error validating enode"))
+          }
+        }
+        errors
+      }
       staticPeers.addString("peerRepository", "default", "Peer repository to which static nodes should go", null)
 
       val discoverySection = SchemaBuilder.create()
