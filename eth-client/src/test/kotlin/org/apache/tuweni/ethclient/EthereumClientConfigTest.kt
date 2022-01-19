@@ -113,4 +113,11 @@ class EthereumClientConfigTest {
     assertEquals("localhost:15000", config.proxies()[0].upstream())
     assertEquals("", config.proxies()[0].downstream())
   }
+
+  @Test
+  fun testInvalidPeers() {
+    val config = EthereumClientConfig.fromString("[static.default]\nenodes=[\"enode://foo:bar@localhost:303\"]")
+    val errors = config.validate()
+    assertEquals(1, errors.count())
+  }
 }
