@@ -54,7 +54,9 @@ abstract class Synchronizer(
           }
         }
       }.awaitAll()
-      client.requestBlockBodies(bodiesToRequest)
+      if (!bodiesToRequest.isEmpty()) {
+        client.requestBlockBodies(bodiesToRequest)
+      }
     }
   }
 }

@@ -42,6 +42,7 @@ import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.rlpx.RLPxService
+import org.apache.tuweni.rlpx.wire.DisconnectReason
 import org.apache.tuweni.rlpx.wire.WireConnection
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.bigints.UInt64
@@ -277,5 +278,17 @@ class EthHandlerTest {
     val messageRead = Receipts.read(messageCapture.value)
     assertEquals(1, messageRead.transactionReceipts.size)
     assertEquals(txReceipt, messageRead.transactionReceipts[0][0])
+  }
+
+  @Test
+  fun testGetBodiesEmpty(): Unit = runBlocking {
+    val conn = mock(WireConnection::class.java)
+    handler.handle(
+      conn,
+      MessageType.GetBlockBodies.code,
+      GetBlockBodies(listOf()).toBytes()
+    ).await()
+
+    verify(service).disconnect(conn, DisconnectReason.SUBPROTOCOL_REASON)
   }
 }

@@ -197,6 +197,10 @@ internal class EthHandler(
   }
 
   private suspend fun handleGetBlockBodies(connection: WireConnection, message: GetBlockBodies) {
+    if (message.hashes.isEmpty()) {
+      service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
+      return
+    }
     service.send(
       connection.agreedSubprotocolVersion(ETH62.name()),
       MessageType.BlockBodies.code,

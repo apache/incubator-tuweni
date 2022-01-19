@@ -17,6 +17,7 @@
 package org.apache.tuweni.ethclient
 
 import org.apache.tuweni.devp2p.eth.Status
+import org.apache.tuweni.peer.repository.Identity
 import org.apache.tuweni.rlpx.WireConnectionRepository
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
 import org.apache.tuweni.rlpx.wire.WireConnection
@@ -28,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class WireConnectionPeerRepositoryAdapter(val peerRepository: EthereumPeerRepository) : WireConnectionRepository {
 
-  private val wireConnectionToIdentities = ConcurrentHashMap<String, String>()
+  private val wireConnectionToIdentities = ConcurrentHashMap<String, Identity>()
   private val connections = ConcurrentHashMap<String, WireConnection>()
   private val connectionListeners = ArrayList<WireConnectionRepository.Listener>()
 
@@ -49,7 +50,7 @@ class WireConnectionPeerRepositoryAdapter(val peerRepository: EthereumPeerReposi
     val peer = peerRepository.storePeer(id, Instant.now(), Instant.now())
     peerRepository.addConnection(peer, id)
     connections[id.id()] = wireConnection
-    wireConnectionToIdentities[wireConnection.uri()] = id.id()
+    wireConnectionToIdentities[wireConnection.uri()] = peer.id()
     wireConnection.registerListener {
       if (it == WireConnection.Event.CONNECTED) {
         for (listener in connectionListeners) {

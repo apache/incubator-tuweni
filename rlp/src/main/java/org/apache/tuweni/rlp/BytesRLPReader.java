@@ -38,7 +38,7 @@ final class BytesRLPReader implements RLPReader {
     if (remaining == 0) {
       return Bytes.EMPTY;
     }
-    return content.slice(remaining);
+    return content.slice(index++, remaining);
   }
 
   @Override

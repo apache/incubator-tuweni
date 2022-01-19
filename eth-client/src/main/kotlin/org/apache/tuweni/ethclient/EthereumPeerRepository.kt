@@ -33,10 +33,10 @@ import java.util.stream.Stream
 interface EthereumPeerRepository : PeerRepository {
   /**
    * Stores the status message sent for a connection
-   * @param connId the ID of the connection
+   * @param peerIdentity the peer identity
    * @param status the status message
    */
-  fun storeStatus(connId: String, status: Status)
+  fun storeStatus(peerIdentity: Identity, status: Status)
 
   /**
    * Provides a stream of active connections.
@@ -87,8 +87,9 @@ class MemoryEthereumPeerRepository : EthereumPeerRepository {
   val statusListeners = HashMap<String, (EthereumConnection) -> Unit>()
   val identityListeners = HashMap<String, (Identity) -> Unit>()
 
-  override fun storeStatus(connId: String, status: Status) {
-    connections[connId]?.let { conn ->
+  override fun storeStatus(peerIdentity: Identity, status: Status) {
+    val connKey = peerMap[peerIdentity]?.let { createConnectionKey(it, peerIdentity) }
+    connections[connKey]?.let { conn ->
       (conn as MemoryEthereumConnection).status = status
       statusListeners.values.forEach {
         it(conn)

@@ -56,7 +56,7 @@ internal class EthHandler66(
     }
     return asyncCompletion {
       logger.debug("Receiving message of type {}", messageType)
-      val pair = RLP.decode(message) {
+      val pair = RLP.decodeList(message) {
         Pair(it.readValue(), it.readRemaining())
       }
       val requestIdentifier = pair.first
@@ -232,6 +232,10 @@ internal class EthHandler66(
   }
 
   private suspend fun handleGetBlockBodies(connection: WireConnection, requestIdentifier: Bytes, message: GetBlockBodies) {
+    if (message.hashes.isEmpty()) {
+      service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
+      return
+    }
     val bodies = BlockBodies(controller.findBlockBodies(message.hashes))
     service.send(
       EthSubprotocol.ETH66,
