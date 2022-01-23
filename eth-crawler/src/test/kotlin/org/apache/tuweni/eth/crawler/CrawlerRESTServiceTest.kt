@@ -26,9 +26,11 @@ class CrawlerRESTServiceTest {
   @Test
   fun startAndStop() = runBlocking {
     val repo = mock<RelationalPeerRepository>()
+    val statsMeter = SdkMeterProvider.builder().build().get("stats")
     val meter = SdkMeterProvider.builder().build().get("crawler")
+    val stats = StatsJob(repo, listOf(), statsMeter)
 
-    val service = CrawlerRESTService(repository = repo, meter = meter)
+    val service = CrawlerRESTService(repository = repo, meter = meter, stats = stats)
     service.start().await()
     service.stop().await()
     Unit

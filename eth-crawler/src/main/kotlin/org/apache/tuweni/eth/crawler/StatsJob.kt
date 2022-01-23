@@ -19,6 +19,7 @@ package org.apache.tuweni.eth.crawler
 import io.opentelemetry.api.metrics.Meter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -31,7 +32,7 @@ class StatsJob(
   private val upgradeConfigs: List<UpgradeConfig> = listOf(),
   private val meter: Meter,
   private val clientsStatsDelay: Long = 30 * 1000L,
-  override val coroutineContext: CoroutineContext
+  override val coroutineContext: CoroutineContext = Dispatchers.Default
 ) : CoroutineScope {
 
   companion object {
