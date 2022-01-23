@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.eth.crawler.rest
 
+import org.apache.tuweni.eth.crawler.ClientIdInfo
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

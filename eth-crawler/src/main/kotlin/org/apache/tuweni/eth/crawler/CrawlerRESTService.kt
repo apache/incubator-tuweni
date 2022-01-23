@@ -46,6 +46,7 @@ class CrawlerRESTService(
   val allowedMethods: String = "*",
   val allowedHeaders: String = "*",
   val repository: RelationalPeerRepository,
+  val stats: StatsJob,
   val meter: Meter,
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope {
@@ -103,6 +104,7 @@ class CrawlerRESTService(
     newServer.stopAtShutdown = true
     newServer.start()
     serHol.servlet.servletConfig.servletContext.setAttribute("repo", repository)
+    serHol.servlet.servletConfig.servletContext.setAttribute("stats", stats)
     val restMetrics = RESTMetrics(
       meter.longCounterBuilder("peers").setDescription("Number of times peers have been requested").build(),
       meter.longCounterBuilder("clients").setDescription("Number of times client stats have been requested").build()

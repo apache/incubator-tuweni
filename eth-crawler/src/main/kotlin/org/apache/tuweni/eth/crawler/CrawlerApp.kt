@@ -88,7 +88,7 @@ class CrawlerApplication(
       val thread = Thread("crawler")
       thread.isDaemon = true
       thread
-    }.asCoroutineDispatcher()
+    }.asCoroutineDispatcher(),
 ) : CoroutineScope {
 
   private val metricsService = MetricsService(
@@ -118,7 +118,9 @@ class CrawlerApplication(
       .load()
     flyway.migrate()
     val crawlerMeter = metricsService.meterSdkProvider["crawler"]
-    val repo = RelationalPeerRepository(ds, config.peerCacheExpiration(), config.clientIdsInterval(), config.clientsStatsDelay(), crawlerMeter, config.upgradesVersions(), createCoroutineContext())
+    val repo = RelationalPeerRepository(ds, config.peerCacheExpiration(), config.clientIdsInterval())
+    val statsJob =
+      StatsJob(repo, config.upgradesVersions(), crawlerMeter, config.clientsStatsDelay(), createCoroutineContext())
 
     logger.info("Initial bootnodes: ${config.bootNodes()}")
     val scraper = Scraper(
@@ -195,8 +197,15 @@ class CrawlerApplication(
         connect(rlpxService, it.nodeId, InetSocketAddress(it.endpoint.address, it.endpoint.tcpPort ?: 30303))
       }
     }
-    val restService =
-      CrawlerRESTService(port = config.restPort(), networkInterface = config.restNetworkInterface(), repository = repo, maxRequestsPerSec = config.maxRequestsPerSec(), meter = meter, allowedOrigins = config.corsAllowedOrigins())
+    val restService = CrawlerRESTService(
+      port = config.restPort(),
+      networkInterface = config.restNetworkInterface(),
+      repository = repo,
+      stats = statsJob,
+      maxRequestsPerSec = config.maxRequestsPerSec(),
+      meter = meter,
+      allowedOrigins = config.corsAllowedOrigins()
+    )
     val refreshLoop = AtomicBoolean(true)
     val ethstatsDataRepository = EthstatsDataRepository(ds)
     val ethstatsServer = EthStatsServer(
@@ -211,7 +220,7 @@ class CrawlerApplication(
     Runtime.getRuntime().addShutdownHook(
       Thread {
         runBlocking {
-          repo.stop()
+          statsJob.stop()
           refreshLoop.set(false)
           scraper.stop().await()
           dnsDaemon.close()
@@ -225,7 +234,7 @@ class CrawlerApplication(
       }
     )
     runBlocking {
-      repo.start()
+      statsJob.start()
       restService.start().await()
       launch {
         while (refreshLoop.get()) {

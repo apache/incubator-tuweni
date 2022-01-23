@@ -16,11 +16,8 @@
  */
 package org.apache.tuweni.eth.crawler
 
-import io.opentelemetry.api.metrics.Meter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.concurrent.ExpiringMap
@@ -32,13 +29,11 @@ import org.apache.tuweni.devp2p.Peer
 import org.apache.tuweni.devp2p.PeerRepository
 import org.apache.tuweni.devp2p.eth.Status
 import org.apache.tuweni.devp2p.parseEnodeUri
-import org.apache.tuweni.eth.crawler.rest.ClientIdInfo
 import org.apache.tuweni.rlpx.wire.WireConnection
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.sql.Timestamp
 import java.util.UUID
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.sql.DataSource
 import kotlin.coroutines.CoroutineContext
 
@@ -46,9 +41,6 @@ open class RelationalPeerRepository(
   private val dataSource: DataSource,
   private val expiration: Long = 5 * 60 * 1000L,
   private val clientIdsInterval: Long = 24 * 60 * 60 * 1000 * 2L,
-  private val clientsStatsDelay: Long = 30 * 1000L,
-  private val meter: Meter,
-  private val upgradeConfigs: List<UpgradeConfig> = listOf(),
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope, PeerRepository {
 
@@ -58,11 +50,6 @@ open class RelationalPeerRepository(
 
   private val listeners = mutableListOf<(Peer) -> Unit>()
   private val peerCache = ExpiringMap<SECP256K1.PublicKey, String>()
-  private val totalClientsGauge =
-    meter.longValueRecorderBuilder("totalClients").setDescription("Number of nodes used to compute client stats")
-      .build()
-  private val clientCalculationsCounter =
-    meter.longCounterBuilder("clients").setDescription("Number of times clients were computed").build()
 
   override fun addListener(listener: (Peer) -> Unit) {
     listeners.add(listener)
@@ -237,60 +224,6 @@ open class RelationalPeerRepository(
       }
     }
   }
-
-  private var clientIds: List<ClientInfo>? = null
-  private var clientsStats: Map<String, Map<String, Long>>? = null
-  private var upgradeStats: MutableMap<String, ClientReadyStats> = mutableMapOf()
-  private val started = AtomicBoolean(false)
-
-  fun start() {
-    logger.info("Starting repo")
-    launch {
-      started.set(true)
-      while (started.get()) {
-        logger.info("Finding client ids")
-        val newClientIds = getClientIdsInternal()
-        logger.info("Found client ids ${newClientIds.size}")
-        clientIds = newClientIds
-        val newClientsStats = mutableMapOf<String, MutableMap<String, Long>>()
-        val total = newClientIds.stream().mapToInt { it.count }.sum()
-
-        newClientIds.forEach { newClientCount ->
-          val clientIdInfo = ClientIdInfo(newClientCount.clientId)
-          val versionStats = newClientsStats.computeIfAbsent(clientIdInfo.name) { mutableMapOf() }
-          val statsCount = versionStats[clientIdInfo.version] ?: 0
-          versionStats[clientIdInfo.version] = statsCount + newClientCount.count
-        }
-        for (upgradeConfig in upgradeConfigs) {
-          var upgradeReady = 0
-          newClientIds.forEach { newClientCount ->
-            val clientIdInfo = ClientIdInfo(newClientCount.clientId)
-            upgradeConfig.versions.get(clientIdInfo.name().lowercase())?.let { upgradeVersion ->
-              if (clientIdInfo >= upgradeVersion) {
-                upgradeReady += newClientCount.count
-              }
-            }
-          }
-          upgradeStats.put(upgradeConfig.name, ClientReadyStats(total, upgradeReady))
-        }
-        clientsStats = newClientsStats
-        totalClientsGauge.record(total.toLong())
-        clientCalculationsCounter.add(1)
-
-        delay(clientsStatsDelay)
-      }
-    }
-  }
-
-  suspend fun stop() {
-    started.set(false)
-  }
-
-  internal fun getUpgradeStats() = upgradeStats
-
-  internal fun getClientIds(): List<ClientInfo> = clientIds ?: listOf()
-
-  internal fun getClientStats(): Map<String, Map<String, Long>> = clientsStats ?: mapOf()
 
   internal fun getClientIdsInternal(): List<ClientInfo> {
     dataSource.connection.use { conn ->
