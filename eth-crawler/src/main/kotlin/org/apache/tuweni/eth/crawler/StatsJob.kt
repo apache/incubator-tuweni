@@ -18,6 +18,7 @@ package org.apache.tuweni.eth.crawler
 
 import io.opentelemetry.api.metrics.Meter
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -50,8 +51,8 @@ class StatsJob(
     meter.longCounterBuilder("clients").setDescription("Number of times clients were computed").build()
 
   fun start() {
-    logger.info("Starting repo")
-    job = launch {
+    logger.info("Starting stats job")
+    job = launch(coroutineContext, CoroutineStart.UNDISPATCHED) {
       logger.info("Computing client ids")
       started.set(true)
       while (started.get()) {

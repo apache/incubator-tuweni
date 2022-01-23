@@ -99,7 +99,7 @@ class CrawlerApplication(
     enablePrometheus = config.metricsPrometheusEnabled()
   )
 
-  fun createCoroutineContext() = Executors.newFixedThreadPool(
+  private fun createCoroutineContext() = Executors.newFixedThreadPool(
     config.numberOfThreads()
   ) {
     val thread = Thread("crawler")
@@ -120,7 +120,7 @@ class CrawlerApplication(
     val crawlerMeter = metricsService.meterSdkProvider["crawler"]
     val repo = RelationalPeerRepository(ds, config.peerCacheExpiration(), config.clientIdsInterval())
     val statsJob =
-      StatsJob(repo, config.upgradesVersions(), crawlerMeter, config.clientsStatsDelay(), createCoroutineContext())
+      StatsJob(repo, config.upgradesVersions(), crawlerMeter, config.clientsStatsDelay(), coroutineContext)
 
     logger.info("Initial bootnodes: ${config.bootNodes()}")
     val scraper = Scraper(
