@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 import org.apache.tuweni.devp2p.eth.EthRequestsManager
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.units.bigints.UInt256
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.coroutines.CoroutineContext
@@ -34,8 +35,10 @@ class FromUnknownParentSynchronizer(
   coroutineContext: CoroutineContext = executor.asCoroutineDispatcher(),
   repository: BlockchainRepository,
   client: EthRequestsManager,
-  peerRepository: EthereumPeerRepository
-) : Synchronizer(executor, coroutineContext, repository, client, peerRepository) {
+  peerRepository: EthereumPeerRepository,
+  from: UInt256?,
+  to: UInt256?
+) : Synchronizer(executor, coroutineContext, repository, client, peerRepository, from, to) {
 
   var listenerId: String? = null
 
@@ -52,6 +55,9 @@ class FromUnknownParentSynchronizer(
 
   private fun listenToBlockHeaders(header: BlockHeader) {
     if (header.number.isZero) {
+      return
+    }
+    if ((null != from && header.number < from) || (null != to && header.number > to)) {
       return
     }
     val parentHash = header.parentHash ?: return

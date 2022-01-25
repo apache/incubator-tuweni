@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 import org.apache.tuweni.devp2p.eth.EthRequestsManager
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.units.bigints.UInt256
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.coroutines.CoroutineContext
@@ -29,13 +30,15 @@ import kotlin.coroutines.CoroutineContext
 const val BEST_PEER_DELAY: Long = 5000
 const val HEADERS_RESPONSE_TIMEOUT: Long = 10000
 
-class FromBestBlockSynchronizer(
+class FromBestBlockHeaderSynchronizer(
   executor: ExecutorService = Executors.newSingleThreadExecutor(),
   coroutineContext: CoroutineContext = executor.asCoroutineDispatcher(),
   repository: BlockchainRepository,
   client: EthRequestsManager,
   peerRepository: EthereumPeerRepository,
-) : Synchronizer(executor, coroutineContext, repository, client, peerRepository) {
+  from: UInt256?,
+  to: UInt256?,
+) : Synchronizer(executor, coroutineContext, repository, client, peerRepository, from, to) {
 
   override fun start() {
     launch {
@@ -51,6 +54,9 @@ class FromBestBlockSynchronizer(
   }
 
   private fun askNextBestHeaders(header: BlockHeader) {
+    if ((null != from && header.number < from) || (null != to && header.number > to)) {
+      return
+    }
     launch {
       if (peerRepository.activeConnections().count() == 0L) {
         askNextBestHeaders(header)
