@@ -69,22 +69,10 @@ specific language governing permissions and limitations under the License.
                              Public Key
                          </th>
                          <th>
-                             P2P Version
-                         </th>
-                         <th>
                              Client ID
                          </th>
                          <th>
                              Capabilities
-                         </th>
-                         <th>
-                             Genesis Hash
-                         </th>
-                         <th>
-                             Best Hash
-                         </th>
-                         <th>
-                             Total Difficulty
                          </th>
                      </tr>
                     </thead>
@@ -97,19 +85,10 @@ specific language governing permissions and limitations under the License.
                               {{ item.nodeId.substr(0,8) }}...{{ item.nodeId.substr(-8,8) }}
                           </td>
                           <td>
-                              {{ item.p2pVersion }}
-                          </td>
-                          <td>
                               {{ item.clientId }}
                           </td>
                           <td>
                               {{ item.capabilities }}
-                          </td>
-                          <td>
-                              {{ item.genesisHash.substr(0,8) }}...{{ item.genesisHash.substr(-8,8) }}
-                          </td>
-                          <td>
-                              {{ item.bestHash.substr(0,8) }}...{{ item.bestHash.substr(-8,8) }}
                           </td>
                       </tr>
                     </tbody>
