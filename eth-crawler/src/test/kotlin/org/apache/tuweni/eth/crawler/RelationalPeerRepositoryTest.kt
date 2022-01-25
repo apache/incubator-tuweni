@@ -55,15 +55,15 @@ class RelationalPeerRepositoryTest {
 
   @Test
   fun testGetNewPeer() = runBlocking {
-    val repository = RelationalPeerRepository(dataSource!!, meter = meter)
+    val repository = RelationalPeerRepository(dataSource!!)
     val peer = repository.get("localhost", 30303, SECP256K1.KeyPair.random().publicKey())
     assertNotNull(peer)
   }
 
   @Test
   fun testUpdateEndpoint() = runBlocking {
-    val repository = RelationalPeerRepository(dataSource!!, meter = meter)
-    val repository2 = RelationalPeerRepository(dataSource!!, meter = meter)
+    val repository = RelationalPeerRepository(dataSource!!)
+    val repository2 = RelationalPeerRepository(dataSource!!)
     val peer = repository.get("localhost", 30303, SECP256K1.KeyPair.random().publicKey())
     assertNotNull(peer)
     val lastSeen = 32L

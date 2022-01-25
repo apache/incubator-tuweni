@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.eth.crawler.rest
+package org.apache.tuweni.eth.crawler
 
 data class ClientIdInfo(val clientId: String) : Comparable<String> {
 
