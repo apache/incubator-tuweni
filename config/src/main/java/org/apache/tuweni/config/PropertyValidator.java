@@ -103,6 +103,21 @@ public interface PropertyValidator<T> {
   }
 
   /**
+   * A validator that ensures a property, if present, is equal or greater than the value.
+   *
+   * @param value The lower bound (inclusive).
+   * @return A validator that ensures a property, if present, is equal or greater than the value.
+   */
+  static PropertyValidator<Number> isGreaterOrEqual(long value) {
+    return (key, position, currentValue) -> {
+      if (currentValue != null && (currentValue.longValue() < value)) {
+        return singleError(position, "Value of property '" + key + "' is less than '" + value + "'");
+      }
+      return noErrors();
+    };
+  }
+
+  /**
    * A validator that ensures a property, if present, has a value within a given set.
    *
    * @param values The acceptable values.

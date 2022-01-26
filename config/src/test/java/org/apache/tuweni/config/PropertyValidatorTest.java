@@ -81,4 +81,12 @@ class PropertyValidatorTest {
     assertEquals(1, errors.size());
     assertEquals("Value of property 'foo' should be \"one\", \"two\", or \"three \"", errors.get(0).getMessage());
   }
+
+  @Test
+  void validatesEqualOrGreater() {
+    PropertyValidator<Number> longPropertyValidator = PropertyValidator.isGreaterOrEqual(32L);
+    assertTrue(longPropertyValidator.validate("foo", null, 33L).isEmpty());
+    assertTrue(longPropertyValidator.validate("foo", null, 32L).isEmpty());
+    assertEquals(1, longPropertyValidator.validate("foo", null, 31L).size());
+  }
 }

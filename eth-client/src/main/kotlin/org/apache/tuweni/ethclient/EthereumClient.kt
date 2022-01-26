@@ -74,13 +74,13 @@ class EthereumClient(
   }
 
   private var metricsService: MetricsService? = null
-  private val genesisFiles = HashMap<String, GenesisFile>()
-  private val services = HashMap<String, RLPxService>()
-  private val storageRepositories = HashMap<String, BlockchainRepository>()
-  val peerRepositories = HashMap<String, EthereumPeerRepository>()
-  private val dnsClients = HashMap<String, DNSClient>()
-  private val discoveryServices = HashMap<String, DiscoveryService>()
-  private val synchronizers = HashMap<String, Synchronizer>()
+  private val genesisFiles = mutableMapOf<String, GenesisFile>()
+  private val services = mutableMapOf<String, RLPxService>()
+  private val storageRepositories = mutableMapOf<String, BlockchainRepository>()
+  val peerRepositories = mutableMapOf<String, EthereumPeerRepository>()
+  private val dnsClients = mutableMapOf<String, DNSClient>()
+  private val discoveryServices = mutableMapOf<String, DiscoveryService>()
+  private val synchronizers = mutableMapOf<String, Synchronizer>()
 
   private val managerHandler = mutableListOf<DefaultCacheManager>()
 
@@ -272,28 +272,45 @@ class EthereumClient(
             }
           }
 
-          val synchronizer = PeerStatusEthSynchronizer(
-            repository = repository,
-            client = service.getClient(ETH66) as EthRequestsManager,
-            peerRepository = peerRepository,
-            adapter = adapter
-          )
-          synchronizers[rlpxConfig.getName() + "status"] = synchronizer
-          synchronizer.start()
-          val parentSynchronizer = FromUnknownParentSynchronizer(
-            repository = repository,
-            client = service.getClient(ETH66) as EthRequestsManager,
-            peerRepository = peerRepository
-          )
-          synchronizers[rlpxConfig.getName() + "parent"] = parentSynchronizer
-          parentSynchronizer.start()
-          val bestSynchronizer = FromBestBlockSynchronizer(
-            repository = repository,
-            client = service.getClient(ETH66) as EthRequestsManager,
-            peerRepository = peerRepository
-          )
-          synchronizers[rlpxConfig.getName() + "best"] = bestSynchronizer
-          bestSynchronizer.start()
+          for (sync in config.synchronizers()) {
+            when (sync.getType()) {
+              SynchronizerType.best -> {
+                val bestSynchronizer = FromBestBlockHeaderSynchronizer(
+                  repository = repository,
+                  client = service.getClient(ETH66) as EthRequestsManager,
+                  peerRepository = peerRepository,
+                  from = sync.getFrom(),
+                  to = sync.getTo(),
+                )
+                bestSynchronizer.start()
+                synchronizers[sync.getName()] = bestSynchronizer
+              }
+              SynchronizerType.status -> {
+                val synchronizer = PeerStatusEthSynchronizer(
+                  repository = repository,
+                  client = service.getClient(ETH66) as EthRequestsManager,
+                  peerRepository = peerRepository,
+                  adapter = adapter,
+                  from = sync.getFrom(),
+                  to = sync.getTo(),
+                )
+                synchronizer.start()
+                synchronizers[sync.getName()] = synchronizer
+              }
+              SynchronizerType.parent -> {
+                val parentSynchronizer = FromUnknownParentSynchronizer(
+                  repository = repository,
+                  client = service.getClient(ETH66) as EthRequestsManager,
+                  peerRepository = peerRepository,
+                  from = sync.getFrom(),
+                  to = sync.getTo(),
+                )
+                parentSynchronizer.start()
+                synchronizers[sync.getName()] = parentSynchronizer
+              }
+            }
+          }
+
           logger.info("Finished configuring Ethereum client ${rlpxConfig.getName()}")
         }
       }

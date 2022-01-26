@@ -26,6 +26,7 @@ import org.apache.tuweni.config.SchemaBuilder
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.parseEnodeUri
 import org.apache.tuweni.eth.genesis.GenesisFile
+import org.apache.tuweni.units.bigints.UInt256
 import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
 import java.net.URI
@@ -186,6 +187,21 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
     }
   }
 
+  fun synchronizers(): List<SynchronizerConfiguration> {
+    val synchronizers = config.sections("synchronizer")
+    if (synchronizers == null || synchronizers.isEmpty()) {
+      return emptyList()
+    }
+    return synchronizers.map { section ->
+      val sectionConfig = config.getConfigurationSection("proxy.$section")
+      SynchronizerConfigurationImpl(
+        section, SynchronizerType.valueOf(sectionConfig.getString("type")),
+        UInt256.valueOf(sectionConfig.getLong("from")),
+        UInt256.valueOf(sectionConfig.getLong("to"))
+      )
+    }
+  }
+
   fun validate(): Stream<ConfigurationError> {
     val schema = createSchema()
     var errors = schema.validate(this.config)
@@ -205,7 +221,10 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
   private fun validateSubsection(name: String, schema: Schema): Stream<ConfigurationError> {
     var errors = listOf<ConfigurationError>().stream()
     for (subSection in this.config.sections(name)) {
-      errors = Stream.concat(errors, schema.getSubSection(name).validate(this.config.getConfigurationSection("$name.$subSection")))
+      errors = Stream.concat(
+        errors,
+        schema.getSubSection(name).validate(this.config.getConfigurationSection("$name.$subSection"))
+      )
     }
     return errors
   }
@@ -250,7 +269,12 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       val discoverySection = SchemaBuilder.create()
       discoverySection.addString("identity", "", "Node identity", null)
       discoverySection.addString("networkInterface", "127.0.0.1", "Network interface to bind", null)
-      discoverySection.addInteger("port", 0, "Port to expose the discovery service on", PropertyValidator.isValidPortOrZero())
+      discoverySection.addInteger(
+        "port",
+        0,
+        "Port to expose the discovery service on",
+        PropertyValidator.isValidPortOrZero()
+      )
       discoverySection.addString("peerRepository", "default", "Peer repository to which records should go", null)
 
       val genesis = SchemaBuilder.create()
@@ -276,7 +300,12 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
         }
       )
       rlpx.addInteger("port", 0, "Port to expose the RLPx service on", PropertyValidator.isValidPortOrZero())
-      rlpx.addInteger("advertisedPort", 30303, "Port to advertise in communications as the RLPx service port", PropertyValidator.isValidPort())
+      rlpx.addInteger(
+        "advertisedPort",
+        30303,
+        "Port to advertise in communications as the RLPx service port",
+        PropertyValidator.isValidPort()
+      )
       rlpx.addString("clientName", "Apache Tuweni", "Name of the Ethereum client", null)
       rlpx.addString("repository", "default", "Name of the blockchain repository", null)
       rlpx.addString("peerRepository", "default", "Peer repository to which records should go", null)
@@ -287,6 +316,17 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
 
       val peerRepositoriesSection = SchemaBuilder.create()
       peerRepositoriesSection.addString("type", "memory", "Peer repository type", PropertyValidator.anyOf("memory"))
+
+      val synchronizersSection = SchemaBuilder.create()
+      synchronizersSection.addString(
+        "type",
+        "status",
+        "Synchronizer type",
+        PropertyValidator.anyOf("status", "parent", "best")
+      )
+      synchronizersSection.addLong("from", 0L, "Start block to sync from", PropertyValidator.isGreaterOrEqual(0L))
+      synchronizersSection.addLong("to", 0L, "End block to sync to", PropertyValidator.isGreaterOrEqual(0L))
+
       val builder = SchemaBuilder.create()
       builder.addSection("metrics", metricsSection.toSchema())
       builder.addSection("storage", storageSection.toSchema())
@@ -297,6 +337,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       builder.addSection("genesis", genesis.toSchema())
       builder.addSection("proxy", proxiesSection.toSchema())
       builder.addSection("peerRepository", peerRepositoriesSection.toSchema())
+      builder.addSection("synchronizer", synchronizersSection.toSchema())
 
       return builder.toSchema()
     }
@@ -379,7 +420,19 @@ interface PeerRepositoryConfiguration {
   fun getType(): String
 }
 
-internal class PeerRepositoryConfigurationImpl(private val repoName: String, private val type: String) : PeerRepositoryConfiguration {
+enum class SynchronizerType {
+  best, status, parent
+}
+
+interface SynchronizerConfiguration {
+  fun getName(): String
+  fun getType(): SynchronizerType
+  fun getFrom(): UInt256?
+  fun getTo(): UInt256?
+}
+
+internal class PeerRepositoryConfigurationImpl(private val repoName: String, private val type: String) :
+  PeerRepositoryConfiguration {
   override fun getName(): String = repoName
   override fun getType(): String = type
 }
@@ -414,7 +467,8 @@ internal data class RLPxServiceConfigurationImpl(
   override fun peerRepository(): String = peerRepository
 }
 
-internal data class GenesisFileConfigurationImpl(private val name: String, private val genesisFilePath: URI) : GenesisFileConfiguration {
+internal data class GenesisFileConfigurationImpl(private val name: String, private val genesisFilePath: URI) :
+  GenesisFileConfiguration {
   override fun getName(): String = name
 
   override fun genesisFile(): GenesisFile =
@@ -470,16 +524,33 @@ data class DiscoveryConfigurationImpl(
   override fun getPort() = port
 }
 
-data class StaticPeersConfigurationImpl(private val enodes: List<String>, private val peerRepository: String) : StaticPeersConfiguration {
+data class StaticPeersConfigurationImpl(private val enodes: List<String>, private val peerRepository: String) :
+  StaticPeersConfiguration {
 
   override fun enodes(): List<String> = enodes
 
   override fun peerRepository() = peerRepository
 }
 
-data class ProxyConfigurationImpl(private val name: String, private val upstream: String, private val downstream: String) : ProxyConfiguration {
+data class ProxyConfigurationImpl(
+  private val name: String,
+  private val upstream: String,
+  private val downstream: String,
+) : ProxyConfiguration {
   override fun name() = name
 
   override fun upstream() = upstream
   override fun downstream() = downstream
+}
+
+data class SynchronizerConfigurationImpl(
+  private val name: String,
+  private val type: SynchronizerType,
+  private val from: UInt256?,
+  private val to: UInt256?,
+) : SynchronizerConfiguration {
+  override fun getName() = name
+  override fun getType() = type
+  override fun getFrom(): UInt256? = from
+  override fun getTo(): UInt256? = to
 }

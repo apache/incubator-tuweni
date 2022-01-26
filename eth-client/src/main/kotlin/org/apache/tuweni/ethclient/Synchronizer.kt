@@ -25,6 +25,7 @@ import org.apache.tuweni.devp2p.eth.EthRequestsManager
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.units.bigints.UInt256
 import org.slf4j.LoggerFactory
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -37,7 +38,9 @@ abstract class Synchronizer(
   override val coroutineContext: CoroutineContext = executor.asCoroutineDispatcher(),
   val repository: BlockchainRepository,
   val client: EthRequestsManager,
-  val peerRepository: EthereumPeerRepository
+  val peerRepository: EthereumPeerRepository,
+  val from: UInt256?,
+  val to: UInt256?
 ) : CoroutineScope {
   abstract fun start()
   abstract fun stop()
