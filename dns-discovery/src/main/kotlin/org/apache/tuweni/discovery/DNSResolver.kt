@@ -93,7 +93,11 @@ class DNSResolver @JvmOverloads constructor(
       }
     }
     visitTree(enrLink, visitor)
-    logger.info("Resolved ${nodes.size} nodes")
+    if (nodes.size > 0) {
+      logger.info("Resolved ${nodes.size} nodes")
+    } else {
+      logger.debug("No nodes resolved")
+    }
     return nodes
   }
 
