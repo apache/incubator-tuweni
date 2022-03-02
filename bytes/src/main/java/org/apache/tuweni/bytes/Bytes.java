@@ -592,6 +592,19 @@ public interface Bytes extends Comparable<Bytes> {
   }
 
   /**
+   * Generate a bytes object filled with the same byte.
+   *
+   * @param b the byte to fill the Bytes with
+   * @param size the size of the object
+   * @return a value filled with a fixed byte
+   */
+  static Bytes repeat(byte b, int size) {
+    byte[] buffer = new byte[size];
+    Arrays.fill(buffer, b);
+    return Bytes.wrap(buffer);
+  }
+
+  /**
    *
    * Provides the number of bytes this value represents.
    * 
