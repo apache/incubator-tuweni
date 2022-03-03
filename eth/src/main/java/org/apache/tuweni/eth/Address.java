@@ -25,6 +25,11 @@ import org.apache.tuweni.crypto.SECP256K1;
 public final class Address extends DelegatingBytes {
 
   /**
+   * Burn address.
+   */
+  public static final Address ZERO = Address.fromBytes(Bytes.repeat((byte) 0, 20));
+
+  /**
    * Transform a public key into an Ethereum address.
    * 
    * @param publicKey the public key

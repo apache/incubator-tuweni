@@ -56,6 +56,18 @@ public class EthJsonModule extends SimpleModule {
     }
   }
 
+  static class AddressKeySerializer extends StdSerializer<Address> {
+
+    protected AddressKeySerializer() {
+      super(Address.class);
+    }
+
+    @Override
+    public void serialize(Address value, JsonGenerator g, SerializerProvider provider) throws IOException {
+      g.writeFieldName(value.toHexString());
+    }
+  }
+
   static class BytesSerializer extends StdSerializer<Bytes> {
 
     BytesSerializer() {
@@ -204,6 +216,7 @@ public class EthJsonModule extends SimpleModule {
   public EthJsonModule() {
     addSerializer(Hash.class, new HashSerializer());
     addSerializer(Address.class, new AddressSerializer());
+    addKeySerializer(Address.class, new AddressKeySerializer());
     addSerializer(Bytes.class, new BytesSerializer());
     addSerializer(Gas.class, new GasSerializer());
     addSerializer(UInt256.class, new UInt256Serializer());
