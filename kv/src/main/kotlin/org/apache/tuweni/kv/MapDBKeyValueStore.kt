@@ -125,6 +125,10 @@ constructor(
     }
   }
 
+  override suspend fun remove(key: K) {
+    storageData.remove(keySerializer(key))
+  }
+
   override suspend fun put(key: K, value: V) {
     storageData[keySerializer(key)] = valueSerializer(value)
     db.commit()

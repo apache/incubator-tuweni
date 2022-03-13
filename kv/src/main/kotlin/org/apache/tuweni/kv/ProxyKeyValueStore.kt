@@ -74,6 +74,10 @@ class ProxyKeyValueStore<K, V, E, R>(
     }
   }
 
+  override suspend fun remove(key: K) {
+    store.remove(proxyKey(key))
+  }
+
   override suspend fun put(key: K, value: V) = store.put(proxyKey(key), proxyValue(key, value))
 
   override suspend fun keys(): Iterable<K> = store.keys().map(unproxyKey)

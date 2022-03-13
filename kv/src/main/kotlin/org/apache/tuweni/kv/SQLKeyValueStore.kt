@@ -154,6 +154,14 @@ constructor(
     }
   }
 
+  override suspend fun remove(key: K) {
+    connectionPool.asyncConnection.await().use {
+      val stmt = it.prepareStatement("DELETE FROM $tableName WHERE $keyColumn = ?")
+      stmt.setBytes(1, keySerializer(key).toArrayUnsafe())
+      stmt.execute()
+    }
+  }
+
   override suspend fun put(key: K, value: V) {
     connectionPool.asyncConnection.await().use {
       val stmt = it.prepareStatement("INSERT INTO $tableName($keyColumn, $valueColumn) VALUES(?,?)")

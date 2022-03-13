@@ -138,6 +138,13 @@ constructor(
     }
   }
 
+  override suspend fun remove(key: K) {
+    if (closed.get()) {
+      throw IllegalStateException("Closed DB")
+    }
+    db.delete(keySerializer(key).toArrayUnsafe())
+  }
+
   override suspend fun put(key: K, value: V) {
     if (closed.get()) {
       throw IllegalStateException("Closed DB")

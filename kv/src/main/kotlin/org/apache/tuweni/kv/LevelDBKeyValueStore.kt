@@ -159,6 +159,10 @@ constructor(
     }
   }
 
+  override suspend fun remove(key: K) {
+    db.delete(keySerializer(key).toArrayUnsafe())
+  }
+
   override suspend fun put(key: K, value: V) = db.put(
     keySerializer(key).toArrayUnsafe(),
     valueSerializer(value).toArrayUnsafe()

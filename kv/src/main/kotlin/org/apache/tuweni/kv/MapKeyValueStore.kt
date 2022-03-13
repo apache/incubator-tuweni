@@ -62,6 +62,10 @@ constructor(
     map[key] = value
   }
 
+  override suspend fun remove(key: K) {
+    map.remove(key)
+  }
+
   override suspend fun keys(): Iterable<K> = map.keys
 
   override suspend fun clear() {

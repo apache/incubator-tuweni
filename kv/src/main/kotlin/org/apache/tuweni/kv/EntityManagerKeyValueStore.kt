@@ -71,6 +71,18 @@ constructor(
     }
   }
 
+  override suspend fun remove(key: K) {
+    val em = entityManagerProvider()
+    em.transaction.begin()
+    try {
+      val entity = em.find(entityClass, key)
+      return em.remove(entity)
+    } finally {
+      em.transaction.commit()
+      em.close()
+    }
+  }
+
   /**
    * Convenience method to put a record directly
    * @param value the value to store

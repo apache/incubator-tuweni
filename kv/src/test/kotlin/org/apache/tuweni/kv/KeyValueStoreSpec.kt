@@ -65,6 +65,14 @@ object KeyValueStoreSpec : Spek({
       }
     }
 
+    it("should allow to remove values") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.remove(foobar)
+        kv.get(foobar).should.equal(null)
+      }
+    }
+
     it("should allow to see if a key is present") {
       runBlocking {
         kv.put(foobar, foo)
@@ -109,6 +117,14 @@ object InfinispanKeyValueStoreSpec : Spek({
       runBlocking {
         kv.put(foo, foo)
         backingMap.get(foo).should.equal(foo)
+      }
+    }
+
+    it("should allow to remove values") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.remove(foobar)
+        kv.get(foobar).should.equal(null)
       }
     }
 
@@ -169,6 +185,14 @@ object MapDBKeyValueStoreSpec : Spek({
       runBlocking {
         kv.put(foobar, foo)
         kv.get(foobar).should.equal(foo)
+      }
+    }
+
+    it("should allow to remove values") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.remove(foobar)
+        kv.get(foobar).should.equal(null)
       }
     }
 
@@ -253,6 +277,14 @@ object LevelDBKeyValueStoreSpec : Spek({
       }
     }
 
+    it("should allow to remove values") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.remove(foobar)
+        kv.get(foobar).should.equal(null)
+      }
+    }
+
     it("should allow to see if a key is present") {
       runBlocking {
         kv.put(foobar, foo)
@@ -324,6 +356,14 @@ object RocksDBKeyValueStoreSpec : Spek({
       runBlocking {
         kv.put(foobar, foo)
         kv.get(foobar).should.equal(foo)
+      }
+    }
+
+    it("should allow to remove values") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.remove(foobar)
+        kv.get(foobar).should.equal(null)
       }
     }
 
@@ -420,6 +460,14 @@ object SQLKeyValueStoreSpec : Spek({
       }
     }
 
+    it("should allow to remove values") {
+      runBlocking {
+        kv.put(foobar, foo)
+        kv.remove(foobar)
+        kv.get(foobar).should.equal(null)
+      }
+    }
+
     it("should allow to see if a key is present") {
       runBlocking {
         kv.put(foobar, foo)
@@ -504,6 +552,14 @@ object EntityManagerKeyValueStoreSpec : Spek({
       }
     }
 
+    it("should allow to remove values") {
+      runBlocking {
+        kv.put("foobar", Store("foo", "bar"))
+        kv.remove("foobar")
+        kv.get("foobar").should.equal(null)
+      }
+    }
+
     it("should allow to see if a key is present") {
       runBlocking {
         kv.put("foo", Store("foo", "bar"))
@@ -573,6 +629,14 @@ object ProxyKeyValueStoreSpec : Spek({
         proxy.put(foo, bar)
         proxy.get(foo).should.equal(bar)
         kv.get(Base64.encode(foo)).should.equal(Base64.encode(bar))
+      }
+    }
+
+    it("should allow to remove values") {
+      runBlocking {
+        proxy.put(foo, bar)
+        proxy.remove(foo)
+        proxy.get(foo).should.equal(null)
       }
     }
 
