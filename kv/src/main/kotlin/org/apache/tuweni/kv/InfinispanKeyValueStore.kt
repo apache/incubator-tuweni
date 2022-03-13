@@ -53,6 +53,10 @@ class InfinispanKeyValueStore<K, V> constructor(
     cache.putAsync(key, value).await()
   }
 
+  override suspend fun remove(key: K) {
+    cache.removeAsync(key).await()
+  }
+
   override suspend fun keys(): Iterable<K> = cache.keys
 
   override suspend fun clear() {

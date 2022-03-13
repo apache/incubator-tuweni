@@ -239,6 +239,11 @@ class RedisKeyValueStore<K, V>(
     future.await()
   }
 
+  override suspend fun remove(key: K) {
+    val future: CompletionStage<Long> = asyncCommands.del(keySerializer(key))
+    future.await()
+  }
+
   override suspend fun keys(): Iterable<K> = asyncCommands.keys(Bytes.EMPTY).await().map(keyDeserializer)
 
   override suspend fun clear() {

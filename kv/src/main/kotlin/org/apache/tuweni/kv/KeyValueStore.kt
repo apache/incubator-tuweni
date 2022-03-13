@@ -70,6 +70,13 @@ interface KeyValueStore<K, V> : Closeable, CoroutineScope {
   suspend fun put(key: K, value: V)
 
   /**
+   * Removes data from the store.
+   *
+   * @param key The key to associate with the data, for use when retrieving.
+   */
+  suspend fun remove(key: K)
+
+  /**
    * Puts data into the store.
    *
    * Note: if the storage implementation already contains content for the given key, it does not need to replace the
