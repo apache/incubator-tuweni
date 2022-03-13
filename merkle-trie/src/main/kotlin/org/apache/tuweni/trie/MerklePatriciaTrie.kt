@@ -22,6 +22,8 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.AsyncResult
+import org.apache.tuweni.crypto.Hash
+import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.trie.CompactEncoding.bytesToPath
 import java.util.function.Function
 import kotlin.coroutines.CoroutineContext
@@ -43,6 +45,11 @@ internal fun stringDeserializer(b: Bytes): String = String(b.toArrayUnsafe(), UT
 class MerklePatriciaTrie<V> @JvmOverloads constructor(valueSerializer: (V) -> Bytes, override val coroutineContext: CoroutineContext = Dispatchers.Default) : MerkleTrie<Bytes, V> {
 
   companion object {
+    val RLP_NULL = RLP.encodeByteArray(ByteArray(0))
+    /**
+     * The default empty hash of the tree, if the tree is empty.
+     */
+    val EMPTY_HASH = Hash.keccak256(RLP_NULL)
     /**
      * Create a trie with keys and values of type [Bytes].
      */

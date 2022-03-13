@@ -18,14 +18,12 @@ package org.apache.tuweni.trie
 
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
-import org.apache.tuweni.crypto.Hash.keccak256
-import org.apache.tuweni.rlp.RLP
+import org.apache.tuweni.trie.MerklePatriciaTrie.Companion.EMPTY_HASH
+import org.apache.tuweni.trie.MerklePatriciaTrie.Companion.RLP_NULL
 
 internal class NullNode<V> private constructor() : Node<V> {
 
   companion object {
-    private val RLP_NULL = RLP.encodeByteArray(ByteArray(0))
-    private val HASH = keccak256(RLP_NULL)
     private val instance = NullNode<Any>()
 
     @Suppress("UNCHECKED_CAST")
@@ -42,7 +40,7 @@ internal class NullNode<V> private constructor() : Node<V> {
 
   override fun rlpRef(): Bytes = RLP_NULL
 
-  override fun hash(): Bytes32 = HASH
+  override fun hash(): Bytes32 = EMPTY_HASH
 
   override suspend fun replacePath(path: Bytes): Node<V> = this
 }
