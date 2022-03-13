@@ -19,6 +19,7 @@ package org.apache.tuweni.evm
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.Address
+import org.apache.tuweni.eth.Log
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.evm.impl.GasManager
 import org.apache.tuweni.units.bigints.UInt256
@@ -98,6 +99,7 @@ data class EVMResult(
   val statusCode: EVMExecutionStatusCode,
   val gasManager: GasManager,
   val hostContext: HostContext,
+  val changes: ExecutionChanges,
   val output: Bytes? = null,
 )
 
@@ -312,7 +314,7 @@ interface HostContext {
    * @param value The value to be stored.
    * @return The effect on the storage item.
    */
-  suspend fun setStorage(address: Address, key: Bytes, value: Bytes32): Int
+  suspend fun setStorage(address: Address, key: Bytes32, value: Bytes32): Int
 
   /**
    * Get balance function.
@@ -574,3 +576,29 @@ val opcodes = mapOf<Byte, String>(
   Pair(0xfe.toByte(), "invalid"),
   Pair(0xff.toByte(), "selfdestruct"),
 )
+
+/**
+ * EVM transaction changes
+ */
+interface ExecutionChanges {
+
+  /**
+   * Changes made to account storage.
+   */
+  fun getAccountChanges(): Map<Address, HashMap<Bytes32, Bytes32>>
+
+  /**
+   * Logs emitted during execution
+   */
+  fun getLogs(): List<Log>
+
+  /**
+   * Lists of accounts to destroy
+   */
+  fun accountsToDestroy(): List<Address>
+
+  /**
+   * Lists of balance changes, with the final balances
+   */
+  fun getBalanceChanges(): Map<Address, Wei>
+}
