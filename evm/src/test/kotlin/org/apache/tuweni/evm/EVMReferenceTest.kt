@@ -27,18 +27,15 @@ import org.apache.tuweni.eth.AccountState
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.EthJsonModule
 import org.apache.tuweni.eth.Hash
-import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.evm.impl.EvmVmImpl
+import org.apache.tuweni.genesis.Genesis
 import org.apache.tuweni.io.Resources
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
-import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.trie.MerklePatriciaTrie
-import org.apache.tuweni.trie.MerkleStorage
 import org.apache.tuweni.trie.MerkleTrie
-import org.apache.tuweni.trie.StoredMerklePatriciaTrie
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
@@ -126,45 +123,17 @@ class EVMReferenceTest {
   private fun runReferenceTests(testName: String, test: JsonReferenceTest) = runBlocking {
     assertNotNull(testName)
     println(testName)
-    val stateStore = MapKeyValueStore<Bytes, Bytes>()
-    val repository = BlockchainRepository(
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      stateStore,
-      BlockchainIndex(writer!!)
-    )
+    val repository = BlockchainRepository.inMemory(Genesis.dev())
     test.pre!!.forEach { address, state ->
       runBlocking {
-        val tree = MerklePatriciaTrie.storingBytes()
-        state.storage!!.forEach { key, value ->
-          runBlocking {
-            tree.put(key, value)
-          }
-        }
-        val accountState =
-          AccountState(state.nonce!!, state.balance!!, Hash.fromBytes(tree.rootHash()), Hash.hash(state.code!!))
+        val accountState = AccountState(state.nonce!!, state.balance!!, Hash.fromBytes(MerkleTrie.EMPTY_TRIE_ROOT_HASH), Hash.hash(state.code!!))
         repository.storeAccount(address, accountState)
         repository.storeCode(state.code!!)
         val accountStorage = state.storage
 
         if (accountStorage != null) {
-          val accountStorageTree = StoredMerklePatriciaTrie.storingBytes32(
-            object : MerkleStorage {
-              override suspend fun get(hash: Bytes32): Bytes? {
-                return stateStore.get(hash)
-              }
-
-              override suspend fun put(hash: Bytes32, content: Bytes) {
-                stateStore.put(hash, content)
-              }
-            },
-            MerkleTrie.EMPTY_TRIE_ROOT_HASH
-          )
           for (entry in accountStorage) {
-            accountStorageTree.put(Bytes32.leftPad(entry.key), Bytes32.leftPad(entry.value))
+            repository.storeAccountValue(address, Bytes32.leftPad(entry.key), Bytes32.leftPad(entry.value))
           }
         }
       }
@@ -257,7 +226,7 @@ class EVMReferenceTest {
             )
             val accountState = repository.getAccount(address)
             val balance = accountState?.balance?.add(
-              (result.hostContext as TransactionalEVMHostContext).balanceChanges.get(address) ?: Wei.valueOf(0)
+              result.changes.getBalanceChanges().get(address) ?: Wei.valueOf(0)
             ) ?: Wei.valueOf(0)
             assertEquals(state.balance, balance)
             assertEquals(state.nonce, accountState!!.nonce)
