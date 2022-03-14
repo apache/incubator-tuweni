@@ -25,6 +25,7 @@ import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.evm.impl.EvmVmImpl
+import org.apache.tuweni.genesis.Genesis
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
@@ -66,14 +67,15 @@ class EVMBrokenMetreAttack {
     val address = Address.fromHexString("0x5a31505a31505a31505a31505a31505a31505a31")
     val code = createAttack(opcode)
     val stateStore = MapKeyValueStore<Bytes, Bytes>()
-    val repository = BlockchainRepository(
+    val repository = BlockchainRepository.init(
       MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
       stateStore,
-      BlockchainIndex(writer)
+      BlockchainIndex(writer),
+      Genesis.dev()
     )
     val tree = MerklePatriciaTrie.storingBytes()
     val accountState =

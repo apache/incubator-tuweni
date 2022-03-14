@@ -74,6 +74,25 @@ class Genesis(
 ) {
 
   companion object {
+    /**
+     * A hash of a RLP-encoded list, useful to represent blocks with no ommers.
+     */
+    val emptyListHash = Hash.hash(RLP.encodeList { })
+
+    /**
+     * A hash of the RLP encoding of a zero-bytes long bytes array.
+     */
+    val emptyHash = Hash.hash(
+      RLP.encode { writer: RLPWriter ->
+        writer.writeValue(Bytes.EMPTY)
+      }
+    )
+
+    /**
+     * A hash of the RLP encoding of an empty trie
+     */
+    val emptyTrieHash = Hash.hash(RLP.encodeValue(Bytes.EMPTY))
+
     fun dev(
       genesis: Genesis = Genesis(
         Bytes.ofUnsignedLong(0),
@@ -88,19 +107,12 @@ class Genesis(
         GenesisConfig(1337, 0, 0, 0, 0)
       ),
     ): Block {
-      val emptyListHash = Hash.hash(RLP.encodeList { })
-      val emptyHash = Hash.hash(
-        RLP.encode { writer: RLPWriter ->
-          writer.writeValue(Bytes.EMPTY)
-        }
-      )
-      val emptyTrie = Hash.hash(RLP.encodeValue(Bytes.EMPTY))
       return Block(
         BlockHeader(
           Hash.fromBytes(genesis.parentHash),
           emptyListHash,
           genesis.coinbase,
-          emptyTrie,
+          emptyTrieHash,
           emptyHash,
           emptyHash,
           Bytes.wrap(ByteArray(256)),

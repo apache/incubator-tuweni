@@ -17,12 +17,14 @@
 package org.apache.tuweni.les
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.devp2p.eth.RandomConnectionSelectionStrategy
 import org.apache.tuweni.devp2p.eth.SimpleBlockchainInformation
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.MemoryTransactionPool
+import org.apache.tuweni.genesis.Genesis
 import org.apache.tuweni.junit.TempDirectoryExtension
 import org.apache.tuweni.rlpx.MemoryWireConnectionsRepository
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
@@ -47,7 +49,7 @@ internal class LESSubprotocolTest {
 
   @Test
   @Throws(Exception::class)
-  fun supportsLESv2() {
+  fun supportsLESv2() = runBlocking {
 
     val sp = LESSubprotocol(
       Dispatchers.Default,
@@ -58,7 +60,7 @@ internal class LESSubprotocolTest {
       UInt256.ZERO,
       UInt256.ZERO,
       UInt256.ZERO,
-      BlockchainRepository.inMemory(),
+      BlockchainRepository.inMemory(Genesis.dev()),
       MemoryTransactionPool(),
       RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository())
     )
@@ -67,7 +69,7 @@ internal class LESSubprotocolTest {
 
   @Test
   @Throws(Exception::class)
-  fun noSupportForv3() {
+  fun noSupportForv3() = runBlocking {
 
     val sp = LESSubprotocol(
       Dispatchers.Default,
@@ -78,7 +80,7 @@ internal class LESSubprotocolTest {
       UInt256.ZERO,
       UInt256.ZERO,
       UInt256.ZERO,
-      BlockchainRepository.inMemory(),
+      BlockchainRepository.inMemory(Genesis.dev()),
       MemoryTransactionPool(),
       RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository())
     )
@@ -87,7 +89,7 @@ internal class LESSubprotocolTest {
 
   @Test
   @Throws(Exception::class)
-  fun noSupportForETH() {
+  fun noSupportForETH() = runBlocking {
     val sp = LESSubprotocol(
       Dispatchers.Default,
       blockchainInformation,
@@ -97,7 +99,7 @@ internal class LESSubprotocolTest {
       UInt256.ZERO,
       UInt256.ZERO,
       UInt256.ZERO,
-      BlockchainRepository.inMemory(),
+      BlockchainRepository.inMemory(Genesis.dev()),
       MemoryTransactionPool(),
       RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository())
     )
