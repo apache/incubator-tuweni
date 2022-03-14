@@ -24,8 +24,10 @@ import org.apache.tuweni.eth.EthJsonModule
 import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.units.bigints.UInt256
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.Instant
 
 @ExtendWith(BouncyCastleExtension::class)
 class GenesisTest {
@@ -48,5 +50,12 @@ class GenesisTest {
     mapper.registerModule(EthJsonModule())
     val contents = mapper.writeValueAsBytes(genesis)
     GenesisFile.read(contents)
+  }
+
+  @Test
+  fun testDev() {
+    val dev = Genesis.dev()
+    assertEquals(UInt256.ZERO, dev.header.number)
+    assertEquals(Instant.ofEpochSecond(0), dev.header.timestamp)
   }
 }

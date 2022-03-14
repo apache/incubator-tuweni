@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.devp2p.eth
 
+import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.devp2p.eth.EthHelloSubprotocol.Companion.ETH63
 import org.apache.tuweni.devp2p.eth.EthHelloSubprotocol.Companion.ETH64
@@ -25,6 +26,7 @@ import org.apache.tuweni.devp2p.eth.EthSubprotocol.Companion.ETH66
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.MemoryTransactionPool
+import org.apache.tuweni.genesis.Genesis
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
@@ -47,8 +49,8 @@ class EthSubprotocolTest {
   )
 
   @Test
-  fun testVersion() {
-    val repository = BlockchainRepository.inMemory()
+  fun testVersion() = runBlocking {
+    val repository = BlockchainRepository.inMemory(Genesis.dev())
     val eth = EthSubprotocol(
       blockchainInfo = blockchainInfo,
       repository = repository,
@@ -58,8 +60,8 @@ class EthSubprotocolTest {
   }
 
   @Test
-  fun testSupports() {
-    val repository = BlockchainRepository.inMemory()
+  fun testSupports() = runBlocking {
+    val repository = BlockchainRepository.inMemory(Genesis.dev())
     val eth = EthSubprotocol(
       blockchainInfo = blockchainInfo,
       repository = repository,

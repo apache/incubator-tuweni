@@ -39,6 +39,7 @@ import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.MemoryTransactionPool
+import org.apache.tuweni.genesis.Genesis
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
@@ -294,7 +295,7 @@ internal class LESSubProtocolHandlerTest {
   @Throws(Exception::class)
   fun receiveOtherMessageBeforeStatus() = runBlocking {
     val service = MyRLPxService()
-    val repo = BlockchainRepository.inMemory()
+    val repo = BlockchainRepository.inMemory(Genesis.dev())
     val pool = MemoryTransactionPool()
     val controller = EthController(
       repo,

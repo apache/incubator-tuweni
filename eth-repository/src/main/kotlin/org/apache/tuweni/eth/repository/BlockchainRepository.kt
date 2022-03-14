@@ -40,7 +40,10 @@ import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.kv.KeyValueStore
 import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.trie.MerkleStorage
+import org.apache.tuweni.trie.MerkleTrie
 import org.apache.tuweni.trie.StoredMerklePatriciaTrie
+import org.apache.tuweni.units.bigints.UInt256
+import org.apache.tuweni.units.ethereum.Wei
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import kotlin.coroutines.CoroutineContext
@@ -82,11 +85,11 @@ class BlockchainRepository(
      *
      * @return an in-memory repository
      */
-    fun inMemory(): BlockchainRepository {
+    suspend fun inMemory(genesisBlock: Block): BlockchainRepository {
       val analyzer = StandardAnalyzer()
       val config = IndexWriterConfig(analyzer)
       val writer = IndexWriter(ByteBuffersDirectory(), config)
-      return BlockchainRepository(
+      val repo = BlockchainRepository(
         MapKeyValueStore(),
         MapKeyValueStore(),
         MapKeyValueStore(),
@@ -95,6 +98,10 @@ class BlockchainRepository(
         MapKeyValueStore(),
         BlockchainIndex(writer),
       )
+      repo.setGenesisBlock(genesisBlock)
+      repo.storeBlock(genesisBlock)
+      repo.createWorldState()
+      return repo
     }
 
     /**
@@ -125,6 +132,7 @@ class BlockchainRepository(
       )
       repo.setGenesisBlock(genesisBlock)
       repo.storeBlock(genesisBlock)
+      repo.createWorldState()
       return repo
     }
   }
@@ -137,6 +145,23 @@ class BlockchainRepository(
   val blockBodiesStoredCounter =
     meter?.longCounterBuilder("blocks_bodies_stored")?.setDescription("Number of block bodies stored")?.build()
   var indexing = true
+  var worldState: StoredMerklePatriciaTrie<Bytes>? = null
+
+  suspend fun createWorldState() {
+    val latestBlock = retrieveChainHead()
+    worldState = StoredMerklePatriciaTrie.storingBytes(
+      object : MerkleStorage {
+        override suspend fun get(hash: Bytes32): Bytes? {
+          return stateStore.get(hash)
+        }
+
+        override suspend fun put(hash: Bytes32, content: Bytes) {
+          stateStore.put(hash, content)
+        }
+      },
+      latestBlock.header.stateRoot
+    )
+  }
 
   /**
    * Stores a block body into the repository.
@@ -410,7 +435,7 @@ class BlockchainRepository(
   }
 
   private suspend fun setGenesisBlock(block: Block) {
-    return chainMetadata
+    chainMetadata
       .put(GENESIS_BLOCK, block.getHeader().getHash())
   }
 
@@ -442,7 +467,17 @@ class BlockchainRepository(
    * @param account the account's state
    */
   suspend fun storeAccount(address: Address, account: AccountState) =
-    stateStore.put(Hash.hash(address), account.toBytes())
+    worldState!!.put(Hash.hash(address), account.toBytes())
+
+  /**
+   * Destroys an account.
+   *
+   * @param address the address of the account
+   * @param account the account's state
+   */
+  suspend fun destroyAccount(address: Address) {
+    worldState!!.remove(Hash.hash(address))
+  }
 
   /**
    * Retrieves an account state for a given account.
@@ -451,7 +486,7 @@ class BlockchainRepository(
    * @return the account's state, or null if not found
    */
   suspend fun getAccount(address: Address): AccountState? =
-    stateStore.get(Hash.hash(address))?.let { AccountState.fromBytes(it) }
+    worldState!!.get(Hash.hash(address))?.let { AccountState.fromBytes(it) }
 
   /**
    * Checks if a given account is stored in the repository.
@@ -459,7 +494,7 @@ class BlockchainRepository(
    * @param address the address of the account
    * @return true if the accounts exists
    */
-  suspend fun accountsExists(address: Address): Boolean = stateStore.containsKey(Hash.hash(address))
+  suspend fun accountsExists(address: Address): Boolean = (null != getAccount(address))
 
   /**
    * Gets a value stored in an account store, or null if the account doesn't exist.
@@ -469,8 +504,7 @@ class BlockchainRepository(
    */
   suspend fun getAccountStoreValue(address: Address, key: Bytes32): Bytes32? {
     logger.trace("Entering getAccountStoreValue")
-    val accountStateBytes = stateStore.get(Hash.hash(address)) ?: return null
-    val accountState = AccountState.fromBytes(accountStateBytes)
+    val accountState = getAccount(address) ?: return null
     val tree = StoredMerklePatriciaTrie.storingBytes32(
       object : MerkleStorage {
         override suspend fun get(hash: Bytes32): Bytes? {
@@ -487,18 +521,55 @@ class BlockchainRepository(
   }
 
   /**
+   * Provides a new account state
+   *
+   * @return a new blank account state
+   */
+  fun newAccountState(): AccountState {
+    return AccountState(UInt256.ZERO, Wei.valueOf(0), Hash.fromBytes(MerkleTrie.EMPTY_TRIE_ROOT_HASH), Hash.hash(Bytes.EMPTY))
+  }
+
+  /**
+   * Stores a value in an account store.
+   *
+   * @param address the address of the account
+   * @param key the key of the value to retrieve in the account storage.
+   * @param value the value to store
+   */
+  suspend fun storeAccountValue(address: Address, key: Bytes32, value: Bytes32) {
+    logger.trace("Entering storeAccountValue")
+    val addrHash = Hash.hash(address)
+    val accountState = worldState!!.get(addrHash)?.let { AccountState.fromBytes(it) } ?: newAccountState()
+    val tree = StoredMerklePatriciaTrie.storingBytes(
+      object : MerkleStorage {
+        override suspend fun get(hash: Bytes32): Bytes? {
+          return stateStore.get(hash)
+        }
+
+        override suspend fun put(hash: Bytes32, content: Bytes) {
+          stateStore.put(hash, content)
+        }
+      },
+      accountState.storageRoot
+    )
+    tree.put(key, value)
+    val newAccountState = AccountState(accountState.nonce, accountState.balance, Hash.fromBytes(tree.rootHash()), accountState.codeHash)
+    worldState!!.put(addrHash, newAccountState.toBytes())
+  }
+
+  /**
    * Gets the code of an account
    *
    * @param address the address of the account
    * @return the code or null if the address doesn't exist or the code is not present.
    */
   suspend fun getAccountCode(address: Address): Bytes? {
-    val accountStateBytes = stateStore.get(Hash.hash(address))
+    val accountStateBytes = worldState!!.get(Hash.hash(address))
     if (accountStateBytes == null) {
       return null
     }
     val accountState = AccountState.fromBytes(accountStateBytes)
-    return stateStore.get(accountState.codeHash)
+    return worldState!!.get(accountState.codeHash)
   }
 
   /**
@@ -519,6 +590,6 @@ class BlockchainRepository(
    * @param code the code to store
    */
   suspend fun storeCode(code: Bytes) {
-    stateStore.put(Hash.hash(code), code)
+    worldState!!.put(Hash.hash(code), code)
   }
 }
