@@ -55,7 +55,7 @@ class GenesisTest {
   @Test
   fun testDev() {
     val dev = Genesis.dev()
-    assertEquals(0, dev.header.number)
+    assertEquals(UInt256.ZERO, dev.header.number)
     assertEquals(Instant.ofEpochSecond(0), dev.header.timestamp)
   }
 }
