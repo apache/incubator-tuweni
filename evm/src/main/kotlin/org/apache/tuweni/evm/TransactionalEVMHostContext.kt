@@ -86,7 +86,7 @@ class TransactionalEVMHostContext(
     logger.trace("Entering getRepositoryStorage")
     val key = Bytes32.wrap(keyBytes)
     val value = repository.getAccountStoreValue(address, key)
-    logger.info("Found value $value")
+    logger.trace("key $key, value $value")
     return value ?: Bytes32.ZERO
   }
 
@@ -103,10 +103,10 @@ class TransactionalEVMHostContext(
   override suspend fun getStorage(address: Address, key: Bytes32): Bytes32 {
     logger.trace("Entering getStorage")
     var value = accountChanges[address]?.get(key)
-    logger.info("Found value $value")
     if (value == null) {
       value = repository.getAccountStoreValue(address, key)?.let { UInt256.fromBytes(it) }
     }
+    logger.trace("key $key value $value")
     return value ?: UInt256.ZERO
   }
 
