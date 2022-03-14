@@ -553,7 +553,8 @@ class BlockchainRepository(
       accountState.storageRoot
     )
     tree.put(key, value)
-    worldState!!.put(addrHash, accountState.toBytes())
+    val newAccountState = AccountState(accountState.nonce, accountState.balance, Hash.fromBytes(tree.rootHash()), accountState.codeHash)
+    worldState!!.put(addrHash, newAccountState.toBytes())
   }
 
   /**
