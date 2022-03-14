@@ -253,7 +253,7 @@ class EVMReferenceTest {
           runBlocking {
             assertTrue(
               repository.accountsExists(address) ||
-                (result.hostContext as TransactionalEVMHostContext).accountChanges.containsKey(address)
+                (result.hostContext as TransactionalEVMHostContext).getAccountChanges().containsKey(address)
             )
             val accountState = repository.getAccount(address)
             val balance = accountState?.balance?.add(
@@ -270,7 +270,7 @@ class EVMReferenceTest {
         }
         test.logs?.let {
           val logsTree = MerklePatriciaTrie.storingBytes()
-          (result.hostContext as TransactionalEVMHostContext).logs.forEach {
+          (result.hostContext as TransactionalEVMHostContext).getLogs().forEach {
             runBlocking {
               logsTree.put(Hash.hash(it.toBytes()), it.toBytes())
             }

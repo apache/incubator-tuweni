@@ -23,6 +23,7 @@ import org.apache.tuweni.evm.EVMResult
 import org.apache.tuweni.evm.EvmVm
 import org.apache.tuweni.evm.HardFork
 import org.apache.tuweni.evm.HostContext
+import org.apache.tuweni.evm.TransactionalEVMHostContext
 import org.apache.tuweni.evm.opcodes
 import org.slf4j.LoggerFactory
 
@@ -72,7 +73,7 @@ class EvmVmImpl : EvmVm {
       val opcode = registry.get(fork, code.get(current))
       if (opcode == null) {
         logger.error("Could not find opcode for ${code.slice(current, 1)} at position $current")
-        return EVMResult(EVMExecutionStatusCode.INVALID_INSTRUCTION, gasManager, hostContext)
+        return EVMResult(EVMExecutionStatusCode.INVALID_INSTRUCTION, gasManager, hostContext, hostContext as TransactionalEVMHostContext)
       }
       val currentOpcodeByte = code.get(current)
       current++
@@ -87,27 +88,27 @@ class EvmVmImpl : EvmVm {
           logger.trace(executionPath.map { opcodes[it] ?: it.toString(16) }.joinToString(">"))
         }
         if (result.status == EVMExecutionStatusCode.SUCCESS && !gasManager.hasGasLeft()) {
-          return EVMResult(EVMExecutionStatusCode.OUT_OF_GAS, gasManager, hostContext)
+          return EVMResult(EVMExecutionStatusCode.OUT_OF_GAS, gasManager, hostContext, hostContext as TransactionalEVMHostContext)
         }
-        return EVMResult(result.status, gasManager, hostContext, result.output)
+        return EVMResult(result.status, gasManager, hostContext, hostContext as TransactionalEVMHostContext, result.output)
       }
       result?.newCodePosition?.let {
         current = result.newCodePosition
       }
       if (!gasManager.hasGasLeft()) {
-        return EVMResult(EVMExecutionStatusCode.OUT_OF_GAS, gasManager, hostContext)
+        return EVMResult(EVMExecutionStatusCode.OUT_OF_GAS, gasManager, hostContext, hostContext as TransactionalEVMHostContext)
       }
       if (stack.overflowed()) {
-        return EVMResult(EVMExecutionStatusCode.STACK_OVERFLOW, gasManager, hostContext)
+        return EVMResult(EVMExecutionStatusCode.STACK_OVERFLOW, gasManager, hostContext, hostContext as TransactionalEVMHostContext)
       }
       if (result?.validationStatus != null) {
-        return EVMResult(result.validationStatus, gasManager, hostContext)
+        return EVMResult(result.validationStatus, gasManager, hostContext, hostContext as TransactionalEVMHostContext)
       }
     }
     if (logger.isTraceEnabled) {
       logger.trace(executionPath.map { opcodes[it] ?: it.toString(16) }.joinToString(">"))
     }
-    return EVMResult(EVMExecutionStatusCode.SUCCESS, gasManager, hostContext)
+    return EVMResult(EVMExecutionStatusCode.SUCCESS, gasManager, hostContext, hostContext as TransactionalEVMHostContext)
   }
 
   override fun capabilities(): Int {

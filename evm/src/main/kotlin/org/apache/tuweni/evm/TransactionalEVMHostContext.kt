@@ -47,17 +47,26 @@ class TransactionalEVMHostContext(
   val currentTimestamp: Long,
   val currentGasLimit: Long,
   val currentDifficulty: UInt256
-) : HostContext {
+) : HostContext, ExecutionChanges {
 
   companion object {
     private val logger = LoggerFactory.getLogger(TransactionalEVMHostContext::class.java)
   }
 
-  val accountChanges = HashMap<Address, HashMap<Bytes, Bytes32>>()
-  val logs = mutableListOf<Log>()
+  private val accountChanges = mutableMapOf<Address, HashMap<Bytes32, Bytes32>>()
+  private val logs = mutableListOf<Log>()
   val accountsToDestroy = mutableListOf<Address>()
   val balanceChanges = HashMap<Address, Wei>()
   val warmedUpStorage = HashSet<Bytes>()
+
+  override fun getAccountChanges(): Map<Address, HashMap<Bytes32, Bytes32>> = accountChanges
+
+  override fun getLogs(): List<Log> = logs
+
+  override fun accountsToDestroy(): List<Address> = accountsToDestroy
+
+  override fun getBalanceChanges(): Map<Address, Wei> = balanceChanges
+
   /**
    * Check account existence function.
    *
@@ -125,7 +134,7 @@ class TransactionalEVMHostContext(
    * A storage item has been deleted: X -> 0.
    * EVMC_STORAGE_DELETED = 4
    */
-  override suspend fun setStorage(address: Address, key: Bytes, value: Bytes32): Int {
+  override suspend fun setStorage(address: Address, key: Bytes32, value: Bytes32): Int {
     logger.trace("Entering setStorage {} {} {}", address, key, value)
     var newAccount = false
     accountChanges.computeIfAbsent(address) {
