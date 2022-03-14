@@ -13,6 +13,7 @@
 package org.apache.tuweni.eth;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.apache.tuweni.units.ethereum.Gas;
@@ -76,6 +77,18 @@ public class EthJsonModule extends SimpleModule {
 
     @Override
     public void serialize(Bytes value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+      gen.writeString(value.toHexString());
+    }
+  }
+
+  static class Bytes32Serializer extends StdSerializer<Bytes32> {
+
+    Bytes32Serializer() {
+      super(Bytes32.class);
+    }
+
+    @Override
+    public void serialize(Bytes32 value, JsonGenerator gen, SerializerProvider provider) throws IOException {
       gen.writeString(value.toHexString());
     }
   }
@@ -177,6 +190,18 @@ public class EthJsonModule extends SimpleModule {
     }
   }
 
+  static class Bytes32Deserializer extends StdDeserializer<Bytes32> {
+
+    Bytes32Deserializer() {
+      super(Bytes32.class);
+    }
+
+    @Override
+    public Bytes32 deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+      return Bytes32.fromHexString(p.getValueAsString());
+    }
+  }
+
   static class UInt256Deserializer extends StdDeserializer<UInt256> {
 
     UInt256Deserializer() {
@@ -218,6 +243,7 @@ public class EthJsonModule extends SimpleModule {
     addSerializer(Address.class, new AddressSerializer());
     addKeySerializer(Address.class, new AddressKeySerializer());
     addSerializer(Bytes.class, new BytesSerializer());
+    addSerializer(Bytes32.class, new Bytes32Serializer());
     addSerializer(Gas.class, new GasSerializer());
     addSerializer(UInt256.class, new UInt256Serializer());
     addSerializer(Instant.class, new InstantSerializer());
@@ -229,6 +255,7 @@ public class EthJsonModule extends SimpleModule {
     addDeserializer(UInt256.class, new UInt256Deserializer());
     addKeyDeserializer(UInt256.class, new UInt256KeyDeserializer());
     addDeserializer(Bytes.class, new BytesDeserializer());
+    addDeserializer(Bytes32.class, new Bytes32Deserializer());
     addSerializer(SECP256K1.PublicKey.class, new PublicKeySerializer());
   }
 }
