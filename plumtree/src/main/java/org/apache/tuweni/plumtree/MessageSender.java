@@ -38,9 +38,13 @@ public interface MessageSender {
      */
     PRUNE,
     /**
-     * Send a message
+     * Gossip a message
      */
-    GOSSIP
+    GOSSIP,
+    /**
+     * Send a direct message
+     */
+    SEND
   }
 
   /**

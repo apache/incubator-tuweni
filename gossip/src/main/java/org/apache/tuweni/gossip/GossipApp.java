@@ -100,7 +100,7 @@ public final class GossipApp {
         opts.listenPort(),
         Hash::keccak256,
         repository,
-        (bytes, attr) -> readMessage(opts.messageLog(), errStream, bytes),
+        (bytes, attr, peer) -> readMessage(opts.messageLog(), errStream, bytes),
         null,
         new CountingPeerPruningFunction(10),
         100,

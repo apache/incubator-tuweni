@@ -95,6 +95,8 @@ public final class VertxGossipServer {
           case PRUNE:
             state.receivePruneMessage(peer);
             break;
+          case SEND:
+            payloadListener.listen(Bytes.fromHexString(message.payload), message.attributes, peer);
         }
       }
     }
@@ -245,5 +247,19 @@ public final class VertxGossipServer {
       throw new IllegalStateException("Server has not started");
     }
     state.sendGossipMessage(attributes, message);
+  }
+
+  /**
+   * Send a message to one peer specifically.
+   *
+   * @param peer the peer to send to
+   * @param attributes the payload to propagate
+   * @param message the payload to propagate
+   */
+  public void send(Peer peer, String attributes, Bytes message) {
+    if (!started.get()) {
+      throw new IllegalStateException("Server has not started");
+    }
+    state.sendMessage(peer, attributes, message);
   }
 }

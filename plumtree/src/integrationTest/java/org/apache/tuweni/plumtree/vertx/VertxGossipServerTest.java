@@ -21,6 +21,7 @@ import org.apache.tuweni.junit.VertxExtension;
 import org.apache.tuweni.junit.VertxInstance;
 import org.apache.tuweni.plumtree.EphemeralPeerRepository;
 import org.apache.tuweni.plumtree.MessageListener;
+import org.apache.tuweni.plumtree.Peer;
 
 import io.vertx.core.Vertx;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ class VertxGossipServerTest {
     public Bytes message;
 
     @Override
-    public void listen(Bytes messageBody, String attributes) {
+    public void listen(Bytes messageBody, String attributes, Peer peer) {
       message = messageBody;
     }
   }
@@ -212,5 +213,50 @@ class VertxGossipServerTest {
     server1.stop().join();
     server2.stop().join();
     server3.stop().join();
+  }
+
+  @Test
+  void sendMessages(@VertxInstance Vertx vertx) throws Exception {
+    MessageListenerImpl messageReceived1 = new MessageListenerImpl();
+    MessageListenerImpl messageReceived2 = new MessageListenerImpl();
+
+    EphemeralPeerRepository peerRepository1 = new EphemeralPeerRepository();
+
+    VertxGossipServer server1 = new VertxGossipServer(
+        vertx,
+        "127.0.0.1",
+        10000,
+        bytes -> bytes,
+        peerRepository1,
+        messageReceived1,
+        (message, peer) -> true,
+        null,
+        200,
+        200);
+    VertxGossipServer server2 = new VertxGossipServer(
+        vertx,
+        "127.0.0.1",
+        10001,
+        bytes -> bytes,
+        new EphemeralPeerRepository(),
+        messageReceived2,
+        (message, peer) -> true,
+        null,
+        200,
+        200);
+
+    server1.start().join();
+    server2.start().join();
+
+    server1.connectTo("127.0.0.1", 10001).join();
+    assertEquals(1, peerRepository1.eagerPushPeers().size());
+    String attributes = "{\"message_type\": \"BLOCK\"}";
+    server1.send(peerRepository1.peers().iterator().next(), attributes, Bytes.fromHexString("deadbeef"));
+    Thread.sleep(1000);
+    assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);
+    Thread.sleep(1000);
+
+    server1.stop().join();
+    server2.stop().join();
   }
 }
