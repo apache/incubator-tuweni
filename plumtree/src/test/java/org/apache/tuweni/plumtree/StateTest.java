@@ -54,7 +54,7 @@ class StateTest {
     public Bytes message;
 
     @Override
-    public void listen(Bytes messageBody, String attributes) {
+    public void listen(Bytes messageBody, String attributes, Peer peer) {
       message = messageBody;
     }
   };

@@ -24,6 +24,7 @@ public interface MessageListener {
    * 
    * @param messageBody the body of the message
    * @param attributes the attributes of the message
+   * @param peer the peer we received the message from
    */
-  public void listen(Bytes messageBody, String attributes);
+  public void listen(Bytes messageBody, String attributes, Peer peer);
 }

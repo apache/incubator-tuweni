@@ -52,6 +52,11 @@ public final class State {
   private final Timer timer = new Timer("plumtree", true);
   private final long delay;
 
+  public void sendMessage(Peer peer, String attributes, Bytes message) {
+    Bytes messageHash = messageHashingFunction.hash(message);
+    messageSender.sendMessage(MessageSender.Verb.SEND, attributes, peer, messageHash, message);
+  }
+
   final class MessageHandler {
 
     private final Bytes hash;
@@ -94,7 +99,7 @@ public final class State {
                               .sendMessage(MessageSender.Verb.IHAVE, null, peer, hash, null)))
                       .collect(Collectors.toList()));
           if (sender != null) {
-            messageListener.listen(message, attributes);
+            messageListener.listen(message, attributes, sender);
           }
         }
       } else {
