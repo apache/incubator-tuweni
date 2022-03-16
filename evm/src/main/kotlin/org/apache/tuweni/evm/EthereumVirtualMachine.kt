@@ -22,6 +22,8 @@ import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.Log
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.evm.impl.GasManager
+import org.apache.tuweni.evm.impl.Memory
+import org.apache.tuweni.evm.impl.Stack
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
@@ -60,7 +62,8 @@ enum class EVMExecutionStatusCode(val number: Int) {
   WASM_TRAP(16),
   INTERNAL_ERROR(-1),
   REJECTED(-2),
-  OUT_OF_MEMORY(-3);
+  OUT_OF_MEMORY(-3),
+  HALTED(-4);
 }
 
 /**
@@ -100,6 +103,8 @@ data class EVMResult(
   val gasManager: GasManager,
   val hostContext: HostContext,
   val changes: ExecutionChanges,
+  val stack: Stack,
+  val memory: Memory,
   val output: Bytes? = null,
 )
 

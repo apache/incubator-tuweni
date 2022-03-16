@@ -23,6 +23,8 @@ import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.evm.impl.EvmVmImpl
+import org.apache.tuweni.evm.impl.StepListener
+import org.apache.tuweni.genesis.Genesis
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
@@ -37,24 +39,24 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.nio.charset.StandardCharsets
 
-@Disabled
 @ExtendWith(LuceneIndexWriterExtension::class, BouncyCastleExtension::class)
 class EthereumVirtualMachineTest {
 
   @Test
   fun testVersion(@LuceneIndexWriter writer: IndexWriter) = runBlocking {
-    val repository = BlockchainRepository(
+    val repository = BlockchainRepository.init(
       MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
       MapKeyValueStore(),
-      BlockchainIndex(writer)
+      BlockchainIndex(writer),
+      Genesis.dev()
     )
     val vm = EthereumVirtualMachine(repository, EvmVmImpl::create)
     vm.start()
-    assertEquals("0.0.0", vm.version())
+    assertEquals("0.0.1", vm.version())
     vm.stop()
   }
 
@@ -62,30 +64,31 @@ class EthereumVirtualMachineTest {
   fun testExecuteCall(@LuceneIndexWriter writer: IndexWriter) {
     val result = runCode(writer, Bytes.fromHexString("0x30600052596000f3"))
     assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-    assertEquals(0, result.gasManager.gasLeft())
+    assertEquals(Gas.valueOf(199984), result.gasManager.gasLeft())
   }
 
   @Test
   fun testExecuteCounter(@LuceneIndexWriter writer: IndexWriter) {
     val result = runCode(writer, Bytes.fromHexString("0x600160005401600055"))
     assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-    assertEquals(0, result.gasManager.gasLeft())
+    assertEquals(Gas.valueOf(179488), result.gasManager.gasLeft())
   }
 
   @Test
   fun testExecuteReturnBlockNumber(@LuceneIndexWriter writer: IndexWriter) {
     val result = runCode(writer, Bytes.fromHexString("0x43600052596000f3"))
     assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-    assertEquals(100000, result.gasManager.gasLeft())
+    assertEquals(Gas.valueOf(199984), result.gasManager.gasLeft())
   }
 
   @Test
   fun testExecuteSaveReturnBlockNumber(@LuceneIndexWriter writer: IndexWriter) {
     val result = runCode(writer, Bytes.fromHexString("0x4360005543600052596000f3"))
     assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-    assertEquals(100000, result.gasManager.gasLeft())
+    assertEquals(Gas.valueOf(197779), result.gasManager.gasLeft())
   }
 
+  @Disabled
   @Test
   @Throws(Exception::class)
   fun testGetCapabilities(@LuceneIndexWriter writer: IndexWriter) = runBlocking {
@@ -104,6 +107,7 @@ class EthereumVirtualMachineTest {
     vm.stop()
   }
 
+  @Disabled
   @Test
   @Throws(Exception::class)
   fun testSetOption(@LuceneIndexWriter writer: IndexWriter) = runBlocking {
@@ -159,36 +163,68 @@ class EthereumVirtualMachineTest {
     }
   }
 
-  private fun runCode(writer: IndexWriter, code: Bytes): EVMResult = runBlocking {
-    val repository = BlockchainRepository(
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      MapKeyValueStore(),
-      BlockchainIndex(writer)
-    )
-
-    val vm = EthereumVirtualMachine(repository, EvmVmImpl::create)
-    vm.start()
-    try {
-      val sender = Address.fromHexString("0x3339626637316465316237643762653362353100")
-      val destination = Address.fromBytes(Bytes.fromHexString("3533636637373230346545656639353265323500"))
-      val value = Bytes.fromHexString("0x3100")
-      val inputData = Bytes.wrap("hello w\u0000".toByteArray(StandardCharsets.UTF_8))
-      val gas = Gas.valueOf(200000)
-      vm.execute(
-        sender, destination, value, code, inputData, gas,
-        Wei.valueOf(0),
-        Address.fromBytes(Bytes.random(20)),
-        0,
-        0,
-        2,
-        UInt256.valueOf(1)
+  private fun runCode(writer: IndexWriter, code: Bytes, vmFn: () -> EvmVm = { EvmVmImpl.create() }): EVMResult =
+    runBlocking {
+      val repository = BlockchainRepository.init(
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        MapKeyValueStore(),
+        BlockchainIndex(writer),
+        Genesis.dev()
       )
-    } finally {
-      vm.stop()
+
+      val vm = EthereumVirtualMachine(repository, vmFn)
+      vm.start()
+      try {
+        val sender = Address.fromHexString("0x3339626637316465316237643762653362353100")
+        val destination = Address.fromBytes(Bytes.fromHexString("3533636637373230346545656639353265323500"))
+        val value = Bytes.fromHexString("0x3100")
+        val inputData = Bytes.wrap("hello w\u0000".toByteArray(StandardCharsets.UTF_8))
+        val gas = Gas.valueOf(200000)
+        vm.execute(
+          sender, destination, value, code, inputData, gas,
+          Wei.valueOf(0),
+          Address.fromBytes(Bytes.random(20)),
+          0,
+          0,
+          2,
+          UInt256.valueOf(1)
+        )
+      } finally {
+        vm.stop()
+      }
     }
+
+  @Test
+  fun snapshotExecution(@LuceneIndexWriter writer: IndexWriter) {
+    val listener = object : StepListener {
+      override fun halt(executionPath: List<Byte>): Boolean {
+        if (executionPath.size > 3) {
+          return true
+        }
+        return false
+      }
+    }
+    val result = runCode(writer, Bytes.fromHexString("0x30600052596000f3"), { EvmVmImpl.create(listener) })
+    assertEquals(EVMExecutionStatusCode.HALTED, result.statusCode)
+    assertEquals(Gas.valueOf(199987), result.gasManager.gasLeft())
+  }
+
+  @Test
+  fun snapshotExecutionTooFar(@LuceneIndexWriter writer: IndexWriter) {
+    val listener = object : StepListener {
+      override fun halt(executionPath: List<Byte>): Boolean {
+        if (executionPath.size > 255) {
+          return true
+        }
+        return false
+      }
+    }
+    val result = runCode(writer, Bytes.fromHexString("0x30600052596000f3"), { EvmVmImpl.create(listener) })
+    assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
+    assertEquals(Gas.valueOf(199984), result.gasManager.gasLeft())
   }
 }
