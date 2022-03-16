@@ -60,11 +60,10 @@ static String buildTag(releaseBuild) {
 //////
 // Default tasks and build aliases
 
-defaultTasks 'checkLicenses', 'spotlessCheck', 'jar', 'test', ':javadoc'
+defaultTasks 'spotlessCheck', 'jar', 'test', ':javadoc'
 
 def buildAliases = ['dev': [
     'spotlessApply',
-    'checkLicenses',
     ':jar',
     'test',
     ':javadoc'
