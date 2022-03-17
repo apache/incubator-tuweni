@@ -33,6 +33,7 @@ import org.iq80.leveldb.DBException
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
+import org.junit.jupiter.api.fail
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.sql.DriverManager
@@ -677,6 +678,115 @@ object ProxyKeyValueStoreSpec : Spek({
         proxy.put(foo, bar)
         proxy.clear()
         proxy.get(foo).should.be.`null`
+      }
+    }
+  }
+})
+
+object CascadingKeyValueStoreSpec : Spek({
+  val kv = MapKeyValueStore<Bytes, Bytes>()
+  val backingKv = MapKeyValueStore<Bytes, Bytes>()
+  val cascade = CascadingKeyValueStore(
+    kv,
+    backingKv
+  )
+  afterGroup {
+    cascade.close()
+  }
+  describe("a cascading key value store") {
+
+    it("should allow to retrieve values") {
+      runBlocking {
+        cascade.put(foo, bar)
+        cascade.get(foo).should.equal(bar)
+        kv.get(foo).should.equal(bar)
+      }
+    }
+
+    it("should allow to remove values") {
+      runBlocking {
+        cascade.put(foo, bar)
+        cascade.remove(foo)
+        cascade.get(foo).should.equal(null)
+      }
+    }
+
+    it("should allow to see if a key is present") {
+      runBlocking {
+        cascade.put(foo, bar)
+        cascade.containsKey(foo).should.be.`true`
+        cascade.containsKey(foobar).should.be.`false`
+      }
+    }
+
+    it("should allow to update values") {
+      runBlocking {
+        cascade.put(foo, bar)
+        cascade.put(foo, foobar)
+        cascade.get(foo).should.equal(foobar)
+      }
+    }
+
+    it("should return null when no value is present") {
+      runBlocking {
+        cascade.get(foobar).should.be.`null`
+      }
+    }
+
+    it("should iterate over keys") {
+      runBlocking {
+        cascade.put(foo, bar)
+        cascade.put(bar, foo)
+        val keys = cascade.keys().map { it }
+        keys.should.contain(bar)
+        keys.should.contain(foo)
+      }
+    }
+
+    it("can clear its contents") {
+      runBlocking {
+        cascade.put(foo, bar)
+        cascade.clear()
+        cascade.get(foo).should.be.`null`
+      }
+    }
+
+    it("cascades reads to the backing store") {
+      runBlocking {
+        backingKv.put(foo, bar)
+        cascade.get(foo).should.equal(bar)
+      }
+    }
+
+    it("cascades keys to the backing store") {
+      runBlocking {
+        backingKv.put(foo, bar)
+        cascade.keys().should.equal(listOf(foo))
+      }
+    }
+
+    it("overrides values without touching the backing store") {
+      runBlocking {
+        backingKv.put(foo, bar)
+        cascade.put(foo, foobar)
+        cascade.get(foo).should.equal(foobar)
+        backingKv.get(foo).should.equal(bar)
+      }
+    }
+
+    it("applies changes to backing store") {
+      runBlocking {
+        backingKv.put(bar, foo)
+        cascade.put(foo, bar)
+        cascade.remove(bar)
+        cascade.applyChanges()
+        backingKv.get(bar).should.be.`null`
+        backingKv.get(foo).should.equal(bar)
+        cascade.clear()
+        cascade.applyChanges()
+        for (key in backingKv.keys()) {
+          fail("No key should be present, found $key")
+        }
       }
     }
   }
