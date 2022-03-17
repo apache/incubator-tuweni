@@ -580,4 +580,6 @@ class BlockchainRepository(
   override suspend fun storeCode(code: Bytes) {
     worldState!!.put(Hash.hash(code), code)
   }
+
+  override fun stateRootHash(): Bytes32 = worldState!!.rootHash()
 }

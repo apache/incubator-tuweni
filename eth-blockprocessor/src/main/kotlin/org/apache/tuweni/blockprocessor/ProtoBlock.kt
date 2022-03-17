@@ -24,6 +24,7 @@ import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
+import org.apache.tuweni.eth.repository.TransientStateRepository
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.bigints.UInt64
@@ -94,7 +95,12 @@ data class ProtoBlockBody(val transactions: List<Transaction>) {
  *
  * Proto-blocks are produced when transactions are executed, and can be turned into full valid blocks.
  */
-class ProtoBlock(val header: SealableHeader, val body: ProtoBlockBody, val transactionReceipts: List<TransactionReceipt>) {
+class ProtoBlock(
+  val header: SealableHeader,
+  val body: ProtoBlockBody,
+  val transactionReceipts: List<TransactionReceipt>,
+  val stateChanges: TransientStateRepository
+) {
 
   fun toBlock(
     ommers: List<BlockHeader>,

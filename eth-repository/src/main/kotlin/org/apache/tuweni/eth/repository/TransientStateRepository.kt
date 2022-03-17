@@ -120,6 +120,8 @@ class TransientStateRepository(val repository: BlockchainRepository) : StateRepo
     transientWorldState.put(Hash.hash(code), code)
   }
 
+  override fun stateRootHash(): Bytes32 = transientWorldState.rootHash()
+
   /**
    * Apply changes of this repository to the blockchain repository.
    */
