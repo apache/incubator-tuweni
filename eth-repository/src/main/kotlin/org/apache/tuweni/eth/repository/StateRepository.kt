@@ -102,4 +102,11 @@ interface StateRepository {
    * @param code the code to store
    */
   suspend fun storeCode(code: Bytes)
+
+  /**
+   * Computes the root hash of the state
+   *
+   * @return the root hash of the state
+   */
+  fun stateRootHash(): Bytes32
 }

@@ -24,6 +24,7 @@ import org.apache.tuweni.eth.LogsBloomFilter
 import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.eth.repository.TransientStateRepository
 import org.apache.tuweni.evm.EVMExecutionStatusCode
 import org.apache.tuweni.evm.EthereumVirtualMachine
 import org.apache.tuweni.evm.impl.EvmVmImpl
@@ -42,6 +43,7 @@ import java.time.Instant
 class BlockProcessor {
 
   suspend fun execute(parentBlock: Block, transactions: List<Transaction>, repository: BlockchainRepository): ProtoBlock {
+    val stateChanges = TransientStateRepository(repository)
     val vm = EthereumVirtualMachine(repository, EvmVmImpl::create)
     vm.start()
     var index = 0L
@@ -70,10 +72,10 @@ class BlockProcessor {
           UInt256.ONE,
           Wei.valueOf(0),
           Hash.fromBytes(MerkleTrie.EMPTY_TRIE_ROOT_HASH),
-          org.apache.tuweni.eth.Hash.hash(tx.payload)
+          Hash.hash(tx.payload)
         )
-        repository.storeAccount(contractAddress, state)
-        repository.storeCode(tx.payload)
+        stateChanges.storeAccount(contractAddress, state)
+        stateChanges.storeCode(tx.payload)
         val receipt = TransactionReceipt(
           1,
           0, // TODO
@@ -84,7 +86,7 @@ class BlockProcessor {
         receiptsTrie.put(indexKey, receipt.toBytes())
         counter++
       } else {
-        val code = repository.getAccountCode(tx.to!!)
+        val code = stateChanges.getAccountCode(tx.to!!)
         val result = vm.execute(
           tx.sender!!,
           tx.to!!,
@@ -103,20 +105,20 @@ class BlockProcessor {
           throw Exception("invalid transaction result")
         }
         for (balanceChange in result.changes.getBalanceChanges()) {
-          val state = repository.getAccount(balanceChange.key)?.let {
+          val state = stateChanges.getAccount(balanceChange.key)?.let {
             AccountState(it.nonce, balanceChange.value, it.storageRoot, it.codeHash)
-          } ?: repository.newAccountState()
-          repository.storeAccount(balanceChange.key, state)
+          } ?: stateChanges.newAccountState()
+          stateChanges.storeAccount(balanceChange.key, state)
         }
 
         for (storageChange in result.changes.getAccountChanges()) {
           for (oneStorageChange in storageChange.value) {
-            repository.storeAccountValue(storageChange.key, oneStorageChange.key, oneStorageChange.value)
+            stateChanges.storeAccountValue(storageChange.key, oneStorageChange.key, oneStorageChange.value)
           }
         }
 
         for (accountToDestroy in result.changes.accountsToDestroy()) {
-          repository.destroyAccount(accountToDestroy)
+          stateChanges.destroyAccount(accountToDestroy)
         }
         for (log in result.changes.getLogs()) {
           bloomFilter.insertLog(log)
@@ -143,7 +145,7 @@ class BlockProcessor {
     val block = ProtoBlock(
       SealableHeader(
         parentBlock.header.hash,
-        Hash.fromBytes(repository.worldState!!.rootHash()),
+        Hash.fromBytes(stateChanges.stateRootHash()),
         Hash.fromBytes(transactionsTrie.rootHash()),
         Hash.fromBytes(receiptsTrie.rootHash()),
         bloomFilter.toBytes(),
@@ -152,7 +154,8 @@ class BlockProcessor {
         allGasUsed,
       ),
       ProtoBlockBody(transactions),
-      allReceipts
+      allReceipts,
+      stateChanges
     )
     return block
   }
