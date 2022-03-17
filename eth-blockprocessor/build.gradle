@@ -1,0 +1,52 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
+ * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
+ * to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+description = 'Ethereum Block Processor'
+
+dependencies {
+  implementation 'com.fasterxml.jackson.core:jackson-databind'
+  implementation 'dnsjava:dnsjava'
+  implementation 'io.opentelemetry:opentelemetry-api'
+  implementation 'io.opentelemetry:opentelemetry-sdk'
+  implementation 'io.opentelemetry:opentelemetry-sdk-metrics'
+  implementation 'io.vertx:vertx-core'
+  implementation 'org.fusesource.leveldbjni:leveldbjni-all'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+  implementation 'org.apache.lucene:lucene-core'
+  implementation 'org.infinispan:infinispan-core'
+  implementation 'org.infinispan:infinispan-cachestore-rocksdb'
+
+  implementation project(':bytes')
+  implementation project(':concurrent-coroutines')
+  implementation project(':crypto')
+  implementation project(':eth')
+  implementation project(':genesis')
+  implementation project(':eth-repository')
+  implementation project(':evm')
+  implementation project(':kv')
+  implementation project(':metrics')
+  implementation project(':rlp')
+  implementation project(':units')
+  implementation project(':merkle-trie')
+
+  testImplementation project(':junit')
+  testImplementation 'org.bouncycastle:bcprov-jdk15on'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testImplementation 'org.junit.jupiter:junit-jupiter-params'
+  testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin'
+  testImplementation 'org.mockito:mockito-junit-jupiter'
+  testImplementation 'ch.qos.logback:logback-classic'
+
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+  runtimeOnly 'ch.qos.logback:logback-classic'
+}
