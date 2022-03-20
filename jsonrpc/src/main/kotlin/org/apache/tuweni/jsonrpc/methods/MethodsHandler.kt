@@ -208,3 +208,22 @@ class CachingPollingHandler(
     }
   }
 }
+
+class ConstantStringResult(val result: String) {
+  suspend fun handle(request: JSONRPCRequest): JSONRPCResponse {
+    return JSONRPCResponse(id = request.id, result = result)
+  }
+}
+
+class ConstantBooleanResult(val result: Boolean) {
+  suspend fun handle(request: JSONRPCRequest): JSONRPCResponse {
+    return JSONRPCResponse(id = request.id, result = result)
+  }
+}
+
+class FunctionCallResult(val result: () -> Any?) {
+
+  suspend fun handle(request: JSONRPCRequest): JSONRPCResponse {
+    return JSONRPCResponse(id = request.id, result = result())
+  }
+}

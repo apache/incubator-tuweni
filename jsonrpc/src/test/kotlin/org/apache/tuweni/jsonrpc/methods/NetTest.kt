@@ -16,25 +16,18 @@
  */
 package org.apache.tuweni.jsonrpc.methods
 
-import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.eth.Hash
+import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.eth.JSONRPCRequest
-import org.apache.tuweni.eth.JSONRPCResponse
-import org.apache.tuweni.eth.invalidParams
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
-fun registerWeb3(clientVersion: String): Map<String, suspend (JSONRPCRequest) -> JSONRPCResponse> {
-  val version = ConstantStringResult(clientVersion)
-  return mapOf(Pair("web3_sha3", ::sha3), Pair("web3_clientVersion", version::handle))
-}
+class NetTest {
 
-suspend fun sha3(request: JSONRPCRequest): JSONRPCResponse {
-  if (request.params.size != 1) {
-    return invalidParams.copy(id = request.id)
-  }
-  try {
-    val input = Bytes.fromHexString(request.params[0])
-    return JSONRPCResponse(id = request.id, result = Hash.hash(input).toHexString())
-  } catch (e: IllegalArgumentException) {
-    return invalidParams.copy(id = request.id)
+  @Test
+  fun testNetCheck() = runBlocking {
+    val net = registerNet("2", true, { 2 })
+    assertEquals("2", net["net_version"]?.invoke(JSONRPCRequest(1, "", arrayOf()))?.result)
+    assertEquals(true, net["net_listening"]?.invoke(JSONRPCRequest(1, "", arrayOf()))?.result)
+    assertEquals("0x2", net["net_peerCount"]?.invoke(JSONRPCRequest(1, "", arrayOf()))?.result)
   }
 }
