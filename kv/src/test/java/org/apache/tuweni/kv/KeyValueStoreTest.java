@@ -33,6 +33,8 @@ import java.util.Set;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(TempDirectoryExtension.class)
@@ -114,6 +116,8 @@ class KeyValueStoreTest {
     assertEquals(new HashSet<>(Arrays.asList(Bytes.of(123))), keys);
   }
 
+  // disabled on Windows as CI doesn't have leveldb headers.
+  @DisabledOnOs(OS.WINDOWS)
   @Test
   void testLevelDBWithoutOptions(@TempDirectory Path tempDirectory) throws Exception {
     try (LevelDBKeyValueStore<Bytes, Bytes> leveldb = LevelDBKeyValueStore
