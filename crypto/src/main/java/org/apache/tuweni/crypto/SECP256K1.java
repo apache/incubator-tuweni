@@ -250,7 +250,7 @@ public final class SECP256K1 {
 
   public static Bytes decrypt(SECP256K1.SecretKey secretKey, Bytes encrypted) {
     try {
-      ECPrivateKeySpec keySpec = new ECPrivateKeySpec(secretKey.bytes().toBigInteger(), PARAMETER_SPEC);
+      ECPrivateKeySpec keySpec = new ECPrivateKeySpec(secretKey.bytes().toUnsignedBigInteger(), PARAMETER_SPEC);
       KeyFactory keyFactory = KeyFactory.getInstance("EC");
       java.security.PrivateKey bcKey = keyFactory.generatePrivate(keySpec);
       Cipher iesCipher = Cipher.getInstance("ECIES", "BC");
