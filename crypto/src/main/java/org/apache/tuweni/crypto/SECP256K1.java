@@ -23,6 +23,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.nio.file.StandardOpenOption.READ;
 import static org.apache.tuweni.crypto.Hash.keccak256;
 import static org.apache.tuweni.crypto.SECP256K1.Parameters.CURVE;
+import static org.apache.tuweni.crypto.SECP256K1.Parameters.PARAMETER_SPEC;
 import static org.apache.tuweni.io.file.Files.atomicReplace;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -37,6 +38,7 @@ import java.nio.CharBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -44,6 +46,7 @@ import java.security.SecureRandom;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Arrays;
 import javax.annotation.Nullable;
+import javax.crypto.Cipher;
 import javax.security.auth.Destroyable;
 
 import com.google.common.base.Objects;
@@ -59,6 +62,12 @@ import org.bouncycastle.crypto.signers.ECDSASigner;
 import org.bouncycastle.crypto.signers.HMacDSAKCalculator;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
+import org.bouncycastle.jcajce.provider.asymmetric.util.EC5Util;
+import org.bouncycastle.jcajce.provider.asymmetric.util.ECUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.spec.ECPrivateKeySpec;
+import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECAlgorithms;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.math.ec.FixedPointCombMultiplier;
@@ -91,6 +100,7 @@ public final class SECP256K1 {
   // Lazily initialize parameters by using java initialization on demand
   public static final class Parameters {
     public static final ECDomainParameters CURVE;
+    static final ECParameterSpec PARAMETER_SPEC;
     static final BigInteger CURVE_ORDER;
     static final BigInteger HALF_CURVE_ORDER;
     static final KeyPairGenerator KEY_PAIR_GENERATOR;
@@ -105,6 +115,11 @@ public final class SECP256K1 {
       }
       X9ECParameters params = SECNamedCurves.getByName(CURVE_NAME);
       CURVE = new ECDomainParameters(params.getCurve(), params.getG(), params.getN(), params.getH());
+      PARAMETER_SPEC = new ECParameterSpec(
+              params.getCurve(),
+              CURVE.getG(),
+              CURVE.getN(),
+              CURVE.getH());
       CURVE_ORDER = CURVE.getN();
       HALF_CURVE_ORDER = CURVE_ORDER.shiftRight(1);
       if (CURVE_ORDER.compareTo(SecP256K1Curve.q) >= 0) {
@@ -209,6 +224,42 @@ public final class SECP256K1 {
     byte[] qBytes = q.getEncoded(false);
     // We remove the prefix
     return new BigInteger(1, Arrays.copyOfRange(qBytes, 1, qBytes.length));
+  }
+
+  /**
+   * Encrypts bytes using a public key.
+   * @param publicKey the public key for encryption
+   * @param payload the payload to encrypt
+   * @return the encrypted data
+   */
+  public static Bytes encrypt(SECP256K1.PublicKey publicKey, Bytes payload) {
+    try {
+      ECPoint ecPoint = publicKey.asEcPoint();
+      ECPublicKeySpec keySpec = new ECPublicKeySpec(ecPoint, PARAMETER_SPEC);
+      KeyFactory keyFactory = KeyFactory.getInstance("EC");
+      java.security.PublicKey bcKey = keyFactory.generatePublic(keySpec);
+
+      Cipher iesCipher = Cipher.getInstance("ECIES", "BC");
+      iesCipher.init(Cipher.ENCRYPT_MODE, bcKey);
+      byte[] output = iesCipher.doFinal(payload.toArrayUnsafe());
+      return Bytes.wrap(output);
+    } catch(Exception e) {
+      throw new EncryptionException(e);
+    }
+  }
+
+  public static Bytes decrypt(SECP256K1.SecretKey secretKey, Bytes encrypted) {
+    try {
+      ECPrivateKeySpec keySpec = new ECPrivateKeySpec(secretKey.bytes().toBigInteger(), PARAMETER_SPEC);
+      KeyFactory keyFactory = KeyFactory.getInstance("EC");
+      java.security.PrivateKey bcKey = keyFactory.generatePrivate(keySpec);
+      Cipher iesCipher = Cipher.getInstance("ECIES", "BC");
+      iesCipher.init(Cipher.DECRYPT_MODE, bcKey);
+      byte[] output = iesCipher.doFinal(encrypted.toArrayUnsafe());
+      return Bytes.wrap(output);
+    } catch (Exception e) {
+      throw new DecryptionException(e);
+    }
   }
 
   /**

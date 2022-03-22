@@ -354,4 +354,12 @@ class SECP256K1Test {
     Bytes32 otherSharedSecret = SECP256K1.calculateKeyAgreement(otherKP.secretKey(), kp.publicKey());
     assertEquals(sharedSecret, otherSharedSecret);
   }
+
+  @Test
+  void encryptDecrypt() {
+    KeyPair kp = SECP256K1.KeyPair.random();
+    Bytes encrypted = SECP256K1.encrypt(kp.publicKey(), Bytes.fromHexString("0xdeadbeef"));
+    Bytes decrypted = SECP256K1.decrypt(kp.secretKey(), encrypted);
+    assertEquals(Bytes.fromHexString("0xdeadbeef"), decrypted);
+  }
 }
