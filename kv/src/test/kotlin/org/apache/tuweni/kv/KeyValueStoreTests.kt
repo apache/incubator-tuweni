@@ -48,7 +48,7 @@ object Vars {
   val foobar = Bytes.wrap("foobar".toByteArray())!!
 }
 
-class KeyValueStoreTest {
+class MapKeyValueStoreTest {
   val backingMap = mutableMapOf<Bytes, Bytes>()
   val kv = MapKeyValueStore(backingMap)
 
