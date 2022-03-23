@@ -20,6 +20,7 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.evm.EVMExecutionStatusCode
 import org.apache.tuweni.evm.EVMMessage
 import org.apache.tuweni.evm.EVMResult
+import org.apache.tuweni.evm.EVMState
 import org.apache.tuweni.evm.EvmVm
 import org.apache.tuweni.evm.HardFork
 import org.apache.tuweni.evm.HostContext
@@ -41,9 +42,11 @@ interface StepListener {
   /**
    * Checks the execution path
    *
+   * @param executionPath the path of execution
+   * @param state the state of the EVM
    * @return true to halt the execution
    */
-  fun halt(executionPath: List<Byte>): Boolean
+  fun handleStep(executionPath: List<Byte>, state: EVMState): Boolean
 }
 
 class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
@@ -85,7 +88,7 @@ class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
       val opcode = registry.get(fork, code.get(current))
       if (opcode == null) {
         logger.error("Could not find opcode for ${code.slice(current, 1)} at position $current")
-        return EVMResult(EVMExecutionStatusCode.INVALID_INSTRUCTION, gasManager, hostContext, hostContext as TransactionalEVMHostContext, stack, memory)
+        return EVMResult(EVMExecutionStatusCode.INVALID_INSTRUCTION, hostContext, hostContext as TransactionalEVMHostContext, EVMState(gasManager, hostContext.getLogs(), stack, memory))
       }
       val currentOpcodeByte = code.get(current)
       current++
@@ -95,36 +98,36 @@ class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
         ">> OPCODE: ${opcodes[currentOpcodeByte] ?: currentOpcodeByte.toString(16)} " +
           "gas: ${gasManager.gasLeft()} cost: ${gasManager.lastGasCost()}"
       )
+      val state = EVMState(gasManager, (hostContext as TransactionalEVMHostContext).getLogs(), stack, memory, result?.output)
+
       if (result?.status != null) {
         if (logger.isTraceEnabled) {
           logger.trace(executionPath.map { opcodes[it] ?: it.toString(16) }.joinToString(">"))
         }
         if (result.status == EVMExecutionStatusCode.SUCCESS && !gasManager.hasGasLeft()) {
-          return EVMResult(EVMExecutionStatusCode.OUT_OF_GAS, gasManager, hostContext, hostContext as TransactionalEVMHostContext, stack, memory)
+          return EVMResult(EVMExecutionStatusCode.OUT_OF_GAS, hostContext, hostContext, state)
         }
-        return EVMResult(result.status, gasManager, hostContext, hostContext as TransactionalEVMHostContext, stack, memory, result.output)
+        return EVMResult(result.status, hostContext, hostContext, state)
       }
       result?.newCodePosition?.let {
         current = result.newCodePosition
       }
       if (!gasManager.hasGasLeft()) {
-        return EVMResult(EVMExecutionStatusCode.OUT_OF_GAS, gasManager, hostContext, hostContext as TransactionalEVMHostContext, stack, memory)
+        return EVMResult(EVMExecutionStatusCode.OUT_OF_GAS, hostContext, hostContext, state)
       }
       if (stack.overflowed()) {
-        return EVMResult(EVMExecutionStatusCode.STACK_OVERFLOW, gasManager, hostContext, hostContext as TransactionalEVMHostContext, stack, memory)
+        return EVMResult(EVMExecutionStatusCode.STACK_OVERFLOW, hostContext, hostContext, state)
       }
       if (result?.validationStatus != null) {
-        return EVMResult(result.validationStatus, gasManager, hostContext, hostContext as TransactionalEVMHostContext, stack, memory)
+        return EVMResult(result.validationStatus, hostContext, hostContext, state)
       }
-      stepListener?.halt(executionPath)?.let {
+      stepListener?.handleStep(executionPath, state)?.let {
         if (it) {
           return EVMResult(
             EVMExecutionStatusCode.HALTED,
-            gasManager,
             hostContext,
-            hostContext as TransactionalEVMHostContext,
-            stack,
-            memory
+            hostContext,
+            EVMState(gasManager, hostContext.getLogs(), stack, memory, result?.output)
           )
         }
       }
@@ -132,7 +135,8 @@ class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
     if (logger.isTraceEnabled) {
       logger.trace(executionPath.map { opcodes[it] ?: it.toString(16) }.joinToString(">"))
     }
-    return EVMResult(EVMExecutionStatusCode.SUCCESS, gasManager, hostContext, hostContext as TransactionalEVMHostContext, stack, memory)
+    val state = EVMState(gasManager, (hostContext as TransactionalEVMHostContext).getLogs(), stack, memory)
+    return EVMResult(EVMExecutionStatusCode.SUCCESS, hostContext, hostContext, state)
   }
 
   override fun capabilities(): Int {

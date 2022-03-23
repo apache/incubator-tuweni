@@ -64,28 +64,28 @@ class EthereumVirtualMachineTest {
   fun testExecuteCall(@LuceneIndexWriter writer: IndexWriter) {
     val result = runCode(writer, Bytes.fromHexString("0x30600052596000f3"))
     assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-    assertEquals(Gas.valueOf(199984), result.gasManager.gasLeft())
+    assertEquals(Gas.valueOf(199984), result.state.gasManager.gasLeft())
   }
 
   @Test
   fun testExecuteCounter(@LuceneIndexWriter writer: IndexWriter) {
     val result = runCode(writer, Bytes.fromHexString("0x600160005401600055"))
     assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-    assertEquals(Gas.valueOf(179488), result.gasManager.gasLeft())
+    assertEquals(Gas.valueOf(179488), result.state.gasManager.gasLeft())
   }
 
   @Test
   fun testExecuteReturnBlockNumber(@LuceneIndexWriter writer: IndexWriter) {
     val result = runCode(writer, Bytes.fromHexString("0x43600052596000f3"))
     assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-    assertEquals(Gas.valueOf(199984), result.gasManager.gasLeft())
+    assertEquals(Gas.valueOf(199984), result.state.gasManager.gasLeft())
   }
 
   @Test
   fun testExecuteSaveReturnBlockNumber(@LuceneIndexWriter writer: IndexWriter) {
     val result = runCode(writer, Bytes.fromHexString("0x4360005543600052596000f3"))
     assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-    assertEquals(Gas.valueOf(197779), result.gasManager.gasLeft())
+    assertEquals(Gas.valueOf(197779), result.state.gasManager.gasLeft())
   }
 
   @Disabled
@@ -157,7 +157,7 @@ class EthereumVirtualMachineTest {
         )
       }
       assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-      assertEquals(20000, result.gasManager.gasLeft())
+      assertEquals(20000, result.state.gasManager.gasLeft())
     } finally {
       vm.stop()
     }
@@ -201,7 +201,7 @@ class EthereumVirtualMachineTest {
   @Test
   fun snapshotExecution(@LuceneIndexWriter writer: IndexWriter) {
     val listener = object : StepListener {
-      override fun halt(executionPath: List<Byte>): Boolean {
+      override fun handleStep(executionPath: List<Byte>, state: EVMState): Boolean {
         if (executionPath.size > 3) {
           return true
         }
@@ -210,13 +210,13 @@ class EthereumVirtualMachineTest {
     }
     val result = runCode(writer, Bytes.fromHexString("0x30600052596000f3"), { EvmVmImpl.create(listener) })
     assertEquals(EVMExecutionStatusCode.HALTED, result.statusCode)
-    assertEquals(Gas.valueOf(199987), result.gasManager.gasLeft())
+    assertEquals(Gas.valueOf(199987), result.state.gasManager.gasLeft())
   }
 
   @Test
   fun snapshotExecutionTooFar(@LuceneIndexWriter writer: IndexWriter) {
     val listener = object : StepListener {
-      override fun halt(executionPath: List<Byte>): Boolean {
+      override fun handleStep(executionPath: List<Byte>, state: EVMState): Boolean {
         if (executionPath.size > 255) {
           return true
         }
@@ -225,6 +225,24 @@ class EthereumVirtualMachineTest {
     }
     val result = runCode(writer, Bytes.fromHexString("0x30600052596000f3"), { EvmVmImpl.create(listener) })
     assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-    assertEquals(Gas.valueOf(199984), result.gasManager.gasLeft())
+    assertEquals(Gas.valueOf(199984), result.state.gasManager.gasLeft())
+  }
+
+  @Test
+  fun testDump(@LuceneIndexWriter writer: IndexWriter) {
+    val listener = object : StepListener {
+      override fun handleStep(executionPath: List<Byte>, state: EVMState): Boolean {
+        if (executionPath.size > 3) {
+          return true
+        }
+        return false
+      }
+    }
+    val result = runCode(writer, Bytes.fromHexString("0x30600052596000f3"), { EvmVmImpl.create(listener) })
+    assertEquals(EVMExecutionStatusCode.HALTED, result.statusCode)
+    assertEquals(
+      Bytes.fromHexString("0xf85c866d656d6f7279a0000000000000000000000000353363663737323034654565663935326532350085737461636ba00000000000000000000000000000000000000000000000000000000000000020866f757470757480846c6f6773"),
+      result.state.toBytes()
+    )
   }
 }
