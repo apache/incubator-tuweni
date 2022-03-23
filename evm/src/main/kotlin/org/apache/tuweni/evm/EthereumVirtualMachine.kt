@@ -24,6 +24,7 @@ import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.evm.impl.GasManager
 import org.apache.tuweni.evm.impl.Memory
 import org.apache.tuweni.evm.impl.Stack
+import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
@@ -93,19 +94,55 @@ enum class HardFork(val number: Int) {
 val latestHardFork = HardFork.BERLIN
 
 /**
- * Result of EVM execution
- * @param statusCode the execution result status
- * @param hostContext the context of changes
+ * State of the EVM
+ *
+ * @param gasManager the gas manager
+ * @param logs the logs of the EVM
+ * @param stack the stack of the execution
+ * @param memory the current memory allocation
  * @param output the output of the execution
  */
-data class EVMResult(
-  val statusCode: EVMExecutionStatusCode,
+data class EVMState(
   val gasManager: GasManager,
-  val hostContext: HostContext,
-  val changes: ExecutionChanges,
+  val logs: List<Log>,
   val stack: Stack,
   val memory: Memory,
   val output: Bytes? = null,
+) {
+
+  /**
+   * Dumps the EVM execution state into a byte array
+   */
+  fun toBytes(): Bytes = RLP.encodeList {
+    it.writeString("gas")
+    it.writeValue(gasManager.gas.toBytes())
+    it.writeString("memory")
+    it.writeValue(memory.memoryData ?: Bytes.EMPTY)
+    it.writeString("stack")
+    for (i in 0 until stack.size()) {
+      it.writeValue(stack.get(i) ?: Bytes.EMPTY)
+    }
+    it.writeString("output")
+    it.writeValue(output ?: Bytes.EMPTY)
+    it.writeString("logs")
+    for (log in logs) {
+      it.writeValue(log.toBytes())
+    }
+  }
+}
+
+/**
+ * Result of EVM execution
+ * @param statusCode the execution result status
+ * @param hostContext the context of changes
+ * @param changes the set of changes
+ * @param state the EVM state
+ */
+data class EVMResult(
+  val statusCode: EVMExecutionStatusCode,
+  val hostContext: HostContext,
+  val changes: ExecutionChanges,
+  val state: EVMState,
 )
 
 /**
@@ -120,7 +157,7 @@ data class EVMMessage(
   val sender: Address,
   val inputData: Bytes,
   val value: Bytes,
-  val createSalt: Bytes32 = Bytes32.ZERO
+  val createSalt: Bytes32 = Bytes32.ZERO,
 )
 
 /**
@@ -133,7 +170,7 @@ data class EVMMessage(
 class EthereumVirtualMachine(
   private val repository: BlockchainRepository,
   private val evmVmFactory: () -> EvmVm,
-  private val options: Map<String, String> = mapOf()
+  private val options: Map<String, String> = mapOf(),
 ) {
 
   private var vm: EvmVm? = null
@@ -196,7 +233,7 @@ class EthereumVirtualMachine(
     currentDifficulty: UInt256,
     callKind: CallKind = CallKind.CALL,
     revision: HardFork = latestHardFork,
-    depth: Int = 0
+    depth: Int = 0,
   ): EVMResult {
     val hostContext = TransactionalEVMHostContext(
       repository,
@@ -241,7 +278,7 @@ class EthereumVirtualMachine(
     callKind: CallKind = CallKind.CALL,
     revision: HardFork = latestHardFork,
     depth: Int = 0,
-    hostContext: HostContext
+    hostContext: HostContext,
   ): EVMResult {
     val msg =
       EVMMessage(

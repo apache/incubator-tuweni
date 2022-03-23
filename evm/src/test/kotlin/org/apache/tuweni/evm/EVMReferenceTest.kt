@@ -248,11 +248,11 @@ class EVMReferenceTest {
 
         // assertEquals(test.gas, result.gasManager.gasLeft())
         if (test.out?.isEmpty == true) {
-          assertTrue(result.output == null || result.output?.isEmpty ?: false)
+          assertTrue(result.state.output == null || result.state.output?.isEmpty ?: false)
         } else {
           assertEquals(
             test.out?.let { if (it.size() < 32) Bytes32.rightPad(it) else it },
-            result.output?.let { if (it.size() < 32) Bytes32.rightPad(it) else it }
+            result.state.output?.let { if (it.size() < 32) Bytes32.rightPad(it) else it }
           )
         }
       }

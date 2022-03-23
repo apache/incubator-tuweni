@@ -28,6 +28,7 @@ import org.apache.tuweni.eth.repository.TransientStateRepository
 import org.apache.tuweni.evm.EVMExecutionStatusCode
 import org.apache.tuweni.evm.EthereumVirtualMachine
 import org.apache.tuweni.evm.impl.EvmVmImpl
+import org.apache.tuweni.evm.impl.StepListener
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.trie.MerklePatriciaTrie
 import org.apache.tuweni.trie.MerkleTrie
@@ -42,9 +43,22 @@ import java.time.Instant
  */
 class BlockProcessor {
 
-  suspend fun execute(parentBlock: Block, transactions: List<Transaction>, repository: BlockchainRepository): ProtoBlock {
+  /**
+   * Executes a state transition.
+   *
+   * @param parentBlock the parent block
+   * @param transactions the list of transactions to execute
+   * @param repository the blockchain repository to execute against
+   * @param stepListener an optional listener that can follow the steps of the execution
+   */
+  suspend fun execute(
+    parentBlock: Block,
+    transactions: List<Transaction>,
+    repository: BlockchainRepository,
+    stepListener: StepListener? = null,
+  ): ProtoBlock {
     val stateChanges = TransientStateRepository(repository)
-    val vm = EthereumVirtualMachine(repository, EvmVmImpl::create)
+    val vm = EthereumVirtualMachine(repository, { EvmVmImpl.create(stepListener) })
     vm.start()
     var index = 0L
 
@@ -130,7 +144,7 @@ class BlockProcessor {
         }
         val receipt = TransactionReceipt(
           1,
-          result.gasManager.gasCost.toLong(),
+          result.state.gasManager.gasCost.toLong(),
           txLogsBloomFilter,
           result.changes.getLogs()
         )
@@ -138,7 +152,7 @@ class BlockProcessor {
         receiptsTrie.put(indexKey, receipt.toBytes())
         counter++
 
-        allGasUsed = allGasUsed.add(result.gasManager.gasCost)
+        allGasUsed = allGasUsed.add(result.state.gasManager.gasCost)
       }
     }
 
