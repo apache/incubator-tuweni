@@ -103,6 +103,12 @@ Move the files from `https://dist.apache.org/repos/dist/dev/incubator/tuweni/${R
 svn move -m "Move Apache Tuweni ${RELEASE VERSION} to releases" https://dist.apache.org/repos/dist/dev/incubator/tuweni/${RELEASE VERSION} https://dist.apache.org/repos/dist/release/incubator/tuweni/${RELEASE VERSION}
 ```
 
+Make sure to remove old releases from the dist site as well, to avoid clogging the servers.
+
+```bash
+svn rm -m "Remove old Tuweni release" https://dist.apache.org/repos/dist/release/incubator/tuweni/OLD_RELEASE
+```
+
 ### Release the artifacts to maven central
 
 Go to repository.apache.org to the closed repository you closed during the RC process.
