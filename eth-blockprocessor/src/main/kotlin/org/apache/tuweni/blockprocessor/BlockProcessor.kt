@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.blockprocessor
 
+import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.eth.AccountState
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.Block
@@ -73,6 +74,9 @@ class BlockProcessor {
     for (tx in transactions) {
       val indexKey = RLP.encodeValue(UInt256.valueOf(counter).trimLeadingZeros())
       transactionsTrie.put(indexKey, tx.toBytes())
+      var code: Bytes
+      var to: Address
+      var inputData: Bytes
       if (null == tx.to) {
         val contractAddress = Address.fromBytes(
           Hash.hash(
@@ -82,6 +86,9 @@ class BlockProcessor {
             }
           ).slice(12)
         )
+        to = contractAddress
+        code = tx.payload
+        inputData = Bytes.EMPTY
         val state = AccountState(
           UInt256.ONE,
           Wei.valueOf(0),
@@ -90,70 +97,63 @@ class BlockProcessor {
         )
         stateChanges.storeAccount(contractAddress, state)
         stateChanges.storeCode(tx.payload)
-        val receipt = TransactionReceipt(
-          1,
-          0, // TODO
-          LogsBloomFilter(),
-          emptyList()
-        )
-        allReceipts.add(receipt)
-        receiptsTrie.put(indexKey, receipt.toBytes())
-        counter++
       } else {
-        val code = stateChanges.getAccountCode(tx.to!!)
-        val result = vm.execute(
-          tx.sender!!,
-          tx.to!!,
-          tx.value,
-          code!!,
-          tx.payload,
-          parentBlock.header.gasLimit,
-          tx.gasPrice,
-          Address.ZERO,
-          index,
-          Instant.now().toEpochMilli(),
-          tx.gasLimit.toLong(),
-          parentBlock.header.difficulty
-        )
-        if (result.statusCode != EVMExecutionStatusCode.SUCCESS) {
-          throw Exception("invalid transaction result")
-        }
-        for (balanceChange in result.changes.getBalanceChanges()) {
-          val state = stateChanges.getAccount(balanceChange.key)?.let {
-            AccountState(it.nonce, balanceChange.value, it.storageRoot, it.codeHash)
-          } ?: stateChanges.newAccountState()
-          stateChanges.storeAccount(balanceChange.key, state)
-        }
-
-        for (storageChange in result.changes.getAccountChanges()) {
-          for (oneStorageChange in storageChange.value) {
-            stateChanges.storeAccountValue(storageChange.key, oneStorageChange.key, oneStorageChange.value)
-          }
-        }
-
-        for (accountToDestroy in result.changes.accountsToDestroy()) {
-          stateChanges.destroyAccount(accountToDestroy)
-        }
-        for (log in result.changes.getLogs()) {
-          bloomFilter.insertLog(log)
-        }
-
-        val txLogsBloomFilter = LogsBloomFilter()
-        for (log in result.changes.getLogs()) {
-          bloomFilter.insertLog(log)
-        }
-        val receipt = TransactionReceipt(
-          1,
-          result.state.gasManager.gasCost.toLong(),
-          txLogsBloomFilter,
-          result.changes.getLogs()
-        )
-        allReceipts.add(receipt)
-        receiptsTrie.put(indexKey, receipt.toBytes())
-        counter++
-
-        allGasUsed = allGasUsed.add(result.state.gasManager.gasCost)
+        code = stateChanges.getAccountCode(tx.to!!)!!
+        to = tx.to!!
+        inputData = tx.payload
       }
+      val result = vm.execute(
+        tx.sender!!,
+        to,
+        tx.value,
+        code,
+        inputData,
+        tx.gasLimit,
+        tx.gasPrice,
+        Address.ZERO,
+        index,
+        Instant.now().toEpochMilli(),
+        tx.gasLimit.toLong(),
+        parentBlock.header.difficulty
+      )
+      if (result.statusCode != EVMExecutionStatusCode.SUCCESS) {
+        throw Exception("invalid transaction result ${result.statusCode}")
+      }
+      for (balanceChange in result.changes.getBalanceChanges()) {
+        val state = stateChanges.getAccount(balanceChange.key)?.let {
+          AccountState(it.nonce, balanceChange.value, it.storageRoot, it.codeHash)
+        } ?: stateChanges.newAccountState()
+        stateChanges.storeAccount(balanceChange.key, state)
+      }
+
+      for (storageChange in result.changes.getAccountChanges()) {
+        for (oneStorageChange in storageChange.value) {
+          stateChanges.storeAccountValue(storageChange.key, oneStorageChange.key, oneStorageChange.value)
+        }
+      }
+
+      for (accountToDestroy in result.changes.accountsToDestroy()) {
+        stateChanges.destroyAccount(accountToDestroy)
+      }
+      for (log in result.changes.getLogs()) {
+        bloomFilter.insertLog(log)
+      }
+
+      val txLogsBloomFilter = LogsBloomFilter()
+      for (log in result.changes.getLogs()) {
+        bloomFilter.insertLog(log)
+      }
+      val receipt = TransactionReceipt(
+        1,
+        result.state.gasManager.gasCost.toLong(),
+        txLogsBloomFilter,
+        result.changes.getLogs()
+      )
+      allReceipts.add(receipt)
+      receiptsTrie.put(indexKey, receipt.toBytes())
+      counter++
+
+      allGasUsed = allGasUsed.add(result.state.gasManager.gasCost)
     }
 
     val block = ProtoBlock(
