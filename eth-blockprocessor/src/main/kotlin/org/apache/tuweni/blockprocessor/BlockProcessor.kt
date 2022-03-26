@@ -78,14 +78,7 @@ class BlockProcessor {
       var to: Address
       var inputData: Bytes
       if (null == tx.to) {
-        val contractAddress = Address.fromBytes(
-          Hash.hash(
-            RLP.encodeList {
-              it.writeValue(tx.sender!!)
-              it.writeValue(tx.nonce)
-            }
-          ).slice(12)
-        )
+        val contractAddress = Address.fromTransaction(tx)
         to = contractAddress
         code = tx.payload
         inputData = Bytes.EMPTY

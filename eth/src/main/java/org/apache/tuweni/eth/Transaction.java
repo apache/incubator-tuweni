@@ -103,26 +103,8 @@ public final class Transaction {
       throw new RLPException("Additional bytes present at the end of the encoding");
     }
 
-    byte v;
-    Integer chainId = null;
-
-    if (encodedV == V_BASE || encodedV == (V_BASE + 1)) {
-      v = (byte) (encodedV - V_BASE);
-    } else if (encodedV > 35) {
-      chainId = (encodedV - 35) / 2;
-      v = (byte) (encodedV - (2 * chainId + 35));
-    } else {
-      throw new RLPException("Invalid v encoded value " + encodedV);
-    }
-
-    SECP256K1.Signature signature;
     try {
-      signature = SECP256K1.Signature.create(v, r, s);
-    } catch (IllegalArgumentException e) {
-      throw new RLPException("Invalid signature: " + e.getMessage());
-    }
-    try {
-      return new Transaction(nonce, gasPrice, gasLimit, address, value, payload, chainId, signature);
+      return fromEncoded(nonce, gasPrice, gasLimit, address, value, payload, r, s, encodedV);
     } catch (IllegalArgumentException e) {
       throw new RLPException(e.getMessage(), e);
     }
@@ -230,6 +212,37 @@ public final class Transaction {
     this.signature = signature;
     this.payload = payload;
     this.chainId = chainId;
+  }
+
+  public static Transaction fromEncoded(
+      UInt256 nonce,
+      Wei gasPrice,
+      Gas gasLimit,
+      @Nullable Address to,
+      Wei value,
+      Bytes payload,
+      BigInteger r,
+      BigInteger s,
+      int encodedV) {
+    byte v;
+    Integer chainId = null;
+
+    if (encodedV == V_BASE || encodedV == (V_BASE + 1)) {
+      v = (byte) (encodedV - V_BASE);
+    } else if (encodedV > 35) {
+      chainId = (encodedV - 35) / 2;
+      v = (byte) (encodedV - (2 * chainId + 35));
+    } else {
+      throw new RLPException("Invalid v encoded value " + encodedV);
+    }
+
+    SECP256K1.Signature signature;
+    try {
+      signature = SECP256K1.Signature.create(v, r, s);
+    } catch (IllegalArgumentException e) {
+      throw new RLPException("Invalid signature: " + e.getMessage());
+    }
+    return new Transaction(nonce, gasPrice, gasLimit, to, value, payload, chainId, signature);
   }
 
   /**

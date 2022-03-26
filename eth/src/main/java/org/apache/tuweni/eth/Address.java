@@ -18,6 +18,7 @@ import static java.util.Objects.requireNonNull;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.DelegatingBytes;
 import org.apache.tuweni.crypto.SECP256K1;
+import org.apache.tuweni.rlp.RLP;
 
 /**
  * An Ethereum account address.
@@ -28,6 +29,20 @@ public final class Address extends DelegatingBytes {
    * Burn address.
    */
   public static final Address ZERO = Address.fromBytes(Bytes.repeat((byte) 0, 20));
+
+  /**
+   * Derive a contract address from a transaction.
+   */
+  public static Address fromTransaction(Transaction transaction) {
+    if (transaction.getSender() == null) {
+      throw new IllegalArgumentException("Invalid transaction signature, cannot recover sender");
+    }
+    Bytes encoded = RLP.encodeList((writer) -> {
+      writer.writeValue(transaction.getSender());
+      writer.writeValue(transaction.getNonce().toMinimalBytes());
+    });
+    return Address.fromBytes(Hash.hash(encoded).slice(12));
+  }
 
   /**
    * Transform a public key into an Ethereum address.
