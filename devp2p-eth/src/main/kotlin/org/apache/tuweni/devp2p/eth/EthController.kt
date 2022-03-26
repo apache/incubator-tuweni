@@ -129,7 +129,7 @@ class EthController(
       return
     }
     val hashes = request.data as List<*>
-    for (i in 0..hashes.size) {
+    for (i in 0 until hashes.size) {
       repository.storeBlockBody(hashes[i] as Hash, bodies[i])
     }
     request.handle.complete(bodies)

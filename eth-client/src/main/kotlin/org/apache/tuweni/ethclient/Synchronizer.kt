@@ -58,7 +58,10 @@ abstract class Synchronizer(
         }
       }.awaitAll()
       if (!bodiesToRequest.isEmpty()) {
+        logger.info("Requesting ${bodiesToRequest.size} block bodies")
         client.requestBlockBodies(bodiesToRequest)
+      } else {
+        logger.info("No bodies requested")
       }
     }
   }

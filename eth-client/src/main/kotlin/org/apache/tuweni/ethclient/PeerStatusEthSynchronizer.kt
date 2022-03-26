@@ -19,6 +19,7 @@ package org.apache.tuweni.ethclient
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import org.apache.tuweni.devp2p.eth.EthRequestsManager
+import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.units.bigints.UInt256
@@ -41,7 +42,7 @@ class PeerStatusEthSynchronizer(
   client: EthRequestsManager,
   peerRepository: EthereumPeerRepository,
   private val adapter: WireConnectionPeerRepositoryAdapter,
-  from: UInt256?,
+  from: UInt256? = UInt256.ZERO,
   to: UInt256?
 ) : Synchronizer(executor, coroutineContext, repository, client, peerRepository, from, to) {
 
@@ -70,7 +71,36 @@ class PeerStatusEthSynchronizer(
           0L,
           true,
           adapter.get(ethereumConnection)
-        ).thenAccept(::addHeaders)
+        ).thenAccept {
+          addHeaders(it)
+          launch {
+            repeatAskingForHeaders(ethereumConnection, it.last())
+          }
+        }
+      }
+    }
+  }
+
+  private suspend fun repeatAskingForHeaders(ethereumConnection: EthereumConnection, header: BlockHeader) {
+    if (from?.greaterOrEqualThan(header.number) == true) {
+      logger.info("Status synchronizer done with ${ethereumConnection.identity()}")
+      return
+    }
+    if (repository.hasBlockHeader(header.hash)) {
+      logger.info("Status synchronizer hitting known header ${header.number}, stop there.")
+      return
+    }
+    logger.info("Requesting headers for  ${ethereumConnection.identity()} at block ${header.number}")
+    client.requestBlockHeaders(
+      Hash.fromBytes(header.hash),
+      HEADER_REQUEST_SIZE,
+      0L,
+      true,
+      adapter.get(ethereumConnection)
+    ).thenAccept {
+      addHeaders(it)
+      launch {
+        repeatAskingForHeaders(ethereumConnection, it.last())
       }
     }
   }
