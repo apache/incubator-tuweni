@@ -193,7 +193,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       return emptyList()
     }
     return synchronizers.map { section ->
-      val sectionConfig = config.getConfigurationSection("proxy.$section")
+      val sectionConfig = config.getConfigurationSection("synchronizer.$section")
       SynchronizerConfigurationImpl(
         section, SynchronizerType.valueOf(sectionConfig.getString("type")),
         UInt256.valueOf(sectionConfig.getLong("from")),
@@ -474,7 +474,9 @@ internal data class GenesisFileConfigurationImpl(private val name: String, priva
   override fun genesisFile(): GenesisFile =
     GenesisFile.read(
       if (genesisFilePath.scheme == "classpath") {
-        GenesisFileConfigurationImpl::class.java.getResource(genesisFilePath.path).readBytes()
+        val resource = GenesisFileConfigurationImpl::class.java.getResource(genesisFilePath.path)
+          ?: throw IllegalArgumentException("No such classpath resource: ${genesisFilePath.path}")
+        resource.readBytes()
       } else {
         Files.readAllBytes(Path.of(genesisFilePath))
       }
