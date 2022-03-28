@@ -48,16 +48,20 @@ class BlockProcessor {
    * Executes a state transition.
    *
    * @param parentBlock the parent block
+   * @param gasLimit the gas limit of the block
+   * @param gasUsed the gas used already
    * @param transactions the list of transactions to execute
    * @param repository the blockchain repository to execute against
    * @param stepListener an optional listener that can follow the steps of the execution
    */
   suspend fun execute(
     parentBlock: Block,
+    gasLimit: Gas,
+    gasUsed: Gas,
     transactions: List<Transaction>,
     repository: BlockchainRepository,
     stepListener: StepListener? = null,
-  ): ProtoBlock {
+  ): ProtoBlock? {
     val stateChanges = TransientStateRepository(repository)
     val vm = EthereumVirtualMachine(repository, { EvmVmImpl.create(stepListener) })
     vm.start()
@@ -72,6 +76,9 @@ class BlockProcessor {
     var counter = 0L
     var allGasUsed = Gas.ZERO
     for (tx in transactions) {
+      if (tx.getGasLimit() > gasLimit.subtract(gasUsed).subtract(allGasUsed)) {
+        return null
+      }
       val indexKey = RLP.encodeValue(UInt256.valueOf(counter).trimLeadingZeros())
       transactionsTrie.put(indexKey, tx.toBytes())
       var code: Bytes

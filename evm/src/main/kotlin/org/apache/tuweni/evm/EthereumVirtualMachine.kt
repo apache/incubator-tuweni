@@ -37,7 +37,8 @@ enum class CallKind(val number: Int) {
   DELEGATECALL(1),
   CALLCODE(2),
   CREATE(3),
-  CREATE2(4)
+  CREATE2(4),
+  STATICCALL(5)
 }
 
 /**
@@ -395,6 +396,18 @@ interface HostContext {
   suspend fun getCodeHash(address: Address): Bytes32
 
   /**
+   * Get account nonce
+   *
+   *
+   * This function is used by a VM to get the nonce of the account at
+   * the given address.
+   *
+   * @param address The address of the account.
+   * @return The nonce of the accountt.
+   */
+  suspend fun getNonce(address: Address): UInt256
+
+  /**
    * Copy code function.
    *
    *
@@ -526,6 +539,9 @@ val opcodes = mapOf<Byte, String>(
   Pair(0x18, "xor"),
   Pair(0x19, "not"),
   Pair(0x1a, "byte"),
+  Pair(0x1b, "shl"),
+  Pair(0x1c, "shr"),
+  Pair(0x1d, "sar"),
   Pair(0x20, "sha3"),
   Pair(0x30, "address"),
   Pair(0x31, "balance"),
@@ -615,6 +631,11 @@ val opcodes = mapOf<Byte, String>(
   Pair(0xa2.toByte(), "log2"),
   Pair(0xa3.toByte(), "log3"),
   Pair(0xa4.toByte(), "log4"),
+  Pair(0xf1.toByte(), "call"),
+  Pair(0xf2.toByte(), "callcode"),
+  Pair(0xf3.toByte(), "return"),
+  Pair(0xf4.toByte(), "delegatecall"),
+  Pair(0xfa.toByte(), "staticcall"),
   Pair(0xfe.toByte(), "invalid"),
   Pair(0xff.toByte(), "selfdestruct"),
 )

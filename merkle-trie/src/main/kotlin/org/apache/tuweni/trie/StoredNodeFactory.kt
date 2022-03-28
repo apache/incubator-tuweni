@@ -76,7 +76,10 @@ internal class StoredNodeFactory<V>(
   }
 
   internal suspend fun retrieve(hash: Bytes32): Node<V> {
-    val bytes = storage.get(hash) ?: throw MerkleStorageException("Missing value for hash $hash")
+    val bytes = storage.get(hash)
+    if (bytes == null) {
+      return NullNode.instance()
+    }
     val node = decode(bytes) { "Invalid RLP value for hash $hash" }
     assert(hash == node.hash()) { "Node hash ${node.hash()} not equal to expected $hash" }
     return node
@@ -172,10 +175,12 @@ internal class StoredNodeFactory<V>(
   }
 
   private fun decodeLeaf(path: Bytes, valueRlp: RLPReader, errMessage: () -> String): LeafNode<V> {
-    if (valueRlp.nextIsEmpty()) {
-      throw MerkleStorageException(errMessage() + ": leaf has null value")
+    var value: V
+    if (!valueRlp.nextIsEmpty()) {
+      value = decodeValue(valueRlp, errMessage)
+    } else {
+      value = valueDeserializer(Bytes.EMPTY)
     }
-    val value = decodeValue(valueRlp, errMessage)
     return LeafNode(path, value, this, valueSerializer)
   }
 

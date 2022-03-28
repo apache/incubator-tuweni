@@ -27,6 +27,8 @@ import org.apache.tuweni.evm.impl.berlin.and
 import org.apache.tuweni.evm.impl.berlin.balance
 import org.apache.tuweni.evm.impl.berlin.blockhash
 import org.apache.tuweni.evm.impl.berlin.byte
+import org.apache.tuweni.evm.impl.berlin.call
+import org.apache.tuweni.evm.impl.berlin.callcode
 import org.apache.tuweni.evm.impl.berlin.calldatacopy
 import org.apache.tuweni.evm.impl.berlin.calldataload
 import org.apache.tuweni.evm.impl.berlin.calldatasize
@@ -35,6 +37,7 @@ import org.apache.tuweni.evm.impl.berlin.callvalue
 import org.apache.tuweni.evm.impl.berlin.codecopy
 import org.apache.tuweni.evm.impl.berlin.codesize
 import org.apache.tuweni.evm.impl.berlin.coinbase
+import org.apache.tuweni.evm.impl.berlin.delegatecall
 import org.apache.tuweni.evm.impl.berlin.difficulty
 import org.apache.tuweni.evm.impl.berlin.div
 import org.apache.tuweni.evm.impl.berlin.dup
@@ -85,6 +88,10 @@ import org.apache.tuweni.evm.impl.berlin.timestamp
 import org.apache.tuweni.evm.impl.berlin.xor
 import org.apache.tuweni.evm.impl.berlin.extcodecopy
 import org.apache.tuweni.evm.impl.berlin.returndatasize
+import org.apache.tuweni.evm.impl.berlin.sar
+import org.apache.tuweni.evm.impl.berlin.shl
+import org.apache.tuweni.evm.impl.berlin.shr
+import org.apache.tuweni.evm.impl.berlin.staticcall
 
 fun interface Opcode {
   fun execute(
@@ -130,6 +137,9 @@ class OpcodeRegistry(val opcodes: Map<HardFork, Map<Byte, Opcode>>) {
       berlinOpcodes[0x18] = xor
       berlinOpcodes[0x19] = not
       berlinOpcodes[0x1a] = byte
+      berlinOpcodes[0x1b] = shl
+      berlinOpcodes[0x1c] = shr
+      berlinOpcodes[0x1d] = sar
       berlinOpcodes[0x20] = sha3
       berlinOpcodes[0x30] = address
       berlinOpcodes[0x31] = balance
@@ -166,7 +176,12 @@ class OpcodeRegistry(val opcodes: Map<HardFork, Map<Byte, Opcode>>) {
       berlinOpcodes[0x59] = msize
       berlinOpcodes[0x5a] = gas
       berlinOpcodes[0x5b] = jumpdest
+      berlinOpcodes[0xf0.toByte()] = org.apache.tuweni.evm.impl.berlin.create
+      berlinOpcodes[0xf1.toByte()] = call
+      berlinOpcodes[0xf2.toByte()] = callcode
       berlinOpcodes[0xf3.toByte()] = retuRn
+      berlinOpcodes[0xf4.toByte()] = delegatecall
+      berlinOpcodes[0xfa.toByte()] = staticcall
       berlinOpcodes[0xfe.toByte()] = invalid
       berlinOpcodes[0xff.toByte()] = selfdestruct
       for (i in 1..32) {

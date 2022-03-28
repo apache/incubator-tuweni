@@ -92,7 +92,6 @@ class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
       }
       val currentOpcodeByte = code.get(current)
       current++
-      // TODO implement call and pass result
       val result = opcode.execute(gasManager, hostContext, stack, msg, code, current, memory, null)
       logger.trace(
         ">> OPCODE: ${opcodes[currentOpcodeByte] ?: currentOpcodeByte.toString(16)} " +

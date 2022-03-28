@@ -220,6 +220,23 @@ class TransactionalEVMHostContext(
   }
 
   /**
+   * Get account nonce
+   *
+   *
+   * This function is used by a VM to get the nonce of the account at
+   * the given address.
+   *
+   * @param address The address of the account.
+   * @return The nonce of the accountt.
+   */
+  override suspend fun getNonce(address: Address): UInt256 {
+    logger.trace("Entering getNonce")
+    val account = repository.getAccount(address)
+
+    return account?.nonce ?: UInt256.ONE
+  }
+
+  /**
    * Copy code function.
    *
    *

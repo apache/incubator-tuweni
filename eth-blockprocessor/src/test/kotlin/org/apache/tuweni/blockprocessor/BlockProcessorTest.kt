@@ -24,6 +24,7 @@ import org.apache.tuweni.genesis.Genesis
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.bigints.UInt64
+import org.apache.tuweni.units.ethereum.Gas
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -39,8 +40,8 @@ class BlockProcessorTest {
   fun testValidBlockNoTransactions() = runBlocking {
     val processor = BlockProcessor()
     val repository = BlockchainRepository.inMemory(Genesis.dev())
-    val protoBlock = processor.execute(Genesis.dev(), listOf(), repository)
-    val block = protoBlock.toBlock(listOf(), Address.ZERO, UInt256.ONE, Instant.now(), Bytes.EMPTY, Genesis.emptyHash, UInt64.random())
+    val protoBlock = processor.execute(Genesis.dev(), Gas.valueOf(100), Gas.ZERO, listOf(), repository)
+    val block = protoBlock!!.toBlock(listOf(), Address.ZERO, UInt256.ONE, Instant.now(), Bytes.EMPTY, Genesis.emptyHash, UInt64.random())
     assertEquals(0, block.body.transactions.size)
   }
 }

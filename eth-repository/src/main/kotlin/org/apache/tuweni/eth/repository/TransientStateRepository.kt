@@ -16,7 +16,6 @@
  */
 package org.apache.tuweni.eth.repository
 
-import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.AccountState
@@ -38,9 +37,7 @@ class TransientStateRepository(val repository: BlockchainRepository) : StateRepo
   private val transientWorldState: StoredMerklePatriciaTrie<Bytes>
 
   init {
-    val stateRoot = runBlocking {
-      repository.retrieveChainHead().header.stateRoot
-    }
+    val stateRoot = repository.worldState!!.rootHash()
     transientWorldState = StoredMerklePatriciaTrie.storingBytes(
       object : MerkleStorage {
         override suspend fun get(hash: Bytes32): Bytes? {
@@ -100,7 +97,8 @@ class TransientStateRepository(val repository: BlockchainRepository) : StateRepo
   }
 
   override suspend fun getAccountCode(address: Address): Bytes? {
-    val accountStateBytes = transientWorldState.get(Hash.hash(address))
+    val addressHash = Hash.hash(address)
+    val accountStateBytes = transientWorldState.get(addressHash)
     if (accountStateBytes == null) {
       return null
     }
