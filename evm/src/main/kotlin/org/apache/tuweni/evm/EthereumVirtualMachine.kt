@@ -215,6 +215,7 @@ class EthereumVirtualMachine(
    * @param currentTimestamp current block timestamp
    * @param currentGasLimit current gas limit
    * @param currentDifficulty block current total difficulty
+   * @param chainId the ID of the current chain
    * @param callKind the type of call
    * @param revision the hard fork revision in which to execute
    * @return the result of the execution
@@ -232,6 +233,7 @@ class EthereumVirtualMachine(
     currentTimestamp: Long,
     currentGasLimit: Long,
     currentDifficulty: UInt256,
+    chainId: UInt256,
     callKind: CallKind = CallKind.CALL,
     revision: HardFork = latestHardFork,
     depth: Int = 0,
@@ -250,7 +252,8 @@ class EthereumVirtualMachine(
       currentNumber,
       currentTimestamp,
       currentGasLimit,
-      currentDifficulty
+      currentDifficulty,
+      chainId
     )
     val result =
       executeInternal(
@@ -504,6 +507,7 @@ interface HostContext {
   fun getDifficulty(): UInt256
   fun increaseBalance(address: Address, amount: Wei)
   suspend fun setBalance(address: Address, balance: Wei)
+  fun getChaindId(): UInt256
 }
 
 interface EvmVm {
@@ -565,6 +569,8 @@ val opcodes = mapOf<Byte, String>(
   Pair(0x43, "number"),
   Pair(0x44, "difficulty"),
   Pair(0x45, "gaslimit"),
+  Pair(0x46, "chainid"),
+  Pair(0x47, "selfbalance"),
   Pair(0x50, "pop"),
   Pair(0x51, "mload"),
   Pair(0x52, "mstore"),
@@ -609,6 +615,22 @@ val opcodes = mapOf<Byte, String>(
   Pair(0x7d, "push30"),
   Pair(0x7e, "push31"),
   Pair(0x7f, "push32"),
+  Pair(0x80.toByte(), "dup1"),
+  Pair(0x81.toByte(), "dup2"),
+  Pair(0x82.toByte(), "dup3"),
+  Pair(0x83.toByte(), "dup4"),
+  Pair(0x84.toByte(), "dup5"),
+  Pair(0x85.toByte(), "dup6"),
+  Pair(0x86.toByte(), "dup7"),
+  Pair(0x87.toByte(), "dup8"),
+  Pair(0x88.toByte(), "dup9"),
+  Pair(0x89.toByte(), "dup10"),
+  Pair(0x8a.toByte(), "dup11"),
+  Pair(0x8b.toByte(), "dup12"),
+  Pair(0x8c.toByte(), "dup13"),
+  Pair(0x8d.toByte(), "dup14"),
+  Pair(0x8e.toByte(), "dup15"),
+  Pair(0x8f.toByte(), "dup16"),
   Pair(0x90.toByte(), "swap1"),
   Pair(0x91.toByte(), "swap2"),
   Pair(0x92.toByte(), "swap3"),
@@ -625,16 +647,17 @@ val opcodes = mapOf<Byte, String>(
   Pair(0x9d.toByte(), "swap14"),
   Pair(0x9e.toByte(), "swap15"),
   Pair(0x9f.toByte(), "swap16"),
-  Pair(0xf3.toByte(), "return"),
   Pair(0xa0.toByte(), "log0"),
   Pair(0xa1.toByte(), "log1"),
   Pair(0xa2.toByte(), "log2"),
   Pair(0xa3.toByte(), "log3"),
   Pair(0xa4.toByte(), "log4"),
+  Pair(0xf0.toByte(), "create"),
   Pair(0xf1.toByte(), "call"),
   Pair(0xf2.toByte(), "callcode"),
   Pair(0xf3.toByte(), "return"),
   Pair(0xf4.toByte(), "delegatecall"),
+  Pair(0xf5.toByte(), "create2"),
   Pair(0xfa.toByte(), "staticcall"),
   Pair(0xfe.toByte(), "invalid"),
   Pair(0xff.toByte(), "selfdestruct"),

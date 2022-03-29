@@ -413,6 +413,19 @@ val retuRn = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
   Result(EVMExecutionStatusCode.SUCCESS, output = output)
 }
 
+val revert = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
+  val location = stack.pop()
+  val length = stack.pop()
+  if (null == location || null == length) {
+    return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  }
+  val pre = memoryCost(memory.size())
+  val post: Gas = memoryCost(memory.newSize(location, length))
+  gasManager.add(post.subtract(pre))
+  val output = memory.read(location, length)
+  Result(EVMExecutionStatusCode.REVERT, output = output)
+}
+
 val address = Opcode { gasManager, _, stack, msg, _, _, _, _ ->
   gasManager.add(2)
   stack.push(Bytes32.leftPad(msg.destination))
@@ -1076,6 +1089,51 @@ val create = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ -
   Result()
 }
 
+val create2 = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
+  val value = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  val inputDataOffset = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  val inputDataLength = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  val salt = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  val inputPre = memoryCost(memory.size())
+  val inputPost = memoryCost(memory.newSize(inputDataOffset, inputDataLength))
+  val inputMemoryCost = inputPost.subtract(inputPre)
+  gasManager.add(Gas.valueOf(32000).add(inputMemoryCost).add(Gas.valueOf(inputDataLength.divide(32).multiply(6))))
+  val inputData = memory.read(inputDataOffset, inputDataLength)
+  if (inputData == null) {
+    return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
+  }
+  val hash = Hash.keccak256(
+    Bytes.concatenate(
+      Bytes.fromHexString("0xFF"),
+      message.sender,
+      salt,
+      Hash.keccak256(inputData)
+    )
+  )
+  val to = Address.fromBytes(hash.slice(12))
+  runBlocking {
+
+    val result = hostContext.call(
+      EVMMessage(
+        CallKind.CREATE2.number,
+        0,
+        message.depth + 1,
+        gasManager.gasLeft(),
+        to,
+        message.sender,
+        inputData,
+        value
+      )
+    )
+    if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
+      stack.push(UInt256.ONE)
+    } else {
+      stack.push(UInt256.ZERO)
+    }
+  }
+  Result()
+}
+
 val shl = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(3)
   var shiftAmount = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
@@ -1084,7 +1142,7 @@ val shl = Opcode { gasManager, _, stack, _, _, _, _, _ ->
     stack.push(UInt256.ZERO)
     Result()
   } else {
-    val shiftAmountInt = shiftAmount.intValue()
+    val shiftAmountInt = shiftAmount.getInt(28)
     val value = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
     if (shiftAmountInt >= 256 || shiftAmountInt < 0) {
       stack.push(UInt256.ZERO)
@@ -1104,7 +1162,7 @@ val shr = Opcode { gasManager, _, stack, _, _, _, _, _ ->
     stack.push(UInt256.ZERO)
     Result()
   } else {
-    val shiftAmountInt = shiftAmount.intValue()
+    val shiftAmountInt = shiftAmount.getInt(28)
     val value = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
     if (shiftAmountInt >= 256 || shiftAmountInt < 0) {
       stack.push(UInt256.ZERO)
@@ -1124,7 +1182,7 @@ val sar = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   if (shiftAmount.trimLeadingZeros().size() > 4) {
     stack.push(if (negativeNumber) UInt256.MAX_VALUE else UInt256.ZERO)
   } else {
-    val shiftAmountInt = shiftAmount.toInt()
+    val shiftAmountInt = shiftAmount.getInt(28)
     if (shiftAmountInt >= 256 || shiftAmountInt < 0) {
       stack.push(if (negativeNumber) UInt256.MAX_VALUE else UInt256.ZERO)
     } else {
@@ -1241,4 +1299,19 @@ val selfdestruct = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
 
     Result(EVMExecutionStatusCode.SUCCESS)
   }
+}
+
+val selfbalance = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
+  gasManager.add(5)
+  val account = runBlocking {
+    hostContext.getBalance(msg.sender)
+  }
+  stack.push(account)
+  Result()
+}
+
+val chainid = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
+  gasManager.add(2)
+  stack.push(hostContext.getChaindId())
+  Result()
 }

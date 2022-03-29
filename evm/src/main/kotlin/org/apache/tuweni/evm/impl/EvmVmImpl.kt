@@ -93,10 +93,14 @@ class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
       val currentOpcodeByte = code.get(current)
       current++
       val result = opcode.execute(gasManager, hostContext, stack, msg, code, current, memory, null)
-      logger.trace(
-        ">> OPCODE: ${opcodes[currentOpcodeByte] ?: currentOpcodeByte.toString(16)} " +
-          "gas: ${gasManager.gasLeft()} cost: ${gasManager.lastGasCost()}"
-      )
+      if (logger.isTraceEnabled) {
+        val foo = Bytes.of(currentOpcodeByte).toHexString()
+
+        logger.trace(
+          ">> OPCODE: ${opcodes[currentOpcodeByte] ?: throw java.lang.RuntimeException("unknown opcode $foo") } " +
+            "gas: ${gasManager.gasLeft()} cost: ${gasManager.lastGasCost()}"
+        )
+      }
       val state = EVMState(gasManager, (hostContext as TransactionalEVMHostContext).getLogs(), stack, memory, result?.output)
 
       if (result?.status != null) {

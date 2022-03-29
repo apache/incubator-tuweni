@@ -46,7 +46,8 @@ class TransactionalEVMHostContext(
   val currentNumber: Long,
   val currentTimestamp: Long,
   val currentGasLimit: Long,
-  val currentDifficulty: UInt256
+  val currentDifficulty: UInt256,
+  val chainId: UInt256
 ) : HostContext, ExecutionChanges {
 
   companion object {
@@ -368,4 +369,6 @@ class TransactionalEVMHostContext(
   override suspend fun setBalance(address: Address, balance: Wei) {
     balanceChanges[address] = getBalance(address).subtract(balance)
   }
+
+  override fun getChaindId(): UInt256 = chainId
 }

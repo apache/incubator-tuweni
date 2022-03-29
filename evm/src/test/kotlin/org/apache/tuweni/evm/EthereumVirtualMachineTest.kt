@@ -153,7 +153,9 @@ class EthereumVirtualMachineTest {
           0,
           0,
           2,
-          UInt256.valueOf(1), CallKind.CREATE
+          UInt256.valueOf(1),
+          UInt256.valueOf(1),
+          CallKind.CREATE
         )
       }
       assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
@@ -191,6 +193,7 @@ class EthereumVirtualMachineTest {
           0,
           0,
           2,
+          UInt256.valueOf(1),
           UInt256.valueOf(1)
         )
       } finally {

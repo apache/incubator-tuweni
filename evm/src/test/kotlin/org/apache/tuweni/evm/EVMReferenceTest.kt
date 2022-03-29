@@ -153,7 +153,8 @@ class EVMReferenceTest {
         test.env?.currentNumber!!.toLong(),
         test.env?.currentTimestamp!!.toLong(),
         test.env?.currentGasLimit!!.toLong(),
-        test.env?.currentDifficulty!!
+        test.env?.currentDifficulty!!,
+        UInt256.valueOf(1)
       )
       if (test.post == null) {
         assertNotEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)

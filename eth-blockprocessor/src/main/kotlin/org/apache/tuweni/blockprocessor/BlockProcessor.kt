@@ -41,8 +41,10 @@ import java.time.Instant
 /**
  * A block processor executing blocks, executing in sequence transactions
  * and committing data to a blockchain repository.
+ *
+ * @param chainId the chain identifier
  */
-class BlockProcessor {
+class BlockProcessor(val chainId: UInt256) {
 
   /**
    * Executes a state transition.
@@ -114,7 +116,8 @@ class BlockProcessor {
         index,
         Instant.now().toEpochMilli(),
         tx.gasLimit.toLong(),
-        parentBlock.header.difficulty
+        parentBlock.header.difficulty,
+        chainId
       )
       if (result.statusCode != EVMExecutionStatusCode.SUCCESS) {
         throw Exception("invalid transaction result ${result.statusCode}")

@@ -34,9 +34,11 @@ import org.apache.tuweni.evm.impl.berlin.calldataload
 import org.apache.tuweni.evm.impl.berlin.calldatasize
 import org.apache.tuweni.evm.impl.berlin.caller
 import org.apache.tuweni.evm.impl.berlin.callvalue
+import org.apache.tuweni.evm.impl.berlin.chainid
 import org.apache.tuweni.evm.impl.berlin.codecopy
 import org.apache.tuweni.evm.impl.berlin.codesize
 import org.apache.tuweni.evm.impl.berlin.coinbase
+import org.apache.tuweni.evm.impl.berlin.create2
 import org.apache.tuweni.evm.impl.berlin.delegatecall
 import org.apache.tuweni.evm.impl.berlin.difficulty
 import org.apache.tuweni.evm.impl.berlin.div
@@ -88,7 +90,9 @@ import org.apache.tuweni.evm.impl.berlin.timestamp
 import org.apache.tuweni.evm.impl.berlin.xor
 import org.apache.tuweni.evm.impl.berlin.extcodecopy
 import org.apache.tuweni.evm.impl.berlin.returndatasize
+import org.apache.tuweni.evm.impl.berlin.revert
 import org.apache.tuweni.evm.impl.berlin.sar
+import org.apache.tuweni.evm.impl.berlin.selfbalance
 import org.apache.tuweni.evm.impl.berlin.shl
 import org.apache.tuweni.evm.impl.berlin.shr
 import org.apache.tuweni.evm.impl.berlin.staticcall
@@ -164,6 +168,8 @@ class OpcodeRegistry(val opcodes: Map<HardFork, Map<Byte, Opcode>>) {
       berlinOpcodes[0x43] = number
       berlinOpcodes[0x44] = difficulty
       berlinOpcodes[0x45] = gasLimit
+      berlinOpcodes[0x46] = chainid
+      berlinOpcodes[0x47] = selfbalance
       berlinOpcodes[0x50] = pop
       berlinOpcodes[0x51] = mload
       berlinOpcodes[0x52] = mstore
@@ -181,7 +187,9 @@ class OpcodeRegistry(val opcodes: Map<HardFork, Map<Byte, Opcode>>) {
       berlinOpcodes[0xf2.toByte()] = callcode
       berlinOpcodes[0xf3.toByte()] = retuRn
       berlinOpcodes[0xf4.toByte()] = delegatecall
+      berlinOpcodes[0xf5.toByte()] = create2
       berlinOpcodes[0xfa.toByte()] = staticcall
+      berlinOpcodes[0xfd.toByte()] = revert
       berlinOpcodes[0xfe.toByte()] = invalid
       berlinOpcodes[0xff.toByte()] = selfdestruct
       for (i in 1..32) {
