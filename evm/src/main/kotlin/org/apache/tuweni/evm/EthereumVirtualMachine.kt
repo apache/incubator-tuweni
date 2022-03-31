@@ -20,6 +20,7 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.Log
+import org.apache.tuweni.eth.precompiles.PrecompileContract
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.evm.impl.GasManager
 import org.apache.tuweni.evm.impl.Memory
@@ -170,6 +171,7 @@ data class EVMMessage(
  */
 class EthereumVirtualMachine(
   private val repository: BlockchainRepository,
+  private val precompiles: Map<Address, PrecompileContract>,
   private val evmVmFactory: () -> EvmVm,
   private val options: Map<String, String> = mapOf(),
 ) {
@@ -253,7 +255,7 @@ class EthereumVirtualMachine(
       currentTimestamp,
       currentGasLimit,
       currentDifficulty,
-      chainId
+      chainId,
     )
     val result =
       executeInternal(
@@ -284,18 +286,26 @@ class EthereumVirtualMachine(
     depth: Int = 0,
     hostContext: HostContext,
   ): EVMResult {
-    val msg =
-      EVMMessage(
-        callKind.number, 0, depth, gas, destination, sender, inputData,
-        value
-      )
+    val contract = precompiles[destination]
+    if (contract != null) {
+      val result = contract.run(inputData)
+      val gasManager = GasManager(gas)
+      gasManager.add(result.gas)
+      return EVMResult(EVMExecutionStatusCode.SUCCESS, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), result.output))
+    } else {
+      val msg =
+        EVMMessage(
+          callKind.number, 0, depth, gas, destination, sender, inputData,
+          value
+        )
 
-    return vm().execute(
-      hostContext,
-      revision,
-      msg,
-      code
-    )
+      return vm().execute(
+        hostContext,
+        revision,
+        msg,
+        code
+      )
+    }
   }
 
   /**
@@ -687,4 +697,14 @@ interface ExecutionChanges {
    * Lists of balance changes, with the final balances
    */
   fun getBalanceChanges(): Map<Address, Wei>
+}
+
+object NoOpExecutionChanges : ExecutionChanges {
+  override fun getAccountChanges(): Map<Address, HashMap<Bytes32, Bytes32>> = mapOf()
+
+  override fun getLogs(): List<Log> = listOf()
+
+  override fun accountsToDestroy(): List<Address> = listOf()
+
+  override fun getBalanceChanges(): Map<Address, Wei> = mapOf()
 }

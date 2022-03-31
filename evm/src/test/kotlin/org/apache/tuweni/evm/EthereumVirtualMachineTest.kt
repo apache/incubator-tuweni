@@ -20,6 +20,7 @@ import kotlinx.coroutines.runBlocking
 import org.apache.lucene.index.IndexWriter
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.eth.Address
+import org.apache.tuweni.eth.precompiles.Registry
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.evm.impl.EvmVmImpl
@@ -54,7 +55,7 @@ class EthereumVirtualMachineTest {
       BlockchainIndex(writer),
       Genesis.dev()
     )
-    val vm = EthereumVirtualMachine(repository, EvmVmImpl::create)
+    val vm = EthereumVirtualMachine(repository, Registry.istanbul, EvmVmImpl::create)
     vm.start()
     assertEquals("0.0.1", vm.version())
     vm.stop()
@@ -101,7 +102,7 @@ class EthereumVirtualMachineTest {
       MapKeyValueStore(),
       BlockchainIndex(writer)
     )
-    val vm = EthereumVirtualMachine(repository, EvmVmImpl::create)
+    val vm = EthereumVirtualMachine(repository, Registry.istanbul, EvmVmImpl::create)
     vm.start()
     assertTrue(vm.capabilities() > 0)
     vm.stop()
@@ -120,7 +121,7 @@ class EthereumVirtualMachineTest {
       MapKeyValueStore(),
       BlockchainIndex(writer)
     )
-    val vm = EthereumVirtualMachine(repository, EvmVmImpl::create, mapOf(Pair("verbose", "1")))
+    val vm = EthereumVirtualMachine(repository, Registry.istanbul, EvmVmImpl::create, mapOf(Pair("verbose", "1")))
     vm.start()
     vm.stop()
   }
@@ -137,7 +138,7 @@ class EthereumVirtualMachineTest {
       BlockchainIndex(writer)
     )
 
-    val vm = EthereumVirtualMachine(repository, EvmVmImpl::create)
+    val vm = EthereumVirtualMachine(repository, Registry.istanbul, EvmVmImpl::create)
     vm.start()
     try {
       val sender = Address.fromHexString("0x3339626637316465316237643762653362353100")
@@ -178,7 +179,7 @@ class EthereumVirtualMachineTest {
         Genesis.dev()
       )
 
-      val vm = EthereumVirtualMachine(repository, vmFn)
+      val vm = EthereumVirtualMachine(repository, Registry.istanbul, vmFn)
       vm.start()
       try {
         val sender = Address.fromHexString("0x3339626637316465316237643762653362353100")

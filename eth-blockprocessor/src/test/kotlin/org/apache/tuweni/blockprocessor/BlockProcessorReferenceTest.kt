@@ -29,6 +29,8 @@ import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.EthJsonModule
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.Transaction
+import org.apache.tuweni.eth.precompiles.Registry
+import org.apache.tuweni.eth.precompiles.Registry.istanbul
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.genesis.Genesis
 import org.apache.tuweni.io.Resources
@@ -175,7 +177,7 @@ class BlockProcessorReferenceTest {
 
     try {
       val protoBlock =
-        processor.execute(Genesis.dev(), test.env!!.currentGasLimit!!, Gas.ZERO, listOf(tx()), repository)
+        processor.execute(Genesis.dev(), test.env!!.currentGasLimit!!, Gas.ZERO, listOf(tx()), repository, Registry.istanbul)
       assertNotNull(protoBlock)
     } catch (e: Exception) {
       if (e.message == "invalid transaction result REVERT") {

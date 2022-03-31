@@ -47,7 +47,7 @@ class TransactionalEVMHostContext(
   val currentTimestamp: Long,
   val currentGasLimit: Long,
   val currentDifficulty: UInt256,
-  val chainId: UInt256
+  val chainId: UInt256,
 ) : HostContext, ExecutionChanges {
 
   companion object {

@@ -24,6 +24,7 @@ import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.LogsBloomFilter
 import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.eth.TransactionReceipt
+import org.apache.tuweni.eth.precompiles.PrecompileContract
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.TransientStateRepository
 import org.apache.tuweni.evm.EVMExecutionStatusCode
@@ -55,6 +56,7 @@ class BlockProcessor(val chainId: UInt256) {
    * @param transactions the list of transactions to execute
    * @param repository the blockchain repository to execute against
    * @param stepListener an optional listener that can follow the steps of the execution
+   * @param precompiles the map of precompiles
    */
   suspend fun execute(
     parentBlock: Block,
@@ -62,10 +64,11 @@ class BlockProcessor(val chainId: UInt256) {
     gasUsed: Gas,
     transactions: List<Transaction>,
     repository: BlockchainRepository,
+    precompiles: Map<Address, PrecompileContract>,
     stepListener: StepListener? = null,
   ): ProtoBlock? {
     val stateChanges = TransientStateRepository(repository)
-    val vm = EthereumVirtualMachine(repository, { EvmVmImpl.create(stepListener) })
+    val vm = EthereumVirtualMachine(repository, precompiles, { EvmVmImpl.create(stepListener) })
     vm.start()
     var index = 0L
 

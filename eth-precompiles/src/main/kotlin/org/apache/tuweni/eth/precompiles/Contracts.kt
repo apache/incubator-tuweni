@@ -78,7 +78,7 @@ class RIPEMD160PrecompiledContract : PrecompileContract {
   }
 }
 
-class ModExpPrecmpileContract : PrecompileContract {
+class ModExpPrecompileContract : PrecompileContract {
   companion object {
     val BASE_OFFSET = BigInteger.valueOf(96)
 
@@ -113,13 +113,15 @@ class ModExpPrecmpileContract : PrecompileContract {
       Bytes.wrap(base.modPow(exp, mod).toByteArray()).trimLeadingZeros()
     }
 
-    return Result(0, Bytes.wrap(modExp.toArrayUnsafe(), 0, modulusLength.toInt()))
+    return Result(0, Bytes.wrap(Bytes.repeat(0, modulusLength.toInt() - modExp.size()), modExp))
   }
 }
 
-class AltBN128PrecompiledContract(private val operation: Byte, val inputLen: Int) : PrecompileContract {
+class AltBN128PrecompiledContract(private val operation: Byte, val inputLen: Int, val baseCost: Long, val pairingGasCost: Long) : PrecompileContract {
 
   override fun run(input: Bytes): Result {
+    val parameters = input.size() / 192
+    val gasCost = pairingGasCost * parameters + baseCost
     val result = ByteArray(LibEthPairings.EIP196_PREALLOCATE_FOR_RESULT_BYTES)
     val error = ByteArray(LibEthPairings.EIP2537_PREALLOCATE_FOR_ERROR_BYTES)
 
@@ -136,9 +138,9 @@ class AltBN128PrecompiledContract(private val operation: Byte, val inputLen: Int
       err_len
     )
     return if (errorNo == 0) {
-      Result(0, Bytes.wrap(result, 0, o_len.getValue()))
+      Result(gasCost, Bytes.wrap(result, 0, o_len.getValue()))
     } else {
-      Result(0, Bytes.EMPTY)
+      Result(gasCost, Bytes.EMPTY)
     }
   }
 }

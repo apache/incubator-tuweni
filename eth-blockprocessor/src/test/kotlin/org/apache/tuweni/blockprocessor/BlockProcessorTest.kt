@@ -19,6 +19,7 @@ package org.apache.tuweni.blockprocessor
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.eth.Address
+import org.apache.tuweni.eth.precompiles.Registry
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.genesis.Genesis
 import org.apache.tuweni.junit.BouncyCastleExtension
@@ -40,7 +41,7 @@ class BlockProcessorTest {
   fun testValidBlockNoTransactions() = runBlocking {
     val processor = BlockProcessor(UInt256.ONE)
     val repository = BlockchainRepository.inMemory(Genesis.dev())
-    val protoBlock = processor.execute(Genesis.dev(), Gas.valueOf(100), Gas.ZERO, listOf(), repository)
+    val protoBlock = processor.execute(Genesis.dev(), Gas.valueOf(100), Gas.ZERO, listOf(), repository, Registry.istanbul)
     val block = protoBlock!!.toBlock(listOf(), Address.ZERO, UInt256.ONE, Instant.now(), Bytes.EMPTY, Genesis.emptyHash, UInt64.random())
     assertEquals(0, block.body.transactions.size)
   }
