@@ -85,7 +85,10 @@ class ModExpPrecompileContract : PrecompileContract {
     fun extractParameter(input: Bytes, offset: BigInteger, length: Int): BigInteger {
       return if (BigInteger.valueOf(input.size().toLong()).compareTo(offset) <= 0) {
         BigInteger.ZERO
-      } else input.slice(offset.toInt(), length).toUnsignedBigInteger()
+      } else {
+        val min = Math.max(0, Math.min(length, input.size() - offset.toInt() - length))
+        Bytes32.rightPad(input.slice(offset.toInt(), min)).toUnsignedBigInteger()
+      }
     }
   }
 
@@ -112,8 +115,12 @@ class ModExpPrecompileContract : PrecompileContract {
     } else {
       Bytes.wrap(base.modPow(exp, mod).toByteArray()).trimLeadingZeros()
     }
+    var buffer = modulusLength.toInt() - modExp.size()
+    if (buffer < 0) {
+      buffer = 0
+    }
 
-    return Result(0, Bytes.wrap(Bytes.repeat(0, modulusLength.toInt() - modExp.size()), modExp))
+    return Result(0, Bytes.wrap(Bytes.repeat(0, buffer), modExp))
   }
 }
 
