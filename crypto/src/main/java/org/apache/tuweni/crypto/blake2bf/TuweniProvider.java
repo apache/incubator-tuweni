@@ -10,25 +10,27 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.tuweni.junit;
+package org.apache.tuweni.crypto.blake2bf;
 
-import org.apache.tuweni.crypto.blake2bf.TuweniProvider;
-
-import java.security.Security;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.jupiter.api.extension.BeforeAllCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.Provider;
 
 /**
- * A junit5 extension, that installs a BouncyCastle security provider.
- *
+ * Bouncy Castle Security Provider for specific Apache Tuweni message digests.
  */
-public class BouncyCastleExtension implements BeforeAllCallback {
+public final class TuweniProvider extends Provider {
 
-  @Override
-  public void beforeAll(ExtensionContext context) throws Exception {
-    Security.addProvider(new BouncyCastleProvider());
-    Security.addProvider(new TuweniProvider());
+  private static final String info = "Tuweni Security Provider v1.0";
+
+  public static final String PROVIDER_NAME = "Tuweni";
+
+  @SuppressWarnings({"unchecked", "removal"})
+  public TuweniProvider() {
+    super(PROVIDER_NAME, "1.0", info);
+    AccessController.doPrivileged((PrivilegedAction) () -> {
+      put("MessageDigest.Blake2bf", Blake2bfMessageDigest.class.getName());
+      return null;
+    });
   }
 }

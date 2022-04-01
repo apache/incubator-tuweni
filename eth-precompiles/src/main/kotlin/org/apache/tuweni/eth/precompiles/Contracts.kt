@@ -39,10 +39,10 @@ class IDPrecompiledContract : PrecompileContract {
 class ECRECPrecompiledContract : PrecompileContract {
   override fun run(input: Bytes): Result {
     val padded = if (input.size() < 128)
-      Bytes.wrap(input.toArrayUnsafe(), 0, 128)
+      Bytes.wrap(Bytes.repeat(0, 128 - input.size()), input)
     else
       input
-    val h = padded.slice(0, 32) as Bytes32
+    val h = Bytes32.wrap(padded.slice(0, 32))
     val v = padded.slice(32, 32)
     val r = padded.slice(64, 32)
     val s = padded.slice(96, 32)
@@ -87,14 +87,18 @@ class ModExpPrecompileContract : PrecompileContract {
         BigInteger.ZERO
       } else {
         val min = Math.max(0, Math.min(length, input.size() - offset.toInt() - length))
-        Bytes32.rightPad(input.slice(offset.toInt(), min)).toUnsignedBigInteger()
+        var sliced = input.slice(offset.toInt(), min)
+        if (sliced.size() > 32) {
+          sliced = sliced.slice(sliced.size() - 32)
+        }
+        Bytes32.rightPad(sliced).toUnsignedBigInteger()
       }
     }
   }
 
   override fun run(input: Bytes): Result {
     val padded = if (input.size() < 96)
-      Bytes.wrap(input.toArrayUnsafe(), 0, 96)
+      Bytes.wrap(Bytes.repeat(0, 96 - input.size()), input)
     else
       input
     val baseLength = padded.slice(0, 32).toUnsignedBigInteger()
@@ -164,7 +168,7 @@ class Blake2BFPrecompileContract : PrecompileContract {
       return Result(0, Bytes.EMPTY)
     }
 
-    val rounds = input.getInt(0)
+    val rounds = Bytes.wrap(Bytes.repeat(0, 4), input.slice(0, 4))
 
     return Result(rounds.toLong(), Hash.digestUsingAlgorithm(input, "BLAKE2BF"))
   }

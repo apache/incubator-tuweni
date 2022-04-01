@@ -19,6 +19,7 @@ package org.apache.tuweni.ethclient
 import io.vertx.core.Vertx
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.app.commons.ApplicationUtils
+import org.apache.tuweni.crypto.blake2bf.TuweniProvider
 import org.apache.tuweni.ethclientui.UI
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import picocli.CommandLine
@@ -29,6 +30,7 @@ import kotlin.system.exitProcess
 fun main(args: Array<String>) = runBlocking {
   ApplicationUtils.renderBanner("Apache Tuweni client loading")
   Security.addProvider(BouncyCastleProvider())
+  Security.addProvider(TuweniProvider())
   val opts = CommandLine.populateCommand(AppOptions(), *args)
 
   if (opts.help) {

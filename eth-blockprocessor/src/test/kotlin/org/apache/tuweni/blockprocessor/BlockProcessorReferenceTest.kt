@@ -184,9 +184,9 @@ class BlockProcessorReferenceTest {
         // carry on.
       } else if (testName.startsWith("badOpcodes")) {
         assertEquals("invalid transaction result INVALID_INSTRUCTION", e.message)
-      } else if (testName.startsWith("stackOverflow")) {
+      } else if (testName.startsWith("stackOverflow") || testName.startsWith("stackLimitPush")) {
         assertEquals("invalid transaction result STACK_OVERFLOW", e.message)
-      } else if (testName.startsWith("shallowStack")) {
+      } else if (testName.startsWith("shallowStack") || testName.startsWith("StackUnderFlowContractCreation")) {
         assertEquals("invalid transaction result STACK_UNDERFLOW", e.message)
       } else if (testName.contains("OOG")) {
         assertEquals("invalid transaction result OUT_OF_GAS", e.message)
