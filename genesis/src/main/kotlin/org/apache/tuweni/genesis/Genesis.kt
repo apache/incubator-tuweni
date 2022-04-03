@@ -58,6 +58,7 @@ open class GenesisConfig(
   "gasUsed",
   "mixHash",
   "coinbase",
+  "parentHash",
   "alloc"
 )
 class Genesis(
@@ -69,7 +70,7 @@ class Genesis(
   private val timestamp: Long,
   val extraData: Bytes,
   private val gasLimit: Long,
-  val alloc: Map<Address, UInt256>,
+  val alloc: Map<Address, Map<String, UInt256>>,
   val config: GenesisConfig,
 ) {
 
