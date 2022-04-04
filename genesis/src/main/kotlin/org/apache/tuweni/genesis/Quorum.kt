@@ -28,6 +28,7 @@ import org.apache.tuweni.units.bigints.UInt256
 class QuorumConfig(val genesis: Genesis, val validators: List<SECP256K1.KeyPair>, val allocations: List<Allocation>) {
 
   companion object {
+    val validatorHeader = "Public key,Secret key\n"
     val header = "User,Public key,Address,Secret key\n"
 
     fun generate(
@@ -46,7 +47,7 @@ class QuorumConfig(val genesis: Genesis, val validators: List<SECP256K1.KeyPair>
     ): QuorumConfig {
       val allocations = AllocationGenerator().createAllocations(numberAllocations, amount)
 
-      val validators = (0..numberValidators).map {
+      val validators = (0 until numberValidators).map {
         SECP256K1.KeyPair.random()
       }
 
@@ -78,9 +79,9 @@ class QuorumConfig(val genesis: Genesis, val validators: List<SECP256K1.KeyPair>
       allocations: List<Allocation>,
       validators: List<SECP256K1.KeyPair>,
     ): QuorumConfig {
-      val allocs = mutableMapOf<Address, UInt256>()
+      val allocs = mutableMapOf<Address, Map<String, UInt256>>()
       for (alloc in allocations) {
-        allocs[alloc.address] = alloc.amount
+        allocs[alloc.address] = mapOf(Pair("balance", alloc.amount))
       }
       val genesis = Genesis(
         nonce = nonce,
@@ -97,6 +98,12 @@ class QuorumConfig(val genesis: Genesis, val validators: List<SECP256K1.KeyPair>
 
       return QuorumConfig(genesis, validators, allocations)
     }
+  }
+
+  fun validatorsToCsv(): String {
+    return validatorHeader + validators.map {
+      it.publicKey().toHexString() + "," + it.secretKey().bytes().toHexString()
+    }.joinToString("\n")
   }
 
   fun allocsToCsv(): String {
