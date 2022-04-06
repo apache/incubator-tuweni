@@ -98,7 +98,7 @@ import org.apache.tuweni.evm.impl.berlin.shr
 import org.apache.tuweni.evm.impl.berlin.staticcall
 
 fun interface Opcode {
-  fun execute(
+  suspend fun execute(
     gasManager: GasManager,
     hostContext: HostContext,
     stack: Stack,

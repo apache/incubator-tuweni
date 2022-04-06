@@ -16,7 +16,6 @@
  */
 package org.apache.tuweni.evm.impl.berlin
 
-import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.crypto.Hash
@@ -341,41 +340,39 @@ fun swap(index: Int): Opcode {
 }
 
 val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
-  runBlocking {
-    val key = stack.pop()
-    val value = stack.pop()
-    if (null == key || null == value) {
-      return@runBlocking Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-    }
-    val remainingGas = gasManager.gasLeft()
-    if (remainingGas <= 2300) {
-      return@runBlocking Result(EVMExecutionStatusCode.OUT_OF_GAS)
-    }
-
-    val address = msg.destination
-    val slotIsWarm = hostContext.warmUpStorage(address, key)
-
-    val currentValue = hostContext.getStorage(address, key)
-    val cost = if (value.equals(currentValue)) {
-      Gas.valueOf(100)
-    } else {
-      val originalValue = hostContext.getRepositoryStorage(address, key)
-      if (originalValue.equals(currentValue)) {
-        if (originalValue.isZero) {
-          Gas.valueOf(20000L - 2100)
-        } else Gas.valueOf(5000L - 2100)
-      } else {
-        Gas.valueOf(100)
-      }
-    }.add(if (slotIsWarm) Gas.ZERO else Gas.valueOf(2100))
-    gasManager.add(cost)
-
-    // frame.incrementGasRefund(gasCalculator().calculateStorageRefundAmount(account, key, value))
-
-    hostContext.setStorage(address, key, value)
-
-    Result()
+  val key = stack.pop()
+  val value = stack.pop()
+  if (null == key || null == value) {
+    return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   }
+  val remainingGas = gasManager.gasLeft()
+  if (remainingGas <= 2300) {
+    return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
+  }
+
+  val address = msg.destination
+  val slotIsWarm = hostContext.warmUpStorage(address, key)
+
+  val currentValue = hostContext.getStorage(address, key)
+  val cost = if (value.equals(currentValue)) {
+    Gas.valueOf(100)
+  } else {
+    val originalValue = hostContext.getRepositoryStorage(address, key)
+    if (originalValue.equals(currentValue)) {
+      if (originalValue.isZero) {
+        Gas.valueOf(20000L - 2100)
+      } else Gas.valueOf(5000L - 2100)
+    } else {
+      Gas.valueOf(100)
+    }
+  }.add(if (slotIsWarm) Gas.ZERO else Gas.valueOf(2100))
+  gasManager.add(cost)
+
+  // frame.incrementGasRefund(gasCalculator().calculateStorageRefundAmount(account, key, value))
+
+  hostContext.setStorage(address, key, value)
+
+  Result()
 }
 
 val sload = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
@@ -385,9 +382,8 @@ val sload = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   val slotIsWarm = hostContext.warmUpStorage(address, key)
   gasManager.add(if (slotIsWarm) 100 else 2600)
 
-  runBlocking {
-    stack.push(hostContext.getStorage(address, key))
-  }
+  stack.push(hostContext.getStorage(address, key))
+
   Result()
 }
 
@@ -461,9 +457,8 @@ val balance = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
     gasManager.add(2600)
   }
 
-  runBlocking {
-    stack.push(hostContext.getBalance(address))
-  }
+  stack.push(hostContext.getBalance(address))
+
   Result()
 }
 
@@ -577,10 +572,9 @@ val extcodecopy = Opcode { gasManager, hostContext, stack, _, _, _, memory, _ ->
 
   gasManager.add(copyCost.add(memoryCost))
 
-  runBlocking {
-    val code = hostContext.getCode(Address.fromBytes(address.slice(12, 20)))
-    memory.write(memOffset, sourceOffset, length, code)
-  }
+  val code = hostContext.getCode(Address.fromBytes(address.slice(12, 20)))
+  memory.write(memOffset, sourceOffset, length, code)
+
 
   Result()
 }
@@ -655,18 +649,16 @@ val mload = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
 
 val extcodesize = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   gasManager.add(700)
-  runBlocking {
-    stack.push(UInt256.valueOf(hostContext.getCode(msg.destination).size().toLong()))
-    Result()
-  }
+  stack.push(UInt256.valueOf(hostContext.getCode(msg.destination).size().toLong()))
+  Result()
+
 }
 
 val extcodehash = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   gasManager.add(700)
-  runBlocking {
-    stack.push(Hash.keccak256(hostContext.getCode(msg.destination)))
-    Result()
-  }
+  stack.push(Hash.keccak256(hostContext.getCode(msg.destination)))
+  Result()
+
 }
 
 val msize = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
@@ -819,10 +811,8 @@ val call = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
   val outputPost = memoryCost(memory.newSize(outputDataOffset, outputDataLength))
   val outputMemoryCost = outputPost.subtract(outputPre)
   val memoryCost = if (outputMemoryCost.compareTo(inputMemoryCost) < 0) inputMemoryCost else outputMemoryCost
-  runBlocking {
-    if (!hostContext.accountExists(to) && !value.isZero) {
-      cost = cost.add(Gas.valueOf(25000))
-    }
+  if (!hostContext.accountExists(to) && !value.isZero) {
+    cost = cost.add(Gas.valueOf(25000))
   }
   cost.add(
     if (hostContext.warmUpAccount(to)) {
@@ -837,28 +827,29 @@ val call = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
   if (inputData == null) {
     return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
   }
-  runBlocking {
-    val result = hostContext.call(
-      EVMMessage(
-        CallKind.CALL.number,
-        0,
-        message.depth + 1,
-        gas,
-        to,
-        message.sender,
-        inputData,
-        value
-      )
+  val result = hostContext.call(
+    EVMMessage(
+      CallKind.CALL.number,
+      0,
+      message.depth + 1,
+      gas,
+      to,
+      message.sender,
+      inputData,
+      value
     )
-    if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
-      stack.push(UInt256.ONE)
-      result.state.output?.let {
-        memory.write(outputDataOffset, UInt256.ZERO, outputDataLength, it)
-      }
-    } else {
-      stack.push(UInt256.ZERO)
+  )
+  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
+    stack.push(UInt256.ONE)
+    result.state.output?.let {
+      memory.write(outputDataOffset, UInt256.ZERO, outputDataLength, it)
     }
+  } else if (result.statusCode == EVMExecutionStatusCode.CALL_DEPTH_EXCEEDED) {
+    return@Opcode Result(result.statusCode)
+  } else {
+    stack.push(UInt256.ZERO)
   }
+
   Result()
 }
 
@@ -898,28 +889,27 @@ val delegatecall = Opcode { gasManager, hostContext, stack, message, _, _, memor
   if (inputData == null) {
     return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
   }
-  runBlocking {
-    val result = hostContext.call(
-      EVMMessage(
-        CallKind.DELEGATECALL.number,
-        0,
-        message.depth + 1,
-        gas,
-        to,
-        message.sender,
-        inputData,
-        Wei.valueOf(0)
-      )
+  val result = hostContext.call(
+    EVMMessage(
+      CallKind.DELEGATECALL.number,
+      0,
+      message.depth + 1,
+      gas,
+      to,
+      message.sender,
+      inputData,
+      Wei.valueOf(0)
     )
-    if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
-      stack.push(UInt256.ONE)
-      result.state.output?.let {
-        memory.write(outputDataOffset, UInt256.ZERO, outputDataLength, it)
-      }
-    } else {
-      stack.push(UInt256.ZERO)
+  )
+  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
+    stack.push(UInt256.ONE)
+    result.state.output?.let {
+      memory.write(outputDataOffset, UInt256.ZERO, outputDataLength, it)
     }
+  } else {
+    stack.push(UInt256.ZERO)
   }
+
   Result()
 }
 
@@ -949,11 +939,10 @@ val callcode = Opcode { gasManager, hostContext, stack, message, _, _, memory, _
   val outputPost = memoryCost(memory.newSize(outputDataOffset, outputDataLength))
   val outputMemoryCost = outputPost.subtract(outputPre)
   val memoryCost = if (outputMemoryCost.compareTo(inputMemoryCost) < 0) inputMemoryCost else outputMemoryCost
-  runBlocking {
-    if (!hostContext.accountExists(to) && !value.isZero) {
-      cost = cost.add(Gas.valueOf(25000))
-    }
+  if (!hostContext.accountExists(to) && !value.isZero) {
+    cost = cost.add(Gas.valueOf(25000))
   }
+
   cost.add(
     if (hostContext.warmUpAccount(to)) {
       Gas.valueOf(2600)
@@ -967,28 +956,27 @@ val callcode = Opcode { gasManager, hostContext, stack, message, _, _, memory, _
   if (inputData == null) {
     return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
   }
-  runBlocking {
-    val result = hostContext.call(
-      EVMMessage(
-        CallKind.CALL.number,
-        0,
-        message.depth + 1,
-        gas,
-        to,
-        message.sender,
-        inputData,
-        value
-      )
+  val result = hostContext.call(
+    EVMMessage(
+      CallKind.CALL.number,
+      0,
+      message.depth + 1,
+      gas,
+      to,
+      message.sender,
+      inputData,
+      value
     )
-    if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
-      stack.push(UInt256.ONE)
-      result.state.output?.let {
-        memory.write(outputDataOffset, UInt256.ZERO, outputDataLength, it)
-      }
-    } else {
-      stack.push(UInt256.ZERO)
+  )
+  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
+    stack.push(UInt256.ONE)
+    result.state.output?.let {
+      memory.write(outputDataOffset, UInt256.ZERO, outputDataLength, it)
     }
+  } else {
+    stack.push(UInt256.ZERO)
   }
+
   Result()
 }
 
@@ -1027,28 +1015,27 @@ val staticcall = Opcode { gasManager, hostContext, stack, message, _, _, memory,
   if (inputData == null) {
     return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
   }
-  runBlocking {
-    val result = hostContext.call(
-      EVMMessage(
-        CallKind.STATICCALL.number,
-        0,
-        message.depth + 1,
-        gas,
-        to,
-        message.sender,
-        inputData,
-        Wei.valueOf(0)
-      )
+  val result = hostContext.call(
+    EVMMessage(
+      CallKind.STATICCALL.number,
+      0,
+      message.depth + 1,
+      gas,
+      to,
+      message.sender,
+      inputData,
+      Wei.valueOf(0)
     )
-    if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
-      stack.push(UInt256.ONE)
-      result.state.output?.let {
-        memory.write(outputDataOffset, UInt256.ZERO, outputDataLength, it)
-      }
-    } else {
-      stack.push(UInt256.ZERO)
+  )
+  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
+    stack.push(UInt256.ONE)
+    result.state.output?.let {
+      memory.write(outputDataOffset, UInt256.ZERO, outputDataLength, it)
     }
+  } else {
+    stack.push(UInt256.ZERO)
   }
+
   Result()
 }
 
@@ -1064,28 +1051,27 @@ val create = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ -
   if (inputData == null) {
     return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
   }
-  runBlocking {
-    val nonce = hostContext.getNonce(message.sender)
-    val to = Address.fromSenderAndNonce(message.sender, nonce)
+  val nonce = hostContext.getNonce(message.sender)
+  val to = Address.fromSenderAndNonce(message.sender, nonce)
 
-    val result = hostContext.call(
-      EVMMessage(
-        CallKind.CREATE.number,
-        0,
-        message.depth + 1,
-        gasManager.gasLeft(),
-        to,
-        message.sender,
-        inputData,
-        value
-      )
+  val result = hostContext.call(
+    EVMMessage(
+      CallKind.CREATE.number,
+      0,
+      message.depth + 1,
+      gasManager.gasLeft(),
+      to,
+      message.sender,
+      inputData,
+      value
     )
-    if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
-      stack.push(UInt256.ONE)
-    } else {
-      stack.push(UInt256.ZERO)
-    }
+  )
+  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
+    stack.push(UInt256.ONE)
+  } else {
+    stack.push(UInt256.ZERO)
   }
+
   Result()
 }
 
@@ -1111,26 +1097,25 @@ val create2 = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ 
     )
   )
   val to = Address.fromBytes(hash.slice(12))
-  runBlocking {
 
-    val result = hostContext.call(
-      EVMMessage(
-        CallKind.CREATE2.number,
-        0,
-        message.depth + 1,
-        gasManager.gasLeft(),
-        to,
-        message.sender,
-        inputData,
-        value
-      )
+  val result = hostContext.call(
+    EVMMessage(
+      CallKind.CREATE2.number,
+      0,
+      message.depth + 1,
+      gasManager.gasLeft(),
+      to,
+      message.sender,
+      inputData,
+      value
     )
-    if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
-      stack.push(UInt256.ONE)
-    } else {
-      stack.push(UInt256.ZERO)
-    }
+  )
+  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
+    stack.push(UInt256.ONE)
+  } else {
+    stack.push(UInt256.ZERO)
   }
+
   Result()
 }
 
@@ -1279,33 +1264,31 @@ val selfdestruct = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
     EVMExecutionStatusCode.STACK_UNDERFLOW
   )
 
-  runBlocking {
 
-    val inheritance = hostContext.getBalance(recipientAddress)
+  val inheritance = hostContext.getBalance(recipientAddress)
 
-    val accountIsWarm = hostContext.warmUpAccount(recipientAddress)
+  val accountIsWarm = hostContext.warmUpAccount(recipientAddress)
 
-    val cost = if (hostContext.accountExists(recipientAddress) && !inheritance.isZero) {
-      Gas.valueOf(30000)
-    } else {
-      Gas.valueOf(5000)
-    }.add(if (accountIsWarm) Gas.ZERO else Gas.valueOf(2600))
-    gasManager.add(cost)
-    val address: Address = msg.destination
+  val cost = if (hostContext.accountExists(recipientAddress) && !inheritance.isZero) {
+    Gas.valueOf(30000)
+  } else {
+    Gas.valueOf(5000)
+  }.add(if (accountIsWarm) Gas.ZERO else Gas.valueOf(2600))
+  gasManager.add(cost)
+  val address: Address = msg.destination
 
-    hostContext.selfdestruct(address, recipientAddress)
+  hostContext.selfdestruct(address, recipientAddress)
 
-    // frame.addRefund(recipient.getAddress(), account.getBalance())
+  // frame.addRefund(recipient.getAddress(), account.getBalance())
 
-    Result(EVMExecutionStatusCode.SUCCESS)
-  }
+  Result(EVMExecutionStatusCode.SUCCESS)
+
 }
 
 val selfbalance = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   gasManager.add(5)
-  val account = runBlocking {
-    hostContext.getBalance(msg.sender)
-  }
+  val account = hostContext.getBalance(msg.sender)
+
   stack.push(account)
   Result()
 }

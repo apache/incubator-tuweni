@@ -37,6 +37,7 @@ import org.apache.tuweni.io.Resources
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
+import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.trie.MerkleTrie
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
@@ -69,7 +70,7 @@ class BlockProcessorReferenceTest {
     @Throws(IOException::class)
     private fun findGeneralStateTests(): Stream<Arguments> {
       return findTests("/GeneralStateTests/**/*.json").filter {
-        !(it.get()[0] as String).contains("loop")
+        !(it.get()[0] as String).contains("loop") || (it.get()[0] as String).equals("OverflowGasMakeMoney")
       }
     }
 
@@ -175,27 +176,16 @@ class BlockProcessorReferenceTest {
     }
     val processor = BlockProcessor(UInt256.ONE)
 
-    try {
-      val protoBlock =
-        processor.execute(Genesis.dev(), test.env!!.currentGasLimit!!, Gas.ZERO, listOf(tx()), repository, Registry.istanbul)
-      assertNotNull(protoBlock)
-    } catch (e: Exception) {
-      if (e.message == "invalid transaction result REVERT") {
-        // carry on.
-      } else if (testName.startsWith("badOpcodes")) {
-        assertEquals("invalid transaction result INVALID_INSTRUCTION", e.message)
-      } else if (testName.startsWith("stackOverflow") || testName.startsWith("stackLimitPush")) {
-        assertEquals("invalid transaction result STACK_OVERFLOW", e.message)
-      } else if (testName.startsWith("shallowStack") || testName.startsWith("StackUnderFlowContractCreation")) {
-        assertEquals("invalid transaction result STACK_UNDERFLOW", e.message)
-      } else if (testName.contains("OOG")) {
-        assertEquals("invalid transaction result OUT_OF_GAS", e.message)
-      } else {
-        throw e
-      }
-    }
+    val result = processor.execute(Genesis.dev(), test.env!!.currentGasLimit!!, Gas.ZERO, listOf(tx()), repository, Registry.istanbul)
 
-    // assertEquals(exec.logs, protoBlock!!.header.receiptsRoot)
+    val logsHash = Hash.hash(RLP.encodeList { writer ->
+      result.block.transactionReceipts.map { it.logs }.flatten().forEach {
+        it.writeTo(writer)
+      }
+    })
+    assertEquals(exec.logs, logsHash)
+
+    //assertEquals(exec.hash, result.block.header.stateRoot)
   }
 }
 

@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory
 class TransactionalEVMHostContext(
   val repository: BlockchainRepository,
   val ethereumVirtualMachine: EthereumVirtualMachine,
-  val depth: Int,
   val sender: Address,
   val destination: Address,
   val value: Bytes,
@@ -298,15 +297,16 @@ class TransactionalEVMHostContext(
    * @return The result of the call.
    */
   override suspend fun call(evmMessage: EVMMessage): EVMResult {
-    logger.trace("Entering call")
+    logger.trace("Entering call ${evmMessage.kind}")
+    val code = repository.getAccountCode(destination)
     val result = ethereumVirtualMachine.executeInternal(
       evmMessage.sender,
       evmMessage.destination,
       evmMessage.value,
-      Bytes.EMPTY,
+      code ?: Bytes.EMPTY,
       evmMessage.inputData,
       evmMessage.gas,
-      depth = depth + 1,
+      depth = evmMessage.depth,
       hostContext = this
     )
     return result

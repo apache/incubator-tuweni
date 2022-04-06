@@ -243,7 +243,6 @@ class EthereumVirtualMachine(
     val hostContext = TransactionalEVMHostContext(
       repository,
       this,
-      depth,
       sender,
       destination,
       value,
@@ -286,12 +285,17 @@ class EthereumVirtualMachine(
     depth: Int = 0,
     hostContext: HostContext,
   ): EVMResult {
+    if (depth > 1024) {
+      val gasManager = GasManager(gas)
+      return EVMResult(EVMExecutionStatusCode.CALL_DEPTH_EXCEEDED, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), null))
+    }
+
     val contract = precompiles[destination]
     if (contract != null) {
       val result = contract.run(inputData)
       val gasManager = GasManager(gas)
       gasManager.add(result.gas)
-      return EVMResult(EVMExecutionStatusCode.SUCCESS, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), result.output))
+      return EVMResult(if (result.output == null) EVMExecutionStatusCode.PRECOMPILE_FAILURE else EVMExecutionStatusCode.SUCCESS, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), result.output))
     } else {
       val msg =
         EVMMessage(

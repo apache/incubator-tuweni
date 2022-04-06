@@ -66,7 +66,7 @@ class BlockProcessor(val chainId: UInt256) {
     repository: BlockchainRepository,
     precompiles: Map<Address, PrecompileContract>,
     stepListener: StepListener? = null,
-  ): ProtoBlock? {
+  ): BlockProcessorResult {
     val stateChanges = TransientStateRepository(repository)
     val vm = EthereumVirtualMachine(repository, precompiles, { EvmVmImpl.create(stepListener) })
     vm.start()
@@ -80,9 +80,11 @@ class BlockProcessor(val chainId: UInt256) {
 
     var counter = 0L
     var allGasUsed = Gas.ZERO
+    var success = true
     for (tx in transactions) {
       if (tx.getGasLimit() > gasLimit.subtract(gasUsed).subtract(allGasUsed)) {
-        return null
+        success = false
+        continue
       }
       val indexKey = RLP.encodeValue(UInt256.valueOf(counter).trimLeadingZeros())
       transactionsTrie.put(indexKey, tx.toBytes())
@@ -123,7 +125,7 @@ class BlockProcessor(val chainId: UInt256) {
         chainId
       )
       if (result.statusCode != EVMExecutionStatusCode.SUCCESS) {
-        throw Exception("invalid transaction result ${result.statusCode}")
+        success = false
       }
       for (balanceChange in result.changes.getBalanceChanges()) {
         val state = stateChanges.getAccount(balanceChange.key)?.let {
@@ -177,6 +179,8 @@ class BlockProcessor(val chainId: UInt256) {
       allReceipts,
       stateChanges
     )
-    return block
+    return BlockProcessorResult(block, success)
   }
 }
+
+data class BlockProcessorResult(val block: ProtoBlock, val success: Boolean)
