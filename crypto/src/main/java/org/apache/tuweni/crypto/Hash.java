@@ -21,6 +21,8 @@ import org.apache.tuweni.crypto.sodium.Sodium;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Various utilities for providing hashes (digests) of arbitrary data.
@@ -34,16 +36,21 @@ public final class Hash {
   private Hash() {}
 
   // SHA-2
-  private static String SHA2_256 = "SHA-256";
-  private static String SHA2_512_256 = "SHA-512/256";
+  private static final String SHA2_256 = "SHA-256";
+  private static final String SHA2_512_256 = "SHA-512/256";
 
   // Keccak
-  private static String KECCAK_256 = "KECCAK-256";
+  private static final String KECCAK_256 = "KECCAK-256";
   private static String KECCAK_512 = "KECCAK-512";
 
+  private static final ThreadLocal<Map<String, MessageDigest>> cachedDigests =
+      ThreadLocal.withInitial(() -> new ConcurrentHashMap<>());
+
   // SHA-3
-  private static String SHA3_256 = "SHA3-256";
-  private static String SHA3_512 = "SHA3-512";
+  private static final String SHA3_256 = "SHA3-256";
+  private static final String SHA3_512 = "SHA3-512";
+
+
 
   /**
    * Helper method to generate a digest using the provided algorithm.
@@ -57,7 +64,13 @@ public final class Hash {
   public static byte[] digestUsingAlgorithm(byte[] input, String alg) throws NoSuchAlgorithmException {
     requireNonNull(input);
     requireNonNull(alg);
-    MessageDigest digest = MessageDigest.getInstance(alg);
+    MessageDigest digest = cachedDigests.get().computeIfAbsent(alg, (key) -> {
+      try {
+        return MessageDigest.getInstance(key);
+      } catch (NoSuchAlgorithmException e) {
+        throw new RuntimeException(e);
+      }
+    });
     digest.update(input);
     return digest.digest();
   }
