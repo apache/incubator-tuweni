@@ -155,6 +155,7 @@ data class EVMMessage(
   val flags: Int,
   val depth: Int = 0,
   val gas: Gas,
+  val contract: Address,
   val destination: Address,
   val sender: Address,
   val inputData: Bytes,
@@ -260,6 +261,7 @@ class EthereumVirtualMachine(
       executeInternal(
         sender,
         destination,
+        destination,
         value,
         code,
         inputData,
@@ -276,6 +278,7 @@ class EthereumVirtualMachine(
   internal suspend fun executeInternal(
     sender: Address,
     destination: Address,
+    contractAddress: Address,
     value: Bytes,
     code: Bytes,
     inputData: Bytes,
@@ -290,7 +293,7 @@ class EthereumVirtualMachine(
       return EVMResult(EVMExecutionStatusCode.CALL_DEPTH_EXCEEDED, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), null))
     }
 
-    val contract = precompiles[destination]
+    val contract = precompiles[contractAddress]
     if (contract != null) {
       val result = contract.run(inputData)
       val gasManager = GasManager(gas)
@@ -299,7 +302,7 @@ class EthereumVirtualMachine(
     } else {
       val msg =
         EVMMessage(
-          callKind.number, 0, depth, gas, destination, sender, inputData,
+          callKind.number, 0, depth, gas, contractAddress, destination, sender, inputData,
           value
         )
 
@@ -672,7 +675,12 @@ val opcodes = mapOf<Byte, String>(
   Pair(0xf3.toByte(), "return"),
   Pair(0xf4.toByte(), "delegatecall"),
   Pair(0xf5.toByte(), "create2"),
+  Pair(0xf6.toByte(), "unused"),
+  Pair(0xf7.toByte(), "unused"),
+  Pair(0xf8.toByte(), "unused"),
+  Pair(0xf9.toByte(), "unused"),
   Pair(0xfa.toByte(), "staticcall"),
+  Pair(0xfb.toByte(), "unused"),
   Pair(0xfd.toByte(), "revert"),
   Pair(0xfe.toByte(), "invalid"),
   Pair(0xff.toByte(), "selfdestruct"),

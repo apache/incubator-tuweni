@@ -52,6 +52,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.io.IOException
 import java.io.InputStream
 import java.io.UncheckedIOException
+import java.net.URL
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
@@ -70,7 +71,7 @@ class BlockProcessorReferenceTest {
     @Throws(IOException::class)
     private fun findGeneralStateTests(): Stream<Arguments> {
       return findTests("/GeneralStateTests/**/*.json").filter {
-        !(it.get()[0] as String).contains("loop") || (it.get()[0] as String).equals("OverflowGasMakeMoney")
+        !(it.get()[1] as String).contains("loop") || (it.get()[1] as String).equals("OverflowGasMakeMoney")
       }
     }
 
@@ -78,7 +79,7 @@ class BlockProcessorReferenceTest {
     private fun findTests(glob: String): Stream<Arguments> {
       return Resources.find(glob).flatMap { url ->
         try {
-          url.openConnection().getInputStream().use { input -> prepareTests(input) }
+          url.openConnection().getInputStream().use { input -> prepareTests(url, input) }
         } catch (e: IOException) {
           throw UncheckedIOException("Could not read $url", e)
         }
@@ -86,7 +87,7 @@ class BlockProcessorReferenceTest {
     }
 
     @Throws(IOException::class)
-    private fun prepareTests(input: InputStream): Stream<Arguments> {
+    private fun prepareTests(path: URL, input: InputStream): Stream<Arguments> {
 
       val typeRef = object : TypeReference<HashMap<String, JsonReferenceTest>>() {}
       val allTests: Map<String, JsonReferenceTest> = mapper.readValue(input, typeRef)
@@ -111,7 +112,7 @@ class BlockProcessorReferenceTest {
                 keyPair
               )
             }
-            val arg = Arguments.of(entry.key, "Berlin", index, entry.value, txFn, exec)
+            val arg = Arguments.of(path, entry.key, "Berlin", index, entry.value, txFn, exec)
             index++
             arg
           }
@@ -127,9 +128,10 @@ class BlockProcessorReferenceTest {
     writer = newWriter
   }
 
-  @ParameterizedTest(name = "{index}: {0} {1} {2}")
+  @ParameterizedTest(name = "{index}: {1} {2} {3}")
   @MethodSource("findGeneralStateTests")
   fun runGeneralStateTests(
+    path: URL,
     testName: String,
     hardFork: String,
     testIndex: Int,
@@ -137,10 +139,11 @@ class BlockProcessorReferenceTest {
     tx: () -> Transaction,
     exec: TransactionExecution,
   ) {
-    runReferenceTests(testName, hardFork, testIndex, test, tx, exec)
+    runReferenceTests(path, testName, hardFork, testIndex, test, tx, exec)
   }
 
   private fun runReferenceTests(
+    path: URL,
     testName: String,
     hardFork: String,
     testIndex: Int,
@@ -151,7 +154,7 @@ class BlockProcessorReferenceTest {
     assertNotNull(testName)
     assertNotNull(hardFork)
     assertNotNull(testIndex)
-    println(testName)
+    println("$path $testName")
     assertNotNull(test)
     assertNotNull(exec)
     val repository = BlockchainRepository.inMemory(Genesis.dev())
@@ -178,14 +181,16 @@ class BlockProcessorReferenceTest {
 
     val result = processor.execute(Genesis.dev(), test.env!!.currentGasLimit!!, Gas.ZERO, listOf(tx()), repository, Registry.istanbul)
 
-    val logsHash = Hash.hash(RLP.encodeList { writer ->
-      result.block.transactionReceipts.map { it.logs }.flatten().forEach {
-        it.writeTo(writer)
+    val logsHash = Hash.hash(
+      RLP.encodeList { writer ->
+        result.block.transactionReceipts.map { it.logs }.flatten().forEach {
+          it.writeTo(writer)
+        }
       }
-    })
+    )
     assertEquals(exec.logs, logsHash)
 
-    //assertEquals(exec.hash, result.block.header.stateRoot)
+    // assertEquals(exec.hash, result.block.header.stateRoot)
   }
 }
 

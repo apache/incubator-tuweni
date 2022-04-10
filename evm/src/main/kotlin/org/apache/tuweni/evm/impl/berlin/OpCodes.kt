@@ -474,6 +474,9 @@ val gasPrice = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
 
 val gas = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(2)
+  if (!gasManager.hasGasLeft()) {
+    return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
+  }
   stack.push(UInt256.valueOf(gasManager.gasLeft().toLong()))
   Result()
 }
@@ -569,7 +572,6 @@ val extcodecopy = Opcode { gasManager, hostContext, stack, _, _, _, memory, _ ->
   val code = hostContext.getCode(Address.fromBytes(address.slice(12, 20)))
   memory.write(memOffset, sourceOffset, length, code)
 
-
   Result()
 }
 
@@ -636,7 +638,7 @@ val mload = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
 
 val extcodesize = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
   gasManager.add(700)
-  val address = stack.pop()?.slice(12)?.let { Address.fromBytes(it)} ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  val address = stack.pop()?.slice(12)?.let { Address.fromBytes(it) } ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   stack.push(UInt256.valueOf(hostContext.getCode(address).size().toLong()))
   Result()
 }
@@ -645,7 +647,6 @@ val extcodehash = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   gasManager.add(700)
   stack.push(Hash.keccak256(hostContext.getCode(msg.destination)))
   Result()
-
 }
 
 val msize = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
@@ -773,7 +774,7 @@ val call = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
   if (stack.size() < 7) {
     return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   }
-  val gas = Gas.valueOf(stack.pop()!!)
+  val stipend = Gas.valueOf(stack.pop()!!)
   val to = Address.fromBytes(stack.pop()!!.slice(12))
   val value = stack.pop()!!
   val inputDataOffset = stack.pop()!!
@@ -802,22 +803,30 @@ val call = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
   )
 
   gasManager.add(cost.add(memoryCost))
+  if (!gasManager.hasGasLeft()) {
+    return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
+  }
   val inputData = memory.read(inputDataOffset, inputDataLength)
   if (inputData == null) {
     return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
   }
+
+  val gasLeft = gasManager.gasLeft()
+  val gasAvailable = Gas.minimum(stipend, gasLeft.subtract(gasLeft.divide(Gas.valueOf(64))))
   val result = hostContext.call(
     EVMMessage(
       CallKind.CALL.number,
       0,
       message.depth + 1,
-      gas,
+      gasAvailable,
       to,
-      message.sender,
+      to,
+      message.destination,
       inputData,
       value
     )
   )
+  gasManager.add(result.state.gasManager.gasCost)
   if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
     stack.push(UInt256.ONE)
     result.state.output?.let {
@@ -860,6 +869,9 @@ val delegatecall = Opcode { gasManager, hostContext, stack, message, _, _, memor
   )
 
   gasManager.add(cost.add(memoryCost))
+  if (!gasManager.hasGasLeft()) {
+    return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
+  }
   val inputData = memory.read(inputDataOffset, inputDataLength)
   if (inputData == null) {
     return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
@@ -871,6 +883,7 @@ val delegatecall = Opcode { gasManager, hostContext, stack, message, _, _, memor
       message.depth + 1,
       gas,
       to,
+      message.destination,
       message.sender,
       inputData,
       Wei.valueOf(0)
@@ -923,6 +936,9 @@ val callcode = Opcode { gasManager, hostContext, stack, message, _, _, memory, _
   )
 
   gasManager.add(cost.add(memoryCost))
+  if (!gasManager.hasGasLeft()) {
+    return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
+  }
   val inputData = memory.read(inputDataOffset, inputDataLength)
   if (inputData == null) {
     return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
@@ -934,7 +950,8 @@ val callcode = Opcode { gasManager, hostContext, stack, message, _, _, memory, _
       message.depth + 1,
       gas,
       to,
-      message.sender,
+      to,
+      to,
       inputData,
       value
     )
@@ -978,6 +995,9 @@ val staticcall = Opcode { gasManager, hostContext, stack, message, _, _, memory,
   )
 
   gasManager.add(cost.add(memoryCost))
+  if (!gasManager.hasGasLeft()) {
+    return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
+  }
   val inputData = memory.read(inputDataOffset, inputDataLength)
   if (inputData == null) {
     return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
@@ -989,6 +1009,7 @@ val staticcall = Opcode { gasManager, hostContext, stack, message, _, _, memory,
       message.depth + 1,
       gas,
       to,
+      message.destination,
       message.sender,
       inputData,
       Wei.valueOf(0)
@@ -1025,6 +1046,7 @@ val create = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ -
       0,
       message.depth + 1,
       gasManager.gasLeft(),
+      to,
       to,
       message.sender,
       inputData,
@@ -1067,6 +1089,7 @@ val create2 = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ 
       0,
       message.depth + 1,
       gasManager.gasLeft(),
+      to,
       to,
       message.sender,
       inputData,
@@ -1165,6 +1188,10 @@ fun log(topics: Int): Opcode {
     )
     val memoryCost = memoryCost(memory.newSize(location, length).subtract(memory.size()))
     gasManager.add(cost.add(memoryCost))
+    if (!gasManager.hasGasLeft()) {
+      return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
+    }
+
     val address = msg.destination
 
     val data = memory.read(location, length)
@@ -1226,7 +1253,6 @@ val selfdestruct = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
     EVMExecutionStatusCode.STACK_UNDERFLOW
   )
 
-
   val inheritance = hostContext.getBalance(recipientAddress)
 
   val accountIsWarm = hostContext.warmUpAccount(recipientAddress)
@@ -1244,7 +1270,6 @@ val selfdestruct = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   // frame.addRefund(recipient.getAddress(), account.getBalance())
 
   Result(EVMExecutionStatusCode.SUCCESS)
-
 }
 
 val selfbalance = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->

@@ -298,10 +298,11 @@ class TransactionalEVMHostContext(
    */
   override suspend fun call(evmMessage: EVMMessage): EVMResult {
     logger.trace("Entering call ${evmMessage.kind}")
-    val code = repository.getAccountCode(evmMessage.destination)
+    val code = repository.getAccountCode(evmMessage.contract)
     val result = ethereumVirtualMachine.executeInternal(
       evmMessage.sender,
       evmMessage.destination,
+      evmMessage.contract,
       evmMessage.value,
       code ?: Bytes.EMPTY,
       evmMessage.inputData,
@@ -339,7 +340,11 @@ class TransactionalEVMHostContext(
 
   override fun emitLog(address: Address, data: Bytes, topics: List<Bytes32>) {
     logger.trace("Entering emitLog")
-    logs.add(Log(Address.fromBytes(Bytes.wrap(address)), data, topics))
+    val log = Log(Address.fromBytes(Bytes.wrap(address)), data, topics)
+    logs.add(log)
+    if (logger.isTraceEnabled()) {
+      logger.trace(log.toString())
+    }
   }
 
   override fun warmUpAccount(address: Address): Boolean =

@@ -51,8 +51,9 @@ class Memory {
     if (sourceOffset.fitsInt() && sourceOffset.intValue() < code.size()) {
       val maxCodeLength = code.size() - sourceOffset.intValue()
       val length = if (maxCodeLength < numBytes.intValue()) maxCodeLength else numBytes.intValue()
-      logger.trace("Writing ${code.slice(sourceOffset.intValue(), maxCodeLength)}")
-      memoryData!!.set(offset.intValue(), code.slice(sourceOffset.intValue(), length))
+      val toWrite = code.slice(sourceOffset.intValue(), length)
+      logger.trace("Writing $toWrite")
+      memoryData!!.set(offset.intValue(), toWrite)
     }
 
     wordsSize = newSize(offset, numBytes)
@@ -82,8 +83,12 @@ class Memory {
     if (!from.fitsInt() || !length.fitsInt() || !max.fitsInt()) {
       return null
     }
+
     val localMemoryData = memoryData
     if (localMemoryData != null) {
+      if (from.intValue() >= localMemoryData.size()) {
+        return Bytes.wrap(ByteArray(length.size()))
+      }
       if (localMemoryData.size() < max.intValue()) {
         val l = max.intValue() - localMemoryData.size()
         return Bytes.concatenate(
