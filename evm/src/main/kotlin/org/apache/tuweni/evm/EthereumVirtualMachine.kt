@@ -673,6 +673,7 @@ val opcodes = mapOf<Byte, String>(
   Pair(0xf4.toByte(), "delegatecall"),
   Pair(0xf5.toByte(), "create2"),
   Pair(0xfa.toByte(), "staticcall"),
+  Pair(0xfd.toByte(), "revert"),
   Pair(0xfe.toByte(), "invalid"),
   Pair(0xff.toByte(), "selfdestruct"),
 )

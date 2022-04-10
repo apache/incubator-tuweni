@@ -110,7 +110,7 @@ class BlockProcessor(val chainId: UInt256) {
         stateChanges.storeAccount(contractAddress, state)
         stateChanges.storeCode(tx.payload)
       } else {
-        code = stateChanges.getAccountCode(tx.to!!)!!
+        code = stateChanges.getAccountCode(tx.to!!) ?: Bytes.EMPTY
         to = tx.to!!
         inputData = tx.payload
       }

@@ -298,7 +298,7 @@ class TransactionalEVMHostContext(
    */
   override suspend fun call(evmMessage: EVMMessage): EVMResult {
     logger.trace("Entering call ${evmMessage.kind}")
-    val code = repository.getAccountCode(destination)
+    val code = repository.getAccountCode(evmMessage.destination)
     val result = ethereumVirtualMachine.executeInternal(
       evmMessage.sender,
       evmMessage.destination,
