@@ -28,7 +28,7 @@ import org.apache.tuweni.units.bigints.UInt256
 class QuorumConfig(val genesis: Genesis, val validators: List<SECP256K1.KeyPair>, val allocations: List<Allocation>) {
 
   companion object {
-    val validatorHeader = "Public key,Secret key\n"
+    val validatorHeader = "Address,Public key,Secret key\n"
     val header = "User,Public key,Address,Secret key\n"
 
     fun generate(
@@ -102,7 +102,7 @@ class QuorumConfig(val genesis: Genesis, val validators: List<SECP256K1.KeyPair>
 
   fun validatorsToCsv(): String {
     return validatorHeader + validators.map {
-      it.publicKey().toHexString() + "," + it.secretKey().bytes().toHexString()
+      Address.fromPublicKey(it.publicKey()).toHexString() + "," + it.publicKey().toHexString() + "," + it.secretKey().bytes().toHexString()
     }.joinToString("\n")
   }
 
