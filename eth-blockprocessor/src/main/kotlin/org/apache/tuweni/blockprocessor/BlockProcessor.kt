@@ -37,6 +37,7 @@ import org.apache.tuweni.trie.MerkleTrie
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
+import org.slf4j.LoggerFactory
 import java.time.Instant
 
 /**
@@ -46,6 +47,10 @@ import java.time.Instant
  * @param chainId the chain identifier
  */
 class BlockProcessor(val chainId: UInt256) {
+
+  companion object {
+    val logger = LoggerFactory.getLogger(BlockProcessor::class.java)
+  }
 
   /**
    * Executes a state transition.
@@ -125,6 +130,7 @@ class BlockProcessor(val chainId: UInt256) {
         chainId
       )
       if (result.statusCode != EVMExecutionStatusCode.SUCCESS) {
+        logger.info("EVM execution failed with status ${result.statusCode}")
         success = false
       }
       for (balanceChange in result.changes.getBalanceChanges()) {

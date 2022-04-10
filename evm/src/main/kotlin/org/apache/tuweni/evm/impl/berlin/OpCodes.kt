@@ -647,11 +647,11 @@ val mload = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
   Result()
 }
 
-val extcodesize = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
+val extcodesize = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
   gasManager.add(700)
-  stack.push(UInt256.valueOf(hostContext.getCode(msg.destination).size().toLong()))
+  val address = stack.pop()?.slice(12)?.let { Address.fromBytes(it)} ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  stack.push(UInt256.valueOf(hostContext.getCode(address).size().toLong()))
   Result()
-
 }
 
 val extcodehash = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
@@ -1192,7 +1192,7 @@ fun log(topics: Int): Opcode {
       return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
     }
 
-    val cost = Gas.valueOf(375).add((Gas.valueOf(8).multiply(Gas.valueOf(length)))).add(
+    var cost = Gas.valueOf(375).add((Gas.valueOf(8).multiply(Gas.valueOf(length)))).add(
       Gas.valueOf(375)
         .multiply(
           Gas.valueOf(
@@ -1200,9 +1200,8 @@ fun log(topics: Int): Opcode {
           )
         )
     )
-    val pre = memoryCost(memory.size())
-    val post: Gas = memoryCost(memory.newSize(location, length))
-    gasManager.add(cost.add(post.subtract(pre)))
+    val memoryCost = memoryCost(memory.newSize(location, length).subtract(memory.size()))
+    gasManager.add(cost.add(memoryCost))
     val address = msg.destination
 
     val data = memory.read(location, length)
