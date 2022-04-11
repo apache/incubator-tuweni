@@ -147,13 +147,9 @@ val sgt = Opcode { gasManager, _, stack, _, _, _, _, _ ->
 
 val isZero = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   gasManager.add(3L)
-  val item = stack.pop()
-  if (null == item) {
-    Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  } else {
-    stack.push(if (item.isZero) UInt256.ONE else UInt256.ZERO)
-    Result()
-  }
+  val item = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  stack.push(if (item.isZero) UInt256.ONE else UInt256.ZERO)
+  Result()
 }
 
 val and = Opcode { gasManager, _, stack, _, _, _, _, _ ->
@@ -332,9 +328,9 @@ fun swap(index: Int): Opcode {
   return Opcode { gasManager, _, stack, _, _, _, _, _ ->
     gasManager.add(3L)
     val eltN = stack.get(index) ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-    val elt0 = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-    stack.push(eltN)
+    val elt0 = stack.get(0) ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
     stack.set(index, elt0)
+    stack.set(0, eltN)
     Result()
   }
 }
@@ -428,7 +424,7 @@ val address = Opcode { gasManager, _, stack, msg, _, _, _, _ ->
 
 val origin = Opcode { gasManager, _, stack, msg, _, _, _, _ ->
   gasManager.add(2)
-  stack.push(Bytes32.leftPad(msg.sender))
+  stack.push(Bytes32.leftPad(msg.origin))
   Result()
 }
 
@@ -815,13 +811,14 @@ val call = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
   val gasAvailable = Gas.minimum(stipend, gasLeft.subtract(gasLeft.divide(Gas.valueOf(64))))
   val result = hostContext.call(
     EVMMessage(
-      CallKind.CALL.number,
+      CallKind.CALL,
       0,
       message.depth + 1,
       gasAvailable,
       to,
       to,
       message.destination,
+      message.origin,
       inputData,
       value
     )
@@ -878,13 +875,14 @@ val delegatecall = Opcode { gasManager, hostContext, stack, message, _, _, memor
   }
   val result = hostContext.call(
     EVMMessage(
-      CallKind.DELEGATECALL.number,
+      CallKind.DELEGATECALL,
       0,
       message.depth + 1,
       gas,
       to,
       message.destination,
       message.sender,
+      message.origin,
       inputData,
       Wei.valueOf(0)
     )
@@ -945,13 +943,14 @@ val callcode = Opcode { gasManager, hostContext, stack, message, _, _, memory, _
   }
   val result = hostContext.call(
     EVMMessage(
-      CallKind.CALL.number,
+      CallKind.CALLCODE,
       0,
       message.depth + 1,
       gas,
       to,
       to,
       to,
+      message.origin,
       inputData,
       value
     )
@@ -1004,13 +1003,14 @@ val staticcall = Opcode { gasManager, hostContext, stack, message, _, _, memory,
   }
   val result = hostContext.call(
     EVMMessage(
-      CallKind.STATICCALL.number,
+      CallKind.STATICCALL,
       0,
       message.depth + 1,
       gas,
       to,
       message.destination,
-      message.sender,
+      message.destination,
+      message.origin,
       inputData,
       Wei.valueOf(0)
     )
@@ -1042,13 +1042,14 @@ val create = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ -
 
   val result = hostContext.call(
     EVMMessage(
-      CallKind.CREATE.number,
+      CallKind.CREATE,
       0,
       message.depth + 1,
       gasManager.gasLeft(),
       to,
       to,
       message.sender,
+      message.origin,
       inputData,
       value
     )
@@ -1085,13 +1086,14 @@ val create2 = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ 
 
   val result = hostContext.call(
     EVMMessage(
-      CallKind.CREATE2.number,
+      CallKind.CREATE2,
       0,
       message.depth + 1,
       gasManager.gasLeft(),
       to,
       to,
       message.sender,
+      message.origin,
       inputData,
       value
     )
@@ -1176,6 +1178,9 @@ fun log(topics: Int): Opcode {
     val length = stack.pop()
     if (null == location || null == length) {
       return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+    }
+    if (msg.kind == CallKind.STATICCALL) {
+      return@Opcode Result(EVMExecutionStatusCode.STATIC_MODE_VIOLATION)
     }
 
     var cost = Gas.valueOf(375).add((Gas.valueOf(8).multiply(Gas.valueOf(length)))).add(

@@ -19,7 +19,7 @@ package org.apache.tuweni.blockprocessor
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.eth.AccountState
 import org.apache.tuweni.eth.Address
-import org.apache.tuweni.eth.Block
+import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.LogsBloomFilter
 import org.apache.tuweni.eth.Transaction
@@ -27,6 +27,7 @@ import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.eth.precompiles.PrecompileContract
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.TransientStateRepository
+import org.apache.tuweni.evm.CallKind
 import org.apache.tuweni.evm.EVMExecutionStatusCode
 import org.apache.tuweni.evm.EthereumVirtualMachine
 import org.apache.tuweni.evm.impl.EvmVmImpl
@@ -55,7 +56,8 @@ class BlockProcessor(val chainId: UInt256) {
   /**
    * Executes a state transition.
    *
-   * @param parentBlock the parent block
+   * @param parentBlock the parent block header
+   * @param coinbase the coinbase of the block
    * @param gasLimit the gas limit of the block
    * @param gasUsed the gas used already
    * @param transactions the list of transactions to execute
@@ -64,7 +66,8 @@ class BlockProcessor(val chainId: UInt256) {
    * @param precompiles the map of precompiles
    */
   suspend fun execute(
-    parentBlock: Block,
+    parentBlock: BlockHeader,
+    coinbase: Address,
     gasLimit: Gas,
     gasUsed: Gas,
     transactions: List<Transaction>,
@@ -73,7 +76,7 @@ class BlockProcessor(val chainId: UInt256) {
     stepListener: StepListener? = null,
   ): BlockProcessorResult {
     val stateChanges = TransientStateRepository(repository)
-    val vm = EthereumVirtualMachine(repository, precompiles, { EvmVmImpl.create(stepListener) })
+    val vm = EthereumVirtualMachine(stateChanges, repository, precompiles, { EvmVmImpl.create(stepListener) })
     vm.start()
     var index = 0L
 
@@ -114,6 +117,11 @@ class BlockProcessor(val chainId: UInt256) {
         to = tx.to!!
         inputData = tx.payload
       }
+      if (tx.value > UInt256.ZERO) {
+        val account = stateChanges.getAccount(to) ?: stateChanges.newAccountState()
+        val newAccountState = AccountState(account.nonce, account.balance.add(tx.value), account.storageRoot, account.codeHash)
+        stateChanges.storeAccount(to, newAccountState)
+      }
       val result = vm.execute(
         tx.sender!!,
         to,
@@ -122,22 +130,17 @@ class BlockProcessor(val chainId: UInt256) {
         inputData,
         tx.gasLimit,
         tx.gasPrice,
-        Address.ZERO,
+        coinbase,
         index,
         Instant.now().toEpochMilli(),
         tx.gasLimit.toLong(),
-        parentBlock.header.difficulty,
-        chainId
+        parentBlock.difficulty,
+        chainId,
+        CallKind.CALL
       )
       if (result.statusCode != EVMExecutionStatusCode.SUCCESS) {
         logger.info("EVM execution failed with status ${result.statusCode}")
         success = false
-      }
-      for (balanceChange in result.changes.getBalanceChanges()) {
-        val state = stateChanges.getAccount(balanceChange.key)?.let {
-          AccountState(it.nonce, balanceChange.value, it.storageRoot, it.codeHash)
-        } ?: stateChanges.newAccountState()
-        stateChanges.storeAccount(balanceChange.key, state)
       }
 
       for (storageChange in result.changes.getAccountChanges()) {
@@ -172,13 +175,13 @@ class BlockProcessor(val chainId: UInt256) {
 
     val block = ProtoBlock(
       SealableHeader(
-        parentBlock.header.hash,
+        parentBlock.hash,
         Hash.fromBytes(stateChanges.stateRootHash()),
         Hash.fromBytes(transactionsTrie.rootHash()),
         Hash.fromBytes(receiptsTrie.rootHash()),
         bloomFilter.toBytes(),
-        parentBlock.header.number.add(1),
-        parentBlock.header.gasLimit,
+        parentBlock.number.add(1),
+        parentBlock.gasLimit,
         allGasUsed,
       ),
       ProtoBlockBody(transactions),

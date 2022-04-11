@@ -26,6 +26,7 @@ import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.eth.AccountState
 import org.apache.tuweni.eth.Address
+import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.EthJsonModule
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.Transaction
@@ -40,6 +41,7 @@ import org.apache.tuweni.junit.LuceneIndexWriterExtension
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.trie.MerkleTrie
 import org.apache.tuweni.units.bigints.UInt256
+import org.apache.tuweni.units.bigints.UInt64
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -49,10 +51,12 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.InputStream
 import java.io.UncheckedIOException
 import java.net.URL
+import java.time.Instant
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
@@ -60,6 +64,8 @@ import java.util.stream.Stream
 class BlockProcessorReferenceTest {
 
   companion object {
+
+    val logger = LoggerFactory.getLogger(BlockProcessorReferenceTest::class.java)
 
     val mapper = ObjectMapper()
 
@@ -154,7 +160,7 @@ class BlockProcessorReferenceTest {
     assertNotNull(testName)
     assertNotNull(hardFork)
     assertNotNull(testIndex)
-    println("$path $testName")
+    logger.trace("$path $testName")
     assertNotNull(test)
     assertNotNull(exec)
     val repository = BlockchainRepository.inMemory(Genesis.dev())
@@ -179,15 +185,35 @@ class BlockProcessorReferenceTest {
     }
     val processor = BlockProcessor(UInt256.ONE)
 
-    val result = processor.execute(Genesis.dev(), test.env!!.currentGasLimit!!, Gas.ZERO, listOf(tx()), repository, Registry.istanbul)
-
-    val logsHash = Hash.hash(
-      RLP.encodeList { writer ->
-        result.block.transactionReceipts.map { it.logs }.flatten().forEach {
-          it.writeTo(writer)
-        }
-      }
+    val parentBlockHeader = BlockHeader(
+      test.env!!.previousHash!!,
+      Hash.hash(RLP.encodeList {}),
+      test.env!!.currentCoinbase!!,
+      Hash.fromBytes(repository.worldState!!.rootHash()),
+      Hash.hash(RLP.encodeList {}),
+      Hash.hash(RLP.encodeList {}),
+      Bytes.repeat(0, 256),
+      test.env!!.currentDifficulty!!,
+      test.env!!.currentNumber!!,
+      test.env!!.currentGasLimit!!,
+      Gas.ZERO,
+      Instant.ofEpochSecond(test.env!!.currentTimestamp!!.toLong()),
+      Bytes.EMPTY,
+      Hash.hash(RLP.encodeList {}),
+      UInt64.random(),
     )
+
+    val result = processor.execute(parentBlockHeader, test.env!!.currentCoinbase!!, test.env!!.currentGasLimit!!, Gas.ZERO, listOf(tx()), repository, Registry.istanbul)
+
+    val rlp = RLP.encodeList { writer ->
+      val logs = result.block.transactionReceipts.map { it.logs }.flatten()
+      result.block.transactionReceipts.map { it.logs }.flatten().forEach {
+        println(it)
+        it.writeTo(writer)
+      }
+      println(logs.size)
+    }
+    val logsHash = Hash.hash(rlp)
     assertEquals(exec.logs, logsHash)
 
     // assertEquals(exec.hash, result.block.header.stateRoot)

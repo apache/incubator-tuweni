@@ -87,18 +87,18 @@ class Memory {
     val localMemoryData = memoryData
     if (localMemoryData != null) {
       if (from.intValue() >= localMemoryData.size()) {
-        return Bytes.wrap(ByteArray(length.size()))
+        return Bytes.repeat(0, length.intValue())
       }
       if (localMemoryData.size() < max.intValue()) {
         val l = max.intValue() - localMemoryData.size()
         return Bytes.concatenate(
           localMemoryData.slice(from.intValue(), length.intValue() - l),
-          Bytes.wrap(ByteArray(l))
+          Bytes.repeat(0, l)
         )
       }
       return localMemoryData.slice(from.intValue(), length.intValue())
     } else {
-      return Bytes.wrap(ByteArray(length.intValue()))
+      return Bytes.repeat(0, length.intValue())
     }
   }
 }

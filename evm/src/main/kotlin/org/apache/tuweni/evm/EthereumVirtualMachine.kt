@@ -22,6 +22,7 @@ import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.Log
 import org.apache.tuweni.eth.precompiles.PrecompileContract
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.eth.repository.StateRepository
 import org.apache.tuweni.evm.impl.GasManager
 import org.apache.tuweni.evm.impl.Memory
 import org.apache.tuweni.evm.impl.Stack
@@ -151,13 +152,14 @@ data class EVMResult(
  * Message sent to the EVM for execution
  */
 data class EVMMessage(
-  val kind: Int,
+  val kind: CallKind,
   val flags: Int,
   val depth: Int = 0,
   val gas: Gas,
   val contract: Address,
   val destination: Address,
   val sender: Address,
+  val origin: Address,
   val inputData: Bytes,
   val value: Bytes,
   val createSalt: Bytes32 = Bytes32.ZERO,
@@ -171,6 +173,7 @@ data class EVMMessage(
  * @param options the options to set on the EVM, specific to the library
  */
 class EthereumVirtualMachine(
+  private val transientRepository: StateRepository,
   private val repository: BlockchainRepository,
   private val precompiles: Map<Address, PrecompileContract>,
   private val evmVmFactory: () -> EvmVm,
@@ -237,12 +240,13 @@ class EthereumVirtualMachine(
     currentGasLimit: Long,
     currentDifficulty: UInt256,
     chainId: UInt256,
-    callKind: CallKind = CallKind.CALL,
+    callKind: CallKind,
     revision: HardFork = latestHardFork,
     depth: Int = 0,
   ): EVMResult {
     val hostContext = TransactionalEVMHostContext(
       repository,
+      transientRepository,
       this,
       sender,
       destination,
@@ -260,6 +264,7 @@ class EthereumVirtualMachine(
     val result =
       executeInternal(
         sender,
+        sender,
         destination,
         destination,
         value,
@@ -276,6 +281,7 @@ class EthereumVirtualMachine(
   }
 
   internal suspend fun executeInternal(
+    origin: Address,
     sender: Address,
     destination: Address,
     contractAddress: Address,
@@ -283,7 +289,7 @@ class EthereumVirtualMachine(
     code: Bytes,
     inputData: Bytes,
     gas: Gas,
-    callKind: CallKind = CallKind.CALL,
+    callKind: CallKind,
     revision: HardFork = latestHardFork,
     depth: Int = 0,
     hostContext: HostContext,
@@ -302,7 +308,7 @@ class EthereumVirtualMachine(
     } else {
       val msg =
         EVMMessage(
-          callKind.number, 0, depth, gas, contractAddress, destination, sender, inputData,
+          callKind, 0, depth, gas, contractAddress, destination, sender, origin, inputData,
           value
         )
 
@@ -522,8 +528,6 @@ interface HostContext {
   fun getBlockHash(): Bytes32
   fun getCoinbase(): Address
   fun getDifficulty(): UInt256
-  fun increaseBalance(address: Address, amount: Wei)
-  suspend fun setBalance(address: Address, balance: Wei)
   fun getChaindId(): UInt256
 }
 
@@ -705,11 +709,6 @@ interface ExecutionChanges {
    * Lists of accounts to destroy
    */
   fun accountsToDestroy(): List<Address>
-
-  /**
-   * Lists of balance changes, with the final balances
-   */
-  fun getBalanceChanges(): Map<Address, Wei>
 }
 
 object NoOpExecutionChanges : ExecutionChanges {
@@ -718,6 +717,4 @@ object NoOpExecutionChanges : ExecutionChanges {
   override fun getLogs(): List<Log> = listOf()
 
   override fun accountsToDestroy(): List<Address> = listOf()
-
-  override fun getBalanceChanges(): Map<Address, Wei> = mapOf()
 }
