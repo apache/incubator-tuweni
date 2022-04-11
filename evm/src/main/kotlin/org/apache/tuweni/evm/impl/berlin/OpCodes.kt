@@ -341,6 +341,9 @@ val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   if (null == key || null == value) {
     return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   }
+  if (msg.kind == CallKind.STATICCALL) {
+    return@Opcode Result(EVMExecutionStatusCode.STATIC_MODE_VIOLATION)
+  }
   val remainingGas = gasManager.gasLeft()
   if (remainingGas <= 2300) {
     return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
