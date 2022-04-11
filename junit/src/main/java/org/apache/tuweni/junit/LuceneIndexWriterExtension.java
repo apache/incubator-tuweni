@@ -17,6 +17,7 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.NoLockFactory;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -50,7 +51,7 @@ public class LuceneIndexWriterExtension implements ParameterResolver, AfterAllCa
       throws ParameterResolutionException {
     if (writer == null) {
       try {
-        index = new ByteBuffersDirectory();
+        index = new ByteBuffersDirectory(NoLockFactory.INSTANCE);
 
         StandardAnalyzer analyzer = new StandardAnalyzer();
         IndexWriterConfig config = new IndexWriterConfig(analyzer);
