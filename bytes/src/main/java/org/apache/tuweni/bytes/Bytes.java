@@ -599,9 +599,7 @@ public interface Bytes extends Comparable<Bytes> {
    * @return a value filled with a fixed byte
    */
   static Bytes repeat(byte b, int size) {
-    byte[] buffer = new byte[size];
-    Arrays.fill(buffer, b);
-    return Bytes.wrap(buffer);
+    return new ConstantBytesValue(b, size);
   }
 
   /**
