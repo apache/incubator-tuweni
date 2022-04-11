@@ -770,6 +770,9 @@ val call = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
   if (stack.size() < 7) {
     return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   }
+  if (message.kind == CallKind.STATICCALL) {
+    return@Opcode Result(EVMExecutionStatusCode.STATIC_MODE_VIOLATION)
+  }
   val stipend = Gas.valueOf(stack.pop()!!)
   val to = Address.fromBytes(stack.pop()!!.slice(12))
   val value = stack.pop()!!
