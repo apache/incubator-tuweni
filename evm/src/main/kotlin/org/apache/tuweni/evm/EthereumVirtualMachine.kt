@@ -235,7 +235,7 @@ class EthereumVirtualMachine(
     gas: Gas,
     gasPrice: Wei,
     currentCoinbase: Address,
-    currentNumber: Long,
+    currentNumber: UInt256,
     currentTimestamp: UInt256,
     currentGasLimit: Long,
     currentDifficulty: UInt256,
@@ -488,7 +488,7 @@ interface HostContext {
    * @param number The block hash.
    * @return The block hash or zeroed bytes if the information about the block is not available.
    */
-  fun getBlockHash(number: Long): Bytes32
+  fun getBlockHash(number: UInt256): Bytes32
 
   /**
    * Log function.
@@ -524,7 +524,7 @@ interface HostContext {
    */
   fun timestamp(): UInt256
   fun getGasLimit(): Long
-  fun getBlockNumber(): Long
+  fun getBlockNumber(): UInt256
   fun getBlockHash(): Bytes32
   fun getCoinbase(): Address
   fun getDifficulty(): UInt256

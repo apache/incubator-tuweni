@@ -78,7 +78,6 @@ class BlockProcessor(val chainId: UInt256) {
     val stateChanges = TransientStateRepository(repository)
     val vm = EthereumVirtualMachine(stateChanges, repository, precompiles, { EvmVmImpl.create(stepListener) })
     vm.start()
-    var index = 0L
 
     val bloomFilter = LogsBloomFilter()
 
@@ -131,7 +130,7 @@ class BlockProcessor(val chainId: UInt256) {
         tx.gasLimit,
         tx.gasPrice,
         coinbase,
-        index,
+        parentBlock.number.add(1),
         timestamp,
         tx.gasLimit.toLong(),
         parentBlock.difficulty,

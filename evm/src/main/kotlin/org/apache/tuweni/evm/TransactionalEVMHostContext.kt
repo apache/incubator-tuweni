@@ -42,7 +42,7 @@ class TransactionalEVMHostContext(
   val gas: Gas,
   private val gasPrice: Wei,
   val currentCoinbase: Address,
-  val currentNumber: Long,
+  val currentNumber: UInt256,
   val currentTimestamp: UInt256,
   val currentGasLimit: Long,
   val currentDifficulty: UInt256,
@@ -307,7 +307,7 @@ class TransactionalEVMHostContext(
     logger.trace("Entering getTxContext")
     return Bytes.concatenate(
       gasPrice.toBytes(),
-      sender, currentCoinbase, Bytes.ofUnsignedLong(currentNumber),
+      sender, currentCoinbase, currentNumber,
       currentTimestamp,
       Bytes.ofUnsignedLong(currentGasLimit),
       currentDifficulty.toBytes(),
@@ -315,9 +315,9 @@ class TransactionalEVMHostContext(
     )
   }
 
-  override fun getBlockHash(number: Long): Bytes32 {
+  override fun getBlockHash(number: UInt256): Bytes32 {
     logger.trace("Entering getBlockHash")
-    val listOfCandidates = blockchainRepository.findBlockByHashOrNumber(UInt256.valueOf(number).toBytes())
+    val listOfCandidates = blockchainRepository.findBlockByHashOrNumber(number)
     return listOfCandidates.firstOrNull() ?: Bytes32.ZERO
   }
 
@@ -325,9 +325,6 @@ class TransactionalEVMHostContext(
     logger.trace("Entering emitLog")
     val log = Log(Address.fromBytes(Bytes.wrap(address)), data, topics)
     logs.add(log)
-    if (logger.isTraceEnabled()) {
-      logger.trace(log.toString())
-    }
   }
 
   override fun warmUpAccount(address: Address): Boolean =

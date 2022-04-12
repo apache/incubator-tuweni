@@ -482,18 +482,15 @@ val difficulty = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
 
 val number = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
   gasManager.add(2)
-  stack.push(UInt256.valueOf(hostContext.getBlockNumber()))
+  stack.push(hostContext.getBlockNumber())
   Result()
 }
 
 val blockhash = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
   gasManager.add(20)
   val number = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  if (!number.fitsLong() || number.toLong() < hostContext.getBlockNumber() - 256) {
-    stack.push(UInt256.ZERO)
-  } else {
-    stack.push(UInt256.fromBytes(hostContext.getBlockHash(number.toLong())))
-  }
+  stack.push(UInt256.fromBytes(hostContext.getBlockHash(number)))
+
   Result()
 }
 

@@ -202,7 +202,7 @@ class BlockProcessorReferenceTest {
       Hash.hash(RLP.encodeList {}),
       Bytes.repeat(0, 256),
       test.env!!.currentDifficulty!!,
-      test.env!!.currentNumber!!,
+      test.env!!.currentNumber!!.subtract(UInt256.ONE),
       test.env!!.currentGasLimit!!,
       Gas.ZERO,
       Instant.ofEpochSecond(test.env!!.currentTimestamp!!.toLong()),
