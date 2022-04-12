@@ -108,16 +108,21 @@ class BlockProcessorReferenceTest {
           val keyPair = SECP256K1.KeyPair.fromSecretKey(secretKey)
           val berlinTests = test.post?.get("Berlin")?.map { exec ->
             val txFn = {
+              val value = test.transaction!!.value!!.get(exec.indexes!!.value!!)
+              if (value.size() > 32) {
+                null
+              } else {
 
-              Transaction(
-                test.transaction!!.nonce!!,
-                Wei.valueOf(20),
-                test.transaction!!.gasLimit!!.get(exec.indexes!!.gas!!),
-                test.transaction!!.to,
-                Wei.valueOf(UInt256.fromBytes(test.transaction!!.value!!.get(exec.indexes!!.value!!))),
-                test.transaction!!.data!!.get(exec.indexes!!.data!!),
-                keyPair
-              )
+                Transaction(
+                  test.transaction!!.nonce!!,
+                  Wei.valueOf(20),
+                  test.transaction!!.gasLimit!!.get(exec.indexes!!.gas!!),
+                  test.transaction!!.to,
+                  Wei.valueOf(UInt256.fromBytes(value)),
+                  test.transaction!!.data!!.get(exec.indexes!!.data!!),
+                  keyPair
+                )
+              }
             }
             val arg = Arguments.of(path, entry.key, "Berlin", index, entry.value, txFn, exec)
             index++
@@ -155,7 +160,7 @@ class BlockProcessorReferenceTest {
     hardFork: String,
     testIndex: Int,
     test: JsonReferenceTest,
-    tx: () -> Transaction,
+    tx: () -> Transaction?,
     exec: TransactionExecution,
   ) = runBlocking {
     assertNotNull(testName)
@@ -164,6 +169,8 @@ class BlockProcessorReferenceTest {
     logger.trace("$path $testName")
     assertNotNull(test)
     assertNotNull(exec)
+    val transaction = tx() ?: return@runBlocking
+
     val repository = BlockchainRepository.inMemory(Genesis.dev())
     test.pre!!.forEach { address, state ->
       runBlocking {
@@ -203,8 +210,7 @@ class BlockProcessorReferenceTest {
       Hash.hash(RLP.encodeList {}),
       UInt64.random(),
     )
-
-    val result = processor.execute(parentBlockHeader, test.env!!.currentCoinbase!!, test.env!!.currentGasLimit!!, Gas.ZERO, test.env!!.currentTimestamp!!, listOf(tx()), repository, Registry.istanbul)
+    val result = processor.execute(parentBlockHeader, test.env!!.currentCoinbase!!, test.env!!.currentGasLimit!!, Gas.ZERO, test.env!!.currentTimestamp!!, listOf(transaction), repository, Registry.istanbul)
 
     val rlp = RLP.encodeList { writer ->
       val logs = result.block.transactionReceipts.map { it.logs }.flatten()
@@ -214,14 +220,13 @@ class BlockProcessorReferenceTest {
     }
     val logsHash = Hash.hash(rlp)
     assertEquals(
-      exec.logs, logsHash,
-      Supplier<String> {
-        val logs = result.block.transactionReceipts.map { it.logs }.flatten()
-        logs.map {
-          it.toString()
-        }.joinToString("\n") + "\n" + logs.size
-      }
-    )
+      exec.logs, logsHash
+    ) {
+      val logs = result.block.transactionReceipts.map { it.logs }.flatten()
+      logs.map {
+        it.toString()
+      }.joinToString("\n") + "\n" + logs.size
+    }
 
     // assertEquals(exec.hash, result.block.header.stateRoot)
   }
