@@ -57,6 +57,7 @@ import java.io.InputStream
 import java.io.UncheckedIOException
 import java.net.URL
 import java.time.Instant
+import java.util.function.Supplier
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
@@ -203,18 +204,24 @@ class BlockProcessorReferenceTest {
       UInt64.random(),
     )
 
-    val result = processor.execute(parentBlockHeader, test.env!!.currentCoinbase!!, test.env!!.currentGasLimit!!, Gas.ZERO, listOf(tx()), repository, Registry.istanbul)
+    val result = processor.execute(parentBlockHeader, test.env!!.currentCoinbase!!, test.env!!.currentGasLimit!!, Gas.ZERO, test.env!!.currentTimestamp!!, listOf(tx()), repository, Registry.istanbul)
 
     val rlp = RLP.encodeList { writer ->
       val logs = result.block.transactionReceipts.map { it.logs }.flatten()
-      result.block.transactionReceipts.map { it.logs }.flatten().forEach {
-        println(it)
+      logs.forEach {
         it.writeTo(writer)
       }
-      println(logs.size)
     }
     val logsHash = Hash.hash(rlp)
-    assertEquals(exec.logs, logsHash)
+    assertEquals(
+      exec.logs, logsHash,
+      Supplier<String> {
+        val logs = result.block.transactionReceipts.map { it.logs }.flatten()
+        logs.map {
+          it.toString()
+        }.joinToString("\n") + "\n" + logs.size
+      }
+    )
 
     // assertEquals(exec.hash, result.block.header.stateRoot)
   }

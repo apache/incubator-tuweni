@@ -1197,7 +1197,7 @@ fun log(topics: Int): Opcode {
           )
         )
     )
-    val memoryCost = memoryCost(memory.newSize(location, length).subtract(memory.size()))
+    val memoryCost = if (length.isZero) Gas.ZERO else memoryCost(memory.newSize(location, length).subtract(memory.size()))
     gasManager.add(cost.add(memoryCost))
     if (!gasManager.hasGasLeft()) {
       return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)

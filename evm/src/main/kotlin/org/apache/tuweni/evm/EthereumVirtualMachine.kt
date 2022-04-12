@@ -236,7 +236,7 @@ class EthereumVirtualMachine(
     gasPrice: Wei,
     currentCoinbase: Address,
     currentNumber: Long,
-    currentTimestamp: Long,
+    currentTimestamp: UInt256,
     currentGasLimit: Long,
     currentDifficulty: UInt256,
     chainId: UInt256,

@@ -39,7 +39,6 @@ import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
 import org.slf4j.LoggerFactory
-import java.time.Instant
 
 /**
  * A block processor executing blocks, executing in sequence transactions
@@ -70,6 +69,7 @@ class BlockProcessor(val chainId: UInt256) {
     coinbase: Address,
     gasLimit: Gas,
     gasUsed: Gas,
+    timestamp: UInt256,
     transactions: List<Transaction>,
     repository: BlockchainRepository,
     precompiles: Map<Address, PrecompileContract>,
@@ -132,7 +132,7 @@ class BlockProcessor(val chainId: UInt256) {
         tx.gasPrice,
         coinbase,
         index,
-        Instant.now().toEpochMilli(),
+        timestamp,
         tx.gasLimit.toLong(),
         parentBlock.difficulty,
         chainId,

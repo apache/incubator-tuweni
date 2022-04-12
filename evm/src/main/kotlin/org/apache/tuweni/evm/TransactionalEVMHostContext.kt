@@ -43,7 +43,7 @@ class TransactionalEVMHostContext(
   private val gasPrice: Wei,
   val currentCoinbase: Address,
   val currentNumber: Long,
-  val currentTimestamp: Long,
+  val currentTimestamp: UInt256,
   val currentGasLimit: Long,
   val currentDifficulty: UInt256,
   val chainId: UInt256,
@@ -308,7 +308,7 @@ class TransactionalEVMHostContext(
     return Bytes.concatenate(
       gasPrice.toBytes(),
       sender, currentCoinbase, Bytes.ofUnsignedLong(currentNumber),
-      Bytes.ofUnsignedLong(currentTimestamp),
+      currentTimestamp,
       Bytes.ofUnsignedLong(currentGasLimit),
       currentDifficulty.toBytes(),
       UInt256.ONE.toBytes()
@@ -346,7 +346,7 @@ class TransactionalEVMHostContext(
 
   override fun getCoinbase() = currentCoinbase
 
-  override fun timestamp(): UInt256 = UInt256.valueOf(currentTimestamp)
+  override fun timestamp() = currentTimestamp
 
   override fun getDifficulty() = currentDifficulty
 
