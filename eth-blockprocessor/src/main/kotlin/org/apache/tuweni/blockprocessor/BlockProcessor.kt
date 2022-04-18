@@ -142,12 +142,6 @@ class BlockProcessor(val chainId: UInt256) {
         success = false
       }
 
-      for (storageChange in result.changes.getAccountChanges()) {
-        for (oneStorageChange in storageChange.value) {
-          stateChanges.storeAccountValue(storageChange.key, oneStorageChange.key, oneStorageChange.value)
-        }
-      }
-
       for (accountToDestroy in result.changes.accountsToDestroy()) {
         stateChanges.destroyAccount(accountToDestroy)
       }
