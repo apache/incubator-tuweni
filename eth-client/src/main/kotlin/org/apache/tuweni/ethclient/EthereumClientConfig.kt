@@ -193,7 +193,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       return emptyList()
     }
     return synchronizers.map { section ->
-      val sectionConfig = config.getConfigurationSection("proxy.$section")
+      val sectionConfig = config.getConfigurationSection("synchronizer.$section")
       SynchronizerConfigurationImpl(
         section, SynchronizerType.valueOf(sectionConfig.getString("type")),
         UInt256.valueOf(sectionConfig.getLong("from")),

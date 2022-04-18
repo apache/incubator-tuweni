@@ -34,6 +34,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(VertxExtension::class, BouncyCastleExtension::class)
 class EthereumClientRunTest {
 
+  @Disabled
   @Test
   fun connectToDevNetwork(@VertxInstance vertx: Vertx) = runBlocking {
     val keyPair = SECP256K1.KeyPair.random()
