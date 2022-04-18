@@ -68,7 +68,7 @@ public final class Hash {
       try {
         return MessageDigest.getInstance(key);
       } catch (NoSuchAlgorithmException e) {
-        throw new RuntimeException(e);
+        throw new IllegalStateException(e);
       }
     });
     digest.update(input);
