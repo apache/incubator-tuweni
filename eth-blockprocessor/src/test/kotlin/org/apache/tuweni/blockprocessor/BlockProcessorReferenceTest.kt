@@ -57,7 +57,6 @@ import java.io.InputStream
 import java.io.UncheckedIOException
 import java.net.URL
 import java.time.Instant
-import java.util.function.Supplier
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
@@ -224,7 +223,7 @@ class BlockProcessorReferenceTest {
     ) {
       val logs = result.block.transactionReceipts.map { it.logs }.flatten()
       logs.map {
-        it.toString()
+        "Log{" + "logger=" + it.logger + ", data=" + it.data.toEllipsisHexString() + ", topics=" + it.topics + '}'
       }.joinToString("\n") + "\n" + logs.size
     }
 

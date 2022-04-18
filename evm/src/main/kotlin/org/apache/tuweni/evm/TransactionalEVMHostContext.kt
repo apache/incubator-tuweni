@@ -53,12 +53,9 @@ class TransactionalEVMHostContext(
     private val logger = LoggerFactory.getLogger(TransactionalEVMHostContext::class.java)
   }
 
-  private val accountChanges = mutableMapOf<Address, HashMap<Bytes32, Bytes32>>()
   private val logs = mutableListOf<Log>()
   val accountsToDestroy = mutableListOf<Address>()
   val warmedUpStorage = HashSet<Bytes>()
-
-  override fun getAccountChanges(): Map<Address, HashMap<Bytes32, Bytes32>> = accountChanges
 
   override fun getLogs(): List<Log> = logs
 
@@ -78,12 +75,11 @@ class TransactionalEVMHostContext(
     return transientRepository.accountsExists(address)
   }
 
-  override suspend fun getRepositoryStorage(address: Address, keyBytes: Bytes): Bytes32 {
+  override suspend fun getRepositoryStorage(address: Address, key: Bytes32): Bytes32? {
     logger.trace("Entering getRepositoryStorage")
-    val key = Bytes32.wrap(keyBytes)
-    val value = transientRepository.getAccountStoreValue(address, key)
+    val value = blockchainRepository.getAccountStoreValue(address, key)
     logger.trace("key $key, value $value")
-    return value ?: Bytes32.ZERO
+    return value
   }
 
   /**
@@ -96,14 +92,11 @@ class TransactionalEVMHostContext(
    * @param key The index of the account's storage entry.
    * @return The storage value at the given storage key or null bytes if the account does not exist.
    */
-  override suspend fun getStorage(address: Address, key: Bytes32): Bytes32 {
+  override suspend fun getStorage(address: Address, key: Bytes32): Bytes32? {
     logger.trace("Entering getStorage")
-    var value = accountChanges[address]?.get(key)
-    if (value == null) {
-      value = transientRepository.getAccountStoreValue(address, key)?.let { UInt256.fromBytes(it) }
-    }
+    val value = transientRepository.getAccountStoreValue(address, key)?.let { UInt256.fromBytes(it) }
     logger.trace("key $key value $value")
-    return value ?: UInt256.ZERO
+    return value
   }
 
   /**
@@ -330,8 +323,10 @@ class TransactionalEVMHostContext(
   override fun warmUpAccount(address: Address): Boolean =
     !warmedUpStorage.add(address)
 
-  override fun warmUpStorage(address: Address, key: UInt256): Boolean =
-    !warmedUpStorage.add(Bytes.concatenate(address, Bytes.fromHexString("0x0f"), key))
+  override fun warmUpStorage(address: Address, key: UInt256): Boolean {
+    logger.trace("entering warmUpStorage $address $key")
+    return !warmedUpStorage.add(Bytes.concatenate(address, Bytes.fromHexString("0x0f"), key))
+  }
 
   override fun getGasPrice() = gasPrice
 

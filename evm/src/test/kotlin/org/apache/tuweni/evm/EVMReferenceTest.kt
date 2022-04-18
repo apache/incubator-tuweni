@@ -27,6 +27,7 @@ import org.apache.tuweni.eth.AccountState
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.EthJsonModule
 import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.precompiles.Registry
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.evm.impl.EvmVmImpl
 import org.apache.tuweni.genesis.Genesis
@@ -138,7 +139,7 @@ class EVMReferenceTest {
         }
       }
     }
-    val vm = EthereumVirtualMachine(repository, EvmVmImpl::create)
+    val vm = EthereumVirtualMachine(repository, repository, Registry.istanbul, EvmVmImpl::create)
     vm.start()
     try {
       val result = vm.execute(
@@ -150,11 +151,12 @@ class EVMReferenceTest {
         test.exec?.gas!!,
         test.exec?.gasPrice!!,
         test.env?.currentCoinbase!!,
-        test.env?.currentNumber!!.toLong(),
-        test.env?.currentTimestamp!!.toLong(),
+        test.env?.currentNumber!!,
+        test.env?.currentTimestamp!!,
         test.env?.currentGasLimit!!.toLong(),
         test.env?.currentDifficulty!!,
-        UInt256.valueOf(1)
+        UInt256.valueOf(1),
+        CallKind.CALL,
       )
       if (test.post == null) {
         assertNotEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
@@ -222,13 +224,10 @@ class EVMReferenceTest {
         test.post!!.forEach { address, state ->
           runBlocking {
             assertTrue(
-              repository.accountsExists(address) ||
-                (result.hostContext as TransactionalEVMHostContext).getAccountChanges().containsKey(address)
+              repository.accountsExists(address)
             )
             val accountState = repository.getAccount(address)
-            val balance = accountState?.balance?.add(
-              result.changes.getBalanceChanges().get(address) ?: Wei.valueOf(0)
-            ) ?: Wei.valueOf(0)
+            val balance = accountState?.balance ?: Wei.valueOf(0)
             assertEquals(state.balance, balance)
             assertEquals(state.nonce, accountState!!.nonce)
 
@@ -247,7 +246,7 @@ class EVMReferenceTest {
           }
         }
 
-        // assertEquals(test.gas, result.gasManager.gasLeft())
+        assertEquals(test.gas, result.state.gasManager.gasLeft())
         if (test.out?.isEmpty == true) {
           assertTrue(result.state.output == null || result.state.output?.isEmpty ?: false)
         } else {

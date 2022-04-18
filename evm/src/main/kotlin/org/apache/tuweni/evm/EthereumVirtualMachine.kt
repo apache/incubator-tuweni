@@ -355,7 +355,7 @@ interface HostContext {
    * @param key The index of the account's storage entry.
    * @return The storage value at the given storage key or null bytes if the account does not exist.
    */
-  suspend fun getRepositoryStorage(address: Address, keyBytes: Bytes): Bytes32
+  suspend fun getRepositoryStorage(address: Address, key: Bytes32): Bytes32?
 
   /**
    * Get storage function.
@@ -367,7 +367,7 @@ interface HostContext {
    * @param key The index of the account's storage entry.
    * @return The storage value at the given storage key or null bytes if the account does not exist.
    */
-  suspend fun getStorage(address: Address, key: Bytes32): Bytes32
+  suspend fun getStorage(address: Address, key: Bytes32): Bytes32?
 
   /**
    * Set storage function.
@@ -696,11 +696,6 @@ val opcodes = mapOf<Byte, String>(
 interface ExecutionChanges {
 
   /**
-   * Changes made to account storage.
-   */
-  fun getAccountChanges(): Map<Address, HashMap<Bytes32, Bytes32>>
-
-  /**
    * Logs emitted during execution
    */
   fun getLogs(): List<Log>
@@ -712,8 +707,6 @@ interface ExecutionChanges {
 }
 
 object NoOpExecutionChanges : ExecutionChanges {
-  override fun getAccountChanges(): Map<Address, HashMap<Bytes32, Bytes32>> = mapOf()
-
   override fun getLogs(): List<Log> = listOf()
 
   override fun accountsToDestroy(): List<Address> = listOf()

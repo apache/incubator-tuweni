@@ -352,7 +352,7 @@ val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
       Gas.valueOf(800)
     } else {
       val originalValue = hostContext.getRepositoryStorage(address, key)
-      if (originalValue.equals(currentValue)) {
+      if (value.equals(originalValue)) {
         if (originalValue.isZero) {
           Gas.valueOf(20000)
         } else Gas.valueOf(5000)
@@ -382,7 +382,7 @@ val sload = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   gasManager.add(800)
 
   runBlocking {
-    stack.push(hostContext.getStorage(address, key))
+    stack.push(hostContext.getStorage(address, key) ?: UInt256.ZERO)
   }
   Result()
 }

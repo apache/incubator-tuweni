@@ -55,7 +55,7 @@ class EthereumVirtualMachineTest {
       BlockchainIndex(writer),
       Genesis.dev()
     )
-    val vm = EthereumVirtualMachine(repository, Registry.istanbul, EvmVmImpl::create)
+    val vm = EthereumVirtualMachine(repository, repository, Registry.istanbul, EvmVmImpl::create)
     vm.start()
     assertEquals("0.0.1", vm.version())
     vm.stop()
@@ -102,7 +102,7 @@ class EthereumVirtualMachineTest {
       MapKeyValueStore(),
       BlockchainIndex(writer)
     )
-    val vm = EthereumVirtualMachine(repository, Registry.istanbul, EvmVmImpl::create)
+    val vm = EthereumVirtualMachine(repository, repository, Registry.istanbul, EvmVmImpl::create)
     vm.start()
     assertTrue(vm.capabilities() > 0)
     vm.stop()
@@ -121,7 +121,8 @@ class EthereumVirtualMachineTest {
       MapKeyValueStore(),
       BlockchainIndex(writer)
     )
-    val vm = EthereumVirtualMachine(repository, Registry.istanbul, EvmVmImpl::create, mapOf(Pair("verbose", "1")))
+    val vm =
+      EthereumVirtualMachine(repository, repository, Registry.istanbul, EvmVmImpl::create, mapOf(Pair("verbose", "1")))
     vm.start()
     vm.stop()
   }
@@ -138,7 +139,7 @@ class EthereumVirtualMachineTest {
       BlockchainIndex(writer)
     )
 
-    val vm = EthereumVirtualMachine(repository, Registry.istanbul, EvmVmImpl::create)
+    val vm = EthereumVirtualMachine(repository, repository, Registry.istanbul, EvmVmImpl::create)
     vm.start()
     try {
       val sender = Address.fromHexString("0x3339626637316465316237643762653362353100")
@@ -151,8 +152,8 @@ class EthereumVirtualMachineTest {
           sender, destination, value, Bytes.fromHexString("0x00"), inputData, gas,
           Wei.valueOf(0),
           Address.fromBytes(Bytes.random(20)),
-          0,
-          0,
+          UInt256.ZERO,
+          UInt256.ZERO,
           2,
           UInt256.valueOf(1),
           UInt256.valueOf(1),
@@ -179,7 +180,7 @@ class EthereumVirtualMachineTest {
         Genesis.dev()
       )
 
-      val vm = EthereumVirtualMachine(repository, Registry.istanbul, vmFn)
+      val vm = EthereumVirtualMachine(repository, repository, Registry.istanbul, vmFn)
       vm.start()
       try {
         val sender = Address.fromHexString("0x3339626637316465316237643762653362353100")
@@ -191,11 +192,12 @@ class EthereumVirtualMachineTest {
           sender, destination, value, code, inputData, gas,
           Wei.valueOf(0),
           Address.fromBytes(Bytes.random(20)),
-          0,
-          0,
+          UInt256.ZERO,
+          UInt256.ZERO,
           2,
           UInt256.valueOf(1),
-          UInt256.valueOf(1)
+          UInt256.valueOf(1),
+          CallKind.CALL,
         )
       } finally {
         vm.stop()

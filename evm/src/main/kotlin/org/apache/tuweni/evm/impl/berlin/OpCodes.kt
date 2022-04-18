@@ -352,13 +352,13 @@ val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   val address = msg.destination
   val slotIsWarm = hostContext.warmUpStorage(address, key)
 
-  val currentValue = hostContext.getStorage(address, key)
+  val currentValue = hostContext.getStorage(address, key) ?: UInt256.ZERO
   val cost = if (value.equals(currentValue)) {
     Gas.valueOf(100)
   } else {
-    val originalValue = hostContext.getRepositoryStorage(address, key)
-    if (originalValue.equals(currentValue)) {
-      if (originalValue.isZero) {
+    val originalValue = hostContext.getRepositoryStorage(address, key) ?: UInt256.ZERO
+    if (currentValue.equals(originalValue)) {
+      if (originalValue.isZero == true) {
         Gas.valueOf(20000L - 2100)
       } else Gas.valueOf(5000L - 2100)
     } else {
@@ -366,8 +366,6 @@ val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
     }
   }.add(if (slotIsWarm) Gas.ZERO else Gas.valueOf(2100))
   gasManager.add(cost)
-
-  // frame.incrementGasRefund(gasCalculator().calculateStorageRefundAmount(account, key, value))
 
   hostContext.setStorage(address, key, value)
 
@@ -381,7 +379,7 @@ val sload = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   val slotIsWarm = hostContext.warmUpStorage(address, key)
   gasManager.add(if (slotIsWarm) 100 else 2600)
 
-  stack.push(hostContext.getStorage(address, key))
+  stack.push(hostContext.getRepositoryStorage(address, key) ?: UInt256.ZERO)
 
   Result()
 }
