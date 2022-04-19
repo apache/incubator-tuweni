@@ -149,6 +149,7 @@ class HashTest {
     Provider[] providers = Security.getProviders();
     Stream.of(Security.getProviders()).map(Provider::getName).forEach(Security::removeProvider);
     Hash.USE_SODIUM = false;
+    Hash.cachedDigests.get().clear();
     try {
       assertThrows(IllegalStateException.class, () -> Hash.sha2_256("horse".getBytes(UTF_8)));
       assertThrows(IllegalStateException.class, () -> Hash.sha2_256(Bytes.wrap("horse".getBytes(UTF_8))));

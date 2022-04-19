@@ -41,10 +41,9 @@ public final class Hash {
 
   // Keccak
   private static final String KECCAK_256 = "KECCAK-256";
-  private static String KECCAK_512 = "KECCAK-512";
+  private static final String KECCAK_512 = "KECCAK-512";
 
-  private static final ThreadLocal<Map<String, MessageDigest>> cachedDigests =
-      ThreadLocal.withInitial(() -> new ConcurrentHashMap<>());
+  static final ThreadLocal<Map<String, MessageDigest>> cachedDigests = ThreadLocal.withInitial(ConcurrentHashMap::new);
 
   // SHA-3
   private static final String SHA3_256 = "SHA3-256";
@@ -64,15 +63,23 @@ public final class Hash {
   public static byte[] digestUsingAlgorithm(byte[] input, String alg) throws NoSuchAlgorithmException {
     requireNonNull(input);
     requireNonNull(alg);
-    MessageDigest digest = cachedDigests.get().computeIfAbsent(alg, (key) -> {
-      try {
-        return MessageDigest.getInstance(key);
-      } catch (NoSuchAlgorithmException e) {
-        throw new IllegalStateException(e);
+    try {
+      MessageDigest digest = cachedDigests.get().computeIfAbsent(alg, (key) -> {
+        try {
+          return MessageDigest.getInstance(key);
+        } catch (NoSuchAlgorithmException e) {
+          throw new RuntimeException(e);
+        }
+      });
+      digest.update(input);
+      return digest.digest();
+    } catch (RuntimeException e) {
+      if (e.getCause() instanceof NoSuchAlgorithmException) {
+        throw (NoSuchAlgorithmException) e.getCause();
+      } else {
+        throw e;
       }
-    });
-    digest.update(input);
-    return digest.digest();
+    }
   }
 
   /**
