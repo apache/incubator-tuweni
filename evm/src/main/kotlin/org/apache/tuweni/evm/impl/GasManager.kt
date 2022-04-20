@@ -22,6 +22,7 @@ class GasManager(val gas: Gas) {
 
   var gasCost = Gas.ZERO
   var lastGasCost = Gas.ZERO
+  var refund = 0L
 
   fun add(g: Long) {
     add(Gas.valueOf(g))
@@ -44,4 +45,8 @@ class GasManager(val gas: Gas) {
   }
 
   fun lastGasCost(): Gas = lastGasCost
+
+  fun addRefund(refund: Long) {
+    this.refund += refund
+  }
 }

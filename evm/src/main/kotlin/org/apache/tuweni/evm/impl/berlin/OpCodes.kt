@@ -353,12 +353,12 @@ val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   val slotIsWarm = hostContext.warmUpStorage(address, key)
 
   val currentValue = hostContext.getStorage(address, key) ?: UInt256.ZERO
+  val originalValue = hostContext.getRepositoryStorage(address, key) ?: UInt256.ZERO
   val cost = if (value.equals(currentValue)) {
     Gas.valueOf(100)
   } else {
-    val originalValue = hostContext.getRepositoryStorage(address, key) ?: UInt256.ZERO
     if (currentValue.equals(originalValue)) {
-      if (originalValue.isZero == true) {
+      if (originalValue.isZero) {
         Gas.valueOf(20000L - 2100)
       } else Gas.valueOf(5000L - 2100)
     } else {
@@ -368,6 +368,35 @@ val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   gasManager.add(cost)
 
   hostContext.setStorage(address, key, value)
+
+  val refund: Long = if (value.equals(currentValue)) {
+    0
+  } else {
+    if (originalValue.equals(currentValue)) {
+      if (originalValue.isZero) {
+        0L
+      } else if (value.isZero()) {
+        15000
+      } else {
+        0L
+      }
+    } else {
+      var refund = 0L
+      if (!originalValue.isZero) {
+        if (currentValue.isZero) {
+          refund = -15000
+        } else if (value.isZero()) {
+          refund = 15000
+        }
+      }
+      if (originalValue.equals(value)) {
+        refund += if (originalValue.isZero) 19900 else 2800
+      }
+      refund
+    }
+  }
+
+  gasManager.addRefund(refund)
 
   Result()
 }
@@ -631,7 +660,8 @@ val mload = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
 
 val extcodesize = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
   gasManager.add(700)
-  val address = stack.pop()?.slice(12)?.let { Address.fromBytes(it) } ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  val address = stack.pop()?.slice(12)?.let { Address.fromBytes(it) }
+    ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   stack.push(UInt256.valueOf(hostContext.getCode(address).size().toLong()))
   Result()
 }
@@ -1191,7 +1221,8 @@ fun log(topics: Int): Opcode {
           )
         )
     )
-    val memoryCost = if (length.isZero) Gas.ZERO else memoryCost(memory.newSize(location, length).subtract(memory.size()))
+    val memoryCost =
+      if (length.isZero) Gas.ZERO else memoryCost(memory.newSize(location, length).subtract(memory.size()))
     gasManager.add(cost.add(memoryCost))
     if (!gasManager.hasGasLeft()) {
       return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
