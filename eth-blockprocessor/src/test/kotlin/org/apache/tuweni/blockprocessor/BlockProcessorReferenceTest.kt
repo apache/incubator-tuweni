@@ -46,6 +46,7 @@ import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -59,6 +60,7 @@ import java.time.Instant
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
+@Disabled()
 @ExtendWith(LuceneIndexWriterExtension::class, BouncyCastleExtension::class)
 class BlockProcessorReferenceTest {
 
