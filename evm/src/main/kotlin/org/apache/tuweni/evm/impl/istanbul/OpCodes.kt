@@ -704,13 +704,16 @@ val sha3 = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
   if (null == from || null == length) {
     return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
   }
-  val numWords: UInt256 = length.divideCeil(Bytes32.SIZE.toLong())
+  val numWords: UInt256 = length.divideCeil(32L)
   val copyCost = Gas.valueOf(6).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(30))
-  val pre = memoryCost(memory.size())
-  val post: Gas = memoryCost(memory.newSize(from, length))
-  val memoryCost = post.subtract(pre)
+
+  val memoryCost = if (length.isZero) Gas.ZERO else {
+    val pre = org.apache.tuweni.evm.impl.frontier.memoryCost(memory.size())
+    val post: Gas = org.apache.tuweni.evm.impl.frontier.memoryCost(memory.newSize(from, length))
+    post.subtract(pre)
+  }
   gasManager.add(copyCost.add(memoryCost))
-  val bytes = memory.read(from, length)
+  val bytes = memory.read(from, length, false)
   stack.push(if (bytes == null) Bytes32.ZERO else Hash.keccak256(bytes))
   Result()
 }
