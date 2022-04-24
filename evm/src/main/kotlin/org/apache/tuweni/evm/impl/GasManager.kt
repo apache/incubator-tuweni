@@ -16,13 +16,16 @@
  */
 package org.apache.tuweni.evm.impl
 
+import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
+import org.apache.tuweni.units.ethereum.Wei
 
 class GasManager(val gas: Gas) {
 
   var gasCost = Gas.ZERO
   var lastGasCost = Gas.ZERO
-  var refund = 0L
+  private var refund = 0L
+  private var refundAsUint256 = UInt256.ZERO
 
   fun add(g: Long) {
     add(Gas.valueOf(g))
@@ -46,7 +49,14 @@ class GasManager(val gas: Gas) {
 
   fun lastGasCost(): Gas = lastGasCost
 
+  fun addRefund(refund: UInt256) {
+    refundAsUint256 = this.refundAsUint256.add(refund)
+  }
   fun addRefund(refund: Long) {
     this.refund += refund
+  }
+
+  fun applyRefund(value: Wei): Wei {
+    return value.add(refundAsUint256).add(refund)
   }
 }

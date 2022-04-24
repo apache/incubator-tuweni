@@ -94,10 +94,10 @@ class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
       current++
       val result = opcode.execute(gasManager, hostContext, stack, msg, code, current, memory, null)
       if (logger.isTraceEnabled) {
-        val foo = Bytes.of(currentOpcodeByte).toHexString()
+        val opCodeAsString = Bytes.of(currentOpcodeByte).toHexString()
 
         logger.trace(
-          ">> OPCODE: ${opcodes[currentOpcodeByte] ?: throw java.lang.RuntimeException("unknown opcode $foo") } " +
+          ">> OPCODE: ${opcodes[currentOpcodeByte] ?: opCodeAsString } " +
             "gas: ${gasManager.gasLeft()} cost: ${gasManager.lastGasCost()}"
         )
       }

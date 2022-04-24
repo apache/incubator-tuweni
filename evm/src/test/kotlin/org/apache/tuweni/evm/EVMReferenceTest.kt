@@ -77,6 +77,18 @@ class EVMReferenceTest {
       return findTests("/istanbul/VMTests/**/*.json")
     }
 
+    @JvmStatic
+    @Throws(IOException::class)
+    private fun findFrontierTests(): Stream<Arguments> {
+      return findTests("/frontier/VMTests/**/*.json")
+    }
+
+    @JvmStatic
+    @Throws(IOException::class)
+    private fun findConstantinopleTests(): Stream<Arguments> {
+      return findTests("/constantinople/VMTests/**/*.json")
+    }
+
     @Throws(IOException::class)
     private fun findTests(glob: String): Stream<Arguments> {
       return Resources.find(glob).filter { !(it.file.contains("loop") && it.file.contains("10M")) }.flatMap { url ->
@@ -112,22 +124,39 @@ class EVMReferenceTest {
   @ParameterizedTest(name = "Berlin {index}: {0}")
   @MethodSource("findBerlinTests")
   fun runBerlinReferenceTests(testName: String, test: JsonReferenceTest) {
-    runReferenceTests(testName, test)
+    runReferenceTests(testName, HardFork.BERLIN, test)
   }
 
   @ParameterizedTest(name = "Istanbul {index}: {0}")
   @MethodSource("findIstanbulTests")
   fun runIstanbulReferenceTests(testName: String, test: JsonReferenceTest) {
-    runReferenceTests(testName, test)
+    runReferenceTests(testName, HardFork.ISTANBUL, test)
   }
 
-  private fun runReferenceTests(testName: String, test: JsonReferenceTest) = runBlocking {
+  @ParameterizedTest(name = "Frontier {index}: {0}")
+  @MethodSource("findFrontierTests")
+  fun runFrontierReferenceTests(testName: String, test: JsonReferenceTest) {
+    runReferenceTests(testName, HardFork.FRONTIER, test)
+  }
+
+  @ParameterizedTest(name = "Constantinople {index}: {0}")
+  @MethodSource("findConstantinopleTests")
+  fun runConstantinopleReferenceTests(testName: String, test: JsonReferenceTest) {
+    runReferenceTests(testName, HardFork.CONSTANTINOPLE, test)
+  }
+
+  private fun runReferenceTests(testName: String, hardFork: HardFork, test: JsonReferenceTest) = runBlocking {
     assertNotNull(testName)
     println(testName)
     val repository = BlockchainRepository.inMemory(Genesis.dev())
     test.pre!!.forEach { address, state ->
       runBlocking {
-        val accountState = AccountState(state.nonce!!, state.balance!!, Hash.fromBytes(MerkleTrie.EMPTY_TRIE_ROOT_HASH), Hash.hash(state.code!!))
+        val accountState = AccountState(
+          state.nonce!!,
+          state.balance!!,
+          Hash.fromBytes(MerkleTrie.EMPTY_TRIE_ROOT_HASH),
+          Hash.hash(state.code!!)
+        )
         repository.storeAccount(address, accountState)
         repository.storeCode(state.code!!)
         val accountStorage = state.storage
@@ -157,6 +186,7 @@ class EVMReferenceTest {
         test.env?.currentDifficulty!!,
         UInt256.valueOf(1),
         CallKind.CALL,
+        hardFork
       )
       if (test.post == null) {
         assertNotEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
@@ -209,7 +239,10 @@ class EVMReferenceTest {
           testName.startsWith("sha3_5") ||
           testName.startsWith("sha3_6") ||
           testName.startsWith("sha3_bigSize") ||
-          testName.startsWith("ackermann33")
+          testName.startsWith("ackermann33") ||
+          testName.equals("push33") ||
+          testName.equals("sstore_load_2") ||
+          testName.equals("jumpTo1InstructionafterJump")
         ) {
           assertEquals(EVMExecutionStatusCode.OUT_OF_GAS, result.statusCode)
         } else if (testName.contains("stacklimit", true)) {
@@ -246,7 +279,6 @@ class EVMReferenceTest {
           }
         }
 
-        // assertEquals(test.gas, result.state.gasManager.gasLeft())
         if (test.out?.isEmpty == true) {
           assertTrue(result.state.output == null || result.state.output?.isEmpty ?: false)
         } else {
@@ -255,6 +287,12 @@ class EVMReferenceTest {
             result.state.output?.let { if (it.size() < 32) Bytes32.rightPad(it) else it }
           )
         }
+        assertEquals(
+          test.gas!!.toLong(),
+          result.state.gasManager.gasLeft().toLong(),
+          " diff: " + if (test.gas!! > result.state.gasManager.gasLeft()) test.gas!!.subtract(result.state.gasManager.gasLeft()) else result.state.gasManager.gasLeft()
+            .subtract(test.gas!!)
+        )
       }
     } finally {
       vm.stop()

@@ -45,6 +45,7 @@ import org.apache.tuweni.evm.impl.berlin.div
 import org.apache.tuweni.evm.impl.berlin.dup
 import org.apache.tuweni.evm.impl.berlin.eq
 import org.apache.tuweni.evm.impl.berlin.exp
+import org.apache.tuweni.evm.impl.berlin.extcodecopy
 import org.apache.tuweni.evm.impl.berlin.extcodehash
 import org.apache.tuweni.evm.impl.berlin.extcodesize
 import org.apache.tuweni.evm.impl.berlin.gas
@@ -74,28 +75,27 @@ import org.apache.tuweni.evm.impl.berlin.pop
 import org.apache.tuweni.evm.impl.berlin.push
 import org.apache.tuweni.evm.impl.berlin.retuRn
 import org.apache.tuweni.evm.impl.berlin.returndatacopy
+import org.apache.tuweni.evm.impl.berlin.returndatasize
+import org.apache.tuweni.evm.impl.berlin.revert
+import org.apache.tuweni.evm.impl.berlin.sar
 import org.apache.tuweni.evm.impl.berlin.sdiv
+import org.apache.tuweni.evm.impl.berlin.selfbalance
 import org.apache.tuweni.evm.impl.berlin.selfdestruct
 import org.apache.tuweni.evm.impl.berlin.sgt
 import org.apache.tuweni.evm.impl.berlin.sha3
+import org.apache.tuweni.evm.impl.berlin.shl
+import org.apache.tuweni.evm.impl.berlin.shr
 import org.apache.tuweni.evm.impl.berlin.signextend
 import org.apache.tuweni.evm.impl.berlin.sload
 import org.apache.tuweni.evm.impl.berlin.slt
 import org.apache.tuweni.evm.impl.berlin.smod
 import org.apache.tuweni.evm.impl.berlin.sstore
+import org.apache.tuweni.evm.impl.berlin.staticcall
 import org.apache.tuweni.evm.impl.berlin.stop
 import org.apache.tuweni.evm.impl.berlin.sub
 import org.apache.tuweni.evm.impl.berlin.swap
 import org.apache.tuweni.evm.impl.berlin.timestamp
 import org.apache.tuweni.evm.impl.berlin.xor
-import org.apache.tuweni.evm.impl.berlin.extcodecopy
-import org.apache.tuweni.evm.impl.berlin.returndatasize
-import org.apache.tuweni.evm.impl.berlin.revert
-import org.apache.tuweni.evm.impl.berlin.sar
-import org.apache.tuweni.evm.impl.berlin.selfbalance
-import org.apache.tuweni.evm.impl.berlin.shl
-import org.apache.tuweni.evm.impl.berlin.shr
-import org.apache.tuweni.evm.impl.berlin.staticcall
 
 fun interface Opcode {
   suspend fun execute(
@@ -284,7 +284,166 @@ class OpcodeRegistry(val opcodes: Map<HardFork, Map<Byte, Opcode>>) {
       for (i in 0..4) {
         istanbulOpcodes[(0xa0 + i).toByte()] = org.apache.tuweni.evm.impl.istanbul.log(i)
       }
-      val forks = mapOf(Pair(HardFork.BERLIN, berlinOpcodes), Pair(HardFork.ISTANBUL, istanbulOpcodes))
+      val constantinopleOpcodes = mutableMapOf<Byte, Opcode>()
+      constantinopleOpcodes[0x00] = org.apache.tuweni.evm.impl.constantinople.stop
+      constantinopleOpcodes[0x01] = org.apache.tuweni.evm.impl.constantinople.add
+      constantinopleOpcodes[0x02] = org.apache.tuweni.evm.impl.constantinople.mul
+      constantinopleOpcodes[0x03] = org.apache.tuweni.evm.impl.constantinople.sub
+      constantinopleOpcodes[0x04] = org.apache.tuweni.evm.impl.constantinople.div
+      constantinopleOpcodes[0x05] = org.apache.tuweni.evm.impl.constantinople.sdiv
+      constantinopleOpcodes[0x06] = org.apache.tuweni.evm.impl.constantinople.mod
+      constantinopleOpcodes[0x07] = org.apache.tuweni.evm.impl.constantinople.smod
+      constantinopleOpcodes[0x08] = org.apache.tuweni.evm.impl.constantinople.addmod
+      constantinopleOpcodes[0x09] = org.apache.tuweni.evm.impl.constantinople.mulmod
+      constantinopleOpcodes[0x10] = org.apache.tuweni.evm.impl.constantinople.lt
+      constantinopleOpcodes[0x11] = org.apache.tuweni.evm.impl.constantinople.gt
+      constantinopleOpcodes[0x12] = org.apache.tuweni.evm.impl.constantinople.slt
+      constantinopleOpcodes[0x13] = org.apache.tuweni.evm.impl.constantinople.sgt
+      constantinopleOpcodes[0x0a] = org.apache.tuweni.evm.impl.constantinople.exp
+      constantinopleOpcodes[0x0b] = org.apache.tuweni.evm.impl.constantinople.signextend
+      constantinopleOpcodes[0x14] = org.apache.tuweni.evm.impl.constantinople.eq
+      constantinopleOpcodes[0x15] = org.apache.tuweni.evm.impl.constantinople.isZero
+      constantinopleOpcodes[0x16] = org.apache.tuweni.evm.impl.constantinople.and
+      constantinopleOpcodes[0x17] = org.apache.tuweni.evm.impl.constantinople.or
+      constantinopleOpcodes[0x18] = org.apache.tuweni.evm.impl.constantinople.xor
+      constantinopleOpcodes[0x19] = org.apache.tuweni.evm.impl.constantinople.not
+      constantinopleOpcodes[0x1a] = org.apache.tuweni.evm.impl.constantinople.byte
+      constantinopleOpcodes[0x20] = org.apache.tuweni.evm.impl.constantinople.sha3
+      constantinopleOpcodes[0x30] = org.apache.tuweni.evm.impl.constantinople.address
+      constantinopleOpcodes[0x31] = org.apache.tuweni.evm.impl.constantinople.balance
+      constantinopleOpcodes[0x32] = org.apache.tuweni.evm.impl.constantinople.origin
+      constantinopleOpcodes[0x33] = org.apache.tuweni.evm.impl.constantinople.caller
+      constantinopleOpcodes[0x34] = org.apache.tuweni.evm.impl.constantinople.callvalue
+      constantinopleOpcodes[0x35] = org.apache.tuweni.evm.impl.constantinople.calldataload
+      constantinopleOpcodes[0x36] = org.apache.tuweni.evm.impl.constantinople.calldatasize
+      constantinopleOpcodes[0x37] = org.apache.tuweni.evm.impl.constantinople.calldatacopy
+      constantinopleOpcodes[0x38] = org.apache.tuweni.evm.impl.constantinople.codesize
+      constantinopleOpcodes[0x39] = org.apache.tuweni.evm.impl.constantinople.codecopy
+      constantinopleOpcodes[0x3a] = org.apache.tuweni.evm.impl.constantinople.gasPrice
+      constantinopleOpcodes[0x3b] = org.apache.tuweni.evm.impl.constantinople.extcodesize
+      constantinopleOpcodes[0x3c] = org.apache.tuweni.evm.impl.constantinople.extcodecopy
+      constantinopleOpcodes[0x3d] = org.apache.tuweni.evm.impl.constantinople.returndatasize
+      constantinopleOpcodes[0x3e] = org.apache.tuweni.evm.impl.constantinople.returndatacopy
+      constantinopleOpcodes[0x3f] = org.apache.tuweni.evm.impl.constantinople.extcodehash
+      constantinopleOpcodes[0x40] = org.apache.tuweni.evm.impl.constantinople.blockhash
+      constantinopleOpcodes[0x41] = org.apache.tuweni.evm.impl.constantinople.coinbase
+      constantinopleOpcodes[0x42] = org.apache.tuweni.evm.impl.constantinople.timestamp
+      constantinopleOpcodes[0x43] = org.apache.tuweni.evm.impl.constantinople.number
+      constantinopleOpcodes[0x44] = org.apache.tuweni.evm.impl.constantinople.difficulty
+      constantinopleOpcodes[0x45] = org.apache.tuweni.evm.impl.constantinople.gasLimit
+      constantinopleOpcodes[0x50] = org.apache.tuweni.evm.impl.constantinople.pop
+      constantinopleOpcodes[0x51] = org.apache.tuweni.evm.impl.constantinople.mload
+      constantinopleOpcodes[0x52] = org.apache.tuweni.evm.impl.constantinople.mstore
+      constantinopleOpcodes[0x53] = org.apache.tuweni.evm.impl.constantinople.mstore8
+      constantinopleOpcodes[0x54] = org.apache.tuweni.evm.impl.constantinople.sload
+      constantinopleOpcodes[0x55] = org.apache.tuweni.evm.impl.constantinople.sstore
+      constantinopleOpcodes[0x56] = org.apache.tuweni.evm.impl.constantinople.jump
+      constantinopleOpcodes[0x57] = org.apache.tuweni.evm.impl.constantinople.jumpi
+      constantinopleOpcodes[0x58] = org.apache.tuweni.evm.impl.constantinople.pc
+      constantinopleOpcodes[0x59] = org.apache.tuweni.evm.impl.constantinople.msize
+      constantinopleOpcodes[0x5a] = org.apache.tuweni.evm.impl.constantinople.gas
+      constantinopleOpcodes[0x5b] = org.apache.tuweni.evm.impl.constantinople.jumpdest
+      constantinopleOpcodes[0xf3.toByte()] = org.apache.tuweni.evm.impl.constantinople.retuRn
+      constantinopleOpcodes[0xfe.toByte()] = org.apache.tuweni.evm.impl.constantinople.invalid
+      constantinopleOpcodes[0xff.toByte()] = org.apache.tuweni.evm.impl.constantinople.selfdestruct
+      for (i in 1..32) {
+        constantinopleOpcodes[(0x60 + i - 1).toByte()] = org.apache.tuweni.evm.impl.constantinople.push(i)
+      }
+
+      for (i in 1..16) {
+        constantinopleOpcodes[(0x80 + i - 1).toByte()] = org.apache.tuweni.evm.impl.constantinople.dup(i)
+      }
+
+      for (i in 1..16) {
+        constantinopleOpcodes[(0x90 + i - 1).toByte()] = org.apache.tuweni.evm.impl.constantinople.swap(i)
+      }
+
+      for (i in 0..4) {
+        constantinopleOpcodes[(0xa0 + i).toByte()] = org.apache.tuweni.evm.impl.constantinople.log(i)
+      }
+      val frontierOpcodes = mutableMapOf<Byte, Opcode>()
+      frontierOpcodes[0x00] = org.apache.tuweni.evm.impl.frontier.stop
+      frontierOpcodes[0x01] = org.apache.tuweni.evm.impl.frontier.add
+      frontierOpcodes[0x02] = org.apache.tuweni.evm.impl.frontier.mul
+      frontierOpcodes[0x03] = org.apache.tuweni.evm.impl.frontier.sub
+      frontierOpcodes[0x04] = org.apache.tuweni.evm.impl.frontier.div
+      frontierOpcodes[0x05] = org.apache.tuweni.evm.impl.frontier.sdiv
+      frontierOpcodes[0x06] = org.apache.tuweni.evm.impl.frontier.mod
+      frontierOpcodes[0x07] = org.apache.tuweni.evm.impl.frontier.smod
+      frontierOpcodes[0x08] = org.apache.tuweni.evm.impl.frontier.addmod
+      frontierOpcodes[0x09] = org.apache.tuweni.evm.impl.frontier.mulmod
+      frontierOpcodes[0x10] = org.apache.tuweni.evm.impl.frontier.lt
+      frontierOpcodes[0x11] = org.apache.tuweni.evm.impl.frontier.gt
+      frontierOpcodes[0x12] = org.apache.tuweni.evm.impl.frontier.slt
+      frontierOpcodes[0x13] = org.apache.tuweni.evm.impl.frontier.sgt
+      frontierOpcodes[0x0a] = org.apache.tuweni.evm.impl.frontier.exp
+      frontierOpcodes[0x0b] = org.apache.tuweni.evm.impl.frontier.signextend
+      frontierOpcodes[0x14] = org.apache.tuweni.evm.impl.frontier.eq
+      frontierOpcodes[0x15] = org.apache.tuweni.evm.impl.frontier.isZero
+      frontierOpcodes[0x16] = org.apache.tuweni.evm.impl.frontier.and
+      frontierOpcodes[0x17] = org.apache.tuweni.evm.impl.frontier.or
+      frontierOpcodes[0x18] = org.apache.tuweni.evm.impl.frontier.xor
+      frontierOpcodes[0x19] = org.apache.tuweni.evm.impl.frontier.not
+      frontierOpcodes[0x1a] = org.apache.tuweni.evm.impl.frontier.byte
+      frontierOpcodes[0x20] = org.apache.tuweni.evm.impl.frontier.sha3
+      frontierOpcodes[0x30] = org.apache.tuweni.evm.impl.frontier.address
+      frontierOpcodes[0x31] = org.apache.tuweni.evm.impl.frontier.balance
+      frontierOpcodes[0x32] = org.apache.tuweni.evm.impl.frontier.origin
+      frontierOpcodes[0x33] = org.apache.tuweni.evm.impl.frontier.caller
+      frontierOpcodes[0x34] = org.apache.tuweni.evm.impl.frontier.callvalue
+      frontierOpcodes[0x35] = org.apache.tuweni.evm.impl.frontier.calldataload
+      frontierOpcodes[0x36] = org.apache.tuweni.evm.impl.frontier.calldatasize
+      frontierOpcodes[0x37] = org.apache.tuweni.evm.impl.frontier.calldatacopy
+      frontierOpcodes[0x38] = org.apache.tuweni.evm.impl.frontier.codesize
+      frontierOpcodes[0x39] = org.apache.tuweni.evm.impl.frontier.codecopy
+      frontierOpcodes[0x3a] = org.apache.tuweni.evm.impl.frontier.gasPrice
+      frontierOpcodes[0x3b] = org.apache.tuweni.evm.impl.frontier.extcodesize
+      frontierOpcodes[0x3c] = org.apache.tuweni.evm.impl.frontier.extcodecopy
+      frontierOpcodes[0x3d] = org.apache.tuweni.evm.impl.frontier.returndatasize
+      frontierOpcodes[0x3e] = org.apache.tuweni.evm.impl.frontier.returndatacopy
+      frontierOpcodes[0x3f] = org.apache.tuweni.evm.impl.frontier.extcodehash
+      frontierOpcodes[0x40] = org.apache.tuweni.evm.impl.frontier.blockhash
+      frontierOpcodes[0x41] = org.apache.tuweni.evm.impl.frontier.coinbase
+      frontierOpcodes[0x42] = org.apache.tuweni.evm.impl.frontier.timestamp
+      frontierOpcodes[0x43] = org.apache.tuweni.evm.impl.frontier.number
+      frontierOpcodes[0x44] = org.apache.tuweni.evm.impl.frontier.difficulty
+      frontierOpcodes[0x45] = org.apache.tuweni.evm.impl.frontier.gasLimit
+      frontierOpcodes[0x50] = org.apache.tuweni.evm.impl.frontier.pop
+      frontierOpcodes[0x51] = org.apache.tuweni.evm.impl.frontier.mload
+      frontierOpcodes[0x52] = org.apache.tuweni.evm.impl.frontier.mstore
+      frontierOpcodes[0x53] = org.apache.tuweni.evm.impl.frontier.mstore8
+      frontierOpcodes[0x54] = org.apache.tuweni.evm.impl.frontier.sload
+      frontierOpcodes[0x55] = org.apache.tuweni.evm.impl.frontier.sstore
+      frontierOpcodes[0x56] = org.apache.tuweni.evm.impl.frontier.jump
+      frontierOpcodes[0x57] = org.apache.tuweni.evm.impl.frontier.jumpi
+      frontierOpcodes[0x58] = org.apache.tuweni.evm.impl.frontier.pc
+      frontierOpcodes[0x59] = org.apache.tuweni.evm.impl.frontier.msize
+      frontierOpcodes[0x5a] = org.apache.tuweni.evm.impl.frontier.gas
+      frontierOpcodes[0x5b] = org.apache.tuweni.evm.impl.frontier.jumpdest
+      frontierOpcodes[0xf3.toByte()] = org.apache.tuweni.evm.impl.frontier.retuRn
+      frontierOpcodes[0xfe.toByte()] = org.apache.tuweni.evm.impl.frontier.invalid
+      frontierOpcodes[0xff.toByte()] = org.apache.tuweni.evm.impl.frontier.selfdestruct
+      for (i in 1..32) {
+        frontierOpcodes[(0x60 + i - 1).toByte()] = org.apache.tuweni.evm.impl.frontier.push(i)
+      }
+
+      for (i in 1..16) {
+        frontierOpcodes[(0x80 + i - 1).toByte()] = org.apache.tuweni.evm.impl.frontier.dup(i)
+      }
+
+      for (i in 1..16) {
+        frontierOpcodes[(0x90 + i - 1).toByte()] = org.apache.tuweni.evm.impl.frontier.swap(i)
+      }
+
+      for (i in 0..4) {
+        frontierOpcodes[(0xa0 + i).toByte()] = org.apache.tuweni.evm.impl.frontier.log(i)
+      }
+      val forks = mapOf(
+        Pair(HardFork.BERLIN, berlinOpcodes),
+        Pair(HardFork.ISTANBUL, istanbulOpcodes),
+        Pair(HardFork.CONSTANTINOPLE, constantinopleOpcodes),
+        Pair(HardFork.FRONTIER, frontierOpcodes)
+      )
       return OpcodeRegistry(forks)
     }
   }

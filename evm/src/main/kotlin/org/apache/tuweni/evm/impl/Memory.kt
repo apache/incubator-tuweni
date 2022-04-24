@@ -69,7 +69,6 @@ class Memory {
   }
 
   fun newSize(memOffset: UInt256, length: UInt256): UInt256 {
-
     val candidate = memOffset.add(length)
     if (candidate < memOffset || candidate < length) {
       return UInt256.MAX_VALUE
@@ -78,10 +77,13 @@ class Memory {
     return if (wordsSize > candidateWords) wordsSize else candidateWords
   }
 
-  fun read(from: UInt256, length: UInt256): Bytes? {
+  fun read(from: UInt256, length: UInt256, updateMemorySize: Boolean = true): Bytes? {
     val max = from.add(length)
     if (!from.fitsInt() || !length.fitsInt() || !max.fitsInt()) {
       return null
+    }
+    if (updateMemorySize) {
+      wordsSize = newSize(from, length)
     }
 
     val localMemoryData = memoryData
