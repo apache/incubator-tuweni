@@ -952,54 +952,6 @@ private val create = Opcode { gasManager, hostContext, stack, message, _, _, mem
   Result()
 }
 
-private val create2 = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
-  val value = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  val inputDataOffset = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  val inputDataLength = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  val salt = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  val inputMemoryCost =
-    org.apache.tuweni.evm.impl.spuriousDragon.memoryCost(
-      memory.newSize(inputDataOffset, inputDataLength)
-        .subtract(memory.size())
-    )
-  gasManager.add(Gas.valueOf(32000).add(inputMemoryCost).add(Gas.valueOf(inputDataLength.divide(32).multiply(6))))
-  val inputData = memory.read(inputDataOffset, inputDataLength)
-  if (inputData == null) {
-    return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
-  }
-  val hash = Hash.keccak256(
-    Bytes.concatenate(
-      Bytes.fromHexString("0xFF"),
-      message.sender,
-      salt,
-      Hash.keccak256(inputData)
-    )
-  )
-  val to = Address.fromBytes(hash.slice(12))
-
-  val result = hostContext.call(
-    EVMMessage(
-      CallKind.CREATE2,
-      0,
-      message.depth + 1,
-      gasManager.gasLeft(),
-      to,
-      to,
-      message.sender,
-      message.origin,
-      inputData,
-      value
-    )
-  )
-  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
-    stack.push(UInt256.ONE)
-  } else {
-    stack.push(UInt256.ZERO)
-  }
-
-  Result()
-}
-
 private val call = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
 
   if (stack.size() < 7) {
@@ -1394,7 +1346,6 @@ val homesteadOpcodes = buildMap {
   this[0xf2.toByte()] = callcode
   this[0xf3.toByte()] = retuRn
   this[0xf4.toByte()] = delegatecall
-  this[0xf5.toByte()] = create2
   this[0xfa.toByte()] = staticcall
   this[0xfd.toByte()] = revert
   this[0xfe.toByte()] = invalid
