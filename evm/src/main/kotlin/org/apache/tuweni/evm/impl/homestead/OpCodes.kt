@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.evm.impl.istanbul
+package org.apache.tuweni.evm.impl.homestead
 
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
@@ -286,9 +286,9 @@ private val exp = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   if (null == number || null == power) {
     Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   } else {
-    val numBytes: Int = (power.bitLength() + 7) / 8
+    val numBytes = (power.bitLength() + 7) / 8
 
-    val cost = (Gas.valueOf(50).multiply(Gas.valueOf(numBytes.toLong())))
+    val cost = (Gas.valueOf(10).multiply(Gas.valueOf(numBytes.toLong())))
       .add(Gas.valueOf(10))
     gasManager.add(cost)
 
@@ -350,27 +350,10 @@ private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
 
     val address = msg.destination
 
-    val currentValue = hostContext.getStorage(address, key)
-    val cost = if (value.equals(currentValue)) {
-      Gas.valueOf(800)
-    } else {
-      val originalValue = hostContext.getRepositoryStorage(address, key)
-      if (value.equals(originalValue)) {
-        if (originalValue.isZero) {
-          Gas.valueOf(20000)
-        } else Gas.valueOf(5000)
-      } else {
-        Gas.valueOf(800)
-      }
-    }
+    val currentValue = hostContext.getStorage(address, key) ?: UInt256.ZERO
+
+    val cost = if (!value.isZero && currentValue.isZero) Gas.valueOf(20000) else Gas.valueOf(5000)
     gasManager.add(cost)
-
-    val remainingGas = gasManager.gasLeft()
-    if (remainingGas <= 2300) {
-      return@runBlocking Result(EVMExecutionStatusCode.OUT_OF_GAS)
-    }
-
-    // frame.incrementGasRefund(gasCalculator().calculateStorageRefundAmount(account, key, value))
 
     hostContext.setStorage(address, key, value)
 
@@ -382,7 +365,7 @@ private val sload = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   val key = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
 
   val address = msg.destination
-  gasManager.add(800)
+  gasManager.add(50)
 
   runBlocking {
     stack.push(hostContext.getStorage(address, key) ?: UInt256.ZERO)
@@ -439,7 +422,7 @@ private val balance = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
 
   val address = stack.pop()?.slice(12, 20)?.let { Address.fromBytes(it) }
     ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  gasManager.add(700)
+  gasManager.add(20)
 
   runBlocking {
     stack.push(hostContext.getBalance(address))
@@ -513,9 +496,8 @@ fun memoryCost(length: UInt256): Gas {
   if (!length.fitsInt()) {
     return Gas.TOO_HIGH
   }
-  val len: Gas = Gas.valueOf(length)
-  val base: Gas = len.multiply(len).divide(Gas.valueOf(512))
-  return Gas.valueOf(3).multiply(len).add(base)
+  val base = length.multiply(length).divide(UInt256.valueOf(512))
+  return Gas.valueOf(UInt256.valueOf(3).multiply(length).add(base))
 }
 
 private val codecopy = Opcode { gasManager, _, stack, _, code, _, memory, _ ->
@@ -581,7 +563,6 @@ private val returndatacopy = Opcode { gasManager, _, stack, _, _, _, memory, cal
   val pre = memoryCost(memory.size())
   val post = memoryCost(memory.newSize(memOffset, length))
   val memoryCost = post.subtract(pre)
-
   gasManager.add(copyCost.add(memoryCost))
 
   memory.write(memOffset, sourceOffset, length, returnData)
@@ -631,7 +612,7 @@ private val mload = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
 }
 
 private val extcodesize = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
-  gasManager.add(700)
+  gasManager.add(20)
   runBlocking {
     stack.push(UInt256.valueOf(hostContext.getCode(msg.destination).size().toLong()))
     Result()
@@ -711,8 +692,8 @@ private val sha3 = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
   val copyCost = Gas.valueOf(6).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(30))
 
   val memoryCost = if (length.isZero) Gas.ZERO else {
-    val pre = org.apache.tuweni.evm.impl.frontier.memoryCost(memory.size())
-    val post: Gas = org.apache.tuweni.evm.impl.frontier.memoryCost(memory.newSize(from, length))
+    val pre = memoryCost(memory.size())
+    val post: Gas = memoryCost(memory.newSize(from, length))
     post.subtract(pre)
   }
   gasManager.add(copyCost.add(memoryCost))
@@ -856,410 +837,14 @@ private val selfdestruct = Opcode { gasManager, hostContext, stack, msg, _, _, _
   runBlocking {
 
     val inheritance = hostContext.getBalance(recipientAddress)
+    gasManager.addRefund(inheritance.toUInt256())
 
-    val accountIsWarm = hostContext.warmUpAccount(recipientAddress)
-
-    val cost = if (hostContext.accountExists(recipientAddress) && !inheritance.isZero) {
-      Gas.valueOf(30000)
-    } else {
-      Gas.valueOf(5000)
-    }.add(if (accountIsWarm) Gas.ZERO else Gas.valueOf(2600))
-    gasManager.add(cost)
     val address: Address = msg.destination
 
     hostContext.selfdestruct(address, recipientAddress)
 
-    // frame.addRefund(recipient.getAddress(), account.getBalance())
-
     Result(EVMExecutionStatusCode.SUCCESS)
   }
-}
-
-private val call = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
-
-  if (stack.size() < 7) {
-    return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  }
-  if (message.kind == CallKind.STATICCALL) {
-    return@Opcode Result(EVMExecutionStatusCode.STATIC_MODE_VIOLATION)
-  }
-  val stipend = Gas.valueOf(stack.pop()!!)
-  val to = Address.fromBytes(stack.pop()!!.slice(12))
-  val value = stack.pop()!!
-  val inputDataOffset = stack.pop()!!
-  val inputDataLength = stack.pop()!!
-
-  val outputDataOffset = stack.pop()!!
-  val outputDataLength = stack.pop()!!
-
-  var cost = Gas.valueOf(700L)
-  if (!value.isZero) {
-    cost = cost.add(Gas.valueOf(9000))
-  }
-
-  val inputMemoryCost = memoryCost(
-    memory.newSize(inputDataOffset, inputDataLength)
-      .subtract(memory.size())
-  )
-  val outputMemoryCost = memoryCost(
-    memory.newSize(outputDataOffset, outputDataLength)
-      .subtract(memory.size())
-  )
-  val memoryCost = if (outputMemoryCost.compareTo(inputMemoryCost) < 0) inputMemoryCost else outputMemoryCost
-  if (!hostContext.accountExists(to) && !value.isZero) {
-    cost = cost.add(Gas.valueOf(25000))
-  }
-  cost.add(
-    if (!hostContext.warmUpAccount(to)) {
-      Gas.valueOf(2600)
-    } else {
-      Gas.valueOf(100)
-    }
-  )
-
-  gasManager.add(cost.add(memoryCost))
-  if (!gasManager.hasGasLeft()) {
-    return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
-  }
-  val inputData = memory.read(inputDataOffset, inputDataLength)
-  if (inputData == null) {
-    return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
-  }
-
-  val gasLeft = gasManager.gasLeft()
-  val gasAvailable = Gas.minimum(stipend, gasLeft.subtract(gasLeft.divide(Gas.valueOf(64))))
-  val result = hostContext.call(
-    EVMMessage(
-      CallKind.CALL,
-      0,
-      message.depth + 1,
-      gasAvailable,
-      to,
-      to,
-      message.destination,
-      message.origin,
-      inputData,
-      value
-    )
-  )
-  gasManager.add(result.state.gasManager.gasCost)
-  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
-    stack.push(UInt256.ONE)
-    result.state.output?.let {
-      memory.write(outputDataOffset, UInt256.ZERO, outputDataLength, it)
-    }
-  } else if (result.statusCode == EVMExecutionStatusCode.CALL_DEPTH_EXCEEDED) {
-    return@Opcode Result(result.statusCode)
-  } else {
-    stack.push(UInt256.ZERO)
-  }
-
-  Result()
-}
-
-private val delegatecall = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
-
-  if (stack.size() < 6) {
-    return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  }
-  val gas = Gas.valueOf(stack.pop()!!)
-  val to = Address.fromBytes(stack.pop()!!.slice(12))
-  val inputDataOffset = stack.pop()!!
-  val inputDataLength = stack.pop()!!
-
-  val outputDataOffset = stack.pop()!!
-  val outputDataLength = stack.pop()!!
-
-  var cost = Gas.valueOf(700L)
-
-  val inputMemoryCost = memoryCost(
-    memory.newSize(inputDataOffset, inputDataLength)
-      .subtract(memory.size())
-  )
-  val outputMemoryCost = memoryCost(
-    memory.newSize(outputDataOffset, outputDataLength)
-      .subtract(memory.size())
-  )
-  val memoryCost = if (outputMemoryCost.compareTo(inputMemoryCost) < 0) inputMemoryCost else outputMemoryCost
-
-  cost.add(
-    if (!hostContext.warmUpAccount(to)) {
-      Gas.valueOf(2600)
-    } else {
-      Gas.valueOf(100)
-    }
-  )
-
-  gasManager.add(cost.add(memoryCost))
-  if (!gasManager.hasGasLeft()) {
-    return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
-  }
-  val inputData = memory.read(inputDataOffset, inputDataLength)
-  if (inputData == null) {
-    return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
-  }
-  val result = hostContext.call(
-    EVMMessage(
-      CallKind.DELEGATECALL,
-      0,
-      message.depth + 1,
-      gas,
-      to,
-      message.destination,
-      message.sender,
-      message.origin,
-      inputData,
-      Wei.valueOf(0)
-    )
-  )
-  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
-    stack.push(UInt256.ONE)
-    result.state.output?.let {
-      memory.write(outputDataOffset, UInt256.ZERO, outputDataLength, it)
-    }
-  } else {
-    stack.push(UInt256.ZERO)
-  }
-
-  Result()
-}
-
-private val callcode = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
-
-  if (stack.size() < 7) {
-    return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  }
-  val gas = Gas.valueOf(stack.pop()!!)
-  val to = Address.fromBytes(stack.pop()!!.slice(12))
-  val value = stack.pop()!!
-  val inputDataOffset = stack.pop()!!
-  val inputDataLength = stack.pop()!!
-
-  val outputDataOffset = stack.pop()!!
-  val outputDataLength = stack.pop()!!
-
-  var cost = Gas.valueOf(700L)
-  if (!value.isZero) {
-    cost = cost.add(Gas.valueOf(9000))
-  }
-
-  val inputMemoryCost = memoryCost(
-    memory.newSize(inputDataOffset, inputDataLength)
-      .subtract(memory.size())
-  )
-  val outputMemoryCost = memoryCost(
-    memory.newSize(outputDataOffset, outputDataLength)
-      .subtract(memory.size())
-  )
-  val memoryCost = if (outputMemoryCost.compareTo(inputMemoryCost) < 0) inputMemoryCost else outputMemoryCost
-  if (!hostContext.accountExists(to) && !value.isZero) {
-    cost = cost.add(Gas.valueOf(25000))
-  }
-
-  cost.add(
-    if (!hostContext.warmUpAccount(to)) {
-      Gas.valueOf(2600)
-    } else {
-      Gas.valueOf(100)
-    }
-  )
-
-  gasManager.add(cost.add(memoryCost))
-  if (!gasManager.hasGasLeft()) {
-    return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
-  }
-  val inputData = memory.read(inputDataOffset, inputDataLength)
-  if (inputData == null) {
-    return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
-  }
-  val result = hostContext.call(
-    EVMMessage(
-      CallKind.CALLCODE,
-      0,
-      message.depth + 1,
-      gas,
-      to,
-      to,
-      to,
-      message.origin,
-      inputData,
-      value
-    )
-  )
-  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
-    stack.push(UInt256.ONE)
-    result.state.output?.let {
-      memory.write(outputDataOffset, UInt256.ZERO, outputDataLength, it)
-    }
-  } else {
-    stack.push(UInt256.ZERO)
-  }
-
-  Result()
-}
-
-private val staticcall = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
-
-  if (stack.size() < 6) {
-    return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  }
-  val gas = Gas.valueOf(stack.pop()!!)
-  val to = Address.fromBytes(stack.pop()!!.slice(12))
-  val inputDataOffset = stack.pop()!!
-  val inputDataLength = stack.pop()!!
-
-  val outputDataOffset = stack.pop()!!
-  val outputDataLength = stack.pop()!!
-
-  var cost = Gas.valueOf(700L)
-
-  val inputMemoryCost = memoryCost(
-    memory.newSize(inputDataOffset, inputDataLength)
-      .subtract(memory.size())
-  )
-  val outputMemoryCost = memoryCost(
-    memory.newSize(outputDataOffset, outputDataLength)
-      .subtract(memory.size())
-  )
-  val memoryCost = if (outputMemoryCost.compareTo(inputMemoryCost) < 0) inputMemoryCost else outputMemoryCost
-  cost.add(
-    if (!hostContext.warmUpAccount(to)) {
-      Gas.valueOf(2600)
-    } else {
-      Gas.valueOf(100)
-    }
-  )
-
-  gasManager.add(cost.add(memoryCost))
-  if (!gasManager.hasGasLeft()) {
-    return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
-  }
-  val inputData = memory.read(inputDataOffset, inputDataLength)
-  if (inputData == null) {
-    return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
-  }
-  val result = hostContext.call(
-    EVMMessage(
-      CallKind.STATICCALL,
-      0,
-      message.depth + 1,
-      gas,
-      to,
-      message.destination,
-      message.destination,
-      message.origin,
-      inputData,
-      Wei.valueOf(0)
-    )
-  )
-  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
-    stack.push(UInt256.ONE)
-    result.state.output?.let {
-      memory.write(outputDataOffset, UInt256.ZERO, outputDataLength, it)
-    }
-  } else {
-    stack.push(UInt256.ZERO)
-  }
-
-  Result()
-}
-
-private val create = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
-  val value = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  val inputDataOffset = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  val inputDataLength = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  val inputMemoryCost = memoryCost(
-    memory.newSize(inputDataOffset, inputDataLength)
-      .subtract(memory.size())
-  )
-  gasManager.add(Gas.valueOf(32000).add(inputMemoryCost))
-  val inputData = memory.read(inputDataOffset, inputDataLength)
-  if (inputData == null) {
-    return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
-  }
-  val nonce = hostContext.getNonce(message.sender)
-  val to = Address.fromSenderAndNonce(message.sender, nonce)
-
-  val result = hostContext.call(
-    EVMMessage(
-      CallKind.CREATE,
-      0,
-      message.depth + 1,
-      gasManager.gasLeft(),
-      to,
-      to,
-      message.sender,
-      message.origin,
-      inputData,
-      value
-    )
-  )
-  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
-    stack.push(UInt256.ONE)
-  } else {
-    stack.push(UInt256.ZERO)
-  }
-
-  Result()
-}
-
-private val create2 = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
-  val value = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  val inputDataOffset = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  val inputDataLength = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  val salt = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  val inputMemoryCost = memoryCost(
-    memory.newSize(inputDataOffset, inputDataLength)
-      .subtract(memory.size())
-  )
-  gasManager.add(Gas.valueOf(32000).add(inputMemoryCost).add(Gas.valueOf(inputDataLength.divide(32).multiply(6))))
-  val inputData = memory.read(inputDataOffset, inputDataLength)
-  if (inputData == null) {
-    return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
-  }
-  val hash = Hash.keccak256(
-    Bytes.concatenate(
-      Bytes.fromHexString("0xFF"),
-      message.sender,
-      salt,
-      Hash.keccak256(inputData)
-    )
-  )
-  val to = Address.fromBytes(hash.slice(12))
-
-  val result = hostContext.call(
-    EVMMessage(
-      CallKind.CREATE2,
-      0,
-      message.depth + 1,
-      gasManager.gasLeft(),
-      to,
-      to,
-      message.sender,
-      message.origin,
-      inputData,
-      value
-    )
-  )
-  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
-    stack.push(UInt256.ONE)
-  } else {
-    stack.push(UInt256.ZERO)
-  }
-
-  Result()
-}
-
-private val revert = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
-  val location = stack.pop()
-  val length = stack.pop()
-  if (null == location || null == length) {
-    return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  }
-  val memoryCost = memoryCost(memory.newSize(location, length).subtract(memory.size()))
-  gasManager.add(memoryCost)
-  val output = memory.read(location, length)
-  Result(EVMExecutionStatusCode.REVERT, output = output)
 }
 
 private val shl = Opcode { gasManager, _, stack, _, _, _, _, _ ->
@@ -1327,6 +912,391 @@ private val sar = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   Result()
 }
 
+private val create = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
+  val value = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  val inputDataOffset = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  val inputDataLength = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  val inputMemoryCost =
+    org.apache.tuweni.evm.impl.spuriousDragon.memoryCost(
+      memory.newSize(inputDataOffset, inputDataLength)
+        .subtract(memory.size())
+    )
+  gasManager.add(Gas.valueOf(32000).add(inputMemoryCost))
+  val inputData = memory.read(inputDataOffset, inputDataLength)
+  if (inputData == null) {
+    return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
+  }
+  val nonce = hostContext.getNonce(message.sender)
+  val to = Address.fromSenderAndNonce(message.sender, nonce)
+
+  val result = hostContext.call(
+    EVMMessage(
+      CallKind.CREATE,
+      0,
+      message.depth + 1,
+      gasManager.gasLeft(),
+      to,
+      to,
+      message.sender,
+      message.origin,
+      inputData,
+      value
+    )
+  )
+  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
+    stack.push(UInt256.ONE)
+  } else {
+    stack.push(UInt256.ZERO)
+  }
+
+  Result()
+}
+
+private val create2 = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
+  val value = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  val inputDataOffset = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  val inputDataLength = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  val salt = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  val inputMemoryCost =
+    org.apache.tuweni.evm.impl.spuriousDragon.memoryCost(
+      memory.newSize(inputDataOffset, inputDataLength)
+        .subtract(memory.size())
+    )
+  gasManager.add(Gas.valueOf(32000).add(inputMemoryCost).add(Gas.valueOf(inputDataLength.divide(32).multiply(6))))
+  val inputData = memory.read(inputDataOffset, inputDataLength)
+  if (inputData == null) {
+    return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
+  }
+  val hash = Hash.keccak256(
+    Bytes.concatenate(
+      Bytes.fromHexString("0xFF"),
+      message.sender,
+      salt,
+      Hash.keccak256(inputData)
+    )
+  )
+  val to = Address.fromBytes(hash.slice(12))
+
+  val result = hostContext.call(
+    EVMMessage(
+      CallKind.CREATE2,
+      0,
+      message.depth + 1,
+      gasManager.gasLeft(),
+      to,
+      to,
+      message.sender,
+      message.origin,
+      inputData,
+      value
+    )
+  )
+  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
+    stack.push(UInt256.ONE)
+  } else {
+    stack.push(UInt256.ZERO)
+  }
+
+  Result()
+}
+
+private val call = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
+
+  if (stack.size() < 7) {
+    return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  }
+  if (message.kind == CallKind.STATICCALL) {
+    return@Opcode Result(EVMExecutionStatusCode.STATIC_MODE_VIOLATION)
+  }
+  val stipend = Gas.valueOf(stack.pop()!!)
+  val to = Address.fromBytes(stack.pop()!!.slice(12))
+  val value = stack.pop()!!
+  val inputDataOffset = stack.pop()!!
+  val inputDataLength = stack.pop()!!
+
+  val outputDataOffset = stack.pop()!!
+  val outputDataLength = stack.pop()!!
+
+  var cost = Gas.valueOf(700L)
+  if (!value.isZero) {
+    cost = cost.add(Gas.valueOf(9000))
+  }
+
+  val inputMemoryCost =
+    org.apache.tuweni.evm.impl.spuriousDragon.memoryCost(
+      memory.newSize(inputDataOffset, inputDataLength)
+        .subtract(memory.size())
+    )
+  val outputMemoryCost =
+    org.apache.tuweni.evm.impl.spuriousDragon.memoryCost(
+      memory.newSize(outputDataOffset, outputDataLength)
+        .subtract(memory.size())
+    )
+  val memoryCost = if (outputMemoryCost.compareTo(inputMemoryCost) < 0) inputMemoryCost else outputMemoryCost
+  if (!hostContext.accountExists(to) && !value.isZero) {
+    cost = cost.add(Gas.valueOf(25000))
+  }
+  cost.add(
+    if (!hostContext.warmUpAccount(to)) {
+      Gas.valueOf(2600)
+    } else {
+      Gas.valueOf(100)
+    }
+  )
+
+  gasManager.add(cost.add(memoryCost))
+  if (!gasManager.hasGasLeft()) {
+    return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
+  }
+  val inputData = memory.read(inputDataOffset, inputDataLength)
+  if (inputData == null) {
+    return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
+  }
+
+  val gasLeft = gasManager.gasLeft()
+  val gasAvailable = Gas.minimum(stipend, gasLeft.subtract(gasLeft.divide(Gas.valueOf(64))))
+  val result = hostContext.call(
+    EVMMessage(
+      CallKind.CALL,
+      0,
+      message.depth + 1,
+      gasAvailable,
+      to,
+      to,
+      message.destination,
+      message.origin,
+      inputData,
+      value
+    )
+  )
+  gasManager.add(result.state.gasManager.gasCost)
+  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
+    stack.push(UInt256.ONE)
+    result.state.output?.let {
+      memory.write(outputDataOffset, UInt256.ZERO, outputDataLength, it)
+    }
+  } else if (result.statusCode == EVMExecutionStatusCode.CALL_DEPTH_EXCEEDED) {
+    return@Opcode Result(result.statusCode)
+  } else {
+    stack.push(UInt256.ZERO)
+  }
+
+  Result()
+}
+
+private val delegatecall = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
+
+  if (stack.size() < 6) {
+    return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  }
+  val gas = Gas.valueOf(stack.pop()!!)
+  val to = Address.fromBytes(stack.pop()!!.slice(12))
+  val inputDataOffset = stack.pop()!!
+  val inputDataLength = stack.pop()!!
+
+  val outputDataOffset = stack.pop()!!
+  val outputDataLength = stack.pop()!!
+
+  var cost = Gas.valueOf(700L)
+
+  val inputMemoryCost =
+    org.apache.tuweni.evm.impl.spuriousDragon.memoryCost(
+      memory.newSize(inputDataOffset, inputDataLength)
+        .subtract(memory.size())
+    )
+  val outputMemoryCost =
+    org.apache.tuweni.evm.impl.spuriousDragon.memoryCost(
+      memory.newSize(outputDataOffset, outputDataLength)
+        .subtract(memory.size())
+    )
+  val memoryCost = if (outputMemoryCost.compareTo(inputMemoryCost) < 0) inputMemoryCost else outputMemoryCost
+
+  cost.add(
+    if (!hostContext.warmUpAccount(to)) {
+      Gas.valueOf(2600)
+    } else {
+      Gas.valueOf(100)
+    }
+  )
+
+  gasManager.add(cost.add(memoryCost))
+  if (!gasManager.hasGasLeft()) {
+    return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
+  }
+  val inputData = memory.read(inputDataOffset, inputDataLength)
+  if (inputData == null) {
+    return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
+  }
+  val result = hostContext.call(
+    EVMMessage(
+      CallKind.DELEGATECALL,
+      0,
+      message.depth + 1,
+      gas,
+      to,
+      message.destination,
+      message.sender,
+      message.origin,
+      inputData,
+      Wei.valueOf(0)
+    )
+  )
+  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
+    stack.push(UInt256.ONE)
+    result.state.output?.let {
+      memory.write(outputDataOffset, UInt256.ZERO, outputDataLength, it)
+    }
+  } else {
+    stack.push(UInt256.ZERO)
+  }
+
+  Result()
+}
+
+private val callcode = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
+
+  if (stack.size() < 7) {
+    return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  }
+  val gas = Gas.valueOf(stack.pop()!!)
+  val to = Address.fromBytes(stack.pop()!!.slice(12))
+  val value = stack.pop()!!
+  val inputDataOffset = stack.pop()!!
+  val inputDataLength = stack.pop()!!
+
+  val outputDataOffset = stack.pop()!!
+  val outputDataLength = stack.pop()!!
+
+  var cost = Gas.valueOf(700L)
+  if (!value.isZero) {
+    cost = cost.add(Gas.valueOf(9000))
+  }
+
+  val inputMemoryCost =
+    org.apache.tuweni.evm.impl.spuriousDragon.memoryCost(
+      memory.newSize(inputDataOffset, inputDataLength)
+        .subtract(memory.size())
+    )
+  val outputMemoryCost =
+    org.apache.tuweni.evm.impl.spuriousDragon.memoryCost(
+      memory.newSize(outputDataOffset, outputDataLength)
+        .subtract(memory.size())
+    )
+  val memoryCost = if (outputMemoryCost.compareTo(inputMemoryCost) < 0) inputMemoryCost else outputMemoryCost
+  if (!hostContext.accountExists(to) && !value.isZero) {
+    cost = cost.add(Gas.valueOf(25000))
+  }
+
+  cost.add(
+    if (!hostContext.warmUpAccount(to)) {
+      Gas.valueOf(2600)
+    } else {
+      Gas.valueOf(100)
+    }
+  )
+
+  gasManager.add(cost.add(memoryCost))
+  if (!gasManager.hasGasLeft()) {
+    return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
+  }
+  val inputData = memory.read(inputDataOffset, inputDataLength)
+  if (inputData == null) {
+    return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
+  }
+  val result = hostContext.call(
+    EVMMessage(
+      CallKind.CALLCODE,
+      0,
+      message.depth + 1,
+      gas,
+      to,
+      to,
+      to,
+      message.origin,
+      inputData,
+      value
+    )
+  )
+  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
+    stack.push(UInt256.ONE)
+    result.state.output?.let {
+      memory.write(outputDataOffset, UInt256.ZERO, outputDataLength, it)
+    }
+  } else {
+    stack.push(UInt256.ZERO)
+  }
+
+  Result()
+}
+
+private val staticcall = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
+
+  if (stack.size() < 6) {
+    return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  }
+  val gas = Gas.valueOf(stack.pop()!!)
+  val to = Address.fromBytes(stack.pop()!!.slice(12))
+  val inputDataOffset = stack.pop()!!
+  val inputDataLength = stack.pop()!!
+
+  val outputDataOffset = stack.pop()!!
+  val outputDataLength = stack.pop()!!
+
+  var cost = Gas.valueOf(700L)
+
+  val inputMemoryCost =
+    org.apache.tuweni.evm.impl.spuriousDragon.memoryCost(
+      memory.newSize(inputDataOffset, inputDataLength)
+        .subtract(memory.size())
+    )
+  val outputMemoryCost =
+    org.apache.tuweni.evm.impl.spuriousDragon.memoryCost(
+      memory.newSize(outputDataOffset, outputDataLength)
+        .subtract(memory.size())
+    )
+  val memoryCost = if (outputMemoryCost.compareTo(inputMemoryCost) < 0) inputMemoryCost else outputMemoryCost
+  cost.add(
+    if (!hostContext.warmUpAccount(to)) {
+      Gas.valueOf(2600)
+    } else {
+      Gas.valueOf(100)
+    }
+  )
+
+  gasManager.add(cost.add(memoryCost))
+  if (!gasManager.hasGasLeft()) {
+    return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
+  }
+  val inputData = memory.read(inputDataOffset, inputDataLength)
+  if (inputData == null) {
+    return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
+  }
+  val result = hostContext.call(
+    EVMMessage(
+      CallKind.STATICCALL,
+      0,
+      message.depth + 1,
+      gas,
+      to,
+      message.destination,
+      message.destination,
+      message.origin,
+      inputData,
+      Wei.valueOf(0)
+    )
+  )
+  if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
+    stack.push(UInt256.ONE)
+    result.state.output?.let {
+      memory.write(outputDataOffset, UInt256.ZERO, outputDataLength, it)
+    }
+  } else {
+    stack.push(UInt256.ZERO)
+  }
+
+  Result()
+}
+
 private val selfbalance = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   gasManager.add(5)
   val account = hostContext.getBalance(msg.sender)
@@ -1341,7 +1311,20 @@ private val chainid = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
   Result()
 }
 
-val istanbulOpcodes = buildMap {
+private val revert = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
+  val location = stack.pop()
+  val length = stack.pop()
+  if (null == location || null == length) {
+    return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  }
+  val memoryCost =
+    org.apache.tuweni.evm.impl.spuriousDragon.memoryCost(memory.newSize(location, length).subtract(memory.size()))
+  gasManager.add(memoryCost)
+  val output = memory.read(location, length)
+  Result(EVMExecutionStatusCode.REVERT, output = output)
+}
+
+val homesteadOpcodes = buildMap {
   this[0x00] = stop
   this[0x01] = add
   this[0x02] = mul

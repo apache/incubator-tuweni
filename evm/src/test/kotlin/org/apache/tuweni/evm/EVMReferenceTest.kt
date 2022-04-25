@@ -45,6 +45,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -121,12 +122,14 @@ class EVMReferenceTest {
     writer = newWriter
   }
 
+  @Disabled
   @ParameterizedTest(name = "Berlin {index}: {0}")
   @MethodSource("findBerlinTests")
   fun runBerlinReferenceTests(testName: String, test: JsonReferenceTest) {
     runReferenceTests(testName, HardFork.BERLIN, test)
   }
 
+  @Disabled
   @ParameterizedTest(name = "Istanbul {index}: {0}")
   @MethodSource("findIstanbulTests")
   fun runIstanbulReferenceTests(testName: String, test: JsonReferenceTest) {
@@ -139,6 +142,7 @@ class EVMReferenceTest {
     runReferenceTests(testName, HardFork.FRONTIER, test)
   }
 
+  @Disabled
   @ParameterizedTest(name = "Constantinople {index}: {0}")
   @MethodSource("findConstantinopleTests")
   fun runConstantinopleReferenceTests(testName: String, test: JsonReferenceTest) {

@@ -321,11 +321,11 @@ class TransactionalEVMHostContext(
   }
 
   override fun warmUpAccount(address: Address): Boolean =
-    !warmedUpStorage.add(address)
+    warmedUpStorage.add(address)
 
   override fun warmUpStorage(address: Address, key: UInt256): Boolean {
     logger.trace("entering warmUpStorage $address $key")
-    return !warmedUpStorage.add(Bytes.concatenate(address, Bytes.fromHexString("0x0f"), key))
+    return warmedUpStorage.add(Bytes.concatenate(address, Bytes.fromHexString("0x0f"), key))
   }
 
   override fun getGasPrice() = gasPrice

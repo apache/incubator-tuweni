@@ -505,12 +505,12 @@ interface HostContext {
   fun emitLog(address: Address, data: Bytes, topics: List<Bytes32>)
 
   /**
-   * Returns true if the account was never used.
+   * Returns true if the account was used in this context already.
    */
   fun warmUpAccount(address: Address): Boolean
 
   /**
-   * Returns true if the storage slot was never used.
+   * Returns true if the storage slot was used in this context already.
    */
   fun warmUpStorage(address: Address, key: UInt256): Boolean
 
