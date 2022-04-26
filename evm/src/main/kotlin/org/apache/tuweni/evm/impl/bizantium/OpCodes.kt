@@ -951,7 +951,6 @@ private val create = Opcode { gasManager, hostContext, stack, message, _, _, mem
   Result()
 }
 
-
 private val call = Opcode { gasManager, hostContext, stack, message, _, _, memory, _ ->
 
   if (stack.size() < 7) {

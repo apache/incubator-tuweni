@@ -108,7 +108,7 @@ public final class Gas implements Comparable<Gas> {
    * @return the minimum between the 2 gas objects
    */
   public static Gas minimum(Gas one, Gas two) {
-    return one.compareTo(two) <= 0 ? two : one;
+    return one.compareTo(two) <= 0 ? one : two;
   }
 
   /**
