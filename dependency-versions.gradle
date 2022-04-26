@@ -37,6 +37,11 @@ dependencyManagement {
     dependency('io.ktor:ktor-client-json:1.4.2')
     dependency('io.ktor:ktor-client-serialization:1.4.2')
     dependency('io.ktor:ktor-client-cio:1.4.2')
+    dependency('net.java.dev.jna:jna:5.11.0')
+    dependency('org.hyperledger.besu:bls12-381:0.4.3')
+    dependency('org.hyperledger.besu:altbn128:0.4.3')
+    dependency('org.hyperledger.besu:secp256k1:0.4.3')
+
     dependency('io.ktor:ktor-network:1.4.2')
     dependency('io.ktor:ktor-server-core:1.4.2')
     dependency('io.ktor:ktor-server-netty:1.4.2')
@@ -110,12 +115,12 @@ dependencyManagement {
 
 
     dependency('org.jetbrains:annotations:16.0.3')
-    dependencySet(group: 'org.jetbrains.kotlin', version: '1.5.31') {
+    dependencySet(group: 'org.jetbrains.kotlin', version: '1.6.20') {
       entry 'kotlin-reflect'
       entry 'kotlin-stdlib'
       entry 'kotlin-stdlib-jdk8'
     }
-    dependencySet(group: 'org.jetbrains.kotlinx', version: '1.5.2') {
+    dependencySet(group: 'org.jetbrains.kotlinx', version: '1.6.0') {
       entry 'kotlinx-coroutines-core'
       entry 'kotlinx-coroutines-guava'
       entry 'kotlinx-coroutines-jdk8'

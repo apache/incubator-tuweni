@@ -45,6 +45,18 @@ public class EthJsonModule extends SimpleModule {
     }
   }
 
+  static class HashDeserializer extends StdDeserializer<Hash> {
+
+    HashDeserializer() {
+      super(Hash.class);
+    }
+
+    @Override
+    public Hash deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+      return Hash.fromHexString(p.getValueAsString());
+    }
+  }
+
   static class AddressSerializer extends StdSerializer<Address> {
 
     AddressSerializer() {
@@ -150,6 +162,9 @@ public class EthJsonModule extends SimpleModule {
 
     @Override
     public Address deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+      if (p.getValueAsString().length() == 0) {
+        return null;
+      }
       return Address.fromHexString(p.getValueAsString());
     }
   }
@@ -186,7 +201,11 @@ public class EthJsonModule extends SimpleModule {
 
     @Override
     public Bytes deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-      return Bytes.fromHexString(p.getValueAsString());
+      String value = p.getValueAsString();
+      if (value.startsWith("0x:bigint ")) {
+        value = value.substring(10);
+      }
+      return Bytes.fromHexStringLenient(value);
     }
   }
 
@@ -240,6 +259,7 @@ public class EthJsonModule extends SimpleModule {
 
   public EthJsonModule() {
     addSerializer(Hash.class, new HashSerializer());
+    addDeserializer(Hash.class, new HashDeserializer());
     addSerializer(Address.class, new AddressSerializer());
     addKeySerializer(Address.class, new AddressKeySerializer());
     addSerializer(Bytes.class, new BytesSerializer());

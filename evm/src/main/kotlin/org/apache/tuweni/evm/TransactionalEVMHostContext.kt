@@ -20,10 +20,9 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.AccountState
 import org.apache.tuweni.eth.Address
-import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.Log
 import org.apache.tuweni.eth.repository.BlockchainRepository
-import org.apache.tuweni.trie.MerklePatriciaTrie
+import org.apache.tuweni.eth.repository.StateRepository
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
@@ -33,9 +32,9 @@ import org.slf4j.LoggerFactory
  * EVM context that records changes to the world state, so they can be applied atomically.
  */
 class TransactionalEVMHostContext(
-  val repository: BlockchainRepository,
+  val blockchainRepository: BlockchainRepository,
+  val transientRepository: StateRepository,
   val ethereumVirtualMachine: EthereumVirtualMachine,
-  val depth: Int,
   val sender: Address,
   val destination: Address,
   val value: Bytes,
@@ -43,29 +42,24 @@ class TransactionalEVMHostContext(
   val gas: Gas,
   private val gasPrice: Wei,
   val currentCoinbase: Address,
-  val currentNumber: Long,
-  val currentTimestamp: Long,
+  val currentNumber: UInt256,
+  val currentTimestamp: UInt256,
   val currentGasLimit: Long,
-  val currentDifficulty: UInt256
+  val currentDifficulty: UInt256,
+  val chainId: UInt256,
 ) : HostContext, ExecutionChanges {
 
   companion object {
     private val logger = LoggerFactory.getLogger(TransactionalEVMHostContext::class.java)
   }
 
-  private val accountChanges = mutableMapOf<Address, HashMap<Bytes32, Bytes32>>()
   private val logs = mutableListOf<Log>()
   val accountsToDestroy = mutableListOf<Address>()
-  val balanceChanges = HashMap<Address, Wei>()
   val warmedUpStorage = HashSet<Bytes>()
-
-  override fun getAccountChanges(): Map<Address, HashMap<Bytes32, Bytes32>> = accountChanges
 
   override fun getLogs(): List<Log> = logs
 
   override fun accountsToDestroy(): List<Address> = accountsToDestroy
-
-  override fun getBalanceChanges(): Map<Address, Wei> = balanceChanges
 
   /**
    * Check account existence function.
@@ -78,16 +72,14 @@ class TransactionalEVMHostContext(
    */
   override suspend fun accountExists(address: Address): Boolean {
     logger.trace("Entering accountExists")
-    return accountChanges.containsKey(address) ||
-      repository.accountsExists(address)
+    return transientRepository.accountsExists(address)
   }
 
-  override suspend fun getRepositoryStorage(address: Address, keyBytes: Bytes): Bytes32 {
+  override suspend fun getRepositoryStorage(address: Address, key: Bytes32): Bytes32? {
     logger.trace("Entering getRepositoryStorage")
-    val key = Bytes32.wrap(keyBytes)
-    val value = repository.getAccountStoreValue(address, key)
+    val value = blockchainRepository.getAccountStoreValue(address, key)
     logger.trace("key $key, value $value")
-    return value ?: Bytes32.ZERO
+    return value
   }
 
   /**
@@ -100,14 +92,11 @@ class TransactionalEVMHostContext(
    * @param key The index of the account's storage entry.
    * @return The storage value at the given storage key or null bytes if the account does not exist.
    */
-  override suspend fun getStorage(address: Address, key: Bytes32): Bytes32 {
+  override suspend fun getStorage(address: Address, key: Bytes32): Bytes32? {
     logger.trace("Entering getStorage")
-    var value = accountChanges[address]?.get(key)
-    if (value == null) {
-      value = repository.getAccountStoreValue(address, key)?.let { UInt256.fromBytes(it) }
-    }
+    val value = transientRepository.getAccountStoreValue(address, key)?.let { UInt256.fromBytes(it) }
     logger.trace("key $key value $value")
-    return value ?: UInt256.ZERO
+    return value
   }
 
   /**
@@ -136,20 +125,17 @@ class TransactionalEVMHostContext(
    */
   override suspend fun setStorage(address: Address, key: Bytes32, value: Bytes32): Int {
     logger.trace("Entering setStorage {} {} {}", address, key, value)
-    var newAccount = false
-    accountChanges.computeIfAbsent(address) {
-      newAccount = true
-      HashMap()
-    }
-    val map = accountChanges[address]!!
-    val oldValue = map.get(key)
+
+    val newAccount = transientRepository.accountsExists(address)
+    val repositoryValue = blockchainRepository.getAccountStoreValue(address, key)
+    val oldValue = transientRepository.getAccountStoreValue(address, key)
     val storageAdded = newAccount || oldValue == null
-    val storageWasModifiedBefore = map.containsKey(key)
+    val storageWasModifiedBefore = !(repositoryValue?.equals(oldValue) == true || oldValue == null)
     val storageModified = !(value == UInt256.ZERO && oldValue == null) && !value.equals(oldValue)
     if (!storageModified) {
       return 0
     }
-    map.put(key, value)
+    transientRepository.storeAccountValue(address, key, value)
     if (value.size() == 0) {
       return 4
     }
@@ -177,11 +163,7 @@ class TransactionalEVMHostContext(
   override suspend fun getBalance(address: Address): Wei {
     logger.trace("Entering getBalance")
 
-    val balance = balanceChanges[address]
-    balance?.let {
-      return it
-    }
-    val account = repository.getAccount(address)
+    val account = transientRepository.getAccount(address)
     return account?.balance ?: Wei.valueOf(0)
   }
 
@@ -197,7 +179,7 @@ class TransactionalEVMHostContext(
    */
   override suspend fun getCodeSize(address: Address): Int {
     logger.trace("Entering getCodeSize")
-    val code = repository.getAccountCode(address)
+    val code = transientRepository.getAccountCode(address)
     return code?.size() ?: 0
   }
 
@@ -214,9 +196,26 @@ class TransactionalEVMHostContext(
    */
   override suspend fun getCodeHash(address: Address): Bytes32 {
     logger.trace("Entering getCodeHash")
-    val account = repository.getAccount(address)
+    val account = transientRepository.getAccount(address)
 
     return account?.codeHash ?: Bytes32.ZERO
+  }
+
+  /**
+   * Get account nonce
+   *
+   *
+   * This function is used by a VM to get the nonce of the account at
+   * the given address.
+   *
+   * @param address The address of the account.
+   * @return The nonce of the accountt.
+   */
+  override suspend fun getNonce(address: Address): UInt256 {
+    logger.trace("Entering getNonce")
+    val account = transientRepository.getAccount(address)
+
+    return account?.nonce ?: UInt256.ONE
   }
 
   /**
@@ -233,7 +232,7 @@ class TransactionalEVMHostContext(
    */
   override suspend fun getCode(address: Address): Bytes {
     logger.trace("Entering getCode")
-    val code = repository.getAccountCode(address)
+    val code = transientRepository.getAccountCode(address)
     return code ?: Bytes.EMPTY
   }
 
@@ -250,25 +249,17 @@ class TransactionalEVMHostContext(
   override suspend fun selfdestruct(address: Address, beneficiary: Address) {
     logger.trace("Entering selfdestruct")
     accountsToDestroy.add(address)
-    val account = repository.getAccount(address)
-    val beneficiaryAccountState = repository.getAccount(beneficiary)
-    if (beneficiaryAccountState === null) {
-      repository.storeAccount(
+    val account = transientRepository.getAccount(address)
+    account?.apply {
+      val beneficiaryAccountState = transientRepository.getAccount(beneficiary) ?: transientRepository.newAccountState()
+      transientRepository.storeAccount(
         beneficiary,
         AccountState(
-          UInt256.ZERO, Wei.valueOf(0),
-          Hash.fromBytes(
-            MerklePatriciaTrie.storingBytes().rootHash()
-          ),
-          Hash.hash(Bytes.EMPTY)
+          beneficiaryAccountState.nonce, beneficiaryAccountState.balance.add(account.balance),
+          beneficiaryAccountState.storageRoot,
+          beneficiaryAccountState.codeHash
         )
       )
-    }
-    account?.apply {
-      val balance = balanceChanges.putIfAbsent(beneficiary, account.balance)
-      balance?.let {
-        balanceChanges[beneficiary] = it.add(account.balance)
-      }
     }
     logger.trace("Done selfdestruct")
   }
@@ -280,15 +271,19 @@ class TransactionalEVMHostContext(
    * @return The result of the call.
    */
   override suspend fun call(evmMessage: EVMMessage): EVMResult {
-    logger.trace("Entering call")
+    logger.trace("Entering call ${evmMessage.kind}")
+    val code = transientRepository.getAccountCode(evmMessage.contract)
     val result = ethereumVirtualMachine.executeInternal(
+      evmMessage.origin,
       evmMessage.sender,
       evmMessage.destination,
+      evmMessage.contract,
       evmMessage.value,
-      Bytes.EMPTY,
+      code ?: Bytes.EMPTY,
       evmMessage.inputData,
       evmMessage.gas,
-      depth = depth + 1,
+      evmMessage.kind,
+      depth = evmMessage.depth,
       hostContext = this
     )
     return result
@@ -305,30 +300,33 @@ class TransactionalEVMHostContext(
     logger.trace("Entering getTxContext")
     return Bytes.concatenate(
       gasPrice.toBytes(),
-      sender, currentCoinbase, Bytes.ofUnsignedLong(currentNumber),
-      Bytes.ofUnsignedLong(currentTimestamp),
+      sender, currentCoinbase, currentNumber,
+      currentTimestamp,
       Bytes.ofUnsignedLong(currentGasLimit),
       currentDifficulty.toBytes(),
       UInt256.ONE.toBytes()
     )
   }
 
-  override fun getBlockHash(number: Long): Bytes32 {
+  override fun getBlockHash(number: UInt256): Bytes32 {
     logger.trace("Entering getBlockHash")
-    val listOfCandidates = repository.findBlockByHashOrNumber(UInt256.valueOf(number).toBytes())
+    val listOfCandidates = blockchainRepository.findBlockByHashOrNumber(number)
     return listOfCandidates.firstOrNull() ?: Bytes32.ZERO
   }
 
   override fun emitLog(address: Address, data: Bytes, topics: List<Bytes32>) {
     logger.trace("Entering emitLog")
-    logs.add(Log(Address.fromBytes(Bytes.wrap(address)), data, topics))
+    val log = Log(Address.fromBytes(Bytes.wrap(address)), data, topics)
+    logs.add(log)
   }
 
   override fun warmUpAccount(address: Address): Boolean =
-    !warmedUpStorage.add(address)
+    warmedUpStorage.add(address)
 
-  override fun warmUpStorage(address: Address, key: UInt256): Boolean =
-    !warmedUpStorage.add(Bytes.concatenate(address, Bytes.fromHexString("0x0f"), key))
+  override fun warmUpStorage(address: Address, key: UInt256): Boolean {
+    logger.trace("entering warmUpStorage $address $key")
+    return warmedUpStorage.add(Bytes.concatenate(address, Bytes.fromHexString("0x0f"), key))
+  }
 
   override fun getGasPrice() = gasPrice
 
@@ -340,15 +338,9 @@ class TransactionalEVMHostContext(
 
   override fun getCoinbase() = currentCoinbase
 
-  override fun timestamp(): UInt256 = UInt256.valueOf(currentTimestamp)
+  override fun timestamp() = currentTimestamp
 
   override fun getDifficulty() = currentDifficulty
 
-  override fun increaseBalance(address: Address, amount: Wei) {
-    balanceChanges[address] = balanceChanges[address]?.add(amount) ?: amount
-  }
-
-  override suspend fun setBalance(address: Address, balance: Wei) {
-    balanceChanges[address] = getBalance(address).subtract(balance)
-  }
+  override fun getChaindId(): UInt256 = chainId
 }

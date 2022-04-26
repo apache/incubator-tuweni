@@ -1,0 +1,33 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
+ * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
+ * to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+description = 'Ethereum precompiles.'
+
+dependencies {
+  implementation project(':bytes')
+  implementation project(':concurrent')
+  implementation project(':crypto')
+  implementation project(':eth')
+  implementation project(':units')
+  implementation 'net.java.dev.jna:jna'
+  implementation 'org.bouncycastle:bcprov-jdk15on'
+  implementation 'org.hyperledger.besu:bls12-381'
+  implementation 'org.hyperledger.besu:altbn128'
+  implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+  implementation 'org.slf4j:slf4j-api'
+
+  testImplementation project(':junit')
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testImplementation 'org.junit.jupiter:junit-jupiter-params'
+
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+}

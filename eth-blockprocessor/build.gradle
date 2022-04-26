@@ -25,6 +25,7 @@ dependencies {
   implementation project(':concurrent-coroutines')
   implementation project(':crypto')
   implementation project(':eth')
+  implementation project(':eth-precompiles')
   implementation project(':genesis')
   implementation project(':eth-repository')
   implementation project(':evm')
@@ -34,7 +35,9 @@ dependencies {
   implementation project(':units')
   implementation project(':merkle-trie')
 
+  testImplementation project(':io')
   testImplementation project(':junit')
+  testImplementation 'org.apache.lucene:lucene-core'
   testImplementation 'org.bouncycastle:bcprov-jdk15on'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.junit.jupiter:junit-jupiter-params'

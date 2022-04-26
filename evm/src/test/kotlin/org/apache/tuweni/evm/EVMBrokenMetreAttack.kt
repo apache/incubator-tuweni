@@ -22,6 +22,7 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.eth.AccountState
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.precompiles.Registry
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.evm.impl.EvmVmImpl
@@ -83,7 +84,7 @@ class EVMBrokenMetreAttack {
     repository.storeAccount(address, accountState)
     repository.storeCode(code)
 
-    val vm = EthereumVirtualMachine(repository, EvmVmImpl::create)
+    val vm = EthereumVirtualMachine(repository, repository, Registry.istanbul, EvmVmImpl::create)
     vm.start()
     val result = vm.execute(
       address,
@@ -94,11 +95,13 @@ class EVMBrokenMetreAttack {
       Gas.valueOf(10_000_000),
       Wei.valueOf(1),
       address,
-      123L,
-      123L,
+      UInt256.valueOf(123L),
+      UInt256.valueOf(123L),
       10_000_000,
       UInt256.valueOf(1234),
-      revision = HardFork.ISTANBUL,
+      UInt256.valueOf(1),
+      CallKind.CALL,
+      HardFork.ISTANBUL,
     )
     assertEquals(expectedStatusCode, result.statusCode)
   }

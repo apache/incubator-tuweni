@@ -27,6 +27,7 @@ import org.apache.tuweni.eth.AccountState
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.EthJsonModule
 import org.apache.tuweni.eth.Hash
+import org.apache.tuweni.eth.precompiles.Registry
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.evm.impl.EvmVmImpl
 import org.apache.tuweni.genesis.Genesis
@@ -44,6 +45,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -74,6 +76,18 @@ class EVMReferenceTest {
     @Throws(IOException::class)
     private fun findIstanbulTests(): Stream<Arguments> {
       return findTests("/istanbul/VMTests/**/*.json")
+    }
+
+    @JvmStatic
+    @Throws(IOException::class)
+    private fun findFrontierTests(): Stream<Arguments> {
+      return findTests("/frontier/VMTests/**/*.json")
+    }
+
+    @JvmStatic
+    @Throws(IOException::class)
+    private fun findConstantinopleTests(): Stream<Arguments> {
+      return findTests("/constantinople/VMTests/**/*.json")
     }
 
     @Throws(IOException::class)
@@ -108,25 +122,45 @@ class EVMReferenceTest {
     writer = newWriter
   }
 
+  @Disabled
   @ParameterizedTest(name = "Berlin {index}: {0}")
   @MethodSource("findBerlinTests")
   fun runBerlinReferenceTests(testName: String, test: JsonReferenceTest) {
-    runReferenceTests(testName, test)
+    runReferenceTests(testName, HardFork.BERLIN, test)
   }
 
+  @Disabled
   @ParameterizedTest(name = "Istanbul {index}: {0}")
   @MethodSource("findIstanbulTests")
   fun runIstanbulReferenceTests(testName: String, test: JsonReferenceTest) {
-    runReferenceTests(testName, test)
+    runReferenceTests(testName, HardFork.ISTANBUL, test)
   }
 
-  private fun runReferenceTests(testName: String, test: JsonReferenceTest) = runBlocking {
+  @ParameterizedTest(name = "Frontier {index}: {0}")
+  @MethodSource("findFrontierTests")
+  fun runFrontierReferenceTests(testName: String, test: JsonReferenceTest) {
+    runReferenceTests(testName, HardFork.FRONTIER, test)
+  }
+
+  @Disabled
+  @ParameterizedTest(name = "Constantinople {index}: {0}")
+  @MethodSource("findConstantinopleTests")
+  fun runConstantinopleReferenceTests(testName: String, test: JsonReferenceTest) {
+    runReferenceTests(testName, HardFork.CONSTANTINOPLE, test)
+  }
+
+  private fun runReferenceTests(testName: String, hardFork: HardFork, test: JsonReferenceTest) = runBlocking {
     assertNotNull(testName)
     println(testName)
     val repository = BlockchainRepository.inMemory(Genesis.dev())
     test.pre!!.forEach { address, state ->
       runBlocking {
-        val accountState = AccountState(state.nonce!!, state.balance!!, Hash.fromBytes(MerkleTrie.EMPTY_TRIE_ROOT_HASH), Hash.hash(state.code!!))
+        val accountState = AccountState(
+          state.nonce!!,
+          state.balance!!,
+          Hash.fromBytes(MerkleTrie.EMPTY_TRIE_ROOT_HASH),
+          Hash.hash(state.code!!)
+        )
         repository.storeAccount(address, accountState)
         repository.storeCode(state.code!!)
         val accountStorage = state.storage
@@ -138,7 +172,7 @@ class EVMReferenceTest {
         }
       }
     }
-    val vm = EthereumVirtualMachine(repository, EvmVmImpl::create)
+    val vm = EthereumVirtualMachine(repository, repository, Registry.istanbul, EvmVmImpl::create)
     vm.start()
     try {
       val result = vm.execute(
@@ -150,10 +184,13 @@ class EVMReferenceTest {
         test.exec?.gas!!,
         test.exec?.gasPrice!!,
         test.env?.currentCoinbase!!,
-        test.env?.currentNumber!!.toLong(),
-        test.env?.currentTimestamp!!.toLong(),
+        test.env?.currentNumber!!,
+        test.env?.currentTimestamp!!,
         test.env?.currentGasLimit!!.toLong(),
-        test.env?.currentDifficulty!!
+        test.env?.currentDifficulty!!,
+        UInt256.valueOf(1),
+        CallKind.CALL,
+        hardFork
       )
       if (test.post == null) {
         assertNotEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
@@ -206,7 +243,10 @@ class EVMReferenceTest {
           testName.startsWith("sha3_5") ||
           testName.startsWith("sha3_6") ||
           testName.startsWith("sha3_bigSize") ||
-          testName.startsWith("ackermann33")
+          testName.startsWith("ackermann33") ||
+          testName.equals("push33") ||
+          testName.equals("sstore_load_2") ||
+          testName.equals("jumpTo1InstructionafterJump")
         ) {
           assertEquals(EVMExecutionStatusCode.OUT_OF_GAS, result.statusCode)
         } else if (testName.contains("stacklimit", true)) {
@@ -221,13 +261,10 @@ class EVMReferenceTest {
         test.post!!.forEach { address, state ->
           runBlocking {
             assertTrue(
-              repository.accountsExists(address) ||
-                (result.hostContext as TransactionalEVMHostContext).getAccountChanges().containsKey(address)
+              repository.accountsExists(address)
             )
             val accountState = repository.getAccount(address)
-            val balance = accountState?.balance?.add(
-              result.changes.getBalanceChanges().get(address) ?: Wei.valueOf(0)
-            ) ?: Wei.valueOf(0)
+            val balance = accountState?.balance ?: Wei.valueOf(0)
             assertEquals(state.balance, balance)
             assertEquals(state.nonce, accountState!!.nonce)
 
@@ -246,7 +283,6 @@ class EVMReferenceTest {
           }
         }
 
-        // assertEquals(test.gas, result.gasManager.gasLeft())
         if (test.out?.isEmpty == true) {
           assertTrue(result.state.output == null || result.state.output?.isEmpty ?: false)
         } else {
@@ -255,6 +291,12 @@ class EVMReferenceTest {
             result.state.output?.let { if (it.size() < 32) Bytes32.rightPad(it) else it }
           )
         }
+        assertEquals(
+          test.gas!!.toLong(),
+          result.state.gasManager.gasLeft().toLong(),
+          " diff: " + if (test.gas!! > result.state.gasManager.gasLeft()) test.gas!!.subtract(result.state.gasManager.gasLeft()) else result.state.gasManager.gasLeft()
+            .subtract(test.gas!!)
+        )
       }
     } finally {
       vm.stop()

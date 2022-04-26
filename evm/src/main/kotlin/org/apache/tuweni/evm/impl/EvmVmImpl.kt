@@ -92,18 +92,19 @@ class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
       }
       val currentOpcodeByte = code.get(current)
       current++
-      // TODO implement call and pass result
       val result = opcode.execute(gasManager, hostContext, stack, msg, code, current, memory, null)
-      logger.trace(
-        ">> OPCODE: ${opcodes[currentOpcodeByte] ?: currentOpcodeByte.toString(16)} " +
-          "gas: ${gasManager.gasLeft()} cost: ${gasManager.lastGasCost()}"
-      )
+      if (logger.isTraceEnabled) {
+        val opCodeAsString = Bytes.of(currentOpcodeByte).toHexString()
+
+        logger.trace(
+          ">> OPCODE: ${opcodes[currentOpcodeByte] ?: opCodeAsString } " +
+            "gas: ${gasManager.gasLeft()} cost: ${gasManager.lastGasCost()}"
+        )
+      }
       val state = EVMState(gasManager, (hostContext as TransactionalEVMHostContext).getLogs(), stack, memory, result?.output)
 
       if (result?.status != null) {
-        if (logger.isTraceEnabled) {
-          logger.trace(executionPath.map { opcodes[it] ?: it.toString(16) }.joinToString(">"))
-        }
+        traceExecution(executionPath)
         if (result.status == EVMExecutionStatusCode.SUCCESS && !gasManager.hasGasLeft()) {
           return EVMResult(EVMExecutionStatusCode.OUT_OF_GAS, hostContext, hostContext, state)
         }
@@ -112,6 +113,7 @@ class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
       result?.newCodePosition?.let {
         current = result.newCodePosition
       }
+      traceExecution(executionPath)
       if (!gasManager.hasGasLeft()) {
         return EVMResult(EVMExecutionStatusCode.OUT_OF_GAS, hostContext, hostContext, state)
       }
@@ -132,11 +134,14 @@ class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
         }
       }
     }
+    val state = EVMState(gasManager, (hostContext as TransactionalEVMHostContext).getLogs(), stack, memory)
+    return EVMResult(EVMExecutionStatusCode.SUCCESS, hostContext, hostContext, state)
+  }
+
+  private fun traceExecution(executionPath: List<Byte>) {
     if (logger.isTraceEnabled) {
       logger.trace(executionPath.map { opcodes[it] ?: it.toString(16) }.joinToString(">"))
     }
-    val state = EVMState(gasManager, (hostContext as TransactionalEVMHostContext).getLogs(), stack, memory)
-    return EVMResult(EVMExecutionStatusCode.SUCCESS, hostContext, hostContext, state)
   }
 
   override fun capabilities(): Int {

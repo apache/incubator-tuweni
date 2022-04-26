@@ -12,6 +12,8 @@
  */
 package org.apache.tuweni.junit;
 
+import org.apache.tuweni.crypto.blake2bf.TuweniProvider;
+
 import java.security.Security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -27,5 +29,6 @@ public class BouncyCastleExtension implements BeforeAllCallback {
   @Override
   public void beforeAll(ExtensionContext context) throws Exception {
     Security.addProvider(new BouncyCastleProvider());
+    Security.addProvider(new TuweniProvider());
   }
 }

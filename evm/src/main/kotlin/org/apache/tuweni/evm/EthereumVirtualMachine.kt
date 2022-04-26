@@ -20,7 +20,9 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.Log
+import org.apache.tuweni.eth.precompiles.PrecompileContract
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.eth.repository.StateRepository
 import org.apache.tuweni.evm.impl.GasManager
 import org.apache.tuweni.evm.impl.Memory
 import org.apache.tuweni.evm.impl.Stack
@@ -37,7 +39,8 @@ enum class CallKind(val number: Int) {
   DELEGATECALL(1),
   CALLCODE(2),
   CREATE(3),
-  CREATE2(4)
+  CREATE2(4),
+  STATICCALL(5)
 }
 
 /**
@@ -149,12 +152,14 @@ data class EVMResult(
  * Message sent to the EVM for execution
  */
 data class EVMMessage(
-  val kind: Int,
+  val kind: CallKind,
   val flags: Int,
   val depth: Int = 0,
   val gas: Gas,
+  val contract: Address,
   val destination: Address,
   val sender: Address,
+  val origin: Address,
   val inputData: Bytes,
   val value: Bytes,
   val createSalt: Bytes32 = Bytes32.ZERO,
@@ -168,7 +173,9 @@ data class EVMMessage(
  * @param options the options to set on the EVM, specific to the library
  */
 class EthereumVirtualMachine(
+  private val transientRepository: StateRepository,
   private val repository: BlockchainRepository,
+  private val precompiles: Map<Address, PrecompileContract>,
   private val evmVmFactory: () -> EvmVm,
   private val options: Map<String, String> = mapOf(),
 ) {
@@ -214,6 +221,7 @@ class EthereumVirtualMachine(
    * @param currentTimestamp current block timestamp
    * @param currentGasLimit current gas limit
    * @param currentDifficulty block current total difficulty
+   * @param chainId the ID of the current chain
    * @param callKind the type of call
    * @param revision the hard fork revision in which to execute
    * @return the result of the execution
@@ -227,18 +235,19 @@ class EthereumVirtualMachine(
     gas: Gas,
     gasPrice: Wei,
     currentCoinbase: Address,
-    currentNumber: Long,
-    currentTimestamp: Long,
+    currentNumber: UInt256,
+    currentTimestamp: UInt256,
     currentGasLimit: Long,
     currentDifficulty: UInt256,
-    callKind: CallKind = CallKind.CALL,
+    chainId: UInt256,
+    callKind: CallKind,
     revision: HardFork = latestHardFork,
     depth: Int = 0,
   ): EVMResult {
     val hostContext = TransactionalEVMHostContext(
       repository,
+      transientRepository,
       this,
-      depth,
       sender,
       destination,
       value,
@@ -249,11 +258,14 @@ class EthereumVirtualMachine(
       currentNumber,
       currentTimestamp,
       currentGasLimit,
-      currentDifficulty
+      currentDifficulty,
+      chainId,
     )
     val result =
       executeInternal(
         sender,
+        sender,
+        destination,
         destination,
         value,
         code,
@@ -269,29 +281,44 @@ class EthereumVirtualMachine(
   }
 
   internal suspend fun executeInternal(
+    origin: Address,
     sender: Address,
     destination: Address,
+    contractAddress: Address,
     value: Bytes,
     code: Bytes,
     inputData: Bytes,
     gas: Gas,
-    callKind: CallKind = CallKind.CALL,
+    callKind: CallKind,
     revision: HardFork = latestHardFork,
     depth: Int = 0,
     hostContext: HostContext,
   ): EVMResult {
-    val msg =
-      EVMMessage(
-        callKind.number, 0, depth, gas, destination, sender, inputData,
-        value
-      )
+    if (depth > 1024) {
+      val gasManager = GasManager(gas)
+      return EVMResult(EVMExecutionStatusCode.CALL_DEPTH_EXCEEDED, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), null))
+    }
 
-    return vm().execute(
-      hostContext,
-      revision,
-      msg,
-      code
-    )
+    val contract = precompiles[contractAddress]
+    if (contract != null) {
+      val result = contract.run(inputData)
+      val gasManager = GasManager(gas)
+      gasManager.add(result.gas)
+      return EVMResult(if (result.output == null) EVMExecutionStatusCode.PRECOMPILE_FAILURE else EVMExecutionStatusCode.SUCCESS, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), result.output))
+    } else {
+      val msg =
+        EVMMessage(
+          callKind, 0, depth, gas, contractAddress, destination, sender, origin, inputData,
+          value
+        )
+
+      return vm().execute(
+        hostContext,
+        revision,
+        msg,
+        code
+      )
+    }
   }
 
   /**
@@ -328,7 +355,7 @@ interface HostContext {
    * @param key The index of the account's storage entry.
    * @return The storage value at the given storage key or null bytes if the account does not exist.
    */
-  suspend fun getRepositoryStorage(address: Address, keyBytes: Bytes): Bytes32
+  suspend fun getRepositoryStorage(address: Address, key: Bytes32): Bytes32?
 
   /**
    * Get storage function.
@@ -340,7 +367,7 @@ interface HostContext {
    * @param key The index of the account's storage entry.
    * @return The storage value at the given storage key or null bytes if the account does not exist.
    */
-  suspend fun getStorage(address: Address, key: Bytes32): Bytes32
+  suspend fun getStorage(address: Address, key: Bytes32): Bytes32?
 
   /**
    * Set storage function.
@@ -393,6 +420,18 @@ interface HostContext {
    * @return The hash of the code in the account or null bytes if the account does not exist.
    */
   suspend fun getCodeHash(address: Address): Bytes32
+
+  /**
+   * Get account nonce
+   *
+   *
+   * This function is used by a VM to get the nonce of the account at
+   * the given address.
+   *
+   * @param address The address of the account.
+   * @return The nonce of the accountt.
+   */
+  suspend fun getNonce(address: Address): UInt256
 
   /**
    * Copy code function.
@@ -449,7 +488,7 @@ interface HostContext {
    * @param number The block hash.
    * @return The block hash or zeroed bytes if the information about the block is not available.
    */
-  fun getBlockHash(number: Long): Bytes32
+  fun getBlockHash(number: UInt256): Bytes32
 
   /**
    * Log function.
@@ -466,12 +505,12 @@ interface HostContext {
   fun emitLog(address: Address, data: Bytes, topics: List<Bytes32>)
 
   /**
-   * Returns true if the account was never used.
+   * Returns true if the account was used in this context already.
    */
   fun warmUpAccount(address: Address): Boolean
 
   /**
-   * Returns true if the storage slot was never used.
+   * Returns true if the storage slot was used in this context already.
    */
   fun warmUpStorage(address: Address, key: UInt256): Boolean
 
@@ -485,12 +524,11 @@ interface HostContext {
    */
   fun timestamp(): UInt256
   fun getGasLimit(): Long
-  fun getBlockNumber(): Long
+  fun getBlockNumber(): UInt256
   fun getBlockHash(): Bytes32
   fun getCoinbase(): Address
   fun getDifficulty(): UInt256
-  fun increaseBalance(address: Address, amount: Wei)
-  suspend fun setBalance(address: Address, balance: Wei)
+  fun getChaindId(): UInt256
 }
 
 interface EvmVm {
@@ -526,6 +564,9 @@ val opcodes = mapOf<Byte, String>(
   Pair(0x18, "xor"),
   Pair(0x19, "not"),
   Pair(0x1a, "byte"),
+  Pair(0x1b, "shl"),
+  Pair(0x1c, "shr"),
+  Pair(0x1d, "sar"),
   Pair(0x20, "sha3"),
   Pair(0x30, "address"),
   Pair(0x31, "balance"),
@@ -549,6 +590,8 @@ val opcodes = mapOf<Byte, String>(
   Pair(0x43, "number"),
   Pair(0x44, "difficulty"),
   Pair(0x45, "gaslimit"),
+  Pair(0x46, "chainid"),
+  Pair(0x47, "selfbalance"),
   Pair(0x50, "pop"),
   Pair(0x51, "mload"),
   Pair(0x52, "mstore"),
@@ -593,6 +636,22 @@ val opcodes = mapOf<Byte, String>(
   Pair(0x7d, "push30"),
   Pair(0x7e, "push31"),
   Pair(0x7f, "push32"),
+  Pair(0x80.toByte(), "dup1"),
+  Pair(0x81.toByte(), "dup2"),
+  Pair(0x82.toByte(), "dup3"),
+  Pair(0x83.toByte(), "dup4"),
+  Pair(0x84.toByte(), "dup5"),
+  Pair(0x85.toByte(), "dup6"),
+  Pair(0x86.toByte(), "dup7"),
+  Pair(0x87.toByte(), "dup8"),
+  Pair(0x88.toByte(), "dup9"),
+  Pair(0x89.toByte(), "dup10"),
+  Pair(0x8a.toByte(), "dup11"),
+  Pair(0x8b.toByte(), "dup12"),
+  Pair(0x8c.toByte(), "dup13"),
+  Pair(0x8d.toByte(), "dup14"),
+  Pair(0x8e.toByte(), "dup15"),
+  Pair(0x8f.toByte(), "dup16"),
   Pair(0x90.toByte(), "swap1"),
   Pair(0x91.toByte(), "swap2"),
   Pair(0x92.toByte(), "swap3"),
@@ -609,12 +668,24 @@ val opcodes = mapOf<Byte, String>(
   Pair(0x9d.toByte(), "swap14"),
   Pair(0x9e.toByte(), "swap15"),
   Pair(0x9f.toByte(), "swap16"),
-  Pair(0xf3.toByte(), "return"),
   Pair(0xa0.toByte(), "log0"),
   Pair(0xa1.toByte(), "log1"),
   Pair(0xa2.toByte(), "log2"),
   Pair(0xa3.toByte(), "log3"),
   Pair(0xa4.toByte(), "log4"),
+  Pair(0xf0.toByte(), "create"),
+  Pair(0xf1.toByte(), "call"),
+  Pair(0xf2.toByte(), "callcode"),
+  Pair(0xf3.toByte(), "return"),
+  Pair(0xf4.toByte(), "delegatecall"),
+  Pair(0xf5.toByte(), "create2"),
+  Pair(0xf6.toByte(), "unused"),
+  Pair(0xf7.toByte(), "unused"),
+  Pair(0xf8.toByte(), "unused"),
+  Pair(0xf9.toByte(), "unused"),
+  Pair(0xfa.toByte(), "staticcall"),
+  Pair(0xfb.toByte(), "unused"),
+  Pair(0xfd.toByte(), "revert"),
   Pair(0xfe.toByte(), "invalid"),
   Pair(0xff.toByte(), "selfdestruct"),
 )
@@ -625,11 +696,6 @@ val opcodes = mapOf<Byte, String>(
 interface ExecutionChanges {
 
   /**
-   * Changes made to account storage.
-   */
-  fun getAccountChanges(): Map<Address, HashMap<Bytes32, Bytes32>>
-
-  /**
    * Logs emitted during execution
    */
   fun getLogs(): List<Log>
@@ -638,9 +704,10 @@ interface ExecutionChanges {
    * Lists of accounts to destroy
    */
   fun accountsToDestroy(): List<Address>
+}
 
-  /**
-   * Lists of balance changes, with the final balances
-   */
-  fun getBalanceChanges(): Map<Address, Wei>
+object NoOpExecutionChanges : ExecutionChanges {
+  override fun getLogs(): List<Log> = listOf()
+
+  override fun accountsToDestroy(): List<Address> = listOf()
 }

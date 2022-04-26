@@ -51,8 +51,9 @@ class Memory {
     if (sourceOffset.fitsInt() && sourceOffset.intValue() < code.size()) {
       val maxCodeLength = code.size() - sourceOffset.intValue()
       val length = if (maxCodeLength < numBytes.intValue()) maxCodeLength else numBytes.intValue()
-      logger.trace("Writing ${code.slice(sourceOffset.intValue(), maxCodeLength)}")
-      memoryData!!.set(offset.intValue(), code.slice(sourceOffset.intValue(), length))
+      val toWrite = code.slice(sourceOffset.intValue(), length)
+      logger.trace("Writing $toWrite")
+      memoryData!!.set(offset.intValue(), toWrite)
     }
 
     wordsSize = newSize(offset, numBytes)
@@ -68,7 +69,6 @@ class Memory {
   }
 
   fun newSize(memOffset: UInt256, length: UInt256): UInt256 {
-
     val candidate = memOffset.add(length)
     if (candidate < memOffset || candidate < length) {
       return UInt256.MAX_VALUE
@@ -77,23 +77,30 @@ class Memory {
     return if (wordsSize > candidateWords) wordsSize else candidateWords
   }
 
-  fun read(from: UInt256, length: UInt256): Bytes? {
+  fun read(from: UInt256, length: UInt256, updateMemorySize: Boolean = true): Bytes? {
     val max = from.add(length)
     if (!from.fitsInt() || !length.fitsInt() || !max.fitsInt()) {
       return null
     }
+    if (updateMemorySize) {
+      wordsSize = newSize(from, length)
+    }
+
     val localMemoryData = memoryData
     if (localMemoryData != null) {
+      if (from.intValue() >= localMemoryData.size()) {
+        return Bytes.repeat(0, length.intValue())
+      }
       if (localMemoryData.size() < max.intValue()) {
         val l = max.intValue() - localMemoryData.size()
         return Bytes.concatenate(
           localMemoryData.slice(from.intValue(), length.intValue() - l),
-          Bytes.wrap(ByteArray(l))
+          Bytes.repeat(0, l)
         )
       }
       return localMemoryData.slice(from.intValue(), length.intValue())
     } else {
-      return Bytes.wrap(ByteArray(length.intValue()))
+      return Bytes.repeat(0, length.intValue())
     }
   }
 }

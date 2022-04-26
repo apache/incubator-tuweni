@@ -34,6 +34,38 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(VertxExtension::class, BouncyCastleExtension::class)
 class EthereumClientRunTest {
 
+  @Disabled
+  @Test
+  fun connectToDevNetwork(@VertxInstance vertx: Vertx) = runBlocking {
+    val keyPair = SECP256K1.KeyPair.random()
+    val config = EthereumClientConfig.fromString(
+      """
+      [peerRepository.default]
+      type="memory"
+      [storage.default]
+      path="data"
+      genesis="default"
+      [genesis.default]
+      path="classpath:/genesis/besu-dev.json"
+      [rlpx.default]
+      networkInterface="127.0.0.1"
+      port=30301
+      key="${keyPair.secretKey().bytes().toHexString()}"
+      [static.default]
+      repository="default"
+      enodes=["enode://46a3f45f9e2d8870769b8e6760d47b9c55567cee1175016c36cbe4955dcf1e7042dbb7ce06af9d307ea4a1fef2162d53e14d8a1196fde663444e75a6cd59fcdf@127.0.0.1:33033"]
+      [synchronizer.default]
+      type="status"
+      from=0
+      to=100
+      """.trimMargin()
+    )
+    val client = EthereumClient(vertx, config)
+    client.start()
+    delay(300000)
+    println("Got ${client.peerRepositories["default"]!!.activeConnections().count()} connections")
+  }
+
   @Test
   fun startTwoClientsAndConnectThem(@VertxInstance vertx: Vertx) = runBlocking {
     val keyPair = SECP256K1.KeyPair.random()

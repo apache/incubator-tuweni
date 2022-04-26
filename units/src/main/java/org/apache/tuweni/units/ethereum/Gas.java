@@ -101,6 +101,17 @@ public final class Gas implements Comparable<Gas> {
   }
 
   /**
+   * Provides the minimum value between 2 gas objects.
+   * 
+   * @param one a gas object
+   * @param two another gas object
+   * @return the minimum between the 2 gas objects
+   */
+  public static Gas minimum(Gas one, Gas two) {
+    return one.compareTo(two) <= 0 ? one : two;
+  }
+
+  /**
    * The price of this amount of gas given the provided price per unit of gas.
    *
    * @param gasPrice The price per unit of gas.
