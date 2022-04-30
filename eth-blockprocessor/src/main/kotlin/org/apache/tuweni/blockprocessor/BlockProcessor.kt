@@ -30,6 +30,7 @@ import org.apache.tuweni.eth.repository.TransientStateRepository
 import org.apache.tuweni.evm.CallKind
 import org.apache.tuweni.evm.EVMExecutionStatusCode
 import org.apache.tuweni.evm.EthereumVirtualMachine
+import org.apache.tuweni.evm.HardFork
 import org.apache.tuweni.evm.impl.EvmVmImpl
 import org.apache.tuweni.evm.impl.StepListener
 import org.apache.tuweni.rlp.RLP
@@ -63,6 +64,7 @@ class BlockProcessor(val chainId: UInt256) {
    * @param repository the blockchain repository to execute against
    * @param stepListener an optional listener that can follow the steps of the execution
    * @param precompiles the map of precompiles
+   * @param hardFork the current hard fork
    */
   suspend fun execute(
     parentBlock: BlockHeader,
@@ -73,6 +75,7 @@ class BlockProcessor(val chainId: UInt256) {
     transactions: List<Transaction>,
     repository: BlockchainRepository,
     precompiles: Map<Address, PrecompileContract>,
+    hardFork: HardFork,
     stepListener: StepListener? = null,
   ): BlockProcessorResult {
     val stateChanges = TransientStateRepository(repository)
@@ -89,6 +92,17 @@ class BlockProcessor(val chainId: UInt256) {
     var allGasUsed = Gas.ZERO
     var success = true
     for (tx in transactions) {
+      val sender = tx.sender
+      if (sender === null) {
+        success = false
+        continue
+      }
+      val senderAccount = repository.getAccount(sender)
+      if (senderAccount === null || !Hash.hash(Bytes.EMPTY).equals(senderAccount.codeHash)) {
+        success = false
+        continue
+      }
+
       if (tx.getGasLimit() > gasLimit.subtract(gasUsed).subtract(allGasUsed)) {
         success = false
         continue
@@ -118,7 +132,8 @@ class BlockProcessor(val chainId: UInt256) {
       }
       if (tx.value > UInt256.ZERO) {
         val account = stateChanges.getAccount(to) ?: stateChanges.newAccountState()
-        val newAccountState = AccountState(account.nonce, account.balance.add(tx.value), account.storageRoot, account.codeHash)
+        val newAccountState =
+          AccountState(account.nonce, account.balance.add(tx.value), account.storageRoot, account.codeHash)
         stateChanges.storeAccount(to, newAccountState)
       }
       val result = vm.execute(
@@ -127,7 +142,7 @@ class BlockProcessor(val chainId: UInt256) {
         tx.value,
         code,
         inputData,
-        tx.gasLimit,
+        tx.gasLimit.subtract(Gas.valueOf(21000)),
         tx.gasPrice,
         coinbase,
         parentBlock.number.add(1),
@@ -135,12 +150,35 @@ class BlockProcessor(val chainId: UInt256) {
         tx.gasLimit.toLong(),
         parentBlock.difficulty,
         chainId,
-        CallKind.CALL
+        CallKind.CALL,
+        hardFork,
       )
+      result.state.gasManager.add(21000)
       if (result.statusCode != EVMExecutionStatusCode.SUCCESS) {
         logger.info("EVM execution failed with status ${result.statusCode}")
         success = false
       }
+
+      val pay = result.state.gasManager.gasCost.priceFor(tx.gasPrice)
+      if (pay < tx.gasPrice) { // indicates an overflow.
+        success = false
+      }
+      val newSenderAccountState = AccountState(
+        senderAccount.nonce.add(1),
+        senderAccount.balance.subtract(pay),
+        senderAccount.storageRoot,
+        senderAccount.codeHash
+      )
+      stateChanges.storeAccount(sender, newSenderAccountState)
+
+      val coinbaseAccountState = stateChanges.getAccount(coinbase) ?: stateChanges.newAccountState()
+      val newCoinbaseAccountState = AccountState(
+        coinbaseAccountState.nonce,
+        coinbaseAccountState.balance.add(pay),
+        coinbaseAccountState.storageRoot,
+        coinbaseAccountState.codeHash
+      )
+      stateChanges.storeAccount(coinbase, newCoinbaseAccountState)
 
       for (accountToDestroy in result.changes.accountsToDestroy()) {
         stateChanges.destroyAccount(accountToDestroy)

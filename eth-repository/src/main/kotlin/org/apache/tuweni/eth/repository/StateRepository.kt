@@ -61,7 +61,7 @@ interface StateRepository {
    * @param key the key of the value to retrieve in the account storage.
    * @param value the value to store
    */
-  suspend fun storeAccountValue(address: Address, key: Bytes32, value: Bytes32)
+  suspend fun storeAccountValue(address: Address, key: Bytes32, value: Bytes)
 
   /**
    * Gets the code of an account

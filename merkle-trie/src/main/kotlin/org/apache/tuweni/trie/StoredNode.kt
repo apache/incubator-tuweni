@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.rlp.RLP
@@ -115,4 +116,8 @@ internal class StoredNode<V> : Node<V>, CoroutineScope {
   }
 
   override val coroutineContext = Dispatchers.IO
+
+  override fun toString(toStringFn: (V) -> String): String = runBlocking {
+    load().toString(toStringFn)
+  }
 }

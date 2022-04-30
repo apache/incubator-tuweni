@@ -310,7 +310,7 @@ fun push(length: Int): Opcode {
   return Opcode { gasManager, _, stack, _, code, currentIndex, _, _ ->
     gasManager.add(3)
     val minLength = Math.min(length, code.size() - currentIndex)
-    stack.push(Bytes32.leftPad(code.slice(currentIndex, minLength)))
+    stack.push(code.slice(currentIndex, minLength))
     Result(newCodePosition = currentIndex + minLength)
   }
 }
@@ -337,7 +337,7 @@ fun swap(index: Int): Opcode {
 
 private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   val key = stack.pop()
-  val value = stack.pop()
+  val value = stack.popBytes()
   if (null == key || null == value) {
     return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   }
@@ -370,7 +370,7 @@ private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   }.add(if (slotIsWarm) Gas.ZERO else Gas.valueOf(2100))
   gasManager.add(cost)
 
-  hostContext.setStorage(address, key, value)
+  hostContext.setStorage(address, Hash.keccak256(key), value)
 
   val refund: Long = if (value.equals(currentValue)) {
     0

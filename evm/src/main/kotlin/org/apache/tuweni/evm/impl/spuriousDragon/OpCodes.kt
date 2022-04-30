@@ -315,7 +315,7 @@ fun push(length: Int): Opcode {
   return Opcode { gasManager, _, stack, _, code, currentIndex, _, _ ->
     gasManager.add(3)
     val minLength = Math.min(length, code.size() - currentIndex)
-    stack.push(Bytes32.leftPad(code.slice(currentIndex, minLength)))
+    stack.push(code.slice(currentIndex, minLength))
     Result(newCodePosition = currentIndex + minLength)
   }
 }
@@ -343,7 +343,7 @@ fun swap(index: Int): Opcode {
 private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   runBlocking {
     val key = stack.pop()
-    val value = stack.pop()
+    val value = stack.popBytes()
     if (null == key || null == value) {
       return@runBlocking Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
     }
@@ -355,7 +355,7 @@ private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
     val cost = if (!value.isZero && currentValue.isZero) Gas.valueOf(20000) else Gas.valueOf(5000)
     gasManager.add(cost)
 
-    hostContext.setStorage(address, key, value)
+    hostContext.setStorage(address, Hash.keccak256(key), value)
 
     Result()
   }
@@ -373,7 +373,8 @@ private val sload = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   Result()
 }
 
-private val stop = Opcode { _, _, _, _, _, _, _, _ ->
+private val stop = Opcode { gasManager, _, _, _, _, _, _, _ ->
+  gasManager.add(0L)
   Result(EVMExecutionStatusCode.SUCCESS)
 }
 
@@ -660,8 +661,8 @@ private val calldatacopy = Opcode { gasManager, _, stack, msg, _, _, memory, _ -
 }
 
 private val calldataload = Opcode { gasManager, _, stack, msg, _, _, _, _ ->
-  gasManager.add(3)
   val start = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  gasManager.add(3)
   var set = false
   if (start.fitsInt()) {
     if (msg.inputData.size() > start.intValue()) {

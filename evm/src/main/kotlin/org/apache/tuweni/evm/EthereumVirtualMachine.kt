@@ -30,6 +30,7 @@ import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
+import org.slf4j.LoggerFactory
 
 /**
  * Types of EVM calls
@@ -184,6 +185,10 @@ class EthereumVirtualMachine(
 
   private fun vm() = vm!!
 
+  companion object {
+    val logger = LoggerFactory.getLogger(EthereumVirtualMachine::class.java)
+  }
+
   /**
    * Start the EVM
    */
@@ -301,6 +306,7 @@ class EthereumVirtualMachine(
 
     val contract = precompiles[contractAddress]
     if (contract != null) {
+      logger.trace("Executing precompile $contractAddress")
       val result = contract.run(inputData)
       val gasManager = GasManager(gas)
       gasManager.add(result.gas)
@@ -383,7 +389,7 @@ interface HostContext {
    * @param value The value to be stored.
    * @return The effect on the storage item.
    */
-  suspend fun setStorage(address: Address, key: Bytes32, value: Bytes32): Int
+  suspend fun setStorage(address: Address, key: Bytes32, value: Bytes): Int
 
   /**
    * Get balance function.

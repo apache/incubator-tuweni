@@ -14,26 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.trie
+package org.apache.tuweni.evm.impl
 
-import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.units.bigints.UInt256
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
-internal interface Node<V> {
+class MemoryTest {
 
-  suspend fun accept(visitor: NodeVisitor<V>, path: Bytes): Node<V>
+  @Test
+  fun testNewMemorySize() {
+    val mem = Memory()
+    assertEquals(UInt256.valueOf(1), mem.newSize(UInt256.ZERO, UInt256.valueOf(4)))
 
-  suspend fun path(): Bytes
-
-  suspend fun value(): V?
-
-  fun rlp(): Bytes
-
-  fun rlpRef(): Bytes
-
-  fun hash(): Bytes32
-
-  suspend fun replacePath(path: Bytes): Node<V>
-
-  fun toString(toStringFn: (V) -> String): String
+    assertEquals(UInt256.valueOf(96 / 32), mem.newSize(UInt256.valueOf(128), UInt256.valueOf(32)))
+  }
 }

@@ -123,7 +123,7 @@ class TransactionalEVMHostContext(
    * A storage item has been deleted: X -> 0.
    * EVMC_STORAGE_DELETED = 4
    */
-  override suspend fun setStorage(address: Address, key: Bytes32, value: Bytes32): Int {
+  override suspend fun setStorage(address: Address, key: Bytes32, value: Bytes): Int {
     logger.trace("Entering setStorage {} {} {}", address, key, value)
 
     val newAccount = transientRepository.accountsExists(address)

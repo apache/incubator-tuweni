@@ -99,4 +99,25 @@ class StackTest {
     assertEquals(UInt256.valueOf(5), stack.get(1))
     assertEquals(UInt256.valueOf(4), stack.get(2))
   }
+
+  @Test
+  fun bytes() {
+    val stack = Stack(10)
+    stack.push(Bytes.fromHexString("0x03"))
+    stack.push(Bytes.fromHexString("0x0201"))
+    stack.push(Bytes.fromHexString("0x040506"))
+    stack.push(Bytes32.random())
+    stack.push(Bytes32.random())
+    stack.push(Bytes.fromHexString("0x01"))
+    stack.push(Bytes.fromHexString("0x01"))
+    assertEquals(Bytes.fromHexString("0x0000000000000000000000000000000000000000000000000000000000000001"), stack.pop())
+    assertEquals(Bytes.fromHexString("0x01"), stack.popBytes())
+    stack.pop()
+    stack.pop()
+    assertEquals(Bytes.fromHexString("0x040506"), stack.popBytes())
+    assertEquals(Bytes.fromHexString("0x0000000000000000000000000000000000000000000000000000000000000201"), stack.get(0))
+    assertEquals(Bytes.fromHexString("0x0201"), stack.getBytes(0))
+    assertEquals(Bytes.fromHexString("0x0201"), stack.popBytes())
+    assertEquals(Bytes.fromHexString("0x03"), stack.popBytes())
+  }
 }

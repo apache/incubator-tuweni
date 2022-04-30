@@ -315,7 +315,7 @@ fun push(length: Int): Opcode {
   return Opcode { gasManager, _, stack, _, code, currentIndex, _, _ ->
     gasManager.add(3)
     val minLength = Math.min(length, code.size() - currentIndex)
-    stack.push(Bytes32.leftPad(code.slice(currentIndex, minLength)))
+    stack.push(code.slice(currentIndex, minLength))
     Result(newCodePosition = currentIndex + minLength)
   }
 }
@@ -343,7 +343,7 @@ fun swap(index: Int): Opcode {
 private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   runBlocking {
     val key = stack.pop()
-    val value = stack.pop()
+    val value = stack.popBytes()
     if (null == key || null == value) {
       return@runBlocking Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
     }
@@ -355,7 +355,7 @@ private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
     val cost = if (!value.isZero && currentValue.isZero) Gas.valueOf(20000) else Gas.valueOf(5000)
     gasManager.add(cost)
 
-    hostContext.setStorage(address, key, value)
+    hostContext.setStorage(address, Hash.keccak256(key), value.trimLeadingZeros())
 
     Result()
   }
@@ -373,7 +373,8 @@ private val sload = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   Result()
 }
 
-private val stop = Opcode { _, _, _, _, _, _, _, _ ->
+private val stop = Opcode { gasManager, _, _, _, _, _, _, _ ->
+  gasManager.add(0)
   Result(EVMExecutionStatusCode.SUCCESS)
 }
 
@@ -660,8 +661,8 @@ private val calldatacopy = Opcode { gasManager, _, stack, msg, _, _, memory, _ -
 }
 
 private val calldataload = Opcode { gasManager, _, stack, msg, _, _, _, _ ->
-  gasManager.add(3)
   val start = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  gasManager.add(3)
   var set = false
   if (start.fitsInt()) {
     if (msg.inputData.size() > start.intValue()) {
@@ -864,32 +865,25 @@ private val call = Opcode { gasManager, hostContext, stack, message, _, _, memor
   val outputDataOffset = stack.pop()!!
   val outputDataLength = stack.pop()!!
 
-  var cost = Gas.valueOf(700L)
+  var cost = Gas.valueOf(40L)
   if (!value.isZero) {
     cost = cost.add(Gas.valueOf(9000))
   }
 
-  val inputMemoryCost = memoryCost(
-    memory.newSize(inputDataOffset, inputDataLength)
-      .subtract(memory.size())
-  )
-  val outputMemoryCost = memoryCost(
-    memory.newSize(outputDataOffset, outputDataLength)
-      .subtract(memory.size())
-  )
-  val memoryCost = if (outputMemoryCost.compareTo(inputMemoryCost) < 0) inputMemoryCost else outputMemoryCost
-  if (!hostContext.accountExists(to) && !value.isZero) {
-    cost = cost.add(Gas.valueOf(25000))
-  }
-  cost.add(
-    if (!hostContext.warmUpAccount(to)) {
-      Gas.valueOf(2600)
-    } else {
-      Gas.valueOf(100)
-    }
-  )
+  val inputSize = inputDataOffset.add(inputDataLength)
+  val outputSize = outputDataOffset.add(outputDataLength)
+  val previousMemoryCost = memoryCost(memory.size())
 
-  gasManager.add(cost.add(memoryCost))
+  val callMemoryCost = if (inputSize.compareTo(outputSize) < 0) {
+    memory.newSize(outputDataOffset, outputDataLength)
+  } else {
+    memory.newSize(inputDataOffset, inputDataLength)
+  }
+
+  val memoryCost = memoryCost(callMemoryCost)
+  cost = cost.add(memoryCost.subtract(previousMemoryCost)).add(stipend)
+
+  gasManager.add(cost)
   if (!gasManager.hasGasLeft()) {
     return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
   }
@@ -898,14 +892,12 @@ private val call = Opcode { gasManager, hostContext, stack, message, _, _, memor
     return@Opcode Result(EVMExecutionStatusCode.INVALID_MEMORY_ACCESS)
   }
 
-  val gasLeft = gasManager.gasLeft()
-  val gasAvailable = Gas.minimum(stipend, gasLeft.subtract(gasLeft.divide(Gas.valueOf(64))))
   val result = hostContext.call(
     EVMMessage(
       CallKind.CALL,
       0,
       message.depth + 1,
-      gasAvailable,
+      stipend,
       to,
       to,
       message.destination,
@@ -914,7 +906,6 @@ private val call = Opcode { gasManager, hostContext, stack, message, _, _, memor
       value
     )
   )
-  gasManager.add(result.state.gasManager.gasCost)
   if (result.statusCode == EVMExecutionStatusCode.SUCCESS) {
     stack.push(UInt256.ONE)
     result.state.output?.let {
@@ -942,7 +933,7 @@ private val delegatecall = Opcode { gasManager, hostContext, stack, message, _, 
   val outputDataOffset = stack.pop()!!
   val outputDataLength = stack.pop()!!
 
-  var cost = Gas.valueOf(700L)
+  var cost = Gas.valueOf(40L)
 
   val inputMemoryCost = memoryCost(
     memory.newSize(inputDataOffset, inputDataLength)

@@ -19,6 +19,7 @@ package org.apache.tuweni.trie
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -324,5 +325,29 @@ internal class StoredMerklePatriciaTrieKotlinTest {
       assertEquals("value2", trie3.get(key2))
       assertEquals("value3", trie3.get(key3))
     }
+  }
+
+  @Test
+  fun testRootHash() = runBlocking {
+    val store = mutableMapOf<Bytes, Bytes>()
+    val tree = StoredMerklePatriciaTrie.storingBytes(
+      object : MerkleStorage {
+        override suspend fun get(hash: Bytes32): Bytes? {
+          return store.get(hash)
+        }
+
+        override suspend fun put(hash: Bytes32, content: Bytes) {
+          store.put(hash, content)
+        }
+      },
+      MerkleTrie.EMPTY_TRIE_ROOT_HASH
+    )
+    assertEquals(MerkleTrie.EMPTY_TRIE_ROOT_HASH, tree.rootHash())
+    println(Hash.keccak256(Bytes32.fromHexString("0x0000000000000000000000000000000000000000000000000000000000000001")))
+    tree.put(
+      Hash.keccak256(Bytes32.fromHexString("0x0000000000000000000000000000000000000000000000000000000000000001")),
+      Bytes.fromHexString("0x32")
+    )
+    assertEquals(Bytes32.fromHexString("0x9ff0b4b6f084c8432d75c0549758a165ec9d80e5f01440d8753d57a9c95f529e"), tree.rootHash())
   }
 }

@@ -69,8 +69,9 @@ class Memory {
   }
 
   fun newSize(memOffset: UInt256, length: UInt256): UInt256 {
+
     val candidate = memOffset.add(length)
-    if (candidate < memOffset || candidate < length) {
+    if (candidate < memOffset || candidate < length) { // overflow
       return UInt256.MAX_VALUE
     }
     val candidateWords = candidate.divideCeil(32)
