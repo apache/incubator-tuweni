@@ -167,7 +167,7 @@ class EVMReferenceTest {
 
         if (accountStorage != null) {
           for (entry in accountStorage) {
-            repository.storeAccountValue(address, Bytes32.leftPad(entry.key), Bytes32.leftPad(entry.value))
+            repository.storeAccountValue(address, Hash.hash(entry.key), Bytes32.leftPad(entry.value))
           }
         }
       }
@@ -269,7 +269,7 @@ class EVMReferenceTest {
             assertEquals(state.nonce, accountState!!.nonce)
 
             for (stored in state.storage!!) {
-              val changed = result.hostContext.getStorage(address, stored.key)
+              val changed = result.hostContext.getStorage(address, Hash.hash(stored.key))
               assertEquals(stored.value, changed)
             }
           }
@@ -293,7 +293,7 @@ class EVMReferenceTest {
         }
         assertEquals(
           test.gas!!.toLong(),
-          result.state.gasManager.gasLeft().toLong(),
+          result.state.gasManager.applyRefund(result.state.gasManager.gasLeft()),
           " diff: " + if (test.gas!! > result.state.gasManager.gasLeft()) test.gas!!.subtract(result.state.gasManager.gasLeft()) else result.state.gasManager.gasLeft()
             .subtract(test.gas!!)
         )

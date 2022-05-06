@@ -350,16 +350,15 @@ private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
 
     val address = msg.destination
 
-    val currentValueRaw = hostContext.getStorage(address, key)
-    val currentValue = currentValueRaw ?: UInt256.ZERO
-    val originalValueRaw = hostContext.getRepositoryStorage(address, key)
-    val originalValue = originalValueRaw ?: UInt256.ZERO
+    val keyHash = Hash.keccak256(key)
+    val currentValue = hostContext.getStorage(address, keyHash) ?: UInt256.ZERO
+    val originalValue = hostContext.getRepositoryStorage(address, keyHash) ?: UInt256.ZERO
 
-    val cost = if (currentValueRaw != null && currentValue.equals(value)) {
+    val cost = if (currentValue.equals(UInt256.fromBytes(value))) {
       Gas.valueOf(200)
     } else {
       if (currentValue.equals(originalValue)) {
-        if (originalValueRaw == null || originalValue.isZero) {
+        if (originalValue.isZero) {
           Gas.valueOf(20000)
         } else Gas.valueOf(5000)
       } else {
@@ -368,13 +367,13 @@ private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
     }
     gasManager.add(cost)
 
-    hostContext.setStorage(address, Hash.keccak256(key), value)
+    hostContext.setStorage(address, keyHash, value)
 
-    val refund: Long = if (currentValueRaw != null && value.equals(currentValue)) {
-      0
+    val refund = if (value.equals(currentValue)) {
+      0L
     } else {
       if (originalValue.equals(currentValue)) {
-        if (originalValueRaw != null && originalValue.isZero) {
+        if (originalValue.isZero) {
           0L
         } else if (value.isZero()) {
           15000

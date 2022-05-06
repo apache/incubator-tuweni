@@ -23,6 +23,7 @@ import kotlinx.coroutines.runBlocking
 import org.apache.lucene.index.IndexWriter
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.crypto.Hash.keccak256
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.eth.AccountState
 import org.apache.tuweni.eth.Address
@@ -39,7 +40,9 @@ import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
 import org.apache.tuweni.rlp.RLP
+import org.apache.tuweni.trie.MerkleStorage
 import org.apache.tuweni.trie.MerkleTrie
+import org.apache.tuweni.trie.StoredMerklePatriciaTrie
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.bigints.UInt64
 import org.apache.tuweni.units.ethereum.Gas
@@ -266,10 +269,25 @@ class BlockProcessorReferenceTest {
         "Log{" + "logger=" + it.logger + ", data=" + it.data.toEllipsisHexString() + ", topics=" + it.topics + '}'
       }.joinToString("\n") + "\n" + logs.size
     }
-    for (acct in result.block.stateChanges.dump(10)) {
-      //println(acct)
-      println(AccountState.fromBytes(acct))
-    }
+//    for (acct in result.block.stateChanges.dump(10)) {
+//      println(acct)
+//      val acctState = AccountState.fromBytes(acct)
+//      println(acctState)
+//      val tree = StoredMerklePatriciaTrie.storingBytes(
+//        object : MerkleStorage {
+//          override suspend fun get(hash: Bytes32): Bytes? {
+//            return result.block.stateChanges.transientState.get(hash)
+//          }
+//
+//          override suspend fun put(hash: Bytes32, content: Bytes) {
+//            return result.block.stateChanges.transientState.put(hash, content)
+//          }
+//        },
+//        acctState.storageRoot
+//      )
+//
+//      println(tree.printAsString())
+//    }
 
     assertEquals(exec.txbytes, transaction.toBytes())
     if (exec.expectException != null) {

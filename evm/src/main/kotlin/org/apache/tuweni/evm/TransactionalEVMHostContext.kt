@@ -75,7 +75,7 @@ class TransactionalEVMHostContext(
     return transientRepository.accountsExists(address)
   }
 
-  override suspend fun getRepositoryStorage(address: Address, key: Bytes32): Bytes32? {
+  override suspend fun getRepositoryStorage(address: Address, key: Bytes32): Bytes? {
     logger.trace("Entering getRepositoryStorage")
     val value = blockchainRepository.getAccountStoreValue(address, key)
     logger.trace("key $key, value $value")
@@ -325,7 +325,7 @@ class TransactionalEVMHostContext(
 
   override fun warmUpStorage(address: Address, key: UInt256): Boolean {
     logger.trace("entering warmUpStorage $address $key")
-    return warmedUpStorage.add(Bytes.concatenate(address, Bytes.fromHexString("0x0f"), key))
+    return !warmedUpStorage.add(Bytes.concatenate(address, Bytes.fromHexString("0x0f"), key))
   }
 
   override fun getGasPrice() = gasPrice

@@ -52,11 +52,16 @@ class GasManager(val gas: Gas) {
   fun addRefund(refund: UInt256) {
     refundAsUint256 = this.refundAsUint256.add(refund)
   }
+
   fun addRefund(refund: Long) {
     this.refund += refund
   }
 
-  fun applyRefund(value: Wei): Wei {
-    return value.add(refundAsUint256).add(refund)
+  fun applyRefund(value: Gas): Gas {
+    if (refund < 0) {
+      return value.add(Gas.valueOf(refundAsUint256)).subtract(Gas.valueOf(-refund))
+    } else {
+      return value.add(Gas.valueOf(refundAsUint256)).add(Gas.valueOf(refund))
+    }
   }
 }

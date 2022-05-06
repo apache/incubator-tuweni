@@ -59,9 +59,9 @@ class TransientStateRepository(val repository: BlockchainRepository) : StateRepo
     return null != getAccount(address)
   }
 
-  override suspend fun getAccountStoreValue(address: Address, key: Bytes32): Bytes32? {
+  override suspend fun getAccountStoreValue(address: Address, key: Bytes32): Bytes? {
     val accountState = getAccount(address) ?: return null
-    val tree = StoredMerklePatriciaTrie.storingBytes32(
+    val tree = StoredMerklePatriciaTrie.storingBytes(
       object : MerkleStorage {
         override suspend fun get(hash: Bytes32): Bytes? {
           return transientWorldState.get(hash)

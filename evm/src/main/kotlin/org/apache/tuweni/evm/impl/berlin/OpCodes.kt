@@ -337,7 +337,7 @@ fun swap(index: Int): Opcode {
 
 private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   val key = stack.pop()
-  val value = stack.popBytes()
+  val value = stack.pop()
   if (null == key || null == value) {
     return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   }
@@ -352,25 +352,23 @@ private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   val address = msg.destination
   val slotIsWarm = hostContext.warmUpStorage(address, key)
 
-  val currentValueRaw = hostContext.getStorage(address, key)
-  val currentValue = currentValueRaw ?: UInt256.ZERO
-  val originalValueRaw = hostContext.getRepositoryStorage(address, key)
-  val originalValue = originalValueRaw ?: UInt256.ZERO
+  val currentValue = hostContext.getStorage(address, key) ?: UInt256.ZERO
+  val originalValue = hostContext.getRepositoryStorage(address, key) ?: UInt256.ZERO
 
-  val cost = if (currentValueRaw != null && currentValue.equals(value)) {
-    Gas.valueOf(200)
+  val cost = if (currentValue.equals(value)) {
+    Gas.valueOf(100)
   } else {
     if (currentValue.equals(originalValue)) {
       if (originalValue.isZero) {
         Gas.valueOf(20000)
-      } else Gas.valueOf(5000)
+      } else Gas.valueOf(5000 - 2100)
     } else {
-      Gas.valueOf(200)
+      Gas.valueOf(100)
     }
   }.add(if (slotIsWarm) Gas.ZERO else Gas.valueOf(2100))
   gasManager.add(cost)
 
-  hostContext.setStorage(address, Hash.keccak256(key), value)
+  hostContext.setStorage(address, Hash.keccak256(key), value.toMinimalBytes())
 
   val refund: Long = if (value.equals(currentValue)) {
     0

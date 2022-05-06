@@ -361,7 +361,7 @@ interface HostContext {
    * @param key The index of the account's storage entry.
    * @return The storage value at the given storage key or null bytes if the account does not exist.
    */
-  suspend fun getRepositoryStorage(address: Address, key: Bytes32): Bytes32?
+  suspend fun getRepositoryStorage(address: Address, key: Bytes32): Bytes?
 
   /**
    * Get storage function.
