@@ -39,7 +39,7 @@ data class TransactionProcessorResult(val receipt: TransactionReceipt? = null, v
 
 class TransactionProcessor(val vm: EthereumVirtualMachine, val hardFork: HardFork, val repository: BlockchainRepository, val stateChanges: TransientStateRepository) {
 
-  fun calculateTransactionCost(payload: Bytes, hardFork: HardFork) : Gas {
+  fun calculateTransactionCost(payload: Bytes, hardFork: HardFork): Gas {
     var zeros = 0
     val zeroByte = 0.toByte()
     for (i in 0 until payload.size()) {

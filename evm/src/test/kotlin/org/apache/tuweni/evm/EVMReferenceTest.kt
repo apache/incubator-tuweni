@@ -45,7 +45,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -272,7 +271,7 @@ class EVMReferenceTest {
         }
         assertEquals(
           test.gas!!.toLong(),
-          result.state.gasManager.applyRefund(result.state.gasManager.gasLeft()),
+          result.state.gasManager.gasLeft(),
           " diff: " + if (test.gas!! > result.state.gasManager.gasLeft()) test.gas!!.subtract(result.state.gasManager.gasLeft()) else result.state.gasManager.gasLeft()
             .subtract(test.gas!!)
         )

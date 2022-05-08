@@ -304,6 +304,17 @@ class EthereumVirtualMachine(
       return EVMResult(EVMExecutionStatusCode.CALL_DEPTH_EXCEEDED, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), null))
     }
 
+    if (!value.isZero) {
+      val senderBalance = hostContext.getBalance(sender)
+      if (senderBalance < value) {
+        return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
+      }
+      val amount = UInt256.fromBytes(value)
+      hostContext.setBalance(sender, senderBalance.subtract(amount))
+      val destinationBalance = hostContext.getBalance(destination)
+      hostContext.setBalance(destination, destinationBalance.add(amount))
+    }
+
     val contract = precompiles[contractAddress]
     if (contract != null) {
       logger.trace("Executing precompile $contractAddress")
@@ -511,12 +522,12 @@ interface HostContext {
   fun emitLog(address: Address, data: Bytes, topics: List<Bytes32>)
 
   /**
-   * Returns true if the account was used in this context already.
+   * Returns true if the account was warmed up.
    */
   fun warmUpAccount(address: Address): Boolean
 
   /**
-   * Returns true if the storage slot was used in this context already.
+   * Returns true if the storage slot was warmed up.
    */
   fun warmUpStorage(address: Address, key: UInt256): Boolean
 
@@ -535,6 +546,9 @@ interface HostContext {
   fun getCoinbase(): Address
   fun getDifficulty(): UInt256
   fun getChaindId(): UInt256
+  suspend fun setBalance(address: Address, balance: Wei)
+  fun addRefund(address: Address, refund: Wei)
+  fun addRefund(address: Address, refund: Long)
 }
 
 interface EvmVm {

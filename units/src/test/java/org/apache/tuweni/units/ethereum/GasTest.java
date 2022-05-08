@@ -127,11 +127,6 @@ class GasTest {
   }
 
   @Test
-  void testCompareTo() {
-    assertEquals(-1, (Gas.valueOf(1L)).compareTo(2L));
-  }
-
-  @Test
   void testMinimum() {
     assertEquals(Gas.valueOf(1), Gas.minimum(Gas.valueOf(1), Gas.valueOf(2)));
   }

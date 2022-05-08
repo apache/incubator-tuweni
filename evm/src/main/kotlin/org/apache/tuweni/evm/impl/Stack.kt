@@ -46,7 +46,7 @@ class Stack(private val maxSize: Int = 1025) {
     }
     size--
     val elementSize = stackElements.get(stackElements.size - 1)
-    stackElements.removeAt(stackElements.size -1)
+    stackElements.removeAt(stackElements.size - 1)
     return mutableStack.slice(size * 32, elementSize)?.let { UInt256.fromBytes(it) }
   }
 
@@ -56,7 +56,7 @@ class Stack(private val maxSize: Int = 1025) {
     }
     size--
     val elementSize = stackElements.get(stackElements.size - 1)
-    stackElements.removeAt(stackElements.size -1)
+    stackElements.removeAt(stackElements.size - 1)
     return mutableStack.slice(size * 32, elementSize)
   }
 

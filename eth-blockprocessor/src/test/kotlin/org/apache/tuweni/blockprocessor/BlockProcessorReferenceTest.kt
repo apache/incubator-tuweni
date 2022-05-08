@@ -23,7 +23,6 @@ import kotlinx.coroutines.runBlocking
 import org.apache.lucene.index.IndexWriter
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
-import org.apache.tuweni.crypto.Hash.keccak256
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.eth.AccountState
 import org.apache.tuweni.eth.Address
@@ -40,9 +39,7 @@ import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
 import org.apache.tuweni.rlp.RLP
-import org.apache.tuweni.trie.MerkleStorage
 import org.apache.tuweni.trie.MerkleTrie
-import org.apache.tuweni.trie.StoredMerklePatriciaTrie
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.bigints.UInt64
 import org.apache.tuweni.units.ethereum.Gas
@@ -52,7 +49,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -84,7 +80,7 @@ class BlockProcessorReferenceTest {
     private fun findGeneralStateTests(): Stream<Arguments> {
       return findTests("/GeneralStateTests/**/*.json").filter {
         val testName = it.get()[1] as String
-        (testName == "randomStatetest553") //|| !(testName).contains("loop") || (testName).equals("OverflowGasMakeMoney")
+        (testName == "randomStatetest553") // || !(testName).contains("loop") || (testName).equals("OverflowGasMakeMoney")
       }
     }
 
@@ -111,7 +107,7 @@ class BlockProcessorReferenceTest {
           val test = entry.value
           val secretKey = SECP256K1.SecretKey.fromBytes(test.transaction!!.secretKey!!)
           val keyPair = SECP256K1.KeyPair.fromSecretKey(secretKey)
-           val berlinTests = createTests(keyPair, entry.key, test, HardFork.BERLIN, path)
+          val berlinTests = createTests(keyPair, entry.key, test, HardFork.BERLIN, path)
           val constantinopleTests = createTests(keyPair, entry.key, test, HardFork.CONSTANTINOPLE, path)
           val frontierTests = createTests(keyPair, entry.key, test, HardFork.FRONTIER, path)
           val homesteadTests = createTests(keyPair, entry.key, test, HardFork.HOMESTEAD, path)

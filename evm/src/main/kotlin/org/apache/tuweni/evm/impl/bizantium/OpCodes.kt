@@ -494,9 +494,6 @@ private val timestamp = Opcode { gasManager, hostContext, stack, _, _, _, _, _ -
 }
 
 fun memoryCost(length: UInt256): Gas {
-  if (!length.fitsInt()) {
-    return Gas.TOO_HIGH
-  }
   val base = length.multiply(length).divide(UInt256.valueOf(512))
   return Gas.valueOf(UInt256.valueOf(3).multiply(length).add(base))
 }
@@ -530,10 +527,8 @@ private val extcodecopy = Opcode { gasManager, hostContext, stack, _, _, _, memo
     return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   }
   val numWords: UInt256 = length.divideCeil(Bytes32.SIZE.toLong())
-  val copyCost = Gas.valueOf(3).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(3))
-  val pre = memoryCost(memory.size())
-  val post: Gas = memoryCost(memory.newSize(memOffset, length))
-  val memoryCost = post.subtract(pre)
+  val copyCost = Gas.valueOf(3).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(700))
+  val memoryCost = memoryCost(memory.newSize(memOffset, length).subtract(memory.size()))
 
   gasManager.add(copyCost.add(memoryCost))
 
@@ -831,6 +826,7 @@ private val signextend = Opcode { gasManager, _, stack, _, _, _, _, _ ->
 }
 
 private val selfdestruct = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
+  gasManager.add(Gas.ZERO)
   val recipientAddress = stack.pop()?.slice(12, 20)?.let { Address.fromBytes(it) } ?: return@Opcode Result(
     EVMExecutionStatusCode.STACK_UNDERFLOW
   )
@@ -838,7 +834,7 @@ private val selfdestruct = Opcode { gasManager, hostContext, stack, msg, _, _, _
   runBlocking {
 
     val inheritance = hostContext.getBalance(recipientAddress)
-    gasManager.addRefund(inheritance.toUInt256())
+    hostContext.addRefund(msg.destination, inheritance)
 
     val address: Address = msg.destination
 
@@ -1243,7 +1239,7 @@ private val staticcall = Opcode { gasManager, hostContext, stack, message, _, _,
 
 private val selfbalance = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   gasManager.add(5)
-  val account = hostContext.getBalance(msg.sender)
+  val account = hostContext.getBalance(msg.destination)
 
   stack.push(account)
   Result()

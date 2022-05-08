@@ -64,11 +64,11 @@ class TransientStateRepository(val repository: BlockchainRepository) : StateRepo
     val tree = StoredMerklePatriciaTrie.storingBytes(
       object : MerkleStorage {
         override suspend fun get(hash: Bytes32): Bytes? {
-          return transientWorldState.get(hash)
+          return transientState.get(hash)
         }
 
         override suspend fun put(hash: Bytes32, content: Bytes) {
-          transientWorldState.put(hash, content)
+          transientState.put(hash, content)
         }
       },
       accountState.storageRoot

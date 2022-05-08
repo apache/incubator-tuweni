@@ -397,7 +397,7 @@ private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
       }
     }
 
-    gasManager.addRefund(refund)
+    hostContext.addRefund(msg.destination, refund)
 
     Result()
   }
@@ -536,9 +536,6 @@ private val timestamp = Opcode { gasManager, hostContext, stack, _, _, _, _, _ -
 }
 
 fun memoryCost(length: UInt256): Gas {
-  if (!length.fitsInt()) {
-    return Gas.TOO_HIGH
-  }
   val len: Gas = Gas.valueOf(length)
   val base: Gas = len.multiply(len).divide(Gas.valueOf(512))
   return Gas.valueOf(3).multiply(len).add(base)
@@ -573,10 +570,8 @@ private val extcodecopy = Opcode { gasManager, hostContext, stack, _, _, _, memo
     return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   }
   val numWords: UInt256 = length.divideCeil(Bytes32.SIZE.toLong())
-  val copyCost = Gas.valueOf(3).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(3))
-  val pre = memoryCost(memory.size())
-  val post: Gas = memoryCost(memory.newSize(memOffset, length))
-  val memoryCost = post.subtract(pre)
+  val copyCost = Gas.valueOf(3).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(700))
+  val memoryCost = memoryCost(memory.newSize(memOffset, length).subtract(memory.size()))
 
   gasManager.add(copyCost.add(memoryCost))
 
@@ -899,7 +894,7 @@ private val selfdestruct = Opcode { gasManager, hostContext, stack, msg, _, _, _
 
 private val selfbalance = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   gasManager.add(5)
-  val account = hostContext.getBalance(msg.sender)
+  val account = hostContext.getBalance(msg.destination)
 
   stack.push(account)
   Result()

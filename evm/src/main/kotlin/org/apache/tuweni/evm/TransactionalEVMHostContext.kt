@@ -61,6 +61,8 @@ class TransactionalEVMHostContext(
 
   override fun accountsToDestroy(): List<Address> = accountsToDestroy
 
+  private val refunds = mutableMapOf<Address, Long>()
+
   /**
    * Check account existence function.
    *
@@ -167,6 +169,14 @@ class TransactionalEVMHostContext(
     return account?.balance ?: Wei.valueOf(0)
   }
 
+  override suspend fun setBalance(address: Address, balance: Wei) {
+    logger.trace("Entering setBalance")
+
+    val account = transientRepository.getAccount(address) ?: transientRepository.newAccountState()
+    val newAccount = AccountState(account.nonce, balance, account.storageRoot, account.codeHash, account.version)
+    transientRepository.storeAccount(address, newAccount)
+  }
+
   /**
    * Get code size function.
    *
@@ -260,7 +270,11 @@ class TransactionalEVMHostContext(
           beneficiaryAccountState.codeHash
         )
       )
+      val resetBalance = AccountState(this.nonce, Wei.valueOf(0), this.storageRoot, this.codeHash, this.version)
+      println(address)
+      transientRepository.storeAccount(address, resetBalance)
     }
+
     logger.trace("Done selfdestruct")
   }
 
@@ -325,7 +339,7 @@ class TransactionalEVMHostContext(
 
   override fun warmUpStorage(address: Address, key: UInt256): Boolean {
     logger.trace("entering warmUpStorage $address $key")
-    return !warmedUpStorage.add(Bytes.concatenate(address, Bytes.fromHexString("0x0f"), key))
+    return warmedUpStorage.add(Bytes.concatenate(address, Bytes.fromHexString("0x0f"), key))
   }
 
   override fun getGasPrice() = gasPrice
@@ -343,4 +357,12 @@ class TransactionalEVMHostContext(
   override fun getDifficulty() = currentDifficulty
 
   override fun getChaindId(): UInt256 = chainId
+
+  override fun addRefund(address: Address, refund: Wei) {
+    refunds[address] = (refunds[address] ?: 0) + refund.toLong()
+  }
+
+  override fun addRefund(address: Address, refund: Long) {
+    refunds[address] = (refunds[address] ?: 0) + refund
+  }
 }

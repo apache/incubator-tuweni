@@ -360,19 +360,17 @@ private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
           Gas.valueOf(20000)
         } else Gas.valueOf(5000)
       } else {
-        Gas.valueOf(800)
+        Gas.valueOf(20000)
       }
     }
     gasManager.add(cost)
 
     val remainingGas = gasManager.gasLeft()
-    if (remainingGas <= 2300) {
+    if (remainingGas <= Gas.valueOf(2300)) {
       return@runBlocking Result(EVMExecutionStatusCode.OUT_OF_GAS)
     }
 
-    // frame.incrementGasRefund(gasCalculator().calculateStorageRefundAmount(account, key, value))
-
-    hostContext.setStorage(address, Hash.keccak256(key), value)
+    hostContext.setStorage(address, key, value)
 
     Result()
   }
@@ -511,9 +509,6 @@ private val timestamp = Opcode { gasManager, hostContext, stack, _, _, _, _, _ -
 }
 
 fun memoryCost(length: UInt256): Gas {
-  if (!length.fitsInt()) {
-    return Gas.TOO_HIGH
-  }
   val len: Gas = Gas.valueOf(length)
   val base: Gas = len.multiply(len).divide(Gas.valueOf(512))
   return Gas.valueOf(3).multiply(len).add(base)
@@ -548,10 +543,8 @@ private val extcodecopy = Opcode { gasManager, hostContext, stack, _, _, _, memo
     return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   }
   val numWords: UInt256 = length.divideCeil(Bytes32.SIZE.toLong())
-  val copyCost = Gas.valueOf(3).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(3))
-  val pre = memoryCost(memory.size())
-  val post: Gas = memoryCost(memory.newSize(memOffset, length))
-  val memoryCost = post.subtract(pre)
+  val copyCost = Gas.valueOf(3).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(700))
+  val memoryCost = memoryCost(memory.newSize(memOffset, length).subtract(memory.size()))
 
   gasManager.add(copyCost.add(memoryCost))
 
@@ -564,7 +557,7 @@ private val extcodecopy = Opcode { gasManager, hostContext, stack, _, _, _, memo
 }
 
 private val returndatasize = Opcode { gasManager, _, stack, _, _, _, _, callResult ->
-  gasManager.add(3)
+  gasManager.add(2)
   stack.push(UInt256.valueOf(callResult?.output?.size()?.toLong() ?: 0L))
   Result()
 }
@@ -642,7 +635,8 @@ private val extcodesize = Opcode { gasManager, hostContext, stack, msg, _, _, _,
 private val extcodehash = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   gasManager.add(700)
   runBlocking {
-    stack.push(Hash.keccak256(hostContext.getCode(msg.destination)))
+    val code = hostContext.getCode(msg.destination)
+    stack.push(if (code.isEmpty) UInt256.ZERO else Hash.keccak256(code))
     Result()
   }
 }
@@ -1330,9 +1324,9 @@ private val sar = Opcode { gasManager, _, stack, _, _, _, _, _ ->
 
 private val selfbalance = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   gasManager.add(5)
-  val account = hostContext.getBalance(msg.sender)
+  val balance = hostContext.getBalance(msg.destination)
 
-  stack.push(account)
+  stack.push(balance)
   Result()
 }
 
