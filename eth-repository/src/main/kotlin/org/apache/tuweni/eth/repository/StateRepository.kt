@@ -30,6 +30,11 @@ import org.apache.tuweni.units.ethereum.Wei
  */
 interface StateRepository {
 
+  companion object {
+    val EMPTY_STORAGE_HASH = Hash.fromBytes(MerkleTrie.EMPTY_TRIE_ROOT_HASH)
+    val EMPTY_CODE_HASH = Hash.hash(Bytes.EMPTY)
+  }
+
   /**
    * Retrieves an account state for a given account.
    *
@@ -77,7 +82,7 @@ interface StateRepository {
    * @return a new blank account state
    */
   fun newAccountState(): AccountState {
-    return AccountState(UInt256.ZERO, Wei.valueOf(0), Hash.fromBytes(MerkleTrie.EMPTY_TRIE_ROOT_HASH), Hash.hash(Bytes.EMPTY))
+    return AccountState(UInt256.ZERO, Wei.valueOf(0), EMPTY_STORAGE_HASH, EMPTY_CODE_HASH)
   }
 
   /**

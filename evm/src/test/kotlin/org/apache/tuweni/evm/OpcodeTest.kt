@@ -217,7 +217,15 @@ class OpcodeTest {
         hardFork
       )
 
-      assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
+      if (test.operation.name == "REVERT") {
+        assertEquals(EVMExecutionStatusCode.REVERT, result.statusCode)
+      } else {
+        assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
+      }
+
+      for (i in 0 until test.after.stack.size) {
+        assertEquals(Bytes32.leftPad(test.after.stack[i]), result.state.stack.get(i), "Mismatch of stack elements")
+      }
 
       test.after.accounts.forEach { info ->
         runBlocking {
@@ -225,7 +233,7 @@ class OpcodeTest {
           assertTrue(changesRepository.accountsExists(address))
           val accountState = changesRepository.getAccount(address)
           val balance = accountState?.balance ?: Wei.valueOf(0)
-          assertEquals(info.balance, balance)
+          assertEquals(info.balance, balance, "balance doesn't match: " + address.toHexString() + ":" + if (balance > info.balance) balance.subtract(info.balance).toString() else info.balance.subtract(balance).toString())
           assertEquals(info.nonce, accountState!!.nonce)
 
           for (stored in info.storage) {
@@ -252,10 +260,6 @@ class OpcodeTest {
         }
       }
 
-      for (i in 0 until test.after.stack.size) {
-        assertEquals(Bytes32.leftPad(test.after.stack[i]), result.state.stack.get(i), "Mismatch of stack elements")
-      }
-
       test.after.logs.let {
         val ourLogs = (result.hostContext as TransactionalEVMHostContext).getLogs()
         for (i in 0 until it.size) {
@@ -268,7 +272,7 @@ class OpcodeTest {
         }
       }
 
-      Assertions.assertEquals(
+      assertEquals(
         test.allGasUsed.toLong(),
         result.state.gasManager.gasCost.toLong(),
         " diff: " + if (test.allGasUsed > result.state.gasManager.gasLeft()) test.allGasUsed.subtract(result.state.gasManager.gasLeft()) else result.state.gasManager.gasLeft()

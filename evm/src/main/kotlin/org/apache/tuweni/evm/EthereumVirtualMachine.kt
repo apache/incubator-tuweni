@@ -176,7 +176,7 @@ data class EVMMessage(
 class EthereumVirtualMachine(
   private val transientRepository: StateRepository,
   private val repository: BlockchainRepository,
-  private val precompiles: Map<Address, PrecompileContract>,
+  val precompiles: Map<Address, PrecompileContract>,
   private val evmVmFactory: () -> EvmVm,
   private val options: Map<String, String> = mapOf(),
 ) {
@@ -299,27 +299,40 @@ class EthereumVirtualMachine(
     depth: Int = 0,
     hostContext: HostContext,
   ): EVMResult {
+    var gasAvailable = gas
     if (depth > 1024) {
       val gasManager = GasManager(gas)
       return EVMResult(EVMExecutionStatusCode.CALL_DEPTH_EXCEEDED, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), null))
     }
+    if (callKind == CallKind.CREATE || callKind == CallKind.CREATE2) {
+
+      val codeDepositGasFee = UInt256.valueOf(code.size() * 200L)
+      if (gas < codeDepositGasFee) {
+        return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
+      }
+      gasAvailable = gasAvailable.subtract(codeDepositGasFee)
+    }
 
     if (!value.isZero) {
+      val destinationBalance = hostContext.getBalance(destination)
       val senderBalance = hostContext.getBalance(sender)
+      // TODO check out this logic, seems extremely wrong.
       if (senderBalance < value) {
         return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
       }
       val amount = UInt256.fromBytes(value)
       hostContext.setBalance(sender, senderBalance.subtract(amount))
-      val destinationBalance = hostContext.getBalance(destination)
       hostContext.setBalance(destination, destinationBalance.add(amount))
     }
 
     val contract = precompiles[contractAddress]
     if (contract != null) {
+      if (callKind == CallKind.CREATE || callKind == CallKind.CREATE2) {
+        return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
+      }
       logger.trace("Executing precompile $contractAddress")
       val result = contract.run(inputData)
-      val gasManager = GasManager(gas)
+      val gasManager = GasManager(gasAvailable)
       gasManager.add(result.gas)
       return EVMResult(if (result.output == null) EVMExecutionStatusCode.PRECOMPILE_FAILURE else EVMExecutionStatusCode.SUCCESS, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), result.output))
     } else {
@@ -485,6 +498,14 @@ interface HostContext {
   suspend fun call(evmMessage: EVMMessage): EVMResult
 
   /**
+   * This function supports EVM create calls.
+   *
+   * @param msg The create parameters.
+   * @return The result of the call.
+   */
+  suspend fun create(evmMessage: EVMMessage, code: Bytes): EVMResult
+
+  /**
    * Get transaction context function.
    *
    *
@@ -549,6 +570,7 @@ interface HostContext {
   suspend fun setBalance(address: Address, balance: Wei)
   fun addRefund(address: Address, refund: Wei)
   fun addRefund(address: Address, refund: Long)
+  suspend fun isEmptyAcount(address: Address): Boolean
 }
 
 interface EvmVm {
