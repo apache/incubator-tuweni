@@ -25,14 +25,14 @@
         </encoder>
     </appender>
 
-    <root level="trace">
+    <root level="error">
         <appender-ref ref="STDOUT" />
     </root>
 
-    <logger level="trace" name="org.apache.tuweni.evm.impl.Memory" additivity="false">
+    <logger level="error" name="org.apache.tuweni.evm.impl.Memory" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger level="trace" name="org.apache.tuweni.evm.impl.EvmVmImpl" additivity="false">
+    <logger level="error" name="org.apache.tuweni.evm.impl.EvmVmImpl" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
 </configuration>
