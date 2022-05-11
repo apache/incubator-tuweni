@@ -314,15 +314,15 @@ class EthereumVirtualMachine(
     }
 
     if (!value.isZero) {
-      val destinationBalance = hostContext.getBalance(destination)
-      val senderBalance = hostContext.getBalance(sender)
+//      val destinationBalance = hostContext.getBalance(destination)
+//      val senderBalance = hostContext.getBalance(sender)
       // TODO check out this logic, seems extremely wrong.
-      if (senderBalance < value) {
-        return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
-      }
-      val amount = UInt256.fromBytes(value)
-      hostContext.setBalance(sender, senderBalance.subtract(amount))
-      hostContext.setBalance(destination, destinationBalance.add(amount))
+//      if (destinationBalance < value) {
+//        return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
+//      }
+//      val amount = UInt256.fromBytes(value)
+//      hostContext.setBalance(sender, senderBalance.subtract(amount))
+//      hostContext.setBalance(destination, destinationBalance.add(amount))
     }
 
     val contract = precompiles[contractAddress]

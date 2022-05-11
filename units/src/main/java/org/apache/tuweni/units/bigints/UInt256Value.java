@@ -95,6 +95,20 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
   }
 
   /**
+   * Returns a value that is {@code (this + value)}, or MAX_VALUE if it overflows.
+   * 
+   * @param value the amount to be added to this value
+   * @return {@code this + value} or UInt256.MAX
+   */
+  default T addSafe(T value) {
+    T result = add(value);
+    if (compareTo(result) > 0) {
+      return max();
+    }
+    return result;
+  }
+
+  /**
    * Returns a value that is {@code (this + value)}.
    *
    * @param value The amount to be added to this value.
@@ -113,6 +127,20 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
     T result = add(value);
     if ((value > 0 && compareTo(result) > 0) || (value < 0 && compareTo(result) < 0)) {
       throw new ArithmeticException("UInt256 overflow");
+    }
+    return result;
+  }
+
+  /**
+   * Returns a value that is {@code (this + value)}, or MAX_VALUE if it overflows.
+   *
+   * @param value the amount to be added to this value
+   * @return {@code this + value} or UInt256.MAX
+   */
+  default T addSafe(long value) {
+    T result = add(value);
+    if ((value > 0 && compareTo(result) > 0) || (value < 0 && compareTo(result) < 0)) {
+      return max();
     }
     return result;
   }
@@ -192,6 +220,18 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
     }
     return result;
   }
+
+  /**
+   * Return the max value for this type.
+   *
+   * <p>
+   * The default implementation of this method returns a value obtained from calling the concrete type constructor with
+   * an argument of {@link UInt256#MAX_VALUE}. Most implementations will want to override this method to instead return
+   * a static constant.
+   *
+   * @return The max value for this type.
+   */
+  public T max();
 
   /**
    * Returns a value that is {@code (this * value)}.

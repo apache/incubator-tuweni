@@ -62,7 +62,7 @@ class TransactionalEVMHostContext(
 
   override fun accountsToDestroy(): List<Address> = accountsToDestroy
 
-  private val refunds = mutableMapOf<Address, Long>()
+  private val refunds = mutableMapOf<Address, Wei>()
 
   /**
    * Check account existence function.
@@ -387,10 +387,10 @@ class TransactionalEVMHostContext(
   override fun getChaindId(): UInt256 = chainId
 
   override fun addRefund(address: Address, refund: Wei) {
-    refunds[address] = (refunds[address] ?: 0) + refund.toLong()
+    refunds[address] = refund.addSafe(refunds[address] ?: Wei.ZERO)
   }
 
   override fun addRefund(address: Address, refund: Long) {
-    refunds[address] = (refunds[address] ?: 0) + refund
+    refunds[address] = Wei.valueOf(refund).addSafe(refunds[address] ?: Wei.ZERO)
   }
 }

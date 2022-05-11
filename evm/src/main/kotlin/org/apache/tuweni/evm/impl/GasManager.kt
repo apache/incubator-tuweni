@@ -29,18 +29,18 @@ class GasManager(val gas: Gas) {
 
   fun add(gas: Gas) {
     lastGasCost = gas
-    gasCost = gasCost.add(gas)
+    gasCost = gasCost.addSafe(gas)
   }
 
   fun gasLeft(): Gas {
-    if (gas.tooHigh() || gasCost.tooHigh()) {
+    if (gas < gasCost || gas.tooHigh() || gasCost.tooHigh()) {
       return Gas.ZERO
     }
     return gas.subtract(gasCost)
   }
 
   fun hasGasLeft(): Boolean {
-    return !gas.subtract(gasCost).tooHigh()
+    return !gasLeft().isZero
   }
 
   fun lastGasCost(): Gas = lastGasCost

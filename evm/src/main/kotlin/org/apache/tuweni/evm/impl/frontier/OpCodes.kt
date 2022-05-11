@@ -386,6 +386,9 @@ private val retuRn = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
   }
   val memoryCost = memoryCost(memory.newSize(location, length).subtract(memory.size()))
   gasManager.add(memoryCost)
+  if (!gasManager.hasGasLeft()) {
+    return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
+  }
   val output = memory.read(location, length)
   Result(EVMExecutionStatusCode.SUCCESS, output = output)
 }
@@ -500,12 +503,10 @@ private val codecopy = Opcode { gasManager, _, stack, _, code, _, memory, _ ->
     return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   }
   val numWords: UInt256 = length.divideCeil(Bytes32.SIZE.toLong())
-  val copyCost = Gas.valueOf(3).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(3))
-  val pre = memoryCost(memory.size())
-  val post: Gas = memoryCost(memory.newSize(memOffset, length))
-  val memoryCost = post.subtract(pre)
+  val copyCost = Gas.valueOf(3).multiply(Gas.valueOf(numWords)).addSafe(Gas.valueOf(3))
+  val memoryCost = memoryCost(memory.newSize(memOffset, length).subtract(memory.size()))
 
-  gasManager.add(copyCost.add(memoryCost))
+  gasManager.add(copyCost.addSafe(memoryCost))
 
   memory.write(memOffset, sourceOffset, length, code)
 
@@ -590,10 +591,8 @@ private val mstore8 = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
 
 private val mload = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
   val location = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  val pre = memoryCost(memory.size())
-  val post: Gas = memoryCost(memory.newSize(location, UInt256.valueOf(32)))
-  val memoryCost = post.subtract(pre)
-  gasManager.add(Gas.valueOf(3L).add(memoryCost))
+  val memoryCost = memoryCost(memory.newSize(location, UInt256.valueOf(32)).subtract(memory.size()))
+  gasManager.add(Gas.valueOf(3L).addSafe(memoryCost))
 
   stack.push(Bytes32.leftPad(memory.read(location, UInt256.valueOf(32)) ?: Bytes.EMPTY))
   Result()
@@ -633,11 +632,9 @@ private val calldatacopy = Opcode { gasManager, _, stack, msg, _, _, memory, _ -
   }
   val numWords: UInt256 = length.divideCeil(Bytes32.SIZE.toLong())
   val copyCost = Gas.valueOf(3).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(3))
-  val pre = memoryCost(memory.size())
-  val post = memoryCost(memory.newSize(memOffset, length))
-  val memoryCost = post.subtract(pre)
+  val memoryCost = memoryCost(memory.newSize(memOffset, length).subtract(memory.size()))
 
-  gasManager.add(copyCost.add(memoryCost))
+  gasManager.add(copyCost.addSafe(memoryCost))
 
   memory.write(memOffset, sourceOffset, length, msg.inputData)
 
@@ -677,11 +674,12 @@ private val sha3 = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
   val copyCost = Gas.valueOf(6).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(30))
 
   val memoryCost = if (length.isZero) Gas.ZERO else {
-    val pre = memoryCost(memory.size())
-    val post: Gas = memoryCost(memory.newSize(from, length))
-    post.subtract(pre)
+    memoryCost(memory.newSize(from, length).subtract(memory.size()))
   }
-  gasManager.add(copyCost.add(memoryCost))
+  gasManager.add(copyCost.addSafe(memoryCost))
+  if (!gasManager.hasGasLeft()) {
+    return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
+  }
   val bytes = memory.read(from, length, false)
   stack.push(if (bytes == null) Bytes32.ZERO else Hash.keccak256(bytes))
   Result()
@@ -756,7 +754,10 @@ fun log(topics: Int): Opcode {
         )
     )
     val memoryCost = memoryCost(memory.newSize(location, length).subtract(memory.size()))
-    gasManager.add(memoryCost.add(cost))
+    gasManager.add(memoryCost.addSafe(cost))
+    if (!gasManager.hasGasLeft()) {
+      return@Opcode Result(EVMExecutionStatusCode.OUT_OF_GAS)
+    }
     val address = msg.destination
 
     val data = memory.read(location, length)

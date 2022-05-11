@@ -26,7 +26,17 @@ public interface Bytes32 extends Bytes {
   int SIZE = 32;
 
   /** A {@code Bytes32} containing all zero bytes */
-  Bytes32 ZERO = wrap(new byte[32]);
+  Bytes32 ZERO = Bytes32.repeat((byte) 0);
+
+  /**
+   * Generate a bytes object filled with the same byte.
+   *
+   * @param b the byte to fill the Bytes with
+   * @return a value filled with a fixed byte
+   */
+  static Bytes32 repeat(byte b) {
+    return new ConstantBytes32Value(b);
+  }
 
   /**
    * Wrap the provided byte array, which must be of length 32, as a {@link Bytes32}.
