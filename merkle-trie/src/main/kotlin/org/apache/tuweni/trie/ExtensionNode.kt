@@ -25,7 +25,7 @@ import java.lang.ref.WeakReference
 internal class ExtensionNode<V>(
   private val path: Bytes,
   private val child: Node<V>,
-  private val nodeFactory: NodeFactory<V>
+  private val nodeFactory: NodeFactory<V>,
 ) : Node<V> {
   @Volatile
   private var rlp: WeakReference<Bytes>? = null
@@ -78,5 +78,19 @@ internal class ExtensionNode<V>(
 
   override suspend fun replacePath(path: Bytes): Node<V> {
     return if (path.size() == 0) child else nodeFactory.createExtension(path, child)
+  }
+
+  override fun toString(toStringFn: (V) -> String): String {
+    val builder = StringBuilder()
+    val childRep: String = child.toString(toStringFn).replace("\n\t", "\n\t\t")
+    builder
+      .append("Extension:")
+      .append("\n\tRef: ")
+      .append(rlpRef())
+      .append("\n\tPath: ")
+      .append(CompactEncoding.encode(path))
+      .append("\n\t")
+      .append(childRep)
+    return builder.toString()
   }
 }

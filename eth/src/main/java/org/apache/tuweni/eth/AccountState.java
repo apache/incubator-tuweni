@@ -46,14 +46,15 @@ public final class AccountState {
    */
   public static AccountState fromBytes(Bytes bytes) {
     requireNonNull(bytes);
-    return RLP.decodeList(bytes, reader -> {
-      return new AccountState(
-          reader.readUInt256(),
-          Wei.valueOf(reader.readUInt256()),
-          Hash.fromBytes(reader.readValue()),
-          Hash.fromBytes(reader.readValue()),
-          reader.isComplete() ? DEFAULT_VERSION : reader.readInt());
-    });
+    return RLP
+        .decodeList(
+            bytes,
+            reader -> new AccountState(
+                reader.readUInt256(),
+                Wei.valueOf(reader.readUInt256()),
+                Hash.fromBytes(reader.readValue()),
+                Hash.fromBytes(reader.readValue()),
+                reader.isComplete() ? DEFAULT_VERSION : reader.readInt()));
   }
 
   /**
@@ -134,5 +135,21 @@ public final class AccountState {
   @Override
   public int hashCode() {
     return Objects.hash(nonce, balance, storageRoot, codeHash, version);
+  }
+
+  @Override
+  public String toString() {
+    return "AccountState{"
+        + "nonce="
+        + nonce
+        + ", balance="
+        + balance
+        + ", storageRoot="
+        + storageRoot
+        + ", codeHash="
+        + codeHash
+        + ", version="
+        + version
+        + '}';
   }
 }

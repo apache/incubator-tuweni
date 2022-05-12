@@ -208,4 +208,12 @@ class StoredMerklePatriciaTrie<V> : MerkleTrie<Bytes, V> {
   override fun toString(): String {
     return javaClass.simpleName + "[" + rootHash() + "]"
   }
+
+  suspend fun collect(maxRecords: Int, collector: (V) -> Boolean): Set<V> {
+    val collectVisitor = CollectVisitor(maxRecords, collector)
+    root.accept(collectVisitor, Bytes.EMPTY)
+    return collectVisitor.results
+  }
+
+  fun printAsString(toStringFn: (V) -> String = { it.toString() }) = root.toString(toStringFn)
 }

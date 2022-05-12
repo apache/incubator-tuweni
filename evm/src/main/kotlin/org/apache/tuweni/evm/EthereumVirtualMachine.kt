@@ -30,6 +30,7 @@ import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
+import org.slf4j.LoggerFactory
 
 /**
  * Types of EVM calls
@@ -175,7 +176,7 @@ data class EVMMessage(
 class EthereumVirtualMachine(
   private val transientRepository: StateRepository,
   private val repository: BlockchainRepository,
-  private val precompiles: Map<Address, PrecompileContract>,
+  val precompiles: Map<Address, PrecompileContract>,
   private val evmVmFactory: () -> EvmVm,
   private val options: Map<String, String> = mapOf(),
 ) {
@@ -183,6 +184,10 @@ class EthereumVirtualMachine(
   private var vm: EvmVm? = null
 
   private fun vm() = vm!!
+
+  companion object {
+    val logger = LoggerFactory.getLogger(EthereumVirtualMachine::class.java)
+  }
 
   /**
    * Start the EVM
@@ -294,15 +299,40 @@ class EthereumVirtualMachine(
     depth: Int = 0,
     hostContext: HostContext,
   ): EVMResult {
+    var gasAvailable = gas
     if (depth > 1024) {
       val gasManager = GasManager(gas)
       return EVMResult(EVMExecutionStatusCode.CALL_DEPTH_EXCEEDED, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), null))
     }
+    if (callKind == CallKind.CREATE || callKind == CallKind.CREATE2) {
+
+      val codeDepositGasFee = UInt256.valueOf(code.size() * 200L)
+      if (gas < codeDepositGasFee) {
+        return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
+      }
+      gasAvailable = gasAvailable.subtract(codeDepositGasFee)
+    }
+
+    if (!value.isZero && !options.containsKey("DISABLE_TRANSFER_VALUE")) {
+      val destinationBalance = hostContext.getBalance(destination)
+      val senderBalance = hostContext.getBalance(sender)
+      // TODO check out this logic, seems extremely wrong.
+      val amount = Wei.valueOf(UInt256.fromBytes(value))
+      if (senderBalance.toUInt256() < amount.toUInt256()) {
+        return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
+      }
+      hostContext.setBalance(sender, senderBalance.subtract(amount))
+      hostContext.setBalance(destination, destinationBalance.add(amount))
+    }
 
     val contract = precompiles[contractAddress]
     if (contract != null) {
+      if (callKind == CallKind.CREATE || callKind == CallKind.CREATE2) {
+        return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
+      }
+      logger.trace("Executing precompile $contractAddress")
       val result = contract.run(inputData)
-      val gasManager = GasManager(gas)
+      val gasManager = GasManager(gasAvailable)
       gasManager.add(result.gas)
       return EVMResult(if (result.output == null) EVMExecutionStatusCode.PRECOMPILE_FAILURE else EVMExecutionStatusCode.SUCCESS, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), result.output))
     } else {
@@ -355,7 +385,7 @@ interface HostContext {
    * @param key The index of the account's storage entry.
    * @return The storage value at the given storage key or null bytes if the account does not exist.
    */
-  suspend fun getRepositoryStorage(address: Address, key: Bytes32): Bytes32?
+  suspend fun getRepositoryStorage(address: Address, key: Bytes32): Bytes?
 
   /**
    * Get storage function.
@@ -383,7 +413,7 @@ interface HostContext {
    * @param value The value to be stored.
    * @return The effect on the storage item.
    */
-  suspend fun setStorage(address: Address, key: Bytes32, value: Bytes32): Int
+  suspend fun setStorage(address: Address, key: Bytes32, value: Bytes): Int
 
   /**
    * Get balance function.
@@ -468,6 +498,14 @@ interface HostContext {
   suspend fun call(evmMessage: EVMMessage): EVMResult
 
   /**
+   * This function supports EVM create calls.
+   *
+   * @param msg The create parameters.
+   * @return The result of the call.
+   */
+  suspend fun create(evmMessage: EVMMessage, code: Bytes): EVMResult
+
+  /**
    * Get transaction context function.
    *
    *
@@ -505,12 +543,12 @@ interface HostContext {
   fun emitLog(address: Address, data: Bytes, topics: List<Bytes32>)
 
   /**
-   * Returns true if the account was used in this context already.
+   * Returns true if the account was warmed up.
    */
   fun warmUpAccount(address: Address): Boolean
 
   /**
-   * Returns true if the storage slot was used in this context already.
+   * Returns true if the storage slot was warmed up.
    */
   fun warmUpStorage(address: Address, key: UInt256): Boolean
 
@@ -529,6 +567,10 @@ interface HostContext {
   fun getCoinbase(): Address
   fun getDifficulty(): UInt256
   fun getChaindId(): UInt256
+  suspend fun setBalance(address: Address, balance: Wei)
+  fun addRefund(address: Address, refund: Wei)
+  fun addRefund(address: Address, refund: Long)
+  suspend fun isEmptyAcount(address: Address): Boolean
 }
 
 interface EvmVm {

@@ -499,10 +499,10 @@ class BlockchainRepository(
    * @param address the address of the account
    * @param key the key of the value to retrieve in the account storage.
    */
-  override suspend fun getAccountStoreValue(address: Address, key: Bytes32): Bytes32? {
+  override suspend fun getAccountStoreValue(address: Address, key: Bytes32): Bytes? {
     logger.trace("Entering getAccountStoreValue")
     val accountState = getAccount(address) ?: return null
-    val tree = StoredMerklePatriciaTrie.storingBytes32(
+    val tree = StoredMerklePatriciaTrie.storingBytes(
       object : MerkleStorage {
         override suspend fun get(hash: Bytes32): Bytes? {
           return stateStore.get(hash)
@@ -524,7 +524,7 @@ class BlockchainRepository(
    * @param key the key of the value to retrieve in the account storage.
    * @param value the value to store
    */
-  override suspend fun storeAccountValue(address: Address, key: Bytes32, value: Bytes32) {
+  override suspend fun storeAccountValue(address: Address, key: Bytes32, value: Bytes) {
     logger.trace("Entering storeAccountValue")
     val addrHash = Hash.hash(address)
     val accountState = worldState!!.get(addrHash)?.let { AccountState.fromBytes(it) } ?: newAccountState()
@@ -557,7 +557,7 @@ class BlockchainRepository(
       return null
     }
     val accountState = AccountState.fromBytes(accountStateBytes)
-    return worldState!!.get(accountState.codeHash)
+    return stateStore.get(accountState.codeHash)
   }
 
   /**
@@ -578,7 +578,7 @@ class BlockchainRepository(
    * @param code the code to store
    */
   override suspend fun storeCode(code: Bytes) {
-    worldState!!.put(Hash.hash(code), code)
+    stateStore.put(Hash.hash(code), code)
   }
 
   override fun stateRootHash(): Bytes32 = worldState!!.rootHash()

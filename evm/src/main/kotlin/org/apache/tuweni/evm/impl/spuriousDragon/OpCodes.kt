@@ -16,7 +16,6 @@
  */
 package org.apache.tuweni.evm.impl.spuriousDragon
 
-import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.crypto.Hash
@@ -288,7 +287,7 @@ private val exp = Opcode { gasManager, _, stack, _, _, _, _, _ ->
   } else {
     val numBytes = (power.bitLength() + 7) / 8
 
-    val cost = (Gas.valueOf(10).multiply(Gas.valueOf(numBytes.toLong())))
+    val cost = (Gas.valueOf(50).multiply(Gas.valueOf(numBytes.toLong())))
       .add(Gas.valueOf(10))
     gasManager.add(cost)
 
@@ -315,7 +314,7 @@ fun push(length: Int): Opcode {
   return Opcode { gasManager, _, stack, _, code, currentIndex, _, _ ->
     gasManager.add(3)
     val minLength = Math.min(length, code.size() - currentIndex)
-    stack.push(Bytes32.leftPad(code.slice(currentIndex, minLength)))
+    stack.push(code.slice(currentIndex, minLength))
     Result(newCodePosition = currentIndex + minLength)
   }
 }
@@ -341,39 +340,37 @@ fun swap(index: Int): Opcode {
 }
 
 private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
-  runBlocking {
-    val key = stack.pop()
-    val value = stack.pop()
-    if (null == key || null == value) {
-      return@runBlocking Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-    }
-
-    val address = msg.destination
-
-    val currentValue = hostContext.getStorage(address, key) ?: UInt256.ZERO
-
-    val cost = if (!value.isZero && currentValue.isZero) Gas.valueOf(20000) else Gas.valueOf(5000)
-    gasManager.add(cost)
-
-    hostContext.setStorage(address, key, value)
-
-    Result()
+  val key = stack.pop()
+  val value = stack.popBytes()
+  if (null == key || null == value) {
+    return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   }
+
+  val address = msg.destination
+
+  val currentValue = hostContext.getStorage(address, key) ?: UInt256.ZERO
+
+  val cost = if (!value.isZero && currentValue.isZero) Gas.valueOf(20000) else Gas.valueOf(5000)
+  gasManager.add(cost)
+
+  hostContext.setStorage(address, key, value)
+
+  Result()
 }
 
 private val sload = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   val key = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
 
   val address = msg.destination
-  gasManager.add(50)
+  gasManager.add(200)
 
-  runBlocking {
-    stack.push(hostContext.getStorage(address, key) ?: UInt256.ZERO)
-  }
+  stack.push(hostContext.getStorage(address, key) ?: UInt256.ZERO)
+
   Result()
 }
 
-private val stop = Opcode { _, _, _, _, _, _, _, _ ->
+private val stop = Opcode { gasManager, _, _, _, _, _, _, _ ->
+  gasManager.add(0L)
   Result(EVMExecutionStatusCode.SUCCESS)
 }
 
@@ -422,11 +419,10 @@ private val balance = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
 
   val address = stack.pop()?.slice(12, 20)?.let { Address.fromBytes(it) }
     ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
-  gasManager.add(700)
+  gasManager.add(400)
 
-  runBlocking {
-    stack.push(hostContext.getBalance(address))
-  }
+  stack.push(hostContext.getBalance(address))
+
   Result()
 }
 
@@ -493,9 +489,6 @@ private val timestamp = Opcode { gasManager, hostContext, stack, _, _, _, _, _ -
 }
 
 fun memoryCost(length: UInt256): Gas {
-  if (!length.fitsInt()) {
-    return Gas.TOO_HIGH
-  }
   val base = length.multiply(length).divide(UInt256.valueOf(512))
   return Gas.valueOf(UInt256.valueOf(3).multiply(length).add(base))
 }
@@ -529,17 +522,13 @@ private val extcodecopy = Opcode { gasManager, hostContext, stack, _, _, _, memo
     return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   }
   val numWords: UInt256 = length.divideCeil(Bytes32.SIZE.toLong())
-  val copyCost = Gas.valueOf(3).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(3))
-  val pre = memoryCost(memory.size())
-  val post: Gas = memoryCost(memory.newSize(memOffset, length))
-  val memoryCost = post.subtract(pre)
+  val copyCost = Gas.valueOf(3).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(700))
+  val memoryCost = memoryCost(memory.newSize(memOffset, length).subtract(memory.size()))
 
   gasManager.add(copyCost.add(memoryCost))
 
-  runBlocking {
-    val code = hostContext.getCode(Address.fromBytes(address.slice(12, 20)))
-    memory.write(memOffset, sourceOffset, length, code)
-  }
+  val code = hostContext.getCode(Address.fromBytes(address.slice(12, 20)))
+  memory.write(memOffset, sourceOffset, length, code)
 
   Result()
 }
@@ -613,18 +602,14 @@ private val mload = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
 
 private val extcodesize = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   gasManager.add(700)
-  runBlocking {
-    stack.push(UInt256.valueOf(hostContext.getCode(msg.destination).size().toLong()))
-    Result()
-  }
+  stack.push(UInt256.valueOf(hostContext.getCode(msg.destination).size().toLong()))
+  Result()
 }
 
 private val extcodehash = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   gasManager.add(700)
-  runBlocking {
-    stack.push(Hash.keccak256(hostContext.getCode(msg.destination)))
-    Result()
-  }
+  stack.push(Hash.keccak256(hostContext.getCode(msg.destination)))
+  Result()
 }
 
 private val msize = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
@@ -660,8 +645,8 @@ private val calldatacopy = Opcode { gasManager, _, stack, msg, _, _, memory, _ -
 }
 
 private val calldataload = Opcode { gasManager, _, stack, msg, _, _, _, _ ->
-  gasManager.add(3)
   val start = stack.pop() ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  gasManager.add(3)
   var set = false
   if (start.fitsInt()) {
     if (msg.inputData.size() > start.intValue()) {
@@ -833,18 +818,20 @@ private val selfdestruct = Opcode { gasManager, hostContext, stack, msg, _, _, _
   val recipientAddress = stack.pop()?.slice(12, 20)?.let { Address.fromBytes(it) } ?: return@Opcode Result(
     EVMExecutionStatusCode.STACK_UNDERFLOW
   )
+  val inheritance = hostContext.getBalance(msg.destination)
 
-  runBlocking {
-
-    val inheritance = hostContext.getBalance(recipientAddress)
-    gasManager.addRefund(inheritance.toUInt256())
-
-    val address: Address = msg.destination
-
-    hostContext.selfdestruct(address, recipientAddress)
-
-    Result(EVMExecutionStatusCode.SUCCESS)
+  val cost = if (hostContext.isEmptyAcount(recipientAddress) && !inheritance.isZero) {
+    Gas.valueOf(30000)
+  } else {
+    Gas.valueOf(5000)
   }
+  gasManager.add(cost)
+
+  hostContext.addRefund(msg.destination, inheritance)
+
+  hostContext.selfdestruct(msg.destination, recipientAddress)
+
+  Result(EVMExecutionStatusCode.SUCCESS)
 }
 
 private val shl = Opcode { gasManager, _, stack, _, _, _, _, _ ->
@@ -1242,7 +1229,7 @@ private val staticcall = Opcode { gasManager, hostContext, stack, message, _, _,
 
 private val selfbalance = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   gasManager.add(5)
-  val account = hostContext.getBalance(msg.sender)
+  val account = hostContext.getBalance(msg.destination)
 
   stack.push(account)
   Result()

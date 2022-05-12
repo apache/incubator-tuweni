@@ -217,7 +217,11 @@ public class EthJsonModule extends SimpleModule {
 
     @Override
     public Bytes32 deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-      return Bytes32.fromHexString(p.getValueAsString());
+      String value = p.getValueAsString();
+      if (value == null) {
+        return null;
+      }
+      return Bytes32.fromHexString(value);
     }
   }
 

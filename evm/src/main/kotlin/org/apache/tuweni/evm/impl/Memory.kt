@@ -69,8 +69,12 @@ class Memory {
   }
 
   fun newSize(memOffset: UInt256, length: UInt256): UInt256 {
+    if (length.isZero) {
+      return wordsSize
+    }
+
     val candidate = memOffset.add(length)
-    if (candidate < memOffset || candidate < length) {
+    if (candidate < memOffset || candidate < length) { // overflow
       return UInt256.MAX_VALUE
     }
     val candidateWords = candidate.divideCeil(32)
@@ -78,6 +82,9 @@ class Memory {
   }
 
   fun read(from: UInt256, length: UInt256, updateMemorySize: Boolean = true): Bytes? {
+    if (length.isZero) {
+      return Bytes.EMPTY
+    }
     val max = from.add(length)
     if (!from.fitsInt() || !length.fitsInt() || !max.fitsInt()) {
       return null

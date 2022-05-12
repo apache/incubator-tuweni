@@ -45,7 +45,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -122,31 +121,10 @@ class EVMReferenceTest {
     writer = newWriter
   }
 
-  @Disabled
-  @ParameterizedTest(name = "Berlin {index}: {0}")
-  @MethodSource("findBerlinTests")
-  fun runBerlinReferenceTests(testName: String, test: JsonReferenceTest) {
-    runReferenceTests(testName, HardFork.BERLIN, test)
-  }
-
-  @Disabled
-  @ParameterizedTest(name = "Istanbul {index}: {0}")
-  @MethodSource("findIstanbulTests")
-  fun runIstanbulReferenceTests(testName: String, test: JsonReferenceTest) {
-    runReferenceTests(testName, HardFork.ISTANBUL, test)
-  }
-
   @ParameterizedTest(name = "Frontier {index}: {0}")
   @MethodSource("findFrontierTests")
   fun runFrontierReferenceTests(testName: String, test: JsonReferenceTest) {
     runReferenceTests(testName, HardFork.FRONTIER, test)
-  }
-
-  @Disabled
-  @ParameterizedTest(name = "Constantinople {index}: {0}")
-  @MethodSource("findConstantinopleTests")
-  fun runConstantinopleReferenceTests(testName: String, test: JsonReferenceTest) {
-    runReferenceTests(testName, HardFork.CONSTANTINOPLE, test)
   }
 
   private fun runReferenceTests(testName: String, hardFork: HardFork, test: JsonReferenceTest) = runBlocking {
@@ -167,12 +145,12 @@ class EVMReferenceTest {
 
         if (accountStorage != null) {
           for (entry in accountStorage) {
-            repository.storeAccountValue(address, Bytes32.leftPad(entry.key), Bytes32.leftPad(entry.value))
+            repository.storeAccountValue(address, entry.key, Bytes32.leftPad(entry.value))
           }
         }
       }
     }
-    val vm = EthereumVirtualMachine(repository, repository, Registry.istanbul, EvmVmImpl::create)
+    val vm = EthereumVirtualMachine(repository, repository, Registry.istanbul, EvmVmImpl::create, mapOf(Pair("DISABLE_TRANSFER_VALUE", "true")))
     vm.start()
     try {
       val result = vm.execute(
@@ -292,10 +270,8 @@ class EVMReferenceTest {
           )
         }
         assertEquals(
-          test.gas!!.toLong(),
-          result.state.gasManager.gasLeft().toLong(),
-          " diff: " + if (test.gas!! > result.state.gasManager.gasLeft()) test.gas!!.subtract(result.state.gasManager.gasLeft()) else result.state.gasManager.gasLeft()
-            .subtract(test.gas!!)
+          test.gas!!,
+          result.state.gasManager.gasLeft()
         )
       }
     } finally {

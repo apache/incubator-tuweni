@@ -23,6 +23,7 @@ import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.Log
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.StateRepository
+import org.apache.tuweni.eth.repository.StateRepository.Companion.EMPTY_CODE_HASH
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
@@ -61,6 +62,8 @@ class TransactionalEVMHostContext(
 
   override fun accountsToDestroy(): List<Address> = accountsToDestroy
 
+  private val refunds = mutableMapOf<Address, Wei>()
+
   /**
    * Check account existence function.
    *
@@ -72,14 +75,20 @@ class TransactionalEVMHostContext(
    */
   override suspend fun accountExists(address: Address): Boolean {
     logger.trace("Entering accountExists")
-    return transientRepository.accountsExists(address)
+    return transientRepository.accountsExists(address) || ethereumVirtualMachine.precompiles.contains(address)
   }
 
-  override suspend fun getRepositoryStorage(address: Address, key: Bytes32): Bytes32? {
+  override suspend fun getRepositoryStorage(address: Address, key: Bytes32): Bytes? {
     logger.trace("Entering getRepositoryStorage")
     val value = blockchainRepository.getAccountStoreValue(address, key)
     logger.trace("key $key, value $value")
     return value
+  }
+
+  override suspend fun isEmptyAcount(address: Address): Boolean {
+    logger.trace("Entering isEmptyAcount")
+    val accountState = transientRepository.getAccount(address)
+    return null == accountState || (accountState.balance.isEmpty && accountState.nonce.isZero && accountState.codeHash === EMPTY_CODE_HASH)
   }
 
   /**
@@ -123,7 +132,7 @@ class TransactionalEVMHostContext(
    * A storage item has been deleted: X -> 0.
    * EVMC_STORAGE_DELETED = 4
    */
-  override suspend fun setStorage(address: Address, key: Bytes32, value: Bytes32): Int {
+  override suspend fun setStorage(address: Address, key: Bytes32, value: Bytes): Int {
     logger.trace("Entering setStorage {} {} {}", address, key, value)
 
     val newAccount = transientRepository.accountsExists(address)
@@ -165,6 +174,14 @@ class TransactionalEVMHostContext(
 
     val account = transientRepository.getAccount(address)
     return account?.balance ?: Wei.valueOf(0)
+  }
+
+  override suspend fun setBalance(address: Address, balance: Wei) {
+    logger.trace("Entering setBalance $address with $balance")
+
+    val account = transientRepository.getAccount(address) ?: transientRepository.newAccountState()
+    val newAccount = AccountState(account.nonce, balance, account.storageRoot, account.codeHash, account.version)
+    transientRepository.storeAccount(address, newAccount)
   }
 
   /**
@@ -260,7 +277,10 @@ class TransactionalEVMHostContext(
           beneficiaryAccountState.codeHash
         )
       )
+      val resetBalance = AccountState(this.nonce, Wei.valueOf(0), this.storageRoot, this.codeHash, this.version)
+      transientRepository.storeAccount(address, resetBalance)
     }
+
     logger.trace("Done selfdestruct")
   }
 
@@ -285,6 +305,25 @@ class TransactionalEVMHostContext(
       evmMessage.kind,
       depth = evmMessage.depth,
       hostContext = this
+    )
+    return result
+  }
+
+  override suspend fun create(evmMessage: EVMMessage, code: Bytes): EVMResult {
+    logger.trace("Entering create ${evmMessage.kind}")
+
+    val result = ethereumVirtualMachine.executeInternal(
+      evmMessage.origin,
+      evmMessage.sender,
+      evmMessage.destination,
+      evmMessage.contract,
+      evmMessage.value,
+      code,
+      evmMessage.inputData,
+      evmMessage.gas,
+      evmMessage.kind,
+      depth = evmMessage.depth,
+      hostContext = this,
     )
     return result
   }
@@ -321,10 +360,13 @@ class TransactionalEVMHostContext(
   }
 
   override fun warmUpAccount(address: Address): Boolean =
-    warmedUpStorage.add(address)
+    !ethereumVirtualMachine.precompiles.contains(address) && warmedUpStorage.add(address)
 
   override fun warmUpStorage(address: Address, key: UInt256): Boolean {
     logger.trace("entering warmUpStorage $address $key")
+    if (ethereumVirtualMachine.precompiles.contains(address)) {
+      return false
+    }
     return warmedUpStorage.add(Bytes.concatenate(address, Bytes.fromHexString("0x0f"), key))
   }
 
@@ -343,4 +385,12 @@ class TransactionalEVMHostContext(
   override fun getDifficulty() = currentDifficulty
 
   override fun getChaindId(): UInt256 = chainId
+
+  override fun addRefund(address: Address, refund: Wei) {
+    refunds[address] = refund.addSafe(refunds[address] ?: Wei.ZERO)
+  }
+
+  override fun addRefund(address: Address, refund: Long) {
+    refunds[address] = Wei.valueOf(refund).addSafe(refunds[address] ?: Wei.ZERO)
+  }
 }

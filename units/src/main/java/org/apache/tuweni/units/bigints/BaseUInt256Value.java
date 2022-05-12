@@ -95,13 +95,28 @@ public abstract class BaseUInt256Value<T extends UInt256Value<T>> implements UIn
    *
    * <p>
    * The default implementation of this method returns a value obtained from calling the concrete type constructor with
-   * an argument of {@link Bytes32#ZERO}. Most implementations will want to override this method to instead return a
+   * an argument of {@link UInt256#ZERO}. Most implementations will want to override this method to instead return a
    * static constant.
    *
    * @return The zero value for this type.
    */
   protected T zero() {
     return ctor.apply(UInt256.ZERO);
+  }
+
+  /**
+   * Return the max value for this type.
+   *
+   * <p>
+   * The default implementation of this method returns a value obtained from calling the concrete type constructor with
+   * an argument of {@link UInt256#MAX_VALUE}. Most implementations will want to override this method to instead return
+   * a static constant.
+   *
+   * @return The max value for this type.
+   */
+  @Override
+  public T max() {
+    return ctor.apply(UInt256.MAX_VALUE);
   }
 
   @Override

@@ -35,6 +35,8 @@ public final class Wei extends BaseUInt256Value<Wei> {
     }
   }
 
+  public static final Wei ZERO = Wei.valueOf(0);
+
   private Wei(UInt256 bytes) {
     super(bytes, Wei::new);
   }

@@ -60,7 +60,7 @@ class EthereumVirtualMachineTest {
   fun testExecuteCounter() {
     val result = runCode(Bytes.fromHexString("0x600160005401600055"))
     assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-    assertEquals(Gas.valueOf(177788), result.state.gasManager.gasLeft())
+    assertEquals(Gas.valueOf(179938), result.state.gasManager.gasLeft())
   }
 
   @Test
@@ -74,7 +74,7 @@ class EthereumVirtualMachineTest {
   fun testExecuteSaveReturnBlockNumber() {
     val result = runCode(Bytes.fromHexString("0x4360005543600052596000f3"))
     assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-    assertEquals(Gas.valueOf(179979), result.state.gasManager.gasLeft())
+    assertEquals(Gas.valueOf(194979), result.state.gasManager.gasLeft())
   }
 
   @Disabled
@@ -140,7 +140,7 @@ class EthereumVirtualMachineTest {
       try {
         val sender = Address.fromHexString("0x3339626637316465316237643762653362353100")
         val destination = Address.fromBytes(Bytes.fromHexString("3533636637373230346545656639353265323500"))
-        val value = Bytes.fromHexString("0x3100")
+        val value = Bytes.fromHexString("0x00")
         val inputData = Bytes.wrap("hello w\u0000".toByteArray(StandardCharsets.UTF_8))
         val gas = Gas.valueOf(200000)
         vm.execute(
@@ -153,6 +153,7 @@ class EthereumVirtualMachineTest {
           UInt256.valueOf(1),
           UInt256.valueOf(1),
           CallKind.CALL,
+          HardFork.FRONTIER
         )
       } finally {
         vm.stop()
@@ -202,7 +203,7 @@ class EthereumVirtualMachineTest {
     val result = runCode(Bytes.fromHexString("0x30600052596000f3"), { EvmVmImpl.create(listener) })
     assertEquals(EVMExecutionStatusCode.HALTED, result.statusCode)
     assertEquals(
-      Bytes.fromHexString("0xf86983676173880000000000030d40866d656d6f7279a0000000000000000000000000353363663737323034654565663935326532350085737461636ba00000000000000000000000000000000000000000000000000000000000000020866f757470757480846c6f6773"),
+      Bytes.fromHexString("0xf88183676173a00000000000000000000000000000000000000000000000000000000000030d40866d656d6f7279a0000000000000000000000000353363663737323034654565663935326532350085737461636ba00000000000000000000000000000000000000000000000000000000000000020866f757470757480846c6f6773"),
       result.state.toBytes()
     )
   }

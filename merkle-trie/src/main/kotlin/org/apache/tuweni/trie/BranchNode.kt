@@ -29,7 +29,7 @@ internal class BranchNode<V>(
   private val children: List<Node<V>>,
   private val value: V?,
   private val nodeFactory: NodeFactory<V>,
-  private val valueSerializer: (V) -> Bytes
+  private val valueSerializer: (V) -> Bytes,
 ) : Node<V> {
 
   companion object {
@@ -115,6 +115,28 @@ internal class BranchNode<V>(
       }
     }
     return false
+  }
+
+  override fun toString(): String {
+    return toString { it.toString() }
+  }
+
+  override fun toString(toStringFn: (V) -> String): String {
+    val builder = StringBuilder()
+    builder.append("Branch:")
+    builder.append("\n\tRef: ").append(rlpRef())
+    for (i in 0 until RADIX) {
+      val child = child(i.toByte())
+      val nullNode = NullNode.instance<V>()
+      if (child !== nullNode) {
+        val branchLabel = "[" + Integer.toHexString(i) + "] "
+        val childRep: String = child.toString(toStringFn).replace("\n\t", "\n\t\t")
+        builder.append("\n\t").append(branchLabel).append(childRep)
+      }
+    }
+    builder.append("\n\tValue: ")
+      .append(value?.let { toStringFn(it) } ?: "empty")
+    return builder.toString()
   }
 }
 

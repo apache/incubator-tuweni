@@ -16,7 +16,7 @@
  */
 package org.apache.tuweni.evm.impl
 
-import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.MutableBytes
 import org.apache.tuweni.units.bigints.UInt256
 
@@ -24,12 +24,20 @@ class Stack(private val maxSize: Int = 1025) {
 
   private val mutableStack = MutableBytes.create(maxSize * 32)
   private var size = 0
+  private val stackElements = mutableListOf<Int>()
 
   fun get(i: Int): UInt256? {
     if (i >= size) {
       return null
     }
-    return mutableStack.slice((size - i - 1) * 32, 32)?.let { UInt256.fromBytes(it) }
+    return mutableStack.slice((size - i - 1) * 32, stackElements.get(size - i - 1))?.let { UInt256.fromBytes(it) }
+  }
+
+  fun getBytes(i: Int): Bytes? {
+    if (i >= size) {
+      return null
+    }
+    return mutableStack.slice((size - i - 1) * 32, stackElements.get(size - i - 1))
   }
 
   fun pop(): UInt256? {
@@ -37,15 +45,28 @@ class Stack(private val maxSize: Int = 1025) {
       return null
     }
     size--
-    return mutableStack.slice(size * 32, 32)?.let { UInt256.fromBytes(it) }
+    val elementSize = stackElements.get(stackElements.size - 1)
+    stackElements.removeAt(stackElements.size - 1)
+    return mutableStack.slice(size * 32, elementSize)?.let { UInt256.fromBytes(it) }
   }
 
-  fun push(value: Bytes32): Boolean {
+  fun popBytes(): Bytes? {
+    if (size <= 0) {
+      return null
+    }
+    size--
+    val elementSize = stackElements.get(stackElements.size - 1)
+    stackElements.removeAt(stackElements.size - 1)
+    return mutableStack.slice(size * 32, elementSize)
+  }
+
+  fun push(value: Bytes): Boolean {
     if (size >= maxSize) {
       return false
     }
     mutableStack.set((size * 32), value)
     size++
+    stackElements.add(value.size())
     return true
   }
 
@@ -54,6 +75,7 @@ class Stack(private val maxSize: Int = 1025) {
   fun overflowed(): Boolean = size >= maxSize
 
   fun set(i: Int, elt: UInt256) {
+    stackElements.set((size - i - 1), elt.size())
     mutableStack.set((size - i - 1) * 32, elt)
   }
 }

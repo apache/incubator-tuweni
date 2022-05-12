@@ -34,4 +34,6 @@ internal interface Node<V> {
   fun hash(): Bytes32
 
   suspend fun replacePath(path: Bytes): Node<V>
+
+  fun toString(toStringFn: (V) -> String): String
 }

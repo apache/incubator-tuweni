@@ -26,10 +26,11 @@ internal class LeafNode<V>(
   private val path: Bytes,
   private val value: V,
   private val nodeFactory: NodeFactory<V>,
-  private val valueSerializer: (V) -> Bytes
+  private val valueSerializer: (V) -> Bytes,
 ) : Node<V> {
   @Volatile
   private var rlp: WeakReference<Bytes>? = null
+
   @Volatile
   private var hash: Bytes32? = null
 
@@ -66,4 +67,11 @@ internal class LeafNode<V>(
   }
 
   override suspend fun replacePath(path: Bytes): Node<V> = nodeFactory.createLeaf(path, value)
+
+  override fun toString(toStringFn: (V) -> String): String {
+    return """Leaf:
+	Ref: ${rlpRef()}
+	Path: ${CompactEncoding.encode(path)}
+	Value: ${value?.let(toStringFn) ?: "empty"}"""
+  }
 }

@@ -948,6 +948,11 @@ public final class UInt256 implements UInt256Value<UInt256> {
     return 0;
   }
 
+  @Override
+  public UInt256 max() {
+    return UInt256.MAX_VALUE;
+  }
+
   private static boolean isPowerOf2(long n) {
     assert n > 0;
     return (n & (n - 1)) == 0;

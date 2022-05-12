@@ -45,4 +45,8 @@ internal class NullNode<V> private constructor() : Node<V> {
   override fun hash(): Bytes32 = HASH
 
   override suspend fun replacePath(path: Bytes): Node<V> = this
+
+  override fun toString() = "[NULL]"
+
+  override fun toString(toStringFn: (V) -> String) = "[NULL]"
 }

@@ -16,8 +16,6 @@
  */
 package org.apache.tuweni.blockprocessor
 
-import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.eth.AccountState
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
@@ -27,17 +25,14 @@ import org.apache.tuweni.eth.TransactionReceipt
 import org.apache.tuweni.eth.precompiles.PrecompileContract
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.TransientStateRepository
-import org.apache.tuweni.evm.CallKind
-import org.apache.tuweni.evm.EVMExecutionStatusCode
 import org.apache.tuweni.evm.EthereumVirtualMachine
+import org.apache.tuweni.evm.HardFork
 import org.apache.tuweni.evm.impl.EvmVmImpl
 import org.apache.tuweni.evm.impl.StepListener
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.trie.MerklePatriciaTrie
-import org.apache.tuweni.trie.MerkleTrie
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
-import org.apache.tuweni.units.ethereum.Wei
 import org.slf4j.LoggerFactory
 
 /**
@@ -63,6 +58,7 @@ class BlockProcessor(val chainId: UInt256) {
    * @param repository the blockchain repository to execute against
    * @param stepListener an optional listener that can follow the steps of the execution
    * @param precompiles the map of precompiles
+   * @param hardFork the current hard fork
    */
   suspend fun execute(
     parentBlock: BlockHeader,
@@ -73,6 +69,7 @@ class BlockProcessor(val chainId: UInt256) {
     transactions: List<Transaction>,
     repository: BlockchainRepository,
     precompiles: Map<Address, PrecompileContract>,
+    hardFork: HardFork,
     stepListener: StepListener? = null,
   ): BlockProcessorResult {
     val stateChanges = TransientStateRepository(repository)
@@ -89,81 +86,19 @@ class BlockProcessor(val chainId: UInt256) {
     var allGasUsed = Gas.ZERO
     var success = true
     for (tx in transactions) {
-      if (tx.getGasLimit() > gasLimit.subtract(gasUsed).subtract(allGasUsed)) {
-        success = false
-        continue
-      }
+      val txProcessor = TransactionProcessor(vm, hardFork, repository, stateChanges)
       val indexKey = RLP.encodeValue(UInt256.valueOf(counter).trimLeadingZeros())
       transactionsTrie.put(indexKey, tx.toBytes())
-      var code: Bytes
-      var to: Address
-      var inputData: Bytes
-      if (null == tx.to) {
-        val contractAddress = Address.fromTransaction(tx)
-        to = contractAddress
-        code = tx.payload
-        inputData = Bytes.EMPTY
-        val state = AccountState(
-          UInt256.ONE,
-          Wei.valueOf(0),
-          Hash.fromBytes(MerkleTrie.EMPTY_TRIE_ROOT_HASH),
-          Hash.hash(tx.payload)
-        )
-        stateChanges.storeAccount(contractAddress, state)
-        stateChanges.storeCode(tx.payload)
+      val txResult = txProcessor.execute(tx, timestamp, chainId, parentBlock, gasLimit, gasUsed, allGasUsed, coinbase, bloomFilter)
+      if (txResult.success) {
+        val receipt = txResult.receipt!!
+        receiptsTrie.put(indexKey, receipt.toBytes())
+        allReceipts.add(receipt)
+        allGasUsed = allGasUsed.add(txResult.gasUsed)
       } else {
-        code = stateChanges.getAccountCode(tx.to!!) ?: Bytes.EMPTY
-        to = tx.to!!
-        inputData = tx.payload
-      }
-      if (tx.value > UInt256.ZERO) {
-        val account = stateChanges.getAccount(to) ?: stateChanges.newAccountState()
-        val newAccountState = AccountState(account.nonce, account.balance.add(tx.value), account.storageRoot, account.codeHash)
-        stateChanges.storeAccount(to, newAccountState)
-      }
-      val result = vm.execute(
-        tx.sender!!,
-        to,
-        tx.value,
-        code,
-        inputData,
-        tx.gasLimit,
-        tx.gasPrice,
-        coinbase,
-        parentBlock.number.add(1),
-        timestamp,
-        tx.gasLimit.toLong(),
-        parentBlock.difficulty,
-        chainId,
-        CallKind.CALL
-      )
-      if (result.statusCode != EVMExecutionStatusCode.SUCCESS) {
-        logger.info("EVM execution failed with status ${result.statusCode}")
         success = false
       }
-
-      for (accountToDestroy in result.changes.accountsToDestroy()) {
-        stateChanges.destroyAccount(accountToDestroy)
-      }
-      for (log in result.changes.getLogs()) {
-        bloomFilter.insertLog(log)
-      }
-
-      val txLogsBloomFilter = LogsBloomFilter()
-      for (log in result.changes.getLogs()) {
-        bloomFilter.insertLog(log)
-      }
-      val receipt = TransactionReceipt(
-        1,
-        result.state.gasManager.gasCost.toLong(),
-        txLogsBloomFilter,
-        result.changes.getLogs()
-      )
-      allReceipts.add(receipt)
-      receiptsTrie.put(indexKey, receipt.toBytes())
       counter++
-
-      allGasUsed = allGasUsed.add(result.state.gasManager.gasCost)
     }
 
     val block = ProtoBlock(
