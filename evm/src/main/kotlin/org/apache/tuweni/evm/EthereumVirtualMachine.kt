@@ -313,16 +313,16 @@ class EthereumVirtualMachine(
       gasAvailable = gasAvailable.subtract(codeDepositGasFee)
     }
 
-    if (!value.isZero) {
-//      val destinationBalance = hostContext.getBalance(destination)
-//      val senderBalance = hostContext.getBalance(sender)
+    if (!value.isZero && !options.containsKey("DISABLE_TRANSFER_VALUE")) {
+      val destinationBalance = hostContext.getBalance(destination)
+      val senderBalance = hostContext.getBalance(sender)
       // TODO check out this logic, seems extremely wrong.
-//      if (destinationBalance < value) {
-//        return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
-//      }
-//      val amount = UInt256.fromBytes(value)
-//      hostContext.setBalance(sender, senderBalance.subtract(amount))
-//      hostContext.setBalance(destination, destinationBalance.add(amount))
+      val amount = Wei.valueOf(UInt256.fromBytes(value))
+      if (senderBalance.toUInt256() < amount.toUInt256()) {
+        return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
+      }
+      hostContext.setBalance(sender, senderBalance.subtract(amount))
+      hostContext.setBalance(destination, destinationBalance.add(amount))
     }
 
     val contract = precompiles[contractAddress]

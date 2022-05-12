@@ -59,8 +59,10 @@ class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
     val logger = LoggerFactory.getLogger(EvmVmImpl::class.java)
   }
 
+  private val options = mutableMapOf<String, String>()
+
   override fun setOption(key: String, value: String) {
-    TODO("Not yet implemented")
+    options[key] = value
   }
 
   override fun version(): String {

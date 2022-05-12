@@ -150,7 +150,7 @@ class EVMReferenceTest {
         }
       }
     }
-    val vm = EthereumVirtualMachine(repository, repository, Registry.istanbul, EvmVmImpl::create)
+    val vm = EthereumVirtualMachine(repository, repository, Registry.istanbul, EvmVmImpl::create, mapOf(Pair("DISABLE_TRANSFER_VALUE", "true")))
     vm.start()
     try {
       val result = vm.execute(
