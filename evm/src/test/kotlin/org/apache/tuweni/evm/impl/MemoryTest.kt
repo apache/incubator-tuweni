@@ -27,6 +27,12 @@ class MemoryTest {
     val mem = Memory()
     assertEquals(UInt256.valueOf(1), mem.newSize(UInt256.ZERO, UInt256.valueOf(4)))
 
-    assertEquals(UInt256.valueOf(96 / 32), mem.newSize(UInt256.valueOf(128), UInt256.valueOf(32)))
+    assertEquals(UInt256.valueOf(5), mem.newSize(UInt256.valueOf(128), UInt256.valueOf(32)))
+  }
+
+  @Test
+  fun testMaxSize() {
+    val mem = Memory()
+    assertEquals(UInt256.MAX_VALUE, mem.newSize(UInt256.MAX_VALUE.subtract(2), UInt256.valueOf(4)))
   }
 }

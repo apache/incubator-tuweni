@@ -39,17 +39,6 @@ class CompactEncodingTest {
   }
 
   @Test
-  void encodeTestValue() {
-    assertEquals(
-        Bytes.fromHexString("0x"),
-        CompactEncoding
-            .encode(
-                Bytes
-                    .fromHexString(
-                        "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000110")));
-  }
-
-  @Test
   void decode() {
     assertEquals(Bytes.of(0x01, 0x02, 0x03, 0x04, 0x05), CompactEncoding.decode(Bytes.of(0x11, 0x23, 0x45)));
     assertEquals(

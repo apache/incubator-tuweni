@@ -49,13 +49,6 @@ class GasTest {
   }
 
   @Test
-  void testOverflowAndRemove() {
-    Gas first = Gas.valueOf(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE));
-    Gas second = Gas.valueOf(10);
-    assertTrue(first.subtract(second).tooHigh());
-  }
-
-  @Test
   void testToLong() {
     Gas gas = Gas.valueOf(32L);
     assertEquals(32L, gas.toLong());
@@ -118,7 +111,9 @@ class GasTest {
 
   @Test
   void testToBytes() {
-    assertEquals(Bytes.fromHexString("0x0000000000000001"), Gas.valueOf(1L).toBytes());
+    assertEquals(
+        Bytes.fromHexString("0x0000000000000000000000000000000000000000000000000000000000000001"),
+        Gas.valueOf(1L).toBytes());
   }
 
   @Test
