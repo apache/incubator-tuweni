@@ -820,7 +820,7 @@ private val selfdestruct = Opcode { gasManager, hostContext, stack, msg, _, _, _
   )
   val inheritance = hostContext.getBalance(msg.destination)
 
-  val cost = if (hostContext.isEmptyAcount(recipientAddress) && !inheritance.isZero) {
+  val cost = if (hostContext.isEmptyAccount(recipientAddress) && !inheritance.isZero) {
     Gas.valueOf(30000)
   } else {
     Gas.valueOf(5000)

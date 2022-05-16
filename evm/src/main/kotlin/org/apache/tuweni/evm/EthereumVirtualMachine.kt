@@ -316,7 +316,6 @@ class EthereumVirtualMachine(
     if (!value.isZero && !options.containsKey("DISABLE_TRANSFER_VALUE")) {
       val destinationBalance = hostContext.getBalance(destination)
       val senderBalance = hostContext.getBalance(sender)
-      // TODO check out this logic, seems extremely wrong.
       val amount = Wei.valueOf(UInt256.fromBytes(value))
       if (senderBalance.toUInt256() < amount.toUInt256()) {
         return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
@@ -570,7 +569,7 @@ interface HostContext {
   suspend fun setBalance(address: Address, balance: Wei)
   fun addRefund(address: Address, refund: Wei)
   fun addRefund(address: Address, refund: Long)
-  suspend fun isEmptyAcount(address: Address): Boolean
+  suspend fun isEmptyAccount(address: Address): Boolean
 }
 
 interface EvmVm {

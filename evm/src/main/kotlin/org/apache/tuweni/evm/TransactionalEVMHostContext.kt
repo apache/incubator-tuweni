@@ -24,6 +24,7 @@ import org.apache.tuweni.eth.Log
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.StateRepository
 import org.apache.tuweni.eth.repository.StateRepository.Companion.EMPTY_CODE_HASH
+import org.apache.tuweni.eth.repository.StateRepository.Companion.EMPTY_STORAGE_HASH
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
@@ -85,10 +86,10 @@ class TransactionalEVMHostContext(
     return value
   }
 
-  override suspend fun isEmptyAcount(address: Address): Boolean {
-    logger.trace("Entering isEmptyAcount")
+  override suspend fun isEmptyAccount(address: Address): Boolean {
+    logger.trace("Entering isEmptyAccount")
     val accountState = transientRepository.getAccount(address)
-    return null == accountState || (accountState.balance.isEmpty && accountState.nonce.isZero && accountState.codeHash === EMPTY_CODE_HASH)
+    return null == accountState || (accountState.balance.isZero && accountState.nonce.isZero && EMPTY_CODE_HASH.equals(accountState.codeHash) && EMPTY_STORAGE_HASH.equals(accountState.storageRoot))
   }
 
   /**

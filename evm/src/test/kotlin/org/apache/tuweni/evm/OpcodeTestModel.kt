@@ -73,7 +73,7 @@ data class Log @JsonCreator constructor(
  * This model can be serialized into a YAML document, to be consumed by implementers.
  */
 data class OpcodeTestModel @JsonCreator constructor(
-  @JsonProperty("operation") val operation: Operation,
+  @JsonProperty("name") val name: String,
   @JsonProperty("hardFork") val hardFork: String,
   @JsonProperty("after") val after: After,
   @JsonProperty("before") val before: Before,

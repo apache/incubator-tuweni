@@ -344,17 +344,18 @@ private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
 
   val address = msg.destination
 
-  val currentValue = hostContext.getStorage(address, key)
-  val cost = if (value.equals(currentValue)) {
+  val currentValue = hostContext.getStorage(address, key) ?: UInt256.ZERO
+  val originalValue = hostContext.getRepositoryStorage(address, key) ?: UInt256.ZERO
+
+  val cost = if (currentValue.equals(UInt256.fromBytes(value))) {
     Gas.valueOf(800)
   } else {
-    val originalValue = hostContext.getRepositoryStorage(address, key)
-    if (value.equals(originalValue)) {
+    if (currentValue.equals(originalValue)) {
       if (originalValue.isZero) {
         Gas.valueOf(20000)
       } else Gas.valueOf(5000)
     } else {
-      Gas.valueOf(20000)
+      Gas.valueOf(800)
     }
   }
   gasManager.add(cost)
@@ -837,9 +838,7 @@ private val selfdestruct = Opcode { gasManager, hostContext, stack, msg, _, _, _
 
   val address = msg.destination
 
-  val inheritance = hostContext.getBalance(msg.destination)
-
-  val cost = if (hostContext.isEmptyAcount(recipientAddress) && !inheritance.isZero) {
+  val cost = if (hostContext.isEmptyAccount(recipientAddress)) {
     Gas.valueOf(30000)
   } else {
     Gas.valueOf(5000)
