@@ -1,49 +1,46 @@
 ---
-operation:
-  name: "CREATE2"
-  opcode: "0xf5"
-gasPrice: "0x5049"
-inputData: "0xce5a8e5ea59866ba57170dd495488c6580bd4da9"
-haltReason: "NONE"
+name: "CREATE2"
+hardFork: "petersburg"
+index: 2
 before:
   accounts:
-  - address: "0x88c3b450ea2afd3c5601c9a7a7faa1bc709aeddb"
-    balance: "0x3888"
-    code: "0x"
-    nonce: "0x1e"
-    storage: []
-  - address: "0x20352304d5d67a4752d59eed87d3ab0ed2fbf47d"
-    balance: "0x0"
-    code: "0x"
-    nonce: "0x6"
-    storage: []
-  - address: "0x3aabdee680ab23d214c598bbf52fb51730926f05"
-    balance: "0x0"
+  - address: "0xe8c3da2230e1704c45684256860e031981f138f0"
+    balance: "0x127c"
     code: "0x"
     nonce: "0x17"
+    storage: []
+  - address: "0x66570c31fd6c4d9321e76e8ed4b822c429562607"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x5d"
+    storage: []
+  - address: "0xcd3299641a2deb990d8aeb6d277154aae71d24c7"
+    balance: "0x82f"
+    code: "0x"
+    nonce: "0x3"
     storage: []
   memory: []
   stack:
-  - "0x5cfd78ed42b22714cc769703f82516adf2c7adc8630743"
-  - "0x4e"
-  - "0xfd"
-  - "0x134ca24eadd27d4913f9a289"
+  - "0x19141606908becfb83c636"
+  - "0x66"
+  - "0x8f"
+  - "0xea082d4295585c07eb6592e3d86a9eca122fd564c3a818c4de1774c98883b869"
 after:
   accounts:
-  - address: "0x88c3b450ea2afd3c5601c9a7a7faa1bc709aeddb"
-    balance: "0x3888"
+  - address: "0xcd3299641a2deb990d8aeb6d277154aae71d24c7"
+    balance: "0x82f"
     code: "0x"
-    nonce: "0x1e"
+    nonce: "0x3"
     storage: []
-  - address: "0x3aabdee680ab23d214c598bbf52fb51730926f05"
-    balance: "0x0"
+  - address: "0xe8c3da2230e1704c45684256860e031981f138f0"
+    balance: "0x127c"
     code: "0x"
     nonce: "0x17"
     storage: []
-  - address: "0x20352304d5d67a4752d59eed87d3ab0ed2fbf47d"
+  - address: "0x66570c31fd6c4d9321e76e8ed4b822c429562607"
     balance: "0x0"
     code: "0x"
-    nonce: "0x6"
+    nonce: "0x5d"
     storage: []
   logs: []
   memory:
@@ -55,26 +52,24 @@ after:
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x0000000000000000000000000000000000000000000000000000000000000000"
   stack:
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
-allGasUsed: "0x7d5d"
+sender: "0xe8c3da2230e1704c45684256860e031981f138f0"
+receiver: "0xcd3299641a2deb990d8aeb6d277154aae71d24c7"
+inputData: "0x378d337684ecc7c7a30d3b08f35469256dfac2033f36e0a92b"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x7fea082d4295585c07eb6592e3d86a9eca122fd564c3a818c4de1774c98883b869608f60666a19141606908becfb83c636f5"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x7d36"
+allGasUsed: "0x7d42"
+gasAvailable: "0x8793c8df00"
+gasLimit: 2551500000000
+haltReason: "NONE"
+coinbase: "0x66570c31fd6c4d9321e76e8ed4b822c429562607"
+refunds: {}
+number: 523859353414969939
+timestamp: 6814454656782559425
+mixHashOrPrevRandao: "0x90971e4900e5b4e37bb8a938e8263f411384694ae20f8405c844e4bce5267eef"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x6b134ca24eadd27d4913f9a28960fd604e765cfd78ed42b22714cc769703f82516adf2c7adc8630743f5"
-coinbase: "0x20352304d5d67a4752d59eed87d3ab0ed2fbf47d"
-difficultyBytes: "0x5dfc1ac763d3b547e710c033d384998d52df7417f9b1c0a7cfeda10f37bd8da9"
-gasAvailable: "0xeee8537500"
-gasLimit: 5328500000000
-gasUsed: "0x7d51"
-hardFork: "petersburg"
-index: 2
-mixHashOrPrevRandao: "0xac1f2ecfc034bd1bf1975ba4786ebe3acde1cda4ae306691beacad666f5a990b"
-number: 8934637582317665848
-receiver: "0x3aabdee680ab23d214c598bbf52fb51730926f05"
-refunds: {}
-sender: "0x88c3b450ea2afd3c5601c9a7a7faa1bc709aeddb"
-timestamp: 1019757979818841924
-value: "0x0"
+difficultyBytes: "0xe34ca0db0d3c411f48a1cb7af053d0db6f6b5136c16c2d5235997928db5a9952"

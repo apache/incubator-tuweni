@@ -1,73 +1,71 @@
 ---
-operation:
-  name: "DUP4"
-  opcode: "0x83"
-gasPrice: "0x0"
-inputData: "0x41a4"
-haltReason: "NONE"
+name: "DUP4"
+hardFork: "frontier"
+index: 1
 before:
   accounts:
-  - address: "0x51444dd75159292ac2cca691946f0baf5c2a663a"
+  - address: "0x020cefef2459121e53c00f54a8ae29a404f8d404"
+    balance: "0x740f"
+    code: "0x"
+    nonce: "0x1c"
+    storage: []
+  - address: "0x976a57fd9815d88221721e81b92f03e975686679"
     balance: "0x0"
     code: "0x"
-    nonce: "0x1f"
+    nonce: "0x13"
     storage: []
-  - address: "0x774f0249a81d8810ac0e4f63d41d2017670c5fc6"
-    balance: "0x607"
-    code: "0x"
-    nonce: "0x36"
-    storage: []
-  - address: "0x1bc9723ace8590609a0cf33480e21aaa60eb7897"
+  - address: "0x6734a01723a6c62c172ad9adb2a30ce7bed5b1db"
     balance: "0x0"
     code: "0x"
-    nonce: "0x12"
+    nonce: "0x2"
     storage: []
   memory: []
   stack:
-  - "0x10"
-  - "0x6363b3"
-  - "0x14e26d1d3b49fd67b1b3df992641491dc3b1edbaee09f09531e79e"
-  - "0xdc67ae4fa9c679352360282f7fab818cb9"
+  - "0x283df24252079a26015e475bbb4974b48f899b31532e62ce840ee95c1b"
+  - "0x3da77bf8434778b05fd4d2b0e6"
+  - "0xd9c83100f5523eaaf5145b"
+  - "0x156b861f6b8cbd6fb179d62bb7f8c3996da4882021b18df36b0d9ef58785ac2f"
 after:
   accounts:
-  - address: "0x1bc9723ace8590609a0cf33480e21aaa60eb7897"
+  - address: "0x6734a01723a6c62c172ad9adb2a30ce7bed5b1db"
     balance: "0x0"
     code: "0x"
-    nonce: "0x12"
+    nonce: "0x2"
     storage: []
-  - address: "0x51444dd75159292ac2cca691946f0baf5c2a663a"
+  - address: "0x976a57fd9815d88221721e81b92f03e975686679"
     balance: "0x0"
     code: "0x"
-    nonce: "0x1f"
+    nonce: "0x13"
     storage: []
-  - address: "0x774f0249a81d8810ac0e4f63d41d2017670c5fc6"
-    balance: "0x607"
+  - address: "0x020cefef2459121e53c00f54a8ae29a404f8d404"
+    balance: "0x740f"
     code: "0x"
-    nonce: "0x36"
+    nonce: "0x1c"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0xdc67ae4fa9c679352360282f7fab818cb9"
-  - "0x10"
-  - "0x6363b3"
-  - "0x14e26d1d3b49fd67b1b3df992641491dc3b1edbaee09f09531e79e"
-  - "0xdc67ae4fa9c679352360282f7fab818cb9"
+  - "0x156b861f6b8cbd6fb179d62bb7f8c3996da4882021b18df36b0d9ef58785ac2f"
+  - "0x283df24252079a26015e475bbb4974b48f899b31532e62ce840ee95c1b"
+  - "0x3da77bf8434778b05fd4d2b0e6"
+  - "0xd9c83100f5523eaaf5145b"
+  - "0x156b861f6b8cbd6fb179d62bb7f8c3996da4882021b18df36b0d9ef58785ac2f"
+sender: "0x020cefef2459121e53c00f54a8ae29a404f8d404"
+receiver: "0x6734a01723a6c62c172ad9adb2a30ce7bed5b1db"
+inputData: "0x5331866bf6ebb2a97dcd3996d1d889ba75890581f93699e85120f2fcc53c39edd4bc"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x7f156b861f6b8cbd6fb179d62bb7f8c3996da4882021b18df36b0d9ef58785ac2f6ad9c83100f5523eaaf5145b6c3da77bf8434778b05fd4d2b0e67c283df24252079a26015e475bbb4974b48f899b31532e62ce840ee95c1b83"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x3"
 allGasUsed: "0xf"
+gasAvailable: "0x153e2dc4600"
+gasLimit: 3785500000000
+haltReason: "NONE"
+coinbase: "0x976a57fd9815d88221721e81b92f03e975686679"
+refunds: {}
+number: 5746400161503152890
+timestamp: 4025952495966707557
+mixHashOrPrevRandao: "0xb4c31b44d2f55292449e7a6eb0cd480bd6a7719f7053338571372cf0b675569c"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x70dc67ae4fa9c679352360282f7fab818cb97a14e26d1d3b49fd67b1b3df992641491dc3b1edbaee09f09531e79e626363b3601083"
-coinbase: "0x774f0249a81d8810ac0e4f63d41d2017670c5fc6"
-difficultyBytes: "0xaddc4ebc88c6b9cb71c0ca364e3937e210ff0ec103fb833c7b7f72e547965434"
-gasAvailable: "0x35a4e9000"
-gasLimit: 3118500000000
-gasUsed: "0x3"
-hardFork: "frontier"
-index: 1
-mixHashOrPrevRandao: "0xfdd2340144d26322d7c12a68b46ac7649dfaecc65100ebe9faba8b7000cb8def"
-number: 1238117592864516380
-receiver: "0x1bc9723ace8590609a0cf33480e21aaa60eb7897"
-refunds: {}
-sender: "0x51444dd75159292ac2cca691946f0baf5c2a663a"
-timestamp: 4169091774724021242
-value: "0x0"
+difficultyBytes: "0xc9e9b3e8e5593dda805eecea19d37f50409210decf14557905e005ce100a6441"

@@ -1,70 +1,68 @@
 ---
-operation:
-  name: "SWAP2"
-  opcode: "0x91"
-gasPrice: "0x0"
-inputData: "0x0c41dde09146c67a8257474f721a0212bed517fb14ecaa4070c7c71ce2ee1d7fd0"
-haltReason: "NONE"
+name: "SWAP2"
+hardFork: "berlin"
+index: 2
 before:
   accounts:
-  - address: "0xc68557a09d069502f1b984963337241716ca40ad"
-    balance: "0x583e"
+  - address: "0xc564a725c27cec76eeb1cb3034dd3bad46312c96"
+    balance: "0x0"
     code: "0x"
-    nonce: "0xe"
+    nonce: "0x3"
     storage: []
-  - address: "0x1f863315db44055d00962de640c2d628f63cee95"
-    balance: "0x6b4e"
+  - address: "0xecc00c9959d4f4e461918d6f95db4bbbdb014d77"
+    balance: "0x4d13"
     code: "0x"
-    nonce: "0x3d"
+    nonce: "0x5"
     storage: []
-  - address: "0x6760ade3a2f04ff7c1e9bfdf5e8a765b066d1308"
-    balance: "0x7bac"
+  - address: "0x68e4f8ca6fc6655f4afbbc2ec699ef64fcce6d39"
+    balance: "0x0"
     code: "0x"
     nonce: "0x4"
     storage: []
   memory: []
   stack:
-  - "0x00eeb5878693535f3c5e68040cc0b7f774b39cda199a4d87e491caefee8e"
-  - "0xdba208da7051e7c07608ae00e463c7aaa207abaf7bdd5385"
-  - "0x0d5d169f1c39"
+  - "0x773f250c987dfc1577575592aad92f8e1785b9aee9b09c2f07edc88f1819ad"
+  - "0xa46472d8d98b611dd31a"
+  - "0xcd3e11092a892bcdd12db5e1cbedc3a2eb60b0159d1af6c1a9c94d7b6f"
 after:
   accounts:
-  - address: "0x1f863315db44055d00962de640c2d628f63cee95"
-    balance: "0x6b4e"
-    code: "0x"
-    nonce: "0x3d"
-    storage: []
-  - address: "0x6760ade3a2f04ff7c1e9bfdf5e8a765b066d1308"
-    balance: "0x7bac"
+  - address: "0x68e4f8ca6fc6655f4afbbc2ec699ef64fcce6d39"
+    balance: "0x0"
     code: "0x"
     nonce: "0x4"
     storage: []
-  - address: "0xc68557a09d069502f1b984963337241716ca40ad"
-    balance: "0x583e"
+  - address: "0xecc00c9959d4f4e461918d6f95db4bbbdb014d77"
+    balance: "0x4d13"
     code: "0x"
-    nonce: "0xe"
+    nonce: "0x5"
+    storage: []
+  - address: "0xc564a725c27cec76eeb1cb3034dd3bad46312c96"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x3"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0x0d5d169f1c39"
-  - "0xdba208da7051e7c07608ae00e463c7aaa207abaf7bdd5385"
-  - "0x00eeb5878693535f3c5e68040cc0b7f774b39cda199a4d87e491caefee8e"
+  - "0xcd3e11092a892bcdd12db5e1cbedc3a2eb60b0159d1af6c1a9c94d7b6f"
+  - "0xa46472d8d98b611dd31a"
+  - "0x773f250c987dfc1577575592aad92f8e1785b9aee9b09c2f07edc88f1819ad"
+sender: "0xc564a725c27cec76eeb1cb3034dd3bad46312c96"
+receiver: "0x68e4f8ca6fc6655f4afbbc2ec699ef64fcce6d39"
+inputData: "0x89b661fcaa6fcdac995b82dddb65d7ee9809e30b786c242f74950b6634554ac1b550e7ed427b458384ea7e890d32a9e9938cdcc6639cb1e224bdff5822c4bf"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x7ccd3e11092a892bcdd12db5e1cbedc3a2eb60b0159d1af6c1a9c94d7b6f69a46472d8d98b611dd31a7e773f250c987dfc1577575592aad92f8e1785b9aee9b09c2f07edc88f1819ad91"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x3"
 allGasUsed: "0xc"
+gasAvailable: "0x10eb6520b00"
+gasLimit: 5297500000000
+haltReason: "NONE"
+coinbase: "0xecc00c9959d4f4e461918d6f95db4bbbdb014d77"
+refunds: {}
+number: 989052864304482112
+timestamp: 232305612270364227
+mixHashOrPrevRandao: "0xb51279d5030f458f1ff97aa2050f977252ce512ced5063c8dbd3dabb7b88de4c"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x650d5d169f1c3977dba208da7051e7c07608ae00e463c7aaa207abaf7bdd53857d00eeb5878693535f3c5e68040cc0b7f774b39cda199a4d87e491caefee8e91"
-coinbase: "0x1f863315db44055d00962de640c2d628f63cee95"
-difficultyBytes: "0xddf981982d6f3d6b3eeafdca9e6a7da2ba7eea8bde327d22840dacda7e3ca419"
-gasAvailable: "0x1c1d42c7800"
-gasLimit: 6051000000000
-gasUsed: "0x3"
-hardFork: "berlin"
-index: 2
-mixHashOrPrevRandao: "0xb76786b8e1c604bc0ce84cf1f0cdf7bca8fd1ca8c207023003a889c719d3aab5"
-number: 7685404661920164948
-receiver: "0x6760ade3a2f04ff7c1e9bfdf5e8a765b066d1308"
-refunds: {}
-sender: "0xc68557a09d069502f1b984963337241716ca40ad"
-timestamp: 3634343335897323387
-value: "0x0"
+difficultyBytes: "0xd1f8ea19fc1c79bc348478d4f253e8ee52551b661c891dfffefd76e49ebef64f"

@@ -1,72 +1,70 @@
 ---
-operation:
-  name: "SWAP3"
-  opcode: "0x92"
-gasPrice: "0x16d2"
-inputData: "0x1034540db96d52d2c73d5b96734df2ee7a7934c6ff46afa642fc11430d183b1f98c5467435a9a19e2f90a8c6a6ef76"
-haltReason: "NONE"
+name: "SWAP3"
+hardFork: "istanbul"
+index: 4
 before:
   accounts:
-  - address: "0xd0c66413b50b7839682ac278da047ddfcfbcbdcb"
+  - address: "0x76c601ad6c2fe08933b7d3df1ce11fdc042dcd0d"
     balance: "0x0"
     code: "0x"
-    nonce: "0x5"
+    nonce: "0x4"
     storage: []
-  - address: "0x9d7747cd8e4c04e795291bb9b25f7e1235bc9bef"
-    balance: "0x2a86"
+  - address: "0x18b6268b16f5dad1df1f9301da176789a6c06b45"
+    balance: "0x2b6a"
     code: "0x"
-    nonce: "0x52"
+    nonce: "0x58"
     storage: []
-  - address: "0x499d0495b896d35ababf2a80fa035971acb9c587"
+  - address: "0x8baa964c70cd8bfa54ec4702e61616c1ca0fbab6"
     balance: "0x0"
     code: "0x"
-    nonce: "0x3"
+    nonce: "0xf"
     storage: []
   memory: []
   stack:
-  - "0x26c2deb59ce990"
-  - "0xb0a9f13ff4dcb53c44ec31d8ac9d7ad9ae0d465ef0bee2cb897f9dd121ce0cd7"
-  - "0x006a99f59d7c"
-  - "0xb78b7f4646e3d8fd8620ade314"
+  - "0xbb9df23925b424fe1c6d"
+  - "0x816d42e4c99f04be97d0beddffdc69f8cbb1982fb65083a5794d"
+  - "0xf973b67825dcdbba095a75741b39a7"
+  - "0x17032b1e5c80e2ff35580f09b11c23fa3f786522d5"
 after:
   accounts:
-  - address: "0xd0c66413b50b7839682ac278da047ddfcfbcbdcb"
+  - address: "0x76c601ad6c2fe08933b7d3df1ce11fdc042dcd0d"
     balance: "0x0"
     code: "0x"
-    nonce: "0x5"
+    nonce: "0x4"
     storage: []
-  - address: "0x499d0495b896d35ababf2a80fa035971acb9c587"
+  - address: "0x8baa964c70cd8bfa54ec4702e61616c1ca0fbab6"
     balance: "0x0"
     code: "0x"
-    nonce: "0x3"
+    nonce: "0xf"
     storage: []
-  - address: "0x9d7747cd8e4c04e795291bb9b25f7e1235bc9bef"
-    balance: "0x2a86"
+  - address: "0x18b6268b16f5dad1df1f9301da176789a6c06b45"
+    balance: "0x2b6a"
     code: "0x"
-    nonce: "0x52"
+    nonce: "0x58"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0xb78b7f4646e3d8fd8620ade314"
-  - "0xb0a9f13ff4dcb53c44ec31d8ac9d7ad9ae0d465ef0bee2cb897f9dd121ce0cd7"
-  - "0x006a99f59d7c"
-  - "0x26c2deb59ce990"
+  - "0x17032b1e5c80e2ff35580f09b11c23fa3f786522d5"
+  - "0x816d42e4c99f04be97d0beddffdc69f8cbb1982fb65083a5794d"
+  - "0xf973b67825dcdbba095a75741b39a7"
+  - "0xbb9df23925b424fe1c6d"
+sender: "0x76c601ad6c2fe08933b7d3df1ce11fdc042dcd0d"
+receiver: "0x8baa964c70cd8bfa54ec4702e61616c1ca0fbab6"
+inputData: "0x8c87ac1c75d492d058ef10a9f83fe401517d8f2addd6944a7b20c762c93e3485318e1c2b8ef18135127ef23ee4e3966bc6cd2284a0fea09b5499c490abc7d9"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x7417032b1e5c80e2ff35580f09b11c23fa3f786522d56ef973b67825dcdbba095a75741b39a779816d42e4c99f04be97d0beddffdc69f8cbb1982fb65083a5794d69bb9df23925b424fe1c6d92"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x3"
 allGasUsed: "0xf"
+gasAvailable: "0x16bde238c00"
+gasLimit: 2436000000000
+haltReason: "NONE"
+coinbase: "0x18b6268b16f5dad1df1f9301da176789a6c06b45"
+refunds: {}
+number: 1802960324507680086
+timestamp: 8658806902715897331
+mixHashOrPrevRandao: "0x4a8bd372e2b5af67759b0d09fc4b441266962591473959520c1075d06a4c5958"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x6cb78b7f4646e3d8fd8620ade31465006a99f59d7c7fb0a9f13ff4dcb53c44ec31d8ac9d7ad9ae0d465ef0bee2cb897f9dd121ce0cd76626c2deb59ce99092"
-coinbase: "0x9d7747cd8e4c04e795291bb9b25f7e1235bc9bef"
-difficultyBytes: "0xb71bf180863c6c8f982413f45b534b8e74afafc802639e9c203ec21de9aa4cc2"
-gasAvailable: "0xb12f227a00"
-gasLimit: 7538500000000
-gasUsed: "0x3"
-hardFork: "istanbul"
-index: 4
-mixHashOrPrevRandao: "0x81a3052941f5d4c576436adaac1512970db2774638f6641a4f31eef59b4f9ea0"
-number: 7234912312453927952
-receiver: "0x499d0495b896d35ababf2a80fa035971acb9c587"
-refunds: {}
-sender: "0xd0c66413b50b7839682ac278da047ddfcfbcbdcb"
-timestamp: 3218469695532341899
-value: "0x0"
+difficultyBytes: "0xb5530ce7a2ca75d014bd010ea6c9784e3aa48cd7c9f57bdab80626269ac5e3b2"

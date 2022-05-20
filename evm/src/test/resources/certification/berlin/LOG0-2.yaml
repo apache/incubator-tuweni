@@ -1,72 +1,74 @@
 ---
-operation:
-  name: "LOG0"
-  opcode: "0xa0"
-gasPrice: "0x6cde"
-inputData: "0x8d9cd37482987335593b494dbfcbc48a3e9721d33ddc2561d0b0ce89fb96d000e7805a1f5e681a5b411ed3913ab82ca66811e685b0496f25f7d6402d8648ce"
-haltReason: "NONE"
+name: "LOG0"
+hardFork: "berlin"
+index: 2
 before:
   accounts:
-  - address: "0xdb6522bc8229d28a8089e7d36e51abc749fabcb9"
-    balance: "0x2818"
-    code: "0x"
-    nonce: "0x7"
-    storage: []
-  - address: "0x8ebba48138e81b08e1189cdc24911787d221c09f"
-    balance: "0x4f31"
-    code: "0x"
-    nonce: "0x7"
-    storage: []
-  - address: "0xa9ab2591892fe7c9ec7a761188f2dd7b48a5d733"
+  - address: "0xb50eb6e59ce318a706612f37b20cf3c7081edc42"
     balance: "0x0"
     code: "0x"
-    nonce: "0x8"
+    nonce: "0x14"
+    storage: []
+  - address: "0x1aad9c62fc1b100e7d5aac0839753b0bdf187d2e"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x1c"
+    storage: []
+  - address: "0x290f8a96f9f47e56fda06244d41909a77f226f2a"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0xd"
     storage: []
   memory: []
   stack:
-  - "0x27"
-  - "0x1d"
+  - "0xa2"
+  - "0x28"
 after:
   accounts:
-  - address: "0xdb6522bc8229d28a8089e7d36e51abc749fabcb9"
-    balance: "0x1d7b"
+  - address: "0x290f8a96f9f47e56fda06244d41909a77f226f2a"
+    balance: "0x0"
     code: "0x"
-    nonce: "0x7"
+    nonce: "0xd"
     storage: []
-  - address: "0x8ebba48138e81b08e1189cdc24911787d221c09f"
-    balance: "0x4f31"
+  - address: "0xb50eb6e59ce318a706612f37b20cf3c7081edc42"
+    balance: "0x0"
     code: "0x"
-    nonce: "0x7"
+    nonce: "0x14"
     storage: []
-  - address: "0xa9ab2591892fe7c9ec7a761188f2dd7b48a5d733"
-    balance: "0xa9d"
+  - address: "0x1aad9c62fc1b100e7d5aac0839753b0bdf187d2e"
+    balance: "0x0"
     code: "0x"
-    nonce: "0x8"
+    nonce: "0x1c"
     storage: []
   logs:
-  - logger: "0xa9ab2591892fe7c9ec7a761188f2dd7b48a5d733"
-    data: "0x0000000000000000000000000000000000000000000000000000000000"
+  - logger: "0x290f8a96f9f47e56fda06244d41909a77f226f2a"
+    data: "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000"
     topics: []
   memory:
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
   stack: []
-allGasUsed: "0x26e"
+sender: "0xb50eb6e59ce318a706612f37b20cf3c7081edc42"
+receiver: "0x290f8a96f9f47e56fda06244d41909a77f226f2a"
+inputData: "0x37c6f86ae2ddbec155e5361987743ee01ecf2428db26a1430569487754a214a06cec"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x602860a2a0"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000002839"
+gasUsed: "0x2cc"
+allGasUsed: "0x2d2"
+gasAvailable: "0x49da97e400"
+gasLimit: 4683000000000
+haltReason: "NONE"
+coinbase: "0x1aad9c62fc1b100e7d5aac0839753b0bdf187d2e"
+refunds: {}
+number: 249307194653640944
+timestamp: 6714020689328002800
+mixHashOrPrevRandao: "0xb5b73cf1821a4f2b798e389849f4363b53130de6c58e6aad975763daf583c1db"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x601d6027a0"
-coinbase: "0x8ebba48138e81b08e1189cdc24911787d221c09f"
-difficultyBytes: "0xa63724c6b7497a6fc633c0fc15226b80ace45e85622364736cae816a4a174166"
-gasAvailable: "0x133f11a6a00"
-gasLimit: 1506500000000
-gasUsed: "0x268"
-hardFork: "berlin"
-index: 2
-mixHashOrPrevRandao: "0x6f116548746d8bde7b54bb09efd1b913c55cdc55fbb0bad51b2f0d2f2690a4e4"
-number: 2205441170944479089
-receiver: "0xa9ab2591892fe7c9ec7a761188f2dd7b48a5d733"
-refunds: {}
-sender: "0xdb6522bc8229d28a8089e7d36e51abc749fabcb9"
-timestamp: 3878960350335099658
-value: "0xa9d"
+difficultyBytes: "0xf48169d8995318e3e1d32fc34755fbaf9e40c36897f4f31c50e23b1e3b687225"

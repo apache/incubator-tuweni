@@ -1,74 +1,68 @@
 ---
-operation:
-  name: "MSTORE"
-  opcode: "0x52"
-gasPrice: "0x0"
-inputData: "0x933ba58999dab27ae6b50a932810fc36fcc3259e30d33bc6bf8dfcfd3877c46442f4cbc89340eb496243a13800118ed3ae6441"
-haltReason: "NONE"
+name: "MSTORE"
+hardFork: "petersburg"
+index: 1
 before:
   accounts:
-  - address: "0x7f6fbd177b5f945eef147807df605d6e559d74cb"
-    balance: "0x41d9"
+  - address: "0x50c859f57e8e930488ae6bac6cfb7dd6e79e5afa"
+    balance: "0x12b1"
     code: "0x"
-    nonce: "0x1d"
+    nonce: "0xb"
     storage: []
-  - address: "0x01a54d73b63a174ad3db59ea0ab61aaecdb4b61b"
+  - address: "0xa07693514d53525e04fbb640da0c4a1d3575466e"
     balance: "0x0"
     code: "0x"
-    nonce: "0xc"
+    nonce: "0x1e"
     storage: []
-  - address: "0xe2da0dd7307e84e62aac274d8cc50b05a763c3da"
-    balance: "0x0"
+  - address: "0x15e5d1fe7b53558598fa67298e03fc1611052967"
+    balance: "0x6757"
     code: "0x"
-    nonce: "0xf"
+    nonce: "0x5"
     storage: []
   memory: []
   stack:
-  - "0xdf"
-  - "0x239ba608fcf984c6c9"
+  - "0x4b"
+  - "0xae11eb06ecf4f1c2ef4324073cb3d64436"
 after:
   accounts:
-  - address: "0xe2da0dd7307e84e62aac274d8cc50b05a763c3da"
+  - address: "0x50c859f57e8e930488ae6bac6cfb7dd6e79e5afa"
+    balance: "0x8b6"
+    code: "0x"
+    nonce: "0xb"
+    storage: []
+  - address: "0xa07693514d53525e04fbb640da0c4a1d3575466e"
     balance: "0x0"
     code: "0x"
-    nonce: "0xf"
+    nonce: "0x1e"
     storage: []
-  - address: "0x01a54d73b63a174ad3db59ea0ab61aaecdb4b61b"
-    balance: "0x0"
+  - address: "0x15e5d1fe7b53558598fa67298e03fc1611052967"
+    balance: "0x7152"
     code: "0x"
-    nonce: "0xc"
-    storage: []
-  - address: "0x7f6fbd177b5f945eef147807df605d6e559d74cb"
-    balance: "0x41d9"
-    code: "0x"
-    nonce: "0x1d"
+    nonce: "0x5"
     storage: []
   logs: []
   memory:
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x00000000000000000000000000000000000000000000239ba608fcf984c6c900"
+  - "0x0000000000000000000000000000000000000000000000000000ae11eb06ecf4"
+  - "0xf1c2ef4324073cb3d64436000000000000000000000000000000000000000000"
   stack: []
-allGasUsed: "0x21"
+sender: "0x50c859f57e8e930488ae6bac6cfb7dd6e79e5afa"
+receiver: "0x15e5d1fe7b53558598fa67298e03fc1611052967"
+inputData: "0xd023ab64935b4ef70eaa47613352c9b868c3089b223b2d854a7f0c33b97d2a59486e9541f601"
+value: "0x00000000000000000000000000000000000000000000000000000000000009fb"
+code: "0x70ae11eb06ecf4f1c2ef4324073cb3d64436604b52"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0xf"
+allGasUsed: "0x15"
+gasAvailable: "0xfd8d754a00"
+gasLimit: 475000000000
+haltReason: "NONE"
+coinbase: "0xa07693514d53525e04fbb640da0c4a1d3575466e"
+refunds: {}
+number: 6571756384713395276
+timestamp: 747295691985466143
+mixHashOrPrevRandao: "0x602de902f701178cf7bc4ed2112d3ad8603409fd38ae012392705c820ba9dbb7"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x68239ba608fcf984c6c960df52"
-coinbase: "0x01a54d73b63a174ad3db59ea0ab61aaecdb4b61b"
-difficultyBytes: "0x17982e519e0bce9e9cc36a7b6fa4be4b9d5897ac1d1e7d322a6557854a253cae"
-gasAvailable: "0xa80ea1f200"
-gasLimit: 3620500000000
-gasUsed: "0x1b"
-hardFork: "petersburg"
-index: 1
-mixHashOrPrevRandao: "0x6e13e63f40fbdeb36dff4e5fdfabbcc1f36541dee9b8b7a8e5b3ef5a4db5da69"
-number: 6205605267696071040
-receiver: "0xe2da0dd7307e84e62aac274d8cc50b05a763c3da"
-refunds: {}
-sender: "0x7f6fbd177b5f945eef147807df605d6e559d74cb"
-timestamp: 3983656471500543546
-value: "0x0"
+difficultyBytes: "0x61f3f5638c37df68b30275770231f893fc4a1d6ea79028e1a3d9ced184da8f27"

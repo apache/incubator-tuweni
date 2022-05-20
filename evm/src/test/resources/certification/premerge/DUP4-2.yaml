@@ -1,73 +1,71 @@
 ---
-operation:
-  name: "DUP4"
-  opcode: "0x83"
-gasPrice: "0x0"
-inputData: "0x2a98932d233002e37a366fdfb1a37d9558349508ff0ab2a2796cbc32c00a04cbe153eb8ad90d5d773edce5f156a1ea5dd6aaf84c68e42b99"
-haltReason: "NONE"
+name: "DUP4"
+hardFork: "premerge"
+index: 2
 before:
   accounts:
-  - address: "0xacfb0851f2a9d401cffba472159884bf1b4d6c84"
+  - address: "0x4e3611cdf8e0626b976ae5f802e6d55eabe1d2ab"
     balance: "0x0"
     code: "0x"
-    nonce: "0x1"
+    nonce: "0x2"
     storage: []
-  - address: "0xf655a3d30449e55becada5233a11a03ee8c372a2"
-    balance: "0x4d89"
+  - address: "0x9a7767c87ac43de156705a4905f6f078c4a1b57c"
+    balance: "0x7a83"
     code: "0x"
-    nonce: "0x29"
+    nonce: "0x5b"
     storage: []
-  - address: "0xd163665356c2042e3551695681265e72d01f4d21"
-    balance: "0x7519"
+  - address: "0xc84d800b0e8531679d8e69f5abfe51611f4e544b"
+    balance: "0x0"
     code: "0x"
-    nonce: "0xa"
+    nonce: "0x9"
     storage: []
   memory: []
   stack:
-  - "0xac6e4607b25f3fae4d7581082620cd8ac48e076804e01e2ecd87"
-  - "0x338c106e032131e216"
-  - "0x399eb9576fd566"
-  - "0xe6c2ac4e1d4cb953c243523d4ed5fdb4b8"
+  - "0x525ef5e0feaaa86c5c37595a229bd74edf32a35e3d72"
+  - "0x8bdf09bef896f0095b"
+  - "0x16e0ad98793185d0ce740c98c89b466faae09648b15c0a3f1c59"
+  - "0x5cc0ab9541bae9036d72957336"
 after:
   accounts:
-  - address: "0xacfb0851f2a9d401cffba472159884bf1b4d6c84"
+  - address: "0x4e3611cdf8e0626b976ae5f802e6d55eabe1d2ab"
     balance: "0x0"
     code: "0x"
-    nonce: "0x1"
+    nonce: "0x2"
     storage: []
-  - address: "0xd163665356c2042e3551695681265e72d01f4d21"
-    balance: "0x7519"
+  - address: "0x9a7767c87ac43de156705a4905f6f078c4a1b57c"
+    balance: "0x7a83"
     code: "0x"
-    nonce: "0xa"
+    nonce: "0x5b"
     storage: []
-  - address: "0xf655a3d30449e55becada5233a11a03ee8c372a2"
-    balance: "0x4d89"
+  - address: "0xc84d800b0e8531679d8e69f5abfe51611f4e544b"
+    balance: "0x0"
     code: "0x"
-    nonce: "0x29"
+    nonce: "0x9"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0xe6c2ac4e1d4cb953c243523d4ed5fdb4b8"
-  - "0xac6e4607b25f3fae4d7581082620cd8ac48e076804e01e2ecd87"
-  - "0x338c106e032131e216"
-  - "0x399eb9576fd566"
-  - "0xe6c2ac4e1d4cb953c243523d4ed5fdb4b8"
+  - "0x5cc0ab9541bae9036d72957336"
+  - "0x525ef5e0feaaa86c5c37595a229bd74edf32a35e3d72"
+  - "0x8bdf09bef896f0095b"
+  - "0x16e0ad98793185d0ce740c98c89b466faae09648b15c0a3f1c59"
+  - "0x5cc0ab9541bae9036d72957336"
+sender: "0x4e3611cdf8e0626b976ae5f802e6d55eabe1d2ab"
+receiver: "0xc84d800b0e8531679d8e69f5abfe51611f4e544b"
+inputData: "0x9c980d6d8613d7172138ea09004270a360c4c09a56f02df56a7b249ec29d11e30404dcad238354d1745d96"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x6c5cc0ab9541bae9036d729573367916e0ad98793185d0ce740c98c89b466faae09648b15c0a3f1c59688bdf09bef896f0095b75525ef5e0feaaa86c5c37595a229bd74edf32a35e3d7283"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x3"
 allGasUsed: "0xf"
+gasAvailable: "0x12132ede500"
+gasLimit: 5504000000000
+haltReason: "NONE"
+coinbase: "0x9a7767c87ac43de156705a4905f6f078c4a1b57c"
+refunds: {}
+number: 5832580539483728859
+timestamp: 5180134230027483226
+mixHashOrPrevRandao: "0x0560cd35ce4d44f08f27e25f3fb8687390a30428bb4fff4b7df219beb9ecef28"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x70e6c2ac4e1d4cb953c243523d4ed5fdb4b866399eb9576fd56668338c106e032131e21679ac6e4607b25f3fae4d7581082620cd8ac48e076804e01e2ecd8783"
-coinbase: "0xf655a3d30449e55becada5233a11a03ee8c372a2"
-difficultyBytes: "0x4cb98aa0fd3a78b08e05387fe4a03fe7c7e0a760f65d155cf421a28902e56a64"
-gasAvailable: "0x141adc6f800"
-gasLimit: 5950500000000
-gasUsed: "0x3"
-hardFork: "premerge"
-index: 2
-mixHashOrPrevRandao: "0xdfb2e3b0e7abf501b227cbf98405fb05d59df62298125e6a0f5574124d31ad63"
-number: 1194310624402475735
-receiver: "0xd163665356c2042e3551695681265e72d01f4d21"
-refunds: {}
-sender: "0xacfb0851f2a9d401cffba472159884bf1b4d6c84"
-timestamp: 6513330843790927055
-value: "0x0"
+difficultyBytes: "0x1b5e15812f0f46298168a88c5fc2f4704f843dd65624f9fac27c240fdfce67a6"

@@ -1,73 +1,71 @@
 ---
-operation:
-  name: "DUP4"
-  opcode: "0x83"
-gasPrice: "0x0"
-inputData: "0x21ba23a50364f17510d736cdc1cf5e62bab4a17b718aac11a67da2c9eee40b7ca275353b41e532e6bacac32ba8cad0"
-haltReason: "NONE"
+name: "DUP4"
+hardFork: "spuriousDragon"
+index: 3
 before:
   accounts:
-  - address: "0xe8e77a309cd5ea3cbd32efc3a690214a85e3b1e0"
-    balance: "0x7913"
+  - address: "0x5cc1778a68091107025be8af0a05bad406011b21"
+    balance: "0x30c1"
     code: "0x"
-    nonce: "0x1d"
+    nonce: "0x9"
     storage: []
-  - address: "0x48781a8ff5703418da9144c3a2f9582f0048d253"
+  - address: "0x4fd37e74b81b3654dc2566497bbc31c3ad733749"
+    balance: "0x4545"
+    code: "0x"
+    nonce: "0x"
+    storage: []
+  - address: "0x2f3846ac17713001c162ad1820124a244e3d05e8"
     balance: "0x0"
     code: "0x"
-    nonce: "0x1e"
-    storage: []
-  - address: "0x8f4bd77a476699615b23f76e17479f73ff8f261b"
-    balance: "0x0"
-    code: "0x"
-    nonce: "0x6"
+    nonce: "0xd"
     storage: []
   memory: []
   stack:
-  - "0x4b82415167e461236a082d7072ed1a0a3e63a9b2553b70096b80"
-  - "0x8ab8fd9e2ebd51d8cb100d7451059a046b0e5397f9b322"
-  - "0x03fca0e6c47fa2cbc0010b446362ea6b8dab05"
-  - "0xd3cf0448989349e978c8ad5552e054f5b7cc67bec605"
+  - "0x97856baadf43"
+  - "0x8c5f5c5e8a"
+  - "0xc55c1b"
+  - "0xe7ea52caae746df0589444ed2185da8c8572173010"
 after:
   accounts:
-  - address: "0x48781a8ff5703418da9144c3a2f9582f0048d253"
-    balance: "0x0"
+  - address: "0x2f3846ac17713001c162ad1820124a244e3d05e8"
+    balance: "0x22e8"
     code: "0x"
-    nonce: "0x1e"
+    nonce: "0xd"
     storage: []
-  - address: "0xe8e77a309cd5ea3cbd32efc3a690214a85e3b1e0"
-    balance: "0x74a0"
+  - address: "0x4fd37e74b81b3654dc2566497bbc31c3ad733749"
+    balance: "0x4545"
     code: "0x"
-    nonce: "0x1d"
+    nonce: "0x"
     storage: []
-  - address: "0x8f4bd77a476699615b23f76e17479f73ff8f261b"
-    balance: "0x473"
+  - address: "0x5cc1778a68091107025be8af0a05bad406011b21"
+    balance: "0xdd9"
     code: "0x"
-    nonce: "0x6"
+    nonce: "0x9"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0xd3cf0448989349e978c8ad5552e054f5b7cc67bec605"
-  - "0x4b82415167e461236a082d7072ed1a0a3e63a9b2553b70096b80"
-  - "0x8ab8fd9e2ebd51d8cb100d7451059a046b0e5397f9b322"
-  - "0x03fca0e6c47fa2cbc0010b446362ea6b8dab05"
-  - "0xd3cf0448989349e978c8ad5552e054f5b7cc67bec605"
+  - "0xe7ea52caae746df0589444ed2185da8c8572173010"
+  - "0x97856baadf43"
+  - "0x8c5f5c5e8a"
+  - "0xc55c1b"
+  - "0xe7ea52caae746df0589444ed2185da8c8572173010"
+sender: "0x5cc1778a68091107025be8af0a05bad406011b21"
+receiver: "0x2f3846ac17713001c162ad1820124a244e3d05e8"
+inputData: "0x725970ffdf965a73a174fc489e866e62615d1e"
+value: "0x00000000000000000000000000000000000000000000000000000000000022e8"
+code: "0x74e7ea52caae746df0589444ed2185da8c857217301062c55c1b648c5f5c5e8a6597856baadf4383"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x3"
 allGasUsed: "0xf"
+gasAvailable: "0x1ed99d8d00"
+gasLimit: 9998500000000
+haltReason: "NONE"
+coinbase: "0x4fd37e74b81b3654dc2566497bbc31c3ad733749"
+refunds: {}
+number: 4062579961365148386
+timestamp: 6036302683597674863
+mixHashOrPrevRandao: "0x2f71463ac94e875d92cc00b7b4fbb68546676acccc86d8ddf2db4b8aa877ea13"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x75d3cf0448989349e978c8ad5552e054f5b7cc67bec6057203fca0e6c47fa2cbc0010b446362ea6b8dab05768ab8fd9e2ebd51d8cb100d7451059a046b0e5397f9b322794b82415167e461236a082d7072ed1a0a3e63a9b2553b70096b8083"
-coinbase: "0x48781a8ff5703418da9144c3a2f9582f0048d253"
-difficultyBytes: "0xb012105b21330f28ccb9db24d012491b52630db6be2a9d897723b3a4e6a3027d"
-gasAvailable: "0x3b7110d900"
-gasLimit: 8421000000000
-gasUsed: "0x3"
-hardFork: "spuriousDragon"
-index: 3
-mixHashOrPrevRandao: "0x406baa44b32ba3be7efca26a84223254b456ed8bdfb0b083d51e09ca696166b8"
-number: 5376683164403414666
-receiver: "0x8f4bd77a476699615b23f76e17479f73ff8f261b"
-refunds: {}
-sender: "0xe8e77a309cd5ea3cbd32efc3a690214a85e3b1e0"
-timestamp: 4275142452005076763
-value: "0x473"
+difficultyBytes: "0xe6dbdaa347a247398fef2686d9fe238ace9a97b4699df8a38fb9b71db42fe51f"

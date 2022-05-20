@@ -1,70 +1,75 @@
 ---
-operation:
-  name: "CALLDATACOPY"
-  opcode: "0x37"
-gasPrice: "0x5738"
-inputData: "0xa8b59a1729a15ad92ef02c805d250026958abccda0aef645fd978aa1eb77126654a3e595b95716ba4e29cc93888ff6930d64282331246e26b0fd0f69"
-haltReason: "NONE"
+name: "CALLDATACOPY"
+hardFork: "istanbul"
+index: 0
 before:
   accounts:
-  - address: "0x6b58a918da0a9c53f64e2aba4e76500c60194f8b"
-    balance: "0x53e8"
-    code: "0x"
-    nonce: "0x10"
-    storage: []
-  - address: "0xa1fd60c8c1297748108a71ec6ae27ed040aee9ee"
+  - address: "0x1cc864359b9b62a6ea9809ab761095d96de0cfab"
     balance: "0x0"
     code: "0x"
-    nonce: "0x2a"
+    nonce: "0x18"
     storage: []
-  - address: "0xa16691bf67f92b129e092df35eb03f6dd9dad46a"
+  - address: "0xc858442dc45deeff97a10dab1f2611853a853afd"
     balance: "0x0"
     code: "0x"
-    nonce: "0x1"
+    nonce: "0x53"
+    storage: []
+  - address: "0x230e28b9a0c76fae80db21abb1e1ea41fafe19ba"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x8"
     storage: []
   memory: []
   stack:
-  - "0x08"
-  - "0x85bbbe9332"
-  - "0x41"
+  - "0xcd"
+  - "0xaecc619f98e0b20b9d114e"
+  - "0x56"
 after:
   accounts:
-  - address: "0xa16691bf67f92b129e092df35eb03f6dd9dad46a"
+  - address: "0x230e28b9a0c76fae80db21abb1e1ea41fafe19ba"
     balance: "0x0"
     code: "0x"
-    nonce: "0x1"
+    nonce: "0x8"
     storage: []
-  - address: "0x6b58a918da0a9c53f64e2aba4e76500c60194f8b"
-    balance: "0x53e8"
-    code: "0x"
-    nonce: "0x10"
-    storage: []
-  - address: "0xa1fd60c8c1297748108a71ec6ae27ed040aee9ee"
+  - address: "0xc858442dc45deeff97a10dab1f2611853a853afd"
     balance: "0x0"
     code: "0x"
-    nonce: "0x2a"
+    nonce: "0x53"
+    storage: []
+  - address: "0x1cc864359b9b62a6ea9809ab761095d96de0cfab"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x18"
     storage: []
   logs: []
   memory:
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
   stack: []
-allGasUsed: "0x1e"
+sender: "0x1cc864359b9b62a6ea9809ab761095d96de0cfab"
+receiver: "0x230e28b9a0c76fae80db21abb1e1ea41fafe19ba"
+inputData: "0x35ab94194a3080c3965c0a066f9d6445eb67c06aba111fd26aea5fcfe6"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x60566aaecc619f98e0b20b9d114e60cd37"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x2a"
+allGasUsed: "0x33"
+gasAvailable: "0x673cb31200"
+gasLimit: 1206000000000
+haltReason: "NONE"
+coinbase: "0xc858442dc45deeff97a10dab1f2611853a853afd"
+refunds: {}
+number: 4946991791097110440
+timestamp: 5977854555842905167
+mixHashOrPrevRandao: "0x211738c5a98a59eaf6803f305875ba7267009fb3bd03a76abcbb930d0f9365a0"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x60416485bbbe9332600837"
-coinbase: "0xa1fd60c8c1297748108a71ec6ae27ed040aee9ee"
-difficultyBytes: "0x9425c48a0553cfd4886d28a55547e5bba691c62740df324777e667f778941a81"
-gasAvailable: "0x20aa881b00"
-gasLimit: 835500000000
-gasUsed: "0x15"
-hardFork: "istanbul"
-index: 0
-mixHashOrPrevRandao: "0xd1d415d463b59414bab64bbd1f250b68d7e5ae0533b543a31a63f88dc381f3e8"
-number: 2095835783099944953
-receiver: "0xa16691bf67f92b129e092df35eb03f6dd9dad46a"
-refunds: {}
-sender: "0x6b58a918da0a9c53f64e2aba4e76500c60194f8b"
-timestamp: 5203959232267458422
-value: "0x0"
+difficultyBytes: "0x92d905906b8066f769d839bb0a8ca1531e39decfe4aaf8db64bfb6a69d2d188a"

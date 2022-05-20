@@ -1,67 +1,72 @@
 ---
-operation:
-  name: "SHA3"
-  opcode: "0x20"
-gasPrice: "0x0"
-inputData: "0x62bc"
-haltReason: "NONE"
-before:
-  accounts:
-  - address: "0xd2a59246b50319b4b554f9166def159d75ff815a"
-    balance: "0x299e"
-    code: "0x"
-    nonce: "0xb"
-    storage: []
-  - address: "0x3c3f9dea2f404254dcbea58b444159c9f0827a22"
-    balance: "0x1071"
-    code: "0x"
-    nonce: "0x36"
-    storage: []
-  - address: "0xafe0ed4a58667559b6299cd8cfceab0caa474531"
-    balance: "0x76c4"
-    code: "0x"
-    nonce: "0xb"
-    storage: []
-  memory: []
-  stack:
-  - "0x23eb8035"
-  - "0x00"
-after:
-  accounts:
-  - address: "0x3c3f9dea2f404254dcbea58b444159c9f0827a22"
-    balance: "0x1071"
-    code: "0x"
-    nonce: "0x36"
-    storage: []
-  - address: "0xd2a59246b50319b4b554f9166def159d75ff815a"
-    balance: "0x299e"
-    code: "0x"
-    nonce: "0xb"
-    storage: []
-  - address: "0xafe0ed4a58667559b6299cd8cfceab0caa474531"
-    balance: "0x76c4"
-    code: "0x"
-    nonce: "0xb"
-    storage: []
-  logs: []
-  memory: []
-  stack:
-  - "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
-allGasUsed: "0x24"
-baseFee: null
-chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x60006323eb803520"
-coinbase: "0x3c3f9dea2f404254dcbea58b444159c9f0827a22"
-difficultyBytes: "0x1251e6c0aba5b7f8a98456fcf188a743021ecd40d0d1686328c543cae975d9fc"
-gasAvailable: "0x116d08fe700"
-gasLimit: 6249000000000
-gasUsed: "0x1e"
+name: "SHA3"
 hardFork: "tangerineWhistle"
 index: 3
-mixHashOrPrevRandao: "0x5a784f1e8a176adef2d1a011518f5bb8eeb5f46881061c28006103d223356873"
-number: 5002787772168950193
-receiver: "0xafe0ed4a58667559b6299cd8cfceab0caa474531"
+before:
+  accounts:
+  - address: "0x3e0db4fd0461256f42d0e4454c4a90a203836991"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x1d"
+    storage: []
+  - address: "0x9d68f241a4c6a24d1492b3b0a6e29950e4a9000f"
+    balance: "0x190f"
+    code: "0x"
+    nonce: "0x5d"
+    storage: []
+  - address: "0xe12ee817eeeb490d13e916ef90cba3dd7210ab61"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0xa"
+    storage: []
+  memory: []
+  stack:
+  - "0x8a"
+  - "0x51"
+after:
+  accounts:
+  - address: "0xe12ee817eeeb490d13e916ef90cba3dd7210ab61"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0xa"
+    storage: []
+  - address: "0x9d68f241a4c6a24d1492b3b0a6e29950e4a9000f"
+    balance: "0x190f"
+    code: "0x"
+    nonce: "0x5d"
+    storage: []
+  - address: "0x3e0db4fd0461256f42d0e4454c4a90a203836991"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x1d"
+    storage: []
+  logs: []
+  memory:
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  stack:
+  - "0x51980562e41978f15369c21f26920284ac6836d53b02cd89edf4fedc97e68215"
+sender: "0x3e0db4fd0461256f42d0e4454c4a90a203836991"
+receiver: "0xe12ee817eeeb490d13e916ef90cba3dd7210ab61"
+inputData: "0xfdfbd46ffac362ac6823f6bc5e192f921892"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x6051608a20"
+gasPrice: "0x000000000000000000000000000000000000000000000000000000000000651a"
+gasUsed: "0x45"
+allGasUsed: "0x4b"
+gasAvailable: "0xd52e034400"
+gasLimit: 834500000000
+haltReason: "NONE"
+coinbase: "0x9d68f241a4c6a24d1492b3b0a6e29950e4a9000f"
 refunds: {}
-sender: "0xd2a59246b50319b4b554f9166def159d75ff815a"
-timestamp: 8739837764419190751
-value: "0x0"
+number: 4697466156593497208
+timestamp: 1664179782728812768
+mixHashOrPrevRandao: "0x3860512298576ab5cdf76caae0a11aa2ce649df66ded1dec7e867d47d441c32b"
+baseFee: null
+chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
+difficultyBytes: "0x89feddffe12e19aae64c89270eb37950bec791564eadc696023c33c1e5cf6512"

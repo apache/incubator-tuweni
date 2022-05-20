@@ -1,75 +1,73 @@
 ---
-operation:
-  name: "DUP5"
-  opcode: "0x84"
-gasPrice: "0x5a49"
-inputData: "0x98f999e73cea4b6d260b86"
-haltReason: "NONE"
+name: "DUP5"
+hardFork: "frontier"
+index: 1
 before:
   accounts:
-  - address: "0xb033d7585c6b090dd10dc528754f080021d66d0f"
-    balance: "0x7864"
+  - address: "0x57ba05dd4fb87ff3beb5a173cbd0b765e15e49d4"
+    balance: "0x6e55"
     code: "0x"
-    nonce: "0x1f"
+    nonce: "0x6"
     storage: []
-  - address: "0xf371d7da1958f31d4934fdc42954996589bfbc18"
+  - address: "0x0b15c2f72f5b943729de97e4d64e6b7f56444149"
     balance: "0x0"
     code: "0x"
-    nonce: "0x52"
+    nonce: "0x2"
     storage: []
-  - address: "0xaa4d114f1bc90f173408ea039bc293097d5738cb"
-    balance: "0x0"
+  - address: "0x3dabb08ac0a0f519156a171142afc8a2f33fe7e4"
+    balance: "0x54d4"
     code: "0x"
-    nonce: "0x16"
+    nonce: "0x6"
     storage: []
   memory: []
   stack:
-  - "0xd279cc09340cbb94d6797b242d7a787f1daca7cc3d8af630c1d0c6b0"
-  - "0x63f15e"
-  - "0xf64126bac5494c97f98e7d219409f0"
-  - "0xd407dbbabd839ada9cc50c5aaa"
-  - "0x248cca75501a888711c1a72b849f35a866b33bb39561d4db0d73bf806d897f30"
+  - "0xe9e81ce141"
+  - "0x92c2bd29ba0eb3caa7f5bd0ea56f72c550a8e1"
+  - "0xa0d21488b1a6f54b7f37f8"
+  - "0x6dd4cff3a574bbdc30a0b62850ce"
+  - "0x70310e2918a90ace"
 after:
   accounts:
-  - address: "0xb033d7585c6b090dd10dc528754f080021d66d0f"
-    balance: "0x7864"
+  - address: "0x3dabb08ac0a0f519156a171142afc8a2f33fe7e4"
+    balance: "0x5d8f"
     code: "0x"
-    nonce: "0x1f"
+    nonce: "0x6"
     storage: []
-  - address: "0xaa4d114f1bc90f173408ea039bc293097d5738cb"
+  - address: "0x57ba05dd4fb87ff3beb5a173cbd0b765e15e49d4"
+    balance: "0x659a"
+    code: "0x"
+    nonce: "0x6"
+    storage: []
+  - address: "0x0b15c2f72f5b943729de97e4d64e6b7f56444149"
     balance: "0x0"
     code: "0x"
-    nonce: "0x16"
-    storage: []
-  - address: "0xf371d7da1958f31d4934fdc42954996589bfbc18"
-    balance: "0x0"
-    code: "0x"
-    nonce: "0x52"
+    nonce: "0x2"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0x248cca75501a888711c1a72b849f35a866b33bb39561d4db0d73bf806d897f30"
-  - "0xd279cc09340cbb94d6797b242d7a787f1daca7cc3d8af630c1d0c6b0"
-  - "0x63f15e"
-  - "0xf64126bac5494c97f98e7d219409f0"
-  - "0xd407dbbabd839ada9cc50c5aaa"
-  - "0x248cca75501a888711c1a72b849f35a866b33bb39561d4db0d73bf806d897f30"
+  - "0x70310e2918a90ace"
+  - "0xe9e81ce141"
+  - "0x92c2bd29ba0eb3caa7f5bd0ea56f72c550a8e1"
+  - "0xa0d21488b1a6f54b7f37f8"
+  - "0x6dd4cff3a574bbdc30a0b62850ce"
+  - "0x70310e2918a90ace"
+sender: "0x57ba05dd4fb87ff3beb5a173cbd0b765e15e49d4"
+receiver: "0x3dabb08ac0a0f519156a171142afc8a2f33fe7e4"
+inputData: "0x0c634ddbbd9f3840171b17b207bc2918de1442d1738118d0a368dc5fbac5be099703ffb3d9408d86aff2a571303e4a232df93136002b4a"
+value: "0x00000000000000000000000000000000000000000000000000000000000008bb"
+code: "0x6770310e2918a90ace6d6dd4cff3a574bbdc30a0b62850ce6aa0d21488b1a6f54b7f37f87292c2bd29ba0eb3caa7f5bd0ea56f72c550a8e164e9e81ce14184"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x3"
 allGasUsed: "0x12"
+gasAvailable: "0x1b5b2c58f00"
+gasLimit: 5055000000000
+haltReason: "NONE"
+coinbase: "0x0b15c2f72f5b943729de97e4d64e6b7f56444149"
+refunds: {}
+number: 8022776970261270768
+timestamp: 8009508047596776075
+mixHashOrPrevRandao: "0xa32335bf091c69aa0530f152605ce0e552a8e64ff2110936452563ed435647bf"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x7f248cca75501a888711c1a72b849f35a866b33bb39561d4db0d73bf806d897f306cd407dbbabd839ada9cc50c5aaa6ef64126bac5494c97f98e7d219409f06263f15e7bd279cc09340cbb94d6797b242d7a787f1daca7cc3d8af630c1d0c6b084"
-coinbase: "0xf371d7da1958f31d4934fdc42954996589bfbc18"
-difficultyBytes: "0x9ce1d7a50b592aed21140ae8cd50fab6626cb848b0e0d35ca1ca2c094f1c1000"
-gasAvailable: "0x9f4d7f7a00"
-gasLimit: 3146000000000
-gasUsed: "0x3"
-hardFork: "frontier"
-index: 1
-mixHashOrPrevRandao: "0xd8c9e98e1e96ebe3153024bb40fc721cf79861ac2ba71addffc7ed09e38af854"
-number: 2975324602743273320
-receiver: "0xaa4d114f1bc90f173408ea039bc293097d5738cb"
-refunds: {}
-sender: "0xb033d7585c6b090dd10dc528754f080021d66d0f"
-timestamp: 1816352709594996470
-value: "0x0"
+difficultyBytes: "0x5f395e69909c332d5df22e44c8e4cca9c7d2c72fab41cbd748a52f2574461848"

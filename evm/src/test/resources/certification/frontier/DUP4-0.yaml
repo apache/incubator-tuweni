@@ -1,73 +1,71 @@
 ---
-operation:
-  name: "DUP4"
-  opcode: "0x83"
-gasPrice: "0x22dd"
-inputData: "0x2b630530690444349ef4df5fe5c8975f8b4eca33243da97e44ae75d2"
-haltReason: "NONE"
+name: "DUP4"
+hardFork: "frontier"
+index: 0
 before:
   accounts:
-  - address: "0x397eea40a06390fb083ef3cc8f073e479ebf92ee"
-    balance: "0x3ea2"
-    code: "0x"
-    nonce: "0x22"
-    storage: []
-  - address: "0xbb24ddc0551c6cf6fd26e73c11abf1138b5b83a7"
+  - address: "0x1d6596354cb38c5f2548f023a468a62729ff24ba"
     balance: "0x0"
     code: "0x"
-    nonce: "0x54"
+    nonce: "0x27"
     storage: []
-  - address: "0xe8494b9d519b26210258388b3eff008fe12c1513"
-    balance: "0x1a55"
+  - address: "0x3641395f669de54915be01850155906881488ed8"
+    balance: "0x2253"
     code: "0x"
-    nonce: "0xf"
+    nonce: "0x32"
+    storage: []
+  - address: "0x5ad26c96d71f9e07ce2e63d25649a47bc07f37ea"
+    balance: "0x3fb8"
+    code: "0x"
+    nonce: "0x12"
     storage: []
   memory: []
   stack:
-  - "0x243d07b6ffef5e44074e1887845588d02145956f"
-  - "0x0f"
-  - "0xc1685d9865faa42c89a67b"
-  - "0xafeb20e1fe77f4f54ffeabb6627f0bfe69ed896c39ce6bcc30c16923c63f"
+  - "0x83a5c0550603588ea98b984a491fe65028099c969283d241"
+  - "0x654f2cc1809517096d08"
+  - "0xcaa0ebe30064a306b1e49898ab331507b204"
+  - "0x5f89"
 after:
   accounts:
-  - address: "0xe8494b9d519b26210258388b3eff008fe12c1513"
-    balance: "0x1a55"
-    code: "0x"
-    nonce: "0xf"
-    storage: []
-  - address: "0xbb24ddc0551c6cf6fd26e73c11abf1138b5b83a7"
+  - address: "0x1d6596354cb38c5f2548f023a468a62729ff24ba"
     balance: "0x0"
     code: "0x"
-    nonce: "0x54"
+    nonce: "0x27"
     storage: []
-  - address: "0x397eea40a06390fb083ef3cc8f073e479ebf92ee"
-    balance: "0x3ea2"
+  - address: "0x5ad26c96d71f9e07ce2e63d25649a47bc07f37ea"
+    balance: "0x3fb8"
     code: "0x"
-    nonce: "0x22"
+    nonce: "0x12"
+    storage: []
+  - address: "0x3641395f669de54915be01850155906881488ed8"
+    balance: "0x2253"
+    code: "0x"
+    nonce: "0x32"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0xafeb20e1fe77f4f54ffeabb6627f0bfe69ed896c39ce6bcc30c16923c63f"
-  - "0x243d07b6ffef5e44074e1887845588d02145956f"
-  - "0x0f"
-  - "0xc1685d9865faa42c89a67b"
-  - "0xafeb20e1fe77f4f54ffeabb6627f0bfe69ed896c39ce6bcc30c16923c63f"
+  - "0x5f89"
+  - "0x83a5c0550603588ea98b984a491fe65028099c969283d241"
+  - "0x654f2cc1809517096d08"
+  - "0xcaa0ebe30064a306b1e49898ab331507b204"
+  - "0x5f89"
+sender: "0x1d6596354cb38c5f2548f023a468a62729ff24ba"
+receiver: "0x5ad26c96d71f9e07ce2e63d25649a47bc07f37ea"
+inputData: "0xac6badde626f6b2f930a9790654e"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x615f8971caa0ebe30064a306b1e49898ab331507b20469654f2cc1809517096d087783a5c0550603588ea98b984a491fe65028099c969283d24183"
+gasPrice: "0x00000000000000000000000000000000000000000000000000000000000078ee"
+gasUsed: "0x3"
 allGasUsed: "0xf"
+gasAvailable: "0x12b8f560200"
+gasLimit: 9176500000000
+haltReason: "NONE"
+coinbase: "0x3641395f669de54915be01850155906881488ed8"
+refunds: {}
+number: 8489066491497903736
+timestamp: 2136564497363315833
+mixHashOrPrevRandao: "0x8eaeaecdcb8feaa231f044c41918346189803d8ad092f513bd9ad8ab42bbae32"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x7dafeb20e1fe77f4f54ffeabb6627f0bfe69ed896c39ce6bcc30c16923c63f6ac1685d9865faa42c89a67b600f73243d07b6ffef5e44074e1887845588d02145956f83"
-coinbase: "0xbb24ddc0551c6cf6fd26e73c11abf1138b5b83a7"
-difficultyBytes: "0xf8b28a887e07a68486d4c3f65beed334490e6d922008239f606fa452ca12ff0e"
-gasAvailable: "0x3f30b35a00"
-gasLimit: 9302500000000
-gasUsed: "0x3"
-hardFork: "frontier"
-index: 0
-mixHashOrPrevRandao: "0x734bef911acca01936327adee30e79a87d85428112bdaf3dc7900bd584f0080b"
-number: 2089909669954844756
-receiver: "0xe8494b9d519b26210258388b3eff008fe12c1513"
-refunds: {}
-sender: "0x397eea40a06390fb083ef3cc8f073e479ebf92ee"
-timestamp: 7154016916782543574
-value: "0x0"
+difficultyBytes: "0x5341a0f5f94ccdd65315b77e9d82af85803a06ca436c3cbf7d5abd9f1b0e3a3d"

@@ -1,48 +1,45 @@
 ---
-operation:
-  name: "CODECOPY"
-  opcode: "0x39"
-gasPrice: "0x0"
-inputData: "0xaccd9fd4d47900a1c735275864ec195895e89ca5302d5b550883b7b66c1656a4cd4acc592e0477a4909e4f302a7d485073090b4081ab68d1d473260a94"
-haltReason: "NONE"
+name: "CODECOPY"
+hardFork: "tangerineWhistle"
+index: 2
 before:
   accounts:
-  - address: "0x88b8f96976b88690ae765a993c046e5ec7d66d4b"
-    balance: "0xdc1"
-    code: "0x"
-    nonce: "0x22"
-    storage: []
-  - address: "0x78d7fe05f43e1388ea971d5f0c293eb6bd71126e"
+  - address: "0x49542a548234945bbf9de786e073c2a3f4add998"
     balance: "0x0"
     code: "0x"
-    nonce: "0x5f"
+    nonce: "0xe"
     storage: []
-  - address: "0xd0b0e92127c50ffa341c47f0f5da7db61d7483f2"
-    balance: "0x664f"
+  - address: "0xc25bdb92b7922b4e12a8939a69139bd56bc5f4be"
+    balance: "0x72c1"
     code: "0x"
-    nonce: "0x14"
+    nonce: "0x4c"
+    storage: []
+  - address: "0x68275487a31e67b5d0f8aee46050e889a31ebe45"
+    balance: "0x8e6"
+    code: "0x"
+    nonce: "0x"
     storage: []
   memory: []
   stack:
-  - "0x48"
-  - "0x33bd8aedb2314a57ccd3ef550033a35255b49f9e81713df7"
-  - "0x64"
+  - "0xb9"
+  - "0xdf3c8dcc00a6c5b87c9c82b4982a897d"
+  - "0xc6"
 after:
   accounts:
-  - address: "0xd0b0e92127c50ffa341c47f0f5da7db61d7483f2"
-    balance: "0x664f"
-    code: "0x"
-    nonce: "0x14"
-    storage: []
-  - address: "0x78d7fe05f43e1388ea971d5f0c293eb6bd71126e"
+  - address: "0x49542a548234945bbf9de786e073c2a3f4add998"
     balance: "0x0"
     code: "0x"
-    nonce: "0x5f"
+    nonce: "0xe"
     storage: []
-  - address: "0x88b8f96976b88690ae765a993c046e5ec7d66d4b"
-    balance: "0xdc1"
+  - address: "0xc25bdb92b7922b4e12a8939a69139bd56bc5f4be"
+    balance: "0x72c1"
     code: "0x"
-    nonce: "0x22"
+    nonce: "0x4c"
+    storage: []
+  - address: "0x68275487a31e67b5d0f8aee46050e889a31ebe45"
+    balance: "0x8e6"
+    code: "0x"
+    nonce: "0x"
     storage: []
   logs: []
   memory:
@@ -52,22 +49,29 @@ after:
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
   stack: []
-allGasUsed: "0x2a"
+sender: "0x49542a548234945bbf9de786e073c2a3f4add998"
+receiver: "0x68275487a31e67b5d0f8aee46050e889a31ebe45"
+inputData: "0xe240dcd3854f01"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x60c66fdf3c8dcc00a6c5b87c9c82b4982a897d60b939"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000001fe4"
+gasUsed: "0x3c"
+allGasUsed: "0x45"
+gasAvailable: "0x70e054f000"
+gasLimit: 4825500000000
+haltReason: "NONE"
+coinbase: "0xc25bdb92b7922b4e12a8939a69139bd56bc5f4be"
+refunds: {}
+number: 7995799170876907776
+timestamp: 7528510614084945868
+mixHashOrPrevRandao: "0xd9beb22c53de8212c645b5ba41aee2466f4a968cb278df63b24e4d964ff040a9"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x60647733bd8aedb2314a57ccd3ef550033a35255b49f9e81713df7604839"
-coinbase: "0x78d7fe05f43e1388ea971d5f0c293eb6bd71126e"
-difficultyBytes: "0xab3fdcaa0b108cfdcf49ee736e85f4f46e9170bfc1ef6211b6d16960355dc29e"
-gasAvailable: "0x760b8e0e00"
-gasLimit: 2980000000000
-gasUsed: "0x21"
-hardFork: "tangerineWhistle"
-index: 2
-mixHashOrPrevRandao: "0x9269683004261e8061cea82c57393bc60b90ce33712087a9f1907cf789387c59"
-number: 3764893594434891610
-receiver: "0xd0b0e92127c50ffa341c47f0f5da7db61d7483f2"
-refunds: {}
-sender: "0x88b8f96976b88690ae765a993c046e5ec7d66d4b"
-timestamp: 7998648097350020997
-value: "0x0"
+difficultyBytes: "0x7bfc0b31c82243e5fb422b151fe0c6c5093570cd56036df95b5c185b6251730f"

@@ -1,47 +1,44 @@
 ---
-operation:
-  name: "REVERT"
-  opcode: "0xfd"
-gasPrice: "0x7cde"
-inputData: "0xf9e7750b45fd23ed8d87b93ff23677"
-haltReason: "NONE"
+name: "REVERT"
+hardFork: "constantinople"
+index: 2
 before:
   accounts:
-  - address: "0x0ebdc1913d5e668a497ec5dc72c0beb23beefcd9"
-    balance: "0x0"
+  - address: "0x9992162b3da98488e77f02949c6bbe6beb6d2997"
+    balance: "0x122"
     code: "0x"
-    nonce: "0x1d"
+    nonce: "0x18"
     storage: []
-  - address: "0x1ce8e8fe06808d260daffdfa6dd5cc0f4be66d8d"
-    balance: "0x0"
+  - address: "0xe937323cc4f0e8fdeb651ac940a540d0caf593ba"
+    balance: "0x1339"
     code: "0x"
-    nonce: "0x44"
+    nonce: "0x26"
     storage: []
-  - address: "0x2f9a32a0691e542e4bf9ac6a9db8043646d6b951"
-    balance: "0x0"
+  - address: "0xe3645cfbf72b11b68646bda0881dc087b83e136c"
+    balance: "0x4037"
     code: "0x"
-    nonce: "0x5"
+    nonce: "0x2"
     storage: []
   memory: []
   stack:
-  - "0x77"
-  - "0x39"
+  - "0xd4"
+  - "0xdf"
 after:
   accounts:
-  - address: "0x1ce8e8fe06808d260daffdfa6dd5cc0f4be66d8d"
-    balance: "0x0"
+  - address: "0xe3645cfbf72b11b68646bda0881dc087b83e136c"
+    balance: "0x4037"
     code: "0x"
-    nonce: "0x44"
+    nonce: "0x2"
     storage: []
-  - address: "0x0ebdc1913d5e668a497ec5dc72c0beb23beefcd9"
-    balance: "0x0"
+  - address: "0x9992162b3da98488e77f02949c6bbe6beb6d2997"
+    balance: "0x122"
     code: "0x"
-    nonce: "0x1d"
+    nonce: "0x18"
     storage: []
-  - address: "0x2f9a32a0691e542e4bf9ac6a9db8043646d6b951"
-    balance: "0x0"
+  - address: "0xe937323cc4f0e8fdeb651ac940a540d0caf593ba"
+    balance: "0x1339"
     code: "0x"
-    nonce: "0x5"
+    nonce: "0x26"
     storage: []
   logs: []
   memory:
@@ -51,22 +48,31 @@ after:
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
   stack: []
-allGasUsed: "0x18"
+sender: "0x9992162b3da98488e77f02949c6bbe6beb6d2997"
+receiver: "0xe3645cfbf72b11b68646bda0881dc087b83e136c"
+inputData: "0x619963de8ae565effcaf0ec6c5d50fc438dd5f882ac089de50ed304b4f847fb36e7615bcb603f8cad10a1b03c93e417a5ee7a14b8740c897be"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x60df60d4fd"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x2a"
+allGasUsed: "0x30"
+gasAvailable: "0x12a05f200"
+gasLimit: 2987000000000
+haltReason: "NONE"
+coinbase: "0xe937323cc4f0e8fdeb651ac940a540d0caf593ba"
+refunds: {}
+number: 4737049893997037341
+timestamp: 474938060059744682
+mixHashOrPrevRandao: "0x5745333322ad3557d37100c0d5f1867d9b8da654725c56985dbdf24100b8e21b"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x60396077fd"
-coinbase: "0x1ce8e8fe06808d260daffdfa6dd5cc0f4be66d8d"
-difficultyBytes: "0x075cb83e9073e527e24aba4b65bcc7d0c3cb970efcd7f3343c3a4dc2e7f40dbf"
-gasAvailable: "0xfc57839600"
-gasLimit: 1779000000000
-gasUsed: "0x12"
-hardFork: "constantinople"
-index: 2
-mixHashOrPrevRandao: "0x533fadb58a1fd82d649b1c30ec86388cf94bb3793d805a9b2892189e0dd59ccf"
-number: 3233877430176200404
-receiver: "0x2f9a32a0691e542e4bf9ac6a9db8043646d6b951"
-refunds: {}
-sender: "0x0ebdc1913d5e668a497ec5dc72c0beb23beefcd9"
-timestamp: 8427835066924610935
-value: "0x0"
+difficultyBytes: "0xe1b7edcf5dc298ff3e3091e7ce3288cda7498d1833d8cd2f6537f97ec6db2786"

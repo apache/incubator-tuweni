@@ -1,67 +1,65 @@
 ---
-operation:
-  name: "AND"
-  opcode: "0x16"
-gasPrice: "0x5330"
-inputData: "0xb5c2ee037052"
-haltReason: "NONE"
+name: "AND"
+hardFork: "homestead"
+index: 2
 before:
   accounts:
-  - address: "0x780aceaf8cd80eb82ca534ffe56da7fa350b2d2b"
-    balance: "0x5cb8"
-    code: "0x"
-    nonce: "0xf"
-    storage: []
-  - address: "0xc0ea9392603e0db01b0cc8fbc880301eec8088be"
+  - address: "0xa3d6c1f57480f94bfa19354196eb77c7080a97ff"
     balance: "0x0"
     code: "0x"
-    nonce: "0x1d"
+    nonce: "0x26"
     storage: []
-  - address: "0xcc86e32362228a98a229764a1952f4df75832264"
-    balance: "0x7c30"
+  - address: "0x02f441619ca9de0f1e5d29034b1433fb082799c2"
+    balance: "0x0"
     code: "0x"
-    nonce: "0x13"
+    nonce: "0x40"
+    storage: []
+  - address: "0x157de7d36b0e0d67b274a19a419b4cd6431518f2"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0xc"
     storage: []
   memory: []
   stack:
-  - "0xa8bab11e779889bb804cc48c9d421d65ec5ec3f60e8e61ee55faf2cd"
-  - "0xed436a2988fb3cb3c4bc7c870e40c8d41f3f76a8e4"
+  - "0x005c2fc13154f95628cf"
+  - "0x10903d75e2fa2cf02849fe095ce7367a4141"
 after:
   accounts:
-  - address: "0xc0ea9392603e0db01b0cc8fbc880301eec8088be"
+  - address: "0x157de7d36b0e0d67b274a19a419b4cd6431518f2"
     balance: "0x0"
     code: "0x"
-    nonce: "0x1d"
+    nonce: "0xc"
     storage: []
-  - address: "0xcc86e32362228a98a229764a1952f4df75832264"
-    balance: "0x7c30"
+  - address: "0x02f441619ca9de0f1e5d29034b1433fb082799c2"
+    balance: "0x0"
     code: "0x"
-    nonce: "0x13"
+    nonce: "0x40"
     storage: []
-  - address: "0x780aceaf8cd80eb82ca534ffe56da7fa350b2d2b"
-    balance: "0x5cb8"
+  - address: "0xa3d6c1f57480f94bfa19354196eb77c7080a97ff"
+    balance: "0x0"
     code: "0x"
-    nonce: "0xf"
+    nonce: "0x26"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0x0000000000000000000000a90048008899001144ac5c83060088400e1572a0c4"
+  - "0x0000000000000000000000000000000000000000000000482e01104430520041"
+sender: "0xa3d6c1f57480f94bfa19354196eb77c7080a97ff"
+receiver: "0x157de7d36b0e0d67b274a19a419b4cd6431518f2"
+inputData: "0x4d39df47bb9eea7281a6ced88efc7c6ed908c9288633d7ba22ea817de7940ba6d88854af9d25869ff46a8bf430c28caa157a0d"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x7110903d75e2fa2cf02849fe095ce7367a414169005c2fc13154f95628cf16"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000004090"
+gasUsed: "0x3"
 allGasUsed: "0x9"
+gasAvailable: "0x1702cd32500"
+gasLimit: 2466500000000
+haltReason: "NONE"
+coinbase: "0x02f441619ca9de0f1e5d29034b1433fb082799c2"
+refunds: {}
+number: 7017413612155258383
+timestamp: 7617356296758783535
+mixHashOrPrevRandao: "0x44c6dff7d815a789579d2cb078a1525a5e51c3ccb915fddd0e65ec117042a4fd"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x74ed436a2988fb3cb3c4bc7c870e40c8d41f3f76a8e47ba8bab11e779889bb804cc48c9d421d65ec5ec3f60e8e61ee55faf2cd16"
-coinbase: "0xc0ea9392603e0db01b0cc8fbc880301eec8088be"
-difficultyBytes: "0x03d25b90ee3063f77b70d0f62c51d69e7e7b055f94388196eb5ab64b9f7a64f4"
-gasAvailable: "0x1170634d000"
-gasLimit: 5117500000000
-gasUsed: "0x3"
-hardFork: "homestead"
-index: 2
-mixHashOrPrevRandao: "0x3cb9b69b03ceb02a3d951b19db57fd17d2595fb024f231a16f9ea89c64b3cba3"
-number: 2032443840430886611
-receiver: "0xcc86e32362228a98a229764a1952f4df75832264"
-refunds: {}
-sender: "0x780aceaf8cd80eb82ca534ffe56da7fa350b2d2b"
-timestamp: 5087804278271102651
-value: "0x0"
+difficultyBytes: "0x633013f88f3d8cac4bd16e8bf9e228db873ddbb2789f4beeeb3cc7387c084b09"

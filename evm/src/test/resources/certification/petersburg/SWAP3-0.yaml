@@ -1,72 +1,70 @@
 ---
-operation:
-  name: "SWAP3"
-  opcode: "0x92"
-gasPrice: "0x312f"
-inputData: "0x1297ccda8ae58758a382a979"
-haltReason: "NONE"
+name: "SWAP3"
+hardFork: "petersburg"
+index: 0
 before:
   accounts:
-  - address: "0xa02e5dd7df69d11beb3fe62688ebe37f42bbdb83"
-    balance: "0x2c33"
+  - address: "0x887c918b3dc7d3ff2f7cceee9038eb1b7aebd880"
+    balance: "0x658b"
     code: "0x"
-    nonce: "0x2"
+    nonce: "0x16"
     storage: []
-  - address: "0xb14cc00b3a7185855898e624ebfe7e5f2a5842e1"
+  - address: "0xd2f58d2b5a66cc7deb3be6f272815be0b02a5ed3"
+    balance: "0x6238"
+    code: "0x"
+    nonce: "0x6"
+    storage: []
+  - address: "0x99d2b85350ea851a1d1d32d611fd9cc86f92b468"
     balance: "0x0"
     code: "0x"
-    nonce: "0x57"
-    storage: []
-  - address: "0x3096093e69d575b27a25dbca80f6d632f57c73f8"
-    balance: "0x4656"
-    code: "0x"
-    nonce: "0x12"
+    nonce: "0x"
     storage: []
   memory: []
   stack:
-  - "0xf0285b6d703d1f2ac4a720088af59376d383c5fdc4c2711892"
-  - "0xa7ab0784c0db04087a0f2c0538287cea273d1d0b68"
-  - "0xc7a47fcc15dcc10a19c46ee2eaa2c9949d971e09ecf6faa34a0c4cff90bb"
-  - "0x2f3e08f75d18d6"
+  - "0x4e26da4b023790c42aee5297"
+  - "0x07e97aa59b55ba1b4f92ba661e"
+  - "0x16f866be59070ee4ef9d0aa8b1"
+  - "0x80b21570426e0da5efda63"
 after:
   accounts:
-  - address: "0xa02e5dd7df69d11beb3fe62688ebe37f42bbdb83"
-    balance: "0x2c33"
+  - address: "0x99d2b85350ea851a1d1d32d611fd9cc86f92b468"
+    balance: "0x5c8c"
     code: "0x"
-    nonce: "0x2"
+    nonce: "0x"
     storage: []
-  - address: "0x3096093e69d575b27a25dbca80f6d632f57c73f8"
-    balance: "0x4656"
+  - address: "0x887c918b3dc7d3ff2f7cceee9038eb1b7aebd880"
+    balance: "0x8ff"
     code: "0x"
-    nonce: "0x12"
+    nonce: "0x16"
     storage: []
-  - address: "0xb14cc00b3a7185855898e624ebfe7e5f2a5842e1"
-    balance: "0x0"
+  - address: "0xd2f58d2b5a66cc7deb3be6f272815be0b02a5ed3"
+    balance: "0x6238"
     code: "0x"
-    nonce: "0x57"
+    nonce: "0x6"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0x2f3e08f75d18d6"
-  - "0xa7ab0784c0db04087a0f2c0538287cea273d1d0b68"
-  - "0xc7a47fcc15dcc10a19c46ee2eaa2c9949d971e09ecf6faa34a0c4cff90bb"
-  - "0xf0285b6d703d1f2ac4a720088af59376d383c5fdc4c2711892"
+  - "0x80b21570426e0da5efda63"
+  - "0x07e97aa59b55ba1b4f92ba661e"
+  - "0x16f866be59070ee4ef9d0aa8b1"
+  - "0x4e26da4b023790c42aee5297"
+sender: "0x887c918b3dc7d3ff2f7cceee9038eb1b7aebd880"
+receiver: "0x99d2b85350ea851a1d1d32d611fd9cc86f92b468"
+inputData: "0x0bb6f054f75d670d76a7fcf42e3cf570847bef523a3694cca6a036f45595dc40048a24e2b64eab2bbc07985a43e08c661f2df6b2a1a531a7243f"
+value: "0x0000000000000000000000000000000000000000000000000000000000005c8c"
+code: "0x6a80b21570426e0da5efda636c16f866be59070ee4ef9d0aa8b16c07e97aa59b55ba1b4f92ba661e6b4e26da4b023790c42aee529792"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x3"
 allGasUsed: "0xf"
+gasAvailable: "0x1435aee4000"
+gasLimit: 3730500000000
+haltReason: "NONE"
+coinbase: "0xd2f58d2b5a66cc7deb3be6f272815be0b02a5ed3"
+refunds: {}
+number: 2618056233393852261
+timestamp: 3375483582673832046
+mixHashOrPrevRandao: "0x50e9a9fe376927a62ff3da8e4b4bc8b77f09ce9f2a02865c3b09b9bb5024e4ca"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x662f3e08f75d18d67dc7a47fcc15dcc10a19c46ee2eaa2c9949d971e09ecf6faa34a0c4cff90bb74a7ab0784c0db04087a0f2c0538287cea273d1d0b6878f0285b6d703d1f2ac4a720088af59376d383c5fdc4c271189292"
-coinbase: "0xb14cc00b3a7185855898e624ebfe7e5f2a5842e1"
-difficultyBytes: "0xdf9b0a5624073e22c3b21178948ccc387797767f3f429db1a65976c1da801773"
-gasAvailable: "0xbe38feaa00"
-gasLimit: 2914000000000
-gasUsed: "0x3"
-hardFork: "petersburg"
-index: 0
-mixHashOrPrevRandao: "0x48b2c0bab9570595bc3ae876580acd9ff54e14eb9f6bfaec595d9696247d58b3"
-number: 6111209709501436303
-receiver: "0x3096093e69d575b27a25dbca80f6d632f57c73f8"
-refunds: {}
-sender: "0xa02e5dd7df69d11beb3fe62688ebe37f42bbdb83"
-timestamp: 1639449623450770675
-value: "0x0"
+difficultyBytes: "0x910c76cdb88ff6cf4b2c30b438cdfba067c66b31967e10d27c22e146f929b8af"

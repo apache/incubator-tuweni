@@ -1,54 +1,51 @@
 ---
-operation:
-  name: "LOG1"
-  opcode: "0xa1"
-gasPrice: "0x2922"
-inputData: "0xb2fc9b4ffd6dd5e4a0c3"
-haltReason: "NONE"
+name: "LOG1"
+hardFork: "frontier"
+index: 0
 before:
   accounts:
-  - address: "0xc07b8db86e021ceede2dade32d660498f1c21bf2"
-    balance: "0x3e27"
-    code: "0x"
-    nonce: "0x8"
-    storage: []
-  - address: "0x64132a9825e188ddad0db7c873be753304d5dad6"
+  - address: "0x645509a4e286911cff036a545aa1c599a6826137"
     balance: "0x0"
     code: "0x"
-    nonce: "0x4a"
+    nonce: "0x20"
     storage: []
-  - address: "0xe2def0e2eee42644ab441a576be176759736e3b3"
-    balance: "0x3c0c"
+  - address: "0x7a07afeed11cd2595967ea08f788912f7a5d25d5"
+    balance: "0x65e1"
     code: "0x"
-    nonce: "0x5"
+    nonce: "0x35"
+    storage: []
+  - address: "0x8479c263a840b9a893d0a314be7b9d603d969e76"
+    balance: "0x2cea"
+    code: "0x"
+    nonce: "0x12"
     storage: []
   memory: []
   stack:
-  - "0xe3"
-  - "0x33"
-  - "0xf88622df8b8f987449af5dab6e0aa3c76b97fb4ccfe9"
+  - "0xed"
+  - "0x0c"
+  - "0xde7d533153951564cc"
 after:
   accounts:
-  - address: "0xe2def0e2eee42644ab441a576be176759736e3b3"
-    balance: "0x739e"
+  - address: "0x8479c263a840b9a893d0a314be7b9d603d969e76"
+    balance: "0x2cea"
     code: "0x"
-    nonce: "0x5"
+    nonce: "0x12"
     storage: []
-  - address: "0x64132a9825e188ddad0db7c873be753304d5dad6"
+  - address: "0x7a07afeed11cd2595967ea08f788912f7a5d25d5"
+    balance: "0x65e1"
+    code: "0x"
+    nonce: "0x35"
+    storage: []
+  - address: "0x645509a4e286911cff036a545aa1c599a6826137"
     balance: "0x0"
     code: "0x"
-    nonce: "0x4a"
-    storage: []
-  - address: "0xc07b8db86e021ceede2dade32d660498f1c21bf2"
-    balance: "0x695"
-    code: "0x"
-    nonce: "0x8"
+    nonce: "0x20"
     storage: []
   logs:
-  - logger: "0xe2def0e2eee42644ab441a576be176759736e3b3"
-    data: "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+  - logger: "0x8479c263a840b9a893d0a314be7b9d603d969e76"
+    data: "0x000000000000000000000000"
     topics:
-    - "0x00000000000000000000f88622df8b8f987449af5dab6e0aa3c76b97fb4ccfe9"
+    - "0x0000000000000000000000000000000000000000000000de7d533153951564cc"
   memory:
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -58,23 +55,23 @@ after:
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x0000000000000000000000000000000000000000000000000000000000000000"
   stack: []
-allGasUsed: "0x4aa"
+sender: "0x645509a4e286911cff036a545aa1c599a6826137"
+receiver: "0x8479c263a840b9a893d0a314be7b9d603d969e76"
+inputData: "0xbf27722cca44bcd641c0aa63a448d4ff9f61fdd7862555cf"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x68de7d533153951564cc600c60eda1"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x366"
+allGasUsed: "0x36f"
+gasAvailable: "0x10d6e7eb400"
+gasLimit: 5650000000000
+haltReason: "NONE"
+coinbase: "0x7a07afeed11cd2595967ea08f788912f7a5d25d5"
+refunds: {}
+number: 6310559531337133463
+timestamp: 6692686161507349738
+mixHashOrPrevRandao: "0xb0810d32cbe02224388911af5bacaafdb8eb8f7017199f56d926d9a96cc4becc"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x75f88622df8b8f987449af5dab6e0aa3c76b97fb4ccfe9603360e3a1"
-coinbase: "0x64132a9825e188ddad0db7c873be753304d5dad6"
-difficultyBytes: "0x452cf3e72d802225377b84574057fd6c6aa021d76cb20844f8e910a94a6c744e"
-gasAvailable: "0x1c6b7df0a00"
-gasLimit: 1126500000000
-gasUsed: "0x4a1"
-hardFork: "frontier"
-index: 0
-mixHashOrPrevRandao: "0xac002aedaed53fd4d03b626818089e45a7412ac419e35128d3263c4182f5fc60"
-number: 834799796667386418
-receiver: "0xe2def0e2eee42644ab441a576be176759736e3b3"
-refunds: {}
-sender: "0xc07b8db86e021ceede2dade32d660498f1c21bf2"
-timestamp: 6076637973880468049
-value: "0x3792"
+difficultyBytes: "0xcf446b7b47d1295daef31ccfb28b5f68a29bd3552a2af18ce1d93a452ea5420a"
