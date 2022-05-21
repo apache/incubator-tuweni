@@ -1,67 +1,65 @@
 ---
-operation:
-  name: "ADD"
-  opcode: "0x01"
-gasPrice: "0x0"
-inputData: "0x37e9952542ddb2c6b59fda3ca874ef43191cbaecf700c0b2c49b3425c964f596b4827d2f911c570acb32f03dfe57f465bceb08e8a1c025abb3748b2bc1e7"
-haltReason: "NONE"
+name: "ADD"
+hardFork: "spuriousDragon"
+index: 3
 before:
   accounts:
-  - address: "0x4b62b36ce138e9d227a837473ab3f6e2dc37a2db"
-    balance: "0x45af"
+  - address: "0xe5b2fcedc41b2a909b6dec6ee515a460c5cbae55"
+    balance: "0x0"
     code: "0x"
-    nonce: "0x1d"
+    nonce: "0x11"
     storage: []
-  - address: "0x2aa9993e8a83466c7ae5c6826a016a14b936c80f"
-    balance: "0x6683"
+  - address: "0xc8eb8f98c08fa9f551f72e5865e7ee9d3dc263d3"
+    balance: "0x1bc8"
     code: "0x"
-    nonce: "0x15"
+    nonce: "0x39"
     storage: []
-  - address: "0x622cb443df8f3c66d0abe1accda16f037cd947c6"
-    balance: "0x7fd"
+  - address: "0x32335485be676e13591e6d086ea8e8b1ec2789a0"
+    balance: "0x0"
     code: "0x"
-    nonce: "0xf"
+    nonce: "0x11"
     storage: []
   memory: []
   stack:
-  - "0xd53c9f0a0bfaf5eb9c06a6e847ff2eeafb6825388f7063ec"
-  - "0x840b48dd8455"
+  - "0x8ebd6a4f601dba06e4fc43942874f179726be18bd54080"
+  - "0x77c0f155662246f6a896a509124d499ed078bb6c462e405287c5b378"
 after:
   accounts:
-  - address: "0x622cb443df8f3c66d0abe1accda16f037cd947c6"
-    balance: "0x7fd"
+  - address: "0xc8eb8f98c08fa9f551f72e5865e7ee9d3dc263d3"
+    balance: "0x1bc8"
     code: "0x"
-    nonce: "0xf"
+    nonce: "0x39"
     storage: []
-  - address: "0x2aa9993e8a83466c7ae5c6826a016a14b936c80f"
-    balance: "0x6683"
+  - address: "0x32335485be676e13591e6d086ea8e8b1ec2789a0"
+    balance: "0x0"
     code: "0x"
-    nonce: "0x15"
+    nonce: "0x11"
     storage: []
-  - address: "0x4b62b36ce138e9d227a837473ab3f6e2dc37a2db"
-    balance: "0x45af"
+  - address: "0xe5b2fcedc41b2a909b6dec6ee515a460c5cbae55"
+    balance: "0x0"
     code: "0x"
-    nonce: "0x1d"
+    nonce: "0x11"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0x00d53c9f0a0bfaf5eb9c06a6e847ff2eeafb68a943d84de841"
+  - "0x77c0f15566b10460f7f6c2c3193245e264a1305dbfa0ac34139af3f8"
+sender: "0xe5b2fcedc41b2a909b6dec6ee515a460c5cbae55"
+receiver: "0x32335485be676e13591e6d086ea8e8b1ec2789a0"
+inputData: "0xac851011dec778e9db98bca56184f497d16cdf463585d181d7dd416e2eea94e1148fa06a3dbe256ddee3f0259b9688"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x7b77c0f155662246f6a896a509124d499ed078bb6c462e405287c5b378768ebd6a4f601dba06e4fc43942874f179726be18bd5408001"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x3"
 allGasUsed: "0x9"
+gasAvailable: "0x1b972681000"
+gasLimit: 2428000000000
+haltReason: "NONE"
+coinbase: "0xc8eb8f98c08fa9f551f72e5865e7ee9d3dc263d3"
+refunds: {}
+number: 5380774087136804434
+timestamp: 3125907287348420522
+mixHashOrPrevRandao: "0x107ca3b7189788452b88cc161c7b9960c2700f1118fe7024c8b1e9d9f5665415"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x65840b48dd845577d53c9f0a0bfaf5eb9c06a6e847ff2eeafb6825388f7063ec01"
-coinbase: "0x2aa9993e8a83466c7ae5c6826a016a14b936c80f"
-difficultyBytes: "0x122b06bfebdfb60d6b847a45823814463b1ca422a40b177ad53c13741ab7c6ef"
-gasAvailable: "0x5c92ce8800"
-gasLimit: 7830000000000
-gasUsed: "0x3"
-hardFork: "spuriousDragon"
-index: 3
-mixHashOrPrevRandao: "0x355fb7bf86ac1bf5dd3700add31153b4f7ba31723bb124ef6e73a05454882e27"
-number: 7422277209773494141
-receiver: "0x622cb443df8f3c66d0abe1accda16f037cd947c6"
-refunds: {}
-sender: "0x4b62b36ce138e9d227a837473ab3f6e2dc37a2db"
-timestamp: 6380746476970421443
-value: "0x0"
+difficultyBytes: "0x3f88ba3ed65e5363ef6039662236f44d2351999d87f4fb9664bb23916752b7b4"

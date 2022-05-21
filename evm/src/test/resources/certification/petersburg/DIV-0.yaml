@@ -1,67 +1,65 @@
 ---
-operation:
-  name: "DIV"
-  opcode: "0x04"
-gasPrice: "0x56c2"
-inputData: "0x648efd5b8934f259d17156bc4271454c5ccb365c92d107c517"
-haltReason: "NONE"
+name: "DIV"
+hardFork: "petersburg"
+index: 0
 before:
   accounts:
-  - address: "0xb55ae1955e05deee3a284ca438f8d1bc3b158af8"
-    balance: "0x584f"
-    code: "0x"
-    nonce: "0x9"
-    storage: []
-  - address: "0x84f950add38ddced7ae9248647f3e054a56f1398"
+  - address: "0xf0a8beb27e63f826e479f909334e79b96a547d65"
     balance: "0x0"
     code: "0x"
-    nonce: "0x40"
+    nonce: "0xd"
     storage: []
-  - address: "0xbea668f3b3ddf17d81fba86f52a8c1d441183f49"
-    balance: "0x1552"
+  - address: "0x5fdd4e4ca057c21db769528f664fc4ac502a95c6"
+    balance: "0x34c"
     code: "0x"
-    nonce: "0x14"
+    nonce: "0x18"
+    storage: []
+  - address: "0x4b36dc8aab2f8cdcfd15db90fde8befe8670b315"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x9"
     storage: []
   memory: []
   stack:
-  - "0xecd3eb5b115109bb3a894ec8fd16161cf06bc3a79ca53e07c304"
-  - "0x5a657aaf8ef647e88eae37d2cd4aa8a100d512e79321ba7913a31e942f"
+  - "0xcb300b959c1f27c356cfed266bdb7b989f515ff0ee18e3be9e0905869a"
+  - "0xccf5cc6dd09d28714d6195b6a957b5"
 after:
   accounts:
-  - address: "0xb55ae1955e05deee3a284ca438f8d1bc3b158af8"
-    balance: "0x2499"
+  - address: "0x5fdd4e4ca057c21db769528f664fc4ac502a95c6"
+    balance: "0x34c"
+    code: "0x"
+    nonce: "0x18"
+    storage: []
+  - address: "0x4b36dc8aab2f8cdcfd15db90fde8befe8670b315"
+    balance: "0x0"
     code: "0x"
     nonce: "0x9"
     storage: []
-  - address: "0x84f950add38ddced7ae9248647f3e054a56f1398"
+  - address: "0xf0a8beb27e63f826e479f909334e79b96a547d65"
     balance: "0x0"
     code: "0x"
-    nonce: "0x40"
-    storage: []
-  - address: "0xbea668f3b3ddf17d81fba86f52a8c1d441183f49"
-    balance: "0x4908"
-    code: "0x"
-    nonce: "0x14"
+    nonce: "0xd"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0x00"
+  - "0x00fdc9406692febf2229e75a54dfc4"
+sender: "0xf0a8beb27e63f826e479f909334e79b96a547d65"
+receiver: "0x4b36dc8aab2f8cdcfd15db90fde8befe8670b315"
+inputData: "0x4e6ba98b640a9370e52a6bd4e1632b"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x6eccf5cc6dd09d28714d6195b6a957b57ccb300b959c1f27c356cfed266bdb7b989f515ff0ee18e3be9e0905869a04"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000003135"
+gasUsed: "0x5"
 allGasUsed: "0xb"
+gasAvailable: "0x112db487d00"
+gasLimit: 3994000000000
+haltReason: "NONE"
+coinbase: "0x5fdd4e4ca057c21db769528f664fc4ac502a95c6"
+refunds: {}
+number: 8227275389229620260
+timestamp: 8648315131789921073
+mixHashOrPrevRandao: "0x6418828a3a15535441e7310c10d5f38e359bcbfff0690e884e17a222bf086a07"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x7c5a657aaf8ef647e88eae37d2cd4aa8a100d512e79321ba7913a31e942f79ecd3eb5b115109bb3a894ec8fd16161cf06bc3a79ca53e07c30404"
-coinbase: "0x84f950add38ddced7ae9248647f3e054a56f1398"
-difficultyBytes: "0x48110f2148bfe92c78033cdf7b13b796195e3173a31437e654a34fed40a90997"
-gasAvailable: "0x9a3427ff00"
-gasLimit: 6526500000000
-gasUsed: "0x5"
-hardFork: "petersburg"
-index: 0
-mixHashOrPrevRandao: "0x17dadef7e54c103b33c97d622d3aaffb1bc4323969bc0707ff873e45fcea873b"
-number: 2021003666536690696
-receiver: "0xbea668f3b3ddf17d81fba86f52a8c1d441183f49"
-refunds: {}
-sender: "0xb55ae1955e05deee3a284ca438f8d1bc3b158af8"
-timestamp: 351675910674405911
-value: "0x33b6"
+difficultyBytes: "0x22da5c64f3ad19ac516ed807df822e7680d4875432a04618940bd3d74d59ec5d"

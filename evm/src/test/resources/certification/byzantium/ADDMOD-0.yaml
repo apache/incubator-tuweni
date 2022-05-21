@@ -1,68 +1,66 @@
 ---
-operation:
-  name: "ADDMOD"
-  opcode: "0x08"
-gasPrice: "0x305a"
-inputData: "0x2e6c4553c748b9c1ad989d0c215aa759e6a41e6cb7116adfc2f2921dbe91dc898484e28b6766bca8ff67ff97eb2729"
-haltReason: "NONE"
+name: "ADDMOD"
+hardFork: "byzantium"
+index: 0
 before:
   accounts:
-  - address: "0x8f14c6a8cd17f884c607f245b762f3e679168490"
+  - address: "0x6f0a4d14b59b351ec5520ca64c348d2ead3b4b4f"
+    balance: "0x321e"
+    code: "0x"
+    nonce: "0x18"
+    storage: []
+  - address: "0x813aeaaeb0b19a1feb6a200fe94adfada0034075"
+    balance: "0x1915"
+    code: "0x"
+    nonce: "0x27"
+    storage: []
+  - address: "0x9dd23f0c2c25469d0045f1d03605a7b598f231ce"
     balance: "0x0"
     code: "0x"
-    nonce: "0x29"
-    storage: []
-  - address: "0x11d5fdda005823235d02a7b191f9fea3ec7b1035"
-    balance: "0x3177"
-    code: "0x"
-    nonce: "0x6"
-    storage: []
-  - address: "0xfc86dde3e88ebc6969ae1ae83c38e1f9e2a765c4"
-    balance: "0x1de"
-    code: "0x"
-    nonce: "0x9"
+    nonce: "0xe"
     storage: []
   memory: []
   stack:
-  - "0xb8115252d0269cc43290e687af102585a1620cde4791ff0f1713b4080f4d84"
-  - "0x8b38175ccc"
-  - "0x8d0094790ccc65867e6f4ff23e9aabc467"
+  - "0x07f1ba64fafbe242bba023743bdf6f57652667b61151139654133880b4edba8c"
+  - "0x93b3dde9865b7f7c247e63c8ded779ef2d881d2c50272b5cc47b6b5eabd16c"
+  - "0x5d96b51c412c7ae12fb7b27f9dd59653fa6f480a3bca3f9e68d8b8f6eaf583"
 after:
   accounts:
-  - address: "0x8f14c6a8cd17f884c607f245b762f3e679168490"
+  - address: "0x6f0a4d14b59b351ec5520ca64c348d2ead3b4b4f"
+    balance: "0x321e"
+    code: "0x"
+    nonce: "0x18"
+    storage: []
+  - address: "0x813aeaaeb0b19a1feb6a200fe94adfada0034075"
+    balance: "0x1915"
+    code: "0x"
+    nonce: "0x27"
+    storage: []
+  - address: "0x9dd23f0c2c25469d0045f1d03605a7b598f231ce"
     balance: "0x0"
     code: "0x"
-    nonce: "0x29"
-    storage: []
-  - address: "0xfc86dde3e88ebc6969ae1ae83c38e1f9e2a765c4"
-    balance: "0x1de"
-    code: "0x"
-    nonce: "0x9"
-    storage: []
-  - address: "0x11d5fdda005823235d02a7b191f9fea3ec7b1035"
-    balance: "0x3177"
-    code: "0x"
-    nonce: "0x6"
+    nonce: "0xe"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0x000000000000000000000000000000828f7027c86bab3ee66529f76d1ff0b9cf"
+  - "0x001ce3fd5aa73eb7fc7b20ce8d90164fc8d3f05a52420f0a756c3b4de47d7d33"
+sender: "0x6f0a4d14b59b351ec5520ca64c348d2ead3b4b4f"
+receiver: "0x9dd23f0c2c25469d0045f1d03605a7b598f231ce"
+inputData: "0x6be7718268c578ce1d86ce35c2c57025e04bf1064d164742939455ebea163b93cc0332722e92bda9c371a5171a8268b597058d"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x7e5d96b51c412c7ae12fb7b27f9dd59653fa6f480a3bca3f9e68d8b8f6eaf5837e93b3dde9865b7f7c247e63c8ded779ef2d881d2c50272b5cc47b6b5eabd16c7f07f1ba64fafbe242bba023743bdf6f57652667b61151139654133880b4edba8c08"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x8"
 allGasUsed: "0x11"
+gasAvailable: "0xe6b0483400"
+gasLimit: 1808000000000
+haltReason: "NONE"
+coinbase: "0x813aeaaeb0b19a1feb6a200fe94adfada0034075"
+refunds: {}
+number: 6155339461066369613
+timestamp: 3433860326348852894
+mixHashOrPrevRandao: "0xc58b5002f738708e85fee764a8eff31a43f3fbf18eb18c5f033446253ba9f671"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x708d0094790ccc65867e6f4ff23e9aabc467648b38175ccc7eb8115252d0269cc43290e687af102585a1620cde4791ff0f1713b4080f4d8408"
-coinbase: "0x11d5fdda005823235d02a7b191f9fea3ec7b1035"
-difficultyBytes: "0xc11b2b827515099381be9b43c77bfbef8375c99e87985d841f6cf489603701bb"
-gasAvailable: "0xc92a69c00"
-gasLimit: 8190500000000
-gasUsed: "0x8"
-hardFork: "byzantium"
-index: 0
-mixHashOrPrevRandao: "0x09c06c27f71b632cbe120adde22b38395f0856ad520419bb86267c31aa113a2e"
-number: 5402268384799494113
-receiver: "0xfc86dde3e88ebc6969ae1ae83c38e1f9e2a765c4"
-refunds: {}
-sender: "0x8f14c6a8cd17f884c607f245b762f3e679168490"
-timestamp: 815415206826785364
-value: "0x0"
+difficultyBytes: "0xc45e2cc247ec82797be0d6d1925a5dde1a5602876e7597a87a3bfed29a446e0a"

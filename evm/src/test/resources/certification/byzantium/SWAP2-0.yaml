@@ -1,70 +1,68 @@
 ---
-operation:
-  name: "SWAP2"
-  opcode: "0x91"
-gasPrice: "0x0"
-inputData: "0x56c2509dead87d438d39b9a194dee0288527e073cac5bcdd7150d5927971227cf3a95c2d"
-haltReason: "NONE"
+name: "SWAP2"
+hardFork: "byzantium"
+index: 0
 before:
   accounts:
-  - address: "0xf17036ec784f5a82adf943b648f28bf27d24977c"
-    balance: "0x3a1e"
-    code: "0x"
-    nonce: "0x11"
-    storage: []
-  - address: "0x0809a6a0ef59b497621f1fbb38188f1ae15c4587"
+  - address: "0x85e13894371f248238c1cbf627d6f3eefc3f5768"
     balance: "0x0"
     code: "0x"
-    nonce: "0x42"
+    nonce: "0x14"
     storage: []
-  - address: "0xc51a6bb742f9784a9edd04695ae276111b926509"
+  - address: "0x5001426d6f3ffa599a73ff5992b2bdcb2a0a4a07"
     balance: "0x0"
     code: "0x"
-    nonce: "0xa"
+    nonce: "0x48"
+    storage: []
+  - address: "0x34bfb672980a123a014cfa95f764a810479d121d"
+    balance: "0xa04"
+    code: "0x"
+    nonce: "0x2"
     storage: []
   memory: []
   stack:
-  - "0x06c1105a829634f60476fa491e69344fda7bef943dcbb4a7bf0e5f"
-  - "0x623be75361ce255724983517ad06b090d322469bf62bfa2d74"
-  - "0x51748f7ad44e0a06e3fbe4fac49507c0560d81d9"
+  - "0xa6f52030f9fc09959340afd897814441c856c24d19dd10819b"
+  - "0x6e1f6489decffd6e089796ecc83ae3933d0541f3d2f33c86a5a8b76fe9feaa"
+  - "0x4e34964ab8d5b1"
 after:
   accounts:
-  - address: "0xc51a6bb742f9784a9edd04695ae276111b926509"
-    balance: "0x33cd"
+  - address: "0x34bfb672980a123a014cfa95f764a810479d121d"
+    balance: "0xa04"
     code: "0x"
-    nonce: "0xa"
+    nonce: "0x2"
     storage: []
-  - address: "0xf17036ec784f5a82adf943b648f28bf27d24977c"
-    balance: "0x651"
-    code: "0x"
-    nonce: "0x11"
-    storage: []
-  - address: "0x0809a6a0ef59b497621f1fbb38188f1ae15c4587"
+  - address: "0x5001426d6f3ffa599a73ff5992b2bdcb2a0a4a07"
     balance: "0x0"
     code: "0x"
-    nonce: "0x42"
+    nonce: "0x48"
+    storage: []
+  - address: "0x85e13894371f248238c1cbf627d6f3eefc3f5768"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x14"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0x51748f7ad44e0a06e3fbe4fac49507c0560d81d9"
-  - "0x623be75361ce255724983517ad06b090d322469bf62bfa2d74"
-  - "0x06c1105a829634f60476fa491e69344fda7bef943dcbb4a7bf0e5f"
+  - "0x4e34964ab8d5b1"
+  - "0x6e1f6489decffd6e089796ecc83ae3933d0541f3d2f33c86a5a8b76fe9feaa"
+  - "0xa6f52030f9fc09959340afd897814441c856c24d19dd10819b"
+sender: "0x85e13894371f248238c1cbf627d6f3eefc3f5768"
+receiver: "0x34bfb672980a123a014cfa95f764a810479d121d"
+inputData: "0x8d0dbbd14a125c0a9cf64ab6287d4099afaa0700f1679251929a26d790fb16a72a4a6e7b89572b322a0f288bbc11"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x664e34964ab8d5b17e6e1f6489decffd6e089796ecc83ae3933d0541f3d2f33c86a5a8b76fe9feaa78a6f52030f9fc09959340afd897814441c856c24d19dd10819b91"
+gasPrice: "0x00000000000000000000000000000000000000000000000000000000000002b4"
+gasUsed: "0x3"
 allGasUsed: "0xc"
+gasAvailable: "0xc4b2010000"
+gasLimit: 6786000000000
+haltReason: "NONE"
+coinbase: "0x5001426d6f3ffa599a73ff5992b2bdcb2a0a4a07"
+refunds: {}
+number: 8908333783331373170
+timestamp: 7925876536613619261
+mixHashOrPrevRandao: "0x2091e0073b82c1d19c42d9ad90f44500b06b5d313e8fa37a365c612f64d1b4a2"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x7351748f7ad44e0a06e3fbe4fac49507c0560d81d978623be75361ce255724983517ad06b090d322469bf62bfa2d747a06c1105a829634f60476fa491e69344fda7bef943dcbb4a7bf0e5f91"
-coinbase: "0x0809a6a0ef59b497621f1fbb38188f1ae15c4587"
-difficultyBytes: "0xdd52afe0f532fa2e710eb3c48b63a5bdb3fda06c06cbc4e489de9c29ae91e8c1"
-gasAvailable: "0x1783b253f00"
-gasLimit: 7918000000000
-gasUsed: "0x3"
-hardFork: "byzantium"
-index: 0
-mixHashOrPrevRandao: "0xd4a879ac29bda83e0c377400663105499082a68f8d124a1cf634a5fba3e29f73"
-number: 1169495736379444370
-receiver: "0xc51a6bb742f9784a9edd04695ae276111b926509"
-refunds: {}
-sender: "0xf17036ec784f5a82adf943b648f28bf27d24977c"
-timestamp: 2207727270212940218
-value: "0x33cd"
+difficultyBytes: "0xedd08e2596baacaf920495eaf7cfd00bc7e0ed5a902b75b329159b0ef9ebfb62"

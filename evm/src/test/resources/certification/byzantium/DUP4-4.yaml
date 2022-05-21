@@ -1,73 +1,71 @@
 ---
-operation:
-  name: "DUP4"
-  opcode: "0x83"
-gasPrice: "0x1028"
-inputData: "0x49fc1fcc6af6b1e1c90a355814aed5569389c9657c6c7418d9c5a5778c616b81cc"
-haltReason: "NONE"
+name: "DUP4"
+hardFork: "byzantium"
+index: 4
 before:
   accounts:
-  - address: "0xac55715a2f88c7492869dd4c346973915223174b"
-    balance: "0x6b0f"
+  - address: "0xfe2581ed2a47831ee13f6ef2059b5c150f60e95b"
+    balance: "0x5eb1"
     code: "0x"
-    nonce: "0x18"
+    nonce: "0x24"
     storage: []
-  - address: "0xcc875773141e78f53d07508f4896297dad0f7909"
+  - address: "0x7c11827e6967502ab240bbcab0321e488a380ba3"
     balance: "0x0"
     code: "0x"
-    nonce: "0x7"
+    nonce: "0x32"
     storage: []
-  - address: "0x8d570518d41a758f08948ef33038dee75e008c1c"
-    balance: "0x0"
+  - address: "0x959b49a09db5dea3188fe1ee717f7089feb516fe"
+    balance: "0x5790"
     code: "0x"
-    nonce: "0x16"
+    nonce: "0x8"
     storage: []
   memory: []
   stack:
-  - "0x3b549043e98a6c767ebc0d676a1331922d29"
-  - "0x03"
-  - "0xbfe82257f337ef3bd625311a745c66e3fb5fe8e259187816be93eb226d18"
-  - "0x38a6bcfd500390daca4014b6037d373f8dc0feb8"
+  - "0xc945dc"
+  - "0x9ffa52dfee53c2"
+  - "0x9822412e2d4e2ef4"
+  - "0xbdc21749f00b4dc64ebfdb416b6aa230ba8a46c48ee4c21442842128586f489a"
 after:
   accounts:
-  - address: "0xcc875773141e78f53d07508f4896297dad0f7909"
+  - address: "0xfe2581ed2a47831ee13f6ef2059b5c150f60e95b"
+    balance: "0x2aa4"
+    code: "0x"
+    nonce: "0x24"
+    storage: []
+  - address: "0x959b49a09db5dea3188fe1ee717f7089feb516fe"
+    balance: "0x8b9d"
+    code: "0x"
+    nonce: "0x8"
+    storage: []
+  - address: "0x7c11827e6967502ab240bbcab0321e488a380ba3"
     balance: "0x0"
     code: "0x"
-    nonce: "0x7"
-    storage: []
-  - address: "0xac55715a2f88c7492869dd4c346973915223174b"
-    balance: "0x3e09"
-    code: "0x"
-    nonce: "0x18"
-    storage: []
-  - address: "0x8d570518d41a758f08948ef33038dee75e008c1c"
-    balance: "0x2d06"
-    code: "0x"
-    nonce: "0x16"
+    nonce: "0x32"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0x38a6bcfd500390daca4014b6037d373f8dc0feb8"
-  - "0x3b549043e98a6c767ebc0d676a1331922d29"
-  - "0x03"
-  - "0xbfe82257f337ef3bd625311a745c66e3fb5fe8e259187816be93eb226d18"
-  - "0x38a6bcfd500390daca4014b6037d373f8dc0feb8"
+  - "0xbdc21749f00b4dc64ebfdb416b6aa230ba8a46c48ee4c21442842128586f489a"
+  - "0xc945dc"
+  - "0x9ffa52dfee53c2"
+  - "0x9822412e2d4e2ef4"
+  - "0xbdc21749f00b4dc64ebfdb416b6aa230ba8a46c48ee4c21442842128586f489a"
+sender: "0xfe2581ed2a47831ee13f6ef2059b5c150f60e95b"
+receiver: "0x959b49a09db5dea3188fe1ee717f7089feb516fe"
+inputData: "0xc5ca4c81f67b9ff7df11f0f81a634c011dfd9dfdf63a39416077108c3743b9c7221dcc36dd94834f2c45e938f7"
+value: "0x000000000000000000000000000000000000000000000000000000000000340d"
+code: "0x7fbdc21749f00b4dc64ebfdb416b6aa230ba8a46c48ee4c21442842128586f489a679822412e2d4e2ef4669ffa52dfee53c262c945dc83"
+gasPrice: "0x000000000000000000000000000000000000000000000000000000000000643d"
+gasUsed: "0x3"
 allGasUsed: "0xf"
+gasAvailable: "0x9d2f187f00"
+gasLimit: 3447000000000
+haltReason: "NONE"
+coinbase: "0x7c11827e6967502ab240bbcab0321e488a380ba3"
+refunds: {}
+number: 874704332540605922
+timestamp: 2486894903928283273
+mixHashOrPrevRandao: "0x04ec177171f152f9149ba5f160710ce20079b38395da78e4c435a430f5fd4966"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x7338a6bcfd500390daca4014b6037d373f8dc0feb87dbfe82257f337ef3bd625311a745c66e3fb5fe8e259187816be93eb226d186003713b549043e98a6c767ebc0d676a1331922d2983"
-coinbase: "0xcc875773141e78f53d07508f4896297dad0f7909"
-difficultyBytes: "0xc23b2c97536970b3c5663d63c75042592861f039ab2d11a619fded34a597e794"
-gasAvailable: "0x11d6169c100"
-gasLimit: 2318500000000
-gasUsed: "0x3"
-hardFork: "byzantium"
-index: 4
-mixHashOrPrevRandao: "0x716572b6dfc72cce3a0082532243ff5fd285c6ae725e2bc0b8d8735c003a143d"
-number: 5209243441981087760
-receiver: "0x8d570518d41a758f08948ef33038dee75e008c1c"
-refunds: {}
-sender: "0xac55715a2f88c7492869dd4c346973915223174b"
-timestamp: 5731269636990486938
-value: "0x2d06"
+difficultyBytes: "0xf1baf2815ca02d2984cbf2d5d3be4d0962acc5dcff638a5bf9879afb6c34cf5f"

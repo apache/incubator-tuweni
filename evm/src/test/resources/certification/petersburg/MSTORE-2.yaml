@@ -1,71 +1,72 @@
 ---
-operation:
-  name: "MSTORE"
-  opcode: "0x52"
-gasPrice: "0x0"
-inputData: "0x82bfd574cf9f7146f3b8d939fabfa0b67904fe"
-haltReason: "NONE"
+name: "MSTORE"
+hardFork: "petersburg"
+index: 2
 before:
   accounts:
-  - address: "0x0b14883dcba2fc615afcbe4469db3ab72d61e2b6"
-    balance: "0x3724"
-    code: "0x"
-    nonce: "0x21"
-    storage: []
-  - address: "0xff6573e9ef14b05a7f2d7503dcc1e26e69a64f2d"
-    balance: "0x2d6"
-    code: "0x"
-    nonce: "0x2d"
-    storage: []
-  - address: "0x95bdf4c9152585739cc810461bbec455429d7cb5"
+  - address: "0xe59ffcdc2cc4780c596bf0ef06d829f1d47fad76"
     balance: "0x0"
     code: "0x"
-    nonce: "0x15"
+    nonce: "0x14"
+    storage: []
+  - address: "0xc45663ec5511ccdb4c1cb13248a21dee6038d465"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x43"
+    storage: []
+  - address: "0x84258264aace2996ce72bce89efc91026bc24855"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x4"
     storage: []
   memory: []
   stack:
-  - "0x69"
-  - "0xe8592651d0623383ae884d0fce6490da1a9e76"
+  - "0xe0"
+  - "0xfc6b5eae"
 after:
   accounts:
-  - address: "0xff6573e9ef14b05a7f2d7503dcc1e26e69a64f2d"
-    balance: "0x2d6"
-    code: "0x"
-    nonce: "0x2d"
-    storage: []
-  - address: "0x0b14883dcba2fc615afcbe4469db3ab72d61e2b6"
-    balance: "0x3724"
-    code: "0x"
-    nonce: "0x21"
-    storage: []
-  - address: "0x95bdf4c9152585739cc810461bbec455429d7cb5"
+  - address: "0x84258264aace2996ce72bce89efc91026bc24855"
     balance: "0x0"
     code: "0x"
-    nonce: "0x15"
+    nonce: "0x4"
+    storage: []
+  - address: "0xe59ffcdc2cc4780c596bf0ef06d829f1d47fad76"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x14"
+    storage: []
+  - address: "0xc45663ec5511ccdb4c1cb13248a21dee6038d465"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x43"
     storage: []
   logs: []
   memory:
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x00000000000000000000000000000000000000000000e8592651d0623383ae88"
-  - "0x4d0fce6490da1a9e760000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x00000000000000000000000000000000000000000000000000000000fc6b5eae"
   stack: []
-allGasUsed: "0x18"
+sender: "0xe59ffcdc2cc4780c596bf0ef06d829f1d47fad76"
+receiver: "0x84258264aace2996ce72bce89efc91026bc24855"
+inputData: "0x44c10a914f33a39529d6d58a4d69b3f658"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x63fc6b5eae60e052"
+gasPrice: "0x000000000000000000000000000000000000000000000000000000000000294e"
+gasUsed: "0x1b"
+allGasUsed: "0x21"
+gasAvailable: "0x10c388d0000"
+gasLimit: 2192500000000
+haltReason: "NONE"
+coinbase: "0xc45663ec5511ccdb4c1cb13248a21dee6038d465"
+refunds: {}
+number: 2007567393022643409
+timestamp: 757643513623287282
+mixHashOrPrevRandao: "0x93a97311233df268ae785906c61c56e8af51599e5a5787ce8293ffda1bbdc5f9"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x72e8592651d0623383ae884d0fce6490da1a9e76606952"
-coinbase: "0xff6573e9ef14b05a7f2d7503dcc1e26e69a64f2d"
-difficultyBytes: "0x86afc5c013ec4422c7a8b7d1ae01505d7f484d6f54cd40ac7b0d2323a978c760"
-gasAvailable: "0x1183c268400"
-gasLimit: 7457500000000
-gasUsed: "0x12"
-hardFork: "petersburg"
-index: 2
-mixHashOrPrevRandao: "0xf9e2186cfeb73942d943683632bca7feb875285b9305dbb53155415f2b837902"
-number: 5453722512508884082
-receiver: "0x95bdf4c9152585739cc810461bbec455429d7cb5"
-refunds: {}
-sender: "0x0b14883dcba2fc615afcbe4469db3ab72d61e2b6"
-timestamp: 6558686884344425968
-value: "0x0"
+difficultyBytes: "0x7abe311b5d73ba8b7d21d7387498de5d768ca9ce92eddbd22aa1e62f42824ff8"

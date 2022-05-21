@@ -1,74 +1,72 @@
 ---
-operation:
-  name: "SWAP4"
-  opcode: "0x93"
-gasPrice: "0x60"
-inputData: "0x31d1743198"
-haltReason: "NONE"
+name: "SWAP4"
+hardFork: "spuriousDragon"
+index: 0
 before:
   accounts:
-  - address: "0x2d84b788c49b7d165c35489074923ff3d8e8908e"
-    balance: "0x32ec"
-    code: "0x"
-    nonce: "0x1c"
-    storage: []
-  - address: "0x35ae455976038448d395eba8df4c25da01e99917"
+  - address: "0x831e9b25adba9a357f7b692e409c3831b394632a"
     balance: "0x0"
     code: "0x"
-    nonce: "0x3a"
+    nonce: "0x26"
     storage: []
-  - address: "0x517b471ef8f5157e4411ed25969ae5b9378e0ec9"
+  - address: "0x96f51d2722ddacd3dcb69c938376e79b8dc54644"
+    balance: "0x3c2d"
+    code: "0x"
+    nonce: "0x61"
+    storage: []
+  - address: "0x62d7c3b936231c15795e3275dff5ce5ef6137eaa"
     balance: "0x0"
     code: "0x"
-    nonce: "0x11"
+    nonce: "0x14"
     storage: []
   memory: []
   stack:
-  - "0x09ac85e99d03774e78c86b97d4759fb15fd3"
-  - "0x3682979f1ed4a74fdd38097804c5cc"
-  - "0x9d4f562abe610df86aa6"
-  - "0xb6be6b188edb380997928491cda14e6838c0dcede5f8"
-  - "0xc730e56e9a"
+  - "0x7444f5dff79df672caa563c4d875bec78ce4"
+  - "0x3bc677f8b2c992a1fb1b45e571"
+  - "0x04a3453aa923abd98f53f0"
+  - "0x3f7c295254e442a13038a71f8e44"
+  - "0x52c9ffcb06ad912a6d3fe39559"
 after:
   accounts:
-  - address: "0x35ae455976038448d395eba8df4c25da01e99917"
+  - address: "0x831e9b25adba9a357f7b692e409c3831b394632a"
     balance: "0x0"
     code: "0x"
-    nonce: "0x3a"
+    nonce: "0x26"
     storage: []
-  - address: "0x517b471ef8f5157e4411ed25969ae5b9378e0ec9"
+  - address: "0x96f51d2722ddacd3dcb69c938376e79b8dc54644"
+    balance: "0x3c2d"
+    code: "0x"
+    nonce: "0x61"
+    storage: []
+  - address: "0x62d7c3b936231c15795e3275dff5ce5ef6137eaa"
     balance: "0x0"
     code: "0x"
-    nonce: "0x11"
-    storage: []
-  - address: "0x2d84b788c49b7d165c35489074923ff3d8e8908e"
-    balance: "0x32ec"
-    code: "0x"
-    nonce: "0x1c"
+    nonce: "0x14"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0xc730e56e9a"
-  - "0x3682979f1ed4a74fdd38097804c5cc"
-  - "0x9d4f562abe610df86aa6"
-  - "0xb6be6b188edb380997928491cda14e6838c0dcede5f8"
-  - "0x09ac85e99d03774e78c86b97d4759fb15fd3"
+  - "0x52c9ffcb06ad912a6d3fe39559"
+  - "0x3bc677f8b2c992a1fb1b45e571"
+  - "0x04a3453aa923abd98f53f0"
+  - "0x3f7c295254e442a13038a71f8e44"
+  - "0x7444f5dff79df672caa563c4d875bec78ce4"
+sender: "0x831e9b25adba9a357f7b692e409c3831b394632a"
+receiver: "0x62d7c3b936231c15795e3275dff5ce5ef6137eaa"
+inputData: "0x06b6825702c69e9afe4a98eeef6f7b1fa6b689e46039e25d192e7071f45b44"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x6c52c9ffcb06ad912a6d3fe395596d3f7c295254e442a13038a71f8e446a04a3453aa923abd98f53f06c3bc677f8b2c992a1fb1b45e571717444f5dff79df672caa563c4d875bec78ce493"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x3"
 allGasUsed: "0x12"
+gasAvailable: "0x1a92c0ab500"
+gasLimit: 2123000000000
+haltReason: "NONE"
+coinbase: "0x96f51d2722ddacd3dcb69c938376e79b8dc54644"
+refunds: {}
+number: 3370293949243642011
+timestamp: 6322263905303540600
+mixHashOrPrevRandao: "0x2a9f116f6377721f6fae2728f1cc51306c55e12b789891813aa1ef46a7249296"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x64c730e56e9a75b6be6b188edb380997928491cda14e6838c0dcede5f8699d4f562abe610df86aa66e3682979f1ed4a74fdd38097804c5cc7109ac85e99d03774e78c86b97d4759fb15fd393"
-coinbase: "0x35ae455976038448d395eba8df4c25da01e99917"
-difficultyBytes: "0xc5c38ef18d48f44977ab875a13a7f4e3c610a698e74e741c799708c0a910532f"
-gasAvailable: "0xc55edb7d00"
-gasLimit: 74000000000
-gasUsed: "0x3"
-hardFork: "spuriousDragon"
-index: 0
-mixHashOrPrevRandao: "0x0ebfab355451c1d307cab4b95cde78648b1dee6c46671a825d9fc5a09ea5a7d9"
-number: 5845892002656752540
-receiver: "0x517b471ef8f5157e4411ed25969ae5b9378e0ec9"
-refunds: {}
-sender: "0x2d84b788c49b7d165c35489074923ff3d8e8908e"
-timestamp: 3694621593737219902
-value: "0x0"
+difficultyBytes: "0x8d8d0913372959f7012032c113f860f579816ac1dc5c922e82b465635498a024"

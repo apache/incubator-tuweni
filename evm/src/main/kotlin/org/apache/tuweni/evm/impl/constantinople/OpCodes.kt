@@ -642,15 +642,20 @@ private val mload = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
   Result()
 }
 
-private val extcodesize = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
+private val extcodesize = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
   gasManager.add(700)
-  stack.push(UInt256.valueOf(hostContext.getCode(msg.destination).size().toLong()))
+  val address = stack.pop()?.slice(12)?.let { Address.fromBytes(it) }
+    ?: return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
+  stack.push(UInt256.valueOf(hostContext.getCode(address).size().toLong()))
   Result()
 }
 
-private val extcodehash = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
+private val extcodehash = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
   gasManager.add(400)
-  val code = hostContext.getCode(msg.destination)
+  val recipientAddress = stack.pop()?.slice(12, 20)?.let { Address.fromBytes(it) } ?: return@Opcode Result(
+    EVMExecutionStatusCode.STACK_UNDERFLOW
+  )
+  val code = hostContext.getCode(recipientAddress)
   stack.push(if (code.isEmpty) UInt256.ZERO else Hash.keccak256(code))
   Result()
 }
@@ -865,7 +870,7 @@ private val selfdestruct = Opcode { gasManager, hostContext, stack, msg, _, _, _
 
   val inheritance = hostContext.getBalance(msg.destination)
 
-  val cost = if (hostContext.isEmptyAcount(recipientAddress) && !inheritance.isZero) {
+  val cost = if (hostContext.isEmptyAccount(recipientAddress) && !inheritance.isZero) {
     Gas.valueOf(30000)
   } else {
     Gas.valueOf(5000)

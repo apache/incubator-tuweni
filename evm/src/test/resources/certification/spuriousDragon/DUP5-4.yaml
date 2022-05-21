@@ -1,75 +1,73 @@
 ---
-operation:
-  name: "DUP5"
-  opcode: "0x84"
-gasPrice: "0x0"
-inputData: "0xd841545afb156cbe9c61c9f9204b3b0c4d812981"
-haltReason: "NONE"
+name: "DUP5"
+hardFork: "spuriousDragon"
+index: 4
 before:
   accounts:
-  - address: "0xe1e328db72605b48734d24a0167072b11f46abc1"
-    balance: "0x789d"
+  - address: "0x15dea66d7c9eb66e9e2416ba497c8f67a6418887"
+    balance: "0x346c"
     code: "0x"
-    nonce: "0x1f"
+    nonce: "0x10"
     storage: []
-  - address: "0x41b8fc7c2aa4ee159c8eaf83f6ef97e1c53c45d0"
-    balance: "0xba"
+  - address: "0x1a14de06ba8e4bb3b1641c0499137cb3f2149d9f"
+    balance: "0x0"
     code: "0x"
-    nonce: "0x14"
+    nonce: "0x30"
     storage: []
-  - address: "0xc0b9e9a3e909b4961c53945b81b55c610ca5776e"
-    balance: "0x7072"
+  - address: "0xf45dac6e619f8175561a3045e36f86e6588daab6"
+    balance: "0x5b94"
     code: "0x"
-    nonce: "0xb"
+    nonce: "0x12"
     storage: []
   memory: []
   stack:
-  - "0x3397882ce0ce454134e6e999097a7d825a96568f7bd4acfcb7"
-  - "0xe643ffbbe5952a"
-  - "0x2387baee52a24e497100f21f8a27c08501"
-  - "0x91a7c3f4250f9c59a9"
-  - "0x17c15bc04ec312606ce95607690c22210d8e"
+  - "0x9c711c9f4e18"
+  - "0x8fbb00"
+  - "0x47cb4bec5275ea2c147545f917db9cd0fcd24e847c79c6a265f1bd95fb6f40"
+  - "0x777be099393917"
+  - "0x59d09257c6b34355828bc3ee5f23aa86574eea184e06"
 after:
   accounts:
-  - address: "0xe1e328db72605b48734d24a0167072b11f46abc1"
-    balance: "0x789d"
+  - address: "0x1a14de06ba8e4bb3b1641c0499137cb3f2149d9f"
+    balance: "0x0"
     code: "0x"
-    nonce: "0x1f"
+    nonce: "0x30"
     storage: []
-  - address: "0xc0b9e9a3e909b4961c53945b81b55c610ca5776e"
-    balance: "0x7072"
+  - address: "0x15dea66d7c9eb66e9e2416ba497c8f67a6418887"
+    balance: "0x737"
     code: "0x"
-    nonce: "0xb"
+    nonce: "0x10"
     storage: []
-  - address: "0x41b8fc7c2aa4ee159c8eaf83f6ef97e1c53c45d0"
-    balance: "0xba"
+  - address: "0xf45dac6e619f8175561a3045e36f86e6588daab6"
+    balance: "0x88c9"
     code: "0x"
-    nonce: "0x14"
+    nonce: "0x12"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0x17c15bc04ec312606ce95607690c22210d8e"
-  - "0x3397882ce0ce454134e6e999097a7d825a96568f7bd4acfcb7"
-  - "0xe643ffbbe5952a"
-  - "0x2387baee52a24e497100f21f8a27c08501"
-  - "0x91a7c3f4250f9c59a9"
-  - "0x17c15bc04ec312606ce95607690c22210d8e"
+  - "0x59d09257c6b34355828bc3ee5f23aa86574eea184e06"
+  - "0x9c711c9f4e18"
+  - "0x8fbb00"
+  - "0x47cb4bec5275ea2c147545f917db9cd0fcd24e847c79c6a265f1bd95fb6f40"
+  - "0x777be099393917"
+  - "0x59d09257c6b34355828bc3ee5f23aa86574eea184e06"
+sender: "0x15dea66d7c9eb66e9e2416ba497c8f67a6418887"
+receiver: "0xf45dac6e619f8175561a3045e36f86e6588daab6"
+inputData: "0xa83c9c99381d79c5f11f9f"
+value: "0x0000000000000000000000000000000000000000000000000000000000002d35"
+code: "0x7559d09257c6b34355828bc3ee5f23aa86574eea184e0666777be0993939177e47cb4bec5275ea2c147545f917db9cd0fcd24e847c79c6a265f1bd95fb6f40628fbb00659c711c9f4e1884"
+gasPrice: "0x000000000000000000000000000000000000000000000000000000000000386c"
+gasUsed: "0x3"
 allGasUsed: "0x12"
+gasAvailable: "0x76ffef1700"
+gasLimit: 7701500000000
+haltReason: "NONE"
+coinbase: "0x1a14de06ba8e4bb3b1641c0499137cb3f2149d9f"
+refunds: {}
+number: 1090869818249788744
+timestamp: 8555483560485498334
+mixHashOrPrevRandao: "0xaf1672eea14271838afc21f0d07e41203e729b372c33f5eeb0c29cb5ee2b6d5c"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x7117c15bc04ec312606ce95607690c22210d8e6891a7c3f4250f9c59a9702387baee52a24e497100f21f8a27c0850166e643ffbbe5952a783397882ce0ce454134e6e999097a7d825a96568f7bd4acfcb784"
-coinbase: "0x41b8fc7c2aa4ee159c8eaf83f6ef97e1c53c45d0"
-difficultyBytes: "0xfa8fe1ee1452f94bcabc1b42b3f199bbcefff006dcb8270cade440a53c322cde"
-gasAvailable: "0x142efa46e00"
-gasLimit: 2861500000000
-gasUsed: "0x3"
-hardFork: "spuriousDragon"
-index: 4
-mixHashOrPrevRandao: "0x63cf26f068ba9db67ffa1ba13eba877fbcd88e8bede6b2d0490c1be1c1b26ab9"
-number: 9077737685256648461
-receiver: "0xc0b9e9a3e909b4961c53945b81b55c610ca5776e"
-refunds: {}
-sender: "0xe1e328db72605b48734d24a0167072b11f46abc1"
-timestamp: 76246704661712675
-value: "0x0"
+difficultyBytes: "0x189a7ed30118d4ce1198b5665c251f8de84c5e7d6bd581410fbeb45752a79b11"

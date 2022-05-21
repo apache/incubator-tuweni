@@ -1,88 +1,86 @@
 ---
-operation:
-  name: "SWAP11"
-  opcode: "0x9a"
-gasPrice: "0x0"
-inputData: "0x2de0321b1f93292b22280a5ba6daac540d2b0a7cc88fd56b864d77386dde1e3f6c3e09b487f07f7ddecfc3cb5992b8"
-haltReason: "NONE"
+name: "SWAP11"
+hardFork: "tangerineWhistle"
+index: 4
 before:
   accounts:
-  - address: "0x96834da5ab7d829a96d366857d4cbdba903d6365"
+  - address: "0xd9a30c3d22bfaebeea2c28f7c6085e2cbb6010ae"
+    balance: "0x5ec8"
+    code: "0x"
+    nonce: "0x9"
+    storage: []
+  - address: "0x0abfb447ccc919ed0a66d17ed5adbc373b12386e"
     balance: "0x0"
     code: "0x"
-    nonce: "0x1c"
+    nonce: "0x51"
     storage: []
-  - address: "0x413c79e4ccec187e39295a5d1f171b328f0f18cb"
-    balance: "0x13a3"
+  - address: "0xa063e4945dba18c56826c13ebcf94daf566caa24"
+    balance: "0x0"
     code: "0x"
-    nonce: "0x3d"
-    storage: []
-  - address: "0x08111273b6f9e6b999c436447e3848300111b7be"
-    balance: "0x26d7"
-    code: "0x"
-    nonce: "0xc"
+    nonce: "0xd"
     storage: []
   memory: []
   stack:
-  - "0xfc6a67f885e9ea02a87cadaf8fa8336b"
-  - "0x273fdec9353bffab46a1bd0ddaac7eebd82cc840771a8a6232cc"
-  - "0xf5706dc7a29380731b8eaa5163e638ca"
-  - "0x60d9044677"
-  - "0xa057b3d34b01764c062c0903a84697"
-  - "0x594313837139a8e737673b46"
-  - "0x1c5e8ede9e0a69"
-  - "0x9f0524a32e48ba667f65c80c10ae"
-  - "0xa8e7ec9f573c"
-  - "0x9eff302543267d329185255916355557d94c"
-  - "0xb6"
-  - "0xea52de51455bda4c80a581ce7434b464378e2a39bc06"
+  - "0x1dfac9016a2a3c214f73394daea5"
+  - "0x162a202a36309f8089d482b29b3689449cd25a6ded6c7713"
+  - "0x223960e2b9939ab5834714fa5b3fdb935a986aab9f76dccada7946ac71bf"
+  - "0x4a3bc4418f93ea13ff11d334bea9ae2aa28a00af0ca5"
+  - "0xdf6bfe3bf001909ae160a3bacf08cdcebfe80d3e514716319620e9bca0"
+  - "0xa40fb97799fbd3192f5747a4b6d3ca0fbce7760d61afebf5ded5c3b409720864"
+  - "0x66d3c47730b3b571cf33f2"
+  - "0x530dc6b94f4b2f6980c5a6"
+  - "0x226cee4647e2a59354e76415ac35cbfa1da4b961f948"
+  - "0x23258a8580ab5985710b0a89"
+  - "0x9eaf830a6a5ed68aa0c4f455"
+  - "0x59ccd3a73614ce99d9ff235b65193667e83a54279575e71c958628ba40d571"
 after:
   accounts:
-  - address: "0x413c79e4ccec187e39295a5d1f171b328f0f18cb"
-    balance: "0x13a3"
-    code: "0x"
-    nonce: "0x3d"
-    storage: []
-  - address: "0x96834da5ab7d829a96d366857d4cbdba903d6365"
+  - address: "0x0abfb447ccc919ed0a66d17ed5adbc373b12386e"
     balance: "0x0"
     code: "0x"
-    nonce: "0x1c"
+    nonce: "0x51"
     storage: []
-  - address: "0x08111273b6f9e6b999c436447e3848300111b7be"
-    balance: "0x26d7"
+  - address: "0xa063e4945dba18c56826c13ebcf94daf566caa24"
+    balance: "0x0"
     code: "0x"
-    nonce: "0xc"
+    nonce: "0xd"
+    storage: []
+  - address: "0xd9a30c3d22bfaebeea2c28f7c6085e2cbb6010ae"
+    balance: "0x5ec8"
+    code: "0x"
+    nonce: "0x9"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0xea52de51455bda4c80a581ce7434b464378e2a39bc06"
-  - "0x273fdec9353bffab46a1bd0ddaac7eebd82cc840771a8a6232cc"
-  - "0xf5706dc7a29380731b8eaa5163e638ca"
-  - "0x60d9044677"
-  - "0xa057b3d34b01764c062c0903a84697"
-  - "0x594313837139a8e737673b46"
-  - "0x1c5e8ede9e0a69"
-  - "0x9f0524a32e48ba667f65c80c10ae"
-  - "0xa8e7ec9f573c"
-  - "0x9eff302543267d329185255916355557d94c"
-  - "0xb6"
-  - "0xfc6a67f885e9ea02a87cadaf8fa8336b"
+  - "0x59ccd3a73614ce99d9ff235b65193667e83a54279575e71c958628ba40d571"
+  - "0x162a202a36309f8089d482b29b3689449cd25a6ded6c7713"
+  - "0x223960e2b9939ab5834714fa5b3fdb935a986aab9f76dccada7946ac71bf"
+  - "0x4a3bc4418f93ea13ff11d334bea9ae2aa28a00af0ca5"
+  - "0xdf6bfe3bf001909ae160a3bacf08cdcebfe80d3e514716319620e9bca0"
+  - "0xa40fb97799fbd3192f5747a4b6d3ca0fbce7760d61afebf5ded5c3b409720864"
+  - "0x66d3c47730b3b571cf33f2"
+  - "0x530dc6b94f4b2f6980c5a6"
+  - "0x226cee4647e2a59354e76415ac35cbfa1da4b961f948"
+  - "0x23258a8580ab5985710b0a89"
+  - "0x9eaf830a6a5ed68aa0c4f455"
+  - "0x1dfac9016a2a3c214f73394daea5"
+sender: "0xd9a30c3d22bfaebeea2c28f7c6085e2cbb6010ae"
+receiver: "0xa063e4945dba18c56826c13ebcf94daf566caa24"
+inputData: "0xfdf16f5cb8c62a6b4d172a9aef2237c831b162e0312f045116effbd50c2e06cbeaa50d16cb"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x7e59ccd3a73614ce99d9ff235b65193667e83a54279575e71c958628ba40d5716b9eaf830a6a5ed68aa0c4f4556b23258a8580ab5985710b0a8975226cee4647e2a59354e76415ac35cbfa1da4b961f9486a530dc6b94f4b2f6980c5a66a66d3c47730b3b571cf33f27fa40fb97799fbd3192f5747a4b6d3ca0fbce7760d61afebf5ded5c3b4097208647cdf6bfe3bf001909ae160a3bacf08cdcebfe80d3e514716319620e9bca0754a3bc4418f93ea13ff11d334bea9ae2aa28a00af0ca57d223960e2b9939ab5834714fa5b3fdb935a986aab9f76dccada7946ac71bf77162a202a36309f8089d482b29b3689449cd25a6ded6c77136d1dfac9016a2a3c214f73394daea59a"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x3"
 allGasUsed: "0x27"
+gasAvailable: "0x11e084e5d00"
+gasLimit: 8556000000000
+haltReason: "NONE"
+coinbase: "0x0abfb447ccc919ed0a66d17ed5adbc373b12386e"
+refunds: {}
+number: 1939879921309707832
+timestamp: 2802416145105366492
+mixHashOrPrevRandao: "0x60519437ebe8f7335dfda2ef1409f4023535366673aa13b0d84c1c9cc94e67b6"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x75ea52de51455bda4c80a581ce7434b464378e2a39bc0660b6719eff302543267d329185255916355557d94c65a8e7ec9f573c6d9f0524a32e48ba667f65c80c10ae661c5e8ede9e0a696b594313837139a8e737673b466ea057b3d34b01764c062c0903a846976460d90446776ff5706dc7a29380731b8eaa5163e638ca79273fdec9353bffab46a1bd0ddaac7eebd82cc840771a8a6232cc6ffc6a67f885e9ea02a87cadaf8fa8336b9a"
-coinbase: "0x413c79e4ccec187e39295a5d1f171b328f0f18cb"
-difficultyBytes: "0xb42c704d715b753c05be5093d086af48ed9868bb94e796b31bf0311a3df9d56a"
-gasAvailable: "0x94d349f800"
-gasLimit: 8829500000000
-gasUsed: "0x3"
-hardFork: "tangerineWhistle"
-index: 4
-mixHashOrPrevRandao: "0x743114eb11d4131528688a26004c6d3114d714ae2c9e11e0d7c12e1a95f920c4"
-number: 5812573933276481392
-receiver: "0x08111273b6f9e6b999c436447e3848300111b7be"
-refunds: {}
-sender: "0x96834da5ab7d829a96d366857d4cbdba903d6365"
-timestamp: 2897146213750092695
-value: "0x0"
+difficultyBytes: "0xacbe4cd8ba8f5a10593e6da1dd150a78570116a9dfee2a91f12a0eb528776654"

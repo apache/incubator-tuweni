@@ -1,72 +1,70 @@
 ---
-operation:
-  name: "SWAP3"
-  opcode: "0x92"
-gasPrice: "0x0"
-inputData: "0xdedc21407f66162461"
-haltReason: "NONE"
+name: "SWAP3"
+hardFork: "berlin"
+index: 2
 before:
   accounts:
-  - address: "0xb26d5b5ea87f218d4af1ae5dc6050930535695f2"
-    balance: "0x2a33"
-    code: "0x"
-    nonce: "0x19"
-    storage: []
-  - address: "0x2c708f6b40060ec9c4a136ebcd4a888f58596393"
+  - address: "0x537ad05a86ac949c6515a25dfa66d6f893ee1526"
     balance: "0x0"
     code: "0x"
-    nonce: "0xd"
+    nonce: "0x15"
     storage: []
-  - address: "0x42830a1bd91423f0add85c071d4f915307e56bbf"
-    balance: "0x607a"
+  - address: "0x9dba5049b89fb64cc5c1dc14c37b11db4e562e6c"
+    balance: "0x53ab"
     code: "0x"
-    nonce: "0x7"
+    nonce: "0x33"
+    storage: []
+  - address: "0xac8833f6e7103af587ffa64774f3590a2bf051cf"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x8"
     storage: []
   memory: []
   stack:
-  - "0x5ff2a433ca184d7693834aee1a973c"
-  - "0x54c8e4d06310b96ba1a275ad1cb208ba3c"
-  - "0xffc64344a77275a54856247cec5b0d14c62d1f283d"
-  - "0x6fa9adf5452010ad9da239e3f3e87c"
+  - "0x37414e5550d885dd6c39e36fa2ee412252ef248235ac893322"
+  - "0x32b2a01b7766c9988a3893cbe1f4681b"
+  - "0x74b3c1b85cf11915d59639840517244ad0"
+  - "0x3d779aa46bafcf9a6922472ea5f379d43cf6c4c6"
 after:
   accounts:
-  - address: "0xb26d5b5ea87f218d4af1ae5dc6050930535695f2"
-    balance: "0x2a33"
+  - address: "0x9dba5049b89fb64cc5c1dc14c37b11db4e562e6c"
+    balance: "0x53ab"
     code: "0x"
-    nonce: "0x19"
+    nonce: "0x33"
     storage: []
-  - address: "0x42830a1bd91423f0add85c071d4f915307e56bbf"
-    balance: "0x607a"
-    code: "0x"
-    nonce: "0x7"
-    storage: []
-  - address: "0x2c708f6b40060ec9c4a136ebcd4a888f58596393"
+  - address: "0x537ad05a86ac949c6515a25dfa66d6f893ee1526"
     balance: "0x0"
     code: "0x"
-    nonce: "0xd"
+    nonce: "0x15"
+    storage: []
+  - address: "0xac8833f6e7103af587ffa64774f3590a2bf051cf"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x8"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0x6fa9adf5452010ad9da239e3f3e87c"
-  - "0x54c8e4d06310b96ba1a275ad1cb208ba3c"
-  - "0xffc64344a77275a54856247cec5b0d14c62d1f283d"
-  - "0x5ff2a433ca184d7693834aee1a973c"
+  - "0x3d779aa46bafcf9a6922472ea5f379d43cf6c4c6"
+  - "0x32b2a01b7766c9988a3893cbe1f4681b"
+  - "0x74b3c1b85cf11915d59639840517244ad0"
+  - "0x37414e5550d885dd6c39e36fa2ee412252ef248235ac893322"
+sender: "0x537ad05a86ac949c6515a25dfa66d6f893ee1526"
+receiver: "0xac8833f6e7103af587ffa64774f3590a2bf051cf"
+inputData: "0xcfd12d425c5e86fb704389b6af22"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x733d779aa46bafcf9a6922472ea5f379d43cf6c4c67074b3c1b85cf11915d59639840517244ad06f32b2a01b7766c9988a3893cbe1f4681b7837414e5550d885dd6c39e36fa2ee412252ef248235ac89332292"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000c3f"
+gasUsed: "0x3"
 allGasUsed: "0xf"
+gasAvailable: "0x4921d1a500"
+gasLimit: 3900500000000
+haltReason: "NONE"
+coinbase: "0x9dba5049b89fb64cc5c1dc14c37b11db4e562e6c"
+refunds: {}
+number: 1202854204999925373
+timestamp: 808854362366087840
+mixHashOrPrevRandao: "0x51eb2a89af46dec14b457846ca044097b84505f3d54ccbfffa4248a3c3b77e53"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x6e6fa9adf5452010ad9da239e3f3e87c74ffc64344a77275a54856247cec5b0d14c62d1f283d7054c8e4d06310b96ba1a275ad1cb208ba3c6e5ff2a433ca184d7693834aee1a973c92"
-coinbase: "0x2c708f6b40060ec9c4a136ebcd4a888f58596393"
-difficultyBytes: "0x5178de8dec04ad989baef5c5d22510c6ded2ccd6e70cf90299900c01d697eccd"
-gasAvailable: "0x61d5df2a00"
-gasLimit: 1233000000000
-gasUsed: "0x3"
-hardFork: "berlin"
-index: 2
-mixHashOrPrevRandao: "0x0fc5f97ba1beebc61c67be6ea1c78e6ef37677e6eefb1e0c143a12ca72314602"
-number: 5715176798893153987
-receiver: "0x42830a1bd91423f0add85c071d4f915307e56bbf"
-refunds: {}
-sender: "0xb26d5b5ea87f218d4af1ae5dc6050930535695f2"
-timestamp: 1063590024922747870
-value: "0x0"
+difficultyBytes: "0xe18b641885a1de42b06683d5334f008390fd8497568459052c4b6dd66237105a"

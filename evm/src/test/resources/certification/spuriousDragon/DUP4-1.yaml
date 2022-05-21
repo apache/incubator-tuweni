@@ -1,73 +1,71 @@
 ---
-operation:
-  name: "DUP4"
-  opcode: "0x83"
-gasPrice: "0x2035"
-inputData: "0x96c2a47ff66b09fceaf2f46580ead55514e99253b7"
-haltReason: "NONE"
+name: "DUP4"
+hardFork: "spuriousDragon"
+index: 1
 before:
   accounts:
-  - address: "0xf9786b8caaa57c7b19084da2f759250e27a144cf"
-    balance: "0x5829"
+  - address: "0x3746f2fd00534b8bbf721468c122411232672104"
+    balance: "0x7b9"
     code: "0x"
-    nonce: "0xf"
+    nonce: "0xe"
     storage: []
-  - address: "0x128dd64430ca38f7eee853e2dfdefa03b0f1b9e4"
+  - address: "0x717f429d09dcd3c674ad31765f21f59b97ae3c49"
+    balance: "0x5580"
+    code: "0x"
+    nonce: "0x53"
+    storage: []
+  - address: "0x859fdaa477a3abb08f63324af34c5ca78b731d15"
     balance: "0x0"
     code: "0x"
-    nonce: "0xd"
-    storage: []
-  - address: "0x6bd095b8fe2ca34b39991a14e36286ace1db5727"
-    balance: "0x0"
-    code: "0x"
-    nonce: "0x6"
+    nonce: "0xe"
     storage: []
   memory: []
   stack:
-  - "0x03fcb4"
-  - "0xe741f8b6e7ad4e5e3361803dfdc4f706db891bd949"
-  - "0x61d04feed1fb5cc6a2b2c7b0b9c540c407"
-  - "0x0ec42630080d4128"
+  - "0x9fa97900d2f4c05b51c27155f85e31d12682"
+  - "0xa16a2c359314bf83d4c3f1729c5b00006a1ebbdb"
+  - "0x05808a6e0ca30f4a89d932bba32eee99611b32fe"
+  - "0x676c4550486ac15ccca93c93eea4872e8219bb"
 after:
   accounts:
-  - address: "0x6bd095b8fe2ca34b39991a14e36286ace1db5727"
-    balance: "0x1e07"
+  - address: "0x717f429d09dcd3c674ad31765f21f59b97ae3c49"
+    balance: "0x5580"
     code: "0x"
-    nonce: "0x6"
+    nonce: "0x53"
     storage: []
-  - address: "0xf9786b8caaa57c7b19084da2f759250e27a144cf"
-    balance: "0x3a22"
+  - address: "0x3746f2fd00534b8bbf721468c122411232672104"
+    balance: "0x7b9"
     code: "0x"
-    nonce: "0xf"
+    nonce: "0xe"
     storage: []
-  - address: "0x128dd64430ca38f7eee853e2dfdefa03b0f1b9e4"
+  - address: "0x859fdaa477a3abb08f63324af34c5ca78b731d15"
     balance: "0x0"
     code: "0x"
-    nonce: "0xd"
+    nonce: "0xe"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0x0ec42630080d4128"
-  - "0x03fcb4"
-  - "0xe741f8b6e7ad4e5e3361803dfdc4f706db891bd949"
-  - "0x61d04feed1fb5cc6a2b2c7b0b9c540c407"
-  - "0x0ec42630080d4128"
+  - "0x676c4550486ac15ccca93c93eea4872e8219bb"
+  - "0x9fa97900d2f4c05b51c27155f85e31d12682"
+  - "0xa16a2c359314bf83d4c3f1729c5b00006a1ebbdb"
+  - "0x05808a6e0ca30f4a89d932bba32eee99611b32fe"
+  - "0x676c4550486ac15ccca93c93eea4872e8219bb"
+sender: "0x3746f2fd00534b8bbf721468c122411232672104"
+receiver: "0x859fdaa477a3abb08f63324af34c5ca78b731d15"
+inputData: "0xe7e0024403fac3d50763b0ac0080f1eb1895ec585a555fb84d1e07c98f8285b4bef262bfedb649960ffd77849ef4a33f5753b6"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x72676c4550486ac15ccca93c93eea4872e8219bb7305808a6e0ca30f4a89d932bba32eee99611b32fe73a16a2c359314bf83d4c3f1729c5b00006a1ebbdb719fa97900d2f4c05b51c27155f85e31d1268283"
+gasPrice: "0x000000000000000000000000000000000000000000000000000000000000361d"
+gasUsed: "0x3"
 allGasUsed: "0xf"
+gasAvailable: "0x9cd5b05000"
+gasLimit: 13000000000
+haltReason: "NONE"
+coinbase: "0x717f429d09dcd3c674ad31765f21f59b97ae3c49"
+refunds: {}
+number: 2427928984435264469
+timestamp: 1201897677497572007
+mixHashOrPrevRandao: "0x86083cbfa15e9623cfd28fc4259e026cf44fbc4b309e8a5d4dee646ca9823add"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x670ec42630080d41287061d04feed1fb5cc6a2b2c7b0b9c540c40774e741f8b6e7ad4e5e3361803dfdc4f706db891bd9496203fcb483"
-coinbase: "0x128dd64430ca38f7eee853e2dfdefa03b0f1b9e4"
-difficultyBytes: "0x1483caf805349bfc994cbcca26dbed269ad4100248d8596a19b07d34c91609c9"
-gasAvailable: "0x184dfad7e00"
-gasLimit: 1215500000000
-gasUsed: "0x3"
-hardFork: "spuriousDragon"
-index: 1
-mixHashOrPrevRandao: "0xa4fb2c5d60797be4321d0b7ac143deddd42b6d447b0a25eb7b191d04a7ceb6b5"
-number: 917808251414007218
-receiver: "0x6bd095b8fe2ca34b39991a14e36286ace1db5727"
-refunds: {}
-sender: "0xf9786b8caaa57c7b19084da2f759250e27a144cf"
-timestamp: 4548536783483716293
-value: "0x1e07"
+difficultyBytes: "0x4e65b562a63c73013dd1bfa6e54f405cd280e6aeaaaa8f8985a657be4a9aebf9"

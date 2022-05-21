@@ -1,75 +1,73 @@
 ---
-operation:
-  name: "DUP5"
-  opcode: "0x84"
-gasPrice: "0x6e89"
-inputData: "0xd9d37c36260533087cc245bdaa270650e8"
-haltReason: "NONE"
+name: "DUP5"
+hardFork: "constantinople"
+index: 4
 before:
   accounts:
-  - address: "0x958495bbe6e8aa05299124415bc4b272cde91596"
-    balance: "0x6639"
+  - address: "0x31fab0c76acc970de0cbfe8c10d3f5a3a159705e"
+    balance: "0x50c4"
     code: "0x"
-    nonce: "0xf"
+    nonce: "0x5"
     storage: []
-  - address: "0x63c94667644c3ba43c3ead13d78a987153caec75"
+  - address: "0x91ca06bc310628874b3df2dac05aebcbb7458349"
+    balance: "0x3509"
+    code: "0x"
+    nonce: "0x54"
+    storage: []
+  - address: "0xf09bbf47feb1fa397d88ca13d2c951c4e21c1143"
     balance: "0x0"
     code: "0x"
-    nonce: "0x2b"
-    storage: []
-  - address: "0x704436b224c983b34b5b04684a5ae9153baee24c"
-    balance: "0x0"
-    code: "0x"
-    nonce: "0x15"
+    nonce: "0x14"
     storage: []
   memory: []
   stack:
-  - "0xcaaf8ec4ab3d939fd099"
-  - "0x950fa671"
-  - "0x1412b23ae9bb558e3e15"
-  - "0xfb2eabfeaa30727d39d279e8f3ae61"
-  - "0x8bfd3744029725827728fa7e7425c182d871c5e2d658"
+  - "0x69"
+  - "0xbd9b4da4d7ae4fa71893027e77"
+  - "0x9cbadbfa8480569b812e2a64ac87329be3e5c402012b89a4"
+  - "0x0a758f78f7f22f225663012cd58143c319c4ff372b"
+  - "0xc1"
 after:
   accounts:
-  - address: "0x958495bbe6e8aa05299124415bc4b272cde91596"
-    balance: "0x6639"
+  - address: "0x31fab0c76acc970de0cbfe8c10d3f5a3a159705e"
+    balance: "0x50c4"
     code: "0x"
-    nonce: "0xf"
+    nonce: "0x5"
     storage: []
-  - address: "0x704436b224c983b34b5b04684a5ae9153baee24c"
+  - address: "0xf09bbf47feb1fa397d88ca13d2c951c4e21c1143"
     balance: "0x0"
     code: "0x"
-    nonce: "0x15"
+    nonce: "0x14"
     storage: []
-  - address: "0x63c94667644c3ba43c3ead13d78a987153caec75"
-    balance: "0x0"
+  - address: "0x91ca06bc310628874b3df2dac05aebcbb7458349"
+    balance: "0x3509"
     code: "0x"
-    nonce: "0x2b"
+    nonce: "0x54"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0x8bfd3744029725827728fa7e7425c182d871c5e2d658"
-  - "0xcaaf8ec4ab3d939fd099"
-  - "0x950fa671"
-  - "0x1412b23ae9bb558e3e15"
-  - "0xfb2eabfeaa30727d39d279e8f3ae61"
-  - "0x8bfd3744029725827728fa7e7425c182d871c5e2d658"
+  - "0xc1"
+  - "0x69"
+  - "0xbd9b4da4d7ae4fa71893027e77"
+  - "0x9cbadbfa8480569b812e2a64ac87329be3e5c402012b89a4"
+  - "0x0a758f78f7f22f225663012cd58143c319c4ff372b"
+  - "0xc1"
+sender: "0x31fab0c76acc970de0cbfe8c10d3f5a3a159705e"
+receiver: "0xf09bbf47feb1fa397d88ca13d2c951c4e21c1143"
+inputData: "0xe403a4e1a0d088d7d4b9f8253456678901e7a477659a56668ef49a7e41a49704e106d96f0aaddfdcec10edb8b74d5cd47df73cab4705"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x60c1740a758f78f7f22f225663012cd58143c319c4ff372b779cbadbfa8480569b812e2a64ac87329be3e5c402012b89a46cbd9b4da4d7ae4fa71893027e77606984"
+gasPrice: "0x000000000000000000000000000000000000000000000000000000000000131c"
+gasUsed: "0x3"
 allGasUsed: "0x12"
+gasAvailable: "0xf891eb3400"
+gasLimit: 9589500000000
+haltReason: "NONE"
+coinbase: "0x91ca06bc310628874b3df2dac05aebcbb7458349"
+refunds: {}
+number: 8218923388131855219
+timestamp: 6576295388710836731
+mixHashOrPrevRandao: "0x9485649ee1205d0a52cf622b4b316da564d56434a31df232ffd073e4048d3a76"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x758bfd3744029725827728fa7e7425c182d871c5e2d6586efb2eabfeaa30727d39d279e8f3ae61691412b23ae9bb558e3e1563950fa67169caaf8ec4ab3d939fd09984"
-coinbase: "0x63c94667644c3ba43c3ead13d78a987153caec75"
-difficultyBytes: "0x847b93cfaaa77958472bd4fdb3796d3894233b33bbe258f921bd360e50d57f47"
-gasAvailable: "0x2df5f4f600"
-gasLimit: 3356500000000
-gasUsed: "0x3"
-hardFork: "constantinople"
-index: 4
-mixHashOrPrevRandao: "0x2c83d7d6354ca0ed71f81f60c4c2dcc021aab3d2e721709732cc57cbfbc3b46b"
-number: 7624219322920704727
-receiver: "0x704436b224c983b34b5b04684a5ae9153baee24c"
-refunds: {}
-sender: "0x958495bbe6e8aa05299124415bc4b272cde91596"
-timestamp: 4063440098964093554
-value: "0x0"
+difficultyBytes: "0x61f0fe00d73cfc1f97ea4ad701a1af83d049e7b42bb34c137a925b57f46095ba"

@@ -1,49 +1,46 @@
 ---
-operation:
-  name: "EXTCODECOPY"
-  opcode: "0x3c"
-gasPrice: "0x0"
-inputData: "0x271f10d164e40ccebae4caf31aa07cb144101aa7da81d74e5ac63eb8a5ce35218c7f814db8a8a5f28671ce0b8928b2038ebde4"
-haltReason: "NONE"
+name: "EXTCODECOPY"
+hardFork: "petersburg"
+index: 3
 before:
   accounts:
-  - address: "0x50645d1ab3b6ddf6f4a5acb7614914d2f5d86d81"
-    balance: "0x0"
+  - address: "0x8a2a21c75b6f75ef0884701adbf74e33117c653f"
+    balance: "0x4c48"
     code: "0x"
-    nonce: "0x18"
+    nonce: "0x1f"
     storage: []
-  - address: "0x6121a236f34391803ab1a087a1edad1ce43cb247"
-    balance: "0xa61"
+  - address: "0x58054e7fd3866411da843b233927a389d9f5e81f"
+    balance: "0x549e"
     code: "0x"
-    nonce: "0x33"
+    nonce: "0x1"
     storage: []
-  - address: "0xff860a02aa6b84f35cd2c4898c0eb0dc44d07b18"
-    balance: "0x6f35"
+  - address: "0x66827d544564fc2608d61d02eb2d639da9e132ac"
+    balance: "0xed4"
     code: "0x"
     nonce: "0xb"
     storage: []
   memory: []
   stack:
-  - "0x1e9d403ce1765e8e78f78e94cdddab9217820216a9"
-  - "0xae"
-  - "0xf9164a2e027150294f37c91ef9c5c15c63ef0b8a98bbdda56ac1c0"
-  - "0x7a"
+  - "0xb7751f3f852b35a60c06a3d1a12266a8"
+  - "0xf6"
+  - "0xc99cdfe24b278a14c361be13a809a0d97da65d"
+  - "0x8b"
 after:
   accounts:
-  - address: "0xff860a02aa6b84f35cd2c4898c0eb0dc44d07b18"
-    balance: "0x6f35"
+  - address: "0x8a2a21c75b6f75ef0884701adbf74e33117c653f"
+    balance: "0x137e"
+    code: "0x"
+    nonce: "0x1f"
+    storage: []
+  - address: "0x66827d544564fc2608d61d02eb2d639da9e132ac"
+    balance: "0x479e"
     code: "0x"
     nonce: "0xb"
     storage: []
-  - address: "0x6121a236f34391803ab1a087a1edad1ce43cb247"
-    balance: "0xa61"
+  - address: "0x58054e7fd3866411da843b233927a389d9f5e81f"
+    balance: "0x549e"
     code: "0x"
-    nonce: "0x33"
-    storage: []
-  - address: "0x50645d1ab3b6ddf6f4a5acb7614914d2f5d86d81"
-    balance: "0x0"
-    code: "0x"
-    nonce: "0x18"
+    nonce: "0x1"
     storage: []
   logs: []
   memory:
@@ -57,22 +54,26 @@ after:
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - "0x0000000000000000000000000000000000000000000000000000000000000000"
   stack: []
-allGasUsed: "0x2f2"
+sender: "0x8a2a21c75b6f75ef0884701adbf74e33117c653f"
+receiver: "0x66827d544564fc2608d61d02eb2d639da9e132ac"
+inputData: "0xaff562e0c4d200c04b0db042cf9d06fb3a4f2bbdd0e882"
+value: "0x00000000000000000000000000000000000000000000000000000000000038ca"
+code: "0x608b72c99cdfe24b278a14c361be13a809a0d97da65d60f66fb7751f3f852b35a60c06a3d1a12266a83c"
+gasPrice: "0x000000000000000000000000000000000000000000000000000000000000306c"
+gasUsed: "0x2f2"
+allGasUsed: "0x2fe"
+gasAvailable: "0x1a359ecfb00"
+gasLimit: 8030500000000
+haltReason: "NONE"
+coinbase: "0x58054e7fd3866411da843b233927a389d9f5e81f"
+refunds: {}
+number: 7240303432130781784
+timestamp: 5972566872081193145
+mixHashOrPrevRandao: "0xbc34c71a37fcad60be2de188edec59255ea053653c8b016bb431c439e0640e2e"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x607a7af9164a2e027150294f37c91ef9c5c15c63ef0b8a98bbdda56ac1c060ae741e9d403ce1765e8e78f78e94cdddab9217820216a93c"
-coinbase: "0x6121a236f34391803ab1a087a1edad1ce43cb247"
-difficultyBytes: "0xdf77f7039f28d698ff30533198ac433ae34154d39d62176c12c22e22f6607c8a"
-gasAvailable: "0xbf63049c00"
-gasLimit: 9853000000000
-gasUsed: "0x2e6"
-hardFork: "petersburg"
-index: 3
-mixHashOrPrevRandao: "0xc4a16a51711200a3324dcd61285e962e4f74039c1f43873a275200db5715b681"
-number: 6203868644313487535
-receiver: "0xff860a02aa6b84f35cd2c4898c0eb0dc44d07b18"
-refunds: {}
-sender: "0x50645d1ab3b6ddf6f4a5acb7614914d2f5d86d81"
-timestamp: 180141115438841555
-value: "0x0"
+difficultyBytes: "0xa9ce68127c79eb37e7a8ae6b5df33ce2cf15433eb2dbf06ab5c24ef2883d9ea7"

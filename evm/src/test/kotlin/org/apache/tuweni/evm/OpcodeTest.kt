@@ -121,7 +121,7 @@ class OpcodeTest {
     @Throws(IOException::class)
     private fun prepareTest(input: InputStream): Arguments {
       val test = mapper.readValue(input, OpcodeTestModel::class.java)
-      return Arguments.of(test.operation.name + "-" + test.index, test)
+      return Arguments.of(test.name + "-" + test.index, test)
     }
   }
 
@@ -217,7 +217,7 @@ class OpcodeTest {
         hardFork
       )
 
-      if (test.operation.name == "REVERT") {
+      if (test.name == "REVERT") {
         assertEquals(EVMExecutionStatusCode.REVERT, result.statusCode)
       } else {
         assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)

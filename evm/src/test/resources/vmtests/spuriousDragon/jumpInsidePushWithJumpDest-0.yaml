@@ -1,0 +1,52 @@
+---
+name: "jumpInsidePushWithJumpDest"
+hardFork: "spuriousDragon"
+index: 0
+before:
+  accounts:
+  - address: "0x0f572e5295c57f15886f9b263e2f6d2d6c7b5ec6"
+    balance: "0x152d02c7e14af6800000"
+    code: "0x600456655b6001600155"
+    nonce: "0x"
+    storage: []
+  - address: "0xcd1722f3947def4cf144679da39c4c32bdc35681"
+    balance: "0xde0b6b3a7640000"
+    code: "0x"
+    nonce: "0x"
+    storage: []
+  memory: []
+  stack: []
+after:
+  accounts:
+  - address: "0x0f572e5295c57f15886f9b263e2f6d2d6c7b5ec6"
+    balance: "0x152d10a897fe9de40000"
+    code: "0x"
+    nonce: "0x"
+    storage: []
+  - address: "0xcd1722f3947def4cf144679da39c4c32bdc35681"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x"
+    storage: []
+  logs: []
+  memory: []
+  stack: []
+sender: "0xcd1722f3947def4cf144679da39c4c32bdc35681"
+receiver: "0x0f572e5295c57f15886f9b263e2f6d2d6c7b5ec6"
+inputData: "0x"
+value: "0x0000000000000000000000000000000000000000000000000de0b6b3a7640000"
+code: "0x600456655b6001600155"
+gasPrice: "0x00000000000000000000000000000000000000000000000000005af3107a4000"
+gasUsed: "0x0"
+allGasUsed: "0x186a0"
+gasAvailable: "0x186a0"
+gasLimit: 1000000
+haltReason: "INVALID_JUMP_DESTINATION"
+coinbase: "0x2adc25665018aa1fe0e6bc666dac8fc2697ff9ba"
+refunds: {}
+number: 0
+timestamp: 1
+mixHashOrPrevRandao: "0x0000000000000000000000000000000000000000000000000000000000000000"
+baseFee: null
+chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
+difficultyBytes: "0x0000000000000000000000000000000000000000000000000000000000000100"

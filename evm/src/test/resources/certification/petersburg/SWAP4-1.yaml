@@ -1,74 +1,72 @@
 ---
-operation:
-  name: "SWAP4"
-  opcode: "0x93"
-gasPrice: "0x6670"
-inputData: "0x30fb8ac3aaf150"
-haltReason: "NONE"
+name: "SWAP4"
+hardFork: "petersburg"
+index: 1
 before:
   accounts:
-  - address: "0x0da028eb5797825fa5a98bb475a95930500e9abf"
-    balance: "0x3ab0"
+  - address: "0xfa04f6ef18eccd3ee2759cfb02fa8657e2f24e7c"
+    balance: "0x2bcb"
     code: "0x"
-    nonce: "0x16"
+    nonce: "0x13"
     storage: []
-  - address: "0x050cd0a028256f1a46ed587a1d7bab8b71f67914"
-    balance: "0x649f"
+  - address: "0xdf117bd08b6dd7b451e88ff0967ff70eb06aca3c"
+    balance: "0x4667"
     code: "0x"
-    nonce: "0xa"
+    nonce: "0x4e"
     storage: []
-  - address: "0x58523fafe73bf35cbded0537767bd60043368666"
-    balance: "0x4b6f"
+  - address: "0xee54ea574e768a04c312784a77e29dbab0c6b48e"
+    balance: "0x7ce6"
     code: "0x"
-    nonce: "0xa"
+    nonce: "0x17"
     storage: []
   memory: []
   stack:
-  - "0xfa051f8605b0b609aee19d45d7ca03d4ca05129fdd2c5432d7cb"
-  - "0x87bb354bdd3521f5bf4f75"
-  - "0x0879"
-  - "0x574215b17f15c15627804cfd8d"
-  - "0x8d2192bbf5f93aed7c1ad7c3308d43ebd780"
+  - "0x37a4b3874d6e1400b100"
+  - "0x37afbdd99746bc9c332c8dcaf5"
+  - "0x1c1f6678cd0bd0eb9dd01aa41bfaa197"
+  - "0xd8a79b5781df937106de278510db"
+  - "0x5d667afa4733a9619b24bb0d6ac628c6a8fe7306759ae5"
 after:
   accounts:
-  - address: "0x0da028eb5797825fa5a98bb475a95930500e9abf"
-    balance: "0x3ab0"
+  - address: "0xee54ea574e768a04c312784a77e29dbab0c6b48e"
+    balance: "0x7ce6"
     code: "0x"
-    nonce: "0x16"
+    nonce: "0x17"
     storage: []
-  - address: "0x58523fafe73bf35cbded0537767bd60043368666"
-    balance: "0x4b6f"
+  - address: "0xfa04f6ef18eccd3ee2759cfb02fa8657e2f24e7c"
+    balance: "0x2bcb"
     code: "0x"
-    nonce: "0xa"
+    nonce: "0x13"
     storage: []
-  - address: "0x050cd0a028256f1a46ed587a1d7bab8b71f67914"
-    balance: "0x649f"
+  - address: "0xdf117bd08b6dd7b451e88ff0967ff70eb06aca3c"
+    balance: "0x4667"
     code: "0x"
-    nonce: "0xa"
+    nonce: "0x4e"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0x8d2192bbf5f93aed7c1ad7c3308d43ebd780"
-  - "0x87bb354bdd3521f5bf4f75"
-  - "0x0879"
-  - "0x574215b17f15c15627804cfd8d"
-  - "0xfa051f8605b0b609aee19d45d7ca03d4ca05129fdd2c5432d7cb"
+  - "0x5d667afa4733a9619b24bb0d6ac628c6a8fe7306759ae5"
+  - "0x37afbdd99746bc9c332c8dcaf5"
+  - "0x1c1f6678cd0bd0eb9dd01aa41bfaa197"
+  - "0xd8a79b5781df937106de278510db"
+  - "0x37a4b3874d6e1400b100"
+sender: "0xfa04f6ef18eccd3ee2759cfb02fa8657e2f24e7c"
+receiver: "0xee54ea574e768a04c312784a77e29dbab0c6b48e"
+inputData: "0xccfe63a0f16e8266"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x765d667afa4733a9619b24bb0d6ac628c6a8fe7306759ae56dd8a79b5781df937106de278510db6f1c1f6678cd0bd0eb9dd01aa41bfaa1976c37afbdd99746bc9c332c8dcaf56937a4b3874d6e1400b10093"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000005457"
+gasUsed: "0x3"
 allGasUsed: "0x12"
+gasAvailable: "0xdc0c598b00"
+gasLimit: 7934500000000
+haltReason: "NONE"
+coinbase: "0xdf117bd08b6dd7b451e88ff0967ff70eb06aca3c"
+refunds: {}
+number: 5019399105442040769
+timestamp: 1584426852057067011
+mixHashOrPrevRandao: "0xb257dfa231fb6fa3a26080158b00349c88d4b5d17ecb4363e45c0d21328dd304"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x718d2192bbf5f93aed7c1ad7c3308d43ebd7806c574215b17f15c15627804cfd8d6108796a87bb354bdd3521f5bf4f7579fa051f8605b0b609aee19d45d7ca03d4ca05129fdd2c5432d7cb93"
-coinbase: "0x050cd0a028256f1a46ed587a1d7bab8b71f67914"
-difficultyBytes: "0xaa4ef501d56ce273d39f84912f57b30d79370c002f8d6279e6e061708277fe70"
-gasAvailable: "0x1bfd988c300"
-gasLimit: 9014500000000
-gasUsed: "0x3"
-hardFork: "petersburg"
-index: 1
-mixHashOrPrevRandao: "0xd500f62b04ea5f64246b27b00593e22590815df5c1223114ba5a2934bbcf3a13"
-number: 4950855278979063109
-receiver: "0x58523fafe73bf35cbded0537767bd60043368666"
-refunds: {}
-sender: "0x0da028eb5797825fa5a98bb475a95930500e9abf"
-timestamp: 2414467398276387426
-value: "0x0"
+difficultyBytes: "0xa4b935f5d3b584c1affa4b039898e7c864bbb29786996af86c216bcd6b99f789"

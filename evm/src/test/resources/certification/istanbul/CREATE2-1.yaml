@@ -1,49 +1,46 @@
 ---
-operation:
-  name: "CREATE2"
-  opcode: "0xf5"
-gasPrice: "0x30df"
-inputData: "0x4d5d172a87cbd83c5904d15e2bce7f15406f81eee160978244adb914d38f46"
-haltReason: "NONE"
+name: "CREATE2"
+hardFork: "istanbul"
+index: 1
 before:
   accounts:
-  - address: "0x5af26fafdac2dbc19d0c9fba1f77ea1fb6bff43a"
-    balance: "0x3546"
-    code: "0x"
-    nonce: "0xb"
-    storage: []
-  - address: "0x9eca11fb25b8226794ccba7be8cdaabc17ae8cb2"
+  - address: "0xd7cebb1508249b49feeb170dc2940c4cb4db04a5"
     balance: "0x0"
     code: "0x"
-    nonce: "0x2e"
+    nonce: "0x1d"
     storage: []
-  - address: "0xbcaa4ae89d1d5f372d3ccf896433483a9ab24c27"
-    balance: "0xb55"
+  - address: "0x3deca7c488f5a8b51c12af21461ce4cd2e57743b"
+    balance: "0x0"
     code: "0x"
-    nonce: "0xa"
+    nonce: "0x63"
+    storage: []
+  - address: "0x5c80b77cd1ef3c8823831334c9c83c2e04ad6e47"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x4"
     storage: []
   memory: []
   stack:
-  - "0x3790fa8c617253a666"
-  - "0xbd"
-  - "0xe3"
-  - "0xee7ba9607d69"
+  - "0xef84bc8fa4624c95bbf18817c688c512fc19"
+  - "0x87"
+  - "0x56"
+  - "0x3ae02752"
 after:
   accounts:
-  - address: "0x5af26fafdac2dbc19d0c9fba1f77ea1fb6bff43a"
-    balance: "0x21cb"
-    code: "0x"
-    nonce: "0xb"
-    storage: []
-  - address: "0x9eca11fb25b8226794ccba7be8cdaabc17ae8cb2"
+  - address: "0x3deca7c488f5a8b51c12af21461ce4cd2e57743b"
     balance: "0x0"
     code: "0x"
-    nonce: "0x2e"
+    nonce: "0x63"
     storage: []
-  - address: "0xbcaa4ae89d1d5f372d3ccf896433483a9ab24c27"
-    balance: "0x1ed0"
+  - address: "0x5c80b77cd1ef3c8823831334c9c83c2e04ad6e47"
+    balance: "0x0"
     code: "0x"
-    nonce: "0xa"
+    nonce: "0x4"
+    storage: []
+  - address: "0xd7cebb1508249b49feeb170dc2940c4cb4db04a5"
+    balance: "0x0"
+    code: "0x"
+    nonce: "0x1d"
     storage: []
   logs: []
   memory:
@@ -54,29 +51,24 @@ after:
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x0000000000000000000000000000000000000000000000000000000000000000"
-  - "0x0000000000000000000000000000000000000000000000000000000000000000"
   stack:
   - "0x0000000000000000000000000000000000000000000000000000000000000000"
-allGasUsed: "0x7d63"
+sender: "0xd7cebb1508249b49feeb170dc2940c4cb4db04a5"
+receiver: "0x5c80b77cd1ef3c8823831334c9c83c2e04ad6e47"
+inputData: "0x7c9ed3e9121207bea424d865941cee6cdf44add1fa2779c5cc"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x633ae027526056608771ef84bc8fa4624c95bbf18817c688c512fc19f5"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x7d27"
+allGasUsed: "0x7d33"
+gasAvailable: "0xff8e0ee000"
+gasLimit: 791000000000
+haltReason: "NONE"
+coinbase: "0x3deca7c488f5a8b51c12af21461ce4cd2e57743b"
+refunds: {}
+number: 8096506323251249605
+timestamp: 3891058870885711529
+mixHashOrPrevRandao: "0xd20abd60089795b9981a4bde304f74d080812e4779d9c9e9cc9b7aef0cd875f3"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x65ee7ba9607d6960e360bd683790fa8c617253a666f5"
-coinbase: "0x9eca11fb25b8226794ccba7be8cdaabc17ae8cb2"
-difficultyBytes: "0x9b984906c02e3f4bde8f16fb47b2208461d7a465159c7419d622a4e2242912fd"
-gasAvailable: "0xc93c4b6300"
-gasLimit: 2446000000000
-gasUsed: "0x7d57"
-hardFork: "istanbul"
-index: 1
-mixHashOrPrevRandao: "0x3f9c780a030b41396bebcc6cbb0472c540f67d8d716ba74375aba4df8eeb02bb"
-number: 8709718545672876556
-receiver: "0xbcaa4ae89d1d5f372d3ccf896433483a9ab24c27"
-refunds: {}
-sender: "0x5af26fafdac2dbc19d0c9fba1f77ea1fb6bff43a"
-timestamp: 297494626634421520
-value: "0x137b"
+difficultyBytes: "0x938614d2d7a138eb11fcd94de5c10920351ff09145a4e7cf450742907708bd6c"

@@ -1,73 +1,71 @@
 ---
-operation:
-  name: "DUP4"
-  opcode: "0x83"
-gasPrice: "0x0"
-inputData: "0x6720d024f83d88f1f48562733e1fc8a83775eb32bda52bdc67a2e8bea838d9f4cad404d8b2f99aaf3159e464fbc91cd40dae4d0123ee11e2052c6c"
-haltReason: "NONE"
+name: "DUP4"
+hardFork: "istanbul"
+index: 0
 before:
   accounts:
-  - address: "0x6722803a5a067800ee03647c1217bda6b51ba7cc"
-    balance: "0x2c7f"
-    code: "0x"
-    nonce: "0x1d"
-    storage: []
-  - address: "0x66669a4b2bdb9ad1c1d26272c107ee7060dc31a3"
-    balance: "0x114e"
-    code: "0x"
-    nonce: "0x41"
-    storage: []
-  - address: "0x44c9507862c79c8e7333f2fb19306086d99aa9dc"
+  - address: "0x33cfb5ca7fced184eb422f8a9729977c6caffbf2"
     balance: "0x0"
     code: "0x"
-    nonce: "0x2"
+    nonce: "0x21"
+    storage: []
+  - address: "0xbe419bcc81caec840196488d9acd2a1464510bef"
+    balance: "0x1149"
+    code: "0x"
+    nonce: "0x"
+    storage: []
+  - address: "0x5d3f18b8ac5f3648782b88ef3df1455ed4c76349"
+    balance: "0x3cd4"
+    code: "0x"
+    nonce: "0x"
     storage: []
   memory: []
   stack:
-  - "0x105845456326dbf51a0c9f7da57e946af44b193912b9c0363b9be3316385"
-  - "0x8dde8598e5ee196dddf19c8b65c2887b6fa209f1a719"
-  - "0xbd"
-  - "0x7719e4633c8ee0"
+  - "0xfd9d6eae4342879ecfceaa53d8bf299235"
+  - "0x8a805b147e902fa5991a57894e96cca8"
+  - "0x45b815403c464179194172c85dc25f3e"
+  - "0xb9f4c0e101d3d5e69bea4ca79ab06ce51676a3f31c0d2c95"
 after:
   accounts:
-  - address: "0x6722803a5a067800ee03647c1217bda6b51ba7cc"
-    balance: "0x2c7f"
+  - address: "0xbe419bcc81caec840196488d9acd2a1464510bef"
+    balance: "0x1149"
     code: "0x"
-    nonce: "0x1d"
+    nonce: "0x"
     storage: []
-  - address: "0x44c9507862c79c8e7333f2fb19306086d99aa9dc"
+  - address: "0x5d3f18b8ac5f3648782b88ef3df1455ed4c76349"
+    balance: "0x3cd4"
+    code: "0x"
+    nonce: "0x"
+    storage: []
+  - address: "0x33cfb5ca7fced184eb422f8a9729977c6caffbf2"
     balance: "0x0"
     code: "0x"
-    nonce: "0x2"
-    storage: []
-  - address: "0x66669a4b2bdb9ad1c1d26272c107ee7060dc31a3"
-    balance: "0x114e"
-    code: "0x"
-    nonce: "0x41"
+    nonce: "0x21"
     storage: []
   logs: []
   memory: []
   stack:
-  - "0x7719e4633c8ee0"
-  - "0x105845456326dbf51a0c9f7da57e946af44b193912b9c0363b9be3316385"
-  - "0x8dde8598e5ee196dddf19c8b65c2887b6fa209f1a719"
-  - "0xbd"
-  - "0x7719e4633c8ee0"
+  - "0xb9f4c0e101d3d5e69bea4ca79ab06ce51676a3f31c0d2c95"
+  - "0xfd9d6eae4342879ecfceaa53d8bf299235"
+  - "0x8a805b147e902fa5991a57894e96cca8"
+  - "0x45b815403c464179194172c85dc25f3e"
+  - "0xb9f4c0e101d3d5e69bea4ca79ab06ce51676a3f31c0d2c95"
+sender: "0x33cfb5ca7fced184eb422f8a9729977c6caffbf2"
+receiver: "0x5d3f18b8ac5f3648782b88ef3df1455ed4c76349"
+inputData: "0xf9087905c313b0c9af6ea9b2c9fa"
+value: "0x0000000000000000000000000000000000000000000000000000000000000000"
+code: "0x77b9f4c0e101d3d5e69bea4ca79ab06ce51676a3f31c0d2c956f45b815403c464179194172c85dc25f3e6f8a805b147e902fa5991a57894e96cca870fd9d6eae4342879ecfceaa53d8bf29923583"
+gasPrice: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gasUsed: "0x3"
 allGasUsed: "0xf"
+gasAvailable: "0x19c1642c300"
+gasLimit: 7777000000000
+haltReason: "NONE"
+coinbase: "0xbe419bcc81caec840196488d9acd2a1464510bef"
+refunds: {}
+number: 2612515221000052035
+timestamp: 1175784937597652013
+mixHashOrPrevRandao: "0x38286e799f00f161da8ac98a8ce0fe721ab5f25c9ff3c543754c50fa709ad89b"
 baseFee: null
 chainId: "0x0000000000000000000000000000000000000000000000000000000000000539"
-code: "0x667719e4633c8ee060bd758dde8598e5ee196dddf19c8b65c2887b6fa209f1a7197d105845456326dbf51a0c9f7da57e946af44b193912b9c0363b9be331638583"
-coinbase: "0x66669a4b2bdb9ad1c1d26272c107ee7060dc31a3"
-difficultyBytes: "0xa317b20f4a6ecbf78cbff6026d257da6e5fc432749ed99fcc9d5f92d83b3bd02"
-gasAvailable: "0x332d19d600"
-gasLimit: 795000000000
-gasUsed: "0x3"
-hardFork: "istanbul"
-index: 0
-mixHashOrPrevRandao: "0x8c675d873a08222adf85c6ca16403026a2276d109720d0da74bf2573527e8159"
-number: 1270091960566861665
-receiver: "0x44c9507862c79c8e7333f2fb19306086d99aa9dc"
-refunds: {}
-sender: "0x6722803a5a067800ee03647c1217bda6b51ba7cc"
-timestamp: 6671231222050987551
-value: "0x0"
+difficultyBytes: "0x6d7859ea7c9fa9fb5b9730f3032a4b5daffddb17ba0e5b4199e0a53ffb116279"
