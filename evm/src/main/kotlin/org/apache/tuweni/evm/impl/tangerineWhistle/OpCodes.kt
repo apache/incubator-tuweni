@@ -816,10 +816,16 @@ private val signextend = Opcode { gasManager, _, stack, _, _, _, _, _ ->
 }
 
 private val selfdestruct = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
-  gasManager.add(Gas.valueOf(30000))
   val recipientAddress = stack.pop()?.slice(12, 20)?.let { Address.fromBytes(it) } ?: return@Opcode Result(
     EVMExecutionStatusCode.STACK_UNDERFLOW
   )
+
+  val cost = if (!hostContext.accountExists(recipientAddress)) {
+    Gas.valueOf(30000)
+  } else {
+    Gas.valueOf(5000)
+  }
+  gasManager.add(cost)
 
   val inheritance = hostContext.getBalance(recipientAddress)
   hostContext.addRefund(msg.destination, inheritance)

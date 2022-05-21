@@ -59,6 +59,11 @@ class TransactionalEVMHostContext(
   val accountsToDestroy = mutableListOf<Address>()
   val warmedUpStorage = HashSet<Bytes>()
 
+  init {
+    warmedUpStorage.add(sender)
+    warmedUpStorage.add(destination)
+  }
+
   override fun getLogs(): List<Log> = logs
 
   override fun accountsToDestroy(): List<Address> = accountsToDestroy
