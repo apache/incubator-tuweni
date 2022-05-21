@@ -683,15 +683,18 @@ private val extcodesize = Opcode { gasManager, hostContext, stack, _, _, _, _, _
   Result()
 }
 
-private val extcodehash = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
+private val extcodehash = Opcode { gasManager, hostContext, stack, _, _, _, _, _ ->
+  val recipientAddress = stack.pop()?.slice(12, 20)?.let { Address.fromBytes(it) } ?: return@Opcode Result(
+    EVMExecutionStatusCode.STACK_UNDERFLOW
+  )
   gasManager.add(
-    if (hostContext.warmUpAccount(msg.destination)) {
+    if (hostContext.warmUpAccount(recipientAddress)) {
       Gas.valueOf(2600)
     } else {
       Gas.valueOf(100)
     }
   )
-  val code = hostContext.getCode(msg.destination)
+  val code = hostContext.getCode(recipientAddress)
   stack.push(if (code.isEmpty) UInt256.ZERO else Hash.keccak256(code))
   Result()
 }
