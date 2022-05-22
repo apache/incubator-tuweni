@@ -396,7 +396,7 @@ interface HostContext {
    * @param key The index of the account's storage entry.
    * @return The storage value at the given storage key or null bytes if the account does not exist.
    */
-  suspend fun getStorage(address: Address, key: Bytes32): Bytes32?
+  suspend fun getStorage(address: Address, key: Bytes): Bytes32?
 
   /**
    * Set storage function.
@@ -412,7 +412,7 @@ interface HostContext {
    * @param value The value to be stored.
    * @return The effect on the storage item.
    */
-  suspend fun setStorage(address: Address, key: Bytes32, value: Bytes): Int
+  suspend fun setStorage(address: Address, key: Bytes, value: Bytes): Int
 
   /**
    * Get balance function.

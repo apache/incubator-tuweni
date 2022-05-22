@@ -20,6 +20,7 @@ import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.AccountState
 import org.apache.tuweni.eth.Address
+import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.Log
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.StateRepository
@@ -29,6 +30,7 @@ import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
 import org.slf4j.LoggerFactory
+import java.math.BigInteger
 
 /**
  * EVM context that records changes to the world state, so they can be applied atomically.
@@ -68,7 +70,7 @@ class TransactionalEVMHostContext(
 
   override fun accountsToDestroy(): List<Address> = accountsToDestroy
 
-  private val refunds = mutableMapOf<Address, Wei>()
+  private val refunds = mutableMapOf<Address, BigInteger>()
 
   /**
    * Check account existence function.
@@ -107,9 +109,9 @@ class TransactionalEVMHostContext(
    * @param key The index of the account's storage entry.
    * @return The storage value at the given storage key or null bytes if the account does not exist.
    */
-  override suspend fun getStorage(address: Address, key: Bytes32): Bytes32? {
+  override suspend fun getStorage(address: Address, key: Bytes): Bytes32? {
     logger.trace("Entering getStorage")
-    val value = transientRepository.getAccountStoreValue(address, key)?.let { UInt256.fromBytes(it) }
+    val value = transientRepository.getAccountStoreValue(address, Hash.hash(key))?.let { UInt256.fromBytes(it) }
     logger.trace("key $key value $value")
     return value
   }
@@ -138,19 +140,20 @@ class TransactionalEVMHostContext(
    * A storage item has been deleted: X -> 0.
    * EVMC_STORAGE_DELETED = 4
    */
-  override suspend fun setStorage(address: Address, key: Bytes32, value: Bytes): Int {
+  override suspend fun setStorage(address: Address, key: Bytes, value: Bytes): Int {
     logger.trace("Entering setStorage {} {} {}", address, key, value)
 
+    val hashKey = Hash.hash(key)
     val newAccount = transientRepository.accountsExists(address)
-    val repositoryValue = blockchainRepository.getAccountStoreValue(address, key)
-    val oldValue = transientRepository.getAccountStoreValue(address, key)
+    val repositoryValue = blockchainRepository.getAccountStoreValue(address, hashKey)
+    val oldValue = transientRepository.getAccountStoreValue(address, hashKey)
     val storageAdded = newAccount || oldValue == null
     val storageWasModifiedBefore = !(repositoryValue?.equals(oldValue) == true || oldValue == null)
     val storageModified = !(value == UInt256.ZERO && oldValue == null) && !value.equals(oldValue)
     if (!storageModified) {
       return 0
     }
-    transientRepository.storeAccountValue(address, key, value)
+    transientRepository.storeAccountValue(address, hashKey, value)
     if (value.size() == 0) {
       return 4
     }
@@ -393,10 +396,10 @@ class TransactionalEVMHostContext(
   override fun getChaindId(): UInt256 = chainId
 
   override fun addRefund(address: Address, refund: Wei) {
-    refunds[address] = refund.addSafe(refunds[address] ?: Wei.ZERO)
+    refunds[address] = (refunds[address] ?: BigInteger.ZERO).add(refund.toBigInteger())
   }
 
   override fun addRefund(address: Address, refund: Long) {
-    refunds[address] = Wei.valueOf(refund).addSafe(refunds[address] ?: Wei.ZERO)
+    refunds[address] = (refunds[address] ?: BigInteger.ZERO).add(BigInteger.valueOf(refund))
   }
 }

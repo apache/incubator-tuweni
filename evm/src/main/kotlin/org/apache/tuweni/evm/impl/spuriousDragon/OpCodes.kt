@@ -341,7 +341,7 @@ fun swap(index: Int): Opcode {
 
 private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   val key = stack.pop()
-  val value = stack.popBytes()
+  val value = stack.pop()
   if (null == key || null == value) {
     return@Opcode Result(EVMExecutionStatusCode.STACK_UNDERFLOW)
   }
@@ -353,7 +353,7 @@ private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
   val cost = if (!value.isZero && currentValue.isZero) Gas.valueOf(20000) else Gas.valueOf(5000)
   gasManager.add(cost)
 
-  hostContext.setStorage(address, key, value)
+  hostContext.setStorage(address, key, value.toMinimalBytes())
 
   Result()
 }
