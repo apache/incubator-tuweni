@@ -35,6 +35,7 @@ import org.apache.tuweni.io.Resources
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
+import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.trie.MerklePatriciaTrie
 import org.apache.tuweni.trie.MerkleTrie
 import org.apache.tuweni.units.bigints.UInt256
@@ -145,7 +146,7 @@ class EVMReferenceTest {
 
         if (accountStorage != null) {
           for (entry in accountStorage) {
-            repository.storeAccountValue(address, entry.key, Bytes32.leftPad(entry.value))
+            repository.storeAccountValue(address, Hash.hash(entry.key), RLP.encodeValue(entry.value))
           }
         }
       }

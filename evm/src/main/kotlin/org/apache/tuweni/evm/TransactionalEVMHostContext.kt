@@ -26,6 +26,7 @@ import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.StateRepository
 import org.apache.tuweni.eth.repository.StateRepository.Companion.EMPTY_CODE_HASH
 import org.apache.tuweni.eth.repository.StateRepository.Companion.EMPTY_STORAGE_HASH
+import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
@@ -111,7 +112,7 @@ class TransactionalEVMHostContext(
    */
   override suspend fun getStorage(address: Address, key: Bytes): Bytes32? {
     logger.trace("Entering getStorage")
-    val value = transientRepository.getAccountStoreValue(address, Hash.hash(key))?.let { UInt256.fromBytes(it) }
+    val value = transientRepository.getAccountStoreValue(address, Hash.hash(key))?.let { UInt256.fromBytes(RLP.decodeValue(it)) }
     logger.trace("key $key value $value")
     return value
   }
@@ -153,7 +154,7 @@ class TransactionalEVMHostContext(
     if (!storageModified) {
       return 0
     }
-    transientRepository.storeAccountValue(address, hashKey, value)
+    transientRepository.storeAccountValue(address, hashKey, RLP.encodeValue(value))
     if (value.size() == 0) {
       return 4
     }

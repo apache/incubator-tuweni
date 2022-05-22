@@ -34,6 +34,7 @@ import org.apache.tuweni.io.Resources
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
+import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.trie.MerkleStorage
 import org.apache.tuweni.trie.MerkleTrie
 import org.apache.tuweni.trie.StoredMerklePatriciaTrie
@@ -237,7 +238,7 @@ class OpcodeTest {
           assertEquals(info.nonce, accountState!!.nonce)
 
           for (stored in info.storage) {
-            val changed = changesRepository.getAccountStoreValue(address, Bytes32.leftPad(stored.key)) ?: UInt256.ZERO
+            val changed = changesRepository.getAccountStoreValue(address, Hash.hash(stored.key))?.let { RLP.decodeValue(it) } ?: UInt256.ZERO
             assertEquals(stored.value, Bytes32.leftPad(changed)) {
               runBlocking {
                 val account = changesRepository.getAccount(address) ?: changesRepository.newAccountState()
