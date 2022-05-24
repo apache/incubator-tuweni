@@ -1137,8 +1137,8 @@ private val create = Opcode { gasManager, hostContext, stack, message, _, _, mem
       gasManager.gasLeft(),
       to,
       to,
-      message.sender,
-      message.origin,
+      message.destination,
+      message.destination,
       inputData,
       value
     )

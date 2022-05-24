@@ -343,11 +343,33 @@ internal class StoredMerklePatriciaTrieKotlinTest {
       MerkleTrie.EMPTY_TRIE_ROOT_HASH
     )
     assertEquals(MerkleTrie.EMPTY_TRIE_ROOT_HASH, tree.rootHash())
-    println(Hash.keccak256(Bytes32.fromHexString("0x0000000000000000000000000000000000000000000000000000000000000001")))
     tree.put(
       Hash.keccak256(Bytes32.fromHexString("0x0000000000000000000000000000000000000000000000000000000000000001")),
       Bytes.fromHexString("0x32")
     )
     assertEquals(Bytes32.fromHexString("0x9ff0b4b6f084c8432d75c0549758a165ec9d80e5f01440d8753d57a9c95f529e"), tree.rootHash())
+  }
+
+  @Test
+  fun testRootHashDifferentKey() = runBlocking {
+    val store = mutableMapOf<Bytes, Bytes>()
+    val tree = StoredMerklePatriciaTrie.storingBytes(
+      object : MerkleStorage {
+        override suspend fun get(hash: Bytes32): Bytes? {
+          return store.get(hash)
+        }
+
+        override suspend fun put(hash: Bytes32, content: Bytes) {
+          store.put(hash, content)
+        }
+      },
+      MerkleTrie.EMPTY_TRIE_ROOT_HASH
+    )
+    assertEquals(MerkleTrie.EMPTY_TRIE_ROOT_HASH, tree.rootHash())
+    tree.put(
+      Hash.keccak256(Bytes32.fromHexString("0x0000000000000000000000000000000000000000000000000000000000000001")),
+      Bytes.fromHexString("0x81c8")
+    )
+    assertEquals(Bytes32.fromHexString("0x4e05e0192d92867cde657332e4d893cf4d1fbbfca597067a7a385b876efe0a21"), tree.rootHash())
   }
 }

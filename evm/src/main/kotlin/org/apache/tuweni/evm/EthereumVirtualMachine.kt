@@ -181,13 +181,15 @@ class EthereumVirtualMachine(
   private val options: Map<String, String> = mapOf(),
 ) {
 
+  companion object {
+    val logger = LoggerFactory.getLogger(EthereumVirtualMachine::class.java)
+
+    private val MAX_NONCE = UInt256.fromHexString("0xffffffffffffffff")
+  }
+
   private var vm: EvmVm? = null
 
   private fun vm() = vm!!
-
-  companion object {
-    val logger = LoggerFactory.getLogger(EthereumVirtualMachine::class.java)
-  }
 
   /**
    * Start the EVM
@@ -304,6 +306,12 @@ class EthereumVirtualMachine(
       val gasManager = GasManager(gas)
       return EVMResult(EVMExecutionStatusCode.CALL_DEPTH_EXCEEDED, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), null))
     }
+    val senderNonce = hostContext.getNonce(sender)
+
+    if (senderNonce >= MAX_NONCE) {
+      return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
+    }
+
     if (callKind == CallKind.CREATE || callKind == CallKind.CREATE2) {
 
       val codeDepositGasFee = UInt256.valueOf(code.size() * 200L)
@@ -570,6 +578,7 @@ interface HostContext {
   fun addRefund(address: Address, refund: Wei)
   fun addRefund(address: Address, refund: Long)
   suspend fun isEmptyAccount(address: Address): Boolean
+  suspend fun incrementNonce(address: Address): UInt256
 }
 
 interface EvmVm {

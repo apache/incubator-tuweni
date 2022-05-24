@@ -118,6 +118,16 @@ class TransactionalEVMHostContext(
   }
 
   /**
+   * Increments the nonce of the account associated with the address.
+   */
+  override suspend fun incrementNonce(address: Address): UInt256 {
+    val account = transientRepository.getAccount(address) ?: transientRepository.newAccountState()
+    val newNonce = account.nonce.add(1)
+    transientRepository.storeAccount(address, AccountState(newNonce, account.balance, account.storageRoot, account.codeHash))
+    return newNonce
+  }
+
+  /**
    * Set storage function.
    *
    *
@@ -154,7 +164,11 @@ class TransactionalEVMHostContext(
     if (!storageModified) {
       return 0
     }
-    transientRepository.storeAccountValue(address, hashKey, RLP.encodeValue(value))
+    if (value.isEmpty) {
+      transientRepository.deleteAccountStore(address, hashKey)
+    } else {
+      transientRepository.storeAccountValue(address, hashKey, RLP.encodeValue(value))
+    }
     if (value.size() == 0) {
       return 4
     }
