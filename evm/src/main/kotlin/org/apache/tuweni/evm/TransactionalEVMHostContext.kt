@@ -84,7 +84,7 @@ class TransactionalEVMHostContext(
    */
   override suspend fun accountExists(address: Address): Boolean {
     logger.trace("Entering accountExists")
-    return transientRepository.accountsExists(address) || ethereumVirtualMachine.precompiles.contains(address)
+    return transientRepository.accountsExists(address)
   }
 
   override suspend fun getRepositoryStorage(address: Address, key: Bytes32): Bytes? {

@@ -858,7 +858,6 @@ private val call = Opcode { gasManager, hostContext, stack, message, _, _, memor
 
   val inputSize = inputDataOffset.add(inputDataLength)
   val outputSize = outputDataOffset.add(outputDataLength)
-  val previousMemoryCost = memoryCost(memory.size())
 
   val callMemoryCost = if (inputSize.compareTo(outputSize) < 0) {
     memory.newSize(outputDataOffset, outputDataLength)
@@ -867,7 +866,10 @@ private val call = Opcode { gasManager, hostContext, stack, message, _, _, memor
   }
 
   val memoryCost = memoryCost(callMemoryCost)
-  cost = cost.add(memoryCost.subtract(previousMemoryCost)).add(stipend)
+  cost = cost.addSafe(memoryCost(callMemoryCost.subtract(memory.size())).addSafe(stipend))
+  if (!hostContext.accountExists(to)) {
+    cost = cost.addSafe(Gas.valueOf(25000))
+  }
 
   gasManager.add(cost)
   if (!gasManager.hasGasLeft()) {
