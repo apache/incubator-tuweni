@@ -146,16 +146,19 @@ class EcroverTest {
         hardFork
       )
 
-      assertEquals(EVMExecutionStatusCode.OUT_OF_GAS, result.statusCode)
+      assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
 
       for (i in 0 until test.after.stack.size) {
         assertEquals(Bytes32.leftPad(test.after.stack[i]), result.state.stack.get(i), "Mismatch of stack elements")
       }
 
       test.after.accounts.forEach { info ->
-        runBlocking {
+        runBlocking acct@{
           val address = info.address
-          assertTrue(changesRepository.accountsExists(address))
+          if (Registry.istanbul.contains(address)) {
+            return@acct
+          }
+          assertTrue(changesRepository.accountsExists(address), address.toHexString())
           val accountState = changesRepository.getAccount(address)
           val balance = accountState?.balance ?: Wei.valueOf(0)
           assertEquals(info.balance, balance, "balance doesn't match: " + address.toHexString() + ":" + if (balance > info.balance) balance.subtract(info.balance).toString() else info.balance.subtract(balance).toString())

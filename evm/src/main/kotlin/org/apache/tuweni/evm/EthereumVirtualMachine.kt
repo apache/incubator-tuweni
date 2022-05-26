@@ -321,6 +321,8 @@ class EthereumVirtualMachine(
       gasAvailable = gasAvailable.subtract(codeDepositGasFee)
     }
 
+    val precompile = precompiles[contractAddress]
+
     if (!value.isZero && !options.containsKey("DISABLE_TRANSFER_VALUE")) {
       val destinationBalance = hostContext.getBalance(destination)
       val senderBalance = hostContext.getBalance(sender)
@@ -332,13 +334,12 @@ class EthereumVirtualMachine(
       hostContext.setBalance(destination, destinationBalance.add(amount))
     }
 
-    val contract = precompiles[contractAddress]
-    if (contract != null) {
+    if (precompile != null) {
       if (callKind == CallKind.CREATE || callKind == CallKind.CREATE2) {
         return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
       }
       logger.trace("Executing precompile $contractAddress")
-      val result = contract.run(inputData)
+      val result = precompile.run(inputData)
       val gasManager = GasManager(gasAvailable)
       gasManager.add(result.gas)
       return EVMResult(if (result.output == null) EVMExecutionStatusCode.PRECOMPILE_FAILURE else EVMExecutionStatusCode.SUCCESS, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), result.output))
