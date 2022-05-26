@@ -181,13 +181,15 @@ class EthereumVirtualMachine(
   private val options: Map<String, String> = mapOf(),
 ) {
 
+  companion object {
+    val logger = LoggerFactory.getLogger(EthereumVirtualMachine::class.java)
+
+    private val MAX_NONCE = UInt256.fromHexString("0xffffffffffffffff")
+  }
+
   private var vm: EvmVm? = null
 
   private fun vm() = vm!!
-
-  companion object {
-    val logger = LoggerFactory.getLogger(EthereumVirtualMachine::class.java)
-  }
 
   /**
    * Start the EVM
@@ -304,6 +306,12 @@ class EthereumVirtualMachine(
       val gasManager = GasManager(gas)
       return EVMResult(EVMExecutionStatusCode.CALL_DEPTH_EXCEEDED, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), null))
     }
+    val senderNonce = hostContext.getNonce(sender)
+
+    if (senderNonce >= MAX_NONCE) {
+      return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
+    }
+
     if (callKind == CallKind.CREATE || callKind == CallKind.CREATE2) {
 
       val codeDepositGasFee = UInt256.valueOf(code.size() * 200L)
@@ -312,6 +320,8 @@ class EthereumVirtualMachine(
       }
       gasAvailable = gasAvailable.subtract(codeDepositGasFee)
     }
+
+    val precompile = precompiles[contractAddress]
 
     if (!value.isZero && !options.containsKey("DISABLE_TRANSFER_VALUE")) {
       val destinationBalance = hostContext.getBalance(destination)
@@ -324,13 +334,12 @@ class EthereumVirtualMachine(
       hostContext.setBalance(destination, destinationBalance.add(amount))
     }
 
-    val contract = precompiles[contractAddress]
-    if (contract != null) {
+    if (precompile != null) {
       if (callKind == CallKind.CREATE || callKind == CallKind.CREATE2) {
         return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
       }
       logger.trace("Executing precompile $contractAddress")
-      val result = contract.run(inputData)
+      val result = precompile.run(inputData)
       val gasManager = GasManager(gasAvailable)
       gasManager.add(result.gas)
       return EVMResult(if (result.output == null) EVMExecutionStatusCode.PRECOMPILE_FAILURE else EVMExecutionStatusCode.SUCCESS, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), result.output))
@@ -396,7 +405,7 @@ interface HostContext {
    * @param key The index of the account's storage entry.
    * @return The storage value at the given storage key or null bytes if the account does not exist.
    */
-  suspend fun getStorage(address: Address, key: Bytes32): Bytes32?
+  suspend fun getStorage(address: Address, key: Bytes): Bytes32?
 
   /**
    * Set storage function.
@@ -412,7 +421,7 @@ interface HostContext {
    * @param value The value to be stored.
    * @return The effect on the storage item.
    */
-  suspend fun setStorage(address: Address, key: Bytes32, value: Bytes): Int
+  suspend fun setStorage(address: Address, key: Bytes, value: Bytes): Int
 
   /**
    * Get balance function.
@@ -570,6 +579,7 @@ interface HostContext {
   fun addRefund(address: Address, refund: Wei)
   fun addRefund(address: Address, refund: Long)
   suspend fun isEmptyAccount(address: Address): Boolean
+  suspend fun incrementNonce(address: Address): UInt256
 }
 
 interface EvmVm {

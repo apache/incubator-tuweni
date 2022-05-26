@@ -96,6 +96,26 @@ class TransientStateRepository(val repository: BlockchainRepository) : StateRepo
     transientWorldState.put(addrHash, newAccountState.toBytes())
   }
 
+  override suspend fun deleteAccountStore(address: Address, key: Bytes32) {
+    val addrHash = Hash.hash(address)
+    val accountState = transientWorldState.get(addrHash)?.let { AccountState.fromBytes(it) } ?: newAccountState()
+    val tree = StoredMerklePatriciaTrie.storingBytes(
+      object : MerkleStorage {
+        override suspend fun get(hash: Bytes32): Bytes? {
+          return transientState.get(hash)
+        }
+
+        override suspend fun put(hash: Bytes32, content: Bytes) {
+          transientState.put(hash, content)
+        }
+      },
+      accountState.storageRoot
+    )
+    tree.remove(key)
+    val newAccountState = AccountState(accountState.nonce, accountState.balance, Hash.fromBytes(tree.rootHash()), accountState.codeHash)
+    transientWorldState.put(addrHash, newAccountState.toBytes())
+  }
+
   override suspend fun getAccountCode(address: Address): Bytes? {
     val addressHash = Hash.hash(address)
     val accountStateBytes = transientWorldState.get(addressHash)

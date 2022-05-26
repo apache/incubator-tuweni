@@ -105,12 +105,6 @@ class TransactionProcessor(val vm: EthereumVirtualMachine, val hardFork: HardFor
       to = tx.to!!
       inputData = tx.payload
     }
-    if (tx.value > UInt256.ZERO) {
-      val account = stateChanges.getAccount(to) ?: stateChanges.newAccountState()
-      val newAccountState =
-        AccountState(account.nonce, account.balance.add(tx.value), account.storageRoot, account.codeHash)
-      stateChanges.storeAccount(to, newAccountState)
-    }
     val gasCost = calculateTransactionCost(tx.payload, hardFork)
     val result = vm.execute(
       tx.sender!!,
@@ -139,11 +133,12 @@ class TransactionProcessor(val vm: EthereumVirtualMachine, val hardFork: HardFor
     if (pay < tx.gasPrice) { // indicates an overflow.
       return TransactionProcessorResult()
     }
+    val senderAccountAfter = repository.getAccount(sender)!!
     val newSenderAccountState = AccountState(
-      senderAccount.nonce.add(1),
-      senderAccount.balance.subtract(pay),
-      senderAccount.storageRoot,
-      senderAccount.codeHash
+      senderAccountAfter.nonce.add(1),
+      senderAccountAfter.balance.subtract(pay),
+      senderAccountAfter.storageRoot,
+      senderAccountAfter.codeHash
     )
     stateChanges.storeAccount(sender, newSenderAccountState)
 

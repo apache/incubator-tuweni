@@ -54,7 +54,7 @@ import java.io.UncheckedIOException
 import java.util.stream.Stream
 
 @ExtendWith(LuceneIndexWriterExtension::class, BouncyCastleExtension::class)
-class EvmCertificationTest {
+class EcroverTest {
   companion object {
 
     val mapper = ObjectMapper(YAMLFactory())
@@ -65,44 +65,8 @@ class EvmCertificationTest {
 
     @JvmStatic
     @Throws(IOException::class)
-    private fun findBerlinTests(): Stream<Arguments> {
-      return findTests("/vmtests/berlin/*.yaml")
-    }
-
-    @JvmStatic
-    @Throws(IOException::class)
-    private fun findIstanbulTests(): Stream<Arguments> {
-      return findTests("/vmtests/istanbul/*.yaml")
-    }
-
-    @JvmStatic
-    @Throws(IOException::class)
     private fun findFrontierTests(): Stream<Arguments> {
-      return findTests("/vmtests/frontier/*.yaml")
-    }
-
-    @JvmStatic
-    @Throws(IOException::class)
-    private fun findHomesteadTests(): Stream<Arguments> {
-      return findTests("/vmtests/homestead/*.yaml")
-    }
-
-    @JvmStatic
-    @Throws(IOException::class)
-    private fun findConstantinopleTests(): Stream<Arguments> {
-      return findTests("/vmtests/constantinople/*.yaml")
-    }
-
-    @JvmStatic
-    @Throws(IOException::class)
-    private fun findTangerineWhistleTests(): Stream<Arguments> {
-      return findTests("/vmtests/tangerineWhistle/*.yaml")
-    }
-
-    @JvmStatic
-    @Throws(IOException::class)
-    private fun findSpuriousDragonTests(): Stream<Arguments> {
-      return findTests("/vmtests/spuriousDragon/*.yaml")
+      return Stream.of(EcroverTest::class.java.getResource("/ecrecover.yaml").openConnection().getInputStream().use { input -> prepareTest(input) })
     }
 
     @Throws(IOException::class)
@@ -137,42 +101,6 @@ class EvmCertificationTest {
   @MethodSource("findFrontierTests")
   fun runFrontierReferenceTests(testName: String, test: OpcodeTestModel) {
     runReferenceTests(testName, HardFork.FRONTIER, test)
-  }
-
-  @ParameterizedTest(name = "Homestead {index}: {0}")
-  @MethodSource("findHomesteadTests")
-  fun runHomesteadReferenceTests(testName: String, test: OpcodeTestModel) {
-    runReferenceTests(testName, HardFork.HOMESTEAD, test)
-  }
-
-  @ParameterizedTest(name = "TangerineWhistle {index}: {0}")
-  @MethodSource("findTangerineWhistleTests")
-  fun runTangerineWhistleReferenceTests(testName: String, test: OpcodeTestModel) {
-    runReferenceTests(testName, HardFork.TANGERINE_WHISTLE, test)
-  }
-
-  @ParameterizedTest(name = "SpuriousDragon {index}: {0}")
-  @MethodSource("findSpuriousDragonTests")
-  fun runSpuriousDragonReferenceTests(testName: String, test: OpcodeTestModel) {
-    runReferenceTests(testName, HardFork.SPURIOUS_DRAGON, test)
-  }
-
-  @ParameterizedTest(name = "Constantinople {index}: {0}")
-  @MethodSource("findConstantinopleTests")
-  fun runConstantinopleReferenceTests(testName: String, test: OpcodeTestModel) {
-    runReferenceTests(testName, HardFork.CONSTANTINOPLE, test)
-  }
-
-  @ParameterizedTest(name = "Istanbul {index}: {0}")
-  @MethodSource("findIstanbulTests")
-  fun runIstanbulReferenceTests(testName: String, test: OpcodeTestModel) {
-    runReferenceTests(testName, HardFork.ISTANBUL, test)
-  }
-
-  @ParameterizedTest(name = "Berlin {index}: {0}")
-  @MethodSource("findBerlinTests")
-  fun runBerlinReferenceTests(testName: String, test: OpcodeTestModel) {
-    runReferenceTests(testName, HardFork.BERLIN, test)
   }
 
   private fun runReferenceTests(testName: String, hardFork: HardFork, test: OpcodeTestModel) = runBlocking {
@@ -218,23 +146,19 @@ class EvmCertificationTest {
         hardFork
       )
 
-      if (test.name == "REVERT") {
-        assertEquals(EVMExecutionStatusCode.REVERT, result.statusCode)
-      } else if (result.statusCode == EVMExecutionStatusCode.REJECTED) {
-        // if the execution is rejected, it's because the amount of the value is higher than the sender balance. Pass.
-        return@runBlocking
-      } else {
-        assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
-      }
+      assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
 
       for (i in 0 until test.after.stack.size) {
         assertEquals(Bytes32.leftPad(test.after.stack[i]), result.state.stack.get(i), "Mismatch of stack elements")
       }
 
       test.after.accounts.forEach { info ->
-        runBlocking {
+        runBlocking acct@{
           val address = info.address
-          assertTrue(changesRepository.accountsExists(address))
+          if (Registry.istanbul.contains(address)) {
+            return@acct
+          }
+          assertTrue(changesRepository.accountsExists(address), address.toHexString())
           val accountState = changesRepository.getAccount(address)
           val balance = accountState?.balance ?: Wei.valueOf(0)
           assertEquals(info.balance, balance, "balance doesn't match: " + address.toHexString() + ":" + if (balance > info.balance) balance.subtract(info.balance).toString() else info.balance.subtract(balance).toString())
@@ -275,13 +199,6 @@ class EvmCertificationTest {
           }
         }
       }
-
-      assertEquals(
-        test.allGasUsed.toLong(),
-        result.state.gasManager.gasCost.toLong(),
-        " diff: " + if (test.allGasUsed > result.state.gasManager.gasLeft()) test.allGasUsed.subtract(result.state.gasManager.gasLeft()) else result.state.gasManager.gasLeft()
-          .subtract(test.allGasUsed)
-      )
     } finally {
       vm.stop()
     }

@@ -545,6 +545,27 @@ class BlockchainRepository(
     worldState!!.put(addrHash, newAccountState.toBytes())
   }
 
+  override suspend fun deleteAccountStore(address: Address, key: Bytes32) {
+    logger.trace("Entering deleteAccountStore")
+    val addrHash = Hash.hash(address)
+    val accountState = worldState!!.get(addrHash)?.let { AccountState.fromBytes(it) } ?: newAccountState()
+    val tree = StoredMerklePatriciaTrie.storingBytes(
+      object : MerkleStorage {
+        override suspend fun get(hash: Bytes32): Bytes? {
+          return stateStore.get(hash)
+        }
+
+        override suspend fun put(hash: Bytes32, content: Bytes) {
+          stateStore.put(hash, content)
+        }
+      },
+      accountState.storageRoot
+    )
+    tree.remove(key)
+    val newAccountState = AccountState(accountState.nonce, accountState.balance, Hash.fromBytes(tree.rootHash()), accountState.codeHash)
+    worldState!!.put(addrHash, newAccountState.toBytes())
+  }
+
   /**
    * Gets the code of an account
    *
