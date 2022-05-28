@@ -19,6 +19,7 @@ package org.apache.tuweni.evmdsl
 import org.apache.tuweni.bytes.Bytes
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 
 class CodeTest {
 
@@ -37,5 +38,19 @@ class CodeTest {
     assertEquals(Bytes.fromHexString("0xdeadbeef"), (codeRead.instructions[0] as Push).bytesToPush)
     assertEquals(Bytes.fromHexString("0xf00ba3"), (codeRead.instructions[1] as Push).bytesToPush)
     assertEquals(Bytes.fromHexString("0xf000"), (codeRead.instructions[2] as Push).bytesToPush)
+  }
+
+  @Test
+  fun decodeExistingContract() {
+    // decode the contract:
+    val ba = CodeTest::class.java.getResourceAsStream("/contract.txt")!!.readAllBytes()
+    val contract = Bytes.fromHexString(String(ba))
+    val code = assertDoesNotThrow {
+      Code.read(contract)
+    }
+    assertEquals("PUSH 0x80", code.toString().splitToSequence('\n').first())
+    val codeStr = code.toString()
+    val reread = Code.read(code.toBytes())
+    assertEquals(codeStr, reread.toString())
   }
 }
