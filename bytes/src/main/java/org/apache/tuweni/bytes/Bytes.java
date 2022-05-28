@@ -134,6 +134,21 @@ public interface Bytes extends Comparable<Bytes> {
   }
 
   /**
+   * Wrap a list of other values into a concatenated view.
+   *
+   * <p>
+   * Note that the values are not copied and thus any future update to the values will be reflected in the returned
+   * value. If copying the inputs is desired, use {@link #concatenate(Bytes...)}.
+   *
+   * @param values The values to wrap.
+   * @return A value representing a view over the concatenation of all {@code values}.
+   * @throws IllegalArgumentException if the result overflows an int.
+   */
+  static Bytes wrap(List<Bytes> values) {
+    return ConcatenatedBytes.wrap(values);
+  }
+
+  /**
    * Create a value containing the concatenation of the values provided.
    *
    * @param values The values to copy and concatenate.

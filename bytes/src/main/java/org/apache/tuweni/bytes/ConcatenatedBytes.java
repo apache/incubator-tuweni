@@ -17,6 +17,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkElementIndex;
 
 import java.security.MessageDigest;
+import java.util.List;
 
 final class ConcatenatedBytes extends AbstractBytes {
 
@@ -58,6 +59,52 @@ final class ConcatenatedBytes extends AbstractBytes {
     }
     if (count == values.length) {
       return new ConcatenatedBytes(values, totalSize);
+    }
+
+    Bytes[] concatenated = new Bytes[count];
+    int i = 0;
+    for (Bytes value : values) {
+      if (value instanceof ConcatenatedBytes) {
+        Bytes[] subvalues = ((ConcatenatedBytes) value).values;
+        System.arraycopy(subvalues, 0, concatenated, i, subvalues.length);
+        i += subvalues.length;
+      } else if (value.size() != 0) {
+        concatenated[i++] = value;
+      }
+    }
+    return new ConcatenatedBytes(concatenated, totalSize);
+  }
+
+  static Bytes wrap(List<Bytes> values) {
+    if (values.size() == 0) {
+      return EMPTY;
+    }
+    if (values.size() == 1) {
+      return values.get(0);
+    }
+
+    int count = 0;
+    int totalSize = 0;
+
+    for (Bytes value : values) {
+      int size = value.size();
+      try {
+        totalSize = Math.addExact(totalSize, size);
+      } catch (ArithmeticException e) {
+        throw new IllegalArgumentException("Combined length of values is too long (> Integer.MAX_VALUE)");
+      }
+      if (value instanceof ConcatenatedBytes) {
+        count += ((ConcatenatedBytes) value).values.length;
+      } else if (size != 0) {
+        count += 1;
+      }
+    }
+
+    if (count == 0) {
+      return Bytes.EMPTY;
+    }
+    if (count == values.size()) {
+      return new ConcatenatedBytes(values.toArray(new Bytes[0]), totalSize);
     }
 
     Bytes[] concatenated = new Bytes[count];
