@@ -17,8 +17,6 @@
 package org.apache.tuweni.evmdsl
 
 import org.apache.tuweni.bytes.Bytes
-import kotlin.reflect.full.createInstance
-import kotlin.reflect.full.primaryConstructor
 
 /**
  * EVM code represented as a set of domain-specific instructions.
@@ -37,14 +35,12 @@ class Code(val instructions: List<Instruction>) {
 
           while (index < codeBytes.size()) {
             val model = InstructionRegistry.opcodes.get(codeBytes.get(index))
-              ?: throw IllegalArgumentException("Unknown opcode " + codeBytes.get(index))
-            index++
-            if (model.additionalBytesToRead > 0) {
-              this.add(model.instructionClass.primaryConstructor!!.call(codeBytes.slice(index, model.additionalBytesToRead)))
-              index += model.additionalBytesToRead
-            } else {
-              this.add(model.instructionClass.createInstance())
+            if (model == null) {
+              throw IllegalArgumentException("Unknown opcode " + Bytes.of(codeBytes.get(index)) + " at index " + index)
             }
+            index++
+            this.add(model.creator(codeBytes, index))
+            index += model.additionalBytesToRead
           }
         }
       )
@@ -53,5 +49,9 @@ class Code(val instructions: List<Instruction>) {
 
   fun toBytes(): Bytes {
     return Bytes.wrap(instructions.map { it.toBytes() })
+  }
+
+  override fun toString(): String {
+    return instructions.map { it.toString() }.joinToString("\n")
   }
 }
