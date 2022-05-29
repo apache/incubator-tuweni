@@ -25,6 +25,12 @@ import org.apache.tuweni.bytes.Bytes
 interface Instruction {
 
   fun toBytes(): Bytes
+
+  fun stackItemsNeeded() = stackItemsConsumed()
+
+  fun stackItemsConsumed(): Int
+
+  fun stackItemsProduced(): Int
 }
 
 data class InstructionModel(val opcode: Byte, val additionalBytesToRead: Int = 0, val creator: (code: Bytes, index: Int) -> Instruction)
@@ -173,469 +179,552 @@ class Push(val bytesToPush: Bytes) : Instruction {
   }
 
   override fun toBytes(): Bytes = Bytes.wrap(Bytes.of((0x60 + bytesToPush.size() - 1).toByte()), bytesToPush)
-
   override fun toString(): String = "PUSH ${bytesToPush.toHexString()}"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
-class Invalid(val invalidByte: kotlin.Byte) : Instruction {
-
+data class Invalid(val invalidByte: Byte) : Instruction {
   override fun toBytes(): Bytes = Bytes.of(invalidByte)
-
-  override fun toString(): String = "INVALID 0x${invalidByte.toString(16)}"
+  override fun toString(): String = "INVALID ${Bytes.of(invalidByte)}"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 0
 }
 
 object Stop : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x00)
-
   override fun toString(): String = "STOP"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 0
 }
 
 object Add : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x01)
-
   override fun toString(): String = "ADD"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Mul : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x02)
-
   override fun toString(): String = "MUL"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Sub : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x03)
-
   override fun toString(): String = "SUB"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Div : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x04)
   override fun toString(): String = "DIV"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object SDiv : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x05)
   override fun toString(): String = "SDIV"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Mod : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x06)
   override fun toString(): String = "MOD"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object SMod : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x07)
   override fun toString(): String = "SMOD"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object AddMod : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x08)
   override fun toString(): String = "ADDMOD"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object MulMod : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x09)
   override fun toString(): String = "MULMOD"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Lt : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x10)
   override fun toString(): String = "LT"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Gt : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x11)
   override fun toString(): String = "GT"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Slt : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x12)
   override fun toString(): String = "SLT"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Sgt : Instruction {
 
   override fun toBytes(): Bytes = Bytes.of(0x13)
   override fun toString(): String = "SGT"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Exp : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x0a)
   override fun toString(): String = "EXP"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object SignExtend : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x0b)
-
   override fun toString(): String = "SIGNEXTEND"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Eq : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x14)
   override fun toString(): String = "EQ"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object IsZero : Instruction {
 
   override fun toBytes(): Bytes = Bytes.of(0x15)
   override fun toString(): String = "ISZERO"
+  override fun stackItemsConsumed() = 1
+  override fun stackItemsProduced() = 1
 }
 
 object And : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x16)
   override fun toString(): String = "AND"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Or : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x17)
   override fun toString(): String = "OR"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Xor : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x18)
   override fun toString(): String = "XOR"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Not : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x19)
   override fun toString(): String = "NOT"
+  override fun stackItemsConsumed() = 1
+  override fun stackItemsProduced() = 1
 }
 
 object Byte : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x1a)
   override fun toString(): String = "BYTE"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Shl : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x1b)
   override fun toString(): String = "SHL"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Shr : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x1c)
   override fun toString(): String = "SHR"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Sar : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x1d)
-
   override fun toString(): String = "SAR"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Sha3 : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x20)
   override fun toString(): String = "SHA3"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Address : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x30)
   override fun toString(): String = "ADDRESS"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object Balance : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x31)
   override fun toString(): String = "BALANCE"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object Origin : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x32)
   override fun toString(): String = "ORIGIN"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object Caller : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x33)
   override fun toString(): String = "CALLER"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object CallValue : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x34)
   override fun toString(): String = "CALLVALUE"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object CallDataLoad : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x35)
   override fun toString(): String = "CALLDATALOAD"
+  override fun stackItemsConsumed() = 1
+  override fun stackItemsProduced() = 1
 }
 
 object CallDataSize : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x36)
   override fun toString(): String = "CALLDATASIZE"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object CallDataCopy : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x37)
   override fun toString(): String = "CALLDATACOPY"
+  override fun stackItemsConsumed() = 3
+  override fun stackItemsProduced() = 0
 }
 
 object CodeSize : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x38)
   override fun toString(): String = "CODESIZE"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object CodeCopy : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x39)
   override fun toString(): String = "CODECOPY"
+  override fun stackItemsConsumed() = 3
+  override fun stackItemsProduced() = 0
 }
 
 object GasPrice : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x3a)
   override fun toString(): String = "GASPRICE"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object ExtCodeSize : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x3b)
   override fun toString(): String = "EXTCODESIZE"
+  override fun stackItemsConsumed() = 1
+  override fun stackItemsProduced() = 1
 }
 
 object ExtCodeCopy : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x3c)
   override fun toString(): String = "EXTCODECOPY"
+  override fun stackItemsConsumed() = 4
+  override fun stackItemsProduced() = 0
 }
 
 object ReturnDataSize : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x3d)
   override fun toString(): String = "RETURNDATASIZE"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object ReturnDataCopy : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x3e)
   override fun toString(): String = "RETURNDATACOPY"
+  override fun stackItemsConsumed() = 3
+  override fun stackItemsProduced() = 0
 }
 
 object ExtCodeHash : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x3f)
   override fun toString(): String = "EXTCODEHASH"
+  override fun stackItemsConsumed() = 1
+  override fun stackItemsProduced() = 1
 }
 
 object BlockHash : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x40)
   override fun toString(): String = "BLOCKHASH"
+  override fun stackItemsConsumed() = 1
+  override fun stackItemsProduced() = 1
 }
 
 object Coinbase : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x41)
   override fun toString(): String = "COINBASE"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object Timestamp : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x42)
   override fun toString(): String = "TIMESTAMP"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object Number : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x43)
   override fun toString(): String = "NUMBER"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object Difficulty : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x44)
   override fun toString(): String = "DIFFICULTY"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object GasLimit : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x45)
   override fun toString(): String = "GASLIMIT"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object ChainId : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x46)
   override fun toString(): String = "CHAINID"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object SelfBalance : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x47)
   override fun toString(): String = "SELFBALANCE"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object Pop : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x50)
   override fun toString(): String = "POP"
+  override fun stackItemsConsumed() = 1
+  override fun stackItemsProduced() = 0
 }
 
 object Mload : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x51)
   override fun toString(): String = "MLOAD"
+  override fun stackItemsConsumed() = 1
+  override fun stackItemsProduced() = 1
 }
 
 object Mstore : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x52)
   override fun toString(): String = "MSTORE"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 0
 }
 
 object Mstore8 : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x53)
   override fun toString(): String = "MSTORE8"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Sload : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x54)
   override fun toString(): String = "SLOAD"
+  override fun stackItemsConsumed() = 1
+  override fun stackItemsProduced() = 1
 }
 
 object Sstore : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x55)
   override fun toString(): String = "SSTORE"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 0
 }
 
 object Jump : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x56)
   override fun toString(): String = "JUMP"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 0
 }
 
 object Jumpi : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x57)
   override fun toString(): String = "JUMPI"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 1
 }
 
 object Pc : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x58)
   override fun toString(): String = "PC"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object Msize : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x59)
   override fun toString(): String = "MSIZE"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object Gas : Instruction {
 
   override fun toBytes(): Bytes = Bytes.of(0x5a)
   override fun toString(): String = "GAS"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 1
 }
 
 object JumpDest : Instruction {
 
   override fun toBytes(): Bytes = Bytes.of(0x5b)
   override fun toString(): String = "JUMPDEST"
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 0
 }
 
 object Create : Instruction {
 
   override fun toBytes(): Bytes = Bytes.of(0xf0)
   override fun toString(): String = "CREATE"
+  override fun stackItemsConsumed() = 3
+  override fun stackItemsProduced() = 1
 }
 
 object Call : Instruction {
 
   override fun toBytes(): Bytes = Bytes.of(0xf1)
   override fun toString(): String = "CALL"
+  override fun stackItemsConsumed() = 7
+  override fun stackItemsProduced() = 1
 }
 
 object CallCode : Instruction {
 
   override fun toBytes(): Bytes = Bytes.of(0xf2)
   override fun toString(): String = "CALLCODE"
+  override fun stackItemsConsumed() = 7
+  override fun stackItemsProduced() = 1
 }
 
 object Return : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0xf3)
   override fun toString(): String = "RETURN"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 0
 }
 
 object DelegateCall : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0xf4)
   override fun toString(): String = "DELEGATECALL"
+  override fun stackItemsConsumed() = 7
+  override fun stackItemsProduced() = 1
 }
 
 object Create2 : Instruction {
 
   override fun toBytes(): Bytes = Bytes.of(0xf5)
   override fun toString(): String = "CREATE2"
+  override fun stackItemsConsumed() = 4
+  override fun stackItemsProduced() = 1
 }
 
 object StaticCall : Instruction {
 
   override fun toBytes(): Bytes = Bytes.of(0xfa)
   override fun toString(): String = "STATICCALL"
+  override fun stackItemsConsumed() = 7
+  override fun stackItemsProduced() = 1
 }
 
 object Revert : Instruction {
 
   override fun toBytes(): Bytes = Bytes.of(0xfd)
   override fun toString(): String = "REVERT"
+  override fun stackItemsConsumed() = 2
+  override fun stackItemsProduced() = 0
 }
 
 object SelfDestruct : Instruction {
 
   override fun toBytes(): Bytes = Bytes.of(0xff)
   override fun toString(): String = "SELFDESTRUCT"
+  override fun stackItemsConsumed() = 1
+  override fun stackItemsProduced() = 0
 }
 
 class Dup(val dupIndex: Int) : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x80 + dupIndex - 1)
   override fun toString(): String = "DUP$dupIndex"
+  override fun stackItemsNeeded() = dupIndex
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = dupIndex
 }
 
 class Swap(val swapIndex: Int) : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0x90 + swapIndex - 1)
   override fun toString(): String = "SWAP$swapIndex"
+  override fun stackItemsNeeded() = swapIndex
+  override fun stackItemsConsumed() = 0
+  override fun stackItemsProduced() = 0
 }
 
 class Log(val logIndex: Int) : Instruction {
-
   override fun toBytes(): Bytes = Bytes.of(0xa0 + logIndex)
   override fun toString(): String = "LOG$logIndex"
+  override fun stackItemsConsumed() = logIndex + 2
+  override fun stackItemsProduced() = 0
 }
