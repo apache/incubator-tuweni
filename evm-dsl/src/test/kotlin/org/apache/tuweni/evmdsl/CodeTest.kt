@@ -53,4 +53,49 @@ class CodeTest {
     val reread = Code.read(code.toBytes())
     assertEquals(codeStr, reread.toString())
   }
+
+  @Test
+  fun testValidateUnderFlow() {
+    val code = Code(
+      buildList {
+        this.add(Push(Bytes.fromHexString("0x4567")))
+        this.add(Push(Bytes.fromHexString("0x456778")))
+        this.add(Call)
+      }
+    )
+    val err = code.validate()!!
+    assertEquals(2, err.index)
+    assertEquals(Error.STACK_UNDERFLOW, err.error)
+    assertEquals(Call, err.instruction)
+  }
+
+  @Test
+  fun testValidateInvalid() {
+    val code = Code(
+      buildList {
+        this.add(Push(Bytes.fromHexString("0x4567")))
+        this.add(Push(Bytes.fromHexString("0x456778")))
+        this.add(Invalid(0xfe.toByte()))
+        this.add(Push(Bytes.fromHexString("0x456778")))
+      }
+    )
+    val err = code.validate()!!
+    assertEquals(2, err.index)
+    assertEquals(Error.HIT_INVALID_OPCODE, err.error)
+    assertEquals(Invalid(0xfe.toByte()), err.instruction)
+  }
+
+  @Test
+  fun testValidateOverFlow() {
+    val code = Code(
+      buildList {
+        for (i in 0..1024) {
+          this.add(Push(Bytes.fromHexString("0x4567")))
+        }
+      }
+    )
+    val err = code.validate()!!
+    assertEquals(1024, err.index)
+    assertEquals(Error.STACK_OVERFLOW, err.error)
+  }
 }

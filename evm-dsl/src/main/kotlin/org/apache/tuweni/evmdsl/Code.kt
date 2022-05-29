@@ -47,6 +47,32 @@ class Code(val instructions: List<Instruction>) {
     }
   }
 
+  fun validate(): CodeValidationError? {
+    var stackSize = 0
+    val visited = mutableSetOf<Int>()
+    var index = 0
+    while (visited.add(index)) {
+      val currentInstruction = instructions.getOrNull(index) ?: break
+      if (currentInstruction.stackItemsNeeded() > stackSize) {
+        return CodeValidationError(currentInstruction, index, Error.STACK_UNDERFLOW)
+      }
+      stackSize += currentInstruction.stackItemsProduced()
+      if (stackSize > 1024) {
+        return CodeValidationError(currentInstruction, index, Error.STACK_OVERFLOW)
+      }
+      if (currentInstruction is Invalid) {
+        return CodeValidationError(currentInstruction, index, Error.HIT_INVALID_OPCODE)
+      }
+      // TODO cannot follow jumps right now.
+      if (currentInstruction == Jump || currentInstruction == Jumpi) {
+        break
+      }
+
+      index++
+    }
+    return null
+  }
+
   fun toBytes(): Bytes {
     return Bytes.wrap(instructions.map { it.toBytes() })
   }
@@ -55,3 +81,11 @@ class Code(val instructions: List<Instruction>) {
     return instructions.map { it.toString() }.joinToString("\n")
   }
 }
+
+enum class Error {
+  STACK_UNDERFLOW,
+  STACK_OVERFLOW,
+  HIT_INVALID_OPCODE
+}
+
+data class CodeValidationError(val instruction: Instruction, val index: Int, val error: Error)
