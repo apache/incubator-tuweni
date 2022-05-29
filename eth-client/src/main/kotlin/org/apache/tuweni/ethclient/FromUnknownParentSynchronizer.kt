@@ -30,6 +30,13 @@ import kotlin.coroutines.CoroutineContext
 const val DELAY: Long = 1000
 const val HEADER_PARENT_HEADER_REQUEST_SIZE: Long = 64
 
+/**
+ * This synchronizer is requesting the parent headers of an unknown block header, until this is resolved.
+ *
+ * To maximize chances of getting new headers, the synchronizer will ask for headers with different skip levels,
+ * triggering this synchronizer again and parallelizing requests.
+ *
+ */
 class FromUnknownParentSynchronizer(
   executor: ExecutorService = Executors.newSingleThreadExecutor(),
   coroutineContext: CoroutineContext = executor.asCoroutineDispatcher(),
