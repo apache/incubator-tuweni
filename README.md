@@ -18,10 +18,6 @@ It includes a low-level bytes library, serialization and deserialization codecs 
 
 Tuweni is developed for JDK 11 or higher.
 
-## Build Instructions
-
-Install [Docker](https://docs.docker.com/get-docker/).
-
 ## Clone along with submodules ##
     git clone https://github.com/apache/incubator-tuweni.git tuweni
     cd tuweni
