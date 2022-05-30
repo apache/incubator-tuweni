@@ -30,6 +30,10 @@ import kotlin.coroutines.CoroutineContext
 const val BEST_PEER_DELAY: Long = 5000
 const val HEADERS_RESPONSE_TIMEOUT: Long = 10000
 
+/**
+ * This synchronizer strategy will use the best known header, and keep asking new block headers
+ * from there, until the response comes back with just one header.
+ */
 class FromBestBlockHeaderSynchronizer(
   executor: ExecutorService = Executors.newSingleThreadExecutor(),
   coroutineContext: CoroutineContext = executor.asCoroutineDispatcher(),
