@@ -195,9 +195,30 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
     return synchronizers.map { section ->
       val sectionConfig = config.getConfigurationSection("synchronizer.$section")
       SynchronizerConfigurationImpl(
-        section, SynchronizerType.valueOf(sectionConfig.getString("type")),
+        section,
+        SynchronizerType.valueOf(sectionConfig.getString("type")),
+        sectionConfig.getString("repository"),
+        sectionConfig.getString("peerRepository"),
+        sectionConfig.getString("rlpxService"),
         UInt256.valueOf(sectionConfig.getLong("from")),
-        UInt256.valueOf(sectionConfig.getLong("to"))
+        UInt256.valueOf(sectionConfig.getLong("to")),
+        sectionConfig.getString("fromRepository"),
+      )
+    }
+  }
+
+  fun validators(): List<ValidatorConfiguration> {
+    val validators = config.sections("validator")
+    if (validators == null || validators.isEmpty()) {
+      return emptyList()
+    }
+    return validators.map { section ->
+      val sectionConfig = config.getConfigurationSection("validator.$section")
+      ValidatorConfigurationImpl(
+        section, ValidatorType.valueOf(sectionConfig.getString("type")),
+        UInt256.valueOf(sectionConfig.getLong("from")),
+        UInt256.valueOf(sectionConfig.getLong("to")),
+        sectionConfig.getInteger("chainId"),
       )
     }
   }
@@ -322,11 +343,23 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
         "type",
         "status",
         "Synchronizer type",
-        PropertyValidator.anyOf("status", "parent", "best")
+        PropertyValidator.anyOf("status", "parent", "best", "canonical")
       )
       synchronizersSection.addLong("from", 0L, "Start block to sync from", PropertyValidator.isGreaterOrEqual(0L))
       synchronizersSection.addLong("to", 0L, "End block to sync to", PropertyValidator.isGreaterOrEqual(0L))
+      synchronizersSection.addString("repository", "default", "Blockchain repository to use", null)
+      synchronizersSection.addString("rlpxService", "default", "RLPx service to use for requests with this synchronizer", null)
+      synchronizersSection.addString("peerRepository", "default", "Peer repository to use for requests with this synchronizer", null)
+      synchronizersSection.addString("fromRepository", null, "(only for canonical) Repository to sync from", null)
 
+      val validatorsSection = SchemaBuilder.create()
+      validatorsSection.addString(
+        "type",
+        "evm",
+        "Validator type",
+        PropertyValidator.anyOf("header", "difficulty", "evm")
+      )
+      validatorsSection.addInteger("chainId", 1, "chain id to validate with", null)
       val builder = SchemaBuilder.create()
       builder.addSection("metrics", metricsSection.toSchema())
       builder.addSection("storage", storageSection.toSchema())
@@ -338,6 +371,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       builder.addSection("proxy", proxiesSection.toSchema())
       builder.addSection("peerRepository", peerRepositoriesSection.toSchema())
       builder.addSection("synchronizer", synchronizersSection.toSchema())
+      builder.addSection("validators", validatorsSection.toSchema())
 
       return builder.toSchema()
     }
@@ -421,14 +455,30 @@ interface PeerRepositoryConfiguration {
 }
 
 enum class SynchronizerType {
-  best, status, parent
+  best, status, parent, canonical
 }
 
 interface SynchronizerConfiguration {
   fun getName(): String
+  fun getRepository(): String
+  fun getPeerRepository(): String
+  fun getRlpxService(): String
   fun getType(): SynchronizerType
   fun getFrom(): UInt256?
   fun getTo(): UInt256?
+  fun getFromRepository(): String?
+}
+
+enum class ValidatorType {
+  chainId, transactionsHash
+}
+
+interface ValidatorConfiguration {
+  fun getName(): String
+  fun getType(): ValidatorType
+  fun getFrom(): UInt256?
+  fun getTo(): UInt256?
+  fun getChainId(): Int?
 }
 
 internal class PeerRepositoryConfigurationImpl(private val repoName: String, private val type: String) :
@@ -548,11 +598,33 @@ data class ProxyConfigurationImpl(
 data class SynchronizerConfigurationImpl(
   private val name: String,
   private val type: SynchronizerType,
+  private val repository: String,
+  private val peerRepository: String,
+  private val rlpxService: String,
   private val from: UInt256?,
   private val to: UInt256?,
+  private val fromRepository: String?,
 ) : SynchronizerConfiguration {
+  override fun getName() = name
+  override fun getRepository() = repository
+  override fun getPeerRepository() = peerRepository
+  override fun getRlpxService() = rlpxService
+  override fun getType() = type
+  override fun getFrom(): UInt256? = from
+  override fun getTo(): UInt256? = to
+  override fun getFromRepository() = fromRepository
+}
+
+data class ValidatorConfigurationImpl(
+  private val name: String,
+  private val type: ValidatorType,
+  private val from: UInt256?,
+  private val to: UInt256?,
+  private val chainId: Int?,
+) : ValidatorConfiguration {
   override fun getName() = name
   override fun getType() = type
   override fun getFrom(): UInt256? = from
   override fun getTo(): UInt256? = to
+  override fun getChainId() = chainId
 }

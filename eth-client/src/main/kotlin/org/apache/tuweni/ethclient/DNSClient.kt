@@ -22,6 +22,7 @@ import org.apache.tuweni.discovery.DNSDaemon
 import org.apache.tuweni.discovery.DNSDaemonListener
 import org.apache.tuweni.kv.KeyValueStore
 import org.apache.tuweni.peer.repository.PeerRepository
+import org.slf4j.LoggerFactory
 
 /**
  * Wrapper for running a DNS daemon with configuration.
@@ -34,6 +35,8 @@ class DNSClient(
 
   companion object {
     private val SEQ = "SEQ"
+
+    private val logger = LoggerFactory.getLogger(DNSClient::class.java)
   }
 
   private var dnsDaemon: DNSDaemon? = null

@@ -135,6 +135,7 @@ class BlockchainRepository(
   }
 
   val blockHeaderListeners = mutableMapOf<String, (BlockHeader) -> Unit>()
+  val blockchainHeadListeners = mutableMapOf<String, (Block) -> Unit>()
   val blocksStoredCounter =
     meter?.longCounterBuilder("blocks_stored")?.setDescription("Number of blocks stored")?.build()
   val blockHeadersStoredCounter =
@@ -603,4 +604,14 @@ class BlockchainRepository(
   }
 
   override fun stateRootHash(): Bytes32 = worldState!!.rootHash()
+
+  fun addBlockchainHeadListener(listener: (Block) -> Unit): String {
+    val uuid = UUID.randomUUID().toString()
+    blockchainHeadListeners.put(uuid, listener)
+    return uuid
+  }
+
+  fun removeBlockchainHeadListener(listenerId: String) {
+    blockchainHeadListeners.remove(listenerId)
+  }
 }
