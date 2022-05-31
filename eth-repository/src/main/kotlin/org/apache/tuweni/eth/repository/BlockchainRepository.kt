@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.index.IndexWriter
@@ -191,7 +192,15 @@ class BlockchainRepository(
     blocksStoredCounter?.add(1)
     storeBlockBody(block.getHeader().getHash(), block.getBody())
     blockHeaderStore.put(block.getHeader().getHash(), block.getHeader().toBytes())
-    indexBlockHeader(block.getHeader())
+    if (indexBlockHeader(block.getHeader()).canonical) {
+      for (listener in blockchainHeadListeners.values) {
+        coroutineScope {
+          launch {
+            listener(block)
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -240,9 +249,9 @@ class BlockchainRepository(
     blockHeaderListeners.remove(listenerId)
   }
 
-  suspend fun indexBlockHeader(header: BlockHeader) {
+  suspend fun indexBlockHeader(header: BlockHeader): IndexResult {
     logger.info("Indexing ${header.number} ${header.hash}")
-    blockchainIndex.index { writer -> writer.indexBlockHeader(header, indexing) }
+    return blockchainIndex.indexWithResult { writer -> writer.indexBlockHeader(header, indexing) }
   }
 
   suspend fun reIndexTotalDifficulty() {
@@ -251,6 +260,7 @@ class BlockchainRepository(
       runBlocking {
         reIndexTotalDifficultyInternal(writer, header)
       }
+      IndexResult(false)
     }
   }
 
