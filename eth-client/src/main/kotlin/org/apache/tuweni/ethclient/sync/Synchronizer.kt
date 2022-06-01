@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.ethclient
+package org.apache.tuweni.ethclient.sync
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -25,6 +25,7 @@ import org.apache.tuweni.devp2p.eth.EthRequestsManager
 import org.apache.tuweni.eth.BlockHeader
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.repository.BlockchainRepository
+import org.apache.tuweni.ethclient.EthereumPeerRepository
 import org.apache.tuweni.units.bigints.UInt256
 import org.slf4j.LoggerFactory
 import java.util.concurrent.ExecutorService

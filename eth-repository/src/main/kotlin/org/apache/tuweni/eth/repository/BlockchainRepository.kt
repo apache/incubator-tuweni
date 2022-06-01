@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.index.IndexWriter
@@ -135,6 +136,7 @@ class BlockchainRepository(
   }
 
   val blockHeaderListeners = mutableMapOf<String, (BlockHeader) -> Unit>()
+  val blockchainHeadListeners = mutableMapOf<String, (Block) -> Unit>()
   val blocksStoredCounter =
     meter?.longCounterBuilder("blocks_stored")?.setDescription("Number of blocks stored")?.build()
   val blockHeadersStoredCounter =
@@ -190,7 +192,15 @@ class BlockchainRepository(
     blocksStoredCounter?.add(1)
     storeBlockBody(block.getHeader().getHash(), block.getBody())
     blockHeaderStore.put(block.getHeader().getHash(), block.getHeader().toBytes())
-    indexBlockHeader(block.getHeader())
+    if (indexBlockHeader(block.getHeader()).canonical) {
+      for (listener in blockchainHeadListeners.values) {
+        coroutineScope {
+          launch {
+            listener(block)
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -239,9 +249,9 @@ class BlockchainRepository(
     blockHeaderListeners.remove(listenerId)
   }
 
-  suspend fun indexBlockHeader(header: BlockHeader) {
+  suspend fun indexBlockHeader(header: BlockHeader): IndexResult {
     logger.info("Indexing ${header.number} ${header.hash}")
-    blockchainIndex.index { writer -> writer.indexBlockHeader(header, indexing) }
+    return blockchainIndex.indexWithResult { writer -> writer.indexBlockHeader(header, indexing) }
   }
 
   suspend fun reIndexTotalDifficulty() {
@@ -250,6 +260,7 @@ class BlockchainRepository(
       runBlocking {
         reIndexTotalDifficultyInternal(writer, header)
       }
+      IndexResult(false)
     }
   }
 
@@ -603,4 +614,14 @@ class BlockchainRepository(
   }
 
   override fun stateRootHash(): Bytes32 = worldState!!.rootHash()
+
+  fun addBlockchainHeadListener(listener: (Block) -> Unit): String {
+    val uuid = UUID.randomUUID().toString()
+    blockchainHeadListeners.put(uuid, listener)
+    return uuid
+  }
+
+  fun removeBlockchainHeadListener(listenerId: String) {
+    blockchainHeadListeners.remove(listenerId)
+  }
 }

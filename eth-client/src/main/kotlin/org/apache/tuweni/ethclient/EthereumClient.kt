@@ -41,6 +41,14 @@ import org.apache.tuweni.eth.genesis.GenesisFile
 import org.apache.tuweni.eth.repository.BlockchainIndex
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.MemoryTransactionPool
+import org.apache.tuweni.ethclient.sync.CanonicalSynchronizer
+import org.apache.tuweni.ethclient.sync.FromBestBlockHeaderSynchronizer
+import org.apache.tuweni.ethclient.sync.FromUnknownParentSynchronizer
+import org.apache.tuweni.ethclient.sync.PeerStatusEthSynchronizer
+import org.apache.tuweni.ethclient.sync.Synchronizer
+import org.apache.tuweni.ethclient.validator.ChainIdValidator
+import org.apache.tuweni.ethclient.validator.TransactionsHashValidator
+import org.apache.tuweni.ethclient.validator.Validator
 import org.apache.tuweni.kv.InfinispanKeyValueStore
 import org.apache.tuweni.kv.KeyValueStore
 import org.apache.tuweni.kv.MapKeyValueStore
@@ -81,6 +89,7 @@ class EthereumClient(
   private val dnsClients = mutableMapOf<String, DNSClient>()
   private val discoveryServices = mutableMapOf<String, DiscoveryService>()
   private val synchronizers = mutableMapOf<String, Synchronizer>()
+  private val validators = mutableMapOf<String, Validator>()
 
   private val managerHandler = mutableListOf<DefaultCacheManager>()
 
@@ -271,50 +280,88 @@ class EthereumClient(
               }
             }
           }
-
-          for (sync in config.synchronizers()) {
-            when (sync.getType()) {
-              SynchronizerType.best -> {
-                val bestSynchronizer = FromBestBlockHeaderSynchronizer(
-                  repository = repository,
-                  client = service.getClient(ETH66) as EthRequestsManager,
-                  peerRepository = peerRepository,
-                  from = sync.getFrom(),
-                  to = sync.getTo(),
-                )
-                bestSynchronizer.start()
-                synchronizers[sync.getName()] = bestSynchronizer
-              }
-              SynchronizerType.status -> {
-                val synchronizer = PeerStatusEthSynchronizer(
-                  repository = repository,
-                  client = service.getClient(ETH66) as EthRequestsManager,
-                  peerRepository = peerRepository,
-                  adapter = adapter,
-                  from = sync.getFrom(),
-                  to = sync.getTo(),
-                )
-                synchronizer.start()
-                synchronizers[sync.getName()] = synchronizer
-              }
-              SynchronizerType.parent -> {
-                val parentSynchronizer = FromUnknownParentSynchronizer(
-                  repository = repository,
-                  client = service.getClient(ETH66) as EthRequestsManager,
-                  peerRepository = peerRepository,
-                  from = sync.getFrom(),
-                  to = sync.getTo(),
-                )
-                parentSynchronizer.start()
-                synchronizers[sync.getName()] = parentSynchronizer
-              }
-            }
-          }
-
           logger.info("Finished configuring Ethereum client ${rlpxConfig.getName()}")
         }
       }
-    ).await()
+    ).thenRun {
+
+      for (sync in config.synchronizers()) {
+        val syncRepository = storageRepositories[sync.getRepository()] ?: throw IllegalArgumentException("Repository ${sync.getRepository()} missing for synchronizer ${sync.getName()}")
+        val syncService = services[sync.getRlpxService()] ?: throw IllegalArgumentException("Service ${sync.getRlpxService()} missing for synchronizer ${sync.getName()}")
+        val syncPeerRepository = peerRepositories[sync.getPeerRepository()] ?: throw IllegalArgumentException("Peer repository ${sync.getPeerRepository()} missing for synchronizer ${sync.getName()}")
+        val adapter = WireConnectionPeerRepositoryAdapter(syncPeerRepository)
+
+        when (sync.getType()) {
+          SynchronizerType.best -> {
+            val bestSynchronizer = FromBestBlockHeaderSynchronizer(
+              repository = syncRepository,
+              client = syncService.getClient(ETH66) as EthRequestsManager,
+              peerRepository = syncPeerRepository,
+              from = sync.getFrom(),
+              to = sync.getTo(),
+            )
+            bestSynchronizer.start()
+            synchronizers[sync.getName()] = bestSynchronizer
+          }
+          SynchronizerType.status -> {
+            val synchronizer = PeerStatusEthSynchronizer(
+              repository = syncRepository,
+              client = syncService.getClient(ETH66) as EthRequestsManager,
+              peerRepository = syncPeerRepository,
+              adapter = adapter,
+              from = sync.getFrom(),
+              to = sync.getTo(),
+            )
+            synchronizer.start()
+            synchronizers[sync.getName()] = synchronizer
+          }
+          SynchronizerType.parent -> {
+            val parentSynchronizer = FromUnknownParentSynchronizer(
+              repository = syncRepository,
+              client = syncService.getClient(ETH66) as EthRequestsManager,
+              peerRepository = syncPeerRepository,
+              from = sync.getFrom(),
+              to = sync.getTo(),
+            )
+            parentSynchronizer.start()
+            synchronizers[sync.getName()] = parentSynchronizer
+          }
+          SynchronizerType.canonical -> {
+            val fromRepository = storageRepositories.get(sync.getFromRepository())
+              ?: throw IllegalArgumentException("Missing repository for canonical repository ${sync.getFromRepository()}")
+            val canonicalSynchronizer = CanonicalSynchronizer(
+              repository = syncRepository,
+              client = syncService.getClient(ETH66) as EthRequestsManager,
+              peerRepository = syncPeerRepository,
+              from = sync.getFrom(),
+              to = sync.getTo(),
+              fromRepository = fromRepository,
+            )
+            canonicalSynchronizer.start()
+            synchronizers[sync.getName()] = canonicalSynchronizer
+          }
+        }
+      }
+
+      for (validator in config.validators()) {
+        when (validator.getType()) {
+          ValidatorType.chainId -> {
+            val chainId = validator.getChainId()
+              ?: throw IllegalArgumentException("chainId required for validator ${validator.getName()}")
+            val chainIdValidator = ChainIdValidator(
+              from = validator.getFrom(),
+              to = validator.getTo(),
+              chainId = chainId,
+            )
+            validators[validator.getName()] = chainIdValidator
+          }
+          ValidatorType.transactionsHash -> {
+            val transactionsHashValidator = TransactionsHashValidator(from = validator.getFrom(), to = validator.getTo())
+            validators[validator.getName()] = transactionsHashValidator
+          }
+        }
+      }
+    }.await()
 
     for (staticPeers in config.staticPeers()) {
       val peerRepository = peerRepositories[staticPeers.peerRepository()]
