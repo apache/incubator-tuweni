@@ -18,6 +18,7 @@ package org.apache.tuweni.evmdsl
 
 import org.apache.tuweni.bytes.Bytes
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
@@ -97,5 +98,20 @@ class CodeTest {
     val err = code.validate()!!
     assertEquals(1024, err.index)
     assertEquals(Error.STACK_OVERFLOW, err.error)
+  }
+
+  @Test
+  fun testCreateASimpleReturn() {
+    val code = Code(
+      buildList {
+        this.add(Push(Bytes.wrap("hello world".toByteArray())))
+        this.add(Push(Bytes.fromHexString("0x00")))
+        this.add(Mstore)
+        this.add(Push(Bytes.of("hello world".toByteArray().size)))
+        this.add(Push(Bytes.of(32 - "hello world".toByteArray().size)))
+        this.add(Return)
+      }
+    )
+    assertNull(code.validate()?.error)
   }
 }
