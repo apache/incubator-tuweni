@@ -44,6 +44,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -53,6 +54,7 @@ import java.io.InputStream
 import java.io.UncheckedIOException
 import java.util.stream.Stream
 
+@Tag("referenceTest")
 @ExtendWith(LuceneIndexWriterExtension::class, BouncyCastleExtension::class)
 class EvmCertificationTest {
   companion object {
