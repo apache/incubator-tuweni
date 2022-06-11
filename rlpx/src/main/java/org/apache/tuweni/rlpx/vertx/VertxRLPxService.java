@@ -110,7 +110,7 @@ public final class VertxRLPxService implements RLPxService {
       KeyPair identityKeyPair,
       List<SubProtocol> subProtocols,
       String clientId,
-      Meter meter) {
+      @Nullable Meter meter) {
     this(
         vertx,
         listenPort,
