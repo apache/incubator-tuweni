@@ -16,6 +16,7 @@
  */
 package org.apache.tuweni.stratum.server
 
+import kotlinx.coroutines.Dispatchers
 import org.apache.tuweni.bytes.Bytes32
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -25,7 +26,10 @@ class StratumProtocolTest {
 
   @Test
   fun testStratum1CanHandle() {
-    val protocol = Stratum1Protocol("", submitCallback = { true }, seedSupplier = Bytes32::random)
+    val protocol = Stratum1Protocol(
+      "", submitCallback = { true }, seedSupplier = Bytes32::random,
+      coroutineContext = Dispatchers.Default
+    )
     val conn = StratumConnection(emptyArray(), {}, {})
     assertFalse(protocol.canHandle("", conn))
     assertFalse(protocol.canHandle("\"mining.subscribe", conn))
@@ -38,7 +42,8 @@ class StratumProtocolTest {
     val protocol = Stratum1EthProxyProtocol(
       submitCallback = { true },
       seedSupplier = Bytes32::random,
-      hashrateCallback = { _, _ -> true }
+      hashrateCallback = { _, _ -> true },
+      Dispatchers.Default,
     )
     val conn = StratumConnection(emptyArray(), {}, {})
     assertFalse(protocol.canHandle("", conn))

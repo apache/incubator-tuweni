@@ -22,7 +22,9 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.tracing.TracingPolicy
 import io.vertx.ext.web.client.WebClient
 import io.vertx.ext.web.client.WebClientOptions
+import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.JSONRPCRequest
@@ -32,6 +34,7 @@ import org.apache.tuweni.units.bigints.UInt256
 import java.io.Closeable
 import java.util.Base64
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.coroutines.CoroutineContext
 
 val mapper = ObjectMapper()
 
@@ -44,12 +47,18 @@ class JSONRPCClient(
   val userAgent: String = "Apache Tuweni JSON-RPC Client",
   val basicAuthenticationEnabled: Boolean = false,
   val basicAuthenticationUsername: String = "",
-  val basicAuthenticationPassword: String = ""
-) : Closeable {
+  val basicAuthenticationPassword: String = "",
+  override val coroutineContext: CoroutineContext = vertx.dispatcher(),
+) : Closeable, CoroutineScope {
 
   val requestCounter = AtomicInteger(1)
-  val client = WebClient.create(vertx, WebClientOptions().setUserAgent(userAgent).setTryUseCompression(true).setTracingPolicy(TracingPolicy.ALWAYS) as WebClientOptions)
-  val authorizationHeader = "Basic " + Base64.getEncoder().encode((basicAuthenticationUsername + ":" + basicAuthenticationPassword).toByteArray())
+  val client = WebClient.create(
+    vertx,
+    WebClientOptions().setUserAgent(userAgent).setTryUseCompression(true)
+      .setTracingPolicy(TracingPolicy.ALWAYS) as WebClientOptions
+  )
+  val authorizationHeader = "Basic " + Base64.getEncoder()
+    .encode((basicAuthenticationUsername + ":" + basicAuthenticationPassword).toByteArray())
 
   suspend fun sendRequest(request: JSONRPCRequest): Deferred<JSONRPCResponse> {
     val deferred = CompletableDeferred<JSONRPCResponse>()

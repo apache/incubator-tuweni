@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.stratum.server
+package org.apache.tuweni.stratum.client
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -23,19 +23,19 @@ import org.apache.tuweni.bytes.Bytes32
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class JsonRpcRequest(
-  @JsonProperty("version") val version: String?,
+  @JsonProperty("jsonrpc") val version: String? = "2.0",
   @JsonProperty("method") val method: String,
   @JsonProperty("params") val params: MutableList<Any> = mutableListOf(),
   @JsonProperty("id") val id: String
 ) {
 
-  fun bytes32(i: Int): Bytes32 = Bytes32.fromHexStringLenient(params[i] as String)
+  fun bytes32(i: Int): Bytes32 = Bytes32.fromHexString(params[i] as String)
 
-  fun bytes(i: Int): Bytes = Bytes.fromHexStringLenient(params[i] as String)
+  fun bytes(i: Int): Bytes = Bytes.fromHexString(params[i] as String)
 }
 
 data class JsonRpcSuccessResponse(
   @JsonProperty("id") val id: String,
-  @JsonProperty("version") val version: String = "2.0",
-  @JsonProperty("result") val result: Any
+  @JsonProperty("result") val result: Any,
+  @JsonProperty("error") val error: Any?
 )
