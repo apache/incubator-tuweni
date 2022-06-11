@@ -24,11 +24,15 @@ import io.vertx.core.net.NetServerOptions
 import io.vertx.core.net.NetSocket
 import io.vertx.core.net.SelfSignedCertificate
 import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.dispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Simple main function to run the server with a self-signed certificate.
@@ -59,22 +63,31 @@ class StratumServer(
   val networkInterface: String,
   private val sslOptions: KeyCertOptions?,
   extranonce: String = "",
-  submitCallback: (PoWSolution) -> Boolean,
+  submitCallback: suspend (PoWSolution) -> Boolean,
   seedSupplier: () -> Bytes32,
   hashrateCallback: (Bytes, Long) -> Boolean,
-) {
+  override val coroutineContext: CoroutineContext = vertx.dispatcher(),
+) : CoroutineScope {
 
   companion object {
     val logger = LoggerFactory.getLogger(StratumServer::class.java)
   }
 
   private val protocols = arrayOf(
-    Stratum1EthProxyProtocol(submitCallback, seedSupplier, hashrateCallback),
-    Stratum1Protocol(extranonce, submitCallback = submitCallback, seedSupplier = seedSupplier)
+    Stratum1EthProxyProtocol(submitCallback, seedSupplier, hashrateCallback, this.coroutineContext),
+    Stratum1Protocol(extranonce, submitCallback = submitCallback, seedSupplier = seedSupplier, coroutineContext = this.coroutineContext)
   )
 
   private val started = AtomicBoolean(false)
   private var tcpServer: NetServer? = null
+
+  fun setNewWork(powInput: PoWInput) {
+    for (protocol in protocols) {
+      launch {
+        protocol.setCurrentWorkTask(powInput)
+      }
+    }
+  }
 
   suspend fun start() {
     if (started.compareAndSet(false, true)) {

@@ -10,7 +10,10 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-description = 'Implementation of a Stratum server'
+
+plugins { id 'application' }
+
+description = 'Stratum proxy for getWork/submitWork'
 
 
 dependencies {
@@ -18,6 +21,7 @@ dependencies {
   implementation project(':jsonrpc')
   implementation project(':units')
   implementation project(':eth')
+  implementation project(':stratum:server')
   implementation 'com.fasterxml.jackson.core:jackson-databind'
   implementation 'com.google.guava:guava'
   implementation 'io.vertx:vertx-core'
@@ -34,4 +38,9 @@ dependencies {
   testRuntimeOnly 'ch.qos.logback:logback-classic'
 
   runtimeOnly 'ch.qos.logback:logback-classic'
+}
+
+application {
+  mainClassName = 'org.apache.tuweni.stratum.StratumServerAppKt'
+  applicationName = 'stratum-proxy'
 }

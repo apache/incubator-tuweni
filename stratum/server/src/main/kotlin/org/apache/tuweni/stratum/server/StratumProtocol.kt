@@ -18,6 +18,8 @@ package org.apache.tuweni.stratum.server
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.json.JsonMapper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.slf4j.LoggerFactory
@@ -25,6 +27,7 @@ import java.io.IOException
 import java.time.Instant
 import java.util.ArrayList
 import java.util.Random
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Handler capable of taking care of a connection to a Stratum server according to a specific flavor of the Stratum protocol.
@@ -77,8 +80,9 @@ class Stratum1Protocol(
     timeValue.slice(timeValue.size() - 4, 4).toShortHexString()
   },
   private val subscriptionIdCreator: () -> String = { createSubscriptionID() },
-  private val submitCallback: (PoWSolution) -> (Boolean),
+  private val submitCallback: suspend (PoWSolution) -> (Boolean),
   private val seedSupplier: () -> Bytes32,
+  private val coroutineContext: CoroutineContext,
 ) : StratumProtocol {
   private var currentInput: PoWInput? = null
   private val activeConnections: MutableList<StratumConnection> = ArrayList()
@@ -184,9 +188,11 @@ class Stratum1Protocol(
     )
     currentInput?.prePowHash?.equals(solution.powHash)?.let {
       if (it) {
-        val result = submitCallback(solution)
-        val response = mapper.writeValueAsString(JsonRpcSuccessResponse(message.id, result = result))
-        conn.send(response + "\n")
+        CoroutineScope(coroutineContext).launch {
+          val result = submitCallback(solution)
+          val response = mapper.writeValueAsString(JsonRpcSuccessResponse(message.id, result = result))
+          conn.send(response + "\n")
+        }
       }
     }
   }
@@ -217,9 +223,10 @@ class Stratum1Protocol(
  * This protocol allows miners to submit EthHash solutions over a persistent TCP connection.
  */
 class Stratum1EthProxyProtocol(
-  private val submitCallback: (PoWSolution) -> Boolean,
+  private val submitCallback: suspend (PoWSolution) -> Boolean,
   private val seedSupplier: () -> Bytes32,
   private val hashrateCallback: (Bytes, Long) -> Boolean,
+  private val coroutineContext: CoroutineContext,
 ) : StratumProtocol {
 
   companion object {
@@ -248,9 +255,9 @@ class Stratum1EthProxyProtocol(
 
   private fun sendNewWork(conn: StratumConnection, id: String) {
     val input = currentInput ?: return
-    val result = mutableListOf(
+    val result: List<String> = mutableListOf(
       input.prePowHash.toHexString(),
-      seedSupplier(),
+      seedSupplier().toHexString(),
       input.target.toHexString()
     )
     val req = JsonRpcSuccessResponse(id = id, result = result)
@@ -295,9 +302,11 @@ class Stratum1EthProxyProtocol(
     )
     currentInput?.prePowHash?.equals(solution.powHash)?.let {
       if (it) {
-        val result = submitCallback(solution)
-        val response = mapper.writeValueAsString(JsonRpcSuccessResponse(id = req.id, result = result))
-        conn.send(response + "\n")
+        CoroutineScope(coroutineContext).launch {
+          val result = submitCallback(solution)
+          val response = mapper.writeValueAsString(JsonRpcSuccessResponse(id = req.id, result = result))
+          conn.send(response + "\n")
+        }
       }
     }
   }
