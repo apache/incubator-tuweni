@@ -31,6 +31,7 @@ import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.jsonrpc.JSONRPCClient
 import org.apache.tuweni.jsonrpc.JSONRPCServer
 import org.apache.tuweni.jsonrpc.methods.CachingHandler
+import org.apache.tuweni.jsonrpc.methods.LoggingHandler
 import org.apache.tuweni.jsonrpc.methods.MeteredHandler
 import org.apache.tuweni.jsonrpc.methods.MethodAllowListHandler
 import org.apache.tuweni.jsonrpc.methods.ThrottlingHandler
@@ -150,7 +151,9 @@ class JSONRPCApplication(
 
     val throttlingHandler = ThrottlingHandler(config.maxConcurrentRequests(), nextHandler)
 
-    val handler = MeteredHandler(successCounter, failureCounter, throttlingHandler::handleRequest)
+    val loggingHandler = LoggingHandler(throttlingHandler::handleRequest, "jsonrpclog")
+
+    val handler = MeteredHandler(successCounter, failureCounter, loggingHandler::handleRequest)
     val server = JSONRPCServer(
       vertx,
       config.port(), config.networkInterface(),

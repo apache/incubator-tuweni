@@ -24,12 +24,13 @@ import kotlinx.coroutines.withContext
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.JSONRPCRequest
+import org.apache.tuweni.eth.StringOrLong
 import org.apache.tuweni.jsonrpc.JSONRPCClient
 import org.apache.tuweni.stratum.server.PoWInput
 import org.apache.tuweni.stratum.server.StratumServer
 import org.apache.tuweni.units.bigints.UInt256
 import org.slf4j.LoggerFactory
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.exitProcess
 
@@ -44,7 +45,7 @@ fun main(args: Array<String>) {
   val client = JSONRPCClient(vertx, "http://localhost:8545", "")
 
   val port = args[0].toInt()
-  val idCounter = AtomicInteger(0)
+  val idCounter = AtomicLong(0)
   val seedReference = AtomicReference<Bytes32>()
   val server = StratumServer(
     vertx, port = port, networkInterface = "0.0.0.0",
@@ -52,7 +53,7 @@ fun main(args: Array<String>) {
       logger.info("Got solution $solution")
       withContext(client.coroutineContext) {
         val req = JSONRPCRequest(
-          id = idCounter.incrementAndGet(),
+          id = StringOrLong(idCounter.incrementAndGet()),
           method = "eth_submitWork",
           params = arrayOf(
             Bytes.ofUnsignedLong(solution.nonce).toHexString(),
@@ -79,7 +80,7 @@ fun main(args: Array<String>) {
         try {
           val response = client.sendRequest(
             JSONRPCRequest(
-              id = idCounter.incrementAndGet(),
+              id = StringOrLong(idCounter.incrementAndGet()),
               method = "eth_getWork",
               params = arrayOf()
             )

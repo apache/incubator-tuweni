@@ -31,8 +31,11 @@ suspend fun sha3(request: JSONRPCRequest): JSONRPCResponse {
   if (request.params.size != 1) {
     return invalidParams.copy(id = request.id)
   }
+  if (!(request.params[0] is String)) {
+    return invalidParams.copy(id = request.id)
+  }
   try {
-    val input = Bytes.fromHexString(request.params[0])
+    val input = Bytes.fromHexString(request.params[0] as String)
     return JSONRPCResponse(id = request.id, result = Hash.hash(input).toHexString())
   } catch (e: IllegalArgumentException) {
     return invalidParams.copy(id = request.id)

@@ -27,13 +27,15 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import org.apache.tuweni.eth.Address
+import org.apache.tuweni.eth.EthJsonModule
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
+import org.apache.tuweni.eth.StringOrLong
 import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.units.bigints.UInt256
 import java.io.Closeable
 import java.util.Base64
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.CoroutineContext
 
 val mapper = ObjectMapper()
@@ -51,7 +53,13 @@ class JSONRPCClient(
   override val coroutineContext: CoroutineContext = vertx.dispatcher(),
 ) : Closeable, CoroutineScope {
 
-  val requestCounter = AtomicInteger(1)
+  companion object {
+    private val mapper = ObjectMapper()
+    init {
+      mapper.registerModule(EthJsonModule())
+    }
+  }
+  val requestCounter = AtomicLong(1)
   val client = WebClient.create(
     vertx,
     WebClientOptions().setUserAgent(userAgent).setTryUseCompression(true)
@@ -73,7 +81,8 @@ class JSONRPCClient(
       if (response.failed()) {
         deferred.completeExceptionally(response.cause())
       } else {
-        val jsonResponse = response.result().bodyAsJson(JSONRPCResponse::class.java)
+        println(response.result().bodyAsString())
+        val jsonResponse = mapper.readValue(response.result().bodyAsString(), JSONRPCResponse::class.java)
         deferred.complete(jsonResponse)
       }
     }
@@ -89,7 +98,7 @@ class JSONRPCClient(
    * @throws ConnectException if it cannot dial the remote client
    */
   suspend fun sendRawTransaction(tx: Transaction): String {
-    val body = JSONRPCRequest(nextId(), "eth_sendRawTransaction", arrayOf(tx.toBytes().toHexString()))
+    val body = JSONRPCRequest(StringOrLong(nextId()), "eth_sendRawTransaction", arrayOf(tx.toBytes().toHexString()))
     val jsonResponse = sendRequest(body).await()
     val err = jsonResponse.error
     if (err != null) {
@@ -108,7 +117,7 @@ class JSONRPCClient(
    * @throws ConnectException if it cannot dial the remote client
    */
   suspend fun getBalance_latest(address: Address): UInt256 {
-    val body = JSONRPCRequest(nextId(), "eth_getBalance", arrayOf(address.toHexString(), "latest"))
+    val body = JSONRPCRequest(StringOrLong(nextId()), "eth_getBalance", arrayOf(address.toHexString(), "latest"))
     val jsonResponse = sendRequest(body).await()
     val err = jsonResponse.error
     if (err != null) {
@@ -127,7 +136,7 @@ class JSONRPCClient(
    * @throws ConnectException if it cannot dial the remote client
    */
   suspend fun getTransactionCount_latest(address: Address): UInt256 {
-    val body = JSONRPCRequest(nextId(), "eth_getTransactionCount", arrayOf(address.toHexString(), "latest"))
+    val body = JSONRPCRequest(StringOrLong(nextId()), "eth_getTransactionCount", arrayOf(address.toHexString(), "latest"))
     val jsonResponse = sendRequest(body).await()
     val err = jsonResponse.error
     if (err != null) {
@@ -142,9 +151,9 @@ class JSONRPCClient(
     client.close()
   }
 
-  private fun nextId(): Int {
+  private fun nextId(): Long {
     val next = requestCounter.incrementAndGet()
-    if (next == Int.MAX_VALUE) {
+    if (next == Long.MAX_VALUE) {
       requestCounter.set(1)
     }
     return next

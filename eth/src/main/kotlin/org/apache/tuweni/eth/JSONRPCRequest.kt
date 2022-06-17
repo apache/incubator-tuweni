@@ -19,14 +19,16 @@ package org.apache.tuweni.eth
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
+data class Id(val idAsString: String?, val idAsLong: Long?)
+
 /**
  * JSONRPCRequest represents a JSON-RPC request to a JSON-RPC service.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class JSONRPCRequest(
-  @JsonProperty("id") val id: Int,
+data class JSONRPCRequest constructor(
+  @JsonProperty("id") val id: StringOrLong,
   @JsonProperty("method") val method: String,
-  @JsonProperty("params") val params: Array<String>,
+  @JsonProperty("params") val params: Array<Any>,
   @JsonProperty("jsonrpc") val jsonrpc: String = "2.0"
 ) {
 
@@ -43,7 +45,7 @@ data class JSONRPCRequest(
      */
     fun deserialize(serialized: String): JSONRPCRequest {
       val segments = serialized.split("|")
-      return JSONRPCRequest(id = 0, method = segments[0], params = segments[1].split(",").toTypedArray())
+      return JSONRPCRequest(id = StringOrLong(0), method = segments[0], params = segments[1].split(",").toTypedArray())
     }
   }
 

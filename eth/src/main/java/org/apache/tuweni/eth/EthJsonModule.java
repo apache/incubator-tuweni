@@ -24,6 +24,7 @@ import java.time.Instant;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.KeyDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -261,6 +262,39 @@ public class EthJsonModule extends SimpleModule {
     }
   }
 
+  static class StringOrLongDeserializer extends StdDeserializer<StringOrLong> {
+
+    public StringOrLongDeserializer() {
+      super(StringOrLong.class);
+    }
+
+    @Override
+    public StringOrLong deserialize(JsonParser p, DeserializationContext ctxt) throws IOException,
+        JsonProcessingException {
+      if (p.currentToken().isNumeric()) {
+        return new StringOrLong(p.getLongValue());
+      } else {
+        return new StringOrLong(p.getValueAsString());
+      }
+    }
+  }
+
+  static class StringOrLongSerializer extends StdSerializer<StringOrLong> {
+
+    public StringOrLongSerializer() {
+      super(StringOrLong.class);
+    }
+
+    @Override
+    public void serialize(StringOrLong value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+      if (value.getValueAsString() == null) {
+        gen.writeNumber(value.getValueAsLong());
+      } else {
+        gen.writeString(value.getValueAsString());
+      }
+    }
+  }
+
   public EthJsonModule() {
     addSerializer(Hash.class, new HashSerializer());
     addDeserializer(Hash.class, new HashDeserializer());
@@ -281,5 +315,7 @@ public class EthJsonModule extends SimpleModule {
     addDeserializer(Bytes.class, new BytesDeserializer());
     addDeserializer(Bytes32.class, new Bytes32Deserializer());
     addSerializer(SECP256K1.PublicKey.class, new PublicKeySerializer());
+    addSerializer(StringOrLong.class, new StringOrLongSerializer());
+    addDeserializer(StringOrLong.class, new StringOrLongDeserializer());
   }
 }

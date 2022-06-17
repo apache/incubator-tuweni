@@ -23,6 +23,7 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.eth.JSONRPCResponse
+import org.apache.tuweni.eth.StringOrLong
 import org.apache.tuweni.io.Base64
 import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.junit.VertxInstance
@@ -53,7 +54,7 @@ class JSONRPCServerTest {
     val server = JSONRPCServer(
       vertx, port = 0,
       methodHandler = {
-        JSONRPCResponse(3, "")
+        JSONRPCResponse(StringOrLong(3), "")
       },
       coroutineContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     )
@@ -73,7 +74,7 @@ class JSONRPCServerTest {
     val server = JSONRPCServer(
       vertx, port = 0,
       methodHandler = {
-        JSONRPCResponse(3, "")
+        JSONRPCResponse(StringOrLong(3), "")
       },
       useBasicAuthentication = true,
       basicAuthenticationPassword = "pass",
