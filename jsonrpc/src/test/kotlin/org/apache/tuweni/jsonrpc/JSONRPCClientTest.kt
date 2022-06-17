@@ -27,6 +27,7 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
+import org.apache.tuweni.eth.StringOrLong
 import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.VertxExtension
@@ -60,7 +61,7 @@ class JSONRPCClientTest {
         vertx, port = 0,
         methodHandler = {
           handler.get().handle(it)
-          JSONRPCResponse(3, "")
+          JSONRPCResponse(StringOrLong(3), "")
         },
         coroutineContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
       )
@@ -91,7 +92,7 @@ class JSONRPCClientTest {
       )
       val sent = CompletableDeferred<String>()
       handler.set { request ->
-        sent.complete(request.params.get(0))
+        sent.complete(request.params.get(0) as String)
         JSONRPCResponse(request.id, "")
       }
 

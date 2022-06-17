@@ -21,6 +21,10 @@
         </encoder>
     </appender>
 
+    <logger level="info" name="jsonrpclog" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+
     <root level="info">
         <appender-ref ref="STDOUT" />
     </root>

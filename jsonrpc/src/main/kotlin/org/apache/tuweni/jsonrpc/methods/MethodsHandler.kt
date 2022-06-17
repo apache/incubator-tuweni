@@ -26,6 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
+import org.apache.tuweni.eth.StringOrLong
 import org.apache.tuweni.eth.methodNotEnabled
 import org.apache.tuweni.eth.methodNotFound
 import org.apache.tuweni.eth.tooManyRequests
@@ -167,9 +168,9 @@ class CachingPollingHandler(
   private fun poll() {
     launch {
       try {
-        var id = 1337
+        var id = 1337L
         for (cachedRequest in cachedRequests) {
-          val newResponse = delegateHandler(cachedRequest.copy(id = id))
+          val newResponse = delegateHandler(cachedRequest.copy(id = StringOrLong(id)))
           id++
           if (newResponse.error == null) {
             cacheStore.put(cachedRequest, newResponse)
@@ -206,6 +207,21 @@ class CachingPollingHandler(
         return response.copy(id = request.id)
       }
     }
+  }
+}
+
+class LoggingHandler(
+  private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse,
+  loggerName: String,
+) {
+
+  private val logger = LoggerFactory.getLogger(loggerName)
+
+  suspend fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
+    logger.info(request.toString())
+    val response = delegateHandler.invoke(request)
+    logger.info(response.toString())
+    return response
   }
 }
 

@@ -48,6 +48,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import org.apache.tuweni.eth.EthJsonModule
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
 import org.apache.tuweni.eth.internalError
@@ -79,6 +80,7 @@ class JSONRPCServer(
     val mapper = ObjectMapper()
 
     init {
+      mapper.registerModule(EthJsonModule())
       mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
     }
   }
