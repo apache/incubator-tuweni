@@ -26,7 +26,7 @@ import java.util.Collections
 /**
  * Configuration of the JSON-RPC server as a TOML-based file.
  */
-class JSONRPCConfig(val filePath: Path) {
+class JSONRPCConfig(val filePath: Path? = null) {
 
   companion object {
 
@@ -36,7 +36,7 @@ class JSONRPCConfig(val filePath: Path) {
       .addString("metricsNetworkInterface", "localhost", "Metric service network interface", null)
       .addBoolean("metricsGrpcPushEnabled", false, "Enable pushing metrics to gRPC service", null)
       .addBoolean("metricsPrometheusEnabled", false, "Enable exposing metrics on the Prometheus endpoint", null)
-      .addInteger("port", 8545, "JSON-RPC server port", PropertyValidator.isValidPort())
+      .addInteger("port", 18545, "JSON-RPC server port", PropertyValidator.isValidPort())
       .addString("networkInterface", "127.0.0.1", "JSON-RPC server network interface", null)
       .addString("clientFingerprintsFile", "fingerprints.txt", "File recording client connection fingerprints", null)
       .addBoolean("ssl", false, "Whether the JSON-RPC server should serve data over SSL", null)
@@ -44,15 +44,15 @@ class JSONRPCConfig(val filePath: Path) {
       .addString("basicAuthUsername", "", "HTTP Basic Auth username", null)
       .addString("basicAuthPassword", "", "HTTP Basic Auth password", null)
       .addString("basicAuthRealm", "Apache Tuweni JSON-RPC proxy", "HTTP Basic Auth realm", null)
-      .addListOfString("allowedMethods", Collections.emptyList(), "Allowed JSON-RPC methods", null)
+      .addListOfString("allowedMethods", listOf("eth_", "net_version"), "Allowed JSON-RPC methods", null)
       .addListOfString("allowedRanges", Collections.singletonList("0.0.0.0/0"), "Allowed IP ranges", null)
       .addListOfString("rejectedRanges", Collections.emptyList(), "Rejected IP ranges", null)
       .addString("endpointUrl", "http://localhost:8545", "JSON-RPC endpoint", null)
       .addBoolean("endpointBasicAuthEnabled", false, "Enable basic authentication for the endpoint", null)
       .addString("endpointBasicAuthUsername", "", "Basic authentication username for the endpoint", null)
       .addString("endpointBasicAuthPassword", "", "Basic authentication password for the endpoint", null)
-      .addListOfString("cachedMethods", Collections.emptyList(), "Cached JSON-RPC methods", null)
-      .addBoolean("cacheEnabled", false, "Enable caching", null)
+      .addListOfString("cachedMethods", listOf("eth_blockNumber", "eth_getBlockByNumber", "eth_getBlockByHash", "eth_getTransactionReceipt", "eth_getTransactionByHash", "eth_getLogs"), "Cached JSON-RPC methods", null)
+      .addBoolean("cacheEnabled", true, "Enable caching", null)
       .addString("cacheStoragePath", "", "Location of cache storage", null)
       .addInteger("maxConcurrentRequests", 30, "Maximum concurrent requests", null)
       .addString("metricsGrpcEndpoint", "http://localhost:4317", "Metrics GRPC push endpoint", null)
@@ -62,7 +62,7 @@ class JSONRPCConfig(val filePath: Path) {
       .toSchema()
   }
 
-  val config = Configuration.fromToml(filePath, schema())
+  val config = if (filePath != null) Configuration.fromToml(filePath, schema()) else Configuration.empty(schema())
 
   fun numberOfThreads() = config.getInteger("numberOfThreads")
   fun metricsPort() = config.getInteger("metricsPort")
