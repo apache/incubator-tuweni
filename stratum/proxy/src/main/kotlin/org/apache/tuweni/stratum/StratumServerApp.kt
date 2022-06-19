@@ -91,10 +91,10 @@ fun main(args: Array<String>) {
             return@innerloop
           }
           val result = response.result as List<*>
-          val powHash = Bytes32.fromHexString(result[0] as String)
-          val seed = Bytes32.fromHexString(result[1] as String)
-          val difficulty = UInt256.fromHexString(result[2] as String)
-          val blockNumber = Bytes.fromHexString(result[3] as String).toLong()
+          val powHash = Bytes32.fromHexStringLenient(result[0] as String)
+          val seed = Bytes32.fromHexStringLenient(result[1] as String)
+          val difficulty = UInt256.fromBytes(Bytes.fromHexStringLenient(result[2] as String))
+          val blockNumber = Bytes.fromHexStringLenient(result[3] as String).toLong()
           seedReference.set(seed)
           server.setNewWork(PoWInput(difficulty, powHash, blockNumber))
         } catch (t: Throwable) {
