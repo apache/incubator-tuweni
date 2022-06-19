@@ -76,7 +76,7 @@ fun main(args: Array<String>) {
   }
   server.launch {
     while (true) {
-      server.launch {
+      server.launch innerloop@{
         try {
           val response = client.sendRequest(
             JSONRPCRequest(
@@ -85,6 +85,11 @@ fun main(args: Array<String>) {
               params = arrayOf()
             )
           ).await()
+          val error = response.error
+          if (error != null) {
+            logger.warn("Asking for work returned an error code ${error.code}: ${error.message}")
+            return@innerloop
+          }
           val result = response.result as List<*>
           val powHash = Bytes32.fromHexString(result[0] as String)
           val seed = Bytes32.fromHexString(result[1] as String)
