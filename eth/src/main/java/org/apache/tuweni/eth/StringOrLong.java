@@ -54,4 +54,9 @@ public class StringOrLong {
   public int hashCode() {
     return Objects.hash(valueAsLong, valueAsString);
   }
+
+  @Override
+  public String toString() {
+    return valueAsLong == null ? valueAsString : valueAsLong.toString();
+  }
 }
