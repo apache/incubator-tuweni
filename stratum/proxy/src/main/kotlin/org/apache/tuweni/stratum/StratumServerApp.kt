@@ -69,7 +69,7 @@ fun main(args: Array<String>) {
         resp.result == true
       }
     },
-    seedSupplier = { seedReference.get() }, hashrateCallback = { _, _ -> true }, sslOptions = null,
+    seedSupplier = { seedReference.get() }, sslOptions = null,
   )
   runBlocking {
     server.start()

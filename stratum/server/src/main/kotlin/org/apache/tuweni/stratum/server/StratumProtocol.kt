@@ -25,7 +25,6 @@ import org.apache.tuweni.bytes.Bytes32
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.time.Instant
-import java.util.ArrayList
 import java.util.Random
 import kotlin.coroutines.CoroutineContext
 
@@ -127,8 +126,7 @@ class Stratum1Protocol(
       )
       conn.send(notify + "\n")
     } catch (e: JsonProcessingException) {
-      logger.debug(e.message, e)
-      conn.close()
+      logger.error(e.message, e)
     }
     return true
   }
@@ -149,7 +147,7 @@ class Stratum1Protocol(
       input.target.toBytes().toHexString(),
       true
     )
-    val req = JsonRpcRequest("2.0", "mining.notify", params, "32")
+    val req = JsonRpcRequest("2.0", "mining.notify", params, 32)
     try {
       conn.send(mapper.writeValueAsString(req) + "\n")
     } catch (e: JsonProcessingException) {
@@ -162,19 +160,17 @@ class Stratum1Protocol(
   }
 
   override fun handle(conn: StratumConnection, message: String) {
-    try {
-      val req: JsonRpcRequest = mapper.readValue(message, JsonRpcRequest::class.java)
-      if ("mining.authorize" == req.method) {
-        handleMiningAuthorize(conn, req)
-      } else if ("mining.submit" == req.method) {
-        handleMiningSubmit(conn, req)
-      }
+    val req: JsonRpcRequest = try {
+      mapper.readValue(message, JsonRpcRequest::class.java)
     } catch (e: JsonProcessingException) {
       logger.debug(e.message, e)
-      conn.close()
-    } catch (e: IOException) {
-      logger.debug(e.message, e)
-      conn.close()
+      conn.close(true)
+      return
+    }
+    if ("mining.authorize" == req.method) {
+      handleMiningAuthorize(conn, req)
+    } else if ("mining.submit" == req.method) {
+      handleMiningSubmit(conn, req)
     }
   }
 
@@ -186,14 +182,17 @@ class Stratum1Protocol(
       null,
       message.bytes(3)
     )
-    currentInput?.prePowHash?.equals(solution.powHash)?.let {
-      if (it) {
-        CoroutineScope(coroutineContext).launch {
-          val result = submitCallback(solution)
-          val response = mapper.writeValueAsString(JsonRpcSuccessResponse(message.id, result = result))
-          conn.send(response + "\n")
-        }
+    if (currentInput?.prePowHash?.equals(solution.powHash) == true) {
+      CoroutineScope(coroutineContext).launch {
+        val result = submitCallback(solution)
+        val response = mapper.writeValueAsString(JsonRpcSuccessResponse(message.id, result = result))
+        conn.send(response + "\n")
+        conn.handleClientResponseFeedback(result)
       }
+    } else {
+      val response = mapper.writeValueAsString(JsonRpcSuccessResponse(message.id, result = false))
+      conn.send(response + "\n")
+      conn.handleClientResponseFeedback(false)
     }
   }
 
@@ -225,9 +224,10 @@ class Stratum1Protocol(
 class Stratum1EthProxyProtocol(
   private val submitCallback: suspend (PoWSolution) -> Boolean,
   private val seedSupplier: () -> Bytes32,
-  private val hashrateCallback: (Bytes, Long) -> Boolean,
   private val coroutineContext: CoroutineContext,
 ) : StratumProtocol {
+
+  private val activeConnections: MutableList<StratumConnection> = ArrayList()
 
   companion object {
     private val logger = LoggerFactory.getLogger(Stratum1EthProxyProtocol::class.java)
@@ -245,88 +245,100 @@ class Stratum1EthProxyProtocol(
       }
       val response = mapper.writeValueAsString(JsonRpcSuccessResponse(req.id, result = true))
       conn.send(response + "\n")
+      activeConnections.add(conn)
     } catch (e: JsonProcessingException) {
       logger.debug(e.message, e)
-      conn.close()
+      conn.close(true)
       return false
     }
     return true
   }
 
-  private fun sendNewWork(conn: StratumConnection, id: String) {
+  private fun sendNewWork(conn: StratumConnection, id: Long) {
+    // TODO potentially can return { "id": 10, "result": null, "error": { code: 0, message: "Work not ready" } } here if no work is present.
     val input = currentInput ?: return
     val result: List<String> = mutableListOf(
       input.prePowHash.toHexString(),
       seedSupplier().toHexString(),
       input.target.toHexString()
     )
-    val req = JsonRpcSuccessResponse(id = id, result = result)
+    val resp = JsonRpcSuccessResponse(id = id, result = result)
     try {
-      conn.send(mapper.writeValueAsString(req) + "\n")
+      conn.send(mapper.writeValueAsString(resp) + "\n")
     } catch (e: JsonProcessingException) {
       logger.debug(e.message, e)
     }
   }
 
-  override fun onClose(conn: StratumConnection) {}
+  override fun onClose(conn: StratumConnection) {
+    activeConnections.remove(conn)
+  }
 
   override fun handle(conn: StratumConnection, message: String) {
-    try {
-      val req: JsonRpcRequest = mapper.readValue(message, JsonRpcRequest::class.java)
-      if ("eth_getWork" == req.method) {
-        sendNewWork(conn, req.id)
-      } else if ("eth_submitWork" == req.method) {
-        handleMiningSubmit(conn, req)
-      } else if ("eth_submitHashrate" == req.method) {
-        handleHashrateSubmit(mapper, conn, req)
-      } else {
-        logger.debug("Unsupported message: {}", req.method)
-      }
+    val req: JsonRpcRequest = try {
+      mapper.readValue(message, JsonRpcRequest::class.java)
     } catch (e: JsonProcessingException) {
       logger.debug(e.message, e)
-      conn.close()
-    } catch (e: IOException) {
-      logger.debug(e.message, e)
-      conn.close()
+      conn.close(true)
+      return
+    }
+    if ("eth_getWork" == req.method) {
+      sendNewWork(conn, req.id)
+    } else if ("eth_submitWork" == req.method) {
+      handleMiningSubmit(conn, req)
+    } else if ("eth_submitHashrate" == req.method) {
+      handleHashrateSubmit(mapper, conn, req)
+    } else {
+      logger.debug("Unsupported message: {}", req.method)
     }
   }
 
   @Throws(IOException::class)
   private fun handleMiningSubmit(conn: StratumConnection, req: JsonRpcRequest) {
     logger.debug("Miner submitted solution {}", req)
+    if (req.params.size < 3) {
+      logger.warn("Invalid solution")
+      conn.close(true)
+      return
+    }
     val solution = PoWSolution(
       req.bytes(0).getLong(0),
       req.bytes32(2),
       null,
       req.bytes(1)
     )
-    currentInput?.prePowHash?.equals(solution.powHash)?.let {
-      if (it) {
-        CoroutineScope(coroutineContext).launch {
-          val result = submitCallback(solution)
-          val response = mapper.writeValueAsString(JsonRpcSuccessResponse(id = req.id, result = result))
-          conn.send(response + "\n")
-        }
+    if (currentInput?.prePowHash?.equals(solution.powHash) == true) {
+      CoroutineScope(coroutineContext).launch {
+        val result = submitCallback(solution)
+        val response = mapper.writeValueAsString(JsonRpcSuccessResponse(id = req.id, result = result))
+        conn.send(response + "\n")
+        conn.handleClientResponseFeedback(result)
       }
+    } else {
+      val response = mapper.writeValueAsString(JsonRpcSuccessResponse(id = req.id, result = false))
+      conn.send(response + "\n")
+      conn.handleClientResponseFeedback(false)
     }
   }
 
   override fun setCurrentWorkTask(input: PoWInput) {
     currentInput = input
+    logger.debug("Sending new work to miners: {}", input)
+    for (conn: StratumConnection in activeConnections) {
+      sendNewWork(conn, 0)
+    }
   }
 
   @Throws(IOException::class)
   fun handleHashrateSubmit(
     mapper: JsonMapper,
     conn: StratumConnection,
-    message: JsonRpcRequest
+    message: JsonRpcRequest,
   ) {
-    val hashRate = message.bytes(0)
-    val id = message.bytes(1)
     val response = mapper.writeValueAsString(
       JsonRpcSuccessResponse(
         message.id,
-        result = hashrateCallback(id, hashRate.toBigInteger().toLong())
+        result = true
       )
     )
     conn.send(response + "\n")

@@ -27,8 +27,10 @@ import java.nio.charset.StandardCharsets
  */
 class StratumConnection(
   private val protocols: Array<StratumProtocol>,
-  val closeHandle: () -> Unit,
-  val sender: (String) -> Unit
+  val closeHandle: (Boolean) -> Unit,
+  val sender: (String) -> Unit,
+  val name: String,
+  val threshold: Int = 3,
 ) {
 
   companion object {
@@ -36,6 +38,7 @@ class StratumConnection(
   }
   private var incompleteMessage = ""
   private var protocol: StratumProtocol? = null
+  private var errors = 0
 
   fun handleBuffer(buffer: Buffer) {
     logger.trace("Buffer received {}", buffer)
@@ -46,7 +49,7 @@ class StratumConnection(
       buffer.toString(StandardCharsets.UTF_8)
     } catch (e: IllegalArgumentException) {
       logger.debug("Invalid message with non UTF-8 characters: ${e.message}", e)
-      closeHandle()
+      closeHandle(true)
       return
     }
     val messages: Iterator<String> = splitter.split(messagesString).iterator()
@@ -65,9 +68,10 @@ class StratumConnection(
     }
   }
 
-  fun close() {
+  fun close(addToDenyList: Boolean) {
     logger.trace("Closing connection")
     protocol?.onClose(this)
+    closeHandle(addToDenyList)
   }
 
   private fun handleMessage(message: String) {
@@ -79,7 +83,7 @@ class StratumConnection(
       }
       if (protocol == null) {
         logger.debug("Invalid first message: {}", message)
-        closeHandle()
+        closeHandle(true)
       }
     } else {
       protocol?.handle(this, message)
@@ -89,5 +93,17 @@ class StratumConnection(
   fun send(message: String) {
     logger.debug("Sending message {}", message)
     sender(message)
+  }
+
+  fun handleClientResponseFeedback(result: Boolean) {
+    if (result) {
+      errors = 0
+    } else {
+      errors += 1
+      if (errors > threshold) {
+        logger.warn("Too many errors with handle $name, closing")
+        close(true)
+      }
+    }
   }
 }
