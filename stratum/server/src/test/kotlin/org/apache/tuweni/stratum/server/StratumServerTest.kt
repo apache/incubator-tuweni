@@ -36,7 +36,7 @@ class StratumServerTest {
 
   @Test
   fun testStartStopServer(@VertxInstance vertx: Vertx) {
-    val server = StratumServer(vertx, 0, "127.0.0.1", null, "", { true }, Bytes32::random, { _, _ -> true })
+    val server = StratumServer(vertx, 0, "127.0.0.1", null, "", { true }, Bytes32::random)
     runBlocking {
       server.start()
       assertNotEquals(0, server.port())
@@ -46,7 +46,7 @@ class StratumServerTest {
 
   @Test
   fun testBadClient(@VertxInstance vertx: Vertx) {
-    val server = StratumServer(vertx, 0, "127.0.0.1", null, "", { true }, Bytes32::random, { _, _ -> true })
+    val server = StratumServer(vertx, 0, "127.0.0.1", null, "", { true }, Bytes32::random)
     val disconnected = AsyncCompletion.incomplete()
     runBlocking {
       server.start()
@@ -63,7 +63,7 @@ class StratumServerTest {
 
   @Test
   fun testValidClient(@VertxInstance vertx: Vertx) {
-    val server = StratumServer(vertx, 0, "127.0.0.1", null, "", { true }, Bytes32::random, { _, _ -> true })
+    val server = StratumServer(vertx, 0, "127.0.0.1", null, "", { true }, Bytes32::random)
     runBlocking {
       server.start()
       val client = vertx.createNetClient(NetClientOptions().setTcpKeepAlive(true))
@@ -79,7 +79,7 @@ class StratumServerTest {
         socket.handler { buffer -> message.complete(buffer.toString(StandardCharsets.UTF_8)) }
       }
 
-      assertTrue(message.get()!!.startsWith("{\"id\":\"0\",\"version\":\"2.0\",\"result\":true}\n"))
+      assertTrue(message.get()!!.startsWith("{\"id\":0,\"jsonrpc\":\"2.0\",\"result\":true}\n"), message.get())
       assertFalse(disconnected)
     }
   }
