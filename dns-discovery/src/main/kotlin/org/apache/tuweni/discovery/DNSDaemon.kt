@@ -85,7 +85,7 @@ internal class DNSTimerTask(
   }
 
   override fun run() {
-    logger.info("Refreshing DNS records with $enrLink")
+    logger.debug("Refreshing DNS records with $enrLink")
     records(dnsResolver.collectAll(enrLink))
   }
 }
