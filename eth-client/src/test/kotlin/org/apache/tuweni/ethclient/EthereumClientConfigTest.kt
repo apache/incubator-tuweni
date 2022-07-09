@@ -107,6 +107,17 @@ class EthereumClientConfigTest {
   }
 
   @Test
+  fun testDNSClientWithDNSServer() {
+    val config = EthereumClientConfig.fromString("[dns.mine]\nenrLink=\"example.com\"\npollingPeriod=1000\ndnsServer=\"4.4.5.5\"")
+    assertEquals(1, config.dnsClients().size)
+    assertEquals("example.com", config.dnsClients()[0].enrLink())
+    assertEquals(1000, config.dnsClients()[0].pollingPeriod())
+    assertEquals("default", config.dnsClients()[0].peerRepository())
+    assertEquals("mine", config.dnsClients()[0].getName())
+    assertEquals("4.4.5.5", config.dnsClients()[0].dnsServer())
+  }
+
+  @Test
   fun testProxyConfig() {
     val config = EthereumClientConfig.fromString("[proxy.foo]\nname=\"foo\"\nupstream=\"localhost:15000\"")
     assertEquals(1, config.proxies().size)

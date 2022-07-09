@@ -128,7 +128,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
         sectionConfig.getString("peerRepository"),
         sectionConfig.getString("enrLink"),
         sectionConfig.getLong("pollingPeriod"),
-        sectionConfig.getString("dnsServer")
+        if (sectionConfig.contains("dnsServer")) sectionConfig.getString("dnsServer") else null,
       )
     }
   }

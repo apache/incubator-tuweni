@@ -26,7 +26,7 @@ class DNSClientRunTest {
   @Test
   fun testStartAndStop() {
     val client = DNSClient(
-      DNSConfigurationImpl("default", "foo", "example.com", 1000),
+      DNSConfigurationImpl("default", "foo", "example.com", 1000, null),
       MapKeyValueStore.open(), MemoryPeerRepository()
     )
     runBlocking {
@@ -38,7 +38,7 @@ class DNSClientRunTest {
   @Test
   fun changeSeq() {
     val client = DNSClient(
-      DNSConfigurationImpl("default", "foo", "example.com", 1000),
+      DNSConfigurationImpl("default", "foo", "example.com", 1000, null),
       MapKeyValueStore.open(), MemoryPeerRepository()
     )
     runBlocking {
