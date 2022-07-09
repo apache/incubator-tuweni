@@ -127,7 +127,8 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
         section,
         sectionConfig.getString("peerRepository"),
         sectionConfig.getString("enrLink"),
-        sectionConfig.getLong("pollingPeriod")
+        sectionConfig.getLong("pollingPeriod"),
+        sectionConfig.getString("dnsServer")
       )
     }
   }
@@ -270,6 +271,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       dnsSection.addString("enrLink", null, "DNS domain to query for records", null)
       dnsSection.addLong("pollingPeriod", 50000, "Polling period to refresh DNS records", null)
       dnsSection.addString("peerRepository", "default", "Peer repository to which records should go", null)
+      dnsSection.addString("dnsServer", null, "DNS Server address to use, will use system default if null", null)
 
       val staticPeers = SchemaBuilder.create()
       staticPeers.addListOfString(
@@ -426,6 +428,7 @@ interface RLPxServiceConfiguration {
 interface DNSConfiguration {
   fun enrLink(): String
   fun pollingPeriod(): Long
+  fun dnsServer(): String?
   fun getName(): String
   fun peerRepository(): String
 }
@@ -550,6 +553,7 @@ data class DNSConfigurationImpl(
   private val peerRepository: String,
   private val enrLink: String,
   private val pollingPeriod: Long,
+  private val dnsServer: String?
 ) :
   DNSConfiguration {
   override fun getName() = name
@@ -559,6 +563,8 @@ data class DNSConfigurationImpl(
   override fun enrLink() = enrLink
 
   override fun pollingPeriod(): Long = pollingPeriod
+
+  override fun dnsServer(): String? = dnsServer
 }
 
 data class DiscoveryConfigurationImpl(
