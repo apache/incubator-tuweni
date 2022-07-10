@@ -24,16 +24,20 @@ import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.Context
 import jakarta.ws.rs.core.MediaType
 
-@Path("config")
-class ConfigurationService {
+@Path("state")
+class StateService {
 
   @Context
   var context: ServletContext? = null
 
   @GET
-  @Produces(MediaType.TEXT_PLAIN)
-  fun get(): String {
+  @Produces(MediaType.APPLICATION_JSON)
+  fun get(): Map<String, Long> {
     val client = context!!.getAttribute("ethclient") as EthereumClient
-    return client.config.toToml()
+
+    val pairs = client.peerRepositories.entries.map {
+      Pair(it.key, it.value.activeConnections().count())
+    }
+    return mapOf(*pairs.toTypedArray())
   }
 }

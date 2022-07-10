@@ -19,6 +19,7 @@ package org.apache.tuweni.eth.crawler
 import io.opentelemetry.api.metrics.LongCounter
 import io.opentelemetry.api.metrics.Meter
 import io.swagger.v3.jaxrs2.integration.OpenApiServlet
+import jakarta.servlet.DispatcherType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -34,7 +35,6 @@ import org.glassfish.jersey.servlet.ServletContainer
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.util.EnumSet
-import javax.servlet.DispatcherType
 import kotlin.coroutines.CoroutineContext
 
 class CrawlerRESTService(
@@ -74,7 +74,7 @@ class CrawlerRESTService(
       "org.apache.tuweni.eth.crawler.rest"
     )
 
-    val apiServlet = ctx.addServlet(OpenApiServlet::class.java, "/api/*")
+    val apiServlet = ctx.addServlet(OpenApiServlet::class.java.name, "/api/*")
     apiServlet.setInitParameter("openApi.configuration.resourcePackages", "org.apache.tuweni.eth.crawler.rest")
     apiServlet.initOrder = 2
 
