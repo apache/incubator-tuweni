@@ -20,7 +20,9 @@ import org.apache.tuweni.ethclient.EthereumClient
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.servlet.ServletContextHandler
+import org.eclipse.jetty.servlet.ServletHolder
 import org.eclipse.jetty.util.resource.Resource
+import org.glassfish.jersey.server.ResourceConfig
 import org.glassfish.jersey.servlet.ServletContainer
 import java.net.InetSocketAddress
 
@@ -28,7 +30,7 @@ class UI(
   val port: Int = 0,
   val networkInterface: String = "127.0.0.1",
   val path: String = "/",
-  val client: EthereumClient
+  val client: EthereumClient,
 ) {
 
   private var server: Server? = null
@@ -43,12 +45,10 @@ class UI(
     ctx.contextPath = path
     newServer.handler = ctx
 
-    val serHol = ctx.addServlet(ServletContainer::class.java, "/rest/*")
-    serHol.initOrder = 1
-    serHol.setInitParameter(
-      "jersey.config.server.provider.packages",
-      "org.apache.tuweni.ethclientui"
-    )
+    val config = ResourceConfig().packages(true, "org.apache.tuweni.ethclientui")
+    val holder = ServletHolder(ServletContainer(config))
+    holder.initOrder = 1
+    ctx.addServlet(holder, "/rest/*")
 
     ctx.setBaseResource(Resource.newResource(UI::class.java.getResource("/webapp")))
     val staticContent = ctx.addServlet(DefaultServlet::class.java, "/*")
@@ -57,7 +57,7 @@ class UI(
 
     newServer.stopAtShutdown = true
     newServer.start()
-    serHol.servlet.servletConfig.servletContext.setAttribute("ethclient", client)
+    holder.servlet.servletConfig.servletContext.setAttribute("ethclient", client)
     server = newServer
     actualPort = newServer.uri.port
   }
