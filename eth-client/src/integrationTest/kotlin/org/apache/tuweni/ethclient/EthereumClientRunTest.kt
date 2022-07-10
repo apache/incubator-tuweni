@@ -122,16 +122,16 @@ class EthereumClientRunTest {
   @Test
   fun connectToMainnet(@VertxInstance vertx: Vertx) = runBlocking {
     val config = EthereumClientConfig.fromString(
-      "" +
-        "[peerRepository.default]\n" +
-        "type=\"memory\"\n" +
-        "[storage.default]\n" +
-        "genesis=\"default\"\n" +
-        "path=\"mainnet\"\n" +
-        "[genesis.default]\n" +
-        "path=classpath:/mainnet.json\n" +
-        "[dns.default]\n" +
-        "enrLink=\"enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@all.mainnet.ethdisco.net\""
+      """
+        [peerRepository.default]
+        type="memory"
+        [storage.default]
+        genesis="default"
+        path="mainnet"
+        [genesis.default]
+        path=classpath:/mainnet.json
+        [dns.default]
+        enrLink="enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@all.mainnet.ethdisco.net"""".trimMargin()
     )
     val client = EthereumClient(vertx, config)
     client.start()

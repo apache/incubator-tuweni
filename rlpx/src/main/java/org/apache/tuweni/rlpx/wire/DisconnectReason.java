@@ -108,6 +108,8 @@ public enum DisconnectReason {
         return TIMEOUT;
       case 16:
         return SUBPROTOCOL_REASON;
+      case 99:
+        return NOT_PROVIDED;
       default:
         throw new IllegalArgumentException("Invalid reason " + reason);
     }

@@ -62,6 +62,7 @@ class DNSClient(
     logger.info("Starting DNSClient with ${config.enrLink()}")
     config.enrLink().let { link ->
       val daemon = DNSDaemon(
+        dnsServer = config.dnsServer(),
         seq = seq(),
         enrLink = link,
         period = config.pollingPeriod(),
