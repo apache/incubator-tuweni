@@ -147,7 +147,7 @@ final class BytesSSZReader implements SSZReader {
 
   @Override
   public List<Bytes> readFixedBytesList(int byteLength, int limit) {
-    return readList(remaining -> readFixedBytes(byteLength, limit));
+    return readList(byteLength, () -> readFixedBytes(byteLength, limit));
   }
 
   @Override
