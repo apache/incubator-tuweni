@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.bytes.Bytes48;
 
 import java.math.BigInteger;
@@ -224,5 +225,12 @@ class BytesSSZReaderTest {
     List<Bytes> toWrite = Arrays.asList(Bytes48.random(), Bytes48.random(), Bytes48.random());
     Bytes encoded = SSZ.encode(writer -> writer.writeFixedBytesVector(toWrite));
     assertEquals(toWrite, SSZ.decode(encoded, reader -> reader.readFixedBytesVector(3, 48)));
+  }
+
+  @Test
+  void shouldRoundtripHomogenousBytesList() {
+    List<Bytes32> toWrite = Arrays.asList(Bytes32.random(), Bytes32.random(), Bytes32.random());
+    Bytes encoded = SSZ.encode(writer -> writer.writeFixedBytesList(toWrite));
+    assertEquals(toWrite, SSZ.decode(encoded, reader -> reader.readFixedBytesList(Bytes32.SIZE)));
   }
 }
