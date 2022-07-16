@@ -45,7 +45,7 @@ class UI(
     ctx.contextPath = path
     newServer.handler = ctx
 
-    val config = ResourceConfig().packages(true, "org.apache.tuweni.ethclientui")
+    val config = ResourceConfig().packages(true, "org.apache.tuweni.ethclientui").register(MarshallingFeature::class.java)
     val holder = ServletHolder(ServletContainer(config))
     holder.initOrder = 1
     ctx.addServlet(holder, "/rest/*")

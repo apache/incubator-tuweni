@@ -83,8 +83,8 @@ class EthereumClient(
 
   private var metricsService: MetricsService? = null
   private val genesisFiles = mutableMapOf<String, GenesisFile>()
-  private val services = mutableMapOf<String, RLPxService>()
-  private val storageRepositories = mutableMapOf<String, BlockchainRepository>()
+  private val rlpxServices = mutableMapOf<String, RLPxService>()
+  val storageRepositories = mutableMapOf<String, BlockchainRepository>()
   val peerRepositories = mutableMapOf<String, EthereumPeerRepository>()
   private val dnsClients = mutableMapOf<String, DNSClient>()
   private val discoveryServices = mutableMapOf<String, DiscoveryService>()
@@ -198,6 +198,7 @@ class EthereumClient(
       discoveryServices[it.getName()] = discoveryService
       logger.info("Started discovery service ${it.getName()}")
     }
+    val adapters = mutableMapOf<String, WireConnectionPeerRepositoryAdapter>()
 
     AsyncCompletion.allOf(
       config.rlpxServices().map { rlpxConfig ->
@@ -252,7 +253,8 @@ class EthereumClient(
           meter,
           adapter
         )
-        services[rlpxConfig.getName()] = service
+        adapters[rlpxConfig.getName()] = adapter
+        rlpxServices[rlpxConfig.getName()] = service
         peerRepository.addIdentityListener {
           service.connectTo(
             it.publicKey(),
@@ -287,9 +289,9 @@ class EthereumClient(
 
       for (sync in config.synchronizers()) {
         val syncRepository = storageRepositories[sync.getRepository()] ?: throw IllegalArgumentException("Repository ${sync.getRepository()} missing for synchronizer ${sync.getName()}")
-        val syncService = services[sync.getRlpxService()] ?: throw IllegalArgumentException("Service ${sync.getRlpxService()} missing for synchronizer ${sync.getName()}")
+        val syncService = rlpxServices[sync.getRlpxService()] ?: throw IllegalArgumentException("Service ${sync.getRlpxService()} missing for synchronizer ${sync.getName()}")
         val syncPeerRepository = peerRepositories[sync.getPeerRepository()] ?: throw IllegalArgumentException("Peer repository ${sync.getPeerRepository()} missing for synchronizer ${sync.getName()}")
-        val adapter = WireConnectionPeerRepositoryAdapter(syncPeerRepository)
+        val adapter = adapters[sync.getRlpxService()] ?: throw IllegalArgumentException("Service ${sync.getRlpxService()} missing for synchronizer ${sync.getName()}")
 
         when (sync.getType()) {
           SynchronizerType.best -> {
@@ -397,7 +399,7 @@ class EthereumClient(
     managerHandler.forEach {
       it.stop()
     }
-    AsyncCompletion.allOf(services.values.map(RLPxService::stop)).await()
+    AsyncCompletion.allOf(rlpxServices.values.map(RLPxService::stop)).await()
     storageRepositories.values.forEach(BlockchainRepository::close)
     metricsService?.close()
     Unit
