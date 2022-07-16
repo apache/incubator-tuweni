@@ -51,6 +51,8 @@ class Code(val instructions: List<Instruction>) {
     var stackSize = 0
     val visited = mutableSetOf<Int>()
     var index = 0
+    val jumpDests = mutableSetOf<Int>()
+    val jumpSrcs = mutableMapOf<Int, Int>()
     while (visited.add(index)) {
       val currentInstruction = instructions.getOrNull(index) ?: break
       if (currentInstruction.stackItemsNeeded() > stackSize) {
@@ -63,11 +65,15 @@ class Code(val instructions: List<Instruction>) {
       if (currentInstruction is Invalid) {
         return CodeValidationError(currentInstruction, index, Error.HIT_INVALID_OPCODE)
       }
-      // TODO cannot follow jumps right now.
       if (currentInstruction == Jump || currentInstruction == Jumpi) {
-        break
+        jumpSrcs.put(index, stackSize)
       }
-
+      if (currentInstruction == JumpDest) {
+        jumpDests.add(index)
+      }
+      if (currentInstruction.end()) {
+        stackSize = 0
+      }
       index++
     }
     return null
