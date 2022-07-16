@@ -66,15 +66,6 @@ interface BlockchainInformation {
   fun forks(): List<Long>
 
   /**
-   * Get our latest known fork
-   *
-   * @return the latest fork number we know
-   */
-  fun getLatestFork(): Long? {
-    return if (forks().isEmpty()) null else forks()[forks().size - 1]
-  }
-
-  /**
    * Get all our fork hashes
    *
    * @param all fork hashes, sorted
@@ -83,9 +74,7 @@ interface BlockchainInformation {
     val crc = CRC32()
     crc.update(genesisHash().toArrayUnsafe())
     val forkHashes = ArrayList<Bytes>(listOf(Bytes.ofUnsignedInt(crc.value)))
-    val forks = mutableListOf<Long>()
-    forks.addAll(forks())
-    for (fork in forks) {
+    for (fork in forks()) {
       val byteRepresentationFork = UInt64.valueOf(fork).toBytes()
       crc.update(byteRepresentationFork.toArrayUnsafe(), 0, byteRepresentationFork.size())
       forkHashes.add(Bytes.ofUnsignedInt(crc.value))
@@ -93,18 +82,10 @@ interface BlockchainInformation {
     return forkHashes
   }
 
-  /**
-   * Get latest fork hash, if known
-   *
-   * @return the hash of the latest fork hash we know of
-   */
-  fun getLatestForkHash(): Bytes? {
-    val hashes = getForkHashes()
-    return if (hashes.isEmpty()) {
-      null
-    } else hashes[hashes.size - 1]
-  }
+  fun getLastestApplicableFork(number: Long): ForkInfo
 }
+
+data class ForkInfo(val next: Long, val hash: Bytes)
 
 /**
  * POJO - constant representation of the blockchain information
@@ -116,14 +97,40 @@ interface BlockchainInformation {
  * @param genesisHash the genesis block hash
  * @param forks known forks
  */
-data class SimpleBlockchainInformation(
+class SimpleBlockchainInformation(
   val networkID: UInt256,
   val totalDifficulty: UInt256,
   val bestHash: Hash,
   val bestNumber: UInt256,
   val genesisHash: Hash,
-  val forks: List<Long>
+  possibleForks: List<Long>,
 ) : BlockchainInformation {
+
+  private val forkIds: List<ForkInfo>
+  private val forks: List<Long>
+
+  init {
+    this.forks = possibleForks.filter { it > 0 }.sorted().distinct()
+    val crc = CRC32()
+    crc.update(genesisHash.toArrayUnsafe())
+    val genesisHashCrc = Bytes.ofUnsignedInt(crc.value)
+    val forkHashes = mutableListOf(genesisHashCrc)
+    for (f in forks) {
+      val byteRepresentationFork = Bytes.ofUnsignedLong(f).toArrayUnsafe()
+      crc.update(byteRepresentationFork, 0, byteRepresentationFork.size)
+      forkHashes.add(Bytes.ofUnsignedInt(crc.value))
+    }
+    val mutableForkIds = mutableListOf<ForkInfo>()
+
+    // This loop is for all the fork hashes that have an associated "next fork"
+    for (i in forks.indices) {
+      mutableForkIds.add(ForkInfo(forks.get(i), forkHashes[i]))
+    }
+    if (forks.isNotEmpty()) {
+      mutableForkIds.add(ForkInfo(0, forkHashes.last()))
+    }
+    this.forkIds = mutableForkIds.toList()
+  }
 
   override fun networkID(): UInt256 = networkID
 
@@ -136,4 +143,13 @@ data class SimpleBlockchainInformation(
   override fun genesisHash(): Hash = genesisHash
 
   override fun forks(): List<Long> = forks
+
+  override fun getLastestApplicableFork(number: Long): ForkInfo {
+    for (fork in forkIds) {
+      if (number < fork.next) {
+        return fork
+      }
+    }
+    return forkIds.last()
+  }
 }

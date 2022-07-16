@@ -37,19 +37,19 @@ final class DisconnectMessage implements WireProtocolMessage {
     }
   }
 
-  private final int reason;
-
-  DisconnectMessage(DisconnectReason reason) {
-    this(reason.code);
-  }
+  private final DisconnectReason reason;
 
   DisconnectMessage(int reason) {
+    this(DisconnectReason.valueOf(reason));
+  }
+
+  DisconnectMessage(DisconnectReason reason) {
     this.reason = reason;
   }
 
   @Override
   public Bytes toBytes() {
-    return RLP.encodeList(writer -> writer.writeInt(reason));
+    return RLP.encodeList(writer -> writer.writeInt(reason.code));
   }
 
   @Override
@@ -58,11 +58,15 @@ final class DisconnectMessage implements WireProtocolMessage {
   }
 
   int reason() {
+    return reason.code;
+  }
+
+  DisconnectReason disconnectReason() {
     return reason;
   }
 
   @Override
   public String toString() {
-    return "DisconnectMessage reason=" + DisconnectReason.valueOf(reason).text;
+    return "DisconnectMessage reason=" + reason.text;
   }
 }
