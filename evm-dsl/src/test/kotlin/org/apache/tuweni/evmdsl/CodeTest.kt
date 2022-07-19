@@ -17,6 +17,7 @@
 package org.apache.tuweni.evmdsl
 
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -113,5 +114,48 @@ class CodeTest {
       }
     )
     assertNull(code.validate()?.error)
+  }
+
+  @Test
+  fun testSomeWorkshopCode() {
+    val code = Code(
+      buildList {
+        this.add(Push(Bytes.fromHexString("0x00")))
+        this.add(CallDataLoad) // load from position 0
+        this.add(Custom(Bytes.fromHexString("0xf6"), "SHAREDSECRET", 1, 1))
+        this.add(Push(Bytes.fromHexString("0x11"))) // push jump destination
+        this.add(Jumpi) // if custom returns 0, keep going, else go to jumpdest at byte 0x11
+        this.add(Push(Bytes.fromHexString("0x00"))) // value
+        this.add(Push(Bytes.fromHexString("0x00"))) // location
+        this.add(Mstore) // store 0 in memory
+        this.add(Push(Bytes.fromHexString("0x01"))) // length
+        this.add(Push(Bytes.fromHexString("0x1f"))) // location
+        this.add(Return) // return 0
+        this.add(JumpDest)
+        this.add(Push(Bytes.fromHexString("0x01"))) // value
+        this.add(Push(Bytes.fromHexString("0x00"))) // location
+        this.add(Mstore) // store 1 in memory
+        this.add(Push(Bytes.fromHexString("0x01"))) // length
+        this.add(Push(Bytes.fromHexString("0x1f"))) // location
+        this.add(Return)
+      }
+    )
+    assertNull(code.validate()?.error)
+    println(code.toString())
+    println(code.toBytes().toHexString())
+
+    // surround with instructions to deploy.
+    val deployment = Code(
+      buildList {
+        this.add(Push(Bytes32.rightPad(code.toBytes()))) // pad the code with zeros to create a word
+        this.add(Push(Bytes.fromHexString("0x00"))) // set the location of the memory to store
+        this.add(Mstore)
+        this.add(Push(Bytes.ofUnsignedInt(code.toBytes().size().toLong()))) // length
+        this.add(Push(Bytes.fromHexString("0x00"))) // location
+        this.add(Return) // return the code
+      }
+    )
+
+    println(deployment.toBytes().toHexString())
   }
 }

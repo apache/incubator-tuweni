@@ -31,6 +31,8 @@ interface Instruction {
   fun stackItemsConsumed(): Int
 
   fun stackItemsProduced(): Int
+
+  fun end(): Boolean = false
 }
 
 data class InstructionModel(val opcode: Byte, val additionalBytesToRead: Int = 0, val creator: (code: Bytes, index: Int) -> Instruction)
@@ -665,6 +667,7 @@ object Return : Instruction {
   override fun toString(): String = "RETURN"
   override fun stackItemsConsumed() = 2
   override fun stackItemsProduced() = 0
+  override fun end() = true
 }
 
 object DelegateCall : Instruction {
@@ -696,6 +699,7 @@ object Revert : Instruction {
   override fun toString(): String = "REVERT"
   override fun stackItemsConsumed() = 2
   override fun stackItemsProduced() = 0
+  override fun end() = true
 }
 
 object SelfDestruct : Instruction {
@@ -727,4 +731,11 @@ class Log(val logIndex: Int) : Instruction {
   override fun toString(): String = "LOG$logIndex"
   override fun stackItemsConsumed() = logIndex + 2
   override fun stackItemsProduced() = 0
+}
+
+data class Custom(val bytes: Bytes, val str: String, val consumed: Int, val produced: Int) : Instruction {
+  override fun toBytes() = bytes
+  override fun toString() = str
+  override fun stackItemsConsumed() = consumed
+  override fun stackItemsProduced() = produced
 }
