@@ -21,6 +21,7 @@ import org.apache.tuweni.peer.repository.Identity
 import org.apache.tuweni.rlpx.WireConnectionRepository
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
 import org.apache.tuweni.rlpx.wire.WireConnection
+import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
@@ -28,6 +29,10 @@ import java.util.concurrent.ConcurrentHashMap
  * Class bridging the subprotocols and the connection repository of the RLPx service, updating the Ethereum peer repository with information.
  */
 class WireConnectionPeerRepositoryAdapter(val peerRepository: EthereumPeerRepository) : WireConnectionRepository {
+
+  companion object {
+    val logger = LoggerFactory.getLogger(WireConnectionPeerRepositoryAdapter::class.java)
+  }
 
   private val wireConnectionToIdentities = ConcurrentHashMap<String, Identity>()
   private val connections = ConcurrentHashMap<String, WireConnection>()
@@ -79,7 +84,11 @@ class WireConnectionPeerRepositoryAdapter(val peerRepository: EthereumPeerReposi
   }
 
   fun get(ethereumConnection: EthereumConnection): WireConnection {
-    val conn = connections[ethereumConnection.identity().id()] ?: throw NoSuchElementException("No connection available")
+    val conn = connections[ethereumConnection.identity().id()]
+    if (conn == null) {
+      logger.info("Connection ${ethereumConnection.identity().id()} not found, present are: ${connections.keys.joinToString(",")}}")
+      throw NoSuchElementException("No connection available")
+    }
     return conn
   }
 

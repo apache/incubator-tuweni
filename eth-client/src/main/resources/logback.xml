@@ -11,7 +11,7 @@
  an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  specific language governing permissions and limitations under the License.
 -->
-<configuration>
+<configuration scan="true">
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- encoders are assigned the type
@@ -20,8 +20,20 @@
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
+    <logger level="info" name="org.infinispan" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger level="info" name="io.netty.buffer" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger level="info" name="org.xbill.DNS" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger level="info" name="org.eclipse.jetty" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
 
-    <root level="info">
+    <root level="${root.log.level:-INFO}">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>
