@@ -94,14 +94,14 @@ public class GenesisFile {
     if (gasLimit == null) {
       throw new IllegalArgumentException("gasLimit must be provided");
     }
-    this.nonce = Bytes.fromHexString(nonce);
+    this.nonce = Bytes.fromHexStringLenient(nonce);
     this.difficulty = UInt256.fromHexString(difficulty);
     this.mixhash = Hash.fromHexString(mixhash);
     this.coinbase = Address.fromHexString(coinbase);
     this.timestamp = "0x0".equals(timestamp) ? Instant.ofEpochSecond(0)
-        : Instant.ofEpochSecond(Bytes.fromHexString(timestamp).toLong());
+        : Instant.ofEpochSecond(Bytes.fromHexStringLenient(timestamp).toLong());
     this.extraData = Bytes.fromHexString(extraData);
-    this.gasLimit = Gas.valueOf(Bytes.fromHexString(gasLimit).toLong());
+    this.gasLimit = Gas.valueOf(Bytes.fromHexStringLenient(gasLimit).toLong());
     this.allocs = new HashMap<>();
     for (Map.Entry<String, String> entry : allocs.entrySet()) {
       Address addr = null;

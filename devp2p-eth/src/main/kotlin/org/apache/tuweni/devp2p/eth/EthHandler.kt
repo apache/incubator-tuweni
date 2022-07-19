@@ -18,9 +18,11 @@ package org.apache.tuweni.devp2p.eth
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion
+import org.apache.tuweni.concurrent.ExpiringMap
 import org.apache.tuweni.concurrent.coroutines.asyncCompletion
 import org.apache.tuweni.devp2p.eth.EthSubprotocol.Companion.ETH62
 import org.apache.tuweni.devp2p.eth.EthSubprotocol.Companion.ETH65
@@ -30,7 +32,6 @@ import org.apache.tuweni.rlpx.wire.DisconnectReason
 import org.apache.tuweni.rlpx.wire.SubProtocolHandler
 import org.apache.tuweni.rlpx.wire.WireConnection
 import org.slf4j.LoggerFactory
-import java.util.WeakHashMap
 import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 
@@ -41,7 +42,7 @@ internal class EthHandler(
   private val controller: EthController,
 ) : SubProtocolHandler, CoroutineScope {
 
-  private val pendingStatus = WeakHashMap<String, PeerInfo>()
+  private val pendingStatus = ExpiringMap<String, PeerInfo>(60000)
 
   companion object {
     val logger = LoggerFactory.getLogger(EthHandler::class.java)!!
@@ -227,26 +228,29 @@ internal class EthHandler(
     controller.addNewBlockHashes(message.hashes)
   }
 
-  override fun handleNewPeerConnection(connection: WireConnection): AsyncCompletion {
-    val newPeer = pendingStatus.computeIfAbsent(connection.uri()) { PeerInfo() }
-    val ethSubProtocol = connection.agreedSubprotocolVersion(EthSubprotocol.ETH65.name())
-    if (ethSubProtocol == null) {
-      newPeer.cancel()
-      return newPeer.ready
-    }
-    logger.info("Sending status message to ${connection.uri()}")
-    service.send(
-      ethSubProtocol, MessageType.Status.code, connection,
-      StatusMessage(
-        ethSubProtocol.version(),
-        blockchainInfo.networkID(), blockchainInfo.totalDifficulty(),
-        blockchainInfo.bestHash(), blockchainInfo.genesisHash(), blockchainInfo.getLatestForkHash(),
-        blockchainInfo.getLatestFork()
-      ).toBytes()
-    )
+  override fun handleNewPeerConnection(connection: WireConnection): AsyncCompletion =
+    runBlocking {
+      val newPeer = pendingStatus.computeIfAbsent(connection.uri()) { PeerInfo() }
+      val ethSubProtocol = connection.agreedSubprotocolVersion(EthSubprotocol.ETH65.name())
+      if (ethSubProtocol == null) {
+        newPeer.cancel()
+        return@runBlocking newPeer.ready
+      }
+      logger.info("Sending status message to ${connection.uri()}")
+      val forkId =
+        blockchainInfo.getLastestApplicableFork(controller.repository.retrieveChainHeadHeader().number.toLong())
+      service.send(
+        ethSubProtocol, MessageType.Status.code, connection,
+        StatusMessage(
+          ethSubProtocol.version(),
+          blockchainInfo.networkID(), blockchainInfo.totalDifficulty(),
+          blockchainInfo.bestHash(), blockchainInfo.genesisHash(), forkId.hash,
+          forkId.next
+        ).toBytes()
+      )
 
-    return newPeer.ready
-  }
+      return@runBlocking newPeer.ready
+    }
 
   override fun stop() = asyncCompletion {
   }

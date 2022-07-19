@@ -73,13 +73,15 @@ internal class EthHelloHandler(
       newPeer.cancel()
       return newPeer.ready
     }
+    val forkId =
+      blockchainInfo.getLastestApplicableFork(0L)
     service.send(
       ethSubProtocol, MessageType.Status.code, connection,
       StatusMessage(
         ethSubProtocol.version(),
         blockchainInfo.networkID(), blockchainInfo.totalDifficulty(),
-        blockchainInfo.bestHash(), blockchainInfo.genesisHash(), blockchainInfo.getLatestForkHash(),
-        blockchainInfo.getLatestFork()
+        blockchainInfo.bestHash(), blockchainInfo.genesisHash(), forkId.hash,
+        forkId.next
       ).toBytes()
     )
 

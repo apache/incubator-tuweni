@@ -170,9 +170,9 @@ public final class DefaultWireConnection implements WireConnection {
       return;
     } else if (message.messageId() == 1) {
       DisconnectMessage disconnect = DisconnectMessage.read(message.content());
-      logger.debug("Received disconnect {}", disconnect);
+      logger.debug("Received disconnect {} {}", disconnect.disconnectReason(), uri());
       disconnectReceived = true;
-      disconnectReason = DisconnectReason.valueOf(disconnect.reason());
+      disconnectReason = disconnect.disconnectReason();
       disconnectHandler.run();
       if (!ready.isDone()) {
         ready.complete(this); // Return the connection as is.
@@ -315,7 +315,7 @@ public final class DefaultWireConnection implements WireConnection {
   }
 
   public void sendMessage(SubProtocolIdentifier subProtocolIdentifier, int messageType, Bytes message) {
-    logger.trace("Sending sub-protocol message {} {}", messageType, message);
+    logger.trace("Sending sub-protocol message {} {} {}", messageType, message, uri());
     Integer offset = null;
     for (Map.Entry<Range<Integer>, SubProtocolIdentifier> entry : subprotocolRangeMap.asMapOfRanges().entrySet()) {
       if (entry.getValue().equals(subProtocolIdentifier)) {

@@ -18,8 +18,10 @@ package org.apache.tuweni.devp2p.eth
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.concurrent.AsyncCompletion
+import org.apache.tuweni.concurrent.ExpiringMap
 import org.apache.tuweni.concurrent.coroutines.asyncCompletion
 import org.apache.tuweni.concurrent.coroutines.await
 import org.apache.tuweni.eth.Hash
@@ -30,7 +32,6 @@ import org.apache.tuweni.rlpx.wire.SubProtocolHandler
 import org.apache.tuweni.rlpx.wire.WireConnection
 import org.apache.tuweni.units.bigints.UInt64
 import org.slf4j.LoggerFactory
-import java.util.WeakHashMap
 import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 
@@ -42,7 +43,7 @@ internal class EthHandler66(
 ) : SubProtocolHandler, CoroutineScope {
 
   private val ethHandler = EthHandler(coroutineContext, blockchainInfo, service, controller)
-  private val pendingStatus = WeakHashMap<String, PeerInfo>()
+  private val pendingStatus = ExpiringMap<String, PeerInfo>(60000)
 
   companion object {
     val logger = LoggerFactory.getLogger(EthHandler66::class.java)!!
@@ -63,9 +64,9 @@ internal class EthHandler66(
       val payload = pair.second
 
       when (messageType) {
-        MessageType.Status.code -> handleStatus(connection, StatusMessage.read(payload))
-        MessageType.NewBlockHashes.code -> handleNewBlockHashes(NewBlockHashes.read(payload))
-        MessageType.Transactions.code -> handleTransactions(Transactions.read(payload))
+        MessageType.Status.code -> handleStatus(connection, StatusMessage.read(message))
+        MessageType.NewBlockHashes.code -> handleNewBlockHashes(NewBlockHashes.read(message))
+        MessageType.Transactions.code -> handleTransactions(Transactions.read(message))
         MessageType.GetBlockHeaders.code -> handleGetBlockHeaders(
           connection,
           requestIdentifier,
@@ -78,13 +79,13 @@ internal class EthHandler66(
           GetBlockBodies.read(payload)
         )
         MessageType.BlockBodies.code -> handleBlockBodies(connection, requestIdentifier, BlockBodies.read(payload))
-        MessageType.NewBlock.code -> handleNewBlock(NewBlock.read(payload))
+        MessageType.NewBlock.code -> handleNewBlock(NewBlock.read(message))
         MessageType.GetNodeData.code -> handleGetNodeData(connection, requestIdentifier, GetNodeData.read(payload))
         MessageType.NodeData.code -> handleNodeData(connection, requestIdentifier, NodeData.read(payload))
         MessageType.GetReceipts.code -> handleGetReceipts(connection, requestIdentifier, GetReceipts.read(payload))
         MessageType.Receipts.code -> handleReceipts(connection, requestIdentifier, Receipts.read(payload))
         MessageType.NewPooledTransactionHashes.code -> handleNewPooledTransactionHashes(
-          connection, NewPooledTransactionHashes.read(payload)
+          connection, NewPooledTransactionHashes.read(message)
         )
         MessageType.GetPooledTransactions.code -> handleGetPooledTransactions(
           connection, requestIdentifier,
@@ -272,32 +273,33 @@ internal class EthHandler66(
     controller.addNewBlockHashes(message.hashes)
   }
 
-  override fun handleNewPeerConnection(connection: WireConnection): AsyncCompletion {
+  override fun handleNewPeerConnection(connection: WireConnection): AsyncCompletion = runBlocking {
     if (connection.agreedSubprotocolVersion(EthSubprotocol.ETH66.name()) != EthSubprotocol.ETH66) {
-      return ethHandler.handleNewPeerConnection(connection)
+      logger.debug("Downgrade connection from eth/66 to eth65")
+      return@runBlocking ethHandler.handleNewPeerConnection(connection)
     }
-    val newPeer = pendingStatus.computeIfAbsent(connection.uri()) { PeerInfo() }
+    val newPeer = pendingStatus.computeIfAbsent(connection.uri()) {
+      logger.debug("Register a new peer ${connection.uri()}")
+      PeerInfo()
+    }
     val ethSubProtocol = connection.agreedSubprotocolVersion(EthSubprotocol.ETH66.name())
     if (ethSubProtocol == null) {
       newPeer.cancel()
-      return newPeer.ready
+      return@runBlocking newPeer.ready
     }
+    val forkId =
+      blockchainInfo.getLastestApplicableFork(controller.repository.retrieveChainHeadHeader().number.toLong())
     service.send(
       ethSubProtocol, MessageType.Status.code, connection,
-      RLP.encodeList {
-        it.writeValue(UInt64.random().toBytes())
-        it.writeRLP(
-          StatusMessage(
-            ethSubProtocol.version(),
-            blockchainInfo.networkID(), blockchainInfo.totalDifficulty(),
-            blockchainInfo.bestHash(), blockchainInfo.genesisHash(), blockchainInfo.getLatestForkHash(),
-            blockchainInfo.getLatestFork()
-          ).toBytes()
-        )
-      }
+      StatusMessage(
+        ethSubProtocol.version(),
+        blockchainInfo.networkID(), blockchainInfo.totalDifficulty(),
+        blockchainInfo.bestHash(), blockchainInfo.genesisHash(), forkId.hash,
+        forkId.next
+      ).toBytes()
     )
 
-    return newPeer.ready
+    return@runBlocking newPeer.ready
   }
 
   override fun stop() = asyncCompletion {
