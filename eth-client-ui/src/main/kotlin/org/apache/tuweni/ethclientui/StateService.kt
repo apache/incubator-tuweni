@@ -23,6 +23,13 @@ import jakarta.ws.rs.Path
 import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.Context
 import jakarta.ws.rs.core.MediaType
+import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.units.bigints.UInt256
+
+data class BlockHashAndNumber(val hash: Bytes32, val number: UInt256)
+
+data class State(val peerCounts: Map<String, Long>, val bestBlocks: Map<String, BlockHashAndNumber>)
 
 @Path("state")
 class StateService {
@@ -32,12 +39,18 @@ class StateService {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  fun get(): Map<String, Long> {
+  fun get(): State {
     val client = context!!.getAttribute("ethclient") as EthereumClient
 
-    val pairs = client.peerRepositories.entries.map {
+    val peerCounts = client.peerRepositories.entries.map {
       Pair(it.key, it.value.activeConnections().count())
     }
-    return mapOf(*pairs.toTypedArray())
+    val bestBlocks = client.storageRepositories.entries.map {
+      runBlocking {
+        val bestBlock = it.value.retrieveChainHeadHeader()
+        Pair(it.key, BlockHashAndNumber(bestBlock.hash, bestBlock.number))
+      }
+    }
+    return State(mapOf(*peerCounts.toTypedArray()), mapOf(*bestBlocks.toTypedArray()))
   }
 }
