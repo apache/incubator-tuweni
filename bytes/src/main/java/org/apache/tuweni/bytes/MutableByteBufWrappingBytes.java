@@ -38,6 +38,12 @@ final class MutableByteBufWrappingBytes extends ByteBufWrappingBytes implements 
   }
 
   @Override
+  public void set(int i, Bytes b) {
+    byte[] bytes = b.toArrayUnsafe();
+    byteBuf.setBytes(i, bytes);
+  }
+
+  @Override
   public void setInt(int i, int value) {
     byteBuf.setInt(i, value);
   }

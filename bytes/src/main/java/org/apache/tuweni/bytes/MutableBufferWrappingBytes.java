@@ -33,6 +33,12 @@ final class MutableBufferWrappingBytes extends BufferWrappingBytes implements Mu
   }
 
   @Override
+  public void set(int i, Bytes b) {
+    byte[] bytes = b.toArrayUnsafe();
+    buffer.setBytes(i, bytes);
+  }
+
+  @Override
   public void setInt(int i, int value) {
     buffer.setInt(i, value);
   }

@@ -36,6 +36,12 @@ class MutableArrayWrappingBytes extends ArrayWrappingBytes implements MutableByt
   }
 
   @Override
+  public void set(int i, Bytes b) {
+    byte[] bytesArray = b.toArrayUnsafe();
+    System.arraycopy(bytesArray, 0, bytes, offset + i, bytesArray.length);
+  }
+
+  @Override
   public MutableBytes increment() {
     for (int i = length - 1; i >= offset; --i) {
       if (bytes[i] == (byte) 0xFF) {
