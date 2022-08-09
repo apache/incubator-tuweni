@@ -20,6 +20,10 @@
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
+    <logger level="info" name="org.apache.tuweni.rlpx" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+
     <logger level="info" name="org.infinispan" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
