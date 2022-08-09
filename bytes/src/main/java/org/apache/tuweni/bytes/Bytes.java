@@ -618,6 +618,22 @@ public interface Bytes extends Comparable<Bytes> {
   }
 
   /**
+   * Splits a Bytes object into Bytes32 objects. If the last element is not exactly 32 bytes, it is right padded with
+   * zeros.
+   *
+   * @param bytes the bytes object to segment
+   * @return an array of Bytes32 objects
+   */
+  static Bytes32[] segment(Bytes bytes) {
+    int segments = (int) Math.ceil(bytes.size() / 32.0);
+    Bytes32[] result = new Bytes32[segments];
+    for (int i = 0; i < segments; i++) {
+      result[i] = Bytes32.rightPad(bytes.slice(i * 32, Math.min(32, bytes.size() - i * 32)));
+    }
+    return result;
+  }
+
+  /**
    *
    * Provides the number of bytes this value represents.
    * 
@@ -1467,6 +1483,21 @@ public interface Bytes extends Comparable<Bytes> {
     for (int i = 0; i < size; i++) {
       if (get(i) != 0) {
         return slice(i);
+      }
+    }
+    return Bytes.EMPTY;
+  }
+
+  /**
+   * Return a slice of representing the same value but without any trailing zero bytes.
+   *
+   * @return {@code value} if its right-most byte is non zero, or a slice that exclude any trailing zero bytes.
+   */
+  default Bytes trimTrailingZeros() {
+    int size = size();
+    for (int i = size - 1; i >= 0; i--) {
+      if (get(i) != 0) {
+        return slice(0, i + 1);
       }
     }
     return Bytes.EMPTY;

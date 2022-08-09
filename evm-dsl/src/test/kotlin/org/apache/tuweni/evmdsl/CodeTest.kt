@@ -158,4 +158,46 @@ class CodeTest {
 
     println(deployment.toBytes().toHexString())
   }
+
+  @Test
+  fun testGenerateCode() {
+    val code = Code.generate(10)
+    assertEquals(10, code.toBytes().size())
+  }
+
+  @Test
+  fun testGenerateCode100() {
+    val code100 = Code.generate(100)
+    assertEquals(100, code100.toBytes().size())
+  }
+
+  @Test
+  fun testGenerateCode1000() {
+    val code1000 = Code.generate(1000)
+    assertEquals(1000, code1000.toBytes().size())
+  }
+
+  @Test
+  fun testCodeGenerate1() {
+    val code = Code.generate(1)
+    assertEquals(1, code.toBytes().size())
+  }
+
+  @Test
+  fun testCodeGenerateMultipleOf34() {
+    val code = Code.generate(34 * 5)
+    assertEquals(34 * 5, code.toBytes().size())
+  }
+
+  @Test
+  fun testCodeGenerateMultipleOf34Plus2() {
+    val code = Code.generate(34 * 5 + 2)
+    assertEquals(34 * 5 + 2, code.toBytes().size())
+  }
+
+  @Test
+  fun testCodeGenerateMultipleOf34Plus1() {
+    val code = Code.generate(34 * 5 + 1)
+    assertEquals(34 * 5 + 1, code.toBytes().size())
+  }
 }
