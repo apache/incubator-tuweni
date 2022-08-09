@@ -169,14 +169,21 @@ object InstructionRegistry {
   }
 }
 
-class Push(val bytesToPush: Bytes) : Instruction {
+class Push(bytes: Bytes) : Instruction {
 
+  val bytesToPush: Bytes
   init {
-    if (bytesToPush.size() > 32) {
-      throw IllegalArgumentException("Push can push at most 32 bytes, ${bytesToPush.size()} provided")
+    if (bytes.size() > 32) {
+      throw IllegalArgumentException("Push can push at most 32 bytes, ${bytes.size()} provided")
     }
-    if (bytesToPush.isEmpty) {
+    if (bytes.isEmpty) {
       throw IllegalArgumentException("Push requires at least one byte")
+    }
+    val trimmedBytes = bytes.trimLeadingZeros()
+    bytesToPush = if (trimmedBytes.isEmpty) {
+      Bytes.fromHexString("0x00")
+    } else {
+      trimmedBytes
     }
   }
 

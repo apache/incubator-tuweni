@@ -664,4 +664,37 @@ class BytesTest extends CommonBytesTests {
     ByteBuf buffer = Unpooled.buffer(20).writeByte(3);
     assertEquals(1, Bytes.wrapByteBuf(buffer, 0, buffer.readableBytes()).size());
   }
+
+  @Test
+  void segmentBytes() {
+    Bytes b = Bytes
+        .wrap(
+            Bytes32.ZERO,
+            Bytes32.random(),
+            Bytes32.rightPad(Bytes.fromHexStringLenient("0x1")),
+            Bytes.fromHexString("0xf000"));
+    Bytes32[] result = Bytes.segment(b);
+    assertEquals(4, result.length);
+    assertEquals(Bytes32.rightPad(Bytes.fromHexString("0xf000")), result[3]);
+  }
+
+  @Test
+  void segments() {
+    Bytes value = Bytes.fromHexString("0x7b600035f660115760006000526001601ff35b60016000526001601ff3600052601c6000f3");
+    Bytes32[] result = Bytes.segment(value);
+    assertEquals(Bytes.fromHexString("0x7b600035f660115760006000526001601ff35b60016000526001601ff3600052"), result[0]);
+    assertEquals(Bytes.fromHexString("0x601c6000f3000000000000000000000000000000000000000000000000000000"), result[1]);
+  }
+
+  @Test
+  void testTrimLeadingZeros() {
+    Bytes b = Bytes.fromHexString("0x000000f300567800");
+    assertEquals(Bytes.fromHexString("0xf300567800"), b.trimLeadingZeros());
+  }
+
+  @Test
+  void testTrimTrailingZeros() {
+    Bytes b = Bytes.fromHexString("0x000000f300567800");
+    assertEquals(Bytes.fromHexString("0x000000f3005678"), b.trimTrailingZeros());
+  }
 }

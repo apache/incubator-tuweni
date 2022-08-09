@@ -17,6 +17,7 @@
 package org.apache.tuweni.evmdsl
 
 import org.apache.tuweni.bytes.Bytes
+import org.apache.tuweni.bytes.Bytes32
 
 /**
  * EVM code represented as a set of domain-specific instructions.
@@ -28,6 +29,9 @@ import org.apache.tuweni.bytes.Bytes
 class Code(val instructions: List<Instruction>) {
 
   companion object {
+    /**
+     * Reads the bytecode of code and interprets instructions into opcodes.
+     */
     fun read(codeBytes: Bytes): Code {
       return Code(
         buildList {
@@ -44,6 +48,29 @@ class Code(val instructions: List<Instruction>) {
           }
         }
       )
+    }
+
+    /**
+     * Generates a simple bytecode to be of exactly a given size
+     */
+    fun generate(size: Int): Code {
+      val words32 = size.floorDiv(34)
+      val remainder = size.rem(34)
+      val list = mutableListOf<Instruction>()
+      for (i in 0 until words32) {
+        list.add(Push(Bytes32.rightPad(Bytes.fromHexString("0x0b4dc0ff33"))))
+        list.add(Pop)
+      }
+      if (remainder > 2) {
+        list.add(Push(Bytes.wrap(Bytes.repeat(1.toByte(), remainder - 2))))
+      }
+      if (remainder == 2) {
+        list.add(Origin)
+      }
+      if (remainder > 0) {
+        list.add(Return)
+      }
+      return Code(list)
     }
   }
 
