@@ -129,6 +129,10 @@ class EthController(
       return
     }
     val hashes = request.data as List<*>
+    if (hashes.size != bodies.size) {
+      logger.warn("Block bodies size ${bodies.size} does not match the block header hashes size ${hashes.size}")
+      return
+    }
     for (i in 0 until hashes.size) {
       repository.storeBlockBody(hashes[i] as Hash, bodies[i])
     }

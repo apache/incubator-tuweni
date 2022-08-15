@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory
 /**
  * Client of the ETH subprotocol, allowing to request block and node data
  */
-class EthClient66(
+open class EthClient66(
   private val service: RLPxService,
   private val pendingTransactionsPool: TransactionPool,
   private val connectionSelectionStrategy: ConnectionSelectionStrategy,
