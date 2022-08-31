@@ -16,7 +16,6 @@
  */
 package org.apache.tuweni.stratum.server
 
-import com.google.common.base.Splitter
 import io.vertx.core.buffer.Buffer
 import org.slf4j.LoggerFactory
 import java.nio.charset.StandardCharsets
@@ -42,7 +41,6 @@ class StratumConnection(
 
   fun handleBuffer(buffer: Buffer) {
     logger.trace("Buffer received {}", buffer)
-    val splitter: Splitter = Splitter.on('\n')
     var firstMessage = false
     val messagesString: String
     messagesString = try {
@@ -52,7 +50,7 @@ class StratumConnection(
       closeHandle(true)
       return
     }
-    val messages: Iterator<String> = splitter.split(messagesString).iterator()
+    val messages: Iterator<String> = messagesString.split('\n').iterator()
     while (messages.hasNext()) {
       var message = messages.next()
       if (!firstMessage) {

@@ -20,9 +20,8 @@ import org.apache.tuweni.rlp.RLPWriter;
 
 import java.util.List;
 import java.util.Objects;
-import javax.annotation.Nullable;
 
-import com.google.common.base.MoreObjects;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A transaction receipt, containing information pertaining a transaction execution.
@@ -219,13 +218,17 @@ public final class TransactionReceipt {
 
   @Override
   public String toString() {
-    return MoreObjects
-        .toStringHelper(this)
-        .add("stateRoot", stateRoot)
-        .add("cumulativeGasUsed", cumulativeGasUsed)
-        .add("logs", logs)
-        .add("bloomFilter", bloomFilter)
-        .add("status", status)
-        .toString();
+    return "TransactionReceipt{"
+        + "stateRoot="
+        + stateRoot
+        + ", cumulativeGasUsed="
+        + cumulativeGasUsed
+        + ", logs="
+        + logs
+        + ", bloomFilter="
+        + bloomFilter
+        + ", status="
+        + status
+        + '}';
   }
 }

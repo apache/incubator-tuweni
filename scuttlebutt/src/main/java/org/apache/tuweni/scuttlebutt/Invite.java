@@ -15,9 +15,8 @@ package org.apache.tuweni.scuttlebutt;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.crypto.sodium.Signature;
 
+import java.util.Arrays;
 import java.util.List;
-
-import com.google.common.base.Splitter;
 
 /**
  * An invite code as defined by the Secure Scuttlebutt protocol guide.
@@ -114,7 +113,7 @@ public final class Invite {
   public static Invite fromCanonicalForm(String inviteCode) {
     String exceptionMessage = "Invite code should be of format host:port:publicKey.curveName~secretKey";
 
-    List<String> parts = Splitter.on(':').splitToList(inviteCode);
+    List<String> parts = Arrays.asList(inviteCode.split(":", -1));
 
     if (parts.size() != 3) {
       throw new MalformedInviteCodeException(exceptionMessage);
@@ -124,14 +123,14 @@ public final class Invite {
     String portString = parts.get(1);
     int port = toPort(portString);
 
-    List<String> keyAndSecret = Splitter.on('~').splitToList(parts.get(2));
+    List<String> keyAndSecret = Arrays.asList(parts.get(2).split("~", -1));
 
     if (keyAndSecret.size() != 2) {
       throw new MalformedInviteCodeException(exceptionMessage);
     }
 
     String fullKey = keyAndSecret.get(0);
-    List<String> splitKey = Splitter.on('.').splitToList(fullKey);
+    List<String> splitKey = Arrays.asList(fullKey.split("\\.", -1));
 
     if (splitKey.size() != 2) {
       throw new MalformedInviteCodeException(exceptionMessage);

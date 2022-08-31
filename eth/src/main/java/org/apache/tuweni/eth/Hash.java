@@ -12,7 +12,6 @@
  */
 package org.apache.tuweni.eth;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 import static org.apache.tuweni.crypto.Hash.keccak256;
 
@@ -37,7 +36,9 @@ public final class Hash extends DelegatingBytes32 {
    */
   public static Hash fromBytes(Bytes bytes) {
     requireNonNull(bytes);
-    checkArgument(bytes.size() == SIZE, "Expected %s bytes but got %s", SIZE, bytes.size());
+    if (bytes.size() != SIZE) {
+      throw new IllegalArgumentException(String.format("Expected %s bytes but got %s", SIZE, bytes.size()));
+    }
     return new Hash(Bytes32.wrap(bytes));
   }
 

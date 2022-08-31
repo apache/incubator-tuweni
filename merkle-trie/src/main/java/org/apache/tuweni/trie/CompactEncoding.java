@@ -12,8 +12,6 @@
  */
 package org.apache.tuweni.trie;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.MutableBytes;
 
@@ -98,9 +96,13 @@ public final class CompactEncoding {
    */
   public static Bytes decode(Bytes encoded) {
     int size = encoded.size();
-    checkArgument(size > 0);
+    if (size == 0) {
+      throw new IllegalArgumentException("empty encoded");
+    }
     byte magic = encoded.get(0);
-    checkArgument((magic & 0xc0) == 0, "Invalid compact encoding");
+    if ((magic & 0xc0) != 0) {
+      throw new IllegalArgumentException("Invalid compact encoding");
+    }
 
     boolean isLeaf = (magic & 0x20) != 0;
 

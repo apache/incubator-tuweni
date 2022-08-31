@@ -12,8 +12,6 @@
  */
 package org.apache.tuweni.crypto.sodium;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import org.apache.tuweni.bytes.Bytes;
 
 import javax.security.auth.Destroyable;
@@ -154,7 +152,9 @@ public final class HMACSHA256 {
    * @return the authenticator of the message
    */
   public static byte[] authenticate(byte[] message, Key key) {
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalArgumentException("Key has been destroyed");
+    } ;
     long authBytes = Sodium.crypto_auth_hmacsha256_bytes();
     if (authBytes > Integer.MAX_VALUE) {
       throw new SodiumException("crypto_auth_hmacsha256_bytes: " + authBytes + " is too large");
@@ -188,7 +188,9 @@ public final class HMACSHA256 {
    * @return true if the authenticator verifies the message according to the secret, false otherwise
    */
   public static boolean verify(byte[] authenticator, byte[] in, Key key) {
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalArgumentException("Key has been destroyed");
+    } ;
     if (authenticator.length != Sodium.crypto_auth_hmacsha256_bytes()) {
       throw new IllegalArgumentException(
           "Expected authenticator of "

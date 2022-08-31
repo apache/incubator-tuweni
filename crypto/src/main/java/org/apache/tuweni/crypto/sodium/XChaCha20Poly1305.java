@@ -12,17 +12,14 @@
  */
 package org.apache.tuweni.crypto.sodium;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
-
 import org.apache.tuweni.bytes.Bytes;
 
-import javax.annotation.Nullable;
 import javax.security.auth.Destroyable;
 
 import jnr.ffi.Pointer;
 import jnr.ffi.byref.ByteByReference;
 import jnr.ffi.byref.LongLongByReference;
+import org.jetbrains.annotations.Nullable;
 
 // Documentation copied under the ISC License, from
 // https://github.com/jedisct1/libsodium-doc/blob/424b7480562c2e063bc8c52c452ef891621c8480/secret-key_cryptography/xchacha20-poly1305_construction.md
@@ -409,7 +406,9 @@ public final class XChaCha20Poly1305 {
    */
   public static byte[] encrypt(byte[] message, byte[] data, Key key, Nonce nonce) {
     assertAvailable();
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalArgumentException("Key has been destroyed");
+    }
     byte[] cipherText = new byte[maxCypherTextLength(message)];
 
     LongLongByReference cipherTextLen = new LongLongByReference();
@@ -488,7 +487,9 @@ public final class XChaCha20Poly1305 {
    */
   public static DetachedEncryptionResult encryptDetached(byte[] message, byte[] data, Key key, Nonce nonce) {
     assertAvailable();
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalArgumentException("Key has been destroyed");
+    }
     byte[] cipherText = new byte[message.length];
     long abytes = Sodium.crypto_aead_xchacha20poly1305_ietf_abytes();
     if (abytes > Integer.MAX_VALUE) {
@@ -528,7 +529,9 @@ public final class XChaCha20Poly1305 {
     private boolean complete = false;
 
     private SSEncrypt(Key key) {
-      checkArgument(!key.isDestroyed(), "Key has been destroyed");
+      if (key.isDestroyed()) {
+        throw new IllegalArgumentException("Key has been destroyed");
+      }
       long abytes = Sodium.crypto_secretstream_xchacha20poly1305_abytes();
       if (abytes > Integer.MAX_VALUE) {
         throw new IllegalStateException("crypto_aead_xchacha20poly1305_ietf_abytes: " + abytes + " is too large");
@@ -581,8 +584,12 @@ public final class XChaCha20Poly1305 {
 
     @Override
     public byte[] push(byte[] clearText, boolean isFinal) {
-      checkState(!complete, "stream already completed");
-      checkState(state != null, "stream has been destroyed");
+      if (complete) {
+        throw new IllegalStateException("stream already completed");
+      }
+      if (state == null) {
+        throw new IllegalStateException("stream has been destroyed");
+      }
       byte[] cipherText = new byte[abytes + clearText.length];
       byte tag = isFinal ? TAG_FINAL : 0;
       int rc = Sodium
@@ -674,7 +681,9 @@ public final class XChaCha20Poly1305 {
   @Nullable
   public static byte[] decrypt(byte[] cipherText, byte[] data, Key key, Nonce nonce) {
     assertAvailable();
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalArgumentException("Key has been destroyed");
+    }
     byte[] clearText = new byte[maxClearTextLength(cipherText)];
 
     LongLongByReference clearTextLen = new LongLongByReference();
@@ -768,7 +777,9 @@ public final class XChaCha20Poly1305 {
   @Nullable
   public static byte[] decryptDetached(byte[] cipherText, byte[] mac, byte[] data, Key key, Nonce nonce) {
     assertAvailable();
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalArgumentException("Key has been destroyed");
+    }
     long abytes = Sodium.crypto_aead_xchacha20poly1305_ietf_abytes();
     if (abytes > Integer.MAX_VALUE) {
       throw new IllegalStateException("crypto_aead_xchacha20poly1305_ietf_abytes: " + abytes + " is too large");
@@ -806,7 +817,9 @@ public final class XChaCha20Poly1305 {
     private boolean complete = false;
 
     private SSDecrypt(Key key, byte[] header) {
-      checkArgument(!key.isDestroyed(), "Key has been destroyed");
+      if (key.isDestroyed()) {
+        throw new IllegalArgumentException("Key has been destroyed");
+      }
       if (header.length != Sodium.crypto_secretstream_xchacha20poly1305_headerbytes()) {
         throw new IllegalArgumentException(
             "header must be "
@@ -855,8 +868,12 @@ public final class XChaCha20Poly1305 {
 
     @Override
     public byte[] pull(byte[] cipherText) {
-      checkState(!complete, "stream already completed");
-      checkState(state != null, "stream has been destroyed");
+      if (complete) {
+        throw new IllegalStateException("stream already completed");
+      }
+      if (state == null) {
+        throw new IllegalStateException("stream has been destroyed");
+      }
       if (abytes > cipherText.length) {
         throw new IllegalArgumentException("cipherText is too short");
       }

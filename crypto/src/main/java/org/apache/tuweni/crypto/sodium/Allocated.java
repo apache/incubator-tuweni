@@ -12,14 +12,12 @@
  */
 package org.apache.tuweni.crypto.sodium;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import org.apache.tuweni.bytes.Bytes;
 
-import javax.annotation.Nullable;
 import javax.security.auth.Destroyable;
 
 import jnr.ffi.Pointer;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Allocated objects track allocation of memory using Sodium.
@@ -108,7 +106,9 @@ public final class Allocated implements Destroyable {
    * @return The bytes of this key.
    */
   public byte[] bytesArray() {
-    checkState(!isDestroyed(), "allocated value has been destroyed");
+    if (isDestroyed()) {
+      throw new IllegalStateException("allocated value has been destroyed");
+    }
     return Sodium.reify(ptr, length);
   }
 
@@ -126,14 +126,20 @@ public final class Allocated implements Destroyable {
       return false;
     }
     Allocated other = (Allocated) obj;
-    checkState(!isDestroyed(), "allocated value has been destroyed");
-    checkState(!other.isDestroyed(), "allocated value has been destroyed");
+    if (isDestroyed()) {
+      throw new IllegalStateException("allocated value has been destroyed");
+    }
+    if (other.isDestroyed()) {
+      throw new IllegalStateException("allocated value has been destroyed");
+    }
     return Sodium.sodium_memcmp(this.ptr, other.ptr, length) == 0;
   }
 
   @Override
   public int hashCode() {
-    checkState(!isDestroyed(), "allocated value has been destroyed");
+    if (isDestroyed()) {
+      throw new IllegalStateException("allocated value has been destroyed");
+    }
     return Sodium.hashCode(ptr, length);
   }
 }

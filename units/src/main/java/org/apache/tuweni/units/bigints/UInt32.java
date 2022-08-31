@@ -12,8 +12,6 @@
  */
 package org.apache.tuweni.units.bigints;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import org.apache.tuweni.bytes.Bytes;
 
 import java.math.BigInteger;
@@ -69,7 +67,9 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * @throws IllegalArgumentException If the value is negative.
    */
   public static UInt32 valueOf(int value) {
-    checkArgument(value >= 0, "Argument must be positive");
+    if (value < 0) {
+      throw new IllegalArgumentException("Argument must be positive");
+    }
     return create(value);
   }
 
@@ -81,8 +81,12 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * @throws IllegalArgumentException if the value is negative or too large to be represented as a UInt32
    */
   public static UInt32 valueOf(BigInteger value) {
-    checkArgument(value.bitLength() <= 32, "Argument is too large to represent a UInt32");
-    checkArgument(value.signum() > 0, "Argument must be positive");
+    if (value.bitLength() > 32) {
+      throw new IllegalArgumentException("Argument is too large to represent a UInt32");
+    }
+    if (value.signum() < 0) {
+      throw new IllegalArgumentException("Argument must be positive");
+    }
     return create(value.toByteArray());
   }
 
@@ -105,7 +109,9 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * @throws IllegalArgumentException if {@code bytes.size() > 4}.
    */
   public static UInt32 fromBytes(Bytes bytes, ByteOrder byteOrder) {
-    checkArgument(bytes.size() <= 4, "Argument is greater than 4 bytes");
+    if (bytes.size() > 4) {
+      throw new IllegalArgumentException("Argument is greater than 4 bytes");
+    }
     return create(byteOrder == ByteOrder.LITTLE_ENDIAN ? bytes.reverse() : bytes);
   }
 
@@ -388,7 +394,9 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * @throws IllegalArgumentException if more than 8 bytes are supplied
    */
   public UInt32 and(Bytes bytes) {
-    checkArgument(bytes.size() <= 4, "and with more than 4 bytes");
+    if (bytes.size() > 4) {
+      throw new IllegalArgumentException("and with more than 4 bytes");
+    }
     if (this.isZero()) {
       return ZERO;
     }
@@ -417,7 +425,9 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * @throws IllegalArgumentException if more than 8 bytes are supplied
    */
   public UInt32 or(Bytes bytes) {
-    checkArgument(bytes.size() <= 4, "or with more than 4 bytes");
+    if (bytes.size() > 4) {
+      throw new IllegalArgumentException("or with more than 4 bytes");
+    }
     return create(this.value.or(bytes));
   }
 
@@ -456,7 +466,9 @@ public final class UInt32 implements UInt32Value<UInt32> {
    * @throws IllegalArgumentException if more than 8 bytes are supplied
    */
   public UInt32 xor(Bytes bytes) {
-    checkArgument(bytes.size() <= 4, "xor with more than 4 bytes");
+    if (bytes.size() > 4) {
+      throw new IllegalArgumentException("xor with more than 4 bytes");
+    }
     return create(this.value.xor(bytes).toArrayUnsafe());
   }
 

@@ -17,6 +17,7 @@ import static org.apache.tuweni.config.Configuration.canonicalKey;
 import org.apache.tuweni.toml.Toml;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -25,23 +26,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-
 final class TomlSerializer {
 
-  private static final Splitter LINE_SPLITTER = Splitter.onPattern("\\r?\\n");
+  private static final String LINE_SPLITTER = "\\r?\\n";
 
   private final Configuration configuration;
   private final Schema schema;
   // tableKey -> configKey
-  private final ListMultimap<String, String> tableMap;
+  private final Map<String, List<String>> tableMap;
   // configKey -> leafName
   private final Map<String, String> keyMap;
 
   TomlSerializer(Configuration configuration, Schema schema) {
-    ListMultimap<String, String> tableMap = ArrayListMultimap.create();
+    Map<String, List<String>> tableMap = new HashMap<>();
     Map<String, String> keyMap = new HashMap<>();
 
     configuration.keySet().forEach(configKey -> {
@@ -52,7 +49,12 @@ final class TomlSerializer {
         throw new IllegalStateException("Configuration key '" + configKey + "' is not valid in TOML");
       }
       String tableKey = Toml.joinKeyPath(keyPath.subList(0, keyPath.size() - 1));
-      tableMap.put(tableKey, configKey);
+      List<String> keys = tableMap.get(tableKey);
+      if (keys == null) {
+        keys = new ArrayList<>();
+        tableMap.put(tableKey, keys);
+      }
+      keys.add(configKey);
       keyMap.put(configKey, keyPath.get(keyPath.size() - 1));
     });
 
@@ -173,7 +175,8 @@ final class TomlSerializer {
     if (description == null) {
       return;
     }
-    for (String line : LINE_SPLITTER.split(description)) {
+
+    for (String line : description.split(LINE_SPLITTER, -1)) {
       appendable.append("## ");
       appendable.append(line);
       appendable.append(System.lineSeparator());

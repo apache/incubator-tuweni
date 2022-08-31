@@ -13,8 +13,6 @@
 package org.apache.tuweni.crypto.sodium;
 
 
-import javax.annotation.Nullable;
-
 import jnr.ffi.Pointer;
 import jnr.ffi.annotations.In;
 import jnr.ffi.annotations.Out;
@@ -24,6 +22,7 @@ import jnr.ffi.types.ssize_t;
 import jnr.ffi.types.u_int32_t;
 import jnr.ffi.types.u_int64_t;
 import jnr.ffi.types.u_int8_t;
+import org.jetbrains.annotations.Nullable;
 
 // Generated with https://gist.github.com/cleishm/39fbad03378f5e1ad82521ad821cd065, then modified
 public interface LibSodium {

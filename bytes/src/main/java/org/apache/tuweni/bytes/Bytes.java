@@ -12,11 +12,11 @@
  */
 package org.apache.tuweni.bytes;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkElementIndex;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static java.nio.ByteOrder.BIG_ENDIAN;
+import static org.apache.tuweni.bytes.Checks.checkArgument;
+import static org.apache.tuweni.bytes.Checks.checkElementIndex;
+import static org.apache.tuweni.bytes.Checks.checkNotNull;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

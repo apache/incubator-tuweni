@@ -17,13 +17,13 @@ import static java.util.Objects.requireNonNull;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.BiFunction;
-import javax.annotation.Nullable;
 
 import jnr.ffi.LibraryLoader;
 import jnr.ffi.Platform;
 import jnr.ffi.Pointer;
 import jnr.ffi.byref.ByteByReference;
 import jnr.ffi.byref.LongLongByReference;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Access to the sodium native library.

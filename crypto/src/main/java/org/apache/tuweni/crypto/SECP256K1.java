@@ -17,9 +17,6 @@
  */
 package org.apache.tuweni.crypto;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static java.nio.file.StandardOpenOption.READ;
 import static org.apache.tuweni.crypto.Hash.keccak256;
 import static org.apache.tuweni.crypto.SECP256K1.Parameters.CURVE;
@@ -45,11 +42,10 @@ import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Arrays;
-import javax.annotation.Nullable;
+import java.util.Objects;
 import javax.crypto.Cipher;
 import javax.security.auth.Destroyable;
 
-import com.google.common.base.Objects;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.asn1.x9.X9IntegerConverter;
@@ -72,6 +68,7 @@ import org.bouncycastle.math.ec.ECAlgorithms;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.math.ec.FixedPointCombMultiplier;
 import org.bouncycastle.math.ec.custom.sec.SecP256K1Curve;
+import org.jetbrains.annotations.Nullable;
 
 /*
  * Adapted from the BitcoinJ ECKey (Apache 2 License) implementation:
@@ -417,8 +414,12 @@ public final class SECP256K1 {
    * @return shared secret as 32 bytes
    */
   public static Bytes32 calculateKeyAgreement(SecretKey privKey, PublicKey theirPubKey) {
-    checkArgument(privKey != null, "missing private key");
-    checkArgument(theirPubKey != null, "missing remote public key");
+    if (privKey == null) {
+      throw new IllegalArgumentException("missing private key");
+    }
+    if (theirPubKey == null) {
+      throw new IllegalArgumentException("missing remote public key");
+    }
 
     ECPrivateKeyParameters privKeyP =
         new ECPrivateKeyParameters(privKey.bytes().toUnsignedBigInteger(), Parameters.CURVE);
@@ -464,7 +465,9 @@ public final class SECP256K1 {
      * @throws IllegalArgumentException If the integer would overflow 32 bytes.
      */
     public static SecretKey fromInteger(BigInteger key) {
-      checkNotNull(key);
+      if (key == null) {
+        throw new IllegalArgumentException("key cannot be null");
+      }
       byte[] bytes = key.toByteArray();
       int offset = 0;
       while (bytes[offset] == 0) {
@@ -525,7 +528,9 @@ public final class SECP256K1 {
     }
 
     private SecretKey(Bytes32 bytes) {
-      checkNotNull(bytes);
+      if (bytes == null) {
+        throw new IllegalArgumentException("bytes cannot be null");
+      }
       this.keyBytes = bytes;
     }
 
@@ -536,7 +541,9 @@ public final class SECP256K1 {
      * @throws IOException On a filesystem error.
      */
     public void store(Path file) throws IOException {
-      checkState(keyBytes != null, "SecretKey has been destroyed");
+      if (keyBytes == null) {
+        throw new IllegalArgumentException("SecretKey has been destroyed");
+      }
       // use buffers for all secret key data transfer, so they can be overwritten on completion
       byte[] bytes = new byte[64];
       CharBuffer hexChars = keyBytes.appendHexTo(CharBuffer.allocate(64));
@@ -557,14 +564,18 @@ public final class SECP256K1 {
       if (!(obj instanceof SecretKey)) {
         return false;
       }
-      checkState(keyBytes != null, "SecretKey has been destroyed");
+      if (keyBytes == null) {
+        throw new IllegalArgumentException("SecretKey has been destroyed");
+      }
       SecretKey other = (SecretKey) obj;
       return this.keyBytes.equals(other.keyBytes);
     }
 
     @Override
     public int hashCode() {
-      checkState(keyBytes != null, "SecretKey has been destroyed");
+      if (keyBytes == null) {
+        throw new IllegalArgumentException("SecretKey has been destroyed");
+      }
       return keyBytes.hashCode();
     }
 
@@ -573,7 +584,9 @@ public final class SECP256K1 {
      * @return The bytes of the key.
      */
     public Bytes32 bytes() {
-      checkState(keyBytes != null, "SecretKey has been destroyed");
+      if (keyBytes == null) {
+        throw new IllegalArgumentException("SecretKey has been destroyed");
+      }
       return keyBytes;
     }
 
@@ -582,7 +595,9 @@ public final class SECP256K1 {
      * @return The bytes of the key.
      */
     public byte[] bytesArray() {
-      checkState(keyBytes != null, "SecretKey has been destroyed");
+      if (keyBytes == null) {
+        throw new IllegalArgumentException("SecretKey has been destroyed");
+      }
       return keyBytes.toArrayUnsafe();
     }
   }
@@ -636,7 +651,9 @@ public final class SECP256K1 {
      * @return The associated public key.
      */
     public static PublicKey fromInteger(BigInteger privateKey) {
-      checkNotNull(privateKey);
+      if (privateKey == null) {
+        throw new IllegalArgumentException("privateKey cannot be null");
+      }
       return fromBytes(toBytes64(privateKey.toByteArray()));
     }
 
@@ -710,8 +727,12 @@ public final class SECP256K1 {
     }
 
     private PublicKey(Bytes bytes) {
-      checkNotNull(bytes);
-      checkArgument(bytes.size() == BYTE_LENGTH, "Key must be %s bytes long, got %s", BYTE_LENGTH, bytes.size());
+      if (bytes == null) {
+        throw new IllegalArgumentException("bytes cannot be null");
+      }
+      if (bytes.size() != BYTE_LENGTH) {
+        throw new IllegalArgumentException(String.format("Key must be %s bytes long, got %s", BYTE_LENGTH, bytes.size()));
+      }
       this.keyBytes = bytes;
     }
 
@@ -837,15 +858,19 @@ public final class SECP256K1 {
     }
 
     private KeyPair(SecretKey secretKey, PublicKey publicKey) {
-      checkNotNull(secretKey);
-      checkNotNull(publicKey);
+      if (secretKey == null) {
+        throw new IllegalArgumentException("secretKey cannot be null");
+      }
+      if (publicKey == null) {
+        throw new IllegalArgumentException("publicKey cannot be null");
+      }
       this.secretKey = secretKey;
       this.publicKey = publicKey;
     }
 
     @Override
     public int hashCode() {
-      return Objects.hashCode(secretKey, publicKey);
+      return Objects.hash(secretKey, publicKey);
     }
 
     @Override
@@ -907,8 +932,12 @@ public final class SECP256K1 {
      * @return The signature.
      */
     public static Signature fromBytes(Bytes bytes) {
-      checkNotNull(bytes);
-      checkArgument(bytes.size() == 65, "Signature must be 65 bytes, but got %s instead", bytes.size());
+      if (bytes == null) {
+        throw new IllegalArgumentException("bytes cannot be null");
+      }
+      if (bytes.size() != 65) {
+        throw new IllegalArgumentException(String.format("Signature must be 65 bytes, but got %s instead", bytes.size()));
+      }
       BigInteger r = bytes.slice(0, 32).toUnsignedBigInteger();
       BigInteger s = bytes.slice(32, 32).toUnsignedBigInteger();
       return new Signature(bytes.get(64), r, s);
@@ -928,19 +957,25 @@ public final class SECP256K1 {
     }
 
     Signature(byte v, BigInteger r, BigInteger s) {
-      checkArgument(v == 0 || v == 1, "Invalid v-value, should be 0 or 1, got %s", v);
-      checkNotNull(r);
-      checkNotNull(s);
-      checkArgument(
-          r.compareTo(BigInteger.ONE) >= 0 && r.compareTo(Parameters.CURVE_ORDER) < 0,
-          "Invalid r-value, should be >= 1 and < %s, got %s",
-          Parameters.CURVE_ORDER,
-          r);
-      checkArgument(
-          s.compareTo(BigInteger.ONE) >= 0 && s.compareTo(Parameters.CURVE_ORDER) < 0,
-          "Invalid s-value, should be >= 1 and < %s, got %s",
-          Parameters.CURVE_ORDER,
-          s);
+      if (v != 0 && v != 1) {
+        throw new IllegalArgumentException(String.format("Invalid v-value, should be 0 or 1, got %s", v));
+      }
+      if (r == null) {
+        throw new IllegalArgumentException("r cannot be null");
+      }
+      if (s == null) {
+        throw new IllegalArgumentException("s cannot be null");
+      }
+      if (r.compareTo(BigInteger.ONE) < 0 || r.compareTo(Parameters.CURVE_ORDER) > 0) {
+        throw new IllegalArgumentException(String.format("Invalid r-value, should be >= 1 and < %s, got %s",
+                Parameters.CURVE_ORDER,
+                r));
+      }
+      if (s.compareTo(BigInteger.ONE) < 0 || s.compareTo(Parameters.CURVE_ORDER) > 0) {
+        throw new IllegalArgumentException(String.format("Invalid s-value, should be >= 1 and < %s, got %s",
+                Parameters.CURVE_ORDER,
+                s));
+      }
       this.v = v;
       this.r = r;
       this.s = s;
@@ -1007,7 +1042,7 @@ public final class SECP256K1 {
 
     @Override
     public int hashCode() {
-      return Objects.hashCode(r, s, v);
+      return Objects.hash(r, s, v);
     }
 
     @Override

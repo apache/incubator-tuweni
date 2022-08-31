@@ -12,17 +12,16 @@
  */
 package org.apache.tuweni.crypto.sodium;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import org.apache.tuweni.bytes.Bytes;
 
 import java.util.Arrays;
-import javax.annotation.Nullable;
 import javax.security.auth.Destroyable;
 
 import jnr.ffi.Pointer;
 import jnr.ffi.byref.LongLongByReference;
+import org.jetbrains.annotations.Nullable;
 
 // Documentation copied under the ISC License, from
 // https://github.com/jedisct1/libsodium-doc/blob/424b7480562c2e063bc8c52c452ef891621c8480/secret-key_cryptography/aes-256-gcm.md
@@ -338,7 +337,9 @@ public final class AES256GCM implements AutoCloseable {
   private Pointer ctx;
 
   private AES256GCM(Key key) {
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalArgumentException("Key has been destroyed");
+    }
     ctx = Sodium.malloc(Sodium.crypto_aead_aes256gcm_statebytes());
     try {
       int rc = Sodium.crypto_aead_aes256gcm_beforenm(ctx, key.value.pointer());
@@ -418,7 +419,9 @@ public final class AES256GCM implements AutoCloseable {
    */
   public static byte[] encrypt(byte[] message, byte[] data, Key key, Nonce nonce) {
     assertAvailable();
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalArgumentException("Key has been destroyed");
+    }
 
     byte[] cipherText = new byte[maxCombinedCypherTextLength(message)];
 
@@ -564,7 +567,9 @@ public final class AES256GCM implements AutoCloseable {
    */
   public static DetachedEncryptionResult encryptDetached(byte[] message, byte[] data, Key key, Nonce nonce) {
     assertAvailable();
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalArgumentException("Key has been destroyed");
+    }
 
     byte[] cipherText = new byte[message.length];
     long abytes = Sodium.crypto_aead_aes256gcm_abytes();
@@ -724,7 +729,9 @@ public final class AES256GCM implements AutoCloseable {
   @Nullable
   public static byte[] decrypt(byte[] cipherText, byte[] data, Key key, Nonce nonce) {
     assertAvailable();
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalArgumentException("Key has been destroyed");
+    }
 
     byte[] clearText = new byte[maxClearTextLength(cipherText)];
 
@@ -895,7 +902,9 @@ public final class AES256GCM implements AutoCloseable {
   @Nullable
   public static byte[] decryptDetached(byte[] cipherText, byte[] mac, byte[] data, Key key, Nonce nonce) {
     assertAvailable();
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalArgumentException("Key has been destroyed");
+    }
 
     long abytes = Sodium.crypto_aead_aes256gcm_abytes();
     if (abytes > Integer.MAX_VALUE) {

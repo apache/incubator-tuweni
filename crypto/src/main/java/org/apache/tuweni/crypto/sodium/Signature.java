@@ -15,8 +15,6 @@ package org.apache.tuweni.crypto.sodium;
 // Documentation copied under the ISC License, from
 // https://github.com/jedisct1/libsodium-doc/blob/424b7480562c2e063bc8c52c452ef891621c8480/public-key_cryptography/public-key_signatures.md
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import org.apache.tuweni.bytes.Bytes;
 
 import java.util.Arrays;
@@ -405,7 +403,9 @@ public final class Signature {
      * @return A {@link KeyPair}.
      */
     public static KeyPair forSecretKey(SecretKey secretKey) {
-      checkArgument(!secretKey.value.isDestroyed(), "SecretKey has been destroyed");
+      if (secretKey.value.isDestroyed()) {
+        throw new IllegalStateException("SecretKey has been destroyed");
+      }
       int publicKeyLength = PublicKey.length();
       Pointer publicKey = Sodium.malloc(publicKeyLength);
       try {
@@ -546,7 +546,9 @@ public final class Signature {
    * @return The signature of the message.
    */
   public static Allocated signDetached(Allocated message, SecretKey secretKey) {
-    checkArgument(!secretKey.value.isDestroyed(), "SecretKey has been destroyed");
+    if (secretKey.value.isDestroyed()) {
+      throw new IllegalStateException("SecretKey has been destroyed");
+    }
     Allocated signature = Allocated.allocate(Sodium.crypto_sign_bytes());
     int rc = Sodium
         .crypto_sign_detached(
@@ -570,7 +572,9 @@ public final class Signature {
    * @return The signature of the message.
    */
   public static byte[] signDetached(byte[] message, SecretKey secretKey) {
-    checkArgument(!secretKey.value.isDestroyed(), "SecretKey has been destroyed");
+    if (secretKey.value.isDestroyed()) {
+      throw new IllegalStateException("SecretKey has been destroyed");
+    }
     byte[] signature = new byte[(int) Sodium.crypto_sign_bytes()];
     int rc = Sodium.crypto_sign_detached(signature, null, message, message.length, secretKey.value.pointer());
     if (rc != 0) {
@@ -656,7 +660,9 @@ public final class Signature {
    * @return The signature prepended to the message
    */
   public static byte[] sign(byte[] message, SecretKey secretKey) {
-    checkArgument(!secretKey.value.isDestroyed(), "SecretKey has been destroyed");
+    if (secretKey.value.isDestroyed()) {
+      throw new IllegalStateException("SecretKey has been destroyed");
+    }
     byte[] signature = new byte[(int) Sodium.crypto_sign_bytes() + message.length];
     int rc = Sodium.crypto_sign(signature, null, message, message.length, secretKey.value.pointer());
     if (rc != 0) {

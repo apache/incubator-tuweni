@@ -21,7 +21,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
+
+import org.jetbrains.annotations.Nullable;
 
 final class EmptyConfiguration implements Configuration {
 

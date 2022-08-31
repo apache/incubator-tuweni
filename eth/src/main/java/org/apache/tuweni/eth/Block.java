@@ -20,7 +20,7 @@ import org.apache.tuweni.rlp.RLPException;
 import org.apache.tuweni.rlp.RLPReader;
 import org.apache.tuweni.rlp.RLPWriter;
 
-import com.google.common.base.Objects;
+import java.util.Objects;
 
 /**
  * An Ethereum block.
@@ -106,12 +106,12 @@ public final class Block {
       return false;
     }
     Block other = (Block) obj;
-    return Objects.equal(header, other.header) && Objects.equal(body, other.body);
+    return Objects.equals(header, other.header) && Objects.equals(body, other.body);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(header, body);
+    return Objects.hash(header, body);
   }
 
   @Override

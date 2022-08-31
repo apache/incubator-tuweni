@@ -12,7 +12,6 @@
  */
 package org.apache.tuweni.ssz;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
@@ -212,13 +211,16 @@ public final class SSZ {
   }
 
   static byte[] encodeLongToByteArray(long value, int bitLength) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
-
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     int zeros = (value >= 0) ? Long.numberOfLeadingZeros(value) : Long.numberOfLeadingZeros(-1 - value) - 1;
     int valueBytes = 8 - (zeros / 8);
 
     int byteLength = bitLength / 8;
-    checkArgument(valueBytes <= byteLength, "value is too large for the desired bitLength");
+    if (valueBytes > byteLength) {
+      throw new IllegalArgumentException("value is too large for the desired bitLength");
+    }
 
     byte[] encoded = new byte[byteLength];
 
@@ -249,8 +251,9 @@ public final class SSZ {
   }
 
   public static byte[] encodeBigIntegerToByteArray(BigInteger value, int bitLength) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
-
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     byte[] bytes = value.toByteArray();
     int valueBytes = bytes.length;
     int offset = 0;
@@ -260,7 +263,9 @@ public final class SSZ {
     }
 
     int byteLength = bitLength / 8;
-    checkArgument(valueBytes <= byteLength, "value is too large for the desired bitLength");
+    if (valueBytes > byteLength) {
+      throw new IllegalArgumentException("value is too large for the desired bitLength");
+    }
 
     byte[] encoded;
     if (valueBytes == byteLength && offset == 0) {
@@ -356,14 +361,19 @@ public final class SSZ {
   }
 
   static byte[] encodeULongToByteArray(long value, int bitLength) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
-
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     int zeros = Long.numberOfLeadingZeros(value);
     int valueBytes = 8 - (zeros / 8);
-    checkArgument(zeros == 0 || value >= 0, "Value must be positive or zero");
+    if (value < 0) {
+      throw new IllegalArgumentException("Value must be positive or zero");
+    }
 
     int byteLength = bitLength / 8;
-    checkArgument(valueBytes <= byteLength, "value is too large for the desired bitLength");
+    if (valueBytes > byteLength) {
+      throw new IllegalArgumentException("value is too large for the desired bitLength");
+    }
 
     byte[] encoded = new byte[byteLength];
 
@@ -388,7 +398,9 @@ public final class SSZ {
   }
 
   public static byte[] encodeUBigIntegerToByteArray(BigInteger value, int bitLength) {
-    checkArgument(value.compareTo(BigInteger.ZERO) >= 0, "Value must be positive or zero");
+    if (value.compareTo(BigInteger.ZERO) < 0) {
+      throw new IllegalArgumentException("Value must be positive or zero");
+    }
     return encodeBigIntegerToByteArray(value, bitLength);
   }
 
@@ -474,7 +486,9 @@ public final class SSZ {
    * @throws IllegalArgumentException if {@code address.size != 20}
    */
   public static Bytes encodeAddress(Bytes address) {
-    checkArgument(address.size() == 20, "address is not 20 bytes");
+    if (address.size() != 20) {
+      throw new IllegalArgumentException("address is not 20 bytes");
+    }
     return address;
   }
 
@@ -644,7 +658,9 @@ public final class SSZ {
   }
 
   static void encodeIntListTo(int bitLength, int[] elements, Consumer<byte[]> appender) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     appender.accept(listLengthPrefix(elements.length, bitLength / 8));
     for (int value : elements) {
       appender.accept(encodeLongToByteArray(value, bitLength));
@@ -652,7 +668,9 @@ public final class SSZ {
   }
 
   static void encodeIntListTo(int bitLength, List<Integer> elements, Consumer<byte[]> appender) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     appender.accept(listLengthPrefix(elements.size(), bitLength / 8));
     for (int value : elements) {
       appender.accept(encodeLongToByteArray(value, bitLength));
@@ -688,7 +706,9 @@ public final class SSZ {
   }
 
   static void encodeLongIntListTo(int bitLength, long[] elements, Consumer<byte[]> appender) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     appender.accept(listLengthPrefix(elements.length, bitLength / 8));
     for (long value : elements) {
       appender.accept(encodeLongToByteArray(value, bitLength));
@@ -696,7 +716,9 @@ public final class SSZ {
   }
 
   static void encodeLongIntListTo(int bitLength, List<Long> elements, Consumer<byte[]> appender) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     appender.accept(listLengthPrefix(elements.size(), bitLength / 8));
     for (long value : elements) {
       appender.accept(encodeLongToByteArray(value, bitLength));
@@ -732,7 +754,9 @@ public final class SSZ {
   }
 
   static void encodeBigIntegerListTo(int bitLength, BigInteger[] elements, Consumer<byte[]> appender) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     appender.accept(listLengthPrefix(elements.length, bitLength / 8));
     for (BigInteger value : elements) {
       appender.accept(encodeBigIntegerToByteArray(value, bitLength));
@@ -740,7 +764,9 @@ public final class SSZ {
   }
 
   static void encodeBigIntegerListTo(int bitLength, List<BigInteger> elements, Consumer<byte[]> appender) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     appender.accept(listLengthPrefix(elements.size(), bitLength / 8));
     for (BigInteger value : elements) {
       appender.accept(encodeBigIntegerToByteArray(value, bitLength));
@@ -864,7 +890,9 @@ public final class SSZ {
   }
 
   static void encodeUIntListTo(int bitLength, int[] elements, Consumer<byte[]> appender) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     appender.accept(listLengthPrefix(elements.length, bitLength / 8));
     for (int value : elements) {
       appender.accept(encodeULongToByteArray(value, bitLength));
@@ -872,7 +900,9 @@ public final class SSZ {
   }
 
   static void encodeUIntListTo(int bitLength, List<Integer> elements, Consumer<byte[]> appender) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     appender.accept(listLengthPrefix(elements.size(), bitLength / 8));
     for (int value : elements) {
       appender.accept(encodeULongToByteArray(value, bitLength));
@@ -912,7 +942,9 @@ public final class SSZ {
   }
 
   static void encodeULongIntListTo(int bitLength, long[] elements, Consumer<byte[]> appender) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     appender.accept(listLengthPrefix(elements.length, bitLength / 8));
     for (long value : elements) {
       appender.accept(encodeULongToByteArray(value, bitLength));
@@ -920,7 +952,9 @@ public final class SSZ {
   }
 
   static void encodeULongIntListTo(int bitLength, List<Long> elements, Consumer<byte[]> appender) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     appender.accept(listLengthPrefix(elements.size(), bitLength / 8));
     for (long value : elements) {
       appender.accept(encodeULongToByteArray(value, bitLength));
@@ -1123,7 +1157,9 @@ public final class SSZ {
       if (hashLength == 0) {
         hashLength = bytes.size();
       } else {
-        checkArgument(bytes.size() == hashLength, "Hashes must be all of the same size");
+        if (bytes.size() != hashLength) {
+          throw new IllegalArgumentException("Hashes must be all of the same size");
+        }
       }
     }
     appender.accept(Bytes.wrap(listLengthPrefix(elements.length, 32)));
@@ -1138,7 +1174,9 @@ public final class SSZ {
       if (hashLength == 0) {
         hashLength = bytes.size();
       } else {
-        checkArgument(bytes.size() == hashLength, "Hashes must be all of the same size");
+        if (bytes.size() != hashLength) {
+          throw new IllegalArgumentException("Hashes must be all of the same size");
+        }
       }
     }
     appender.accept(Bytes.wrap(listLengthPrefix(elements.size(), 32)));

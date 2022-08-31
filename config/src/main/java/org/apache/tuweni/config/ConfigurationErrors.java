@@ -14,7 +14,8 @@ package org.apache.tuweni.config;
 
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nullable;
+
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Factory methods for collections of {@link ConfigurationError}.

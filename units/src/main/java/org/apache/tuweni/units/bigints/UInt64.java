@@ -12,8 +12,6 @@
  */
 package org.apache.tuweni.units.bigints;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.MutableBytes;
 
@@ -55,7 +53,9 @@ public final class UInt64 implements UInt64Value<UInt64> {
    * @throws IllegalArgumentException If the value is negative.
    */
   public static UInt64 valueOf(long value) {
-    checkArgument(value >= 0, "Argument must be positive");
+    if (value < 0) {
+      throw new IllegalArgumentException("Argument must be positive");
+    }
     return create(value);
   }
 
@@ -76,8 +76,12 @@ public final class UInt64 implements UInt64Value<UInt64> {
    * @throws IllegalArgumentException if the value is negative or too large to be represented as a UInt64
    */
   public static UInt64 valueOf(BigInteger value) {
-    checkArgument(value.signum() >= 0, "Argument must be positive");
-    checkArgument(value.bitLength() <= 64, "Argument is too large to represent a UInt64");
+    if (value.signum() < 0) {
+      throw new IllegalArgumentException("Argument must be positive");
+    }
+    if (value.bitLength() > 64) {
+      throw new IllegalArgumentException("Argument is too large to represent a UInt64");
+    }
     return create(value.longValue());
   }
 
@@ -89,7 +93,9 @@ public final class UInt64 implements UInt64Value<UInt64> {
    * @throws IllegalArgumentException if {@code bytes.size() > 8}.
    */
   public static UInt64 fromBytes(Bytes bytes) {
-    checkArgument(bytes.size() <= 8, "Argument is greater than 8 bytes");
+    if (bytes.size() > 8) {
+      throw new IllegalArgumentException("Argument is greater than 8 bytes");
+    }
     return create(bytes.toLong());
   }
 
@@ -335,7 +341,9 @@ public final class UInt64 implements UInt64Value<UInt64> {
    * @throws IllegalArgumentException if more than 8 bytes are supplied
    */
   public UInt64 and(Bytes bytes) {
-    checkArgument(bytes.size() <= 8, "and with more than 8 bytes");
+    if (bytes.size() > 8) {
+      throw new IllegalArgumentException("and with more than 8 bytes");
+    }
     if (this.value == 0) {
       return ZERO;
     }
@@ -364,7 +372,9 @@ public final class UInt64 implements UInt64Value<UInt64> {
    * @throws IllegalArgumentException if more than 8 bytes are supplied
    */
   public UInt64 or(Bytes bytes) {
-    checkArgument(bytes.size() <= 8, "or with more than 8 bytes");
+    if (bytes.size() > 8) {
+      throw new IllegalArgumentException("or with more than 8 bytes");
+    }
     return create(this.value | bytes.toLong());
   }
 
@@ -389,7 +399,9 @@ public final class UInt64 implements UInt64Value<UInt64> {
    * @throws IllegalArgumentException if more than 8 bytes are supplied
    */
   public UInt64 xor(Bytes bytes) {
-    checkArgument(bytes.size() <= 8, "xor with more than 8 bytes");
+    if (bytes.size() > 8) {
+      throw new IllegalArgumentException("xor with more than 8 bytes");
+    }
     return create(this.value ^ bytes.toLong());
   }
 

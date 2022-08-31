@@ -12,9 +12,6 @@
  */
 package org.apache.tuweni.crypto.sodium;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
-
 import org.apache.tuweni.bytes.Bytes;
 
 import java.util.Objects;
@@ -293,7 +290,9 @@ public final class DiffieHelman {
      * @return A {@link KeyPair}.
      */
     public static KeyPair forSecretKey(SecretKey secretKey) {
-      checkArgument(!secretKey.isDestroyed(), "SecretKey has been destroyed");
+      if (secretKey.isDestroyed()) {
+        throw new IllegalStateException("SecretKey has been destroyed");
+      }
       return Sodium.scalarMultBase(secretKey.value.pointer(), SecretKey.length(), (ptr, len) -> {
         int publicKeyLength = PublicKey.length();
         if (len != publicKeyLength) {
@@ -377,7 +376,9 @@ public final class DiffieHelman {
      * @return A shared {@link Secret}.
      */
     public static Secret forKeys(SecretKey secretKey, PublicKey publicKey) {
-      checkState(!secretKey.isDestroyed(), "SecretKey has been destroyed");
+      if (secretKey.isDestroyed()) {
+        throw new IllegalStateException("SecretKey has been destroyed");
+      }
       return Sodium
           .scalarMult(
               secretKey.value.pointer(),

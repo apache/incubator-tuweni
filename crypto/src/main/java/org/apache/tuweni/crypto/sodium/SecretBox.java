@@ -12,17 +12,16 @@
  */
 package org.apache.tuweni.crypto.sodium;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 import org.apache.tuweni.bytes.Bytes;
 
 import java.util.Arrays;
-import javax.annotation.Nullable;
 import javax.security.auth.Destroyable;
 
 import jnr.ffi.Pointer;
+import org.jetbrains.annotations.Nullable;
 
 // Documentation copied under the ISC License, from
 // https://github.com/jedisct1/libsodium-doc/blob/424b7480562c2e063bc8c52c452ef891621c8480/secret-key_cryptography/authenticated_encryption.md
@@ -367,7 +366,9 @@ public final class SecretBox {
    * @return The encrypted data.
    */
   public static byte[] encrypt(byte[] message, Key key, Nonce nonce) {
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalArgumentException("Key has been destroyed");
+    }
     int macbytes = macLength();
 
     byte[] cipherText = new byte[macbytes + message.length];
@@ -401,7 +402,9 @@ public final class SecretBox {
    * @return The encrypted data and message authentication code.
    */
   public static DetachedEncryptionResult encryptDetached(byte[] message, Key key, Nonce nonce) {
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalArgumentException("Key has been destroyed");
+    }
     int macbytes = macLength();
 
     byte[] cipherText = new byte[message.length];
@@ -445,7 +448,9 @@ public final class SecretBox {
    */
   @Nullable
   public static Allocated decrypt(Allocated cipherText, Key key, Nonce nonce) {
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalArgumentException("Key has been destroyed");
+    }
     int macLength = macLength();
     if (macLength > cipherText.length()) {
       throw new IllegalArgumentException("cipherText is too short");
@@ -478,7 +483,9 @@ public final class SecretBox {
    */
   @Nullable
   public static byte[] decrypt(byte[] cipherText, Key key, Nonce nonce) {
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalArgumentException("Key has been destroyed");
+    }
     int macLength = macLength();
     if (macLength > cipherText.length) {
       throw new IllegalArgumentException("cipherText is too short");
@@ -527,7 +534,9 @@ public final class SecretBox {
    */
   @Nullable
   public static byte[] decryptDetached(byte[] cipherText, byte[] mac, Key key, Nonce nonce) {
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalArgumentException("Key has been destroyed");
+    }
     int macLength = macLength();
     if (macLength != mac.length) {
       throw new IllegalArgumentException("mac must be " + macLength + " bytes, got " + mac.length);

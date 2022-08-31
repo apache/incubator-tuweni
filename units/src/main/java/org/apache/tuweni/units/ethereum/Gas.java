@@ -12,8 +12,6 @@
  */
 package org.apache.tuweni.units.ethereum;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import org.apache.tuweni.units.bigints.BaseUInt256Value;
 import org.apache.tuweni.units.bigints.UInt256;
 
@@ -68,7 +66,9 @@ public final class Gas extends BaseUInt256Value<Gas> {
    * @throws IllegalArgumentException If the value is negative.
    */
   public static Gas valueOf(long value) {
-    checkArgument(value >= 0, "Argument must be positive");
+    if (value < 0) {
+      throw new IllegalArgumentException("Argument must be positive");
+    }
     if (value <= MAX_CONSTANT) {
       return CONSTANTS[(int) value];
     }
@@ -83,7 +83,9 @@ public final class Gas extends BaseUInt256Value<Gas> {
    * @throws IllegalArgumentException If the value is negative.
    */
   public static Gas valueOf(BigInteger value) {
-    checkArgument(value.signum() >= 0, "Argument must be positive");
+    if (value.signum() < 0) {
+      throw new IllegalArgumentException("Argument must be positive");
+    }
     if (value.compareTo(BI_MAX_CONSTANT) <= 0) {
       return CONSTANTS[value.intValue()];
     }

@@ -19,7 +19,4 @@
  * These classes are included in the standard Tuweni distribution, or separately when using the gradle dependency
  * 'org.apache.tuweni:tuweni-scuttlebutt' (tuweni-scuttlebutt.jar).
  */
-@ParametersAreNonnullByDefault
 package org.apache.tuweni.scuttlebutt;
-
-import javax.annotation.ParametersAreNonnullByDefault;

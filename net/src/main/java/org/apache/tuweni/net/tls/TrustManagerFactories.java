@@ -18,9 +18,10 @@ import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import javax.annotation.Nullable;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Trust manager factories for fingerprinting clients and servers.

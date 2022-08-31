@@ -12,8 +12,6 @@
  */
 package org.apache.tuweni.units.bigints;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes48;
 import org.apache.tuweni.bytes.MutableBytes;
@@ -63,7 +61,9 @@ public final class UInt384 implements UInt384Value<UInt384> {
    * @throws IllegalArgumentException If the value is negative.
    */
   public static UInt384 valueOf(long value) {
-    checkArgument(value >= 0, "Argument must be positive");
+    if (value < 0) {
+      throw new IllegalArgumentException("Argument must be positive");
+    }
     if (value <= MAX_CONSTANT) {
       return CONSTANTS[(int) value];
     }
@@ -78,8 +78,12 @@ public final class UInt384 implements UInt384Value<UInt384> {
    * @throws IllegalArgumentException if the value is negative or too large to be represented as a UInt384
    */
   public static UInt384 valueOf(BigInteger value) {
-    checkArgument(value.signum() >= 0, "Argument must be positive");
-    checkArgument(value.bitLength() <= 384, "Argument is too large to represent a UInt384");
+    if (value.signum() < 0) {
+      throw new IllegalArgumentException("Argument must be positive");
+    }
+    if (value.bitLength() > 384) {
+      throw new IllegalArgumentException("Argument is too large to represent a UInt384");
+    }
     if (value.compareTo(BI_MAX_CONSTANT) <= 0) {
       return CONSTANTS[value.intValue()];
     }

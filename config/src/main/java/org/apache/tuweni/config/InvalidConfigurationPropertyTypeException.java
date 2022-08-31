@@ -12,7 +12,7 @@
  */
 package org.apache.tuweni.config;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An exception thrown when an invalid type is encountered.
