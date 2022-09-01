@@ -25,8 +25,8 @@ class Checks {
   }
 
   static void checkElementIndex(int index, int size) {
-    if (index >= size) {
-      throw new IllegalArgumentException("index is out of bounds");
+    if (index < 0 || index >= size) {
+      throw new IndexOutOfBoundsException("index is out of bounds");
     }
   }
 
