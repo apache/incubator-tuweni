@@ -415,10 +415,10 @@ public final class SECP256K1 {
    */
   public static Bytes32 calculateKeyAgreement(SecretKey privKey, PublicKey theirPubKey) {
     if (privKey == null) {
-      throw new IllegalArgumentException("missing private key");
+      throw new NullPointerException("missing private key");
     }
     if (theirPubKey == null) {
-      throw new IllegalArgumentException("missing remote public key");
+      throw new NullPointerException("missing remote public key");
     }
 
     ECPrivateKeyParameters privKeyP =
@@ -466,7 +466,7 @@ public final class SECP256K1 {
      */
     public static SecretKey fromInteger(BigInteger key) {
       if (key == null) {
-        throw new IllegalArgumentException("key cannot be null");
+        throw new NullPointerException("key cannot be null");
       }
       byte[] bytes = key.toByteArray();
       int offset = 0;
@@ -529,7 +529,7 @@ public final class SECP256K1 {
 
     private SecretKey(Bytes32 bytes) {
       if (bytes == null) {
-        throw new IllegalArgumentException("bytes cannot be null");
+        throw new NullPointerException("bytes cannot be null");
       }
       this.keyBytes = bytes;
     }
@@ -542,7 +542,7 @@ public final class SECP256K1 {
      */
     public void store(Path file) throws IOException {
       if (keyBytes == null) {
-        throw new IllegalArgumentException("SecretKey has been destroyed");
+        throw new NullPointerException("SecretKey has been destroyed");
       }
       // use buffers for all secret key data transfer, so they can be overwritten on completion
       byte[] bytes = new byte[64];
@@ -565,7 +565,7 @@ public final class SECP256K1 {
         return false;
       }
       if (keyBytes == null) {
-        throw new IllegalArgumentException("SecretKey has been destroyed");
+        throw new NullPointerException("SecretKey has been destroyed");
       }
       SecretKey other = (SecretKey) obj;
       return this.keyBytes.equals(other.keyBytes);
@@ -574,7 +574,7 @@ public final class SECP256K1 {
     @Override
     public int hashCode() {
       if (keyBytes == null) {
-        throw new IllegalArgumentException("SecretKey has been destroyed");
+        throw new NullPointerException("SecretKey has been destroyed");
       }
       return keyBytes.hashCode();
     }
@@ -585,7 +585,7 @@ public final class SECP256K1 {
      */
     public Bytes32 bytes() {
       if (keyBytes == null) {
-        throw new IllegalArgumentException("SecretKey has been destroyed");
+        throw new NullPointerException("SecretKey has been destroyed");
       }
       return keyBytes;
     }
@@ -596,7 +596,7 @@ public final class SECP256K1 {
      */
     public byte[] bytesArray() {
       if (keyBytes == null) {
-        throw new IllegalArgumentException("SecretKey has been destroyed");
+        throw new NullPointerException("SecretKey has been destroyed");
       }
       return keyBytes.toArrayUnsafe();
     }
@@ -652,7 +652,7 @@ public final class SECP256K1 {
      */
     public static PublicKey fromInteger(BigInteger privateKey) {
       if (privateKey == null) {
-        throw new IllegalArgumentException("privateKey cannot be null");
+        throw new NullPointerException("privateKey cannot be null");
       }
       return fromBytes(toBytes64(privateKey.toByteArray()));
     }
@@ -728,7 +728,7 @@ public final class SECP256K1 {
 
     private PublicKey(Bytes bytes) {
       if (bytes == null) {
-        throw new IllegalArgumentException("bytes cannot be null");
+        throw new NullPointerException("bytes cannot be null");
       }
       if (bytes.size() != BYTE_LENGTH) {
         throw new IllegalArgumentException(String.format("Key must be %s bytes long, got %s", BYTE_LENGTH, bytes.size()));
@@ -859,10 +859,10 @@ public final class SECP256K1 {
 
     private KeyPair(SecretKey secretKey, PublicKey publicKey) {
       if (secretKey == null) {
-        throw new IllegalArgumentException("secretKey cannot be null");
+        throw new NullPointerException("secretKey cannot be null");
       }
       if (publicKey == null) {
-        throw new IllegalArgumentException("publicKey cannot be null");
+        throw new NullPointerException("publicKey cannot be null");
       }
       this.secretKey = secretKey;
       this.publicKey = publicKey;
@@ -933,7 +933,7 @@ public final class SECP256K1 {
      */
     public static Signature fromBytes(Bytes bytes) {
       if (bytes == null) {
-        throw new IllegalArgumentException("bytes cannot be null");
+        throw new NullPointerException("bytes cannot be null");
       }
       if (bytes.size() != 65) {
         throw new IllegalArgumentException(String.format("Signature must be 65 bytes, but got %s instead", bytes.size()));
@@ -961,10 +961,10 @@ public final class SECP256K1 {
         throw new IllegalArgumentException(String.format("Invalid v-value, should be 0 or 1, got %s", v));
       }
       if (r == null) {
-        throw new IllegalArgumentException("r cannot be null");
+        throw new NullPointerException("r cannot be null");
       }
       if (s == null) {
-        throw new IllegalArgumentException("s cannot be null");
+        throw new NullPointerException("s cannot be null");
       }
       if (r.compareTo(BigInteger.ONE) < 0 || r.compareTo(Parameters.CURVE_ORDER) > 0) {
         throw new IllegalArgumentException(String.format("Invalid r-value, should be >= 1 and < %s, got %s",

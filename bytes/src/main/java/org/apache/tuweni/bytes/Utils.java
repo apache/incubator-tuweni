@@ -20,7 +20,7 @@ class Checks {
 
   static void checkNotNull(@Nullable Object object) {
     if (object == null) {
-      throw new IllegalArgumentException("argument cannot be null");
+      throw new NullPointerException("argument cannot be null");
     }
   }
 
