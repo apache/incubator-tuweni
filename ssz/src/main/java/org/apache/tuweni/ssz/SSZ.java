@@ -366,7 +366,7 @@ public final class SSZ {
     }
     int zeros = Long.numberOfLeadingZeros(value);
     int valueBytes = 8 - (zeros / 8);
-    if (value < 0) {
+    if (zeros != 0 && value < 0) {
       throw new IllegalArgumentException("Value must be positive or zero");
     }
 
