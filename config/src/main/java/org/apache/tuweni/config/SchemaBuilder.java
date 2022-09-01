@@ -22,10 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * This interface allows customers to determine a schema to associate with a configuration to validate the entries read
@@ -35,7 +33,7 @@ public final class SchemaBuilder {
 
   private final Map<String, String> propertyDescriptions = new HashMap<>();
   private final Map<String, Object> propertyDefaults = new HashMap<>();
-  private final ListMultimap<String, PropertyValidator<Object>> propertyValidators = ArrayListMultimap.create();
+  private final Map<String, PropertyValidator<Object>> propertyValidators = new HashMap<>();
   private final List<ConfigurationValidator> configurationValidators = new ArrayList<>();
   private final Map<String, Schema> subSections = new HashMap<>();
 

@@ -18,12 +18,15 @@ package org.apache.tuweni.kv
 
 import com.jolbox.bonecp.BoneCP
 import com.jolbox.bonecp.BoneCPConfig
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.guava.await
+import kotlinx.coroutines.async
 import org.apache.tuweni.bytes.Bytes
 import java.io.IOException
+import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.SQLException
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -49,7 +52,7 @@ constructor(
   private val valueSerializer: (V) -> Bytes,
   private val keyDeserializer: (Bytes) -> K,
   private val valueDeserializer: (Bytes?) -> V?,
-  override val coroutineContext: CoroutineContext = Dispatchers.IO
+  override val coroutineContext: CoroutineContext = Dispatchers.IO,
 ) : KeyValueStore<K, V> {
 
   companion object {
@@ -71,7 +74,7 @@ constructor(
       keySerializer: (K) -> Bytes,
       valueSerializer: (V) -> Bytes,
       keyDeserializer: (Bytes) -> K,
-      valueDeserializer: (Bytes?) -> V?
+      valueDeserializer: (Bytes?) -> V?,
     ) = SQLKeyValueStore<K, V>(
       jdbcurl = jdbcUrl,
       keySerializer = keySerializer,
@@ -104,7 +107,7 @@ constructor(
       keySerializer: (K) -> Bytes,
       valueSerializer: (V) -> Bytes,
       keyDeserializer: (Bytes) -> K,
-      valueDeserializer: (Bytes?) -> V?
+      valueDeserializer: (Bytes?) -> V?,
     ) =
       SQLKeyValueStore<K, V>(
         jdbcUrl,
@@ -127,8 +130,12 @@ constructor(
     connectionPool = BoneCP(config)
   }
 
+  protected suspend fun obtainConnection(): Deferred<Connection> = async {
+    connectionPool.asyncConnection.get(5, TimeUnit.SECONDS)
+  }
+
   override suspend fun containsKey(key: K): Boolean {
-    connectionPool.asyncConnection.await().use {
+    obtainConnection().await().use {
       val stmt = it.prepareStatement("SELECT $valueColumn FROM $tableName WHERE $keyColumn = ?")
       stmt.setBytes(1, keySerializer(key).toArrayUnsafe())
       stmt.execute()
@@ -139,7 +146,7 @@ constructor(
   }
 
   override suspend fun get(key: K): V? {
-    connectionPool.asyncConnection.await().use {
+    obtainConnection().await().use {
       val stmt = it.prepareStatement("SELECT $valueColumn FROM $tableName WHERE $keyColumn = ?")
       stmt.setBytes(1, keySerializer(key).toArrayUnsafe())
       stmt.execute()
@@ -155,7 +162,7 @@ constructor(
   }
 
   override suspend fun remove(key: K) {
-    connectionPool.asyncConnection.await().use {
+    obtainConnection().await().use {
       val stmt = it.prepareStatement("DELETE FROM $tableName WHERE $keyColumn = ?")
       stmt.setBytes(1, keySerializer(key).toArrayUnsafe())
       stmt.execute()
@@ -163,7 +170,7 @@ constructor(
   }
 
   override suspend fun put(key: K, value: V) {
-    connectionPool.asyncConnection.await().use {
+    obtainConnection().await().use {
       val stmt = it.prepareStatement("INSERT INTO $tableName($keyColumn, $valueColumn) VALUES(?,?)")
       stmt.setBytes(1, keySerializer(key).toArrayUnsafe())
       stmt.setBytes(2, valueSerializer(value).toArrayUnsafe())
@@ -195,7 +202,7 @@ constructor(
   }
 
   override suspend fun keys(): Iterable<K> {
-    connectionPool.asyncConnection.await().use {
+    obtainConnection().await().use {
       val stmt = it.prepareStatement("SELECT $keyColumn FROM $tableName")
       stmt.execute()
       return Iterable { SQLIterator(stmt.resultSet, keyDeserializer) }
@@ -203,7 +210,7 @@ constructor(
   }
 
   override suspend fun clear() {
-    connectionPool.asyncConnection.await().use {
+    obtainConnection().await().use {
       val stmt = it.prepareStatement("DELETE FROM $tableName")
       stmt.execute()
     }

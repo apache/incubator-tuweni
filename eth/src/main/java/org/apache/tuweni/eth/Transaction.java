@@ -12,7 +12,6 @@
  */
 package org.apache.tuweni.eth;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -26,9 +25,9 @@ import org.apache.tuweni.units.ethereum.Gas;
 import org.apache.tuweni.units.ethereum.Wei;
 
 import java.math.BigInteger;
-import javax.annotation.Nullable;
+import java.util.Objects;
 
-import com.google.common.base.Objects;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An Ethereum transaction.
@@ -199,7 +198,9 @@ public final class Transaction {
       @Nullable Integer chainId,
       SECP256K1.Signature signature) {
     requireNonNull(nonce);
-    checkArgument(nonce.compareTo(UInt256.ZERO) >= 0, "nonce must be >= 0");
+    if (nonce.compareTo(UInt256.ZERO) < 0) {
+      throw new IllegalArgumentException("nonce must be >= 0");
+    }
     requireNonNull(gasPrice);
     requireNonNull(value);
     requireNonNull(signature);
@@ -393,7 +394,7 @@ public final class Transaction {
     return nonce.equals(that.nonce)
         && gasPrice.equals(that.gasPrice)
         && gasLimit.equals(that.gasLimit)
-        && Objects.equal(to, that.to)
+        && Objects.equals(to, that.to)
         && value.equals(that.value)
         && signature.equals(that.signature)
         && payload.equals(that.payload);
@@ -401,7 +402,7 @@ public final class Transaction {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(nonce, gasPrice, gasLimit, to, value, signature, payload);
+    return Objects.hash(nonce, gasPrice, gasLimit, to, value, signature, payload);
   }
 
   @Override

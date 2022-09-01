@@ -22,8 +22,7 @@ import org.apache.tuweni.rlp.RLPWriter;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.common.base.Objects;
+import java.util.Objects;
 
 /**
  * An Ethereum block body.
@@ -107,7 +106,7 @@ public final class BlockBody {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(transactions, ommers);
+    return Objects.hash(transactions, ommers);
   }
 
   /**

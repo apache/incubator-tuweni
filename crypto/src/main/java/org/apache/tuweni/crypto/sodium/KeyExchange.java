@@ -12,16 +12,13 @@
  */
 package org.apache.tuweni.crypto.sodium;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
-
 import org.apache.tuweni.bytes.Bytes;
 
 import java.util.Objects;
-import javax.annotation.Nullable;
 import javax.security.auth.Destroyable;
 
 import jnr.ffi.Pointer;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Key exchange.
@@ -348,7 +345,9 @@ public final class KeyExchange {
      * @return A {@link KeyPair}.
      */
     public static KeyPair forSecretKey(SecretKey secretKey) {
-      checkArgument(!secretKey.isDestroyed(), "SecretKey has been destroyed");
+      if (secretKey.isDestroyed()) {
+        throw new IllegalArgumentException("SecretKey has been destroyed");
+      }
       return Sodium.scalarMultBase(secretKey.value.pointer(), SecretKey.length(), (ptr, len) -> {
         int publicKeyLength = PublicKey.length();
         if (len != publicKeyLength) {
@@ -543,14 +542,18 @@ public final class KeyExchange {
       if (!(obj instanceof SessionKey)) {
         return false;
       }
-      checkState(this.ptr != null, "SessionKey has been destroyed");
+      if (this.ptr == null) {
+        throw new IllegalStateException("SessionKey has been destroyed");
+      }
       SessionKey other = (SessionKey) obj;
       return other.ptr != null && Sodium.sodium_memcmp(this.ptr, other.ptr, length) == 0;
     }
 
     @Override
     public int hashCode() {
-      checkState(this.ptr != null, "SessionKey has been destroyed");
+      if (this.ptr == null) {
+        throw new IllegalStateException("SessionKey has been destroyed");
+      }
       return Sodium.hashCode(ptr, length);
     }
 
@@ -574,7 +577,9 @@ public final class KeyExchange {
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {
-      checkState(ptr != null, "SessionKey has been destroyed");
+      if (this.ptr == null) {
+        throw new IllegalStateException("SessionKey has been destroyed");
+      }
       return Sodium.reify(ptr, length);
     }
   }
@@ -641,7 +646,9 @@ public final class KeyExchange {
    * @return A pair of session keys.
    */
   public static SessionKeyPair client(KeyPair clientKeys, PublicKey serverKey) {
-    checkArgument(!clientKeys.secretKey.isDestroyed(), "SecretKey has been destroyed");
+    if (clientKeys.secretKey.isDestroyed()) {
+      throw new IllegalStateException("SecretKey has been destroyed");
+    }
     long sessionkeybytes = Sodium.crypto_kx_sessionkeybytes();
     if (sessionkeybytes > Integer.MAX_VALUE) {
       throw new SodiumException("crypto_kx_sessionkeybytes: " + sessionkeybytes + " is too large");
@@ -685,7 +692,9 @@ public final class KeyExchange {
    * @return A pair of session keys.
    */
   public static SessionKeyPair server(KeyPair serverKeys, PublicKey clientKey) {
-    checkArgument(!serverKeys.secretKey.isDestroyed(), "SecretKey has been destroyed");
+    if (serverKeys.secretKey.isDestroyed()) {
+      throw new IllegalArgumentException("SecretKey has been destroyed");
+    }
     long sessionkeybytes = Sodium.crypto_kx_sessionkeybytes();
     if (sessionkeybytes > Integer.MAX_VALUE) {
       throw new SodiumException("crypto_kx_sessionkeybytes: " + sessionkeybytes + " is too large");

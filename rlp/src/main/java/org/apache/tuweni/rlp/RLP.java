@@ -12,7 +12,6 @@
  */
 package org.apache.tuweni.rlp;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
@@ -298,7 +297,9 @@ public final class RLP {
   public static <T> T decodeList(Bytes source, boolean lenient, Function<RLPReader, T> fn) {
     requireNonNull(source);
     requireNonNull(fn);
-    checkArgument(source.size() > 0, "source is empty");
+    if (source.isEmpty()) {
+      throw new IllegalArgumentException("source is empty");
+    }
     return decode(source, lenient, reader -> reader.readList(fn));
   }
 
@@ -328,7 +329,9 @@ public final class RLP {
   public static List<Object> decodeToList(Bytes source, boolean lenient, BiConsumer<RLPReader, List<Object>> fn) {
     requireNonNull(source);
     requireNonNull(fn);
-    checkArgument(source.size() > 0, "source is empty");
+    if (source.isEmpty()) {
+      throw new IllegalArgumentException("source is empty");
+    }
     return decode(source, lenient, reader -> reader.readList(fn));
   }
 
@@ -360,7 +363,9 @@ public final class RLP {
   public static <T> List<T> decodeToList(Bytes source, boolean lenient, Function<RLPReader, T> fn) {
     requireNonNull(source);
     requireNonNull(fn);
-    checkArgument(source.size() > 0, "source is empty");
+    if (source.isEmpty()) {
+      throw new IllegalArgumentException("source is empty");
+    }
     return decode(source, lenient, reader -> reader.readListContents(fn));
   }
 
@@ -411,7 +416,9 @@ public final class RLP {
    */
   public static int decodeInt(Bytes source, boolean lenient) {
     requireNonNull(source);
-    checkArgument(source.size() > 0, "source is empty");
+    if (source.isEmpty()) {
+      throw new IllegalArgumentException("source is empty");
+    }
     return decode(source, lenient, RLPReader::readInt);
   }
 
@@ -436,7 +443,9 @@ public final class RLP {
    */
   public static long decodeLong(Bytes source, boolean lenient) {
     requireNonNull(source);
-    checkArgument(source.size() > 0, "source is empty");
+    if (source.isEmpty()) {
+      throw new IllegalArgumentException("source is empty");
+    }
     return decode(source, lenient, RLPReader::readLong);
   }
 
@@ -461,7 +470,9 @@ public final class RLP {
    */
   public static BigInteger decodeBigInteger(Bytes source, boolean lenient) {
     requireNonNull(source);
-    checkArgument(source.size() > 0, "source is empty");
+    if (source.isEmpty()) {
+      throw new IllegalArgumentException("source is empty");
+    }
     return decode(source, lenient, RLPReader::readBigInteger);
   }
 
@@ -486,7 +497,9 @@ public final class RLP {
    */
   public static String decodeString(Bytes source, boolean lenient) {
     requireNonNull(source);
-    checkArgument(source.size() > 0, "source is empty");
+    if (source.isEmpty()) {
+      throw new IllegalArgumentException("source is empty");
+    }
     return decode(source, lenient, RLPReader::readString);
   }
 
@@ -498,7 +511,9 @@ public final class RLP {
    */
   public static boolean isList(Bytes value) {
     requireNonNull(value);
-    checkArgument(value.size() > 0, "value is empty");
+    if (value.isEmpty()) {
+      throw new IllegalArgumentException("value is empty");
+    }
     return decode(value, RLPReader::nextIsList);
   }
 }

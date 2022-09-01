@@ -20,12 +20,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.ParametersAreNonnullByDefault;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@ParametersAreNonnullByDefault
 final class LoggingPeerRepository implements PeerRepository {
 
   private static final Logger logger = LoggerFactory.getLogger(LoggingPeerRepository.class.getName());

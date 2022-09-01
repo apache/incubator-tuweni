@@ -12,8 +12,8 @@
  */
 package org.apache.tuweni.bytes;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.apache.tuweni.bytes.Checks.checkArgument;
+import static org.apache.tuweni.bytes.Checks.checkNotNull;
 
 import java.security.SecureRandom;
 import java.util.Random;

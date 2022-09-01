@@ -12,8 +12,6 @@
  */
 package org.apache.tuweni.crypto.sodium;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import org.apache.tuweni.bytes.Bytes;
 
 import javax.security.auth.Destroyable;
@@ -195,7 +193,9 @@ public final class Auth {
    * @return The authentication tag.
    */
   public static byte[] auth(byte[] input, Key key) {
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalStateException("Key has been destroyed");
+    }
     long abytes = Sodium.crypto_auth_bytes();
     if (abytes > Integer.MAX_VALUE) {
       throw new IllegalStateException("crypto_auth_bytes: " + abytes + " is too large");
@@ -230,7 +230,9 @@ public final class Auth {
    * @return {@code true} if the tag correction authenticates the input (using the specified key).
    */
   public static boolean verify(byte[] tag, byte[] input, Key key) {
-    checkArgument(!key.isDestroyed(), "Key has been destroyed");
+    if (key.isDestroyed()) {
+      throw new IllegalStateException("Key has been destroyed");
+    }
     long abytes = Sodium.crypto_auth_bytes();
     if (tag.length != abytes) {
       throw new IllegalArgumentException("tag must be " + abytes + " bytes, got " + tag.length);

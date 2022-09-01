@@ -12,7 +12,6 @@
  */
 package org.apache.tuweni.ssz;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -64,7 +63,9 @@ final class BytesSSZReader implements SSZReader {
 
   @Override
   public int readInt(int bitLength) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     int byteLength = bitLength / 8;
     ensureBytes(byteLength, () -> "SSZ encoded data has insufficient length to read a " + bitLength + "-bit integer");
     Bytes bytes = content.slice(index, byteLength);
@@ -78,7 +79,9 @@ final class BytesSSZReader implements SSZReader {
 
   @Override
   public long readLong(int bitLength) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     int byteLength = bitLength / 8;
     ensureBytes(byteLength, () -> "SSZ encoded data has insufficient length to read a " + bitLength + "-bit integer");
     Bytes bytes = content.slice(index, byteLength);
@@ -92,7 +95,9 @@ final class BytesSSZReader implements SSZReader {
 
   @Override
   public BigInteger readBigInteger(int bitLength) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     int byteLength = bitLength / 8;
     ensureBytes(byteLength, () -> "SSZ encoded data has insufficient length to read a " + bitLength + "-bit integer");
     return consumeBytes(byteLength).toBigInteger(LITTLE_ENDIAN);
@@ -100,7 +105,9 @@ final class BytesSSZReader implements SSZReader {
 
   @Override
   public BigInteger readUnsignedBigInteger(int bitLength) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     int byteLength = bitLength / 8;
     ensureBytes(byteLength, () -> "SSZ encoded data has insufficient length to read a " + bitLength + "-bit integer");
     return consumeBytes(byteLength).toUnsignedBigInteger(LITTLE_ENDIAN);
@@ -157,25 +164,33 @@ final class BytesSSZReader implements SSZReader {
 
   @Override
   public List<Integer> readIntList(int bitLength) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     return readList(bitLength / 8, () -> readInt(bitLength));
   }
 
   @Override
   public List<Long> readLongIntList(int bitLength) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     return readList(bitLength / 8, () -> readLong(bitLength));
   }
 
   @Override
   public List<BigInteger> readBigIntegerList(int bitLength) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     return readList(bitLength / 8, () -> readBigInteger(bitLength));
   }
 
   @Override
   public List<BigInteger> readUnsignedBigIntegerList(int bitLength) {
-    checkArgument(bitLength % 8 == 0, "bitLength must be a multiple of 8");
+    if (bitLength % 8 != 0) {
+      throw new IllegalArgumentException("bitLength must be a multiple of 8");
+    }
     return readList(bitLength / 8, () -> readUnsignedBigInteger(bitLength));
   }
 

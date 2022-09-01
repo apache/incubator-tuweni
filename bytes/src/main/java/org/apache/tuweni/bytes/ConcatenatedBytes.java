@@ -13,8 +13,9 @@
 package org.apache.tuweni.bytes;
 
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkElementIndex;
+
+import static org.apache.tuweni.bytes.Checks.checkArgument;
+import static org.apache.tuweni.bytes.Checks.checkElementIndex;
 
 import java.security.MessageDigest;
 import java.util.List;

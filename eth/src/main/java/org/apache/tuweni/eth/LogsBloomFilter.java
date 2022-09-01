@@ -12,7 +12,6 @@
  */
 package org.apache.tuweni.eth;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.tuweni.crypto.Hash.keccak256;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -63,10 +62,10 @@ public final class LogsBloomFilter {
   }
 
   public LogsBloomFilter(Bytes data) {
-    checkArgument(
-        data.size() == 256,
-        "Invalid size for bloom filter backing array: expected 256 but got %s",
-        data.size());
+    if (data.size() != 256) {
+      throw new IllegalArgumentException(
+          String.format("Invalid size for bloom filter backing array: expected 256 but got %s", data.size()));
+    }
     this.data = data.mutableCopy();
   }
 

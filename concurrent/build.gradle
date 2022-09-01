@@ -13,8 +13,9 @@
 description = 'Classes and utilities for working with concurrency.'
 
 dependencies {
-  implementation 'com.google.guava:guava'
   compileOnly 'io.vertx:vertx-core'
+  implementation 'com.google.code.findbugs:jsr305'
+  implementation 'com.google.errorprone:error_prone_annotations'
 
   testImplementation project(':junit')
   testImplementation 'org.junit.jupiter:junit-jupiter-api'

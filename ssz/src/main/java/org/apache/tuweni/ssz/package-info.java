@@ -18,7 +18,4 @@
  * These classes are included in the standard Tuweni distribution, or separately when using the gradle dependency
  * 'org.apache.tuweni:tuweni-ssz' (tuweni-ssz.jar).
  */
-@ParametersAreNonnullByDefault
 package org.apache.tuweni.ssz;
-
-import javax.annotation.ParametersAreNonnullByDefault;

@@ -12,7 +12,7 @@
  */
 package org.apache.tuweni.bytes;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.tuweni.bytes.Checks.checkArgument;
 
 final class GuardedByteArrayBytes32 extends GuardedByteArrayBytes implements Bytes32 {
 

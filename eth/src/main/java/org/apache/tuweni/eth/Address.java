@@ -12,7 +12,6 @@
  */
 package org.apache.tuweni.eth;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -91,7 +90,9 @@ public final class Address extends DelegatingBytes {
    */
   public static Address fromBytes(Bytes bytes) {
     requireNonNull(bytes);
-    checkArgument(bytes.size() == SIZE, "Expected %s bytes but got %s", SIZE, bytes.size());
+    if (bytes.size() != SIZE) {
+      throw new IllegalArgumentException(String.format("Expected %s bytes but got %s", SIZE, bytes.size()));
+    }
     return new Address(bytes);
   }
 

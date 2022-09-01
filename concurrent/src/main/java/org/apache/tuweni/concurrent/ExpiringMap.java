@@ -24,8 +24,6 @@ import java.util.function.LongSupplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
-import com.google.common.annotations.VisibleForTesting;
-
 /**
  * A concurrent hash map that stores values along with an expiry.
  *
@@ -80,7 +78,6 @@ public final class ExpiringMap<K, V> implements Map<K, V> {
     this(System::currentTimeMillis, defaultTimeout);
   }
 
-  @VisibleForTesting
   ExpiringMap(LongSupplier currentTimeSupplier, Long defaultTimeout) {
     this.currentTimeSupplier = currentTimeSupplier;
     this.defaultTimeout = defaultTimeout;

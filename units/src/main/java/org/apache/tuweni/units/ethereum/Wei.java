@@ -12,8 +12,6 @@
  */
 package org.apache.tuweni.units.ethereum;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import org.apache.tuweni.units.bigints.BaseUInt256Value;
 import org.apache.tuweni.units.bigints.UInt256;
 
@@ -78,7 +76,9 @@ public final class Wei extends BaseUInt256Value<Wei> {
    * @throws IllegalArgumentException If the value is negative.
    */
   public static Wei valueOf(long value) {
-    checkArgument(value >= 0, "Argument must be positive");
+    if (value < 0) {
+      throw new IllegalArgumentException("Argument must be positive");
+    }
     if (value <= MAX_CONSTANT) {
       return CONSTANTS[(int) value];
     }
@@ -97,7 +97,9 @@ public final class Wei extends BaseUInt256Value<Wei> {
    * @throws IllegalArgumentException If the value is negative.
    */
   public static Wei valueOf(BigInteger value) {
-    checkArgument(value.signum() >= 0, "Argument must be positive");
+    if (value.signum() < 0) {
+      throw new IllegalArgumentException("Argument must be positive");
+    }
     if (value.compareTo(BI_MAX_CONSTANT) <= 0) {
       return CONSTANTS[value.intValue()];
     }

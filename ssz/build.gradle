@@ -16,12 +16,12 @@ dependencies {
   implementation project(':bytes')
   implementation project(':crypto')
   compileOnly project(':units')
-  implementation 'com.google.guava:guava'
   implementation 'org.jetbrains.kotlin:kotlin-stdlib'
 
   testImplementation project(':units')
   testImplementation project(':junit')
 
+  testImplementation 'com.google.guava:guava'
   testImplementation 'org.bouncycastle:bcprov-jdk15on'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.junit.jupiter:junit-jupiter-params'

@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
  * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
  * to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
@@ -9,13 +9,31 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- *
- * Recursive Length Prefix (RLP) encoding and decoding.
- * <p>
- * An implementation of the Ethereum Recursive Length Prefix (RLP) algorithm, as described at
- * <a href="https://github.com/ethereum/wiki/wiki/RLP">https://github.com/ethereum/wiki/wiki/RLP</a>.
- * <p>
- * These classes are included in the standard Tuweni distribution, or separately when using the gradle dependency
- * 'org.apache.tuweni:tuweni-rlp' (tuweni-rlp.jar).
  */
-package org.apache.tuweni.rlp;
+package org.apache.tuweni.bytes;
+
+import javax.annotation.Nullable;
+
+import com.google.errorprone.annotations.FormatMethod;
+
+class Checks {
+
+  static void checkNotNull(@Nullable Object object) {
+    if (object == null) {
+      throw new NullPointerException("argument cannot be null");
+    }
+  }
+
+  static void checkElementIndex(int index, int size) {
+    if (index < 0 || index >= size) {
+      throw new IndexOutOfBoundsException("index is out of bounds");
+    }
+  }
+
+  @FormatMethod
+  static void checkArgument(boolean condition, String message, Object... args) {
+    if (!condition) {
+      throw new IllegalArgumentException(String.format(message, args));
+    }
+  }
+}

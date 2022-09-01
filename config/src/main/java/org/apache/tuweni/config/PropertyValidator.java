@@ -22,9 +22,8 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
-import com.google.common.base.Strings;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A validator associated with a specific configuration property.
@@ -245,7 +244,7 @@ public interface PropertyValidator<T> {
    */
   static PropertyValidator<String> isNotBlank() {
     return (key, position, value) -> {
-      if (value != null && !Strings.isNullOrEmpty(value)) {
+      if (value == null || value.length() == 0) {
         return singleError(position, "Value of property '" + key + "' is blank");
       }
       return noErrors();

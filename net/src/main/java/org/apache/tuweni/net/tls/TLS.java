@@ -37,7 +37,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
-import com.google.common.base.Strings;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
@@ -131,7 +130,7 @@ public final class TLS {
     cal.add(Calendar.YEAR, 1);
     Date yearFromNow = cal.getTime();
 
-    if (Strings.isNullOrEmpty(commonName)) {
+    if (commonName == null || commonName.isEmpty()) {
       commonName = UUID.randomUUID().toString() + ".com";
     }
 

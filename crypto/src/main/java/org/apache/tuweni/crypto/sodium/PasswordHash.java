@@ -16,9 +16,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import org.apache.tuweni.bytes.Bytes;
 
-import javax.annotation.Nullable;
-
 import jnr.ffi.Pointer;
+import org.jetbrains.annotations.Nullable;
 
 // Documentation copied under the ISC License, from
 // https://github.com/jedisct1/libsodium-doc/blob/424b7480562c2e063bc8c52c452ef891621c8480/password_hashing/the_argon2i_function.md

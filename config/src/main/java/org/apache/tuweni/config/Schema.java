@@ -21,10 +21,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A schema for a configuration, providing default values and validation rules.
@@ -34,20 +32,20 @@ public final class Schema {
   static final Schema EMPTY = new Schema(
       Collections.emptyMap(),
       Collections.emptyMap(),
-      ArrayListMultimap.create(),
+      Collections.emptyMap(),
       Collections.emptyList(),
       Collections.emptyMap());
 
   private final Map<String, String> propertyDescriptions;
   private final Map<String, Object> propertyDefaults;
-  private final ListMultimap<String, PropertyValidator<Object>> propertyValidators;
+  private final Map<String, PropertyValidator<Object>> propertyValidators;
   private final List<ConfigurationValidator> configurationValidators;
   private final Map<String, Schema> subSections;
 
   Schema(
       Map<String, String> propertyDescriptions,
       Map<String, Object> propertyDefaults,
-      ListMultimap<String, PropertyValidator<Object>> propertyValidators,
+      Map<String, PropertyValidator<Object>> propertyValidators,
       List<ConfigurationValidator> configurationValidators,
       Map<String, Schema> subSections) {
     this.propertyDescriptions = propertyDescriptions;
@@ -402,7 +400,7 @@ public final class Schema {
   public Stream<ConfigurationError> validate(Configuration configuration) {
     requireNonNull(configuration);
 
-    Stream<ConfigurationError> propertyErrors = propertyValidators.entries().stream().flatMap(e -> {
+    Stream<ConfigurationError> propertyErrors = propertyValidators.entrySet().stream().flatMap(e -> {
       String key = e.getKey();
       PropertyValidator<Object> validator = e.getValue();
       Object value = configuration.get(key);

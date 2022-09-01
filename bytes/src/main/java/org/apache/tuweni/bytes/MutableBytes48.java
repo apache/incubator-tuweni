@@ -12,7 +12,8 @@
  */
 package org.apache.tuweni.bytes;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+
+import static org.apache.tuweni.bytes.Checks.checkNotNull;
 
 /**
  * A mutable {@link Bytes48}, that is a mutable {@link Bytes} value of exactly 48 bytes.

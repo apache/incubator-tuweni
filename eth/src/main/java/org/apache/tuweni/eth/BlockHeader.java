@@ -24,10 +24,10 @@ import org.apache.tuweni.units.bigints.UInt64;
 import org.apache.tuweni.units.ethereum.Gas;
 
 import java.time.Instant;
-import javax.annotation.Nullable;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.google.common.base.Objects;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An Ethereum block header.
@@ -329,7 +329,7 @@ public final class BlockHeader {
       return false;
     }
     BlockHeader other = (BlockHeader) obj;
-    return Objects.equal(parentHash, other.parentHash)
+    return Objects.equals(parentHash, other.parentHash)
         && ommersHash.equals(other.ommersHash)
         && coinbase.equals(other.coinbase)
         && stateRoot.equals(other.stateRoot)
@@ -349,7 +349,7 @@ public final class BlockHeader {
   @Override
   public int hashCode() {
     return Objects
-        .hashCode(
+        .hash(
             parentHash,
             ommersHash,
             coinbase,

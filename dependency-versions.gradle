@@ -20,6 +20,7 @@ dependencyManagement {
     dependency('com.github.jnr:jnr-ffi:2.1.9')
     dependency('com.github.kstyrc:embedded-redis:0.6')
     dependency('com.google.code.findbugs:jsr305:3.0.2')
+    dependency('com.google.errorprone:error_prone_annotations:2.15.0')
     dependency('com.google.errorprone:error_prone_core:2.9.0')
     dependency('com.google.guava:guava:31.0.1-jre')
     dependency('com.h2database:h2:1.4.197')
@@ -123,7 +124,6 @@ dependencyManagement {
     }
     dependencySet(group: 'org.jetbrains.kotlinx', version: '1.6.0') {
       entry 'kotlinx-coroutines-core'
-      entry 'kotlinx-coroutines-guava'
       entry 'kotlinx-coroutines-jdk8'
     }
     dependencySet(group: 'org.jetbrains.spek', version: '1.1.5') {

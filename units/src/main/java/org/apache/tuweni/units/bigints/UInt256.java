@@ -12,7 +12,6 @@
  */
 package org.apache.tuweni.units.bigints;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
@@ -21,7 +20,8 @@ import org.apache.tuweni.bytes.MutableBytes32;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import javax.annotation.Nullable;
+
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An unsigned 256-bit precision number.
@@ -65,7 +65,9 @@ public final class UInt256 implements UInt256Value<UInt256> {
    * @throws IllegalArgumentException If the value is negative.
    */
   public static UInt256 valueOf(long value) {
-    checkArgument(value >= 0, "Argument must be positive");
+    if (value < 0) {
+      throw new IllegalArgumentException("Argument must be positive");
+    }
     if (value <= MAX_CONSTANT) {
       return CONSTANTS[(int) value];
     }
@@ -80,8 +82,12 @@ public final class UInt256 implements UInt256Value<UInt256> {
    * @throws IllegalArgumentException if the value is negative or too large to be represented as a UInt256
    */
   public static UInt256 valueOf(BigInteger value) {
-    checkArgument(value.signum() >= 0, "Argument must be positive");
-    checkArgument(value.bitLength() <= 256, "Argument is too large to represent a UInt256");
+    if (value.signum() < 0) {
+      throw new IllegalArgumentException("Argument must be positive");
+    }
+    if (value.bitLength() > 256) {
+      throw new IllegalArgumentException("Argument is too large to represent a UInt256");
+    }
     if (value.compareTo(BI_MAX_CONSTANT) <= 0) {
       return CONSTANTS[value.intValue()];
     }

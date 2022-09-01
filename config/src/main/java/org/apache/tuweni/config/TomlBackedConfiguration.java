@@ -31,7 +31,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import javax.annotation.Nullable;
+
+import org.jetbrains.annotations.Nullable;
 
 final class TomlBackedConfiguration implements Configuration {
 

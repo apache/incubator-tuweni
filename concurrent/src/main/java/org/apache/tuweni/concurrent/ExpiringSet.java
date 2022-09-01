@@ -23,8 +23,6 @@ import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 import javax.annotation.Nullable;
 
-import com.google.common.annotations.VisibleForTesting;
-
 /**
  * A concurrent hash set that stores values along with an expiry.
  *
@@ -76,7 +74,6 @@ public final class ExpiringSet<E> implements Set<E> {
     this(Long.MAX_VALUE, System::currentTimeMillis);
   }
 
-  @VisibleForTesting
   ExpiringSet(long evictionTimeout, LongSupplier currentTimeSupplier) {
     if (evictionTimeout <= 0) {
       throw new IllegalArgumentException("Invalid eviction timeout " + evictionTimeout);

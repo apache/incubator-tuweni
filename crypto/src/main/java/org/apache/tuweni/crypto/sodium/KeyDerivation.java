@@ -12,7 +12,6 @@
  */
 package org.apache.tuweni.crypto.sodium;
 
-import static com.google.common.base.Preconditions.checkState;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -168,7 +167,9 @@ public final class KeyDerivation {
      * @return The derived sub key.
      */
     public byte[] deriveKeyArray(int length, long subkeyId, byte[] context) {
-      checkState(!value.isDestroyed(), "MasterKey has been destroyed");
+      if (value.isDestroyed()) {
+        throw new IllegalStateException("MasterKey has been destroyed");
+      }
       assertSubKeyLength(length);
       assertContextLength(context);
 
