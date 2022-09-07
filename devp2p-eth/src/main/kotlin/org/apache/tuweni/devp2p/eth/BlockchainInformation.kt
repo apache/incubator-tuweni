@@ -108,12 +108,13 @@ class SimpleBlockchainInformation(
 
   private val forkIds: List<ForkInfo>
   private val forks: List<Long>
+  private val genesisHashCrc: Bytes
 
   init {
     this.forks = possibleForks.filter { it > 0 }.sorted().distinct()
     val crc = CRC32()
     crc.update(genesisHash.toArrayUnsafe())
-    val genesisHashCrc = Bytes.ofUnsignedInt(crc.value)
+    genesisHashCrc = Bytes.ofUnsignedInt(crc.value)
     val forkHashes = mutableListOf(genesisHashCrc)
     for (f in forks) {
       val byteRepresentationFork = Bytes.ofUnsignedLong(f).toArrayUnsafe()
@@ -150,6 +151,6 @@ class SimpleBlockchainInformation(
         return fork
       }
     }
-    return forkIds.last()
+    return forkIds.lastOrNull() ?: ForkInfo(0, genesisHashCrc)
   }
 }
