@@ -25,7 +25,6 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ReadOnlyBufferException;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -1442,7 +1441,7 @@ public interface Bytes extends Comparable<Bytes> {
     }
   }
 
-  default String toFastHex(boolean prefix){
+  default String toFastHex(boolean prefix) {
 
     int offset = prefix ? 2 : 0;
 
@@ -1629,7 +1628,7 @@ public interface Bytes extends Comparable<Bytes> {
       byte b = get(i);
       int pos = (i * 2) + 2;
       result[pos] = AbstractBytes.HEX_CODE_AS_STRING.charAt(b >> 4 & 15);
-      result[pos+1] = AbstractBytes.HEX_CODE_AS_STRING.charAt(b & 15);
+      result[pos + 1] = AbstractBytes.HEX_CODE_AS_STRING.charAt(b & 15);
     }
     result[6] = '.';
     result[7] = '.';
@@ -1637,7 +1636,7 @@ public interface Bytes extends Comparable<Bytes> {
       byte b = get(i + size - 2);
       int pos = (i * 2) + 8;
       result[pos] = AbstractBytes.HEX_CODE_AS_STRING.charAt(b >> 4 & 15);
-      result[pos+1] = AbstractBytes.HEX_CODE_AS_STRING.charAt(b & 15);
+      result[pos + 1] = AbstractBytes.HEX_CODE_AS_STRING.charAt(b & 15);
     }
     return new String(result);
   }
