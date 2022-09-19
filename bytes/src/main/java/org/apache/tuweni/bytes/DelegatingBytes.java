@@ -13,12 +13,12 @@
 package org.apache.tuweni.bytes;
 
 
-import io.vertx.core.buffer.Buffer;
-
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.MessageDigest;
+
+import io.vertx.core.buffer.Buffer;
 
 /**
  * A class that holds and delegates all operations to its inner bytes field.
