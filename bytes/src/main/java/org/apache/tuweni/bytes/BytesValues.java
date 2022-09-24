@@ -34,7 +34,7 @@ final class BytesValues {
     }
 
     int idxShift = 0;
-    if (len % 2 != 0) {
+    if ((len & 0x01) != 0) {
       if (!lenient) {
         throw new IllegalArgumentException("Invalid odd-length hex binary representation");
       }
@@ -44,7 +44,7 @@ final class BytesValues {
       idxShift = 1;
     }
 
-    int size = len / 2;
+    int size = len >> 1;
     if (destSize < 0) {
       destSize = size;
     } else {
@@ -54,38 +54,30 @@ final class BytesValues {
     byte[] out = new byte[destSize];
 
     int destOffset = (destSize - size);
-    for (int i = 0; i < len; i += 2) {
-      int h = hexToBin(hex.charAt(i));
-      int l = hexToBin(hex.charAt(i + 1));
+    for (int i = destOffset, j = 0; j < len; i++) {
+      int h = Character.digit(hex.charAt(j), 16);
       if (h == -1) {
         throw new IllegalArgumentException(
             String
                 .format(
                     "Illegal character '%c' found at index %d in hex binary representation",
-                    hex.charAt(i),
-                    i - idxShift));
+                    hex.charAt(j),
+                    j - idxShift));
       }
+      j++;
+      int l = Character.digit(hex.charAt(j), 16);
       if (l == -1) {
         throw new IllegalArgumentException(
             String
                 .format(
                     "Illegal character '%c' found at index %d in hex binary representation",
-                    hex.charAt(i + 1),
-                    i + 1 - idxShift));
+                    hex.charAt(j),
+                    j - idxShift));
       }
-
-      out[destOffset + (i / 2)] = (byte) (h * 16 + l);
+      j++;
+      out[i] = (byte) ((h << 4) + l);
     }
     return out;
   }
 
-  private static int hexToBin(char ch) {
-    if ('0' <= ch && ch <= '9') {
-      return ch - 48;
-    } else if ('A' <= ch && ch <= 'F') {
-      return ch - 65 + 10;
-    } else {
-      return 'a' <= ch && ch <= 'f' ? ch - 97 + 10 : -1;
-    }
-  }
 }

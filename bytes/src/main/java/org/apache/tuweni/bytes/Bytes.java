@@ -1434,16 +1434,35 @@ public interface Bytes extends Comparable<Bytes> {
    */
   default <T extends Appendable> T appendHexTo(T appendable) {
     try {
-      int size = size();
-      for (int i = 0; i < size; i++) {
-        byte b = get(i);
-        appendable.append(AbstractBytes.HEX_CODE[b >> 4 & 15]);
-        appendable.append(AbstractBytes.HEX_CODE[b & 15]);
-      }
+      appendable.append(toFastHex(false));
       return appendable;
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
+  }
+
+  default String toFastHex(boolean prefix) {
+
+    int offset = prefix ? 2 : 0;
+
+    int resultSize = (size() * 2) + offset;
+
+    char[] result = new char[resultSize];
+
+    if (prefix) {
+      result[0] = '0';
+      result[1] = 'x';
+    }
+
+    for (int i = 0; i < size(); i++) {
+      byte b = get(i);
+      int pos = i * 2;
+      result[pos + offset] = AbstractBytes.HEX_CODE_AS_STRING.charAt(b >> 4 & 15);
+      result[pos + offset + 1] = AbstractBytes.HEX_CODE_AS_STRING.charAt(b & 15);
+    }
+
+    return new String(result);
+
   }
 
   /**
@@ -1585,7 +1604,7 @@ public interface Bytes extends Comparable<Bytes> {
    * @return This value represented as hexadecimal, starting with "0x".
    */
   default String toHexString() {
-    return appendHexTo(new StringBuilder("0x")).toString();
+    return toFastHex(true);
   }
 
   /**
@@ -1594,7 +1613,7 @@ public interface Bytes extends Comparable<Bytes> {
    * @return This value represented as hexadecimal, with no prefix.
    */
   default String toUnprefixedHexString() {
-    return appendHexTo(new StringBuilder()).toString();
+    return toFastHex(false);
   }
 
   default String toEllipsisHexString() {
@@ -1602,19 +1621,24 @@ public interface Bytes extends Comparable<Bytes> {
     if (size < 6) {
       return toHexString();
     }
-    StringBuilder appendable = new StringBuilder("0x");
+    char[] result = new char[12];
+    result[0] = '0';
+    result[1] = 'x';
     for (int i = 0; i < 2; i++) {
       byte b = get(i);
-      appendable.append(AbstractBytes.HEX_CODE[b >> 4 & 15]);
-      appendable.append(AbstractBytes.HEX_CODE[b & 15]);
+      int pos = (i * 2) + 2;
+      result[pos] = AbstractBytes.HEX_CODE_AS_STRING.charAt(b >> 4 & 15);
+      result[pos + 1] = AbstractBytes.HEX_CODE_AS_STRING.charAt(b & 15);
     }
-    appendable.append("..");
+    result[6] = '.';
+    result[7] = '.';
     for (int i = 0; i < 2; i++) {
       byte b = get(i + size - 2);
-      appendable.append(AbstractBytes.HEX_CODE[b >> 4 & 15]);
-      appendable.append(AbstractBytes.HEX_CODE[b & 15]);
+      int pos = (i * 2) + 8;
+      result[pos] = AbstractBytes.HEX_CODE_AS_STRING.charAt(b >> 4 & 15);
+      result[pos + 1] = AbstractBytes.HEX_CODE_AS_STRING.charAt(b & 15);
     }
-    return appendable.toString();
+    return new String(result);
   }
 
   /**
@@ -1623,7 +1647,7 @@ public interface Bytes extends Comparable<Bytes> {
    * @return This value represented as a minimal hexadecimal string (without any leading zero).
    */
   default String toShortHexString() {
-    StringBuilder hex = appendHexTo(new StringBuilder());
+    String hex = toFastHex(false);
 
     int i = 0;
     while (i < hex.length() && hex.charAt(i) == '0') {
@@ -1643,13 +1667,13 @@ public interface Bytes extends Comparable<Bytes> {
     if (Bytes.EMPTY.equals(this)) {
       return "0x0";
     }
-    StringBuilder hex = appendHexTo(new StringBuilder());
+    String hex = toFastHex(false);
 
     int i = 0;
     while (i < hex.length() - 1 && hex.charAt(i) == '0') {
       i++;
     }
-    return "0x" + hex.substring(hex.charAt(hex.length() - 1) == '0' ? i : i++);
+    return "0x" + hex.substring(i);
   }
 
   /**
