@@ -25,6 +25,7 @@ import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.eth.repository.BlockchainRepository
 import org.apache.tuweni.eth.repository.MemoryTransactionPool
 import org.apache.tuweni.genesis.Genesis
+import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.TempDirectoryExtension
 import org.apache.tuweni.rlpx.MemoryWireConnectionsRepository
 import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
@@ -35,7 +36,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(TempDirectoryExtension::class)
+@ExtendWith(TempDirectoryExtension::class, BouncyCastleExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class LESSubprotocolTest {
 
