@@ -89,12 +89,12 @@ class SubversionStageTask extends DefaultTask {
 
     // create the folder in SVN where we will stage the binaries
     project.exec {
-      commandLine "svn", "mkdir", "-m", "Add new Apache Tuweni folder for release $project.version", "https://dist.apache.org/repos/dist/dev/incubator/tuweni/$project.version-incubating"
+      commandLine "svn", "mkdir", "-m", "Add new Apache Tuweni folder for release $project.version", "https://dist.apache.org/repos/dist/dev/incubator/tuweni/$project.version-incubating", "--force-interactive"
     }
 
     // check out the SVN repository where we will store the binaries
     project.exec {
-      commandLine "svn", "checkout", "https://dist.apache.org/repos/dist/dev/incubator/tuweni/$project.version-incubating", "_staged/$project.version-incubating"
+      commandLine "svn", "checkout", "https://dist.apache.org/repos/dist/dev/incubator/tuweni/$project.version-incubating", "_staged/$project.version-incubating", "--force-interactive"
     }
   }
 }
@@ -138,7 +138,7 @@ class CopyStagedTask extends DefaultTask {
     }
     project.exec {
       workingDir "_staged/$project.version-incubating/"
-      commandLine 'svn', 'ci', '-m', "Add Apache Tuweni $project.version release candidate"
+      commandLine 'svn', 'ci', '-m', "Add Apache Tuweni $project.version release candidate", "--force-interactive"
     }
   }
 }
