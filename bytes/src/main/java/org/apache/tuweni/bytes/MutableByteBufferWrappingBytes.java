@@ -43,6 +43,17 @@ public class MutableByteBufferWrappingBytes extends ByteBufferWrappingBytes impl
   }
 
   @Override
+  public void set(int i, Bytes b) {
+    byte[] bytes = b.toArrayUnsafe();
+    int byteIndex = 0;
+    int thisIndex = offset + i;
+    int end = bytes.length;
+    while (byteIndex < end) {
+      byteBuffer.put(thisIndex++, bytes[byteIndex++]);
+    }
+  }
+
+  @Override
   public MutableBytes mutableSlice(int i, int length) {
     if (i == 0 && length == this.length) {
       return this;

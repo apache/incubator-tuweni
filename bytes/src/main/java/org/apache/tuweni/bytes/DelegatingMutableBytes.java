@@ -40,6 +40,11 @@ public class DelegatingMutableBytes implements MutableBytes {
   }
 
   @Override
+  public void set(int i, Bytes b) {
+    delegate.set(i, b);
+  }
+
+  @Override
   public void setInt(int i, int value) {
     delegate.setInt(i, value);
   }

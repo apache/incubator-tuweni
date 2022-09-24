@@ -1391,9 +1391,7 @@ public interface Bytes extends Comparable<Bytes> {
         destination.size() - destinationOffset,
         destinationOffset);
 
-    for (int i = 0; i < size; i++) {
-      destination.set(destinationOffset + i, get(i));
-    }
+    destination.set(destinationOffset, this);
   }
 
   /**

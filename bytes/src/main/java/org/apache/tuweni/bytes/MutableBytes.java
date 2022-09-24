@@ -42,7 +42,7 @@ public interface MutableBytes extends Bytes {
     if (size == 32) {
       return MutableBytes32.create();
     }
-    return new MutableByteBufferWrappingBytes(ByteBuffer.allocate(size));
+    return new MutableArrayWrappingBytes(new byte[size]);
   }
 
   /**
