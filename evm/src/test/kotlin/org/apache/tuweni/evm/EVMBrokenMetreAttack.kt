@@ -43,16 +43,19 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(LuceneIndexWriterExtension::class, BouncyCastleExtension::class)
 class EVMBrokenMetreAttack {
 
+  @Disabled("Expensive")
   @Test
   fun testBrokenMetreAttackBalance(@LuceneIndexWriter writer: IndexWriter) = runBlocking {
     runAttack("31", writer, EVMExecutionStatusCode.OUT_OF_GAS)
   }
 
+  @Disabled("Expensive")
   @Test
   fun testBrokenMetreAttackExtcodeSize(@LuceneIndexWriter writer: IndexWriter) = runBlocking {
     runAttack("3B", writer, EVMExecutionStatusCode.STACK_OVERFLOW)
   }
 
+  @Disabled("Expensive")
   @Test
   fun testBrokenMetreAttackExtcodeHash(@LuceneIndexWriter writer: IndexWriter) = runBlocking {
     runAttack("3F", writer, EVMExecutionStatusCode.STACK_OVERFLOW)
