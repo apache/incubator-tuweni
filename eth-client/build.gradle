@@ -14,7 +14,6 @@ description = 'Ethereum client'
 
 dependencies {
   implementation 'com.fasterxml.jackson.core:jackson-databind'
-  implementation 'dnsjava:dnsjava'
   implementation 'io.opentelemetry:opentelemetry-api'
   implementation 'io.opentelemetry:opentelemetry-sdk'
   implementation 'io.opentelemetry:opentelemetry-sdk-metrics'
@@ -24,6 +23,7 @@ dependencies {
   implementation 'org.apache.lucene:lucene-core'
   implementation 'org.infinispan:infinispan-core'
   implementation 'org.infinispan:infinispan-cachestore-rocksdb'
+  implementation 'org.slf4j:slf4j-api'
 
   implementation project(':bytes')
   implementation project(':devp2p-eth')

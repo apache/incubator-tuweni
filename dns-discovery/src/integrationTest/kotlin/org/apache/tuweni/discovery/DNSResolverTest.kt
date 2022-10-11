@@ -16,28 +16,32 @@
  */
 package org.apache.tuweni.discovery
 
+import io.vertx.core.Vertx
+import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.junit.BouncyCastleExtension
+import org.apache.tuweni.junit.VertxExtension
+import org.apache.tuweni.junit.VertxInstance
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(BouncyCastleExtension::class)
+@ExtendWith(BouncyCastleExtension::class, VertxExtension::class)
 class DNSResolverTest {
 
   @Test
-  fun testQueryTXT() {
-    val resolver = DNSResolver()
+  fun testQueryTXT(@VertxInstance vertx: Vertx) = runBlocking {
+    val resolver = DNSResolver(vertx = vertx)
     val rec = resolver.resolveRecordRaw("all.goerli.ethdisco.net")
     assertNotNull(rec)
   }
 
   @Disabled("too unstable on CI")
   @Test
-  fun resolveAllGoerliNodes() {
-    val resolver = DNSResolver()
+  fun resolveAllGoerliNodes(@VertxInstance vertx: Vertx) = runBlocking {
+    val resolver = DNSResolver(vertx = vertx)
     val nodes = mutableListOf<EthereumNodeRecord>()
     val visitor = object : DNSVisitor {
       override fun visit(enr: EthereumNodeRecord): Boolean {
@@ -55,8 +59,8 @@ class DNSResolverTest {
 
   @Disabled("too expensive for CI")
   @Test
-  fun resolveAllMainnetNodes() {
-    val resolver = DNSResolver()
+  fun resolveAllMainnetNodes(@VertxInstance vertx: Vertx) = runBlocking {
+    val resolver = DNSResolver(vertx = vertx)
     val nodes = mutableListOf<EthereumNodeRecord>()
     val visitor = object : DNSVisitor {
       override fun visit(enr: EthereumNodeRecord): Boolean {

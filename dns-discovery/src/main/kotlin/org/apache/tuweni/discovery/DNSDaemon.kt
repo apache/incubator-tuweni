@@ -16,12 +16,10 @@
  */
 package org.apache.tuweni.discovery
 
+import io.vertx.core.Vertx
+import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.slf4j.LoggerFactory
-import org.xbill.DNS.ExtendedResolver
-import org.xbill.DNS.Resolver
-import java.util.Timer
-import java.util.TimerTask
 
 /**
  * Resolves DNS records over time, refreshing records.
@@ -39,15 +37,15 @@ class DNSDaemon @JvmOverloads constructor(
   private val seq: Long = 0,
   private val period: Long = 60000L,
   private val dnsServer: String? = null,
-  private val resolver: Resolver = if (dnsServer != null) ExtendedResolver(arrayOf(dnsServer)) else ExtendedResolver()
+  private val vertx: Vertx,
 ) {
   companion object {
     val logger = LoggerFactory.getLogger(DNSDaemon::class.java)
   }
 
-  val listeners = HashSet<DNSDaemonListener>()
+  private var periodicHandle: Long = 0
 
-  private val timer: Timer = Timer(false)
+  val listeners = HashSet<DNSDaemonListener>()
 
   init {
     listener?.let {
@@ -61,31 +59,35 @@ class DNSDaemon @JvmOverloads constructor(
 
   fun start() {
     logger.trace("Starting DNSDaemon for $enrLink")
-    timer.scheduleAtFixedRate(DNSTimerTask(resolver, seq, enrLink, this::updateRecords), 0, period)
+    val task = DNSTimerTask(vertx, seq, enrLink, this::updateRecords)
+    this.periodicHandle = vertx.setPeriodic(period, task::run)
   }
 
   /**
    * Close the daemon.
    */
   public fun close() {
-    timer.cancel()
+    vertx.cancelTimer(this.periodicHandle)
   }
 }
 
 internal class DNSTimerTask(
-  private val resolver: Resolver,
+  private val vertx: Vertx,
   private val seq: Long,
   private val enrLink: String,
   private val records: (List<EthereumNodeRecord>) -> Unit,
-  private val dnsResolver: DNSResolver = DNSResolver(null, seq, resolver)
-) : TimerTask() {
+  private val dnsServer: String? = null,
+  private val dnsResolver: DNSResolver = DNSResolver(dnsServer, seq, vertx)
+) {
 
   companion object {
     val logger = LoggerFactory.getLogger(DNSTimerTask::class.java)
   }
 
-  override fun run() {
+  fun run(@Suppress("UNUSED_PARAMETER") timerId: Long) {
     logger.debug("Refreshing DNS records with $enrLink")
-    records(dnsResolver.collectAll(enrLink))
+    runBlocking {
+      records(dnsResolver.collectAll(enrLink))
+    }
   }
 }

@@ -132,6 +132,7 @@ class CrawlerApplication(
     )
 
     val dnsDaemon = DNSDaemon(
+      vertx = vertx,
       seq = 0L,
       enrLink = config.discoveryDNS(),
       period = config.discoveryDNSPollingPeriod(),
