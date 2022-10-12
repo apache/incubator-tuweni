@@ -32,19 +32,18 @@ package org.apache.tuweni.discovery
  * limitations under the License.
  */
 
+import io.vertx.core.Vertx
+import io.vertx.core.dns.DnsClient
+import io.vertx.core.dns.DnsClientOptions
+import io.vertx.core.dns.DnsException
+import io.vertx.kotlin.coroutines.await
+import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.concurrent.AsyncCompletion
+import org.apache.tuweni.concurrent.coroutines.asyncCompletion
 import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.slf4j.LoggerFactory
-import org.xbill.DNS.DClass
-import org.xbill.DNS.ExtendedResolver
-import org.xbill.DNS.Message
-import org.xbill.DNS.Name
-import org.xbill.DNS.Record
-import org.xbill.DNS.Resolver
-import org.xbill.DNS.Section
-import org.xbill.DNS.Type
-import org.xbill.DNS.WireParseException
 import java.io.IOException
 
 /**
@@ -56,7 +55,14 @@ import java.io.IOException
 class DNSResolver @JvmOverloads constructor(
   private val dnsServer: String? = null,
   var seq: Long = 0,
-  private val resolver: Resolver = if (dnsServer != null) ExtendedResolver(arrayOf(dnsServer)) else ExtendedResolver(),
+  val vertx: Vertx,
+  private val dnsClient: DnsClient = vertx.createDnsClient(
+    DnsClientOptions().apply {
+      if (dnsServer != null) {
+        this.host = dnsServer
+      }
+    }
+  )
 ) {
 
   companion object {
@@ -69,7 +75,7 @@ class DNSResolver @JvmOverloads constructor(
    * @param domainName the domain name to query
    * @return the DNS entry read from the domain
    */
-  public fun resolveRecord(domainName: String): DNSEntry? {
+  suspend fun resolveRecord(domainName: String): DNSEntry? {
     return resolveRecordRaw(domainName)?.let { DNSEntry.readDNSEntry(it) }
   }
 
@@ -84,7 +90,7 @@ class DNSResolver @JvmOverloads constructor(
    * @param enrLink the ENR link to start with, of the form enrtree://PUBKEY@domain
    * @return all ENRs collected
    */
-  public fun collectAll(enrLink: String): List<EthereumNodeRecord> {
+  suspend fun collectAll(enrLink: String): List<EthereumNodeRecord> {
     val nodes = mutableListOf<EthereumNodeRecord>()
     val visitor = object : DNSVisitor {
       override fun visit(enr: EthereumNodeRecord): Boolean {
@@ -106,9 +112,17 @@ class DNSResolver @JvmOverloads constructor(
    * @param enrLink the ENR link to start with
    * @param visitor the visitor that will look at each record
    */
-  public fun visitTree(enrLink: String, visitor: DNSVisitor) {
+  suspend fun visitTree(enrLink: String, visitor: DNSVisitor) {
     val link = ENRTreeLink(enrLink)
     visitTree(link, visitor)
+  }
+
+  fun visitTreeAsync(enrLink: String, visitor: DNSVisitor): AsyncCompletion {
+    return runBlocking {
+      return@runBlocking asyncCompletion {
+        visitTree(enrLink, visitor)
+      }
+    }
   }
 
   /**
@@ -116,7 +130,7 @@ class DNSResolver @JvmOverloads constructor(
    * @param link the ENR link to start with
    * @param visitor the visitor that will look at each record
    */
-  private fun visitTree(link: ENRTreeLink, visitor: DNSVisitor) {
+  private suspend fun visitTree(link: ENRTreeLink, visitor: DNSVisitor) {
     val entry = resolveRecord(link.domainName)
     if (entry !is ENRTreeRoot) {
       logger.debug("Root entry $entry is not an ENR tree root")
@@ -143,39 +157,27 @@ class DNSResolver @JvmOverloads constructor(
    * @param domainName the name of the DNS domain to query
    * @return the first TXT entry of the DNS record
    */
-  fun resolveRecordRaw(domainName: String): String? {
+  suspend fun resolveRecordRaw(domainName: String): String? {
     try {
-
-      // required as TXT records are quite big, and dnsjava maxes out UDP payload.
-      resolver.setTCP(true)
-      val type = Type.TXT
-      val name = Name.fromString(domainName, Name.root)
-      val rec = Record.newRecord(name, type, DClass.IN)
-      val query = Message.newQuery(rec)
-      val response = resolver.send(query)
-      val records = response.getSection(Section.ANSWER)
-
+      val records = dnsClient.resolveTXT(domainName).await()
       if (records.isNotEmpty()) {
-        return records[0].rdataToString()
+        return records[0]
       } else {
         logger.debug("No TXT record for $domainName")
         return null
       }
+    } catch (e: DnsException) {
+      logger.warn("DNS query error with $domainName", e)
+      return null
     } catch (e: IOException) {
       logger.warn("I/O exception contacting remote DNS server when resolving $domainName", e)
-      return null
-    } catch (e: WireParseException) {
-      logger.error("Error reading TXT record", e)
       return null
     }
   }
 
-  private fun internalVisit(entryName: String, domainName: String, visitor: DNSVisitor): Boolean {
+  private suspend fun internalVisit(entryName: String, domainName: String, visitor: DNSVisitor): Boolean {
     try {
-      val entry = resolveRecord("$entryName.$domainName")
-      if (entry == null) {
-        return true
-      }
+      val entry = resolveRecord("$entryName.$domainName") ?: return true
 
       if (entry is ENRNode) {
         return visitor.visit(entry.nodeRecord)

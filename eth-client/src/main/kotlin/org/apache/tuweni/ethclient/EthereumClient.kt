@@ -170,7 +170,7 @@ class EthereumClient(
           "Repository $peerRepository not found, $message"
         )
       }
-      val dnsClient = DNSClient(it, MapKeyValueStore.open(), peerRepository)
+      val dnsClient = DNSClient(vertx, it, MapKeyValueStore.open(), peerRepository)
       dnsClients[it.getName()] = dnsClient
       dnsClient.start()
       logger.info("Started DNS client ${it.getName()} for ${it.enrLink()}")

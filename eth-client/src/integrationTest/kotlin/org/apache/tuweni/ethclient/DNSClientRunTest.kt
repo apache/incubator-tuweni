@@ -16,16 +16,22 @@
  */
 package org.apache.tuweni.ethclient
 
+import io.vertx.core.Vertx
 import kotlinx.coroutines.runBlocking
+import org.apache.tuweni.junit.VertxExtension
+import org.apache.tuweni.junit.VertxInstance
 import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.peer.repository.memory.MemoryPeerRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
+@ExtendWith(VertxExtension::class)
 class DNSClientRunTest {
   @Test
-  fun testStartAndStop() {
+  fun testStartAndStop(@VertxInstance vertx: Vertx) {
     val client = DNSClient(
+      vertx,
       DNSConfigurationImpl("default", "foo", "example.com", 1000, null),
       MapKeyValueStore.open(), MemoryPeerRepository()
     )
@@ -36,8 +42,9 @@ class DNSClientRunTest {
   }
 
   @Test
-  fun changeSeq() {
+  fun changeSeq(@VertxInstance vertx: Vertx) {
     val client = DNSClient(
+      vertx,
       DNSConfigurationImpl("default", "foo", "example.com", 1000, null),
       MapKeyValueStore.open(), MemoryPeerRepository()
     )
