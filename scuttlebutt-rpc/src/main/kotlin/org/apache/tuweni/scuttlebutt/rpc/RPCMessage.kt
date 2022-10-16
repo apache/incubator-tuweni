@@ -33,7 +33,7 @@ class RPCMessage(messageBytes: Bytes) {
   private val rpcFlags: Byte
   private val stream: Boolean
   private val lastMessageOrError: Boolean
-  private var bodyType: BodyType? = null
+  private val bodyType: BodyType
   private val body: Bytes
   private val requestNumber: Int
 
@@ -138,7 +138,7 @@ class RPCMessage(messageBytes: Bytes) {
    *
    * @return the type of the body: a binary message, a UTF-8 string or a JSON message
    */
-  fun bodyType(): BodyType? {
+  fun bodyType(): BodyType {
     return bodyType
   }
 

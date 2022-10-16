@@ -16,6 +16,8 @@
  */
 package org.apache.tuweni.scuttlebutt.rpc
 
+import kotlin.experimental.and
+
 /**
  * Defines constants for dealing with SecureScuttlebutt RPC flags.
  */
@@ -99,9 +101,10 @@ interface RPCFlag {
     }
 
     override fun isApplied(flagsByte: Byte): Boolean {
-      return if (flagsByte.toInt() == value) {
-        this == BINARY
-      } else flagsByte.toInt() and value.toByte().toInt() != 0
+      if (flagsByte.toInt() == 0) {
+        return this == BINARY
+      }
+      return flagsByte.and(value.toByte()).toInt() != 0
     }
 
     companion object {
