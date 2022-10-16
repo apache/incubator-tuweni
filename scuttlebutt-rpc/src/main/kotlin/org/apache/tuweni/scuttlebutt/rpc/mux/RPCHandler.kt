@@ -115,9 +115,8 @@ class RPCHandler(
   }
 
   override fun receivedMessage(message: Bytes) {
-    val synchronizedHandleMessage = Handler { _: Void ->
+    val synchronizedHandleMessage = Handler { _: Void? ->
       val rpcMessage = RPCMessage(message)
-
       // A negative request number indicates that this is a response, rather than a request that this node
       // should service
       if (rpcMessage.requestNumber() < 0) {

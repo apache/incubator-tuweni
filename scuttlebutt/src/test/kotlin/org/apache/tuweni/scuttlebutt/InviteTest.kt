@@ -29,6 +29,7 @@ internal class InviteTest() {
 
   companion object {
     @BeforeAll
+    @JvmStatic
     fun checkAvailable() {
       Assumptions.assumeTrue(Sodium.isAvailable(), "Sodium native library is not available")
     }

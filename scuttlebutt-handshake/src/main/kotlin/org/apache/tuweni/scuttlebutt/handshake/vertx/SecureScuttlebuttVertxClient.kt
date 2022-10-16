@@ -69,9 +69,12 @@ class SecureScuttlebuttVertxClient(private val vertx: Vertx, private val keyPair
           networkIdentifier, remotePublicKey
         )
       }
-      socket.closeHandler { _ ->
+      socket.closeHandler {
         if (handler != null) {
           handler!!.streamClosed()
+        }
+        if (!result.isDone) {
+          result.completeExceptionally( IllegalStateException("Connection closed before handshake"));
         }
       }
       socket.exceptionHandler { e: Throwable ->
@@ -118,6 +121,7 @@ class SecureScuttlebuttVertxClient(private val vertx: Vertx, private val keyPair
             }
           }
           handshakeCounter++
+          result.complete(handler)
         } else {
           val message = client!!.readFromServer(
             Bytes.wrapBuffer(
@@ -151,18 +155,19 @@ class SecureScuttlebuttVertxClient(private val vertx: Vertx, private val keyPair
             }
           }
         }
-        result.complete(handler)
       } catch (e: HandshakeException) {
+        result.completeExceptionally(e)
         logger.debug(e.message, e)
         socket.close()
-        result.completeExceptionally(e)
       } catch (e: StreamException) {
+        result.completeExceptionally(e)
         logger.debug(e.message, e)
         socket.close()
-        result.completeExceptionally(e)
       } catch (t: Throwable) {
+        if (!result.isDone) {
+          result.completeExceptionally(t)
+        }
         logger.error(t.message, t)
-        result.completeExceptionally(t)
         throw RuntimeException(t)
       }
     }
