@@ -15,6 +15,7 @@ description = "High level scuttlebutt library functions"
 dependencies {
   implementation project(":bytes")
   implementation project(":concurrent")
+  implementation project(":concurrent-coroutines")
   implementation project(":crypto")
   implementation project(":io")
   implementation project(":scuttlebutt")
@@ -24,6 +25,8 @@ dependencies {
   implementation 'io.vertx:vertx-core'
   implementation 'org.slf4j:slf4j-api'
   implementation 'com.fasterxml.jackson.core:jackson-databind'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+  implementation 'io.vertx:vertx-lang-kotlin-coroutines'
 
   testImplementation project(':junit')
   testImplementation 'org.bouncycastle:bcprov-jdk15on'

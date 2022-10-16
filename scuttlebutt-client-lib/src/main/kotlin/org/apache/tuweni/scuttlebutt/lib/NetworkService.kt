@@ -20,8 +20,6 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.apache.tuweni.concurrent.AsyncCompletion
-import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.scuttlebutt.Invite
 import org.apache.tuweni.scuttlebutt.MalformedInviteCodeException
 import org.apache.tuweni.scuttlebutt.lib.model.Peer
@@ -31,12 +29,11 @@ import org.apache.tuweni.scuttlebutt.rpc.RPCAsyncRequest
 import org.apache.tuweni.scuttlebutt.rpc.RPCFunction
 import org.apache.tuweni.scuttlebutt.rpc.RPCResponse
 import org.apache.tuweni.scuttlebutt.rpc.RPCStreamRequest
+import org.apache.tuweni.scuttlebutt.rpc.mux.ConnectionClosedException
 import org.apache.tuweni.scuttlebutt.rpc.mux.Multiplexer
 import org.apache.tuweni.scuttlebutt.rpc.mux.ScuttlebuttStreamHandler
-import org.apache.tuweni.scuttlebutt.rpc.mux.exceptions.ConnectionClosedException
 import java.io.IOException
 import java.util.function.Function
-import java.util.stream.Collectors
 
 /**
  * A service for operations that connect nodes together and other network related operations
@@ -52,7 +49,7 @@ class NetworkService(private val multiplexer: Multiplexer) {
   companion object {
     // We don't represent all the fields returned over RPC in our java classes, so we configure the mapper
     // to ignore JSON fields without a corresponding Java field
-    private val mapper: ObjectMapper =
+    private val mapper =
       ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   }
 
@@ -64,20 +61,11 @@ class NetworkService(private val multiplexer: Multiplexer) {
    * times.)
    * @return the invite that was generated.
    */
-  fun generateInviteCode(validForUses: Int): AsyncResult<Invite> {
+  suspend fun generateInviteCode(validForUses: Int): Invite {
     val function = RPCFunction(listOf("invite"), "create")
     val request = RPCAsyncRequest(function, listOf<Any>(validForUses))
-    try {
-      return multiplexer.makeAsyncRequest(request).then { response: RPCResponse ->
-        try {
-          return@then AsyncResult.completed(inviteFromRPCResponse(response))
-        } catch (malformedInviteCodeException: MalformedInviteCodeException) {
-          return@then AsyncResult.exceptional<Invite>(malformedInviteCodeException)
-        }
-      }
-    } catch (ex: JsonProcessingException) {
-      return AsyncResult.exceptional(ex)
-    }
+    val response = multiplexer.makeAsyncRequest(request)
+    return inviteFromRPCResponse(response)
   }
 
   /**
@@ -87,14 +75,10 @@ class NetworkService(private val multiplexer: Multiplexer) {
    * @param invite the invite to redeem
    * @return a completion handle
    */
-  fun redeemInviteCode(invite: Invite): AsyncCompletion {
+  suspend fun redeemInviteCode(invite: Invite) {
     val function = RPCFunction(listOf("invite"), "accept")
     val request = RPCAsyncRequest(function, listOf<Any>(invite.toCanonicalForm()))
-    return try {
-      multiplexer.makeAsyncRequest(request).thenAccept { }
-    } catch (ex: JsonProcessingException) {
-      AsyncCompletion.exceptional(ex)
-    }
+    multiplexer.makeAsyncRequest(request)
   }
 
   /**
@@ -102,44 +86,30 @@ class NetworkService(private val multiplexer: Multiplexer) {
    *
    * @return a handle to seeing all peers
    */
-  val connectedPeers: AsyncResult<List<Peer>>
-    get() = allKnownPeers
-      .thenApply { peers: List<Peer> ->
-        peers.stream().filter { peer: Peer -> (peer.state == "connected") }
-          .collect(Collectors.toList())
-      }
+  suspend fun getConnectedPeers(): List<Peer> {
+    val peers = getAllKnownPeers()
+    return peers.filter {
+      it.state == "connected"
+    }
+  }
 
   /**
    * Queries for all the peers the instance is aware of in its gossip table.
    *
    * @return a handle to the list of all known peers
    */
-  val allKnownPeers: AsyncResult<List<Peer>>
-    get() {
-      val function = RPCFunction(listOf("gossip"), "peers")
-      val request = RPCAsyncRequest(function, listOf())
-      try {
-        return multiplexer.makeAsyncRequest(request).then { rpcResponse: RPCResponse ->
-          try {
-            val peers: List<Peer> =
-              rpcResponse.asJSON(
-                mapper,
-                object :
-                  TypeReference<List<Peer>>() {}
-              )
-            return@then AsyncResult.completed(
-              peers
-            )
-          } catch (e: IOException) {
-            return@then AsyncResult.exceptional<List<Peer>>(
-              e
-            )
-          }
-        }
-      } catch (e: JsonProcessingException) {
-        return AsyncResult.exceptional(e)
-      }
-    }
+  suspend fun getAllKnownPeers(): List<Peer> {
+    val function = RPCFunction(listOf("gossip"), "peers")
+    val request = RPCAsyncRequest(function, listOf())
+    val rpcResponse = multiplexer.makeAsyncRequest(request)
+    val peers: List<Peer> =
+      rpcResponse.asJSON(
+        mapper,
+        object :
+          TypeReference<List<Peer>>() {}
+      )
+    return peers
+  }
 
   /**
    * Opens a stream of peer connection state changes.

@@ -79,7 +79,7 @@ interface Identity {
    * @return the name of the curve associated with this identity
    */
   fun curveName(): String {
-    return curve().name
+    return curve().curveName
   }
 
   /**
