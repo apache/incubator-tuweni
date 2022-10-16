@@ -49,7 +49,7 @@ internal object Utils {
       val secretJSON = java.lang.String.join("", list)
       val mapper = ObjectMapper()
       val values: Map<String, String> =
-        mapper.readValue<Map<String, String>>(secretJSON, object : TypeReference<Map<String, String>>() {})
+        mapper.readValue(secretJSON, object : TypeReference<Map<String, String>>() {})
       val pubKey = values["public"]!!.replace(".ed25519", "")
       val privateKey = values["private"]!!.replace(".ed25519", "")
       val pubKeyBytes = Base64.decode(pubKey)
