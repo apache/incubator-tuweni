@@ -17,15 +17,13 @@
 package org.apache.tuweni.scuttlebutt.lib
 
 import io.vertx.core.Vertx
-import org.apache.tuweni.bytes.Bytes
+import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes32
-import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.crypto.sodium.Signature
 import org.apache.tuweni.io.Base64
 import org.apache.tuweni.scuttlebutt.Invite
 import org.apache.tuweni.scuttlebutt.handshake.vertx.SecureScuttlebuttVertxClient
 import org.apache.tuweni.scuttlebutt.rpc.mux.RPCHandler
-import java.util.function.Consumer
 
 /**
  * A factory for constructing a new instance of ScuttlebuttClient with the given configuration parameters
@@ -49,9 +47,9 @@ object ScuttlebuttClientFactory {
     vertx: Vertx,
     host: String,
     port: Int,
-    keyPair: Signature.KeyPair?,
-    serverPublicKey: Signature.PublicKey?
-  ): AsyncResult<ScuttlebuttClient> {
+    keyPair: Signature.KeyPair,
+    serverPublicKey: Signature.PublicKey,
+  ): ScuttlebuttClient {
     return fromNetWithNetworkKey(vertx, host, port, keyPair, serverPublicKey, DEFAULT_NETWORK)
   }
 
@@ -74,30 +72,27 @@ object ScuttlebuttClientFactory {
     keyPair: Signature.KeyPair?,
     serverPublicKey: Signature.PublicKey?,
     networkIdentifier: Bytes32?
-  ): AsyncResult<ScuttlebuttClient> {
+  ): ScuttlebuttClient {
     val secureScuttlebuttVertxClient = SecureScuttlebuttVertxClient(
       vertx,
       keyPair!!,
       networkIdentifier!!
     )
-    return secureScuttlebuttVertxClient
-      .connectTo(
+    return runBlocking {
+      val client = secureScuttlebuttVertxClient.connectTo(
         port,
         host,
         serverPublicKey,
         null
-      ) { sender: Consumer<Bytes?>?, terminationFn: Runnable? ->
+      ) { sender, terminationFn ->
         RPCHandler(
           vertx,
           sender,
           terminationFn
         )
-      }
-      .thenApply { multiplexer: RPCHandler? ->
-        ScuttlebuttClient(
-          multiplexer!!
-        )
-      }
+      } as RPCHandler
+      return@runBlocking ScuttlebuttClient(client)
+    }
   }
 
   /**
@@ -112,32 +107,29 @@ object ScuttlebuttClientFactory {
   @JvmStatic
   fun withInvite(
     vertx: Vertx,
-    keyPair: Signature.KeyPair?,
+    keyPair: Signature.KeyPair,
     invite: Invite,
-    networkIdentifier: Bytes32?
-  ): AsyncResult<ScuttlebuttClient> {
+    networkIdentifier: Bytes32,
+  ): ScuttlebuttClient {
     val secureScuttlebuttVertxClient = SecureScuttlebuttVertxClient(
       vertx,
-      keyPair!!,
-      networkIdentifier!!
+      keyPair, networkIdentifier
     )
-    return secureScuttlebuttVertxClient
-      .connectTo(
-        invite.port,
-        invite.host,
-        null,
-        invite
-      ) { sender: Consumer<Bytes?>?, terminationFn: Runnable? ->
-        RPCHandler(
-          vertx,
-          sender,
-          terminationFn
-        )
-      }
-      .thenApply { multiplexer: RPCHandler? ->
-        ScuttlebuttClient(
-          multiplexer!!
-        )
-      }
+    return runBlocking {
+      val multiplexer: RPCHandler = secureScuttlebuttVertxClient
+        .connectTo(
+          invite.port,
+          invite.host,
+          null,
+          invite
+        ) { sender, terminationFn ->
+          RPCHandler(
+            vertx,
+            sender,
+            terminationFn
+          )
+        } as RPCHandler
+      return@runBlocking ScuttlebuttClient(multiplexer)
+    }
   }
 }

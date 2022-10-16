@@ -17,13 +17,12 @@
 package org.apache.tuweni.scuttlebutt.lib
 
 import com.fasterxml.jackson.core.JsonProcessingException
-import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.scuttlebutt.rpc.RPCAsyncRequest
 import org.apache.tuweni.scuttlebutt.rpc.RPCResponse
 import org.apache.tuweni.scuttlebutt.rpc.RPCStreamRequest
+import org.apache.tuweni.scuttlebutt.rpc.mux.ConnectionClosedException
 import org.apache.tuweni.scuttlebutt.rpc.mux.Multiplexer
 import org.apache.tuweni.scuttlebutt.rpc.mux.ScuttlebuttStreamHandler
-import org.apache.tuweni.scuttlebutt.rpc.mux.exceptions.ConnectionClosedException
 import java.util.function.Function
 
 /**
@@ -34,12 +33,12 @@ import java.util.function.Function
  */
 class RawRequestService(private val multiplexer: Multiplexer) {
   @Throws(JsonProcessingException::class)
-  fun makeAsyncRequest(request: RPCAsyncRequest?): AsyncResult<RPCResponse> {
+  suspend fun makeAsyncRequest(request: RPCAsyncRequest): RPCResponse {
     return multiplexer.makeAsyncRequest(request)
   }
 
   @Throws(JsonProcessingException::class, ConnectionClosedException::class)
-  fun openStream(request: RPCStreamRequest?, streamFactory: Function<Runnable?, ScuttlebuttStreamHandler?>?) {
+  fun openStream(request: RPCStreamRequest, streamFactory: Function<Runnable, ScuttlebuttStreamHandler>) {
     multiplexer.openStream(request, streamFactory)
   }
 }

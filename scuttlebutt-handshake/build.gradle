@@ -15,11 +15,14 @@ description = 'Scuttlebutt Handshake library'
 dependencies {
   implementation project(':bytes')
   implementation project(':concurrent')
+  implementation project(':concurrent-coroutines')
   implementation project(':crypto')
   implementation project(':scuttlebutt')
   implementation 'org.slf4j:slf4j-api'
   implementation 'com.google.code.findbugs:jsr305'
-  compileOnly 'io.vertx:vertx-core'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+  implementation 'io.vertx:vertx-lang-kotlin-coroutines'
+  implementation 'io.vertx:vertx-core'
 
   testImplementation project(':junit')
 

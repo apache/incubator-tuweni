@@ -15,6 +15,7 @@ description = 'Scuttlebutt RPC library'
 dependencies {
   implementation project(':bytes')
   implementation project(':concurrent')
+  implementation project(':concurrent-coroutines')
   implementation project(':crypto')
   compileOnly 'io.vertx:vertx-core'
   implementation project(':scuttlebutt')
@@ -22,6 +23,8 @@ dependencies {
   implementation 'org.slf4j:slf4j-api'
 
   implementation 'com.fasterxml.jackson.core:jackson-databind'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+  implementation 'io.vertx:vertx-lang-kotlin-coroutines'
 
   testImplementation project(':io')
   testImplementation project(':junit')
