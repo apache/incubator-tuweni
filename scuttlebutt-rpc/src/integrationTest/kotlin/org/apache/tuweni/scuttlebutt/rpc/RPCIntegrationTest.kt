@@ -30,11 +30,11 @@ import org.apache.tuweni.scuttlebutt.handshake.vertx.ClientHandler
 import org.apache.tuweni.scuttlebutt.handshake.vertx.SecureScuttlebuttVertxClient
 import org.apache.tuweni.scuttlebutt.rpc.RPCCodec.encodeRequest
 import org.apache.tuweni.scuttlebutt.rpc.mux.RPCHandler
+import org.apache.tuweni.scuttlebutt.rpc.mux.RPCRequestFailedException
 import org.apache.tuweni.scuttlebutt.rpc.mux.ScuttlebuttStreamHandler
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.util.concurrent.CompletionException
 import java.util.function.Consumer
 
 /**
@@ -145,7 +145,7 @@ internal class RPCIntegrationTest {
     params["text"] = longString
     val asyncRequest = RPCAsyncRequest(RPCFunction("publish"), listOf(params))
     val exception = Assertions.assertThrows(
-      CompletionException::class.java
+      RPCRequestFailedException::class.java
     ) {
       runBlocking {
         rpcHandler.makeAsyncRequest(asyncRequest)
