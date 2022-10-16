@@ -38,6 +38,7 @@ internal class InviteTest {
       Assumptions.assumeTrue(Sodium.isAvailable(), "Sodium native library is not available")
     }
   }
+
   /**
    * Tests that it is possible to generate a test invite code.
    */

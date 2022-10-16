@@ -75,7 +75,8 @@ internal class RPCEncodingTest {
         Bytes.fromHexString(
           "deadbeef"
         ),
-        -1, RPCFlag.BodyType.BINARY
+        -1,
+        RPCFlag.BodyType.BINARY
       )
     }
   }
@@ -89,7 +90,8 @@ internal class RPCEncodingTest {
         Bytes.fromHexString(
           "deadbeef"
         ),
-        0, RPCFlag.BodyType.BINARY
+        0,
+        RPCFlag.BodyType.BINARY
       )
     }
   }

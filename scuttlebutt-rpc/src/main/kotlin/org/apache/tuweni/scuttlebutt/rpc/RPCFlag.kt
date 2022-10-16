@@ -120,7 +120,9 @@ interface RPCFlag {
         }
         return if (UTF_8_STRING.isApplied(flagByte)) {
           UTF_8_STRING
-        } else JSON
+        } else {
+          JSON
+        }
       }
     }
   }

@@ -47,6 +47,7 @@ internal class FeedStreamTest {
       Assumptions.assumeTrue(Sodium.isAvailable(), "Sodium native library is not available")
     }
   }
+
   /**
    * Tests it is possible to make posts and retrieve them again using the FeedService class
    */

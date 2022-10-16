@@ -41,7 +41,7 @@ import org.apache.tuweni.crypto.sodium.Signature
  */
 class SecureScuttlebuttHandshakeServer private constructor(
   private val longTermKeyPair: Signature.KeyPair,
-  networkIdentifier: Bytes32,
+  networkIdentifier: Bytes32
 ) {
   private val ephemeralKeyPair: Box.KeyPair
   private val networkIdentifier: HMACSHA512256.Key

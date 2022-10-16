@@ -48,7 +48,7 @@ object ScuttlebuttClientFactory {
     host: String,
     port: Int,
     keyPair: Signature.KeyPair,
-    serverPublicKey: Signature.PublicKey,
+    serverPublicKey: Signature.PublicKey
   ): ScuttlebuttClient {
     return fromNetWithNetworkKey(vertx, host, port, keyPair, serverPublicKey, DEFAULT_NETWORK)
   }
@@ -109,11 +109,12 @@ object ScuttlebuttClientFactory {
     vertx: Vertx,
     keyPair: Signature.KeyPair,
     invite: Invite,
-    networkIdentifier: Bytes32,
+    networkIdentifier: Bytes32
   ): ScuttlebuttClient {
     val secureScuttlebuttVertxClient = SecureScuttlebuttVertxClient(
       vertx,
-      keyPair, networkIdentifier
+      keyPair,
+      networkIdentifier
     )
     return runBlocking {
       val multiplexer: RPCHandler = secureScuttlebuttVertxClient

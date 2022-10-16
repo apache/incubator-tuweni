@@ -34,6 +34,7 @@ internal class InviteTest() {
       Assumptions.assumeTrue(Sodium.isAvailable(), "Sodium native library is not available")
     }
   }
+
   @Test
   fun invalidPort() {
     Assertions.assertThrows(

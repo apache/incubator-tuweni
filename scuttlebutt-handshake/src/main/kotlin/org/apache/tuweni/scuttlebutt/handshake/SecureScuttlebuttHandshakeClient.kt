@@ -44,7 +44,7 @@ import org.apache.tuweni.scuttlebutt.Invite
 class SecureScuttlebuttHandshakeClient private constructor(
   private val longTermKeyPair: Signature.KeyPair,
   networkIdentifier: Bytes32,
-  serverLongTermPublicKey: Signature.PublicKey?,
+  serverLongTermPublicKey: Signature.PublicKey?
 ) {
   private val ephemeralKeyPair: Box.KeyPair
   private val networkIdentifier: HMACSHA512256.Key
@@ -314,7 +314,7 @@ class SecureScuttlebuttHandshakeClient private constructor(
     fun create(
       ourKeyPair: Signature.KeyPair,
       networkIdentifier: Bytes32,
-      serverLongTermPublicKey: Signature.PublicKey?,
+      serverLongTermPublicKey: Signature.PublicKey?
     ): SecureScuttlebuttHandshakeClient {
       return SecureScuttlebuttHandshakeClient(ourKeyPair, networkIdentifier, serverLongTermPublicKey)
     }

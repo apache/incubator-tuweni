@@ -46,13 +46,15 @@ class SecureScuttlebuttVertxServer(
   private val addr: InetSocketAddress,
   private val keyPair: Signature.KeyPair,
   private val networkIdentifier: Bytes32,
-  private val handlerFactory: (writer: (Bytes) -> Unit, terminationFn: () -> Unit) -> ServerHandler,
+  private val handlerFactory: (writer: (Bytes) -> Unit, terminationFn: () -> Unit) -> ServerHandler
 ) {
 
   val port: Int
     get() = if (server == null) {
       0
-    } else server!!.actualPort()
+    } else {
+      server!!.actualPort()
+    }
 
   companion object {
     private val logger = LoggerFactory.getLogger(SecureScuttlebuttVertxServer::class.java)

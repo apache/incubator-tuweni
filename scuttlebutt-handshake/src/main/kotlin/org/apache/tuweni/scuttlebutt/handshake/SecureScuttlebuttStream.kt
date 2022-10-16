@@ -27,7 +27,7 @@ internal class SecureScuttlebuttStream(
   clientToServerKey: SHA256Hash.Hash?,
   clientToServerNonce: Bytes,
   serverToClientKey: SHA256Hash.Hash?,
-  serverToClientNonce: Bytes,
+  serverToClientNonce: Bytes
 ) : SecureScuttlebuttStreamClient, SecureScuttlebuttStreamServer {
   private val clientToServerKey: SecretBox.Key
   private val clientToServerNonce: MutableBytes

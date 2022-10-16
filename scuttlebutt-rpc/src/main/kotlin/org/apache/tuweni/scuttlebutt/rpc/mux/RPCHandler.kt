@@ -48,7 +48,7 @@ import java.util.function.Function
 class RPCHandler(
   private val vertx: Vertx,
   private val messageSender: Consumer<Bytes>,
-  private val terminationFn: Runnable,
+  private val terminationFn: Runnable
 ) :
   Multiplexer, ClientHandler {
   private val awaitingAsyncResponse: MutableMap<Int, CompletableAsyncResult<RPCResponse>> = ConcurrentHashMap()
@@ -85,7 +85,6 @@ class RPCHandler(
       val requestBytes: Bytes =
         encodeRequest(message.body(), requestNumber, *rpcFlags)
       val closeStreamHandler = {
-
         // Run on vertx context because this callback may be called from a different
         // thread by the caller
         vertx.runOnContext { endStream(requestNumber) }

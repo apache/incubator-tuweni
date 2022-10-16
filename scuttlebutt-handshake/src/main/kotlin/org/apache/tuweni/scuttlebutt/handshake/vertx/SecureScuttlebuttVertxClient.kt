@@ -50,7 +50,7 @@ class SecureScuttlebuttVertxClient(private val vertx: Vertx, private val keyPair
     private val socket: NetSocket,
     remotePublicKey: Signature.PublicKey?,
     invite: Invite?,
-    private val handlerFactory: (sender: (Bytes) -> Unit, terminationFunction: () -> Unit) -> ClientHandler,
+    private val handlerFactory: (sender: (Bytes) -> Unit, terminationFunction: () -> Unit) -> ClientHandler
   ) {
     private val handshakeClient: SecureScuttlebuttHandshakeClient
     private var handshakeCounter = 0
@@ -66,7 +66,8 @@ class SecureScuttlebuttVertxClient(private val vertx: Vertx, private val keyPair
       } else {
         create(
           keyPair,
-          networkIdentifier, remotePublicKey
+          networkIdentifier,
+          remotePublicKey
         )
       }
       socket.closeHandler {
@@ -196,7 +197,7 @@ class SecureScuttlebuttVertxClient(private val vertx: Vertx, private val keyPair
     host: String,
     remotePublicKey: Signature.PublicKey?,
     invite: Invite?,
-    handlerFactory: (sender: (Bytes) -> Unit, terminationFunction: () -> Unit) -> ClientHandler,
+    handlerFactory: (sender: (Bytes) -> Unit, terminationFunction: () -> Unit) -> ClientHandler
   ): ClientHandler {
     client = vertx.createNetClient(NetClientOptions().setTcpKeepAlive(true))
     val socket = client!!.connect(port, host).await()
@@ -204,7 +205,7 @@ class SecureScuttlebuttVertxClient(private val vertx: Vertx, private val keyPair
       socket,
       remotePublicKey,
       invite,
-      handlerFactory,
+      handlerFactory
     )
     return h.result.await()
   }
