@@ -19,7 +19,6 @@ package org.apache.tuweni.scuttlebutt.lib
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.apache.tuweni.concurrent.AsyncResult
 import org.apache.tuweni.scuttlebutt.lib.model.FeedMessage
 import org.apache.tuweni.scuttlebutt.lib.model.ScuttlebuttMessageContent
 import org.apache.tuweni.scuttlebutt.lib.model.StreamHandler
@@ -27,9 +26,9 @@ import org.apache.tuweni.scuttlebutt.rpc.RPCAsyncRequest
 import org.apache.tuweni.scuttlebutt.rpc.RPCFunction
 import org.apache.tuweni.scuttlebutt.rpc.RPCResponse
 import org.apache.tuweni.scuttlebutt.rpc.RPCStreamRequest
+import org.apache.tuweni.scuttlebutt.rpc.mux.ConnectionClosedException
 import org.apache.tuweni.scuttlebutt.rpc.mux.Multiplexer
 import org.apache.tuweni.scuttlebutt.rpc.mux.ScuttlebuttStreamHandler
-import org.apache.tuweni.scuttlebutt.rpc.mux.exceptions.ConnectionClosedException
 import java.io.IOException
 import java.util.Arrays
 import java.util.function.Function
@@ -57,19 +56,14 @@ class FeedService(private val multiplexer: Multiplexer) {
    * @throws JsonProcessingException if 'content' could not be marshalled to JSON.
    </T> */
   @Throws(JsonProcessingException::class)
-  fun <T : ScuttlebuttMessageContent?> publish(content: T): AsyncResult<FeedMessage> {
+  suspend fun <T : ScuttlebuttMessageContent?> publish(content: T): FeedMessage {
     val jsonNode = objectMapper.valueToTree<JsonNode>(content)
     val asyncRequest = RPCAsyncRequest(RPCFunction("publish"), Arrays.asList<Any>(jsonNode))
-    return multiplexer.makeAsyncRequest(asyncRequest).thenApply { rpcResponse: RPCResponse ->
-      try {
-        return@thenApply rpcResponse.asJSON(
-          objectMapper,
-          FeedMessage::class.java
-        )
-      } catch (ex: IOException) {
-        throw CouldNotSerializeException(ex)
-      }
-    }
+    val response = multiplexer.makeAsyncRequest(asyncRequest)
+    return response.asJSON(
+      objectMapper,
+      FeedMessage::class.java
+    )
   }
 
   /**
@@ -83,11 +77,11 @@ class FeedService(private val multiplexer: Multiplexer) {
    * @throws ConnectionClosedException if the stream could not be started because the connection is no longer open.
    */
   @Throws(JsonProcessingException::class, ConnectionClosedException::class)
-  fun createFeedStream(streamHandler: Function<Runnable?, StreamHandler<FeedMessage?>>) {
+  fun createFeedStream(streamHandler: Function<Runnable, StreamHandler<FeedMessage>>) {
     val streamRequest = RPCStreamRequest(RPCFunction("createFeedStream"), Arrays.asList())
     multiplexer.openStream(
       streamRequest
-    ) { closer: Runnable? ->
+    ) { closer: Runnable ->
       object : ScuttlebuttStreamHandler {
         var handler =
           streamHandler.apply(closer)
