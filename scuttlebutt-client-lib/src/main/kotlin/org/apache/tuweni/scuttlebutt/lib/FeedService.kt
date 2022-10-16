@@ -77,11 +77,11 @@ class FeedService(private val multiplexer: Multiplexer) {
    * @throws ConnectionClosedException if the stream could not be started because the connection is no longer open.
    */
   @Throws(JsonProcessingException::class, ConnectionClosedException::class)
-  fun createFeedStream(streamHandler: Function<Runnable?, StreamHandler<FeedMessage?>>) {
+  fun createFeedStream(streamHandler: Function<Runnable, StreamHandler<FeedMessage>>) {
     val streamRequest = RPCStreamRequest(RPCFunction("createFeedStream"), Arrays.asList())
     multiplexer.openStream(
       streamRequest
-    ) { closer: Runnable? ->
+    ) { closer: Runnable ->
       object : ScuttlebuttStreamHandler {
         var handler =
           streamHandler.apply(closer)
