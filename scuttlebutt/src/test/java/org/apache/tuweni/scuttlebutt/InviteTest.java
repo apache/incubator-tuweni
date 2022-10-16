@@ -62,10 +62,10 @@ class InviteTest {
     try {
       Invite invite = Invite.fromCanonicalForm(testInvite);
 
-      assertEquals(invite.host(), "fake.address.com");
-      assertEquals(invite.port(), 8009);
-      assertEquals(invite.identity().publicKeyAsBase64String(), "MS/HpeAess0EGruiZjfnc+x+FkPq7qoMqSD4SdvTCtM=");
-      assertEquals(invite.seedKey().bytes().toBase64String(), "IJubWEcZM6usWncF/Lu26CyI3ZiovcHjh9+kBI1hiKI=");
+      assertEquals(invite.getHost(), "fake.address.com");
+      assertEquals(invite.getPort(), 8009);
+      assertEquals(invite.getIdentity().publicKeyAsBase64String(), "MS/HpeAess0EGruiZjfnc+x+FkPq7qoMqSD4SdvTCtM=");
+      assertEquals(invite.getSeedKey().bytes().toBase64String(), "IJubWEcZM6usWncF/Lu26CyI3ZiovcHjh9+kBI1hiKI=");
 
       assertEquals(invite.toCanonicalForm(), testInvite);
     } catch (MalformedInviteCodeException malformedInviteCodeException) {
@@ -81,7 +81,7 @@ class InviteTest {
     try {
       Invite.fromCanonicalForm(testInvite);
       fail("Exception expected when host missing from invite code.");
-    } catch (MalformedInviteCodeException malformedInviteCodeException) {
+    } catch (MalformedInviteCodeException ignored) {
 
     }
   }
@@ -93,7 +93,7 @@ class InviteTest {
     try {
       Invite.fromCanonicalForm(testInvite);
       fail("Exception expected when seed missing from invite code.");
-    } catch (MalformedInviteCodeException malformedInviteCodeException) {
+    } catch (MalformedInviteCodeException ignored) {
 
     }
 

@@ -71,13 +71,13 @@ public final class SecureScuttlebuttHandshakeClient {
    * @return a new Secure Scuttlebutt handshake client
    */
   public static SecureScuttlebuttHandshakeClient fromInvite(Bytes32 networkIdentifier, Invite invite) {
-    if (!Identity.Curve.Ed25519.equals(invite.identity().curve())) {
+    if (!Identity.Curve.Ed25519.equals(invite.getIdentity().curve())) {
       throw new IllegalArgumentException("Only ed25519 keys are supported");
     }
     return new SecureScuttlebuttHandshakeClient(
-        Signature.KeyPair.fromSeed(invite.seedKey()),
+        Signature.KeyPair.fromSeed(invite.getSeedKey()),
         networkIdentifier,
-        invite.identity().ed25519PublicKey());
+        invite.getIdentity().ed25519PublicKey());
   }
 
   private SecureScuttlebuttHandshakeClient(

@@ -123,8 +123,8 @@ object ScuttlebuttClientFactory {
     )
     return secureScuttlebuttVertxClient
       .connectTo(
-        invite.port(),
-        invite.host(),
+        invite.port,
+        invite.host,
         null,
         invite
       ) { sender: Consumer<Bytes?>?, terminationFn: Runnable? ->
