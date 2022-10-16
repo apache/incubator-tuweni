@@ -28,7 +28,7 @@ import java.nio.file.Paths
 internal object Utils {
   @get:Throws(Exception::class)
   private val localKeys: Signature.KeyPair
-    private get() {
+    get() {
       val ssbPath = Paths.get(System.getenv().getOrDefault("ssb_dir", "/tmp/ssb"))
       return getLocalKeys(ssbPath)
     }
