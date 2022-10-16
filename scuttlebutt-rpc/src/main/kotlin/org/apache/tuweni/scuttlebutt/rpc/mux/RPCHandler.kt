@@ -171,7 +171,7 @@ class RPCHandler(
         } else if (exception.isPresent) {
           scuttlebuttStreamHandler.onStreamError(exception.get())
         } else {
-          val successfulResponse = RPCResponse(response.body(), response.bodyType()!!)
+          val successfulResponse = RPCResponse(response.body(), response.bodyType())
           scuttlebuttStreamHandler.onMessage(successfulResponse)
         }
       } else {
@@ -189,7 +189,7 @@ class RPCHandler(
         if (exception.isPresent) {
           rpcMessageFuture.completeExceptionally(exception.get())
         } else {
-          val successfulResponse = RPCResponse(response.body(), (response.bodyType())!!)
+          val successfulResponse = RPCResponse(response.body(), (response.bodyType()))
           rpcMessageFuture.complete(successfulResponse)
         }
       } else {
