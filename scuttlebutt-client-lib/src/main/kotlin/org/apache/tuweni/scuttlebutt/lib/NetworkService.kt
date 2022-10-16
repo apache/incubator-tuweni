@@ -91,7 +91,7 @@ class NetworkService(private val multiplexer: Multiplexer) {
     val function = RPCFunction(listOf("invite"), "accept")
     val request = RPCAsyncRequest(function, listOf<Any>(invite.toCanonicalForm()))
     return try {
-      multiplexer.makeAsyncRequest(request).thenAccept { r: RPCResponse? -> }
+      multiplexer.makeAsyncRequest(request).thenAccept { }
     } catch (ex: JsonProcessingException) {
       AsyncCompletion.exceptional(ex)
     }
