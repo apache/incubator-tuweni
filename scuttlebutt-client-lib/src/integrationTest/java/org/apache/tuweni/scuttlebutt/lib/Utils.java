@@ -12,8 +12,6 @@
  */
 package org.apache.tuweni.scuttlebutt.lib;
 
-import static org.apache.tuweni.scuttlebutt.lib.ScuttlebuttClientFactory.DEFAULT_NETWORK;
-
 import org.apache.tuweni.concurrent.AsyncResult;
 import org.apache.tuweni.crypto.sodium.Signature;
 import org.apache.tuweni.scuttlebutt.Invite;
@@ -39,7 +37,13 @@ class Utils {
     Signature.KeyPair serverKeypair = getLocalKeys();
     // log in as the server to have master rights.
     AsyncResult<ScuttlebuttClient> scuttlebuttClientLibAsyncResult = ScuttlebuttClientFactory
-        .fromNetWithNetworkKey(vertx, host, port, serverKeypair, serverKeypair.publicKey(), DEFAULT_NETWORK);
+        .fromNetWithNetworkKey(
+            vertx,
+            host,
+            port,
+            serverKeypair,
+            serverKeypair.publicKey(),
+            ScuttlebuttClientFactory.getDEFAULT_NETWORK());
 
     return scuttlebuttClientLibAsyncResult.get();
   }
@@ -56,7 +60,7 @@ class Utils {
             port,
             Signature.KeyPair.random(),
             serverKeypair.publicKey(),
-            DEFAULT_NETWORK);
+            ScuttlebuttClientFactory.getDEFAULT_NETWORK());
 
     return scuttlebuttClientLibAsyncResult.get();
   }
@@ -66,8 +70,12 @@ class Utils {
     String actualHost = env.getOrDefault("ssb_host", "localhost");
     int port = Integer.parseInt(env.getOrDefault("ssb_port", "8008"));
     Invite recalibratedInvite = new Invite(actualHost, port, invite.identity(), invite.seedKey());
-    AsyncResult<ScuttlebuttClient> scuttlebuttClientLibAsyncResult =
-        ScuttlebuttClientFactory.withInvite(vertx, Signature.KeyPair.random(), recalibratedInvite, DEFAULT_NETWORK);
+    AsyncResult<ScuttlebuttClient> scuttlebuttClientLibAsyncResult = ScuttlebuttClientFactory
+        .withInvite(
+            vertx,
+            Signature.KeyPair.random(),
+            recalibratedInvite,
+            ScuttlebuttClientFactory.getDEFAULT_NETWORK());
 
     return scuttlebuttClientLibAsyncResult.get();
   }

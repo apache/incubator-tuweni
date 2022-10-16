@@ -108,7 +108,7 @@ class FeedStreamTest {
     assertEquals("serialization-test", content.getType());
 
     AsyncResult<RPCResponse> result = scuttlebuttClient
-        .rawRequestService()
+        .getRawRequestService()
         .makeAsyncRequest(new RPCAsyncRequest(new RPCFunction("whoami"), Collections.emptyList()));
     assertNotNull(result.get());
     @SuppressWarnings("rawtypes")
