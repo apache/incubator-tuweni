@@ -82,7 +82,7 @@ internal class VertxIntegrationTest {
       InetSocketAddress("localhost", 20000),
       serverKeyPair,
       networkIdentifier
-    ) { sender, _ ->
+    ) { _, _ ->
       serverHandlerRef.set(MyServerHandler())
       serverHandlerRef.get()
     }
