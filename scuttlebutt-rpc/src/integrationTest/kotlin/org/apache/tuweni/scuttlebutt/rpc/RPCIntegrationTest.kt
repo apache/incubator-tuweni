@@ -138,7 +138,6 @@ internal class RPCIntegrationTest {
   @Throws(Exception::class)
   fun postMessageThatIsTooLong(@VertxInstance vertx: Vertx) = runBlocking {
     val rpcHandler = makeRPCHandler(vertx)
-    val results: MutableList<RPCResponse> = ArrayList()
     val longString = String(CharArray(40000)).replace("\u0000", "a")
     // Note: in a real use case, this would more likely be a Java class with these fields
     val params = HashMap<String, String>()
@@ -195,7 +194,7 @@ internal class RPCIntegrationTest {
     val streamRequest = RPCStreamRequest(RPCFunction("createUserStream"), listOf<Map<String, String>>(params))
     handler.openStream(
       streamRequest
-    ) { closeStream: Runnable? ->
+    ) {
       object : ScuttlebuttStreamHandler {
         override fun onMessage(message: RPCResponse) {
           print(message.asString())
