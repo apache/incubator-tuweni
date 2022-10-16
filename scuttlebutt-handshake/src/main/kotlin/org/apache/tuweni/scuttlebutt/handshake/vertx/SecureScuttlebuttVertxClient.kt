@@ -74,7 +74,7 @@ class SecureScuttlebuttVertxClient(private val vertx: Vertx, private val keyPair
           handler!!.streamClosed()
         }
         if (!result.isDone) {
-          result.completeExceptionally( IllegalStateException("Connection closed before handshake"));
+          result.completeExceptionally(IllegalStateException("Connection closed before handshake"))
         }
       }
       socket.exceptionHandler { e: Throwable ->
