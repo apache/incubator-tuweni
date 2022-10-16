@@ -17,8 +17,8 @@
 package org.apache.tuweni.kv
 
 import java.util.function.BiFunction
-import kotlin.coroutines.CoroutineContext
 import java.util.function.Function
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A store used as a proxy for another store.

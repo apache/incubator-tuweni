@@ -39,7 +39,7 @@ internal class EthHandler66(
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
   private val blockchainInfo: BlockchainInformation,
   private val service: RLPxService,
-  private val controller: EthController,
+  private val controller: EthController
 ) : SubProtocolHandler, CoroutineScope {
 
   private val ethHandler = EthHandler(coroutineContext, blockchainInfo, service, controller)
@@ -85,10 +85,12 @@ internal class EthHandler66(
         MessageType.GetReceipts.code -> handleGetReceipts(connection, requestIdentifier, GetReceipts.read(payload))
         MessageType.Receipts.code -> handleReceipts(connection, requestIdentifier, Receipts.read(payload))
         MessageType.NewPooledTransactionHashes.code -> handleNewPooledTransactionHashes(
-          connection, NewPooledTransactionHashes.read(message)
+          connection,
+          NewPooledTransactionHashes.read(message)
         )
         MessageType.GetPooledTransactions.code -> handleGetPooledTransactions(
-          connection, requestIdentifier,
+          connection,
+          requestIdentifier,
           GetPooledTransactions.read(payload)
         )
         MessageType.PooledTransactions.code -> handlePooledTransactions(PooledTransactions.read(payload))
@@ -261,7 +263,9 @@ internal class EthHandler66(
       blockHeaderRequest.reverse
     )
     service.send(
-      EthSubprotocol.ETH66, MessageType.BlockHeaders.code, connection,
+      EthSubprotocol.ETH66,
+      MessageType.BlockHeaders.code,
+      connection,
       RLP.encodeList {
         it.writeValue(requestIdentifier)
         it.writeRLP(BlockHeaders(headers).toBytes())
@@ -290,11 +294,16 @@ internal class EthHandler66(
     val forkId =
       blockchainInfo.getLastestApplicableFork(controller.repository.retrieveChainHeadHeader().number.toLong())
     service.send(
-      ethSubProtocol, MessageType.Status.code, connection,
+      ethSubProtocol,
+      MessageType.Status.code,
+      connection,
       StatusMessage(
         ethSubProtocol.version(),
-        blockchainInfo.networkID(), blockchainInfo.totalDifficulty(),
-        blockchainInfo.bestHash(), blockchainInfo.genesisHash(), forkId.hash,
+        blockchainInfo.networkID(),
+        blockchainInfo.totalDifficulty(),
+        blockchainInfo.bestHash(),
+        blockchainInfo.genesisHash(),
+        forkId.hash,
         forkId.next
       ).toBytes()
     )

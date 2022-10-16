@@ -36,6 +36,7 @@ class FeedValue(val previous: String, val author: Author, val sequence: Long, va
   companion object {
     private val mapper = ObjectMapper()
   }
+
   /**
    * The message content as a JSON string.
    *

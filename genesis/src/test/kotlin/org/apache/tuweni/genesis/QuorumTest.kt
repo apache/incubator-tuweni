@@ -41,7 +41,7 @@ class QuorumTest {
       timestamp = 0L,
       gasLimit = 0L,
       parentHash = Bytes32.leftPad(Bytes.fromHexString("0x00ff")),
-      config = QuorumGenesisConfig(chainId = 1337,),
+      config = QuorumGenesisConfig(chainId = 1337),
       numberAllocations = 10,
       amount = UInt256.valueOf(123),
       numberValidators = 4,

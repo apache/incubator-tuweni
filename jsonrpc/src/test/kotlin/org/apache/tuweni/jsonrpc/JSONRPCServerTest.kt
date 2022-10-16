@@ -52,7 +52,8 @@ class JSONRPCServerTest {
   @Test
   fun testNoAuth(@VertxInstance vertx: Vertx): Unit = runBlocking {
     val server = JSONRPCServer(
-      vertx, port = 0,
+      vertx,
+      port = 0,
       methodHandler = {
         JSONRPCResponse(StringOrLong(3), "")
       },
@@ -72,7 +73,8 @@ class JSONRPCServerTest {
   @Test
   fun testBasicAuth(@VertxInstance vertx: Vertx): Unit = runBlocking {
     val server = JSONRPCServer(
-      vertx, port = 0,
+      vertx,
+      port = 0,
       methodHandler = {
         JSONRPCResponse(StringOrLong(3), "")
       },

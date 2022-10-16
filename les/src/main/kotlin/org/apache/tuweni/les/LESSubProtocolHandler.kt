@@ -139,7 +139,6 @@ internal class LESSubProtocolHandler(
     connection: WireConnection,
     getBlockHeadersMessage: GetBlockHeadersMessage
   ) {
-
     val headersFound = TreeSet<BlockHeader>()
     for (query in getBlockHeadersMessage.queries) {
       headersFound.addAll(

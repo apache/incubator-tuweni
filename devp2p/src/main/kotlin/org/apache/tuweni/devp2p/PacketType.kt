@@ -38,6 +38,7 @@ internal enum class PacketType(
       signature: SECP256K1.Signature
     ) = PingPacket.decode(payload, hash, publicKey, signature) as Packet
   },
+
   /**
    * Pong packet as response to pings
    */
@@ -49,6 +50,7 @@ internal enum class PacketType(
       signature: SECP256K1.Signature
     ) = PongPacket.decode(payload, hash, publicKey, signature) as Packet
   },
+
   /**
    * FindNode packet
    */
@@ -60,6 +62,7 @@ internal enum class PacketType(
       signature: SECP256K1.Signature
     ) = FindNodePacket.decode(payload, hash, publicKey, signature) as Packet
   },
+
   /**
    * Neighbors packet response
    */
@@ -71,6 +74,7 @@ internal enum class PacketType(
       signature: SECP256K1.Signature
     ) = NeighborsPacket.decode(payload, hash, publicKey, signature) as Packet
   },
+
   /**
    * ENR request packet
    */
@@ -82,6 +86,7 @@ internal enum class PacketType(
       signature: SECP256K1.Signature
     ) = ENRRequestPacket.decode(payload, hash, publicKey, signature) as Packet
   },
+
   /**
    * ENR response packet
    */

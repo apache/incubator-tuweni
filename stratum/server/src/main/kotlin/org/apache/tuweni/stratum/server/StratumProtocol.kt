@@ -81,7 +81,7 @@ class Stratum1Protocol(
   private val subscriptionIdCreator: () -> String = { createSubscriptionID() },
   private val submitCallback: suspend (PoWSolution) -> (Boolean),
   private val seedSupplier: () -> Bytes32,
-  private val coroutineContext: CoroutineContext,
+  private val coroutineContext: CoroutineContext
 ) : StratumProtocol {
   private var currentInput: PoWInput? = null
   private val activeConnections: MutableList<StratumConnection> = ArrayList()
@@ -224,7 +224,7 @@ class Stratum1Protocol(
 class Stratum1EthProxyProtocol(
   private val submitCallback: suspend (PoWSolution) -> Boolean,
   private val seedSupplier: () -> Bytes32,
-  private val coroutineContext: CoroutineContext,
+  private val coroutineContext: CoroutineContext
 ) : StratumProtocol {
 
   private val activeConnections: MutableList<StratumConnection> = ArrayList()
@@ -333,7 +333,7 @@ class Stratum1EthProxyProtocol(
   fun handleHashrateSubmit(
     mapper: JsonMapper,
     conn: StratumConnection,
-    message: JsonRpcRequest,
+    message: JsonRpcRequest
   ) {
     val response = mapper.writeValueAsString(
       JsonRpcSuccessResponse(

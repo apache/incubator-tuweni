@@ -54,9 +54,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -121,7 +121,8 @@ class EthHandlerTest {
         blockchainInfo = SimpleBlockchainInformation(
           UInt256.valueOf(42L),
           UInt256.ONE,
-          genesisBlock.header.hash, UInt256.valueOf(42L),
+          genesisBlock.header.hash,
+          UInt256.valueOf(42L),
           genesisBlock.header.hash,
           emptyList()
         ),
@@ -137,9 +138,13 @@ class EthHandlerTest {
           repository.storeTransactionReceipt(
             TransactionReceipt(
               Bytes32.random(),
-              32L, LogsBloomFilter(), emptyList()
+              32L,
+              LogsBloomFilter(),
+              emptyList()
             ),
-            txIndex, tx.hash, newBlock.header.hash
+            txIndex,
+            tx.hash,
+            newBlock.header.hash
           )
           txIndex++
         }
@@ -172,8 +177,13 @@ class EthHandlerTest {
         BlockBody(
           listOf(
             Transaction(
-              UInt256.ONE, Wei.valueOf(20L), Gas.valueOf(3000),
-              Address.fromBytes(Bytes.random(20)), Wei.valueOf(1000), Bytes.EMPTY, SECP256K1.KeyPair.random()
+              UInt256.ONE,
+              Wei.valueOf(20L),
+              Gas.valueOf(3000),
+              Address.fromBytes(Bytes.random(20)),
+              Wei.valueOf(1000),
+              Bytes.EMPTY,
+              SECP256K1.KeyPair.random()
             )
           ),
           emptyList()

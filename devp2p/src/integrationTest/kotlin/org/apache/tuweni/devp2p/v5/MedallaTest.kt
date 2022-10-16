@@ -38,7 +38,6 @@ class MedallaTest {
 
   @Test
   fun testConnect(@VertxInstance vertx: Vertx) = runBlocking {
-
     val enrRec =
       "enr:-LK4QC3FCb7-JTNRiWAezECk_QUJc9c2IkJA1-EAmqAA5wmdbPWsAeRpnMXKRJqOYG0TE99ycB1nOb9y26mjb" +
         "_UoHS4Bh2F0dG5ldHOIAAAAAAAAAACEZXRoMpDnp11aAAAAAf__________gmlkgnY0gmlwhDMPYfCJc2VjcDI1N" +

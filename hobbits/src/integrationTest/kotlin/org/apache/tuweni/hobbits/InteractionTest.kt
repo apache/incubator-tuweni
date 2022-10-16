@@ -158,10 +158,13 @@ class HTTPTest {
       client2.start()
       client2.sendMessage(
         Message(
-          protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"),
+          protocol = Protocol.PING,
+          body = Bytes.fromHexString("deadbeef"),
           headers = Bytes.random(16)
         ),
-        Transport.HTTP, "127.0.0.1", newPort.get()
+        Transport.HTTP,
+        "127.0.0.1",
+        newPort.get()
       )
     }
     Thread.sleep(200)
@@ -230,10 +233,13 @@ class UDPTest {
       client2.start()
       client2.sendMessage(
         Message(
-          protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"),
+          protocol = Protocol.PING,
+          body = Bytes.fromHexString("deadbeef"),
           headers = Bytes.random(16)
         ),
-        Transport.UDP, "localhost", 15000
+        Transport.UDP,
+        "localhost",
+        15000
       )
     }
     Thread.sleep(200)
@@ -296,10 +302,13 @@ class WebSocketTest {
       client2.start()
       client2.sendMessage(
         Message(
-          protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"),
+          protocol = Protocol.PING,
+          body = Bytes.fromHexString("deadbeef"),
           headers = Bytes.random(16)
         ),
-        Transport.WS, "127.0.0.1", newPort.get()
+        Transport.WS,
+        "127.0.0.1",
+        newPort.get()
       )
     }
     Thread.sleep(200)

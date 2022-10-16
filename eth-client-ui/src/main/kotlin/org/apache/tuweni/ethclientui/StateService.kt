@@ -16,7 +16,6 @@
  */
 package org.apache.tuweni.ethclientui
 
-import org.apache.tuweni.ethclient.EthereumClient
 import jakarta.servlet.ServletContext
 import jakarta.ws.rs.GET
 import jakarta.ws.rs.Path
@@ -25,6 +24,7 @@ import jakarta.ws.rs.core.Context
 import jakarta.ws.rs.core.MediaType
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.ethclient.EthereumClient
 import org.apache.tuweni.units.bigints.UInt256
 
 data class BlockHashAndNumber(val hash: Bytes32, val number: UInt256)

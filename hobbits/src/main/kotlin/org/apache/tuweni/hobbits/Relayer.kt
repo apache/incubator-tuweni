@@ -47,7 +47,8 @@ class Relayer(
     when (uri.scheme) {
       "http" -> {
         transport.createHTTPEndpoint(
-          networkInterface = uri.host, port = uri.port,
+          networkInterface = uri.host,
+          port = uri.port,
           handler = {
             async {
               interceptor(it)
@@ -58,7 +59,8 @@ class Relayer(
       }
       "tcp" -> {
         transport.createTCPEndpoint(
-          networkInterface = uri.host, port = uri.port,
+          networkInterface = uri.host,
+          port = uri.port,
           handler = {
             async {
               interceptor(it)
@@ -69,7 +71,8 @@ class Relayer(
       }
       "udp" -> {
         transport.createUDPEndpoint(
-          networkInterface = uri.host, port = uri.port,
+          networkInterface = uri.host,
+          port = uri.port,
           handler = {
             async {
               interceptor(it)
@@ -80,7 +83,8 @@ class Relayer(
       }
       "ws" -> {
         transport.createWSEndpoint(
-          networkInterface = uri.host, port = uri.port,
+          networkInterface = uri.host,
+          port = uri.port,
           handler = {
             async {
               interceptor(it)

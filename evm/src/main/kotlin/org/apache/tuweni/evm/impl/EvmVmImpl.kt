@@ -32,7 +32,7 @@ data class Result(
   val status: EVMExecutionStatusCode? = null,
   val newCodePosition: Int? = null,
   val output: Bytes? = null,
-  val validationStatus: EVMExecutionStatusCode? = null,
+  val validationStatus: EVMExecutionStatusCode? = null
 )
 
 /**

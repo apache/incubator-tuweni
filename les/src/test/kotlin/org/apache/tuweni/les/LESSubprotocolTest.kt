@@ -43,7 +43,8 @@ internal class LESSubprotocolTest {
   private val blockchainInformation = SimpleBlockchainInformation(
     UInt256.valueOf(42L),
     UInt256.ONE,
-    Hash.fromBytes(Bytes32.random()), UInt256.valueOf(42L),
+    Hash.fromBytes(Bytes32.random()),
+    UInt256.valueOf(42L),
     Hash.fromBytes(Bytes32.random()),
     emptyList()
   )
@@ -51,7 +52,6 @@ internal class LESSubprotocolTest {
   @Test
   @Throws(Exception::class)
   fun supportsLESv2() = runBlocking {
-
     val sp = LESSubprotocol(
       Dispatchers.Default,
       blockchainInformation,
@@ -71,7 +71,6 @@ internal class LESSubprotocolTest {
   @Test
   @Throws(Exception::class)
   fun noSupportForv3() = runBlocking {
-
     val sp = LESSubprotocol(
       Dispatchers.Default,
       blockchainInformation,

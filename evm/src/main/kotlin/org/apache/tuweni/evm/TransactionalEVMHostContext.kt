@@ -51,7 +51,7 @@ class TransactionalEVMHostContext(
   val currentTimestamp: UInt256,
   val currentGasLimit: Long,
   val currentDifficulty: UInt256,
-  val chainId: UInt256,
+  val chainId: UInt256
 ) : HostContext, ExecutionChanges {
 
   companion object {
@@ -296,7 +296,8 @@ class TransactionalEVMHostContext(
       transientRepository.storeAccount(
         beneficiary,
         AccountState(
-          beneficiaryAccountState.nonce, beneficiaryAccountState.balance.add(account.balance),
+          beneficiaryAccountState.nonce,
+          beneficiaryAccountState.balance.add(account.balance),
           beneficiaryAccountState.storageRoot,
           beneficiaryAccountState.codeHash
         )
@@ -347,10 +348,11 @@ class TransactionalEVMHostContext(
       evmMessage.gas,
       evmMessage.kind,
       depth = evmMessage.depth,
-      hostContext = this,
+      hostContext = this
     )
     return result
   }
+
   /**
    * Get transaction context function.
    *
@@ -363,7 +365,9 @@ class TransactionalEVMHostContext(
     logger.trace("Entering getTxContext")
     return Bytes.concatenate(
       gasPrice.toBytes(),
-      sender, currentCoinbase, currentNumber,
+      sender,
+      currentCoinbase,
+      currentNumber,
       currentTimestamp,
       Bytes.ofUnsignedLong(currentGasLimit),
       currentDifficulty.toBytes(),

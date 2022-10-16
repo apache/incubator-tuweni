@@ -39,7 +39,7 @@ open class GenesisConfig(
   val eip155Block: Int = 0,
   val eip158Block: Int = 0,
   val byzantiumBlock: Int = 0,
-  val constantinopleBlock: Int = 0,
+  val constantinopleBlock: Int = 0
 )
 
 /**
@@ -71,7 +71,7 @@ class Genesis(
   val extraData: Bytes,
   private val gasLimit: Long,
   val alloc: Map<Address, Map<String, UInt256>>,
-  val config: GenesisConfig,
+  val config: GenesisConfig
 ) {
 
   companion object {
@@ -106,7 +106,7 @@ class Genesis(
         1_000_000L,
         emptyMap(),
         GenesisConfig(1337, 0, 0, 0, 0)
-      ),
+      )
     ): Block {
       return Block(
         BlockHeader(

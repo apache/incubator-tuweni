@@ -69,7 +69,7 @@ class TransactionProcessor(val vm: EthereumVirtualMachine, val hardFork: HardFor
     gasUsed: Gas,
     allGasUsed: Gas,
     coinbase: Address,
-    blockBloomFilter: LogsBloomFilter,
+    blockBloomFilter: LogsBloomFilter
   ): TransactionProcessorResult {
     val sender = tx.sender
     if (sender === null) {
@@ -121,7 +121,7 @@ class TransactionProcessor(val vm: EthereumVirtualMachine, val hardFork: HardFor
       parentBlock.difficulty,
       chainId,
       CallKind.CALL,
-      hardFork,
+      hardFork
     )
     result.state.gasManager.add(gasCost)
     if (result.statusCode != EVMExecutionStatusCode.SUCCESS) {

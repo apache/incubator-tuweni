@@ -30,7 +30,7 @@ fun interface Opcode {
     code: Bytes,
     currentIndex: Int,
     memory: Memory,
-    callResult: Result?,
+    callResult: Result?
   ): Result?
 }
 
@@ -41,7 +41,6 @@ class OpcodeRegistry(val opcodes: Map<HardFork, Map<Byte, Opcode>>) {
 
   companion object {
     fun create(): OpcodeRegistry {
-
       val forks = mapOf(
         Pair(HardFork.FRONTIER, org.apache.tuweni.evm.impl.frontier.frontierOpcodes),
         Pair(HardFork.HOMESTEAD, org.apache.tuweni.evm.impl.homestead.homesteadOpcodes),

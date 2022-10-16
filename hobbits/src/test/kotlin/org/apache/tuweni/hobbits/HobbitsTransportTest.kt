@@ -48,7 +48,9 @@ class HobbitsTransportTest {
       runBlocking {
         server.sendMessage(
           Message(protocol = Protocol.RPC, headers = Bytes.EMPTY, body = Bytes.EMPTY),
-          Transport.TCP, "localhost", 9000
+          Transport.TCP,
+          "localhost",
+          9000
         )
       }
     }

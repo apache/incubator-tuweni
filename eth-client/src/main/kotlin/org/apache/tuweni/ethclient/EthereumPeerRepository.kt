@@ -64,6 +64,7 @@ interface EthereumPeerRepository : PeerRepository {
    * @return a listener ID
    */
   fun addIdentityListener(identityListener: (Identity) -> Unit): String
+
   /**
    * Removes an identity listener
    * @param id the listener identifier

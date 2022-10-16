@@ -29,7 +29,7 @@ class StratumConnection(
   val closeHandle: (Boolean) -> Unit,
   val sender: (String) -> Unit,
   val name: String,
-  val threshold: Int = 3,
+  val threshold: Int = 3
 ) {
 
   companion object {

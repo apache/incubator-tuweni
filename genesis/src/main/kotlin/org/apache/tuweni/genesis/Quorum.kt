@@ -43,7 +43,7 @@ class QuorumConfig(val genesis: Genesis, val validators: List<SECP256K1.KeyPair>
       config: QuorumGenesisConfig,
       numberValidators: Int,
       numberAllocations: Int,
-      amount: UInt256,
+      amount: UInt256
     ): QuorumConfig {
       val allocations = AllocationGenerator().createAllocations(numberAllocations, amount)
 
@@ -77,7 +77,7 @@ class QuorumConfig(val genesis: Genesis, val validators: List<SECP256K1.KeyPair>
       vanity: Bytes32 = Bytes32.ZERO,
       mixHash: Bytes32,
       allocations: List<Allocation>,
-      validators: List<SECP256K1.KeyPair>,
+      validators: List<SECP256K1.KeyPair>
     ): QuorumConfig {
       val allocs = mutableMapOf<Address, Map<String, UInt256>>()
       for (alloc in allocations) {
@@ -140,7 +140,7 @@ class IstanbulConfigOptions(
   val epoch: Int = 3000,
   val policy: Int = 0,
   val testQBFTBlock: Int = 0,
-  val ceil2Nby3Block: Int = 0,
+  val ceil2Nby3Block: Int = 0
 )
 
 @JsonPropertyOrder(alphabetic = true)
@@ -154,7 +154,7 @@ class QuorumGenesisConfig(
   constantinopleBlock: Int = 0,
   val istanbul: IstanbulConfigOptions = IstanbulConfigOptions(),
   val txnSizeLimit: Int = 64,
-  val maxCodeSize: Int = 0,
+  val maxCodeSize: Int = 0
 ) : GenesisConfig(chainId, homesteadBlock, eip150Block, eip155Block, eip158Block, byzantiumBlock, constantinopleBlock) {
 
   @JsonProperty("isQuorum")

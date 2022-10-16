@@ -26,10 +26,9 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.junit.VertxInstance
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.jupiter.api.Assertions.assertEquals
-
 import java.lang.Thread.sleep
 
 @ExtendWith(VertxExtension::class, BouncyCastleExtension::class)

@@ -74,8 +74,13 @@ internal data class StatusMessage(
         }
 
         StatusMessage(
-          protocolVersion, networkID, totalDifficulty, bestHash,
-          genesisHash, forkInfo?.first, forkInfo?.second?.toLong()
+          protocolVersion,
+          networkID,
+          totalDifficulty,
+          bestHash,
+          genesisHash,
+          forkInfo?.first,
+          forkInfo?.second?.toLong()
         )
       }
     }

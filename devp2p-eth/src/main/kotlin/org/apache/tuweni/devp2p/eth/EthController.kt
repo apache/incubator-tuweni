@@ -34,7 +34,7 @@ class EthController(
   val repository: BlockchainRepository,
   val pendingTransactionsPool: TransactionPool,
   val requestsManager: EthRequestsManager,
-  val connectionsListener: (WireConnection, Status) -> Unit = { _, _ -> },
+  val connectionsListener: (WireConnection, Status) -> Unit = { _, _ -> }
 ) {
 
   suspend fun findTransactionReceipts(hashes: List<Hash>): List<List<TransactionReceipt>> {
@@ -166,7 +166,7 @@ class EthController(
   suspend fun addNewTransactionReceipts(
     connection: WireConnection,
     requestIdentifier: Bytes?,
-    transactionReceipts: List<List<TransactionReceipt>>,
+    transactionReceipts: List<List<TransactionReceipt>>
   ) {
     val request = if (requestIdentifier == null) {
       (requestsManager as EthClient).transactionReceiptsRequested(connection)

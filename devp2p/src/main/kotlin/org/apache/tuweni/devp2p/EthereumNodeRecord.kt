@@ -245,7 +245,8 @@ class EthereumNodeRecord(
     }
 
     val sig = SECP256K1.Signature.create(
-      1, signature.slice(0, 32).toUnsignedBigInteger(),
+      1,
+      signature.slice(0, 32).toUnsignedBigInteger(),
       signature.slice(32).toUnsignedBigInteger()
     )
 
@@ -254,7 +255,8 @@ class EthereumNodeRecord(
 
     if (pubKey != recovered) {
       val sig0 = SECP256K1.Signature.create(
-        0, signature.slice(0, 32).toUnsignedBigInteger(),
+        0,
+        signature.slice(0, 32).toUnsignedBigInteger(),
         signature.slice(32).toUnsignedBigInteger()
       )
       val recovered0 = SECP256K1.PublicKey.recoverFromSignature(encoded, sig0)

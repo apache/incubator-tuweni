@@ -29,7 +29,8 @@ import java.security.Security
 fun main(args: Array<String>) {
   Security.addProvider(BouncyCastleProvider())
   val config = QuorumConfig.generate(
-    mixHash = Bytes32.random(), config = QuorumGenesisConfig(chainId = args[0].toInt()),
+    mixHash = Bytes32.random(),
+    config = QuorumGenesisConfig(chainId = args[0].toInt()),
     numberValidators = 4,
     numberAllocations = 100,
     amount = UInt256.fromBytes(Bytes32.rightPad(Bytes.fromHexString("0x10")))

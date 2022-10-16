@@ -104,7 +104,7 @@ class EVMBrokenMetreAttack {
       UInt256.valueOf(1234),
       UInt256.valueOf(1),
       CallKind.CALL,
-      HardFork.ISTANBUL,
+      HardFork.ISTANBUL
     )
     assertEquals(expectedStatusCode, result.statusCode)
   }

@@ -58,7 +58,8 @@ class JSONRPCClientTest {
     fun runServer(@VertxInstance vertx: Vertx): Unit = runBlocking {
       Assumptions.assumeTrue(!System.getProperty("os.name").lowercase().contains("win"), "Server ports cannot bind on Windows")
       server = JSONRPCServer(
-        vertx, port = 0,
+        vertx,
+        port = 0,
         methodHandler = {
           handler.get().handle(it)
           JSONRPCResponse(StringOrLong(3), "")

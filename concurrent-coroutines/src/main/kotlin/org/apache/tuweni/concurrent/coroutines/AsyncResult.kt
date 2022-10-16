@@ -154,7 +154,8 @@ suspend fun <T> AsyncResult<T>.await(): T {
 }
 
 private class ContinuationBiConsumer<T>(
-  @Volatile @JvmField var cont: Continuation<T>?
+  @Volatile @JvmField
+  var cont: Continuation<T>?
 ) : BiConsumer<T?, Throwable?> {
   @Suppress("UNCHECKED_CAST")
   override fun accept(result: T?, exception: Throwable?) {

@@ -98,7 +98,8 @@ internal class ReceiptsMessageTest {
       listOf(
         listOf(
           TransactionReceipt(
-            Bytes32.random(), 3,
+            Bytes32.random(),
+            3,
             LogsBloomFilter.compute(
               logsList
             ),

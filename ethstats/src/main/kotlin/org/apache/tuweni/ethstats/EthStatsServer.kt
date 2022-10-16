@@ -38,7 +38,7 @@ class EthStatsServer(
   val secret: String,
   private val timeSupplier: () -> Instant = Instant::now,
   private val controller: EthStatsServerController,
-  override val coroutineContext: CoroutineContext = Dispatchers.Default,
+  override val coroutineContext: CoroutineContext = Dispatchers.Default
 ) : CoroutineScope {
 
   companion object {

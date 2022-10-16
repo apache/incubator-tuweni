@@ -27,8 +27,8 @@ import org.apache.tuweni.rlpx.wire.SubProtocolIdentifier
 import org.apache.tuweni.rlpx.wire.WireConnection
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 
 internal class SubProtocolServiceImpl() : SubprotocolService {
 

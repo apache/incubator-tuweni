@@ -103,7 +103,7 @@ class SimpleBlockchainInformation(
   val bestHash: Hash,
   val bestNumber: UInt256,
   val genesisHash: Hash,
-  possibleForks: List<Long>,
+  possibleForks: List<Long>
 ) : BlockchainInformation {
 
   private val forkIds: List<ForkInfo>

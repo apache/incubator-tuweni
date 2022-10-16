@@ -52,7 +52,8 @@ object ScraperApp {
     val addr = InetSocketAddress("0.0.0.0", 10000)
     val seen = ConcurrentHashMap.newKeySet<EthereumNodeRecord>()
     val scraper = Scraper(
-      initialENRs = enrs, bindAddress = addr,
+      initialENRs = enrs,
+      bindAddress = addr,
       listeners = listOf { _, nodes ->
         for (node in nodes) {
           if (seen.add(node)) {

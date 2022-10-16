@@ -45,6 +45,7 @@ class FeedService(private val multiplexer: Multiplexer) {
   companion object {
     private val objectMapper = ObjectMapper()
   }
+
   /**
    * Publishes a message to the instance's own scuttlebutt feed, assuming the client established the connection using
    * keys authorising it to perform this operation.

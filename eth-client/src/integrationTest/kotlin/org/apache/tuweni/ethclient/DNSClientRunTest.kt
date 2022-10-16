@@ -33,7 +33,8 @@ class DNSClientRunTest {
     val client = DNSClient(
       vertx,
       DNSConfigurationImpl("default", "foo", "example.com", 1000, null),
-      MapKeyValueStore.open(), MemoryPeerRepository()
+      MapKeyValueStore.open(),
+      MemoryPeerRepository()
     )
     runBlocking {
       client.start()
@@ -46,7 +47,8 @@ class DNSClientRunTest {
     val client = DNSClient(
       vertx,
       DNSConfigurationImpl("default", "foo", "example.com", 1000, null),
-      MapKeyValueStore.open(), MemoryPeerRepository()
+      MapKeyValueStore.open(),
+      MemoryPeerRepository()
     )
     runBlocking {
       client.seq(42L)

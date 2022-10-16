@@ -33,7 +33,9 @@ class StratumProtocolTest {
   @Test
   fun testStratum1CanHandle() {
     val protocol = Stratum1Protocol(
-      "", submitCallback = { true }, seedSupplier = Bytes32::random,
+      "",
+      submitCallback = { true },
+      seedSupplier = Bytes32::random,
       coroutineContext = Dispatchers.Default,
       subscriptionIdCreator = { "1234" }
     )
@@ -47,7 +49,9 @@ class StratumProtocolTest {
   @Test
   fun testSendNewWorkStratum1() {
     val protocol = Stratum1Protocol(
-      "", submitCallback = { true }, seedSupplier = { Bytes32.repeat(1) },
+      "",
+      submitCallback = { true },
+      seedSupplier = { Bytes32.repeat(1) },
       coroutineContext = Dispatchers.Default,
       subscriptionIdCreator = { "1234" },
       jobIdSupplier = { "5678" }
@@ -81,7 +85,9 @@ class StratumProtocolTest {
   @Test
   fun testGetWorkStratum1NoWork() {
     val protocol = Stratum1Protocol(
-      "", submitCallback = { true }, seedSupplier = { Bytes32.repeat(1) },
+      "",
+      submitCallback = { true },
+      seedSupplier = { Bytes32.repeat(1) },
       coroutineContext = Dispatchers.Default,
       subscriptionIdCreator = { "1234" },
       jobIdSupplier = { "5678" }
@@ -108,7 +114,9 @@ class StratumProtocolTest {
   @Test
   fun testGetWorkStratum1() {
     val protocol = Stratum1Protocol(
-      "", submitCallback = { true }, seedSupplier = Bytes32::random,
+      "",
+      submitCallback = { true },
+      seedSupplier = Bytes32::random,
       coroutineContext = Dispatchers.Default,
       subscriptionIdCreator = { "1234" }
     )
@@ -128,7 +136,7 @@ class StratumProtocolTest {
     val protocol = Stratum1EthProxyProtocol(
       submitCallback = { true },
       seedSupplier = Bytes32::random,
-      Dispatchers.Default,
+      Dispatchers.Default
     )
     val conn = StratumConnection(emptyArray(), {}, {}, "foo")
     assertFalse(protocol.canHandle("", conn))
@@ -142,7 +150,7 @@ class StratumProtocolTest {
     val protocol = Stratum1EthProxyProtocol(
       submitCallback = { true },
       seedSupplier = { Bytes32.ZERO },
-      Dispatchers.Default,
+      Dispatchers.Default
     )
     val ref = AtomicReference<String>()
     val conn = StratumConnection(emptyArray(), {}, ref::set, "foo")
@@ -160,7 +168,7 @@ class StratumProtocolTest {
     val protocol = Stratum1EthProxyProtocol(
       submitCallback = { true },
       seedSupplier = { Bytes32.ZERO },
-      Dispatchers.Default,
+      Dispatchers.Default
     )
     val ref = AtomicReference<String>()
     val conn = StratumConnection(emptyArray(), {}, ref::set, "foo")
@@ -180,7 +188,7 @@ class StratumProtocolTest {
     val protocol = Stratum1EthProxyProtocol(
       submitCallback = { true },
       seedSupplier = { Bytes32.ZERO },
-      Dispatchers.Default,
+      Dispatchers.Default
     )
     val ref = AtomicReference<String>()
     protocol.setCurrentWorkTask(PoWInput(UInt256.ZERO, Bytes32.ZERO, 0L))
@@ -204,7 +212,7 @@ class StratumProtocolTest {
     val protocol = Stratum1EthProxyProtocol(
       submitCallback = { false },
       seedSupplier = { Bytes32.ZERO },
-      Dispatchers.Default,
+      Dispatchers.Default
     )
     val ref = AtomicReference<String>()
     protocol.setCurrentWorkTask(PoWInput(UInt256.ZERO, Bytes32.ZERO, 0L))
@@ -231,7 +239,7 @@ class StratumProtocolTest {
     val protocol = Stratum1EthProxyProtocol(
       submitCallback = { false },
       seedSupplier = { Bytes32.ZERO },
-      Dispatchers.Default,
+      Dispatchers.Default
     )
     val ref = AtomicReference<String>()
     protocol.setCurrentWorkTask(PoWInput(UInt256.ZERO, Bytes32.ZERO, 0L))
@@ -257,17 +265,17 @@ class StratumProtocolTest {
     protocol.handle(
       conn,
       """{"method": "eth_submitWork", "id": 4, "params": ["${Bytes.random(8)}","${Bytes.random(32)}","${Bytes.random(32)}"]}
-""".trimMargin()
+      """.trimMargin()
     )
     protocol.handle(
       conn,
       """{"method": "eth_submitWork", "id": 5, "params": ["${Bytes.random(8)}","${Bytes.random(32)}","${Bytes.random(32)}"]}
-""".trimMargin()
+      """.trimMargin()
     )
     protocol.handle(
       conn,
       """{"method": "eth_submitWork", "id": 6, "params": ["${Bytes.random(8)}","${Bytes.random(32)}","${Bytes.random(32)}"]}
-""".trimMargin()
+      """.trimMargin()
     )
     assertTrue(closeRef.get())
   }
@@ -281,7 +289,7 @@ class StratumProtocolTest {
         counter == 2
       },
       seedSupplier = { Bytes32.ZERO },
-      Dispatchers.Default,
+      Dispatchers.Default
     )
     val ref = AtomicReference<String>()
     protocol.setCurrentWorkTask(PoWInput(UInt256.ZERO, Bytes32.ZERO, 0L))
@@ -308,17 +316,17 @@ class StratumProtocolTest {
     protocol.handle(
       conn,
       """{"method": "eth_submitWork", "id": 4, "params": ["${Bytes.random(8)}","${Bytes32.ZERO}","${Bytes.random(32)}"]}
-""".trimMargin()
+      """.trimMargin()
     )
     protocol.handle(
       conn,
       """{"method": "eth_submitWork", "id": 5, "params": ["${Bytes.random(8)}","${Bytes32.ZERO}","${Bytes.random(32)}"]}
-""".trimMargin()
+      """.trimMargin()
     )
     protocol.handle(
       conn,
       """{"method": "eth_submitWork", "id": 6, "params": ["${Bytes.random(8)}","${Bytes32.ZERO}","${Bytes.random(32)}"]}
-""".trimMargin()
+      """.trimMargin()
     )
     assertFalse(closeRef.get())
   }

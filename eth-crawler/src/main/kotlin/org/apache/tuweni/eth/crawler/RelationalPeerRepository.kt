@@ -41,7 +41,7 @@ open class RelationalPeerRepository(
   private val dataSource: DataSource,
   private val expiration: Long = 5 * 60 * 1000L,
   private val clientIdsInterval: Long = 24 * 60 * 60 * 1000 * 2L,
-  override val coroutineContext: CoroutineContext = Dispatchers.Default,
+  override val coroutineContext: CoroutineContext = Dispatchers.Default
 ) : CoroutineScope, PeerRepository {
 
   companion object {
@@ -159,7 +159,7 @@ open class RelationalPeerRepository(
   internal fun getPeersWithInfo(
     infoCollected: Long,
     from: Int? = null,
-    limit: Int? = null,
+    limit: Int? = null
   ): List<PeerConnectionInfoDetails> {
     dataSource.connection.use { conn ->
       var query =
@@ -299,14 +299,14 @@ internal data class PeerConnectionInfoDetails(
   val capabilities: String,
   val genesisHash: String,
   val bestHash: String,
-  val totalDifficulty: String,
+  val totalDifficulty: String
 )
 
 internal class RepositoryPeer(
   override val nodeId: SECP256K1.PublicKey,
   val id: String,
   knownEndpoint: Endpoint,
-  private val dataSource: DataSource,
+  private val dataSource: DataSource
 ) : Peer {
 
   init {

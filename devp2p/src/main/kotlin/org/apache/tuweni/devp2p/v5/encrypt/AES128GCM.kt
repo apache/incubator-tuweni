@@ -39,7 +39,6 @@ object AES128GCM {
    * @param data encryption metadata
    */
   fun encrypt(privateKey: Bytes, nonce: Bytes, message: Bytes, additionalAuthenticatedData: Bytes): Bytes {
-
     val cipher = Cipher.getInstance("AES/GCM/NoPadding")
     cipher.init(
       Cipher.ENCRYPT_MODE,

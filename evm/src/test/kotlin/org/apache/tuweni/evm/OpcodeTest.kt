@@ -278,8 +278,12 @@ class OpcodeTest {
       assertEquals(
         test.allGasUsed.toLong(),
         result.state.gasManager.gasCost.toLong(),
-        " diff: " + if (test.allGasUsed > result.state.gasManager.gasLeft()) test.allGasUsed.subtract(result.state.gasManager.gasLeft()) else result.state.gasManager.gasLeft()
-          .subtract(test.allGasUsed)
+        " diff: " + if (test.allGasUsed > result.state.gasManager.gasLeft()) {
+          test.allGasUsed.subtract(result.state.gasManager.gasLeft())
+        } else {
+          result.state.gasManager.gasLeft()
+            .subtract(test.allGasUsed)
+        }
       )
     } finally {
       vm.stop()

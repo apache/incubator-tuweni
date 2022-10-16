@@ -219,7 +219,9 @@ internal class Session(
       val ticket = Ticket.decrypt(message.ticket, sessionKey.initiatorKey)
       ticket.validate(nodeId, address.host(), now(), message.topic)
       ticket
-    } else null
+    } else {
+      null
+    }
 
     // Create new ticket
     val waitTime = topicTable.put(topic, message.nodeRecord)

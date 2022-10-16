@@ -25,10 +25,11 @@ import java.lang.ref.WeakReference
 internal class ExtensionNode<V>(
   private val path: Bytes,
   private val child: Node<V>,
-  private val nodeFactory: NodeFactory<V>,
+  private val nodeFactory: NodeFactory<V>
 ) : Node<V> {
   @Volatile
   private var rlp: WeakReference<Bytes>? = null
+
   @Volatile
   private var hash: Bytes32? = null
 

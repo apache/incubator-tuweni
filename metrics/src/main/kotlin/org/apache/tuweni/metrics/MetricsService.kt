@@ -41,7 +41,7 @@ class MetricsService(
   enablePrometheus: Boolean = true,
   enableGrpcPush: Boolean = true,
   grpcEndpoint: String = "http://localhost:4317",
-  grpcTimeout: Long = 2000,
+  grpcTimeout: Long = 2000
 ) {
 
   companion object {

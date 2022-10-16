@@ -48,7 +48,9 @@ object ScraperApp {
     val uris = args.map { URI.create(it) }
     val addr = SocketAddress.inetSocketAddress(11000, "0.0.0.0")
     val scraper = Scraper(
-      initialURIs = uris, bindAddress = addr, repository = EphemeralPeerRepository(),
+      initialURIs = uris,
+      bindAddress = addr,
+      repository = EphemeralPeerRepository(),
       listeners = listOf {
         println(it.uri())
       }
@@ -78,7 +80,7 @@ class Scraper(
   val bindAddress: SocketAddress,
   val repository: PeerRepository,
   val listeners: List<(Peer) -> Unit>? = null,
-  val waitSecondsBetweenScrapes: Long = 30,
+  val waitSecondsBetweenScrapes: Long = 30
 ) : CoroutineScope {
 
   private var service: DiscoveryService? = null

@@ -59,8 +59,10 @@ class CrawlerConfig(val filePath: Path) {
         .addString("discoveryDNS", mainnetDiscoveryDNS, "DNS discovery crawler", null)
         .addLong("discoveryDNSPollingPeriod", 60 * 1000L, "DNS Discovery Polling Period in milliseconds", null)
         .addString(
-          "jdbcUrl", System.getProperty("DATABASE_URL", System.getenv("DATABASE_URL")),
-          "JDBC URL of the form jdbc:posgresql://localhost:5432", PropertyValidator.isPresent()
+          "jdbcUrl",
+          System.getProperty("DATABASE_URL", System.getenv("DATABASE_URL")),
+          "JDBC URL of the form jdbc:posgresql://localhost:5432",
+          PropertyValidator.isPresent()
         )
         .addInteger("jdbcConnections", 25, "Number of JDBC connections for the connections pool", null)
         .addString("network", "mainnet", "Network to use instead of providing a genesis file.", null)

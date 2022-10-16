@@ -682,7 +682,9 @@ private val sha3 = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
   val numWords: UInt256 = length.divideCeil(32L)
   val copyCost = Gas.valueOf(6).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(30))
 
-  val memoryCost = if (length.isZero) Gas.ZERO else {
+  val memoryCost = if (length.isZero) {
+    Gas.ZERO
+  } else {
     memoryCost(memory.newSize(from, length).subtract(memory.size()))
   }
   gasManager.add(copyCost.addSafe(memoryCost))

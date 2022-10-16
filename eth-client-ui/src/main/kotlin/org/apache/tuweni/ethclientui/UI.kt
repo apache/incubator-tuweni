@@ -30,7 +30,7 @@ class UI(
   val port: Int = 0,
   val networkInterface: String = "127.0.0.1",
   val path: String = "/",
-  val client: EthereumClient,
+  val client: EthereumClient
 ) {
 
   private var server: Server? = null

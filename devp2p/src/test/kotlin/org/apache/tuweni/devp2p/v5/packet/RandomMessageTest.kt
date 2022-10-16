@@ -17,8 +17,8 @@
 package org.apache.tuweni.devp2p.v5.packet
 
 import org.apache.tuweni.bytes.Bytes
-import org.apache.tuweni.devp2p.v5.RandomMessage
 import org.apache.tuweni.devp2p.v5.Message
+import org.apache.tuweni.devp2p.v5.RandomMessage
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test

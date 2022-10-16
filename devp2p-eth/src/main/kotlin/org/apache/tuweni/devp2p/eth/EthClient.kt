@@ -33,6 +33,7 @@ import org.apache.tuweni.units.bigints.UInt256
 import org.slf4j.LoggerFactory
 
 val logger = LoggerFactory.getLogger(EthClient::class.java)
+
 /**
  * Client of the ETH subprotocol, allowing to request block and node data
  */
@@ -182,7 +183,7 @@ open class EthClient(
   @Suppress("TYPE_INFERENCE_ONLY_INPUT_TYPES_WARNING")
   fun headersRequested(
     connection: WireConnection,
-    blockHeader: BlockHeader,
+    blockHeader: BlockHeader
   ): Request<List<BlockHeader>>? = headerRequests.remove(connection.uri() + blockHeader.hash.toHexString())
     ?: headerRequests.remove(connection.uri() + blockHeader.number.toHexString())
 
