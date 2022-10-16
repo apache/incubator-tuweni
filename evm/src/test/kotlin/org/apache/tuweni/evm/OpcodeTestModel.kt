@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test
 
 data class StorageEntry @JsonCreator constructor(
   @JsonProperty("key") val key: Bytes,
-  @JsonProperty("value") val value: Bytes,
+  @JsonProperty("value") val value: Bytes
 )
 
 data class AccountInfo @JsonCreator constructor(
@@ -39,31 +39,31 @@ data class AccountInfo @JsonCreator constructor(
   @JsonProperty("balance") val balance: Wei,
   @JsonProperty("code") val code: Bytes,
   @JsonProperty("nonce") val nonce: UInt256,
-  @JsonProperty("storage") val storage: List<StorageEntry>,
+  @JsonProperty("storage") val storage: List<StorageEntry>
 )
 
 data class Before @JsonCreator constructor(
   @JsonProperty("accounts") val accounts: List<AccountInfo>,
   @JsonProperty("stack") val stack: List<Bytes>,
-  @JsonProperty("memory") val memory: List<Bytes32>,
+  @JsonProperty("memory") val memory: List<Bytes32>
 )
 
 data class After @JsonCreator constructor(
   @JsonProperty("accounts") val accounts: List<AccountInfo>,
   @JsonProperty("stack") val stack: List<Bytes>,
   @JsonProperty("memory") val memory: List<Bytes32>,
-  @JsonProperty("logs") val logs: List<Log>,
+  @JsonProperty("logs") val logs: List<Log>
 )
 
 data class Operation @JsonCreator constructor(
   @JsonProperty("name") val name: String,
-  @JsonProperty("opcode") val opcode: Bytes,
+  @JsonProperty("opcode") val opcode: Bytes
 )
 
 data class Log @JsonCreator constructor(
   @JsonProperty("logger") val logger: Address,
   @JsonProperty("data") val data: Bytes,
-  @JsonProperty("topics") val topics: List<Bytes32>,
+  @JsonProperty("topics") val topics: List<Bytes32>
 )
 
 /**
@@ -96,7 +96,7 @@ data class OpcodeTestModel @JsonCreator constructor(
   @JsonProperty("value") val value: UInt256,
   @JsonProperty("gasUsed") val gasUsed: Gas,
   @JsonProperty("allGasUsed") val allGasUsed: Gas,
-  @JsonProperty("refunds") val refunds: Map<Address, Wei>,
+  @JsonProperty("refunds") val refunds: Map<Address, Wei>
 )
 
 class OpcodeTestModelTest {

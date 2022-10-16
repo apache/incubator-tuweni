@@ -26,7 +26,7 @@ buildscript {
 }
 
 plugins {
-  id 'com.diffplug.spotless' version '6.6.1'
+  id 'com.diffplug.spotless' version '6.11.0'
   id 'net.ltgt.errorprone' version '2.0.2'
   id 'org.springframework.boot' version '2.4.3'
   id 'io.spring.dependency-management' version '1.0.6.RELEASE'
@@ -179,7 +179,7 @@ subprojects {
     }
     kotlin {
       licenseHeaderFile rootProject.file('gradle/spotless.license.txt')
-      ktlint("0.43.0").userData(['indent_size': '2', 'continuation_indent_size' : '2', 'disabled_rules': 'import-ordering'])
+      ktlint("0.47.1").editorConfigOverride(['indent_size': '2', 'continuation_indent_size' : '2'])
       endWithNewline()
     }
   }

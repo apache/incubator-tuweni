@@ -169,7 +169,8 @@ suspend fun AsyncCompletion.await() {
 }
 
 private class ContinuationConsumer(
-  @Volatile @JvmField var cont: Continuation<Unit>?
+  @Volatile @JvmField
+  var cont: Continuation<Unit>?
 ) : Consumer<Throwable?> {
   override fun accept(exception: Throwable?) {
     val cont = this.cont ?: return // atomically read current value unless null

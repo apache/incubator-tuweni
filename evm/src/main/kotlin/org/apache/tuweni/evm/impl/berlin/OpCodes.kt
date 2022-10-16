@@ -361,7 +361,9 @@ private val sstore = Opcode { gasManager, hostContext, stack, msg, _, _, _, _ ->
     if (currentValue.equals(originalValue)) {
       if (originalValue.isZero) {
         Gas.valueOf(20000)
-      } else Gas.valueOf(5000 - 2100)
+      } else {
+        Gas.valueOf(5000 - 2100)
+      }
     } else {
       Gas.valueOf(100)
     }
@@ -761,7 +763,9 @@ private val sha3 = Opcode { gasManager, _, stack, _, _, _, memory, _ ->
   val numWords: UInt256 = length.divideCeil(32L)
   val copyCost = Gas.valueOf(6).multiply(Gas.valueOf(numWords)).add(Gas.valueOf(30))
 
-  val memoryCost = if (length.isZero) Gas.ZERO else {
+  val memoryCost = if (length.isZero) {
+    Gas.ZERO
+  } else {
     val pre = org.apache.tuweni.evm.impl.frontier.memoryCost(memory.size())
     val post: Gas = org.apache.tuweni.evm.impl.frontier.memoryCost(memory.newSize(from, length))
     post.subtract(pre)

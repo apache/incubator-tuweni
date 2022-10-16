@@ -122,13 +122,17 @@ interface DiscoveryService {
       advertiseTcpPort: Int? = null,
       routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
       packetFilter: ((SECP256K1.PublicKey, SocketAddress) -> Boolean)? = null,
-      timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER,
+      timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER
     ): DiscoveryService {
       val bindAddress =
-        if (host == null) SocketAddress.inetSocketAddress(port, "127.0.0.1") else SocketAddress.inetSocketAddress(
-          port,
-          host
-        )
+        if (host == null) {
+          SocketAddress.inetSocketAddress(port, "127.0.0.1")
+        } else {
+          SocketAddress.inetSocketAddress(
+            port,
+            host
+          )
+        }
       return open(
         vertx,
         keyPair,
@@ -177,7 +181,7 @@ interface DiscoveryService {
       advertiseTcpPort: Int? = null,
       routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
       packetFilter: ((SECP256K1.PublicKey, SocketAddress) -> Boolean)? = null,
-      timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER,
+      timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER
     ): DiscoveryService {
       return CoroutineDiscoveryService(
         vertx,
@@ -295,7 +299,7 @@ internal class CoroutineDiscoveryService constructor(
   private val routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
   private val packetFilter: ((SECP256K1.PublicKey, SocketAddress) -> Boolean)? = null,
   private val timeSupplier: () -> Long = DiscoveryService.CURRENT_TIME_SUPPLIER,
-  override val coroutineContext: CoroutineContext = vertx.dispatcher() + CoroutineExceptionHandler { _, _ -> },
+  override val coroutineContext: CoroutineContext = vertx.dispatcher() + CoroutineExceptionHandler { _, _ -> }
 ) : DiscoveryService, CoroutineScope {
 
   companion object {
@@ -352,7 +356,12 @@ internal class CoroutineDiscoveryService constructor(
       advertiseTcpPort
     )
     enr = EthereumNodeRecord.toRLP(
-      keyPair, seq, enrData, null, InetAddress.getByName(endpoint.address), endpoint.tcpPort,
+      keyPair,
+      seq,
+      enrData,
+      null,
+      InetAddress.getByName(endpoint.address),
+      endpoint.tcpPort,
       endpoint.udpPort
     )
     selfEndpoint = endpoint
@@ -386,7 +395,8 @@ internal class CoroutineDiscoveryService constructor(
       if (result.peer != peer) {
         logger.warn(
           "{}: ignoring bootstrap peer {} - responding node used a different node-id",
-          serviceDescriptor, uri
+          serviceDescriptor,
+          uri
         )
         return false
       }
@@ -483,7 +493,6 @@ internal class CoroutineDiscoveryService constructor(
   }
 
   private suspend fun receivePacket(datagram: Buffer, address: SocketAddress, arrivalTime: Long) {
-
     val packet: Packet
     try {
       packet = Packet.decodeFrom(Bytes.wrap(datagram.bytes))
@@ -572,8 +581,11 @@ internal class CoroutineDiscoveryService constructor(
       logger.debug("{}: verified peer endpoint {} (node-id: {})", serviceDescriptor, endpoint.address, peer.nodeId)
     } else {
       logger.debug(
-        "{}: verified peer endpoint {} (node-id: {} - changed from {})", serviceDescriptor,
-        endpoint.address, peer.nodeId, sender.nodeId
+        "{}: verified peer endpoint {} (node-id: {} - changed from {})",
+        serviceDescriptor,
+        endpoint.address,
+        peer.nodeId,
+        sender.nodeId
       )
     }
 
@@ -619,8 +631,10 @@ internal class CoroutineDiscoveryService constructor(
             endpointVerification(node.endpoint, neighbor).verify(now)
           }?.let { result ->
             logger.debug(
-              "{}: adding {} to the routing table (node-id: {})", serviceDescriptor,
-              result.endpoint.address, result.peer.nodeId
+              "{}: adding {} to the routing table (node-id: {})",
+              serviceDescriptor,
+              result.endpoint.address,
+              result.peer.nodeId
             )
             addToRoutingTable(result.peer)
           }
@@ -688,7 +702,7 @@ internal class CoroutineDiscoveryService constructor(
   private suspend fun ensurePeerIsValid(
     peer: Peer,
     address: SocketAddress,
-    arrivalTime: Long,
+    arrivalTime: Long
   ): VerificationResult? {
     val now = timeSupplier()
     peer.getEndpoint(now - ENDPOINT_PROOF_LONGEVITY_MS)?.let { endpoint ->
@@ -698,7 +712,8 @@ internal class CoroutineDiscoveryService constructor(
 
     val endpoint = peer.updateEndpoint(
       Endpoint(address, peer.endpoint.tcpPort),
-      arrivalTime, now - ENDPOINT_PROOF_LONGEVITY_MS
+      arrivalTime,
+      now - ENDPOINT_PROOF_LONGEVITY_MS
     )
     return withTimeoutOrNull(PEER_VERIFICATION_TIMEOUT_MS) { endpointVerification(endpoint, peer).verify(now) }
   }
@@ -784,7 +799,7 @@ internal class CoroutineDiscoveryService constructor(
      *
      * This will typically be the same as peer.endpoint, but may not be due to concurrent updates.
      */
-    val endpoint: Endpoint,
+    val endpoint: Endpoint
   )
 
   private fun enrRequest(endpoint: Endpoint, peer: Peer) =
@@ -839,7 +854,7 @@ internal class CoroutineDiscoveryService constructor(
 
   private data class ENRResult(
     val peer: Peer,
-    val enr: EthereumNodeRecord,
+    val enr: EthereumNodeRecord
   )
 
   private suspend fun findNodes(peer: Peer, target: SECP256K1.PublicKey): AsyncResult<List<Node>> {

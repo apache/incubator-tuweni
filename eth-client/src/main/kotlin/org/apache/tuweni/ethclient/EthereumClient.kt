@@ -74,7 +74,7 @@ import kotlin.coroutines.CoroutineContext
 class EthereumClient(
   val vertx: Vertx,
   val config: EthereumClientConfig,
-  override val coroutineContext: CoroutineContext = Dispatchers.Unconfined,
+  override val coroutineContext: CoroutineContext = Dispatchers.Unconfined
 ) : CoroutineScope {
 
   companion object {
@@ -106,7 +106,6 @@ class EthereumClient(
   suspend fun start() {
     logger.info("Starting Ethereum client...")
     if (config.metricsEnabled()) {
-
       val metricsService = MetricsService(
         "tuweni",
         port = config.metricsPort(),
@@ -162,9 +161,13 @@ class EthereumClient(
       val peerRepository = peerRepositories[it.peerRepository()]
       if (peerRepository == null) {
         val message = (
-          if (peerRepositories.isEmpty()) "none" else peerRepositories.keys.joinToString(
-            ","
-          )
+          if (peerRepositories.isEmpty()) {
+            "none"
+          } else {
+            peerRepositories.keys.joinToString(
+              ","
+            )
+          }
           ) + " defined"
         throw IllegalArgumentException(
           "Repository $peerRepository not found, $message"
@@ -180,9 +183,13 @@ class EthereumClient(
       val peerRepository = peerRepositories[it.getPeerRepository()]
       if (peerRepository == null) {
         val message = (
-          if (peerRepositories.isEmpty()) "none" else peerRepositories.keys.joinToString(
-            ","
-          )
+          if (peerRepositories.isEmpty()) {
+            "none"
+          } else {
+            peerRepositories.keys.joinToString(
+              ","
+            )
+          }
           ) + " defined"
         throw IllegalArgumentException(
           "Repository $peerRepository not found, $message"
@@ -206,9 +213,13 @@ class EthereumClient(
         val peerRepository = peerRepositories[rlpxConfig.peerRepository()]
         if (peerRepository == null) {
           val message = (
-            if (peerRepositories.isEmpty()) "none" else peerRepositories.keys.joinToString(
-              ","
-            )
+            if (peerRepositories.isEmpty()) {
+              "none"
+            } else {
+              peerRepositories.keys.joinToString(
+                ","
+              )
+            }
             ) + " defined"
           throw IllegalArgumentException(
             "Repository ${rlpxConfig.peerRepository()} not found, $message"
@@ -217,9 +228,13 @@ class EthereumClient(
         val repository = storageRepositories[rlpxConfig.repository()]
         if (repository == null) {
           val message = (
-            if (storageRepositories.isEmpty()) "none" else storageRepositories.keys.joinToString(
-              ","
-            )
+            if (storageRepositories.isEmpty()) {
+              "none"
+            } else {
+              storageRepositories.keys.joinToString(
+                ","
+              )
+            }
             ) + " defined"
           throw IllegalArgumentException(
             "Repository ${rlpxConfig.repository()} not found, $message"
@@ -229,8 +244,12 @@ class EthereumClient(
         val genesisBlock = repository.retrieveGenesisBlock()
         val adapter = WireConnectionPeerRepositoryAdapter(peerRepository)
         val blockchainInfo = SimpleBlockchainInformation(
-          UInt256.valueOf(genesisFile!!.chainId.toLong()), genesisBlock.header.difficulty,
-          genesisBlock.header.hash, genesisBlock.header.number, genesisBlock.header.hash, genesisFile.forks
+          UInt256.valueOf(genesisFile!!.chainId.toLong()),
+          genesisBlock.header.difficulty,
+          genesisBlock.header.hash,
+          genesisBlock.header.number,
+          genesisBlock.header.hash,
+          genesisFile.forks
         )
         logger.info("Initializing with blockchain information $blockchainInfo")
         val ethSubprotocol = EthSubprotocol(
@@ -286,7 +305,6 @@ class EthereumClient(
         }
       }
     ).thenRun {
-
       for (sync in config.synchronizers()) {
         val syncRepository = storageRepositories[sync.getRepository()] ?: throw IllegalArgumentException("Repository ${sync.getRepository()} missing for synchronizer ${sync.getName()}")
         val syncService = rlpxServices[sync.getRlpxService()] ?: throw IllegalArgumentException("Service ${sync.getRlpxService()} missing for synchronizer ${sync.getName()}")
@@ -294,41 +312,41 @@ class EthereumClient(
         val adapter = adapters[sync.getRlpxService()] ?: throw IllegalArgumentException("Service ${sync.getRlpxService()} missing for synchronizer ${sync.getName()}")
 
         when (sync.getType()) {
-          SynchronizerType.best -> {
+          SynchronizerType.BEST -> {
             val bestSynchronizer = FromBestBlockHeaderSynchronizer(
               repository = syncRepository,
               client = syncService.getClient(ETH66) as EthRequestsManager,
               peerRepository = syncPeerRepository,
               from = sync.getFrom(),
-              to = sync.getTo(),
+              to = sync.getTo()
             )
             bestSynchronizer.start()
             synchronizers[sync.getName()] = bestSynchronizer
           }
-          SynchronizerType.status -> {
+          SynchronizerType.STATUS -> {
             val synchronizer = PeerStatusEthSynchronizer(
               repository = syncRepository,
               client = syncService.getClient(ETH66) as EthRequestsManager,
               peerRepository = syncPeerRepository,
               adapter = adapter,
               from = sync.getFrom(),
-              to = sync.getTo(),
+              to = sync.getTo()
             )
             synchronizer.start()
             synchronizers[sync.getName()] = synchronizer
           }
-          SynchronizerType.parent -> {
+          SynchronizerType.PARENT -> {
             val parentSynchronizer = FromUnknownParentSynchronizer(
               repository = syncRepository,
               client = syncService.getClient(ETH66) as EthRequestsManager,
               peerRepository = syncPeerRepository,
               from = sync.getFrom(),
-              to = sync.getTo(),
+              to = sync.getTo()
             )
             parentSynchronizer.start()
             synchronizers[sync.getName()] = parentSynchronizer
           }
-          SynchronizerType.canonical -> {
+          SynchronizerType.CANONICAL -> {
             val fromRepository = storageRepositories.get(sync.getFromRepository())
               ?: throw IllegalArgumentException("Missing repository for canonical repository ${sync.getFromRepository()}")
             val canonicalSynchronizer = CanonicalSynchronizer(
@@ -337,7 +355,7 @@ class EthereumClient(
               peerRepository = syncPeerRepository,
               from = sync.getFrom(),
               to = sync.getTo(),
-              fromRepository = fromRepository,
+              fromRepository = fromRepository
             )
             canonicalSynchronizer.start()
             synchronizers[sync.getName()] = canonicalSynchronizer
@@ -347,17 +365,17 @@ class EthereumClient(
 
       for (validator in config.validators()) {
         when (validator.getType()) {
-          ValidatorType.chainId -> {
+          ValidatorType.CHAINID -> {
             val chainId = validator.getChainId()
               ?: throw IllegalArgumentException("chainId required for validator ${validator.getName()}")
             val chainIdValidator = ChainIdValidator(
               from = validator.getFrom(),
               to = validator.getTo(),
-              chainId = chainId,
+              chainId = chainId
             )
             validators[validator.getName()] = chainIdValidator
           }
-          ValidatorType.transactionsHash -> {
+          ValidatorType.TRANSACTIONHASH -> {
             val transactionsHashValidator = TransactionsHashValidator(from = validator.getFrom(), to = validator.getTo())
             validators[validator.getName()] = transactionsHashValidator
           }
@@ -369,9 +387,13 @@ class EthereumClient(
       val peerRepository = peerRepositories[staticPeers.peerRepository()]
       if (peerRepository == null) {
         val message = (
-          if (peerRepositories.isEmpty()) "none" else peerRepositories.keys.joinToString(
-            ","
-          )
+          if (peerRepositories.isEmpty()) {
+            "none"
+          } else {
+            peerRepositories.keys.joinToString(
+              ","
+            )
+          }
           ) + " defined"
         throw IllegalArgumentException(
           "Repository ${staticPeers.peerRepository()} not found, $message"

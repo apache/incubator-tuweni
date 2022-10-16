@@ -51,7 +51,8 @@ class HandshakeSessionTest {
           peerAddress,
           peerKeyPair.publicKey(),
           { _, message -> runBlocking { peerSession!!.processMessage(message) } },
-          { enr }, Dispatchers.Default
+          { enr },
+          Dispatchers.Default
         )
       peerSession =
         HandshakeSession(
@@ -59,7 +60,8 @@ class HandshakeSessionTest {
           address,
           keyPair.publicKey(),
           { _, message -> runBlocking { session.processMessage(message) } },
-          { peerEnr }, Dispatchers.Default
+          { peerEnr },
+          Dispatchers.Default
         )
 
       val key = session.connect().await()

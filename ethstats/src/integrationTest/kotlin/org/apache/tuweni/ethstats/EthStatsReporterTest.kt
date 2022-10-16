@@ -16,9 +16,9 @@
  */
 package org.apache.tuweni.ethstats
 
+import io.vertx.core.Vertx
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.assertTrue
-
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.Address
@@ -26,17 +26,14 @@ import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.junit.VertxExtension
 import org.apache.tuweni.junit.VertxInstance
 import org.apache.tuweni.units.bigints.UInt256
-
-import java.net.URI
-import java.time.Instant
-import java.util.Collections
-
-import io.vertx.core.Vertx
-import kotlinx.coroutines.delay
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.net.URI
+import java.time.Instant
+import java.util.Collections
 import java.util.concurrent.atomic.AtomicReference
 
 @Disabled("flaky")
@@ -45,7 +42,6 @@ public class EthStatsReporterTest {
 
   @Test
   fun testConnectToLocalEthStats(@VertxInstance vertx: Vertx) = runBlocking {
-
     val now = Instant.EPOCH
     val server = FakeEthStatsServer(vertx, "127.0.0.1", 0)
     val reporter = EthStatsReporter(
@@ -111,7 +107,6 @@ public class EthStatsReporterTest {
 
   @Test
   fun testServer(@VertxInstance vertx: Vertx) = runBlocking {
-
     val now = Instant.EPOCH
     val nodeInfoReference = AtomicReference<NodeInfo>()
     val controller = object : EthStatsServerController {
@@ -120,7 +115,11 @@ public class EthStatsReporterTest {
       }
     }
     val server = EthStatsServer(
-      vertx, "127.0.0.1", 33030, "wat", { now },
+      vertx,
+      "127.0.0.1",
+      33030,
+      "wat",
+      { now },
       controller
     )
     server.start()

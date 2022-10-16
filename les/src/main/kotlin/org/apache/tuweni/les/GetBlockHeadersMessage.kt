@@ -62,10 +62,11 @@ internal data class GetBlockHeadersMessage(val reqID: Long, val queries: List<Bl
                 Bytes32.wrap(queryReader.readValue()),
                 queryReader.readUInt256(),
                 queryReader.readUInt256(),
-                if (queryReader.readInt() == 1)
+                if (queryReader.readInt() == 1) {
                   BlockHeaderQuery.Direction.BACKWARDS
-                else
+                } else {
                   BlockHeaderQuery.Direction.FORWARD
+                }
               )
             }
           )

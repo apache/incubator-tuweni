@@ -71,7 +71,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
         sectionConfig.getInteger("advertisedPort"),
         sectionConfig.getString("repository"),
         sectionConfig.getString("peerRepository"),
-        sectionConfig.getString("key"),
+        sectionConfig.getString("key")
       )
     }
   }
@@ -85,7 +85,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       val sectionConfig = config.getConfigurationSection("genesis.$section")
       GenesisFileConfigurationImpl(
         section,
-        URI.create(sectionConfig.getString("path")),
+        URI.create(sectionConfig.getString("path"))
       )
     }
   }
@@ -99,7 +99,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       val sectionConfig = config.getConfigurationSection("peerRepository.$section")
       PeerRepositoryConfigurationImpl(
         section,
-        sectionConfig.getString("type"),
+        sectionConfig.getString("type")
       )
     }
   }
@@ -128,7 +128,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
         sectionConfig.getString("peerRepository"),
         sectionConfig.getString("enrLink"),
         sectionConfig.getLong("pollingPeriod"),
-        if (sectionConfig.contains("dnsServer")) sectionConfig.getString("dnsServer") else null,
+        if (sectionConfig.contains("dnsServer")) sectionConfig.getString("dnsServer") else null
       )
     }
   }
@@ -168,7 +168,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       val sectionConfig = config.getConfigurationSection("static.$section")
       StaticPeersConfigurationImpl(
         sectionConfig.getListOfString("enodes"),
-        sectionConfig.getString("peerRepository"),
+        sectionConfig.getString("peerRepository")
       )
     }
   }
@@ -203,7 +203,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
         sectionConfig.getString("rlpxService"),
         UInt256.valueOf(sectionConfig.getLong("from")),
         UInt256.valueOf(sectionConfig.getLong("to")),
-        sectionConfig.getString("fromRepository"),
+        sectionConfig.getString("fromRepository")
       )
     }
   }
@@ -216,10 +216,11 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
     return validators.map { section ->
       val sectionConfig = config.getConfigurationSection("validator.$section")
       ValidatorConfigurationImpl(
-        section, ValidatorType.valueOf(sectionConfig.getString("type")),
+        section,
+        ValidatorType.valueOf(sectionConfig.getString("type")),
         UInt256.valueOf(sectionConfig.getLong("from")),
         UInt256.valueOf(sectionConfig.getLong("to")),
-        sectionConfig.getInteger("chainId"),
+        sectionConfig.getInteger("chainId")
       )
     }
   }
@@ -275,7 +276,9 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
 
       val staticPeers = SchemaBuilder.create()
       staticPeers.addListOfString(
-        "enodes", Collections.emptyList(), "Static enodes to connect to in enode://publickey@host:port format"
+        "enodes",
+        Collections.emptyList(),
+        "Static enodes to connect to in enode://publickey@host:port format"
       ) { _, position, value ->
         val errors = mutableListOf<ConfigurationError>()
         for (enode in value!!) {
@@ -306,12 +309,14 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       val rlpx = SchemaBuilder.create()
       rlpx.addString("networkInterface", "127.0.0.1", "Network interface to bind", null)
       rlpx.addString(
-        "key", null, "Hex string representation of the private key used to represent the node",
+        "key",
+        null,
+        "Hex string representation of the private key used to represent the node",
         object : PropertyValidator<String> {
           override fun validate(
             key: String,
             position: DocumentPosition?,
-            value: String?,
+            value: String?
           ): MutableList<ConfigurationError> {
             try {
               SECP256K1.SecretKey.fromBytes(Bytes32.fromHexString(value ?: ""))
@@ -458,7 +463,7 @@ interface PeerRepositoryConfiguration {
 }
 
 enum class SynchronizerType {
-  best, status, parent, canonical
+  BEST, STATUS, PARENT, CANONICAL
 }
 
 interface SynchronizerConfiguration {
@@ -473,7 +478,7 @@ interface SynchronizerConfiguration {
 }
 
 enum class ValidatorType {
-  chainId, transactionsHash
+  CHAINID, TRANSACTIONHASH
 }
 
 interface ValidatorConfiguration {
@@ -498,7 +503,7 @@ internal data class RLPxServiceConfigurationImpl(
   val advertisedPort: Int,
   val repository: String,
   val peerRepository: String,
-  val key: String,
+  val key: String
 ) : RLPxServiceConfiguration {
 
   private val keyPair = SECP256K1.KeyPair.fromSecretKey(SECP256K1.SecretKey.fromBytes(Bytes32.fromHexString(key)))
@@ -539,7 +544,7 @@ internal data class GenesisFileConfigurationImpl(private val name: String, priva
 internal data class DataStoreConfigurationImpl(
   private val name: String,
   private val storagePath: Path,
-  private val genesisFile: String,
+  private val genesisFile: String
 ) : DataStoreConfiguration {
   override fun getName(): String = name
 
@@ -572,7 +577,7 @@ data class DiscoveryConfigurationImpl(
   private val peerRepository: String,
   private val port: Int,
   private val networkInterface: String,
-  private val identity: SECP256K1.KeyPair,
+  private val identity: SECP256K1.KeyPair
 ) :
   DiscoveryConfiguration {
   override fun getName() = name
@@ -593,7 +598,7 @@ data class StaticPeersConfigurationImpl(private val enodes: List<String>, privat
 data class ProxyConfigurationImpl(
   private val name: String,
   private val upstream: String,
-  private val downstream: String,
+  private val downstream: String
 ) : ProxyConfiguration {
   override fun name() = name
 
@@ -609,7 +614,7 @@ data class SynchronizerConfigurationImpl(
   private val rlpxService: String,
   private val from: UInt256?,
   private val to: UInt256?,
-  private val fromRepository: String?,
+  private val fromRepository: String?
 ) : SynchronizerConfiguration {
   override fun getName() = name
   override fun getRepository() = repository
@@ -626,7 +631,7 @@ data class ValidatorConfigurationImpl(
   private val type: ValidatorType,
   private val from: UInt256?,
   private val to: UInt256?,
-  private val chainId: Int?,
+  private val chainId: Int?
 ) : ValidatorConfiguration {
   override fun getName() = name
   override fun getType() = type

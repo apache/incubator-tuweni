@@ -28,7 +28,8 @@ class MessageTest {
   @Test
   fun parseMessageRoundtrip() {
     val msg = Message(
-      protocol = Protocol.PING, headers = Bytes.fromHexString("deadbeef01"),
+      protocol = Protocol.PING,
+      headers = Bytes.fromHexString("deadbeef01"),
       body = Bytes.fromHexString("deadbeef02")
     )
     val serialized = msg.toBytes()
@@ -50,7 +51,8 @@ class MessageTest {
   @Test
   fun testToString() {
     val msg = Message(
-      protocol = Protocol.PING, headers = Bytes.fromHexString("deadbeef01"),
+      protocol = Protocol.PING,
+      headers = Bytes.fromHexString("deadbeef01"),
       body = Bytes.fromHexString("deadbeef02")
     )
     assertEquals(
@@ -64,18 +66,21 @@ class MessageTest {
   @Test
   fun testSize() {
     val msg = Message(
-      protocol = Protocol.PING, headers = Bytes.fromHexString("deadbeef01"),
+      protocol = Protocol.PING,
+      headers = Bytes.fromHexString("deadbeef01"),
       body = Bytes.fromHexString("deadbeef02")
     )
     assertEquals(
-      26, msg.size()
+      26,
+      msg.size()
     )
   }
 
   @Test
   fun testReadMessage() {
     val msg = Message(
-      protocol = Protocol.PING, headers = Bytes.fromHexString("deadbeef01"),
+      protocol = Protocol.PING,
+      headers = Bytes.fromHexString("deadbeef01"),
       body = Bytes.fromHexString("deadbeef02")
     )
     val serialized = msg.toBytes()

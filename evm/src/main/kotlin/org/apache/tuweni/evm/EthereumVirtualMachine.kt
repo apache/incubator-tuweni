@@ -92,7 +92,7 @@ enum class HardFork(val number: Int) {
   CONSTANTINOPLE(5),
   PETERSBURG(6),
   ISTANBUL(7),
-  BERLIN(8),
+  BERLIN(8)
 }
 
 val latestHardFork = HardFork.BERLIN
@@ -111,7 +111,7 @@ data class EVMState(
   val logs: List<Log>,
   val stack: Stack,
   val memory: Memory,
-  val output: Bytes? = null,
+  val output: Bytes? = null
 ) {
 
   /**
@@ -146,7 +146,7 @@ data class EVMResult(
   val statusCode: EVMExecutionStatusCode,
   val hostContext: HostContext,
   val changes: ExecutionChanges,
-  val state: EVMState,
+  val state: EVMState
 )
 
 /**
@@ -163,7 +163,7 @@ data class EVMMessage(
   val origin: Address,
   val inputData: Bytes,
   val value: Bytes,
-  val createSalt: Bytes32 = Bytes32.ZERO,
+  val createSalt: Bytes32 = Bytes32.ZERO
 )
 
 /**
@@ -178,7 +178,7 @@ class EthereumVirtualMachine(
   private val repository: BlockchainRepository,
   val precompiles: Map<Address, PrecompileContract>,
   private val evmVmFactory: () -> EvmVm,
-  private val options: Map<String, String> = mapOf(),
+  private val options: Map<String, String> = mapOf()
 ) {
 
   companion object {
@@ -249,7 +249,7 @@ class EthereumVirtualMachine(
     chainId: UInt256,
     callKind: CallKind,
     revision: HardFork = latestHardFork,
-    depth: Int = 0,
+    depth: Int = 0
   ): EVMResult {
     val hostContext = TransactionalEVMHostContext(
       repository,
@@ -266,7 +266,7 @@ class EthereumVirtualMachine(
       currentTimestamp,
       currentGasLimit,
       currentDifficulty,
-      chainId,
+      chainId
     )
     val result =
       executeInternal(
@@ -299,7 +299,7 @@ class EthereumVirtualMachine(
     callKind: CallKind,
     revision: HardFork = latestHardFork,
     depth: Int = 0,
-    hostContext: HostContext,
+    hostContext: HostContext
   ): EVMResult {
     var gasAvailable = gas
     if (depth > 1024) {
@@ -313,7 +313,6 @@ class EthereumVirtualMachine(
     }
 
     if (callKind == CallKind.CREATE || callKind == CallKind.CREATE2) {
-
       val codeDepositGasFee = UInt256.valueOf(code.size() * 200L)
       if (gas < codeDepositGasFee) {
         return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
@@ -738,7 +737,7 @@ val opcodes = mapOf<Byte, String>(
   Pair(0xfb.toByte(), "unused"),
   Pair(0xfd.toByte(), "revert"),
   Pair(0xfe.toByte(), "invalid"),
-  Pair(0xff.toByte(), "selfdestruct"),
+  Pair(0xff.toByte(), "selfdestruct")
 )
 
 /**

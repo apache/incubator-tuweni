@@ -88,7 +88,7 @@ class CrawlerApplication(
       val thread = Thread("crawler")
       thread.isDaemon = true
       thread
-    }.asCoroutineDispatcher(),
+    }.asCoroutineDispatcher()
 ) : CoroutineScope {
 
   private val metricsService = MetricsService(
@@ -108,7 +108,6 @@ class CrawlerApplication(
   }.asCoroutineDispatcher()
 
   fun run() {
-
     val dbConfig = HikariConfig()
     dbConfig.maximumPoolSize = config.jdbcConnections()
     dbConfig.jdbcUrl = config.jdbcUrl()
@@ -156,8 +155,12 @@ class CrawlerApplication(
     val genesisFile = GenesisFile.read(contents)
     val genesisBlock = genesisFile.toBlock()
     val blockchainInformation = SimpleBlockchainInformation(
-      UInt256.valueOf(genesisFile.chainId.toLong()), genesisBlock.header.difficulty,
-      genesisBlock.header.hash, UInt256.ZERO, genesisBlock.header.hash, genesisFile.forks
+      UInt256.valueOf(genesisFile.chainId.toLong()),
+      genesisBlock.header.difficulty,
+      genesisBlock.header.hash,
+      UInt256.ZERO,
+      genesisBlock.header.hash,
+      genesisFile.forks
     )
     val expiringConnectionIds = ExpiringSet<String>()
 

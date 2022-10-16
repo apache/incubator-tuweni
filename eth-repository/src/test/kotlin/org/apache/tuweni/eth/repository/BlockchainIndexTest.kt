@@ -16,6 +16,17 @@
  */
 package org.apache.tuweni.eth.repository
 
+import org.apache.lucene.index.DirectoryReader
+import org.apache.lucene.index.IndexWriter
+import org.apache.lucene.index.Term
+import org.apache.lucene.search.BooleanClause
+import org.apache.lucene.search.BooleanQuery
+import org.apache.lucene.search.IndexSearcher
+import org.apache.lucene.search.ScoreDoc
+import org.apache.lucene.search.TermQuery
+import org.apache.lucene.search.TopScoreDocCollector
+import org.apache.lucene.store.Directory
+import org.apache.lucene.util.BytesRef
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.Address
@@ -29,19 +40,8 @@ import org.apache.tuweni.junit.LuceneIndex
 import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
 import org.apache.tuweni.units.bigints.UInt256
-import org.apache.tuweni.units.ethereum.Gas
-import org.apache.lucene.index.DirectoryReader
-import org.apache.lucene.index.IndexWriter
-import org.apache.lucene.index.Term
-import org.apache.lucene.search.BooleanClause
-import org.apache.lucene.search.BooleanQuery
-import org.apache.lucene.search.IndexSearcher
-import org.apache.lucene.search.ScoreDoc
-import org.apache.lucene.search.TermQuery
-import org.apache.lucene.search.TopScoreDocCollector
-import org.apache.lucene.store.Directory
-import org.apache.lucene.util.BytesRef
 import org.apache.tuweni.units.bigints.UInt64
+import org.apache.tuweni.units.ethereum.Gas
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -199,7 +199,8 @@ internal class BlockchainIndexTest {
 
     run {
       val entries = reader.findInRange(
-        BlockHeaderFields.NUMBER, header.number.subtract(5),
+        BlockHeaderFields.NUMBER,
+        header.number.subtract(5),
         header.number.add(5)
       )
       assertEquals(1, entries.size)
@@ -278,7 +279,8 @@ internal class BlockchainIndexTest {
     val blockchainIndex = BlockchainIndex(writer)
 
     val txReceipt = TransactionReceipt(
-      Bytes32.random(), 3,
+      Bytes32.random(),
+      3,
       LogsBloomFilter(Bytes.random(256)),
       listOf(
         Log(
@@ -295,7 +297,8 @@ internal class BlockchainIndexTest {
     blockchainIndex.index { it.indexTransactionReceipt(txReceipt, 43, txHash, blockHash) }
 
     val txReceiptWithStatus = TransactionReceipt(
-      42, 322,
+      42,
+      322,
       LogsBloomFilter(Bytes.random(256)),
       listOf(
         Log(

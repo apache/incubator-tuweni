@@ -18,6 +18,8 @@ package org.apache.tuweni.eth.repository
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.apache.lucene.index.IndexWriter
+import org.apache.lucene.util.BytesRef
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.crypto.SECP256K1
@@ -35,11 +37,9 @@ import org.apache.tuweni.junit.LuceneIndexWriter
 import org.apache.tuweni.junit.LuceneIndexWriterExtension
 import org.apache.tuweni.kv.MapKeyValueStore
 import org.apache.tuweni.units.bigints.UInt256
+import org.apache.tuweni.units.bigints.UInt64
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
-import org.apache.lucene.index.IndexWriter
-import org.apache.lucene.util.BytesRef
-import org.apache.tuweni.units.bigints.UInt64
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -505,7 +505,9 @@ internal class BlockchainRepositoryTest {
     )
 
     val txReceipt = TransactionReceipt(
-      Bytes32.random(), 3, LogsBloomFilter(Bytes.random(256)),
+      Bytes32.random(),
+      3,
+      LogsBloomFilter(Bytes.random(256)),
       listOf(
         Log(
           Address.fromBytes(

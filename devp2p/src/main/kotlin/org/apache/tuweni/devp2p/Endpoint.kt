@@ -104,6 +104,7 @@ data class Endpoint(
    * UDP socket address of the endpoint
    */
   val udpSocketAddress: SocketAddress = SocketAddress.inetSocketAddress(udpPort, address)
+
   /**
    * TCP socket address of the endpoint, if set
    */

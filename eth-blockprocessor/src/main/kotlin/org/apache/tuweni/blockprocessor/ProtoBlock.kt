@@ -42,7 +42,7 @@ data class SealableHeader(
   val logsBloom: Bytes,
   val number: UInt256,
   val gasLimit: Gas,
-  val gasUsed: Gas,
+  val gasUsed: Gas
 ) {
 
   /**
@@ -55,7 +55,7 @@ data class SealableHeader(
     timestamp: Instant,
     extraData: Bytes,
     mixHash: Hash,
-    nonce: UInt64,
+    nonce: UInt64
   ): BlockHeader {
     return BlockHeader(
       parentHash,
@@ -109,7 +109,7 @@ class ProtoBlock(
     timestamp: Instant,
     extraData: Bytes,
     mixHash: Hash,
-    nonce: UInt64,
+    nonce: UInt64
   ): Block {
     val ommersHash = Hash.hash(RLP.encodeList { writer -> ommers.forEach { writer.writeValue(it.hash) } })
     return Block(

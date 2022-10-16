@@ -153,7 +153,7 @@ class EphemeralPeerRepository(
 
   private inner class EphemeralPeer(
     override val nodeId: SECP256K1.PublicKey,
-    knownEndpoint: Endpoint,
+    knownEndpoint: Endpoint
   ) : Peer {
     @Volatile
     override var endpoint: Endpoint = knownEndpoint

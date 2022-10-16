@@ -466,7 +466,8 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     document += NumericDocValuesField(TransactionReceiptFields.INDEX.fieldName, txIndex.toLong())
     document += StringField(TransactionReceiptFields.TRANSACTION_HASH.fieldName, id, Field.Store.NO)
     document += StringField(
-      TransactionReceiptFields.BLOCK_HASH.fieldName, toBytesRef(blockHash),
+      TransactionReceiptFields.BLOCK_HASH.fieldName,
+      toBytesRef(blockHash),
       Field.Store.NO
     )
     for (log in txReceipt.getLogs()) {
@@ -480,7 +481,8 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     }
     document += StringField(
       TransactionReceiptFields.BLOOM_FILTER.fieldName,
-      toBytesRef(txReceipt.getBloomFilter().toBytes()), Field.Store.NO
+      toBytesRef(txReceipt.getBloomFilter().toBytes()),
+      Field.Store.NO
     )
     document += NumericDocValuesField(
       TransactionReceiptFields.CUMULATIVE_GAS_USED.fieldName,
@@ -503,7 +505,8 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
 
   private fun queryTxReceiptDocs(query: Query, fields: List<BlockHeaderFields>): List<Document> {
     val txQuery = BooleanQuery.Builder().add(
-      query, BooleanClause.Occur.MUST
+      query,
+      BooleanClause.Occur.MUST
     )
       .add(TermQuery(Term("_type", "txReceipt")), BooleanClause.Occur.MUST).build()
 
@@ -533,7 +536,8 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
 
   private fun queryBlockDocs(query: Query, fields: List<BlockHeaderFields>): List<Document> {
     val blockQuery = BooleanQuery.Builder().add(
-      query, BooleanClause.Occur.MUST
+      query,
+      BooleanClause.Occur.MUST
     )
       .add(TermQuery(Term("_type", "block")), BooleanClause.Occur.MUST).build()
 
@@ -542,7 +546,8 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
 
   private fun queryDiffDocs(query: Query, fields: List<BlockHeaderFields>): List<Document> {
     val blockQuery = BooleanQuery.Builder().add(
-      query, BooleanClause.Occur.MUST
+      query,
+      BooleanClause.Occur.MUST
     )
       .add(TermQuery(Term("_type", "difficulty")), BooleanClause.Occur.MUST).build()
 

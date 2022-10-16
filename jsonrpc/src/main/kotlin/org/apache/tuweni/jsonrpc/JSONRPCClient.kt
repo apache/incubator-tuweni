@@ -50,7 +50,7 @@ class JSONRPCClient(
   val basicAuthenticationEnabled: Boolean = false,
   val basicAuthenticationUsername: String = "",
   val basicAuthenticationPassword: String = "",
-  override val coroutineContext: CoroutineContext = vertx.dispatcher(),
+  override val coroutineContext: CoroutineContext = vertx.dispatcher()
 ) : Closeable, CoroutineScope {
 
   companion object {

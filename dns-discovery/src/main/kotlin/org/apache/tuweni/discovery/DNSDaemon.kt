@@ -37,7 +37,7 @@ class DNSDaemon @JvmOverloads constructor(
   private val seq: Long = 0,
   private val period: Long = 60000L,
   private val dnsServer: String? = null,
-  private val vertx: Vertx,
+  private val vertx: Vertx
 ) {
   companion object {
     val logger = LoggerFactory.getLogger(DNSDaemon::class.java)

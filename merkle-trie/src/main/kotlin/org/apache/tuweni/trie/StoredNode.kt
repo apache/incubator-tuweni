@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicReference
 internal class StoredNode<V> : Node<V>, CoroutineScope {
   private val nodeFactory: StoredNodeFactory<V>
   private val hash: Bytes32
+
   @Volatile
   private var loaded: SoftReference<Node<V>>? = null
   private val loader = AtomicReference<Deferred<Node<V>>>()

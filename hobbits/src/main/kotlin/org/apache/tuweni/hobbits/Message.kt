@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets.UTF_8
 
 internal val PREAMBLE = "EWP".toByteArray(UTF_8)
 internal val MESSAGE_HEADER_LENGTH = PREAMBLE.size + java.lang.Integer.BYTES * 3 + 1
+
 /**
  * Hobbits message.
  *
@@ -111,10 +112,12 @@ enum class Protocol(val code: Byte) {
    * Gossip protocol message
    */
   GOSSIP(1),
+
   /**
    * Ping message
    */
   PING(2),
+
   /**
    * RPC message
    */

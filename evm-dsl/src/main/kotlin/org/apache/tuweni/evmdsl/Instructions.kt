@@ -16,8 +16,8 @@
  */
 package org.apache.tuweni.evmdsl
 
-import kotlin.Byte
 import org.apache.tuweni.bytes.Bytes
+import kotlin.Byte
 
 /**
  * An EVM instruction. It is made of an opcode, optionally followed by bytes to be consumed by the opcode execution.

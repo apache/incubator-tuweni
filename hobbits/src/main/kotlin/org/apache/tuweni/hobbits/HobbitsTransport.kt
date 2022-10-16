@@ -198,7 +198,9 @@ class HobbitsTransport(
       Transport.WS -> {
         try {
           val websocket = httpClient!!.webSocket(
-            port, host, requestURI
+            port,
+            host,
+            requestURI
           ).await()
           websocket.exceptionHandler(exceptionHandler)
           websocket.writeBinaryMessage(Buffer.buffer(message.toBytes().toArrayUnsafe())).await()
@@ -439,14 +441,17 @@ enum class Transport() {
    * HTTP transport
    */
   HTTP,
+
   /**
    * TCP transport
    */
   TCP,
+
   /**
    * UDP transport
    */
   UDP,
+
   /**
    * Websocket transport
    */

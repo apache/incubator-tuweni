@@ -99,7 +99,6 @@ class BlockProcessorReferenceTest {
 
     @Throws(IOException::class)
     private fun prepareTests(path: URL, input: InputStream): Stream<Arguments> {
-
       val typeRef = object : TypeReference<HashMap<String, JsonReferenceTest>>() {}
       val allTests: Map<String, JsonReferenceTest> = mapper.readValue(input, typeRef)
       return allTests
@@ -134,7 +133,7 @@ class BlockProcessorReferenceTest {
       testName: String,
       test: JsonReferenceTest,
       hardFork: HardFork,
-      path: URL,
+      path: URL
     ): List<Arguments> {
       var index = 0
       return test.post?.get(hardForkMappping[hardFork])?.map { exec ->
@@ -143,7 +142,6 @@ class BlockProcessorReferenceTest {
           if (value.size() > 32) {
             null
           } else {
-
             Transaction(
               test.transaction!!.nonce!!,
               test.transaction!!.gasPrice!!,
@@ -178,7 +176,7 @@ class BlockProcessorReferenceTest {
     testIndex: Int,
     test: JsonReferenceTest,
     tx: () -> Transaction,
-    exec: TransactionExecution,
+    exec: TransactionExecution
   ) {
     runReferenceTests(path, testName, hardFork, testIndex, test, tx, exec)
   }
@@ -190,7 +188,7 @@ class BlockProcessorReferenceTest {
     testIndex: Int,
     test: JsonReferenceTest,
     tx: () -> Transaction?,
-    exec: TransactionExecution,
+    exec: TransactionExecution
   ) = runBlocking {
     assertNotNull(testName)
     assertNotNull(hardFork)
@@ -237,7 +235,7 @@ class BlockProcessorReferenceTest {
       Instant.ofEpochSecond(test.env!!.currentTimestamp!!.toLong()),
       Bytes.EMPTY,
       Hash.hash(RLP.encodeList {}),
-      UInt64.random(),
+      UInt64.random()
     )
     val result =
       processor.execute(
@@ -260,7 +258,8 @@ class BlockProcessorReferenceTest {
     }
     val logsHash = Hash.hash(rlp)
     assertEquals(
-      exec.logs, logsHash
+      exec.logs,
+      logsHash
     ) {
       val logs = result.block.transactionReceipts.map { it.logs }.flatten()
       logs.map {
@@ -307,14 +306,14 @@ data class JsonAccountState(
   var balance: Wei? = null,
   var code: Bytes? = null,
   var nonce: UInt256? = null,
-  var storage: Map<UInt256, UInt256>? = null,
+  var storage: Map<UInt256, UInt256>? = null
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class TransactionExecutionIndex(
   var data: Int? = null,
   var gas: Int? = null,
-  var value: Int? = null,
+  var value: Int? = null
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -323,7 +322,7 @@ data class TransactionExecution(
   var hash: Hash? = null,
   var indexes: TransactionExecutionIndex? = null,
   var logs: Bytes? = null,
-  var txbytes: Bytes? = null,
+  var txbytes: Bytes? = null
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -331,7 +330,7 @@ data class JsonReferenceTest(
   var env: Env? = null,
   var post: Map<String, List<TransactionExecution>>? = null,
   var pre: Map<Address, JsonAccountState>? = null,
-  var transaction: TransactionStep? = null,
+  var transaction: TransactionStep? = null
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -343,7 +342,7 @@ data class TransactionStep(
   var secretKey: Bytes32? = null,
   var sender: Address? = null,
   var to: Address? = null,
-  val value: List<Bytes>? = null,
+  val value: List<Bytes>? = null
 ) {
   fun combinedData(): Bytes? =
     data?.let {
@@ -359,5 +358,5 @@ data class Env(
   var currentGasLimit: Gas? = null,
   var currentNumber: UInt256? = null,
   var currentTimestamp: UInt256? = null,
-  var previousHash: Hash? = null,
+  var previousHash: Hash? = null
 )

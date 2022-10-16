@@ -123,7 +123,8 @@ class DNSEntryTest {
   fun testRootToString() {
     val root = ENRTreeRoot(
       mapOf(
-        Pair("enrtree-root", "v1"), Pair("l", "TO4Q75OQ2N7DX4EOOR7X66A6OM"),
+        Pair("enrtree-root", "v1"),
+        Pair("l", "TO4Q75OQ2N7DX4EOOR7X66A6OM"),
         Pair("e", "TO4Q75OQ2N7DX4EOOR7X66A6OM"),
         Pair("seq", "3"),
         Pair("sig", "N-YY6UB9xD0hFx1Gmnt7v0RfSxch5tKyry2SRDoLx7B4GfPXagwLxQqyf7gAMvApFn_ORwZQekMWa_pXrcGCtwE=")

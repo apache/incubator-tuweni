@@ -25,8 +25,8 @@ import org.apache.tuweni.crypto.Hash
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.devp2p.EthereumNodeRecord
 import org.apache.tuweni.devp2p.v5.encrypt.AES128GCM
-import org.apache.tuweni.devp2p.v5.encrypt.SessionKeyGenerator
 import org.apache.tuweni.devp2p.v5.encrypt.SessionKey
+import org.apache.tuweni.devp2p.v5.encrypt.SessionKeyGenerator
 import org.apache.tuweni.rlp.RLP
 import org.apache.tuweni.rlp.RLPReader
 import org.apache.tuweni.units.bigints.UInt256
@@ -190,7 +190,8 @@ internal class HandshakeSession(
     publicKey: SECP256K1.PublicKey
   ): Boolean {
     val signature = SECP256K1.Signature.create(
-      1, signatureBytes.slice(0, 32).toUnsignedBigInteger(),
+      1,
+      signatureBytes.slice(0, 32).toUnsignedBigInteger(),
       signatureBytes.slice(32).toUnsignedBigInteger()
     )
 
@@ -198,7 +199,8 @@ internal class HandshakeSession(
     val hashedSignValue = Hash.sha2_256(signValue)
     if (!SECP256K1.verifyHashed(hashedSignValue, signature, publicKey)) {
       val signature0 = SECP256K1.Signature.create(
-        0, signatureBytes.slice(0, 32).toUnsignedBigInteger(),
+        0,
+        signatureBytes.slice(0, 32).toUnsignedBigInteger(),
         signatureBytes.slice(32).toUnsignedBigInteger()
       )
       return SECP256K1.verifyHashed(hashedSignValue, signature0, publicKey)

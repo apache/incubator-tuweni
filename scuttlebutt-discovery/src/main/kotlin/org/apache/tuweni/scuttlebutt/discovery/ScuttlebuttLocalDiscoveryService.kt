@@ -49,7 +49,7 @@ class ScuttlebuttLocalDiscoveryService(
   private val broadcastPort: Int,
   private val listenNetworkInterface: String,
   private val multicastAddress: String,
-  private val validateMulticast: Boolean = true,
+  private val validateMulticast: Boolean = true
 ) {
 
   companion object {
@@ -82,7 +82,8 @@ class ScuttlebuttLocalDiscoveryService(
           datagramPacket
         )
       }.listen(
-        listenPort, listenNetworkInterface
+        listenPort,
+        listenNetworkInterface
       ).await()
       timerId = vertx.setPeriodic(60000) { broadcast() }
     }
@@ -109,7 +110,9 @@ class ScuttlebuttLocalDiscoveryService(
   fun broadcast() {
     for (id in identities) {
       udpSocket!!.send(
-        id.toCanonicalForm(), broadcastPort, multicastAddress
+        id.toCanonicalForm(),
+        broadcastPort,
+        multicastAddress
       ) { res: AsyncResult<Void?> ->
         if (res.failed()) {
           logger.error(res.cause().message, res.cause())

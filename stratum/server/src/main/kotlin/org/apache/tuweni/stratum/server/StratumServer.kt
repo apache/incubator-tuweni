@@ -40,8 +40,12 @@ import kotlin.coroutines.CoroutineContext
 fun main() = runBlocking {
   val selfSignedCertificate = SelfSignedCertificate.create()
   val server = StratumServer(
-    Vertx.vertx(), port = 10000, networkInterface = "0.0.0.0", sslOptions = selfSignedCertificate.keyCertOptions(),
-    submitCallback = { true }, seedSupplier = { Bytes32.random() },
+    Vertx.vertx(),
+    port = 10000,
+    networkInterface = "0.0.0.0",
+    sslOptions = selfSignedCertificate.keyCertOptions(),
+    submitCallback = { true },
+    seedSupplier = { Bytes32.random() }
   )
   server.start()
   Runtime.getRuntime().addShutdownHook(
@@ -67,7 +71,7 @@ class StratumServer(
   seedSupplier: () -> Bytes32,
   private val errorThreshold: Int = 3,
   denyTimeout: Long = 600000, // 10 minutes in milliseconds
-  override val coroutineContext: CoroutineContext = vertx.dispatcher(),
+  override val coroutineContext: CoroutineContext = vertx.dispatcher()
 ) : CoroutineScope {
 
   companion object {
@@ -114,14 +118,16 @@ class StratumServer(
     }
     socket.exceptionHandler { e -> logger.error(e.message, e) }
     val conn = StratumConnection(
-      protocols, closeHandle = { addToDenyList ->
+      protocols,
+      closeHandle = { addToDenyList ->
         if (addToDenyList) {
           denyList.add(socket.remoteAddress().host())
         }
         socket.close()
-      }, name = name,
+      },
+      name = name,
       threshold = errorThreshold,
-      sender = { bytes -> socket.write(Buffer.buffer(bytes)) },
+      sender = { bytes -> socket.write(Buffer.buffer(bytes)) }
     )
     socket.handler(conn::handleBuffer)
     socket.closeHandler {

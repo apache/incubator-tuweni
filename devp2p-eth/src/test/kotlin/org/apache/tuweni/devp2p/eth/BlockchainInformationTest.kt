@@ -32,8 +32,12 @@ class BlockchainInformationTest {
     val genesisFile = GenesisFile.read(contents)
     val genesisBlock = genesisFile.toBlock()
     val info = SimpleBlockchainInformation(
-      UInt256.valueOf(genesisFile.chainId.toLong()), genesisBlock.header.difficulty,
-      genesisBlock.header.hash, UInt256.valueOf(42L), genesisBlock.header.hash, genesisFile.forks
+      UInt256.valueOf(genesisFile.chainId.toLong()),
+      genesisBlock.header.difficulty,
+      genesisBlock.header.hash,
+      UInt256.valueOf(42L),
+      genesisBlock.header.hash,
+      genesisFile.forks
     )
     assertEquals(Bytes.fromHexString("0xfc64ec04"), info.getForkHashes()[0])
     assertEquals(Bytes.fromHexString("0x97c2c34c"), info.getForkHashes()[1])
@@ -51,8 +55,12 @@ class BlockchainInformationTest {
     val genesisFile = GenesisFile.read(contents)
     val genesisBlock = genesisFile.toBlock()
     val info = SimpleBlockchainInformation(
-      UInt256.valueOf(genesisFile.chainId.toLong()), genesisBlock.header.difficulty,
-      genesisBlock.header.hash, UInt256.valueOf(42L), genesisBlock.header.hash, genesisFile.forks
+      UInt256.valueOf(genesisFile.chainId.toLong()),
+      genesisBlock.header.difficulty,
+      genesisBlock.header.hash,
+      UInt256.valueOf(42L),
+      genesisBlock.header.hash,
+      genesisFile.forks
     )
     assertEquals(1150000L, info.getLastestApplicableFork(0L).next)
   }
@@ -63,8 +71,12 @@ class BlockchainInformationTest {
     val genesisFile = GenesisFile.read(contents)
     val genesisBlock = genesisFile.toBlock()
     val info = SimpleBlockchainInformation(
-      UInt256.valueOf(genesisFile.chainId.toLong()), genesisBlock.header.difficulty,
-      genesisBlock.header.hash, UInt256.valueOf(42L), genesisBlock.header.hash, genesisFile.forks
+      UInt256.valueOf(genesisFile.chainId.toLong()),
+      genesisBlock.header.difficulty,
+      genesisBlock.header.hash,
+      UInt256.valueOf(42L),
+      genesisBlock.header.hash,
+      genesisFile.forks
     )
     assertEquals(Bytes.fromHexString("0x30c7ddbc"), info.getLastestApplicableFork(0L).hash)
     assertEquals(10L, info.getLastestApplicableFork(0L).next)

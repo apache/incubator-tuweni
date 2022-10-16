@@ -39,7 +39,7 @@ internal class EthHandler(
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
   private val blockchainInfo: BlockchainInformation,
   private val service: RLPxService,
-  private val controller: EthController,
+  private val controller: EthController
 ) : SubProtocolHandler, CoroutineScope {
 
   private val pendingStatus = ExpiringMap<String, PeerInfo>(60000)
@@ -171,7 +171,6 @@ internal class EthHandler(
   }
 
   private suspend fun handleGetReceipts(connection: WireConnection, getReceipts: GetReceipts) {
-
     service.send(
       connection.agreedSubprotocolVersion(ETH62.name()),
       MessageType.Receipts.code,
@@ -240,11 +239,16 @@ internal class EthHandler(
       val forkId =
         blockchainInfo.getLastestApplicableFork(controller.repository.retrieveChainHeadHeader().number.toLong())
       service.send(
-        ethSubProtocol, MessageType.Status.code, connection,
+        ethSubProtocol,
+        MessageType.Status.code,
+        connection,
         StatusMessage(
           ethSubProtocol.version(),
-          blockchainInfo.networkID(), blockchainInfo.totalDifficulty(),
-          blockchainInfo.bestHash(), blockchainInfo.genesisHash(), forkId.hash,
+          blockchainInfo.networkID(),
+          blockchainInfo.totalDifficulty(),
+          blockchainInfo.bestHash(),
+          blockchainInfo.genesisHash(),
+          forkId.hash,
           forkId.next
         ).toBytes()
       )

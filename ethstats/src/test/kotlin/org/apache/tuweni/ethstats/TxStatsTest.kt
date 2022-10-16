@@ -16,13 +16,11 @@
  */
 package org.apache.tuweni.ethstats
 
-import org.junit.jupiter.api.Assertions.assertEquals
-
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.eth.EthJsonModule
 import org.apache.tuweni.eth.Hash
-
-import com.fasterxml.jackson.databind.ObjectMapper
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class TxStatsTest {

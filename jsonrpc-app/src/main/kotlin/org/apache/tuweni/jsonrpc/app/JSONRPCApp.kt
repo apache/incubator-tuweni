@@ -25,9 +25,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.app.commons.ApplicationUtils
-import org.apache.tuweni.eth.internalError
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.eth.JSONRPCResponse
+import org.apache.tuweni.eth.internalError
 import org.apache.tuweni.jsonrpc.JSONRPCClient
 import org.apache.tuweni.jsonrpc.JSONRPCServer
 import org.apache.tuweni.jsonrpc.methods.CachingHandler
@@ -92,7 +92,7 @@ object JSONRPCApp {
       enableGrpcPush = config.metricsGrpcPushEnabled(),
       enablePrometheus = config.metricsPrometheusEnabled(),
       grpcEndpoint = config.metricsGrpcEndpoint(),
-      grpcTimeout = config.metricsGrpcTimeout(),
+      grpcTimeout = config.metricsGrpcTimeout()
     )
     val vertx = Vertx.vertx(VertxOptions().setTracingOptions(OpenTelemetryOptions(metricsService.openTelemetry)))
     val app = JSONRPCApplication(vertx, config, metricsService)
@@ -104,7 +104,7 @@ class JSONRPCApplication(
   val vertx: Vertx,
   val config: JSONRPCConfig,
   val metricsService: MetricsService,
-  override val coroutineContext: CoroutineContext = Dispatchers.Unconfined,
+  override val coroutineContext: CoroutineContext = Dispatchers.Unconfined
 ) : CoroutineScope {
 
   fun run() {
@@ -127,7 +127,6 @@ class JSONRPCApplication(
     val failureCounter = meter.longCounterBuilder("failure").build()
 
     val nextHandler = if (config.cacheEnabled()) {
-
       val builder = GlobalConfigurationBuilder().serialization().marshaller(PersistenceMarshaller())
       val manager = DefaultCacheManager(builder.build())
       val cache: Cache<String, JSONRPCResponse> = manager.createCache(
@@ -139,7 +138,8 @@ class JSONRPCApplication(
 
       val cachingHandler =
         CachingHandler(
-          config.cachedMethods(), InfinispanKeyValueStore(cache),
+          config.cachedMethods(),
+          InfinispanKeyValueStore(cache),
           meter.longCounterBuilder("cacheHits").build(),
           meter.longCounterBuilder("cacheMisses").build(),
           allowListHandler::handleRequest

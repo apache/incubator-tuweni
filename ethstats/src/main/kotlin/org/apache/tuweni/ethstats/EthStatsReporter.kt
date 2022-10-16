@@ -84,7 +84,7 @@ class EthStatsReporter(
   private val osVer: String,
   private val historyRequester: (List<UInt256>) -> Unit,
   private val timeSupplier: () -> Instant,
-  override val coroutineContext: CoroutineContext = Dispatchers.Default,
+  override val coroutineContext: CoroutineContext = Dispatchers.Default
 ) : CoroutineScope {
 
   companion object {

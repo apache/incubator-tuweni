@@ -23,9 +23,9 @@ import kotlinx.coroutines.async
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.Hash
-import org.apache.tuweni.ethstats.NodeStats
-import org.apache.tuweni.ethstats.NodeInfo
 import org.apache.tuweni.ethstats.BlockStats
+import org.apache.tuweni.ethstats.NodeInfo
+import org.apache.tuweni.ethstats.NodeStats
 import org.apache.tuweni.ethstats.TxStats
 import org.apache.tuweni.units.bigints.UInt256
 import javax.sql.DataSource
@@ -176,7 +176,7 @@ class EthstatsDataRepository(
             (rs.getArray(10).array as Array<*>).map { TxStats(Hash.fromBytes(Bytes.wrap(it as ByteArray))) },
             Hash.fromBytes(Bytes.wrap(rs.getBytes(11))),
             Hash.fromBytes(Bytes.wrap(rs.getBytes(12))),
-            (rs.getArray(13).array as Array<*>).map { Hash.fromBytes(Bytes.wrap(it as ByteArray)) },
+            (rs.getArray(13).array as Array<*>).map { Hash.fromBytes(Bytes.wrap(it as ByteArray)) }
           )
         } else {
           null
@@ -227,7 +227,7 @@ class EthstatsDataRepository(
             rs.getString(6),
             rs.getString(7),
             rs.getString(8),
-            client = rs.getString(9),
+            client = rs.getString(9)
           )
         } else {
           null

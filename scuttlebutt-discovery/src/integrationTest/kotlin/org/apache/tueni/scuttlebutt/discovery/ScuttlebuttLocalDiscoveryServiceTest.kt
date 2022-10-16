@@ -69,7 +69,8 @@ internal class ScuttlebuttLocalDiscoveryServiceTest {
     ) {
       ScuttlebuttLocalDiscoveryService(
         vertx,
-        8008, 0,
+        8008,
+        0,
         "127.0.0.1",
         "10.0.0.0"
       )

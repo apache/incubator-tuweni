@@ -37,6 +37,7 @@ class ClientsService {
       mapper.registerModule(EthJsonModule())
     }
   }
+
   @javax.ws.rs.core.Context
   var context: ServletContext? = null
 

@@ -48,7 +48,7 @@ class CrawlerRESTService(
   val repository: RelationalPeerRepository,
   val stats: StatsJob,
   val meter: Meter,
-  override val coroutineContext: CoroutineContext = Dispatchers.Default,
+  override val coroutineContext: CoroutineContext = Dispatchers.Default
 ) : CoroutineScope {
 
   companion object {

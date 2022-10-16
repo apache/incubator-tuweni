@@ -50,11 +50,13 @@ class LocalIdentity(val addr: InetSocketAddress, val id: Identity) {
       val result = regexpPattern.matcher(str)
       return if (!result.matches()) {
         null
-      } else LocalIdentity(
-        result.group(1),
-        result.group(2),
-        Identity.fromPublicKey(Signature.PublicKey.fromBytes(Bytes.fromBase64String(result.group(3))))
-      )
+      } else {
+        LocalIdentity(
+          result.group(1),
+          result.group(2),
+          Identity.fromPublicKey(Signature.PublicKey.fromBytes(Bytes.fromBase64String(result.group(3))))
+        )
+      }
     }
   }
 

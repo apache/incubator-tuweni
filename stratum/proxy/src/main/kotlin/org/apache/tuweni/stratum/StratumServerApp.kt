@@ -48,7 +48,9 @@ fun main(args: Array<String>) {
   val idCounter = AtomicLong(0)
   val seedReference = AtomicReference<Bytes32>()
   val server = StratumServer(
-    vertx, port = port, networkInterface = "0.0.0.0",
+    vertx,
+    port = port,
+    networkInterface = "0.0.0.0",
     submitCallback = { solution ->
       logger.info("Got solution $solution")
       withContext(client.coroutineContext) {
@@ -69,7 +71,8 @@ fun main(args: Array<String>) {
         resp.result == true
       }
     },
-    seedSupplier = { seedReference.get() }, sslOptions = null,
+    seedSupplier = { seedReference.get() },
+    sslOptions = null
   )
   runBlocking {
     server.start()

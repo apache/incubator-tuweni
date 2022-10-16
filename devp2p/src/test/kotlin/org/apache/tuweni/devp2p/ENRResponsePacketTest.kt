@@ -34,9 +34,13 @@ internal class ENRResponsePacketTest {
 
     val requestHash = Bytes32.random()
     val enr = EthereumNodeRecord.toRLP(
-      SECP256K1.KeyPair.random(), 2, emptyMap(),
+      SECP256K1.KeyPair.random(),
+      2,
       emptyMap(),
-      InetAddress.getByName("localhost"), 3000, 12000
+      emptyMap(),
+      InetAddress.getByName("localhost"),
+      3000,
+      12000
     )
     val now = System.currentTimeMillis()
     val pong = ENRResponsePacket.create(keyPair, now, requestHash, enr)

@@ -16,13 +16,13 @@
  */
 package org.apache.tuweni.ethclientui
 
-import org.apache.tuweni.ethclient.EthereumClient
 import jakarta.servlet.ServletContext
 import jakarta.ws.rs.GET
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.Context
 import jakarta.ws.rs.core.MediaType
+import org.apache.tuweni.ethclient.EthereumClient
 
 @Path("config")
 class ConfigurationService {

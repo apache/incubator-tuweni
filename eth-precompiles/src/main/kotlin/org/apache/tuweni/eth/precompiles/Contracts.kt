@@ -38,10 +38,11 @@ class IDPrecompiledContract : PrecompileContract {
  */
 class ECRECPrecompiledContract : PrecompileContract {
   override fun run(input: Bytes): Result {
-    val padded = if (input.size() < 128)
+    val padded = if (input.size() < 128) {
       Bytes.wrap(Bytes.repeat(0, 128 - input.size()), input)
-    else
+    } else {
       input
+    }
     val h = Bytes32.wrap(padded.slice(0, 32))
     val v = padded.slice(32, 32)
     val r = padded.slice(64, 32)
@@ -97,10 +98,11 @@ class ModExpPrecompileContract : PrecompileContract {
   }
 
   override fun run(input: Bytes): Result {
-    val padded = if (input.size() < 96)
+    val padded = if (input.size() < 96) {
       Bytes.wrap(Bytes.repeat(0, 96 - input.size()), input)
-    else
+    } else {
       input
+    }
     val baseLength = padded.slice(0, 32).toUnsignedBigInteger()
     val exponentLength = padded.slice(32, 32).toUnsignedBigInteger()
     val modulusLength = padded.slice(64, 32).toUnsignedBigInteger()

@@ -16,12 +16,11 @@
  */
 package org.apache.tuweni.ethstats
 
+import com.fasterxml.jackson.annotation.JsonGetter
+import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.Hash
 import org.apache.tuweni.units.bigints.UInt256
-
-import com.fasterxml.jackson.annotation.JsonGetter
-import com.fasterxml.jackson.annotation.JsonPropertyOrder
 
 /**
  * Block statistics reported to ethnetstats.

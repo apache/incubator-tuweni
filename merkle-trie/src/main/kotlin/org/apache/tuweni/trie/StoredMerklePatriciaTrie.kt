@@ -155,7 +155,7 @@ class StoredMerklePatriciaTrie<V> : MerkleTrie<Bytes, V> {
     storage: MerkleStorage,
     rootHash: Bytes32,
     valueSerializer: (V) -> Bytes,
-    valueDeserializer: (Bytes) -> V,
+    valueDeserializer: (Bytes) -> V
   ) {
     this.storage = storage
     this.nodeFactory = StoredNodeFactory(storage, valueSerializer, valueDeserializer)

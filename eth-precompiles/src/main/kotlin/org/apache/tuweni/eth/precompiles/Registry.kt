@@ -59,7 +59,9 @@ object Registry {
     val bizantiumAltBN128PairingPrecompiledContract =
       AltBN128PrecompiledContract(
         LibEthPairings.EIP196_PAIR_OPERATION_RAW_VALUE,
-        Int.MAX_VALUE / 192 * 192, 100000, 80000
+        Int.MAX_VALUE / 192 * 192,
+        100000,
+        80000
       )
 
     bizantium = buildMap {
@@ -77,7 +79,9 @@ object Registry {
     val istanbulAltBN128PairingPrecompiledContract =
       AltBN128PrecompiledContract(
         LibEthPairings.EIP196_PAIR_OPERATION_RAW_VALUE,
-        Int.MAX_VALUE / 192 * 192, 45000, 34000
+        Int.MAX_VALUE / 192 * 192,
+        45000,
+        34000
       )
     val blake2bf = Address.fromBytes(Bytes.wrap(emptyArray, Bytes.of(9)))
     val blake2BFPrecompileContract = Blake2BFPrecompileContract()

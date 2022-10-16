@@ -108,7 +108,8 @@ internal class LESSubProtocolHandlerTest {
   private val blockchainInformation = SimpleBlockchainInformation(
     UInt256.valueOf(42L),
     UInt256.ONE,
-    block.header.hash, UInt256.valueOf(42L),
+    block.header.hash,
+    UInt256.valueOf(42L),
     block.header.hash,
     emptyList()
   )

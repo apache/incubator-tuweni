@@ -105,7 +105,6 @@ class EVMReferenceTest {
 
     @Throws(IOException::class)
     private fun prepareTests(input: InputStream): Stream<Arguments> {
-
       val typeRef = object : TypeReference<HashMap<String, JsonReferenceTest>>() {}
       val allTests: Map<String, JsonReferenceTest> = mapper.readValue(input, typeRef)
       return allTests
@@ -289,7 +288,7 @@ data class Env(
   var currentDifficulty: UInt256? = null,
   var currentGasLimit: UInt256? = null,
   var currentNumber: UInt256? = null,
-  var currentTimestamp: UInt256? = null,
+  var currentTimestamp: UInt256? = null
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -301,7 +300,7 @@ data class Exec(
   var gas: Gas? = null,
   var gasPrice: Wei? = null,
   var origin: Address? = null,
-  var value: Bytes? = null,
+  var value: Bytes? = null
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -309,7 +308,7 @@ data class JsonAccountState(
   var balance: Wei? = null,
   var code: Bytes? = null,
   var nonce: UInt256? = null,
-  var storage: Map<UInt256, UInt256>? = null,
+  var storage: Map<UInt256, UInt256>? = null
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -320,5 +319,5 @@ data class JsonReferenceTest(
   var logs: Bytes? = null,
   var out: Bytes? = null,
   var post: Map<Address, JsonAccountState>? = null,
-  var pre: Map<Address, JsonAccountState>? = null,
+  var pre: Map<Address, JsonAccountState>? = null
 )

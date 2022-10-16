@@ -35,7 +35,7 @@ internal data class Operation<K, V>(val operationType: OperationType, val key: K
 class CascadingKeyValueStore<K, V>(
   val frontKv: KeyValueStore<K, V>,
   val backingKv: KeyValueStore<K, V>,
-  override val coroutineContext: CoroutineContext = Dispatchers.IO,
+  override val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : KeyValueStore<K, V> {
 
   private val changes = mutableListOf<Operation<K, V>>()

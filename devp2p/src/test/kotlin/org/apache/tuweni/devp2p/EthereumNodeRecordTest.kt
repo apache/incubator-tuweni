@@ -44,7 +44,8 @@ class EthereumNodeRecordTest {
       keyPair,
       1,
       emptyMap(),
-      emptyMap(), InetAddress.getLoopbackAddress(),
+      emptyMap(),
+      InetAddress.getLoopbackAddress(),
       null,
       10000
     )

@@ -131,7 +131,8 @@ class EthereumClientRunTest {
         [genesis.default]
         path=classpath:/mainnet.json
         [dns.default]
-        enrLink="enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@all.mainnet.ethdisco.net"""".trimMargin()
+        enrLink="enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@all.mainnet.ethdisco.net"
+      """.trimMargin()
     )
     val client = EthereumClient(vertx, config)
     client.start()
