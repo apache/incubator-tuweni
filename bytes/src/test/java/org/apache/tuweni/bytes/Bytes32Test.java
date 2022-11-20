@@ -28,6 +28,16 @@ class Bytes32Test {
   }
 
   @Test
+  void constantBytes32slice() {
+    assertEquals(Bytes32.ZERO.slice(12, 20).size(), 20);
+  }
+
+  @Test
+  void constantBytesslice() {
+    assertEquals(Bytes.repeat((byte) 1, 63).slice(12, 20).size(), 20);
+  }
+
+  @Test
   void testMutableBytes32WrapWithOffset() {
     Bytes bytes = Bytes
         .fromHexString(

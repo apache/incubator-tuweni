@@ -38,7 +38,10 @@ class ConstantBytes32Value extends AbstractBytes implements Bytes32 {
 
   @Override
   public Bytes slice(int i, int length) {
-    return new ConstantBytes32Value(this.value);
+    if (length == 32) {
+      return this;
+    }
+    return new ConstantBytesValue(this.value, length);
   }
 
   @Override
