@@ -309,6 +309,10 @@ class BytesTest extends CommonBytesTests {
     assertEquals(-1, Bytes.of(0x01).compareTo(Bytes.of(0x01, 0xff)));
     assertEquals(-1, Bytes.of(0x00, 0x00, 0x01).compareTo(Bytes.of(0x00, 0x02)));
     assertEquals(-1, Bytes.of(0x00, 0x01).compareTo(Bytes.of(0x00, 0x00, 0x05)));
+    assertEquals(0, Bytes.fromHexString("0x0000").compareTo(Bytes.fromHexString("0x00")));
+    assertEquals(0, Bytes.fromHexString("0x00").compareTo(Bytes.fromHexString("0x0000")));
+    assertEquals(0, Bytes.fromHexString("0x000000").compareTo(Bytes.fromHexString("0x000000")));
+    assertEquals(-1, Bytes.fromHexString("0x000001").compareTo(Bytes.fromHexString("0x0001")));
   }
 
   @Test

@@ -1687,9 +1687,14 @@ public interface Bytes extends Comparable<Bytes> {
   default int compareTo(Bytes b) {
     checkNotNull(b);
 
-    int sizeCmp = Integer.compare(bitLength(), b.bitLength());
+    int bitLength = bitLength();
+    int sizeCmp = Integer.compare(bitLength, b.bitLength());
     if (sizeCmp != 0) {
       return sizeCmp;
+    }
+    // same bitlength and is zeroes only, return 0.
+    if (bitLength == 0) {
+      return 0;
     }
 
     for (int i = 0; i < size(); i++) {
