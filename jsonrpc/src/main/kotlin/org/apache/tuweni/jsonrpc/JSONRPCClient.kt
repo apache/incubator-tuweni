@@ -81,7 +81,6 @@ class JSONRPCClient(
       if (response.failed()) {
         deferred.completeExceptionally(response.cause())
       } else {
-        println(response.result().bodyAsString())
         val jsonResponse = mapper.readValue(response.result().bodyAsString(), JSONRPCResponse::class.java)
         deferred.complete(jsonResponse)
       }
