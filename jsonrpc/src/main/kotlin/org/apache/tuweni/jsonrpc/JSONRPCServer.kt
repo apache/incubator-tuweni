@@ -165,11 +165,15 @@ class JSONRPCServer(
             responses.add(handleRequest(request))
           }
           val readyResponses = responses.awaitAll()
+
+          val httpResponse = httpRequest.response().putHeader("content-type", "application/json")
+
           if (readyResponses.size == 1) {
-            httpRequest.response().end(mapper.writeValueAsString(readyResponses.get(0)))
+            httpResponse.end(mapper.writeValueAsString(readyResponses.get(0)))
           } else {
-            httpRequest.response().end(mapper.writeValueAsString(readyResponses))
+            httpResponse.end(mapper.writeValueAsString(readyResponses))
           }
+
           span.end()
         }
       }

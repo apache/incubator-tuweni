@@ -220,7 +220,7 @@ class LoggingHandler(
   suspend fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
     logger.info(request.toString())
     val response = delegateHandler.invoke(request)
-    logger.info(response.toString())
+    logger.debug(response.toString())
     return response
   }
 }
