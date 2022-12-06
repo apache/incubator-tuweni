@@ -19,10 +19,12 @@ dependencies {
   implementation project(':crypto')
   implementation project(':scuttlebutt')
   implementation 'org.slf4j:slf4j-api'
-  implementation 'com.google.code.findbugs:jsr305'
   implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
   implementation 'io.vertx:vertx-lang-kotlin-coroutines'
   implementation 'io.vertx:vertx-core'
+
+  compileOnly 'com.google.code.findbugs:jsr305'
+
 
   testImplementation project(':junit')
 
