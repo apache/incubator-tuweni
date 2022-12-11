@@ -18,8 +18,10 @@ package org.apache.tuweni.devp2p
 
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
+import com.google.common.util.concurrent.UncheckedExecutionException
 import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.kademlia.KademliaRoutingTable
+import java.lang.IllegalArgumentException
 
 /**
  * A routing table for ÐΞVp2p peers.
@@ -98,8 +100,11 @@ internal class DevP2PPeerRoutingTable(selfId: SECP256K1.PublicKey) : PeerRouting
   private fun hashForId(id: SECP256K1.PublicKey): ByteArray? {
     try {
       return idHashCache.get(id) { EthereumNodeRecord.nodeId(id).toArrayUnsafe() }
-    } catch (e: IllegalArgumentException) {
-      return null
+    } catch (e: UncheckedExecutionException) {
+      if (e.cause is IllegalArgumentException) {
+        return null
+      }
+      throw e
     }
   }
 }
