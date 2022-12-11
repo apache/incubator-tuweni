@@ -17,8 +17,9 @@ dependencies {
   implementation project(':concurrent')
   implementation project(':crypto')
   implementation project(':units')
-  implementation 'com.google.code.findbugs:jsr305'
   implementation 'org.bouncycastle:bcprov-jdk15on'
+
+  compileOnly 'com.google.code.findbugs:jsr305'
 
   testImplementation project(':junit')
   testImplementation 'org.bouncycastle:bcprov-jdk15on'

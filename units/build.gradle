@@ -14,7 +14,7 @@ description = 'Classes and utilities for working with 256 bit integers.'
 
 dependencies {
   implementation project(':bytes')
-  implementation 'com.google.code.findbugs:jsr305'
+  compileOnly 'com.google.code.findbugs:jsr305'
 
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.junit.jupiter:junit-jupiter-params'
