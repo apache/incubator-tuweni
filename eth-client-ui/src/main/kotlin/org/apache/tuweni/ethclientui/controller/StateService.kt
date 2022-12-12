@@ -14,38 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.ethclientui
+package org.apache.tuweni.ethclientui.controller
 
-import jakarta.servlet.ServletContext
-import jakarta.ws.rs.GET
-import jakarta.ws.rs.Path
-import jakarta.ws.rs.Produces
-import jakarta.ws.rs.core.Context
-import jakarta.ws.rs.core.MediaType
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes32
 import org.apache.tuweni.ethclient.EthereumClient
 import org.apache.tuweni.units.bigints.UInt256
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 data class BlockHashAndNumber(val hash: Bytes32, val number: UInt256)
 
 data class State(val peerCounts: Map<String, Long>, val bestBlocks: Map<String, BlockHashAndNumber>)
 
-@Path("state")
+@RestController
+@RequestMapping("/rest/state")
 class StateService {
 
-  @Context
-  var context: ServletContext? = null
+  @Autowired
+  var client: EthereumClient? = null
 
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
+  @GetMapping(value = [""], produces = [MediaType.APPLICATION_JSON_VALUE])
   fun get(): State {
-    val client = context!!.getAttribute("ethclient") as EthereumClient
-
-    val peerCounts = client.peerRepositories.entries.map {
+    val peerCounts = client!!.peerRepositories.entries.map {
       Pair(it.key, it.value.activeConnections().count())
     }
-    val bestBlocks = client.storageRepositories.entries.map {
+    val bestBlocks = client!!.storageRepositories.entries.map {
       runBlocking {
         val bestBlock = it.value.retrieveChainHeadHeader()
         Pair(it.key, BlockHashAndNumber(bestBlock.hash, bestBlock.number))

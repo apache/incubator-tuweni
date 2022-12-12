@@ -20,14 +20,14 @@ import io.vertx.core.Vertx
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.app.commons.ApplicationUtils
 import org.apache.tuweni.crypto.blake2bf.TuweniProvider
-import org.apache.tuweni.ethclientui.UI
+import org.apache.tuweni.ethclientui.ClientUIApplication
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import picocli.CommandLine
 import java.nio.file.Path
 import java.security.Security
 import kotlin.system.exitProcess
 
-fun main(args: Array<String>) = runBlocking {
+fun main(args: Array<String>): Unit = runBlocking {
   ApplicationUtils.renderBanner("Apache Tuweni client loading")
   Security.addProvider(BouncyCastleProvider())
   Security.addProvider(TuweniProvider())
@@ -47,9 +47,8 @@ fun main(args: Array<String>) = runBlocking {
   Runtime.getRuntime().addShutdownHook(Thread(Runnable { ethClient.stop() }))
   ethClient.start()
   val (host, port) = opts.web!!.split(":")
-  val ui = UI(networkInterface = host, port = port.toInt(), client = ethClient)
-  Runtime.getRuntime().addShutdownHook(Thread(Runnable { ui.stop() }))
-  ui.start()
+
+  ClientUIApplication.start(networkInterface = host, port = port.toInt(), client = ethClient)
 }
 
 class AppOptions {
