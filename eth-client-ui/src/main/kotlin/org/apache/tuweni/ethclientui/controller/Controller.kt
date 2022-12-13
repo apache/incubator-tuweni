@@ -14,26 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tuweni.ethclientui
+package org.apache.tuweni.ethclientui.controller
 
-import jakarta.servlet.ServletContext
-import jakarta.ws.rs.GET
-import jakarta.ws.rs.Path
-import jakarta.ws.rs.Produces
-import jakarta.ws.rs.core.Context
-import jakarta.ws.rs.core.MediaType
-import org.apache.tuweni.ethclient.EthereumClient
+import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.GetMapping
 
-@Path("config")
-class ConfigurationService {
+@Controller
+class Controller {
 
-  @Context
-  var context: ServletContext? = null
+  @GetMapping("/")
+  fun index(): String {
+    return "index"
+  }
 
-  @GET
-  @Produces(MediaType.TEXT_PLAIN)
-  fun get(): String {
-    val client = context!!.getAttribute("ethclient") as EthereumClient
-    return client.config.toToml()
+  @GetMapping("/config")
+  fun config(): String {
+    return "config"
+  }
+
+  @GetMapping("/state")
+  fun state(): String {
+    return "state"
   }
 }

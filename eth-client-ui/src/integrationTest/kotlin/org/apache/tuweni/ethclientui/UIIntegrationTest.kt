@@ -38,39 +38,42 @@ class UIIntegrationTest {
 
   @Test
   fun testServerComesUp(@VertxInstance vertx: Vertx, @TempDirectory tempDir: Path) = runBlocking {
-    val ui = UI(
-      client = EthereumClient(
-        vertx,
-        EthereumClientConfig.fromString(
-          """[storage.default]
+    val client = EthereumClient(
+      vertx,
+      EthereumClientConfig.fromString(
+        """[storage.default]
 path="${tempDir.toAbsolutePath()}"
 genesis="default"
 [genesis.default]
 path="classpath:/genesis/dev.json"
 [peerRepository.default]
 type="memory""""
-        )
       )
     )
-    ui.client.start()
+    val ui = ClientUIApplication.start(client = client, port = 9000)
+    client.start()
     ui.start()
-    val url = URL("http://localhost:" + ui.actualPort)
+    val app = ui.getBean(ClientUIApplication::class.java)
+    val url = URL("http://localhost:" + app.config.port)
     val con = url.openConnection() as HttpURLConnection
     con.requestMethod = "GET"
     val response = con.inputStream.readAllBytes()
     assertTrue(response.isNotEmpty())
 
-    val url2 = URL("http://localhost:" + ui.actualPort + "/rest/config")
+    val url2 = URL("http://localhost:" + app.config.port + "/rest/config")
     val con2 = url2.openConnection() as HttpURLConnection
     con2.requestMethod = "GET"
     val response2 = con2.inputStream.readAllBytes()
     assertTrue(response2.isNotEmpty())
-    val url3 = URL("http://localhost:" + ui.actualPort + "/rest/state")
+    val url3 = URL("http://localhost:" + app.config.port + "/rest/state")
     val con3 = url3.openConnection() as HttpURLConnection
     con3.requestMethod = "GET"
     val response3 = con3.inputStream.readAllBytes()
     assertTrue(response3.isNotEmpty())
-    assertEquals("""{"peerCounts":{"default":0},"bestBlocks":{"default":{"hash":"0xa08d1edb37ba1c62db764ef7c2566cbe368b850f5b3762c6c24114a3fd97b87f","number":"0x0000000000000000000000000000000000000000000000000000000000000000"}}}""", String(response3))
+    assertEquals(
+      """{"peerCounts":{"default":0},"bestBlocks":{"default":{"hash":"0xa08d1edb37ba1c62db764ef7c2566cbe368b850f5b3762c6c24114a3fd97b87f","number":"0x0000000000000000000000000000000000000000000000000000000000000000"}}}""",
+      String(response3)
+    )
     ui.stop()
   }
 }
