@@ -123,7 +123,15 @@ public class GossipServlet extends HttpServlet {
     super.init(config);
     if (started.compareAndSet(false, true)) {
       httpclient = HttpClients.createDefault();
-      state = new State(peerRepository, messageHashing, this::sendMessage, payloadListener, payloadValidator, peerPruningFunction, graftDelay, lazyQueueInterval);
+      state = new State(
+          peerRepository,
+          messageHashing,
+          this::sendMessage,
+          payloadListener,
+          payloadValidator,
+          peerPruningFunction,
+          graftDelay,
+          lazyQueueInterval);
     }
   }
 
