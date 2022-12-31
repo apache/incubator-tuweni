@@ -50,8 +50,32 @@ public class GossipServlet extends HttpServlet {
   private static final Logger logger = LoggerFactory.getLogger(GossipServlet.class);
   private static final ObjectMapper mapper = new ObjectMapper();
 
-  private static final class Message {
+  private void sendMessage(MessageSender.Verb verb, String attributes, Peer peer, Bytes hash, Bytes payload) {
+    Message message = new Message();
+    message.verb = verb;
+    message.attributes = attributes;
+    message.hash = hash.toHexString();
+    message.payload = payload == null ? null : payload.toHexString();
+    HttpPost postMessage = new HttpPost("http://" + ((ServletPeer) peer).getAddress());
+    postMessage.setHeader(PLUMTREE_SERVER_HEADER, this.networkInterface + ":" + this.port);
+    try {
+      ByteArrayEntity entity = new ByteArrayEntity(mapper.writeValueAsBytes(message), ContentType.APPLICATION_JSON);
+      postMessage.setEntity(entity);
+      httpclient.execute(postMessage, response -> {
+        ((ServletPeer) peer).getErrorsCounter().set(0);
+        return null;
+      });
+    } catch (IOException e) {
+      logger.info("Error sending to peer " + ((ServletPeer) peer).getAddress() + " : " + e.getMessage(), e);
+      int newErrCount = ((ServletPeer) peer).getErrorsCounter().addAndGet(1);
+      if (newErrCount > 5) {
+        logger.error("Too many errors with peer {}, disconnecting ", ((ServletPeer) peer).getAddress());
+        state.removePeer(peer);
+      }
+    }
+  }
 
+  private static final class Message {
     public MessageSender.Verb verb;
     public String attributes;
     public String hash;
@@ -99,30 +123,7 @@ public class GossipServlet extends HttpServlet {
     super.init(config);
     if (started.compareAndSet(false, true)) {
       httpclient = HttpClients.createDefault();
-      state = new State(peerRepository, messageHashing, (verb, attributes, peer, hash, payload) -> {
-        Message message = new Message();
-        message.verb = verb;
-        message.attributes = attributes;
-        message.hash = hash.toHexString();
-        message.payload = payload == null ? null : payload.toHexString();
-        HttpPost postMessage = new HttpPost("http://" + ((ServletPeer) peer).getAddress());
-        postMessage.setHeader(PLUMTREE_SERVER_HEADER, this.networkInterface + ":" + this.port);
-        try {
-          ByteArrayEntity entity = new ByteArrayEntity(mapper.writeValueAsBytes(message), ContentType.APPLICATION_JSON);
-          postMessage.setEntity(entity);
-          httpclient.execute(postMessage, response -> {
-            ((ServletPeer) peer).getErrorsCounter().set(0);
-            return null;
-          });
-        } catch (IOException e) {
-          logger.info("Error sending to peer " + ((ServletPeer) peer).getAddress() + " : " + e.getMessage(), e);
-          int newErrCount = ((ServletPeer) peer).getErrorsCounter().addAndGet(1);
-          if (newErrCount > 5) {
-            logger.error("Too many errors with peer {}, disconnecting ", ((ServletPeer) peer).getAddress());
-            state.removePeer(peer);
-          }
-        }
-      }, payloadListener, payloadValidator, peerPruningFunction, graftDelay, lazyQueueInterval);
+      state = new State(peerRepository, messageHashing, this::sendMessage, payloadListener, payloadValidator, peerPruningFunction, graftDelay, lazyQueueInterval);
     }
   }
 
