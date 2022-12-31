@@ -24,7 +24,7 @@ import org.apache.tuweni.eth.EthJsonModule
 import org.apache.tuweni.eth.crawler.RESTMetrics
 import org.apache.tuweni.eth.crawler.RelationalPeerRepository
 import java.net.URI
-import javax.servlet.ServletContext
+import jakarta.servlet.ServletContext
 import javax.ws.rs.Consumes
 import javax.ws.rs.GET
 import javax.ws.rs.POST

@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.tuweni.eth.EthJsonModule
 import org.apache.tuweni.eth.crawler.RESTMetrics
 import org.apache.tuweni.eth.crawler.StatsJob
-import javax.servlet.ServletContext
+import jakarta.servlet.ServletContext
 import javax.ws.rs.GET
 import javax.ws.rs.Path
 import javax.ws.rs.PathParam
