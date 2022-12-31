@@ -37,6 +37,7 @@ dependencyManagement {
     dependency('org.hyperledger.besu:bls12-381:0.4.3')
     dependency('org.hyperledger.besu:altbn128:0.4.3')
     dependency('org.hyperledger.besu:secp256k1:0.4.3')
+    dependency('org.apache.httpcomponents.client5:httpclient5:5.2.1')
 
     dependency('org.springframework:spring-context:5.3.24')
     dependency('org.springframework.boot:spring-boot:2.7.6')
@@ -72,14 +73,13 @@ dependencyManagement {
       entry 'vertx-web-client'
     }
 
-    dependency('javax.servlet:javax.servlet-api:4.0.1')
+    dependency('jakarta.servlet:jakarta.servlet-api:6.0.0')
     dependency('javax.persistence:javax.persistence-api:2.2')
     dependencySet(group: 'org.antlr', version: '4.10.1') {
       entry 'antlr4'
       entry 'antlr4-runtime'
     }
     dependency('javax.ws.rs:javax.ws.rs-api:2.1.1')
-    dependency('javax.servlet:javax.servlet-api:4.0.1')
     dependency('org.apache.lucene:lucene-core:7.6.0')
     dependency('org.apache.openjpa:openjpa:3.1.0')
     dependency('org.assertj:assertj-core:3.11.1')
