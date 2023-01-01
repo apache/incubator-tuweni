@@ -28,7 +28,7 @@ jobs:
     timeout-minutes: 30
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
         with:
           submodules: true
       - name: Cache Gradle packages
