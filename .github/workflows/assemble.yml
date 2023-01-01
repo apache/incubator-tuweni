@@ -58,12 +58,12 @@ jobs:
         env:
           ENABLE_SIGNING: true
       - name: Upload source distrib
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: distsrc
           path: dist/build/distributions/tuweni-src-*.zip
       - name: Upload binary distrib
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: snapshot.zip
           path: dist/build/distributions/tuweni-bin-*.zip
