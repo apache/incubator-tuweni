@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ class ExpiringSetTest {
   @BeforeEach
   void setup() {
     currentTime = Instant.now();
-    set = new ExpiringSet<>(Long.MAX_VALUE, () -> currentTime.toEpochMilli());
+    set = new ExpiringSet<>(Long.MAX_VALUE, () -> currentTime.toEpochMilli(), null);
   }
 
   @Test
@@ -60,6 +61,15 @@ class ExpiringSetTest {
     assertTrue(set.isEmpty());
 
     assertFalse(set.remove("foo"));
+  }
+
+  @Test
+  void addGlobalExpiryListener() {
+    AtomicReference<String> key = new AtomicReference<>();
+    ExpiringSet<String> listeningSet = new ExpiringSet<>(1L, () -> currentTime.toEpochMilli(), key::set);
+    listeningSet.add("foo", -1);
+    assertEquals("foo", key.get());
+    assertEquals(0, listeningSet.size());
   }
 
   @Test

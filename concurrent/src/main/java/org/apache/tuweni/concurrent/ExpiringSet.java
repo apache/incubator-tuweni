@@ -34,6 +34,8 @@ import javax.annotation.Nullable;
  */
 public final class ExpiringSet<E> implements Set<E> {
 
+  private final Consumer<E> globalExpiryListener;
+
   // Uses object equality, to ensure uniqueness as a value in the storage map
   private static final class ExpiringEntry<E> implements Comparable<ExpiringEntry<E>> {
     private E element;
@@ -64,22 +66,33 @@ public final class ExpiringSet<E> implements Set<E> {
    * @param evictionTimeout the default eviction timeout for entries in milliseconds.
    */
   public ExpiringSet(long evictionTimeout) {
-    this(evictionTimeout, System::currentTimeMillis);
+    this(evictionTimeout, System::currentTimeMillis, null);
+  }
+
+  /**
+   * Construct an empty expiring set.
+   *
+   * @param evictionTimeout the default eviction timeout for entries in milliseconds.
+   * @param expiryListener a listener that will be called for each entry expiration
+   */
+  public ExpiringSet(long evictionTimeout, Consumer<E> expiryListener) {
+    this(evictionTimeout, System::currentTimeMillis, expiryListener);
   }
 
   /**
    * Construct an empty set.
    */
   public ExpiringSet() {
-    this(Long.MAX_VALUE, System::currentTimeMillis);
+    this(Long.MAX_VALUE, System::currentTimeMillis, null);
   }
 
-  ExpiringSet(long evictionTimeout, LongSupplier currentTimeSupplier) {
+  ExpiringSet(long evictionTimeout, LongSupplier currentTimeSupplier, Consumer<E> expiryListener) {
     if (evictionTimeout <= 0) {
       throw new IllegalArgumentException("Invalid eviction timeout " + evictionTimeout);
     }
     this.evictionTimeout = evictionTimeout;
     this.currentTimeSupplier = currentTimeSupplier;
+    this.globalExpiryListener = expiryListener;
   }
 
   @Override
@@ -135,7 +148,7 @@ public final class ExpiringSet<E> implements Set<E> {
     requireNonNull(e);
     purgeExpired();
     ExpiringEntry<E> oldEntry =
-        storage.put(e, new ExpiringEntry<>(e, currentTimeSupplier.getAsLong() + evictionTimeout, null));
+        storage.put(e, new ExpiringEntry<>(e, currentTimeSupplier.getAsLong() + evictionTimeout, globalExpiryListener));
     return oldEntry == null;
   }
 
@@ -148,7 +161,7 @@ public final class ExpiringSet<E> implements Set<E> {
    * @return {@code true} if this set did not already contain the specified element.
    */
   public boolean add(E element, long expiry) {
-    return add(element, expiry, null);
+    return add(element, expiry, globalExpiryListener);
   }
 
   /**
@@ -174,7 +187,8 @@ public final class ExpiringSet<E> implements Set<E> {
       return removedPrevious;
     }
 
-    ExpiringEntry<E> newEntry = new ExpiringEntry<>(element, expiry, expiryListener);
+    ExpiringEntry<E> newEntry =
+        new ExpiringEntry<>(element, expiry, expiryListener == null ? globalExpiryListener : expiryListener);
     ExpiringEntry<E> oldEntry = storage.put(element, newEntry);
     expiryQueue.offer(newEntry);
     if (oldEntry != null && oldEntry.expiry < Long.MAX_VALUE) {
@@ -189,7 +203,8 @@ public final class ExpiringSet<E> implements Set<E> {
     purgeExpired();
     boolean noOldElements = true;
     for (E element : c) {
-      ExpiringEntry<E> oldEntry = storage.put(element, new ExpiringEntry<>(element, Long.MAX_VALUE, null));
+      ExpiringEntry<E> oldEntry =
+          storage.put(element, new ExpiringEntry<>(element, Long.MAX_VALUE, globalExpiryListener));
       if (oldEntry != null) {
         noOldElements = false;
       }
