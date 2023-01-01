@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ class ExpiringMapTest {
   @BeforeEach
   void setup() {
     currentTime = Instant.now();
-    map = new ExpiringMap<>(() -> currentTime.toEpochMilli(), Long.MAX_VALUE);
+    map = new ExpiringMap<>(() -> currentTime.toEpochMilli(), Long.MAX_VALUE, null);
   }
 
   @Test
@@ -73,6 +74,21 @@ class ExpiringMapTest {
     assertTrue(map.isEmpty());
 
     assertNull(map.remove(1));
+  }
+
+  @Test
+  void addGlobalExpiryListener() {
+    AtomicReference<String> key = new AtomicReference<>();
+    AtomicReference<String> value = new AtomicReference<>();
+    ExpiringMap<String, String> listeningMap =
+        new ExpiringMap<>(() -> currentTime.toEpochMilli(), 1L, (String k, String v) -> {
+          key.set(k);
+          value.set(v);
+        });
+    listeningMap.put("foo", "bar", -1);
+    assertEquals("foo", key.get());
+    assertEquals("bar", value.get());
+    assertEquals(0, listeningMap.size());
   }
 
   @Test

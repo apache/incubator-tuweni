@@ -62,11 +62,14 @@ public final class ExpiringMap<K, V> implements Map<K, V> {
   private final LongSupplier currentTimeSupplier;
   private final Long defaultTimeout;
 
+  @Nullable
+  private final BiConsumer<K, V> globalExpiryListener;
+
   /**
    * Construct an empty map.
    */
   public ExpiringMap() {
-    this(System::currentTimeMillis, Long.MAX_VALUE);
+    this(System::currentTimeMillis, Long.MAX_VALUE, null);
   }
 
   /**
@@ -75,12 +78,23 @@ public final class ExpiringMap<K, V> implements Map<K, V> {
    * @param defaultTimeout the default timeout in milliseconds
    */
   public ExpiringMap(Long defaultTimeout) {
-    this(System::currentTimeMillis, defaultTimeout);
+    this(System::currentTimeMillis, defaultTimeout, null);
   }
 
-  ExpiringMap(LongSupplier currentTimeSupplier, Long defaultTimeout) {
+  /**
+   * Construct a map with a default timeout value and a global expiration listener.
+   *
+   * @param defaultTimeout the default timeout in milliseconds
+   * @param expiryListener a listener that will be called for each entry expiration
+   */
+  public ExpiringMap(Long defaultTimeout, BiConsumer<K, V> expiryListener) {
+    this(System::currentTimeMillis, defaultTimeout, expiryListener);
+  }
+
+  ExpiringMap(LongSupplier currentTimeSupplier, Long defaultTimeout, BiConsumer<K, V> expiryListener) {
     this.currentTimeSupplier = currentTimeSupplier;
     this.defaultTimeout = defaultTimeout;
+    this.globalExpiryListener = expiryListener;
   }
 
   @Nullable
@@ -130,7 +144,8 @@ public final class ExpiringMap<K, V> implements Map<K, V> {
     requireNonNull(key);
     requireNonNull(value);
     purgeExpired();
-    ExpiringEntry<K, V> oldEntry = storage.put(key, new ExpiringEntry<>(key, value, defaultTimeout, null));
+    ExpiringEntry<K, V> oldEntry =
+        storage.put(key, new ExpiringEntry<>(key, value, defaultTimeout, globalExpiryListener));
     return (oldEntry == null) ? null : oldEntry.value;
   }
 
@@ -146,7 +161,7 @@ public final class ExpiringMap<K, V> implements Map<K, V> {
    */
   @Nullable
   public V put(K key, V value, long expiry) {
-    return put(key, value, expiry, null);
+    return put(key, value, expiry, globalExpiryListener);
   }
 
   /**
@@ -179,7 +194,8 @@ public final class ExpiringMap<K, V> implements Map<K, V> {
       return previous;
     }
 
-    ExpiringEntry<K, V> newEntry = new ExpiringEntry<>(key, value, expiry, expiryListener);
+    ExpiringEntry<K, V> newEntry =
+        new ExpiringEntry<>(key, value, expiry, expiryListener == null ? globalExpiryListener : expiryListener);
     ExpiringEntry<K, V> oldEntry = storage.put(key, newEntry);
     expiryQueue.offer(newEntry);
     if (oldEntry != null && oldEntry.expiry < Long.MAX_VALUE) {
@@ -193,7 +209,7 @@ public final class ExpiringMap<K, V> implements Map<K, V> {
     requireNonNull(m);
     purgeExpired();
     for (Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
-      storage.put(e.getKey(), new ExpiringEntry<>(e.getKey(), e.getValue(), defaultTimeout, null));
+      storage.put(e.getKey(), new ExpiringEntry<>(e.getKey(), e.getValue(), defaultTimeout, globalExpiryListener));
     }
   }
 
@@ -203,7 +219,8 @@ public final class ExpiringMap<K, V> implements Map<K, V> {
     requireNonNull(key);
     requireNonNull(value);
     purgeExpired();
-    ExpiringEntry<K, V> oldEntry = storage.putIfAbsent(key, new ExpiringEntry<>(key, value, defaultTimeout, null));
+    ExpiringEntry<K, V> oldEntry =
+        storage.putIfAbsent(key, new ExpiringEntry<>(key, value, defaultTimeout, globalExpiryListener));
     return (oldEntry == null) ? null : oldEntry.value;
   }
 
@@ -218,7 +235,7 @@ public final class ExpiringMap<K, V> implements Map<K, V> {
    */
   @Nullable
   public V putIfAbsent(K key, V value, long expiry) {
-    return putIfAbsent(key, value, expiry, null);
+    return putIfAbsent(key, value, expiry, globalExpiryListener);
   }
 
   /**
@@ -250,7 +267,8 @@ public final class ExpiringMap<K, V> implements Map<K, V> {
       return previous;
     }
 
-    ExpiringEntry<K, V> newEntry = new ExpiringEntry<>(key, value, expiry, expiryListener);
+    ExpiringEntry<K, V> newEntry =
+        new ExpiringEntry<>(key, value, expiry, expiryListener == null ? globalExpiryListener : expiryListener);
     ExpiringEntry<K, V> oldEntry = storage.putIfAbsent(key, newEntry);
     if (oldEntry == null) {
       expiryQueue.offer(newEntry);
@@ -292,7 +310,7 @@ public final class ExpiringMap<K, V> implements Map<K, V> {
         expiryQueue.remove(oldEntry);
       }
       V newValue = remappingFunction.apply(k, oldEntry.value);
-      return (newValue == null) ? null : new ExpiringEntry<>(k, newValue, defaultTimeout, null);
+      return (newValue == null) ? null : new ExpiringEntry<>(k, newValue, defaultTimeout, globalExpiryListener);
     });
     return (newEntry == null) ? null : newEntry.value;
   }
@@ -305,14 +323,15 @@ public final class ExpiringMap<K, V> implements Map<K, V> {
             expiryQueue.remove(oldEntry);
           }
           V newValue = remappingFunction.apply(oldEntry.value, newEntry.value);
-          return (newValue == null) ? null : new ExpiringEntry<>(key, newValue, defaultTimeout, null);
+          return (newValue == null) ? null : new ExpiringEntry<>(key, newValue, defaultTimeout, globalExpiryListener);
         });
     return (entry == null) ? null : entry.value;
   }
 
   @Override
   public V replace(K key, V value) {
-    ExpiringEntry<K, V> oldEntry = storage.replace(key, new ExpiringEntry<>(key, value, defaultTimeout, null));
+    ExpiringEntry<K, V> oldEntry =
+        storage.replace(key, new ExpiringEntry<>(key, value, defaultTimeout, globalExpiryListener));
     if (oldEntry != null) {
       if (oldEntry.expiry < Long.MAX_VALUE) {
         expiryQueue.remove(oldEntry);
@@ -331,7 +350,7 @@ public final class ExpiringMap<K, V> implements Map<K, V> {
         if (oldEntry.expiry < Long.MAX_VALUE) {
           expiryQueue.remove(oldEntry);
         }
-        return new ExpiringEntry<>(k, newValue, defaultTimeout, null);
+        return new ExpiringEntry<>(k, newValue, defaultTimeout, globalExpiryListener);
       }
       return oldEntry;
     });
@@ -344,7 +363,11 @@ public final class ExpiringMap<K, V> implements Map<K, V> {
       if (oldEntry.expiry < Long.MAX_VALUE) {
         expiryQueue.remove(oldEntry);
       }
-      return new ExpiringEntry<>(k, requireNonNull(function.apply(k, oldEntry.value)), defaultTimeout, null);
+      return new ExpiringEntry<>(
+          k,
+          requireNonNull(function.apply(k, oldEntry.value)),
+          defaultTimeout,
+          globalExpiryListener);
     });
   }
 
