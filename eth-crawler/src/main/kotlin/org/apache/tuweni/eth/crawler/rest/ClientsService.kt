@@ -17,10 +17,10 @@
 package org.apache.tuweni.eth.crawler.rest
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import jakarta.servlet.ServletContext
 import org.apache.tuweni.eth.EthJsonModule
 import org.apache.tuweni.eth.crawler.RESTMetrics
 import org.apache.tuweni.eth.crawler.StatsJob
-import javax.servlet.ServletContext
 import javax.ws.rs.GET
 import javax.ws.rs.Path
 import javax.ws.rs.PathParam

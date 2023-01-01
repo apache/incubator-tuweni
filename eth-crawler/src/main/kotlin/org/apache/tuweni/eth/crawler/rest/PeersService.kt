@@ -17,6 +17,7 @@
 package org.apache.tuweni.eth.crawler.rest
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import jakarta.servlet.ServletContext
 import org.apache.tuweni.concurrent.ExpiringMap
 import org.apache.tuweni.devp2p.eth.logger
 import org.apache.tuweni.devp2p.parseEnodeUri
@@ -24,7 +25,6 @@ import org.apache.tuweni.eth.EthJsonModule
 import org.apache.tuweni.eth.crawler.RESTMetrics
 import org.apache.tuweni.eth.crawler.RelationalPeerRepository
 import java.net.URI
-import javax.servlet.ServletContext
 import javax.ws.rs.Consumes
 import javax.ws.rs.GET
 import javax.ws.rs.POST
