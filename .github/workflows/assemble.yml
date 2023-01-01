@@ -86,6 +86,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: 11
+          distribution: temurin
       - name: Build from source
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: cd distunzipped/tuweni && ./gradlew assemble
