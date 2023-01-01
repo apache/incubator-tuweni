@@ -36,19 +36,19 @@ jobs:
       - name: Set up GPG key
         run: gpg --import gradle/tuweni-test.asc
       - name: Cache Licenses
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: reports/license/license-dependency.xml
           key: licenses-${{ hashFiles('**/reports/license/license-dependency.xml') }}
           restore-keys: license-dependency.xml
       - name: Cache Gradle packages
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
       - name: Cache Maven Repository
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
