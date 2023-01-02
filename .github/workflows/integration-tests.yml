@@ -60,7 +60,7 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
           restore-keys: ${{ runner.os }}-m2
       - name: gradle integrationTest
-        run: ./gradlew integrationTest
+        run: gradle integrationTest
       - name: Archive Junit Report
         if: always()
         uses: actions/upload-artifact@v3

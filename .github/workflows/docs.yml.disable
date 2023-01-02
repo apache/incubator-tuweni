@@ -48,7 +48,7 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
           restore-keys: ${{ runner.os }}-m2
       - name: gradle docs
-        run: ./gradlew docs
+        run: gradle docs
       - name: Upload docs
         uses: actions/upload-artifact@v2
         with:

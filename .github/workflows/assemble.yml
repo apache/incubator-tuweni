@@ -54,7 +54,7 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/dependency-versions.gradle') }}
           restore-keys: ${{ runner.os }}-m2
       - name: gradle assemble
-        run: ./gradlew assemble -x test -Psignatory.keyId=38F6C7215DD49C32 -Psigning.gnupg.keyName=38F6C7215DD49C32 -Psigning.gnupg.executable=gpg
+        run: gradle assemble -x test -Psignatory.keyId=38F6C7215DD49C32 -Psigning.gnupg.keyName=38F6C7215DD49C32 -Psigning.gnupg.executable=gpg
         env:
           ENABLE_SIGNING: true
       - name: Upload source distrib
