@@ -75,7 +75,7 @@ jobs:
     needs: assemble
     steps:
       - name: Download distsrc
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v3
         with:
           name: distsrc
       - name: Unzip source
