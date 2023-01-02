@@ -75,11 +75,13 @@ jobs:
     needs: assemble
     steps:
       - name: Download distsrc
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v3
+        id: download
         with:
           name: distsrc
+
       - name: Unzip source
-        run: unzip -q -o distsrc/tuweni-src-*.zip -d distunzipped
+        run: unzip -q -o - ${{steps.download.outputs.download-path}} -d distunzipped
       - name: Rename folder
         run: mv distunzipped/tuweni-src-* distunzipped/tuweni
       - name: Set up JDK 11
