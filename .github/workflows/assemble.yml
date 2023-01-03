@@ -81,10 +81,9 @@ jobs:
           name: distsrc
       - name: Display structure of downloaded files
         run: ls -R
-        working-directory: distsrc
 
       - name: Unzip source
-        run: unzip -q -o - ${{steps.download.outputs.download-path}} -d distunzipped
+        run: unzip -q -o - tuweni-src-*.zip -d distunzipped
       - name: Rename folder
         run: mv distunzipped/tuweni-src-* distunzipped/tuweni
       - name: Set up JDK 11
