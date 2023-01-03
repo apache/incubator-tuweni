@@ -79,9 +79,6 @@ jobs:
         id: download
         with:
           name: distsrc
-      - name: Display structure of downloaded files
-        run: ls -R
-
       - name: Unzip source
         run: unzip -q -o - tuweni-src-*.zip -d distunzipped
       - name: Rename folder
