@@ -46,10 +46,10 @@ class StatsJob(
   private var job: Job? = null
 
   private val totalClientsGauge =
-    meter.longValueRecorderBuilder("totalClients").setDescription("Number of nodes used to compute client stats")
-      .build()
+    meter.gaugeBuilder("totalClients").ofLongs().setDescription("Number of nodes used to compute client stats")
+      .buildObserver()
   private val clientCalculationsCounter =
-    meter.longCounterBuilder("clients").setDescription("Number of times clients were computed").build()
+    meter.counterBuilder("clients").setDescription("Number of times clients were computed").build()
 
   fun start() {
     logger.info("Starting stats job")

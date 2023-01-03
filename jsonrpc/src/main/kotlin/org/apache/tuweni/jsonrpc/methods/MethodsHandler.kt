@@ -18,8 +18,9 @@ package org.apache.tuweni.jsonrpc.methods
 
 import com.netflix.concurrency.limits.limit.FixedLimit
 import com.netflix.concurrency.limits.limiter.SimpleLimiter
+import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.metrics.LongCounter
-import io.opentelemetry.api.metrics.common.Labels
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -54,7 +55,7 @@ class MeteredHandler(
 
   suspend fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
     val resp = delegateHandler(request)
-    val labels = Labels.of("method", request.method)
+    val labels = Attributes.of(AttributeKey.stringKey("method"), request.method)
     if (resp.error != null) {
       failCounter.add(1, labels)
     } else {

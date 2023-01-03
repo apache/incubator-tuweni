@@ -167,9 +167,9 @@ public final class VertxRLPxService implements RLPxService {
     });
     if (meter != null) {
       this.connectionsCreatedCounter =
-          meter.longCounterBuilder("connections_created").setDescription("Number of connections created").build();
+          meter.counterBuilder("connections_created").setDescription("Number of connections created").build();
       this.connectionsDisconnectedCounter = meter
-          .longCounterBuilder("connections_disconnected")
+          .counterBuilder("connections_disconnected")
           .setDescription("Number of connections disconnected")
           .build();
     } else {

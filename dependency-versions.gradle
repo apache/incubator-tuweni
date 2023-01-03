@@ -39,13 +39,13 @@ dependencyManagement {
     dependency('org.hyperledger.besu:secp256k1:0.4.3')
     dependency('org.apache.httpcomponents.client5:httpclient5:5.2.1')
 
-    dependency('org.springframework:spring-context:6.0.3')
-    dependency('org.springframework.boot:spring-boot:3.0.1')
-    dependency('org.springframework.boot:spring-boot-starter:3.0.1')
-    dependency('org.springframework.boot:spring-boot-starter-thymeleaf:3.0.1')
-    dependency('org.springframework.boot:spring-boot-starter-web:3.0.1')
-    dependency('org.springframework.boot:spring-boot-starter-webflux:3.0.1')
-    dependency('org.springframework.boot:spring-boot-starter-tomcat:2.7.6')
+    dependency('org.springframework:spring-context:5.3.24')
+    dependency('org.springframework.boot:spring-boot:2.7.7')
+    dependency('org.springframework.boot:spring-boot-starter:2.7.7')
+    dependency('org.springframework.boot:spring-boot-starter-thymeleaf:2.7.7')
+    dependency('org.springframework.boot:spring-boot-starter-web:2.7.7')
+    dependency('org.springframework.boot:spring-boot-starter-webflux:2.7.7')
+    dependency('org.springframework.boot:spring-boot-starter-tomcat:2.7.7')
 
     dependency('io.opentelemetry:opentelemetry-api:1.21.0')
     dependency('io.opentelemetry:opentelemetry-api-metrics:1.10.0-alpha-rc.1')
@@ -57,6 +57,8 @@ dependencyManagement {
     dependency('io.opentelemetry:opentelemetry-sdk:1.21.0')
     dependency('io.opentelemetry:opentelemetry-sdk-trace:1.21.0')
     dependency('io.opentelemetry:opentelemetry-sdk-metrics:1.21.0')
+    dependency('io.opentelemetry:opentelemetry-sdk-testing:1.21.0')
+
     dependency('io.opentelemetry:opentelemetry-semconv:1.21.0-alpha')
     dependency('io.prometheus:simpleclient:0.16.0')
     dependency('io.prometheus:simpleclient_httpserver:0.16.0')
@@ -87,7 +89,7 @@ dependencyManagement {
       entry 'bcpkix-jdk15on'
       entry 'bcprov-jdk15on'
     }
-    dependencySet(group: 'org.eclipse.jetty', version: '12.0.0.alpha3') {
+    dependencySet(group: 'org.eclipse.jetty', version: '11.0.13') {
       entry 'jetty-server'
       entry 'jetty-servlet'
       entry 'jetty-servlets'
@@ -114,8 +116,8 @@ dependencyManagement {
     dependency('org.infinispan:infinispan-cachestore-rocksdb:14.0.4.Final')
 
 
-    dependency('org.jetbrains:annotations:16.0.3')
-    dependencySet(group: 'org.jetbrains.kotlin', version: '1.6.20') {
+    dependency('org.jetbrains:annotations:23.1.0')
+    dependencySet(group: 'org.jetbrains.kotlin', version: '1.8.0') {
       entry 'kotlin-reflect'
       entry 'kotlin-stdlib'
       entry 'kotlin-stdlib-jdk8'

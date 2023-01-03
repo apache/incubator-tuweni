@@ -57,6 +57,7 @@ import org.apache.tuweni.net.ip.IPRangeChecker
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.lang.IllegalArgumentException
+import java.lang.UnsupportedOperationException
 import kotlin.coroutines.CoroutineContext
 
 class JSONRPCServer(
@@ -210,5 +211,15 @@ private class JSONRPCUser(val principal: JsonObject) : User {
   override fun principal(): JsonObject = principal
 
   override fun setAuthProvider(authProvider: AuthProvider?) {
+  }
+  override fun merge(other: User?): User {
+    if (other is JSONRPCUser) {
+      other.principal.map.forEach {
+        this.principal.put(it.key, it.value)
+      }
+    } else {
+      throw UnsupportedOperationException("cannot merge with user $other")
+    }
+    return this
   }
 }

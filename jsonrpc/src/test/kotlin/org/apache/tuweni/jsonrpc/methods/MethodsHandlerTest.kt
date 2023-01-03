@@ -17,9 +17,8 @@
 package org.apache.tuweni.jsonrpc.methods
 
 import io.opentelemetry.sdk.metrics.SdkMeterProvider
-import io.opentelemetry.sdk.metrics.export.IntervalMetricReader
-import io.opentelemetry.sdk.metrics.export.MetricProducer
-import io.opentelemetry.sdk.metrics.testing.InMemoryMetricExporter
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
+import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -36,6 +35,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.Collections
+import java.util.concurrent.TimeUnit
 
 @ExtendWith(BouncyCastleExtension::class)
 class MethodsHandlerTest {
@@ -64,17 +64,14 @@ class MethodsHandlerTest {
   @Test
   fun testCountSuccess() = runBlocking {
     val exporter = InMemoryMetricExporter.create()
-    val meterSdk = SdkMeterProvider.builder().build()
-    val meter = meterSdk.get("handler")
     val intervalMetricReader =
-      IntervalMetricReader.builder()
-        .setMetricExporter(exporter)
-        .setMetricProducers(Collections.singletonList(meterSdk) as Collection<MetricProducer>)
-        .setExportIntervalMillis(1000)
+      PeriodicMetricReader.builder(exporter)
+        .setInterval(1000, TimeUnit.MILLISECONDS)
         .build()
-    intervalMetricReader.start()
-    val successCounter = meter.longCounterBuilder("success").build()
-    val failCounter = meter.longCounterBuilder("fail").build()
+    val meterSdk = SdkMeterProvider.builder().registerMetricReader(intervalMetricReader).build()
+    val meter = meterSdk.get("handler")
+    val successCounter = meter.counterBuilder("success").build()
+    val failCounter = meter.counterBuilder("fail").build()
     val meteredHandler = MeteredHandler(successCounter, failCounter) {
       JSONRPCResponse(StringOrLong(1))
     }
@@ -92,17 +89,14 @@ class MethodsHandlerTest {
   @Test
   fun testFailMeter() = runBlocking {
     val exporter = InMemoryMetricExporter.create()
-    val meterSdk = SdkMeterProvider.builder().build()
-    val meter = meterSdk.get("handler")
     val intervalMetricReader =
-      IntervalMetricReader.builder()
-        .setMetricExporter(exporter)
-        .setMetricProducers(Collections.singletonList(meterSdk) as Collection<MetricProducer>)
-        .setExportIntervalMillis(1000)
+      PeriodicMetricReader.builder(exporter)
+        .setInterval(1000, TimeUnit.MILLISECONDS)
         .build()
-    intervalMetricReader.start()
-    val successCounter = meter.longCounterBuilder("success").build()
-    val failCounter = meter.longCounterBuilder("fail").build()
+    val meterSdk = SdkMeterProvider.builder().registerMetricReader(intervalMetricReader).build()
+    val meter = meterSdk.get("handler")
+    val successCounter = meter.counterBuilder("success").build()
+    val failCounter = meter.counterBuilder("fail").build()
     val meteredHandler = MeteredHandler(successCounter, failCounter) {
       JSONRPCResponse(StringOrLong(1), error = JSONRPCError(123, "foo"))
     }
@@ -188,8 +182,8 @@ class CachingHandlerTest {
     val handler = CachingHandler(
       listOf("foo"),
       kv,
-      meter.longCounterBuilder("foo").build(),
-      meter.longCounterBuilder("bar").build()
+      meter.counterBuilder("foo").build(),
+      meter.counterBuilder("bar").build()
     ) {
       if (it.params.isNotEmpty()) {
         JSONRPCResponse(id = StringOrLong(1), error = JSONRPCError(1234, ""))
@@ -221,8 +215,8 @@ class CachingPollingHandlerTest {
       listOf(JSONRPCRequest(StringOrLong(1), "foo", arrayOf())),
       1000,
       kv,
-      meter.longCounterBuilder("foo").build(),
-      meter.longCounterBuilder("bar").build()
+      meter.counterBuilder("foo").build(),
+      meter.counterBuilder("bar").build()
     ) {
       if (it.params.isNotEmpty()) {
         JSONRPCResponse(id = StringOrLong(1), error = JSONRPCError(1234, ""))

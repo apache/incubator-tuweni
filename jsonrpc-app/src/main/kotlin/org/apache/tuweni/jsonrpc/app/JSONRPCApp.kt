@@ -123,8 +123,8 @@ class JSONRPCApplication(
     }
 
     val meter = metricsService.meterSdkProvider.get("jsonrpc")
-    val successCounter = meter.longCounterBuilder("success").build()
-    val failureCounter = meter.longCounterBuilder("failure").build()
+    val successCounter = meter.counterBuilder("success").build()
+    val failureCounter = meter.counterBuilder("failure").build()
 
     val nextHandler = if (config.cacheEnabled()) {
       val builder = GlobalConfigurationBuilder().serialization().marshaller(PersistenceMarshaller())
@@ -140,8 +140,8 @@ class JSONRPCApplication(
         CachingHandler(
           config.cachedMethods(),
           InfinispanKeyValueStore(cache),
-          meter.longCounterBuilder("cacheHits").build(),
-          meter.longCounterBuilder("cacheMisses").build(),
+          meter.counterBuilder("cacheHits").build(),
+          meter.counterBuilder("cacheMisses").build(),
           allowListHandler::handleRequest
         )
       cachingHandler::handleRequest

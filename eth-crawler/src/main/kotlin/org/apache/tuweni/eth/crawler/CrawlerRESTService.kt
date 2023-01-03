@@ -106,8 +106,8 @@ class CrawlerRESTService(
     serHol.servlet.servletConfig.servletContext.setAttribute("repo", repository)
     serHol.servlet.servletConfig.servletContext.setAttribute("stats", stats)
     val restMetrics = RESTMetrics(
-      meter.longCounterBuilder("peers").setDescription("Number of times peers have been requested").build(),
-      meter.longCounterBuilder("clients").setDescription("Number of times client stats have been requested").build()
+      meter.counterBuilder("peers").setDescription("Number of times peers have been requested").build(),
+      meter.counterBuilder("clients").setDescription("Number of times client stats have been requested").build()
     )
     serHol.servlet.servletConfig.servletContext.setAttribute("metrics", restMetrics)
     server = newServer
