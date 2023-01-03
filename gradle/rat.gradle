@@ -111,6 +111,6 @@ class RatPlugin implements Plugin<Project> {
   void configureDependencies(final Project project) {
     project.configurations { rat }
     project.repositories { mavenCentral() }
-    project.dependencies { rat 'org.apache.rat:apache-rat-tasks:0.13' }
+    project.dependencies { rat 'org.apache.rat:apache-rat-tasks:0.15' }
   }
 }
