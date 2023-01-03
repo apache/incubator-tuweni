@@ -79,6 +79,9 @@ jobs:
         id: download
         with:
           name: distsrc
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: distsrc
 
       - name: Unzip source
         run: unzip -q -o - ${{steps.download.outputs.download-path}} -d distunzipped
