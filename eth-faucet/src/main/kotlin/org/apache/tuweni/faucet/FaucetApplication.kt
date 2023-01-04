@@ -17,6 +17,8 @@
 package org.apache.tuweni.faucet
 
 import io.vertx.core.Vertx
+import jakarta.annotation.PostConstruct
+import jakarta.annotation.PreDestroy
 import org.apache.tuweni.wallet.Wallet
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.springframework.beans.factory.annotation.Value
@@ -36,8 +38,6 @@ import org.springframework.web.reactive.function.client.WebClient
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.security.Security
-import jakarta.annotation.PostConstruct
-import jakarta.annotation.PreDestroy
 
 @SpringBootApplication
 class FaucetApplication {
