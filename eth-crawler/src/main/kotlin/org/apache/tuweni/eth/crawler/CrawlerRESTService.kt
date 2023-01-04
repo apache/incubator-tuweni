@@ -86,7 +86,7 @@ class CrawlerRESTService(
     val swagger = ServletHolder("swagger-ui", DefaultServlet::class.java)
     swagger.setInitParameter(
       "resourceBase",
-      CrawlerRESTService::class.java.getClassLoader().getResource("META-INF/resources/webjars/swagger-ui/3.50.0/").toString()
+      CrawlerRESTService::class.java.getClassLoader().getResource("META-INF/resources/webjars/swagger-ui/4.15.5/").toString()
     )
     swagger.setInitParameter("pathInfoOnly", "true")
     ctx.addServlet(swagger, "/swagger-ui/*")
