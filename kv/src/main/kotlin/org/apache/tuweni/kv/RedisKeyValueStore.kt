@@ -16,18 +16,11 @@
  */
 package org.apache.tuweni.kv
 
-import io.lettuce.core.RedisClient
-import io.lettuce.core.RedisURI
-import io.lettuce.core.api.StatefulRedisConnection
-import io.lettuce.core.api.async.RedisAsyncCommands
-import io.lettuce.core.codec.RedisCodec
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.future.await
 import org.apache.tuweni.bytes.Bytes
-import org.checkerframework.checker.units.qual.K
+import redis.clients.jedis.JedisPool
 import java.io.IOException
 import java.net.InetAddress
-import java.util.concurrent.CompletionStage
 import java.util.function.Function
 import kotlin.coroutines.CoroutineContext
 
@@ -179,18 +172,9 @@ class RedisKeyValueStore<K, V>(
         keyDeserializer::apply,
         valueDeserializer::apply
       )
-
-    /**
-     * A [RedisCodec] for working with Bytes classes.
-     *
-     * @return A [RedisCodec] for working with Bytes classes.
-     */
-    @JvmStatic
-    fun codec(): RedisCodec<Bytes, Bytes> = RedisBytesCodec()
   }
 
-  private val conn: StatefulRedisConnection<Bytes, Bytes>
-  private val asyncCommands: RedisAsyncCommands<Bytes, Bytes>
+  private val conn: JedisPool
 
   /**
    * Open a Redis-backed key-value store.
@@ -211,7 +195,7 @@ class RedisKeyValueStore<K, V>(
     keyDeserializer: (Bytes) -> K,
     valueDeserializer: (Bytes) -> V
   ) : this(
-    RedisURI.create(address.hostAddress, port).toURI().toString(),
+    "redis://${address.hostAddress}:$port",
     keySerializer,
     valueSerializer,
     keyDeserializer,
@@ -219,35 +203,45 @@ class RedisKeyValueStore<K, V>(
   )
 
   init {
-    val redisClient = RedisClient.create(uri)
-    conn = redisClient.connect(codec())
-    asyncCommands = conn.async()
+    conn = JedisPool(uri)
   }
 
-  override suspend fun containsKey(key: K) = asyncCommands.get(keySerializer(key)) != null
+  override suspend fun containsKey(key: K) = conn.resource.use {
+    it.get(keySerializer(key).toArrayUnsafe()) != null
+  }
 
-  override suspend fun get(key: K): V? = asyncCommands.get(keySerializer(key)).thenApply {
-    if (it == null) {
-      null
-    } else {
-      valueDeserializer(it)
+  override suspend fun get(key: K): V? {
+    val keyBytes = keySerializer(key).toArrayUnsafe()
+    return conn.resource.use {
+      val value = it[keyBytes]
+      value?.let { valueDeserializer(Bytes.wrap(it)) }
     }
-  }.await()
+  }
 
   override suspend fun put(key: K, value: V) {
-    val future: CompletionStage<String> = asyncCommands.set(keySerializer(key), valueSerializer(value))
-    future.await()
+    conn.resource.use {
+      it[keySerializer(key).toArrayUnsafe()] = valueSerializer(value).toArrayUnsafe()
+    }
   }
 
   override suspend fun remove(key: K) {
-    val future: CompletionStage<Long> = asyncCommands.del(keySerializer(key))
-    future.await()
+    conn.resource.use {
+      it.del(keySerializer(key).toArrayUnsafe())
+    }
   }
 
-  override suspend fun keys(): Iterable<K> = asyncCommands.keys(Bytes.EMPTY).await().map(keyDeserializer)
+  override suspend fun keys(): Iterable<K> {
+    return conn.resource.use {
+      it.keys(ByteArray(0)).map {
+        keyDeserializer(Bytes.wrap(it))
+      }
+    }
+  }
 
   override suspend fun clear() {
-    asyncCommands.flushdb().await()
+    conn.resource.use {
+      it.flushDB()
+    }
   }
 
   /**
