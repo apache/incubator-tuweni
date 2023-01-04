@@ -36,8 +36,8 @@ import org.springframework.web.reactive.function.client.WebClient
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.security.Security
-import javax.annotation.PostConstruct
-import javax.annotation.PreDestroy
+import jakarta.annotation.PostConstruct
+import jakarta.annotation.PreDestroy
 
 @SpringBootApplication
 class FaucetApplication {

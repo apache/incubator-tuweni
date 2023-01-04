@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import java.net.ConnectException
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 
 val logger = LoggerFactory.getLogger("faucet")
 
