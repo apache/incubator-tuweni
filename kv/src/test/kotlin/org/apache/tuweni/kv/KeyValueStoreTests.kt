@@ -429,12 +429,14 @@ class SQLKeyValueStoreTest {
       val jdbcUrl = "jdbc:h2:${System.getProperty("java.io.tmpdir")}/testdb"
       DriverManager.getConnection(jdbcUrl).use {
         val st = it.createStatement()
-        st.executeUpdate("create table store(key binary, value binary, primary key(key))")
-        st.executeUpdate("create table store2(id binary, val binary, primary key(id))")
+        st.executeUpdate("create table store(foo binary varying(32) primary key, bar binary varying(32))")
+        st.executeUpdate("create table store2(id binary varying(32) primary key, val binary varying(32))")
       }
 
       kv = SQLKeyValueStore(
         jdbcUrl,
+        keyColumn = "foo",
+        valueColumn = "bar",
         keySerializer = { it },
         valueSerializer = { it },
         keyDeserializer = { it },
@@ -455,8 +457,8 @@ class SQLKeyValueStoreTest {
     @JvmStatic
     @AfterAll
     fun tearDown() {
-      kv!!.close()
-      otherkv!!.close()
+      kv?.close()
+      otherkv?.close()
     }
   }
 

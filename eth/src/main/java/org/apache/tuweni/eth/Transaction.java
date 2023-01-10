@@ -362,8 +362,8 @@ public final class Transaction {
    * 
    * @return the public key of the key pair that signed the transaction.
    */
-  @Nullable
-  public SECP256K1.PublicKey extractPublicKey() {
+
+  public SECP256K1.@Nullable PublicKey extractPublicKey() {
     Bytes data = signatureData(nonce, gasPrice, gasLimit, to, value, payload, chainId);
     SECP256K1.PublicKey publicKey = SECP256K1.PublicKey.recoverFromSignature(data, signature);
     return publicKey;

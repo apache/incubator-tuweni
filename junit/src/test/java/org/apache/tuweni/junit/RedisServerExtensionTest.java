@@ -17,11 +17,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.InetAddress;
 
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.RedisURI;
-import io.lettuce.core.api.StatefulRedisConnection;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 @ExtendWith(RedisServerExtension.class)
 class RedisServerExtensionTest {
@@ -30,9 +30,11 @@ class RedisServerExtensionTest {
   void shouldHaveAccessToARedisServer(@RedisPort Integer port) {
     assertNotNull(port);
     assertTrue(port >= 32768, "Port must be more than 32768, was:" + port);
-    RedisClient client = RedisClient.create(RedisURI.create(InetAddress.getLoopbackAddress().getHostAddress(), port));
-    try (StatefulRedisConnection<String, String> conn = client.connect()) {
-      assertTrue(conn.isOpen());
+    try (JedisPool client =
+        new JedisPool(new JedisPoolConfig(), InetAddress.getLoopbackAddress().getHostAddress(), port)) {
+      try (Jedis conn = client.getResource()) {
+        assertTrue(conn.isConnected());
+      }
     }
   }
 }

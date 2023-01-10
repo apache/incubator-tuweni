@@ -157,7 +157,7 @@ public class EthHash {
     long sz = CACHE_BYTES_INIT + CACHE_BYTES_GROWTH * (block_number / EPOCH_LENGTH);
     sz -= HASH_BYTES;
     while (!isPrime(sz / HASH_BYTES)) {
-      sz -= 2 * HASH_BYTES;
+      sz -= 2L * HASH_BYTES;
     }
     return (int) sz;
   }
@@ -172,7 +172,7 @@ public class EthHash {
     long sz = DATASET_BYTES_INIT + DATASET_BYTES_GROWTH * (block_number / EPOCH_LENGTH);
     sz -= MIX_BYTES;
     while (!isPrime(sz / MIX_BYTES)) {
-      sz -= 2 * MIX_BYTES;
+      sz -= 2L * MIX_BYTES;
     }
     return sz;
   }
@@ -193,7 +193,7 @@ public class EthHash {
       cache.add(Hash.keccak512(cache.get(i - 1)));
     }
 
-    Bytes completeCache = Bytes.concatenate(cache.toArray(new Bytes[cache.size()]));
+    Bytes completeCache = Bytes.concatenate(cache.toArray(new Bytes[0]));
 
     byte[] temp = new byte[HASH_BYTES];
     for (int i = 0; i < CACHE_ROUNDS; ++i) {
@@ -273,6 +273,6 @@ public class EthHash {
   }
 
   private static boolean isPrime(long number) {
-    return number > 2 && IntStream.rangeClosed(2, (int) Math.sqrt(number)).noneMatch(n -> (number % n == 0));
+    return number > 2 && IntStream.rangeClosed(2, (int) Math.sqrt((double) number)).noneMatch(n -> (number % n == 0));
   }
 }

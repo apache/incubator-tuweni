@@ -23,7 +23,8 @@ dependencies {
   implementation 'javax.ws.rs:javax.ws.rs-api'
   implementation 'org.webjars:bootstrap'
   implementation 'org.webjars:webjars-locator'
-  implementation 'jakarta.annotation:jakarta.annotation-api:1.3.5'
+  implementation 'javax.annotation:javax.annotation-api:1.3.2'
+  implementation 'org.slf4j:slf4j-api'
 
   implementation project(':bytes')
   implementation project(':concurrent')
@@ -44,8 +45,8 @@ dependencies {
   testImplementation 'org.mockito:mockito-junit-jupiter'
   testImplementation 'org.glassfish.jersey.core:jersey-client'
   testImplementation 'io.vertx:vertx-core'
+  testImplementation 'ch.qos.logback:logback-classic'
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-
   runtimeOnly 'ch.qos.logback:logback-classic'
 }

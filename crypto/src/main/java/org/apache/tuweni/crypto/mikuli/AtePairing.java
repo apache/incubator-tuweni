@@ -21,6 +21,8 @@ import org.apache.milagro.amcl.BLS381.PAIR;
 final class AtePairing {
 
   /**
+   *
+   * Pair of points on the curve
    * 
    * @param p1 the point in Group1, not null
    * @param p2 the point in Group2, not null

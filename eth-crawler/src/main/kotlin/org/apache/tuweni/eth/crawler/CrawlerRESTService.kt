@@ -86,7 +86,7 @@ class CrawlerRESTService(
     val swagger = ServletHolder("swagger-ui", DefaultServlet::class.java)
     swagger.setInitParameter(
       "resourceBase",
-      CrawlerRESTService::class.java.getClassLoader().getResource("META-INF/resources/webjars/swagger-ui/3.50.0/").toString()
+      CrawlerRESTService::class.java.getClassLoader().getResource("META-INF/resources/webjars/swagger-ui/4.15.5/").toString()
     )
     swagger.setInitParameter("pathInfoOnly", "true")
     ctx.addServlet(swagger, "/swagger-ui/*")
@@ -106,8 +106,8 @@ class CrawlerRESTService(
     serHol.servlet.servletConfig.servletContext.setAttribute("repo", repository)
     serHol.servlet.servletConfig.servletContext.setAttribute("stats", stats)
     val restMetrics = RESTMetrics(
-      meter.longCounterBuilder("peers").setDescription("Number of times peers have been requested").build(),
-      meter.longCounterBuilder("clients").setDescription("Number of times client stats have been requested").build()
+      meter.counterBuilder("peers").setDescription("Number of times peers have been requested").build(),
+      meter.counterBuilder("clients").setDescription("Number of times client stats have been requested").build()
     )
     serHol.servlet.servletConfig.servletContext.setAttribute("metrics", restMetrics)
     server = newServer

@@ -138,11 +138,11 @@ class BlockchainRepository(
   val blockHeaderListeners = mutableMapOf<String, (BlockHeader) -> Unit>()
   val blockchainHeadListeners = mutableMapOf<String, (Block) -> Unit>()
   val blocksStoredCounter =
-    meter?.longCounterBuilder("blocks_stored")?.setDescription("Number of blocks stored")?.build()
+    meter?.counterBuilder("blocks_stored")?.setDescription("Number of blocks stored")?.build()
   val blockHeadersStoredCounter =
-    meter?.longCounterBuilder("block_headers_stored")?.setDescription("Number of block headers stored")?.build()
+    meter?.counterBuilder("block_headers_stored")?.setDescription("Number of block headers stored")?.build()
   val blockBodiesStoredCounter =
-    meter?.longCounterBuilder("blocks_bodies_stored")?.setDescription("Number of block bodies stored")?.build()
+    meter?.counterBuilder("blocks_bodies_stored")?.setDescription("Number of block bodies stored")?.build()
   var indexing = true
   var worldState: StoredMerklePatriciaTrie<Bytes>? = null
 

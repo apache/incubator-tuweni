@@ -19,18 +19,15 @@ package org.apache.tuweni.metrics
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter
-import io.opentelemetry.exporter.prometheus.PrometheusCollector
+import io.opentelemetry.exporter.prometheus.PrometheusHttpServer
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.metrics.SdkMeterProvider
-import io.opentelemetry.sdk.metrics.export.IntervalMetricReader
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader
 import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.trace.SdkTracerProvider
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes
-import io.prometheus.client.CollectorRegistry
-import io.prometheus.client.exporter.HTTPServer
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
 
 class MetricsService(
@@ -48,11 +45,11 @@ class MetricsService(
     private val logger = LoggerFactory.getLogger(MetricsService::class.java)
   }
 
-  private val server: HTTPServer?
+  private val server: PrometheusHttpServer?
   val meterSdkProvider: SdkMeterProvider
   val openTelemetry: OpenTelemetrySdk
   private val spanProcessor: BatchSpanProcessor
-  private val periodicReader: IntervalMetricReader?
+  private val periodicReader: PeriodicMetricReader?
 
   init {
     val exporter = OtlpGrpcMetricExporter.builder().setEndpoint(grpcEndpoint).setTimeout(grpcTimeout, TimeUnit.MILLISECONDS).build()
@@ -63,17 +60,17 @@ class MetricsService(
           Attributes.builder().put(ResourceAttributes.SERVICE_NAME, jobName).build()
         )
       )
-    meterSdkProvider = SdkMeterProvider.builder().setResource(resource).build()
+    val sdkMeterProviderBuilder = SdkMeterProvider.builder().setResource(resource)
     if (enableGrpcPush) {
       logger.info("Starting GRPC push metrics service")
-      val builder = IntervalMetricReader.builder()
-        .setExportIntervalMillis(reportingIntervalMillis)
-        .setMetricProducers(setOf(meterSdkProvider))
-        .setMetricExporter(exporter)
-      periodicReader = builder.buildAndStart()
+      val builder = PeriodicMetricReader.builder(exporter)
+        .setInterval(reportingIntervalMillis, TimeUnit.MILLISECONDS)
+      periodicReader = builder.build()
+      sdkMeterProviderBuilder.registerMetricReader(periodicReader)
     } else {
       periodicReader = null
     }
+
     spanProcessor = BatchSpanProcessor.builder(
       OtlpGrpcSpanExporter.builder().setEndpoint(grpcEndpoint)
         .setTimeout(grpcTimeout, TimeUnit.MILLISECONDS).build()
@@ -84,19 +81,18 @@ class MetricsService(
 
     if (enablePrometheus) {
       logger.info("Starting Prometheus metrics service")
-      val prometheusRegistry = CollectorRegistry(true)
-      PrometheusCollector.builder()
-        .setMetricProducer(meterSdkProvider)
-        .build().register<PrometheusCollector>(prometheusRegistry)
-      server = HTTPServer(InetSocketAddress(networkInterface, port), prometheusRegistry, true)
+      server = PrometheusHttpServer.builder().setHost(networkInterface).setPort(port).build()
+      sdkMeterProviderBuilder.registerMetricReader(server).build()
     } else {
       server = null
     }
+
+    meterSdkProvider = sdkMeterProviderBuilder.build()
   }
 
   fun close() {
     periodicReader?.shutdown()
     spanProcessor.shutdown()
-    server?.stop()
+    server?.shutdown()
   }
 }

@@ -68,7 +68,11 @@ public final class RedisServerExtension implements ParameterResolver, AfterAllCa
 
   private Thread shutdownThread = new Thread(() -> {
     if (redisServer != null) {
-      redisServer.stop();
+      try {
+        redisServer.stop();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     }
   });
 
@@ -85,17 +89,22 @@ public final class RedisServerExtension implements ParameterResolver, AfterAllCa
     if (redisServer == null) {
       String localhost = InetAddress.getLoopbackAddress().getHostAddress();
 
-      redisServer = RedisServer
-          .builder()
-          .setting("bind " + localhost)
-          .setting("maxmemory 128mb")
-          .setting("maxmemory-policy allkeys-lru")
-          .setting("appendonly no")
-          .setting("save \"\"")
-          .port(findFreePort())
-          .build();
-      Runtime.getRuntime().addShutdownHook(shutdownThread);
-      redisServer.start();
+      try {
+
+        redisServer = RedisServer
+            .newRedisServer()
+            .setting("bind " + localhost)
+            .setting("maxmemory 128mb")
+            .setting("maxmemory-policy allkeys-lru")
+            .setting("appendonly no")
+            .setting("save \"\"")
+            .port(findFreePort())
+            .build();
+        Runtime.getRuntime().addShutdownHook(shutdownThread);
+        redisServer.start();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     }
     return redisServer.ports().get(0);
   }
@@ -103,7 +112,11 @@ public final class RedisServerExtension implements ParameterResolver, AfterAllCa
   @Override
   public void afterAll(ExtensionContext context) {
     if (redisServer != null) {
-      redisServer.stop();
+      try {
+        redisServer.stop();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
       Runtime.getRuntime().removeShutdownHook(shutdownThread);
     }
   }

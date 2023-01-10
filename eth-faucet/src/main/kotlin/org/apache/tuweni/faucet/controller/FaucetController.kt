@@ -17,6 +17,7 @@
 package org.apache.tuweni.faucet.controller
 
 import io.vertx.core.Vertx
+import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.eth.Address
@@ -34,7 +35,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import java.net.ConnectException
-import javax.annotation.PostConstruct
 
 val logger = LoggerFactory.getLogger("faucet")
 

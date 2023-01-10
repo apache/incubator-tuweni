@@ -34,7 +34,6 @@ class StateTest {
   private static class MockMessageSender implements MessageSender {
 
     Verb verb;
-    String attributes;
     Peer peer;
     Bytes hash;
     Bytes payload;
@@ -42,21 +41,14 @@ class StateTest {
     @Override
     public void sendMessage(Verb verb, String attributes, Peer peer, Bytes hash, Bytes payload) {
       this.verb = verb;
-      this.attributes = attributes;
       this.peer = peer;
       this.hash = hash;
       this.payload = payload;
     }
   }
 
-  private static final MessageListener messageListener = new MessageListener() {
+  private static final MessageListener messageListener = (messageBody, attributes, peer) -> {
 
-    public Bytes message;
-
-    @Override
-    public void listen(Bytes messageBody, String attributes, Peer peer) {
-      message = messageBody;
-    }
   };
 
   @Test
@@ -210,6 +202,7 @@ class StateTest {
     assertEquals(lazyPeer, messageSender.peer);
     assertEquals(MessageSender.Verb.IHAVE, messageSender.verb);
     assertTrue(state.lazyQueue.isEmpty());
+
   }
 
   @Test

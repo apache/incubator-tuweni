@@ -196,7 +196,12 @@ public final class ProgPoW {
     // The source lane's mix[0] value is used to ensure the last loop's DAG data feeds into this loop's address.
     // dag_addr_base is which 256-byte entry within the DAG will be accessed
     int dag_addr_base = mix[loop.intValue() % PROGPOW_LANES][0]
-        .mod(UInt32.valueOf(java.lang.Math.toIntExact(dagBytes / (PROGPOW_LANES * PROGPOW_DAG_LOADS * Integer.BYTES))))
+        .mod(
+            UInt32
+                .valueOf(
+                    java.lang.Math
+                        .toIntExact(
+                            dagBytes / ((long) PROGPOW_LANES * (long) PROGPOW_DAG_LOADS * ((long) Integer.BYTES)))))
         .intValue();
     //mix[loop.intValue()%PROGPOW_LANES][0].mod(UInt32.valueOf((int) dagBytes / (PROGPOW_LANES*PROGPOW_DAG_LOADS*4))).intValue();
     for (int l = 0; l < PROGPOW_LANES; l++) {

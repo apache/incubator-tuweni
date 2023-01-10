@@ -28,14 +28,16 @@ buildscript {
 plugins {
   id 'com.diffplug.spotless' version '6.12.1'
   id 'net.ltgt.errorprone' version '3.0.1'
-  id 'org.springframework.boot' version '2.4.3'
+  id 'org.springframework.boot' version '2.7.7'
   id 'io.spring.dependency-management' version '1.1.0'
   id 'org.gradle.crypto.checksum' version '1.4.0'
-  id 'org.jetbrains.kotlin.jvm' version '1.6.10'
-  id 'org.jetbrains.kotlin.plugin.spring' version '1.6.10'
+  id 'org.jetbrains.kotlin.jvm' version '1.8.0'
+  id 'org.jetbrains.kotlin.plugin.spring' version '1.8.0'
   id 'org.jetbrains.dokka' version '1.7.20'
   id 'maven-publish'
   id 'com.jfrog.bintray' version '1.8.5'
+  id 'se.patrikerdes.use-latest-versions' version '0.2.18'
+  id 'com.github.ben-manes.versions' version '0.44.0'
 }
 
 description = 'A set of libraries and other tools to aid development of blockchain and other decentralized software in Java and other JVM languages'
@@ -309,7 +311,7 @@ allprojects {
       allWarningsAsErrors = true
       freeCompilerArgs = [
         '-Xjsr305=strict',
-        '-Xjvm-default=enable'
+        '-Xjvm-default=all'
       ]
     }
   }

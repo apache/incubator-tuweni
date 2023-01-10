@@ -15,14 +15,14 @@ description = 'Utilities for better junit testing.'
 dependencies {
   implementation project(':crypto')
   implementation project(':io')
-  compileOnly 'com.github.kstyrc:embedded-redis'
+  compileOnly 'com.github.codemonstur:embedded-redis'
   compileOnly 'io.vertx:vertx-core'
   compileOnly 'org.bouncycastle:bcprov-jdk15on'
   compileOnly 'org.junit.jupiter:junit-jupiter-api'
   compileOnly 'org.apache.lucene:lucene-core'
 
-  testImplementation 'com.github.kstyrc:embedded-redis'
-  testImplementation 'io.lettuce:lettuce-core'
+  testImplementation 'com.github.codemonstur:embedded-redis'
+  testImplementation 'redis.clients:jedis'
   testImplementation 'io.vertx:vertx-core'
   testImplementation 'org.apache.lucene:lucene-core'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
