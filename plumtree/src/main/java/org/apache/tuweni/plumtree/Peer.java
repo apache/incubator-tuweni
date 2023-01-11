@@ -14,6 +14,8 @@ package org.apache.tuweni.plumtree;
 
 /**
  * A peer part of the gossip system.
+ *
+ * Peers must implement #hashcode() and #equals(Peer)
  */
-public interface Peer {
+public interface Peer extends Comparable<Peer> {
 }

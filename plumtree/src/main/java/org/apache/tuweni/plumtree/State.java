@@ -16,12 +16,15 @@ import org.apache.tuweni.bytes.Bytes;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.SortedSet;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -31,18 +34,17 @@ import javax.annotation.Nullable;
  * Local state to our peer, representing the make-up of the tree of peers.
  */
 public final class State {
+  private static final int maxMessagesHandlers = 1000000;
 
   private final PeerRepository peerRepository;
   private final MessageHashing messageHashingFunction;
-  private final int maxMessagesHandlers = 1000000;
-  private final Map<Bytes, MessageHandler> messageHandlers =
-      Collections.synchronizedMap(new LinkedHashMap<Bytes, MessageHandler>() {
+  private final Map<Bytes, MessageHandler> messageHandlers = Collections.synchronizedMap(new LinkedHashMap<>() {
 
-        @Override
-        protected boolean removeEldestEntry(final Map.Entry<Bytes, MessageHandler> eldest) {
-          return super.size() > maxMessagesHandlers;
-        }
-      });
+    @Override
+    protected boolean removeEldestEntry(final Map.Entry<Bytes, MessageHandler> eldest) {
+      return super.size() > maxMessagesHandlers;
+    }
+  });
 
   private final MessageSender messageSender;
   private final MessageListener messageListener;
@@ -63,8 +65,8 @@ public final class State {
 
     private final AtomicBoolean receivedFullMessage = new AtomicBoolean(false);
     private final AtomicBoolean requestingGraftMessage = new AtomicBoolean(false);
-    private List<TimerTask> tasks = new ArrayList<>();
-    private List<Peer> lazyPeers = new ArrayList<>();
+    private final List<TimerTask> tasks = new ArrayList<>();
+    private final SortedSet<Peer> lazyPeers = Collections.synchronizedSortedSet(new TreeSet<>());
 
     MessageHandler(Bytes hash) {
       this.hash = hash;
@@ -111,16 +113,17 @@ public final class State {
       }
     }
 
-    private void scheduleGraftMessage(final int index) {
+    private void scheduleGraftMessage(Iterator<Peer> peerIterator) {
       TimerTask timerTask = new TimerTask() {
         @Override
         public void run() {
-          int newPeerIndex = index;
-          if (newPeerIndex == lazyPeers.size()) {
-            newPeerIndex = 0;
+          Iterator<Peer> localPeerIterator = peerIterator;
+          // rotate back to first peer if we still haven't grafted
+          if (!localPeerIterator.hasNext()) {
+            localPeerIterator = lazyPeers.iterator();
           }
-          messageSender.sendMessage(MessageSender.Verb.GRAFT, null, lazyPeers.get(index), hash, null);
-          scheduleGraftMessage(newPeerIndex++);
+          messageSender.sendMessage(MessageSender.Verb.GRAFT, null, localPeerIterator.next(), hash, null);
+          scheduleGraftMessage(localPeerIterator);
         }
       };
       tasks.add(timerTask);
@@ -131,7 +134,8 @@ public final class State {
       if (!receivedFullMessage.get()) {
         lazyPeers.add(peer);
         if (requestingGraftMessage.compareAndSet(false, true)) {
-          scheduleGraftMessage(0);
+          // initiate grafting, starting with the first peer.
+          scheduleGraftMessage(lazyPeers.iterator());
         }
       }
     }

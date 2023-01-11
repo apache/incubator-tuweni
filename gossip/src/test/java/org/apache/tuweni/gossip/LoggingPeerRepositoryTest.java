@@ -19,9 +19,10 @@ import org.apache.tuweni.plumtree.Peer;
 
 import org.junit.jupiter.api.Test;
 
+
 class LoggingPeerRepositoryTest {
 
-  private static final Peer FOO = new Peer() {};
+  private static final Peer FOO = o -> -1;
 
   @Test
   void testAddEagerPeer() {

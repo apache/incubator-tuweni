@@ -14,7 +14,10 @@ package org.apache.tuweni.plumtree.vertx;
 
 import org.apache.tuweni.plumtree.Peer;
 
+import java.util.Objects;
+
 import io.vertx.core.net.NetSocket;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Vert.x gossip peer associated with a socket
@@ -34,5 +37,25 @@ final class SocketPeer implements Peer {
   @Override
   public String toString() {
     return socket.localAddress().toString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+    SocketPeer that = (SocketPeer) o;
+    return Objects.equals(socket.localAddress(), that.socket.localAddress());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(socket.localAddress().toString());
+  }
+
+  @Override
+  public int compareTo(@NotNull Peer o) {
+    return socket.localAddress().toString().compareTo(((SocketPeer) o).socket.localAddress().toString());
   }
 }

@@ -21,6 +21,9 @@ import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.crypto.Hash;
 import org.apache.tuweni.junit.BouncyCastleExtension;
 
+import java.util.UUID;
+
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -28,7 +31,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 class StateTest {
 
   private static class PeerImpl implements Peer {
+    private final String id = UUID.randomUUID().toString();
 
+    @Override
+    public int compareTo(@NotNull Peer o) {
+      return ((PeerImpl) o).id.compareTo(id);
+    }
   }
 
   private static class MockMessageSender implements MessageSender {
