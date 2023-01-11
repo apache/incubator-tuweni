@@ -301,7 +301,7 @@ interface BlockchainIndexWriter {
  */
 internal class IndexReadException : RuntimeException {
   constructor(e: Exception) : super(e) {}
-  constructor(msg: String): super(msg) {}
+  constructor(msg: String) : super(msg) {}
 }
 
 /**
