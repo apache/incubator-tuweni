@@ -142,10 +142,9 @@ interface BlockchainIndexReader {
   /**
    * Find the hash of the block header with the largest total difficulty.
    *
-   * @param field the field to query on
-   * @return the matching hash with the largest field value.
+   * @return the hash of the header with the largest total difficulty
    */
-  fun findLargestTotalDifficulty(): Hash?
+  fun findLargestTotalDifficulty(): Hash
 
   /**
    * Finds hashes of blocks by hash or number.
@@ -300,7 +299,10 @@ interface BlockchainIndexWriter {
 /**
  * Exception thrown when an issue arises when reading the index.
  */
-internal class IndexReadException(e: Exception) : RuntimeException(e)
+internal class IndexReadException : RuntimeException {
+  constructor(e: Exception) : super(e) {}
+  constructor(msg: String): super(msg) {}
+}
 
 /**
  * Exception thrown when an issue arises while writing to the index.
@@ -584,7 +586,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     return queryBlocks(NumericDocValuesField.newSlowExactQuery(field.fieldName, value))
   }
 
-  override fun findLargestTotalDifficulty(): Hash? {
+  override fun findLargestTotalDifficulty(): Hash {
     var searcher: IndexSearcher? = null
     try {
       searcher = searcherManager.acquire()
@@ -595,14 +597,14 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
         Sort(SortField(TOTAL_DIFFICULTY.fieldName, SortField.Type.STRING, true))
       )
       if (topDocs.scoreDocs.isEmpty()) {
-        return null
+        throw IndexReadException("No headers indexed")
       }
       val doc = searcher.doc(topDocs.scoreDocs.elementAt(0).doc, setOf("_id"))
       val bytes = doc.getBinaryValue("_id")
       if (bytes != null) {
         return Hash.fromBytes(Bytes32.wrap(bytes.bytes))
       }
-      return null
+      throw IndexReadException("Record with no _id field")
     } catch (e: IOException) {
       throw IndexReadException(e)
     } finally {
