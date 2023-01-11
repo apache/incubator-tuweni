@@ -106,6 +106,8 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
 
   fun metricsEnabled(): Boolean = config.getConfigurationSection("metrics").getBoolean("enabled")
 
+  fun metricsServiceName(): String = config.getConfigurationSection("metrics").getString("serviceName")
+
   fun metricsPort(): Int = config.getConfigurationSection("metrics").getInteger("port")
 
   fun metricsNetworkInterface(): String = config.getConfigurationSection("metrics").getString("networkInterface")
@@ -262,6 +264,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       metricsSection.addInteger("port", 9090, "Port to expose Prometheus metrics", PropertyValidator.isValidPort())
       metricsSection.addString("networkInterface", "0.0.0.0", "Network interface to expose Prometheus metrics", null)
       metricsSection.addBoolean("enablePrometheus", true, "Enable Prometheus metrics reporting", null)
+      metricsSection.addString("serviceName", "tuweni", "Host service name", null)
       metricsSection.addBoolean("enableGrpcPush", true, "Enable GRPC OpenTelemetry metrics reporting", null)
 
       val storageSection = SchemaBuilder.create()

@@ -107,7 +107,7 @@ class EthereumClient(
     logger.info("Starting Ethereum client...")
     if (config.metricsEnabled()) {
       val metricsService = MetricsService(
-        "tuweni",
+        config.metricsServiceName(),
         port = config.metricsPort(),
         networkInterface = config.metricsNetworkInterface(),
         enableGrpcPush = config.metricsGrpcPushEnabled(),
