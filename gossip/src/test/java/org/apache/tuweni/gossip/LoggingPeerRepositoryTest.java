@@ -20,7 +20,6 @@ import org.apache.tuweni.plumtree.Peer;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
 
 class LoggingPeerRepositoryTest {
 
