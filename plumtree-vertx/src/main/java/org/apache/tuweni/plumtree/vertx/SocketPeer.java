@@ -36,7 +36,7 @@ final class SocketPeer implements Peer {
 
   @Override
   public String toString() {
-    return socket.localAddress().toString();
+    return socket.remoteAddress().toString();
   }
 
   @Override
@@ -46,16 +46,16 @@ final class SocketPeer implements Peer {
     if (o == null || getClass() != o.getClass())
       return false;
     SocketPeer that = (SocketPeer) o;
-    return Objects.equals(socket.localAddress(), that.socket.localAddress());
+    return Objects.equals(socket.remoteAddress(), that.socket.remoteAddress());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(socket.localAddress().toString());
+    return Objects.hash(socket.remoteAddress().toString());
   }
 
   @Override
   public int compareTo(@NotNull Peer o) {
-    return socket.localAddress().toString().compareTo(((SocketPeer) o).socket.localAddress().toString());
+    return socket.remoteAddress().toString().compareTo(((SocketPeer) o).socket.remoteAddress().toString());
   }
 }
