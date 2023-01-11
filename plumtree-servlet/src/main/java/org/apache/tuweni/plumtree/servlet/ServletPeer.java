@@ -41,7 +41,7 @@ public class ServletPeer implements Peer {
   public boolean equals(Object o) {
     if (this == o)
       return true;
-    if (o == null || getClass() != o.getClass())
+    if (!(o instanceof ServletPeer))
       return false;
     ServletPeer that = (ServletPeer) o;
     return Objects.equals(serverUrl, that.serverUrl);
