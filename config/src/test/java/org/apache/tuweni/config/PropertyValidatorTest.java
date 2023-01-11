@@ -89,4 +89,22 @@ class PropertyValidatorTest {
     assertTrue(longPropertyValidator.validate("foo", null, 32L).isEmpty());
     assertEquals(1, longPropertyValidator.validate("foo", null, 31L).size());
   }
+
+  @Test
+  void testIsValidPort() {
+    PropertyValidator<Integer> portValidator = PropertyValidator.isValidPort();
+    assertTrue(portValidator.validate("foo", null, 8080).isEmpty());
+    assertTrue(portValidator.validate("foo", null, 60000).isEmpty());
+    assertEquals(1, portValidator.validate("foo", null, 65536).size());
+    assertEquals(1, portValidator.validate("foo", null, 0).size());
+  }
+
+  @Test
+  void testIsValidPortOrZero() {
+    PropertyValidator<Integer> portValidator = PropertyValidator.isValidPortOrZero();
+    assertTrue(portValidator.validate("foo", null, 8080).isEmpty());
+    assertTrue(portValidator.validate("foo", null, 60000).isEmpty());
+    assertTrue(portValidator.validate("foo", null, 0).isEmpty());
+    assertEquals(1, portValidator.validate("foo", null, 65536).size());
+  }
 }
