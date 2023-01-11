@@ -241,10 +241,13 @@ class EthereumClient(
           )
         }
         val genesisFile = repoToGenesisFile[repository]
+          ?: throw IllegalArgumentException(
+            "Genesis file associated with repository ${rlpxConfig.repository()} not found"
+          )
         val genesisBlock = repository.retrieveGenesisBlock()
         val adapter = WireConnectionPeerRepositoryAdapter(peerRepository)
         val blockchainInfo = SimpleBlockchainInformation(
-          UInt256.valueOf(genesisFile!!.chainId.toLong()),
+          UInt256.valueOf(genesisFile.chainId.toLong()),
           genesisBlock.header.difficulty,
           genesisBlock.header.hash,
           genesisBlock.header.number,
