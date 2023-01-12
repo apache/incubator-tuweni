@@ -17,11 +17,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.tuweni.plumtree.Peer;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+
 
 class LoggingPeerRepositoryTest {
 
-  private static final Peer FOO = new Peer() {};
+  private static final Peer FOO = new Peer() {
+
+    @Override
+    public int compareTo(@NotNull Peer o) {
+      return -1;
+    }
+  };
 
   @Test
   void testAddEagerPeer() {

@@ -24,7 +24,7 @@ class CountingPeerPruningFunctionTest {
   @Test
   void testPruning() {
     CountingPeerPruningFunction fn = new CountingPeerPruningFunction(3);
-    Peer peer = new Peer() {};
+    Peer peer = o -> -1;
     assertFalse(fn.prunePeer(peer));
     assertFalse(fn.prunePeer(peer));
     assertTrue(fn.prunePeer(peer));
