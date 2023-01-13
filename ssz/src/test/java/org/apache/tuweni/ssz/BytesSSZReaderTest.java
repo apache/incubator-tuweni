@@ -12,6 +12,7 @@
  */
 package org.apache.tuweni.ssz;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.tuweni.bytes.Bytes.fromHexString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -21,9 +22,12 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.bytes.Bytes48;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -64,6 +68,23 @@ class BytesSSZReaderTest {
     assertEquals("Bob", readObject.name);
     assertEquals(4, readObject.number);
     assertEquals(BigInteger.valueOf(1234563434344L), readObject.longNumber);
+  }
+
+  @Test
+  void shouldRoundTripComplexObjects() throws IOException {
+    String resourceName = "org/apache/tuweni/ssz/signedBlobTransaction.hex";
+    InputStream inputStream = Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(resourceName));
+    String inputString = new String(inputStream.readAllBytes(), UTF_8);
+    Bytes bytes = fromHexString(inputString);
+
+    TransactionNetworkPayload payload = SSZ.decode(bytes, sszReader -> {
+      var p = new TransactionNetworkPayload();
+      p.populateFromReader(sszReader);
+      return p;
+    });
+
+    Bytes encoded = SSZ.encode(payload::writeTo);
+    assertEquals(inputString, encoded.toString());
   }
 
   @ParameterizedTest

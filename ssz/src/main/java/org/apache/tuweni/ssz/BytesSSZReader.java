@@ -21,6 +21,7 @@ import org.apache.tuweni.units.bigints.UInt384;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.LongFunction;
@@ -239,6 +240,14 @@ final class BytesSSZReader implements SSZReader {
     return bytes;
   }
 
+  @Override
+  public Bytes consumeRemainingBytes(int limit) {
+    if (content.size() - index > limit) {
+      throw new InvalidSSZTypeException("Too many bytes to consume");
+    }
+    return consumeBytes(content.size() - index);
+  }
+
   private List<Bytes> readList(LongFunction<Bytes> bytesSupplier) {
     ensureBytes(4, () -> "SSZ encoded data is not a list");
     int originalIndex = this.index;
@@ -352,5 +361,101 @@ final class BytesSSZReader implements SSZReader {
       throw e;
     }
     return bytesList;
+  }
+
+  @Override
+  public void readAsContainer(SSZReadable... elements) {
+    var variableElements = new ArrayList<ElementOffset>();
+
+    for (SSZReadable element : elements) {
+      if (element.isFixed()) {
+        element.populateFromReader(this);
+      } else {
+        variableElements.add(new ElementOffset(readUInt32(), element));
+      }
+    }
+    if (variableElements.isEmpty()) {
+      return;
+    }
+    for (int i = 0; i < variableElements.size() - 1; i++) {
+      if (variableElements.get(i).getOffset() != index) {
+        throw new InvalidSSZTypeException("Variable elements are not in order");
+      }
+      int length = (int) (variableElements.get(i + 1).offset - variableElements.get(i).offset);
+      variableElements.get(i).getElement().populateFromReader(this.slice(length));
+      this.index += length;
+    }
+    variableElements
+        .get(variableElements.size() - 1)
+        .getElement()
+        .populateFromReader(this.slice(content.size() - index));
+
+  }
+
+  private SSZReader slice(int length) {
+    return new BytesSSZReader(content.slice(index, length));
+  }
+
+  private static class ElementOffset {
+    final long offset;
+    final SSZReadable element;
+
+    public ElementOffset(long offset, SSZReadable element) {
+      this.offset = offset;
+      this.element = element;
+    }
+
+    public long getOffset() {
+      return offset;
+    }
+
+    public SSZReadable getElement() {
+      return element;
+    }
+  }
+
+  @Override
+  public <T extends SSZReadable> List<T> readFixedTypedList(int elementSize, Supplier<T> supplier) {
+    int listSize = (content.size() - index) / elementSize;
+    return readFixedList(listSize, remaining -> readFixedByteArray(elementSize, listSize * elementSize), bytes -> {
+      T t = supplier.get();
+      t.populateFromReader(new BytesSSZReader(Bytes.wrap(bytes)));
+      return t;
+    });
+  }
+
+  @Override
+  public <T extends SSZReadable> List<T> readTypedVector(int listSize, int elementSize, Supplier<T> supplier) {
+    return readFixedList(listSize, remaining -> readFixedByteArray(elementSize, listSize * elementSize), bytes -> {
+      T t = supplier.get();
+      t.populateFromReader(new BytesSSZReader(Bytes.wrap(bytes)));
+      return t;
+    });
+
+  }
+
+  @Override
+  public <T extends SSZReadable> List<T> readVariableSizeTypeList(Supplier<T> supplier) {
+    if (content.size() == index) {
+      return Collections.emptyList();
+    }
+    final long firstOffset = readUInt32();
+    int size = (int) (firstOffset / 4) + 1;
+
+    List<Integer> lengths = new ArrayList<>(size);
+    for (int i = 0; i < size; i++) {
+      lengths.add((int) (readUInt32() - firstOffset));
+    }
+    List<T> elements = new ArrayList<>(size);
+    for (Integer length : lengths) {
+      T t = supplier.get();
+      t.populateFromReader(this.slice(length));
+      this.index += length;
+      elements.add(t);
+    }
+    T t = supplier.get();
+    t.populateFromReader(this.slice(content.size() - index));
+    elements.add(t);
+    return Collections.unmodifiableList(elements);
   }
 }
