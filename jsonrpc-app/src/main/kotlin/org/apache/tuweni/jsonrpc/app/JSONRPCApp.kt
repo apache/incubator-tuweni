@@ -110,8 +110,6 @@ class JSONRPCApplication(
   fun run() {
     logger.info("JSON-RPC proxy starting")
     val client = JSONRPCClient(vertx, config.endpointUrl(), basicAuthenticationEnabled = config.endpointBasicAuthEnabled(), basicAuthenticationUsername = config.endpointBasicAuthUsername(), basicAuthenticationPassword = config.endpointBasicAuthPassword())
-    // TODO allow more options such as allowlist of certificates, enforce client authentication.
-    val trustOptions = VertxTrustOptions.recordClientFingerprints(config.clientFingerprintsFile())
 
     val allowListHandler = MethodAllowListHandler(config.allowedMethods()) { req ->
       try {
@@ -154,6 +152,18 @@ class JSONRPCApplication(
     val loggingHandler = LoggingHandler(throttlingHandler::handleRequest, "jsonrpclog")
 
     val handler = MeteredHandler(successCounter, failureCounter, loggingHandler::handleRequest)
+
+    val trustOptions = when (config.serverSecurity()) {
+      JSONRPCConfig.ServerSecurity.RECORD ->
+        VertxTrustOptions.recordClientFingerprints(config.clientFingerprintsFile())
+      JSONRPCConfig.ServerSecurity.ALLOWLIST ->
+        VertxTrustOptions.allowlistClients(config.clientFingerprintsFile())
+      JSONRPCConfig.ServerSecurity.CA ->
+        VertxTrustOptions.allowlistClients(config.clientFingerprintsFile(), true)
+      JSONRPCConfig.ServerSecurity.TOFU ->
+        VertxTrustOptions.trustClientOnFirstAccess(config.clientFingerprintsFile())
+    }
+
     val server = JSONRPCServer(
       vertx,
       config.port(), config.networkInterface(),
