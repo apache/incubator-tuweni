@@ -19,6 +19,7 @@ name: 'Mark issues as stale'
 on:
   schedule:
     - cron: "27 3 * * 1-5" # Run at an arbitrary time on weekdays.
+  workflow_dispatch:
 
 jobs:
   mark-issues-as-stale:
