@@ -93,7 +93,11 @@ class EthStatsServer(
       ("hello") -> {
         val clientSecret = event.get(1).get("secret").textValue()
         if (clientSecret != secret) {
-          logger.info("Client {} connected with wrong secret {}, disconnecting", websocket.remoteAddress(), clientSecret)
+          logger.info(
+            "Client {} connected with wrong secret {}, disconnecting",
+            websocket.remoteAddress(),
+            clientSecret
+          )
           websocket.close()
           return
         }

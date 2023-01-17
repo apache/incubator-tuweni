@@ -358,8 +358,18 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       synchronizersSection.addLong("from", 0L, "Start block to sync from", PropertyValidator.isGreaterOrEqual(0L))
       synchronizersSection.addLong("to", 0L, "End block to sync to", PropertyValidator.isGreaterOrEqual(0L))
       synchronizersSection.addString("repository", "default", "Blockchain repository to use", null)
-      synchronizersSection.addString("rlpxService", "default", "RLPx service to use for requests with this synchronizer", null)
-      synchronizersSection.addString("peerRepository", "default", "Peer repository to use for requests with this synchronizer", null)
+      synchronizersSection.addString(
+        "rlpxService",
+        "default",
+        "RLPx service to use for requests with this synchronizer",
+        null
+      )
+      synchronizersSection.addString(
+        "peerRepository",
+        "default",
+        "Peer repository to use for requests with this synchronizer",
+        null
+      )
       synchronizersSection.addString("fromRepository", null, "(only for canonical) Repository to sync from", null)
 
       val validatorsSection = SchemaBuilder.create()

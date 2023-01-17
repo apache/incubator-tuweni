@@ -100,7 +100,8 @@ class JSONRPCServer(
   }
 
   suspend fun start() {
-    val serverOptions = HttpServerOptions().setPort(port).setHost(networkInterface).setSsl(ssl).setTracingPolicy(TracingPolicy.ALWAYS)
+    val serverOptions =
+      HttpServerOptions().setPort(port).setHost(networkInterface).setSsl(ssl).setTracingPolicy(TracingPolicy.ALWAYS)
     trustOptions?.let {
       serverOptions.setTrustOptions(it)
     }
@@ -120,9 +121,8 @@ class JSONRPCServer(
       router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)))
       val basicAuthHandler = BasicAuthHandler.create(
         { authInfo, resultHandler ->
-          if (basicAuthenticationUsername == authInfo.getString("username") && basicAuthenticationPassword == authInfo.getString(
-              "password"
-            )
+          if (basicAuthenticationUsername == authInfo.getString("username") &&
+            basicAuthenticationPassword == authInfo.getString("password")
           ) {
             resultHandler.handle(Future.succeededFuture(JSONRPCUser(authInfo)))
           } else {
@@ -212,6 +212,7 @@ private class JSONRPCUser(val principal: JsonObject) : User {
 
   override fun setAuthProvider(authProvider: AuthProvider?) {
   }
+
   override fun merge(other: User?): User {
     if (other is JSONRPCUser) {
       other.principal.map.forEach {

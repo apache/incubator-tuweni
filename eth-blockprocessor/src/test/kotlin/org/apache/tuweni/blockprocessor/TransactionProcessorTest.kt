@@ -82,7 +82,7 @@ class BlockProcessorReferenceTest {
     private fun findGeneralStateTests(): Stream<Arguments> {
       return findTests("/GeneralStateTests/**/*.json").filter {
         val testName = it.get()[1] as String
-        (testName == "randomStatetest553") // || !(testName).contains("loop") || (testName).equals("OverflowGasMakeMoney")
+        (testName == "randomStatetest553")
       }
     }
 

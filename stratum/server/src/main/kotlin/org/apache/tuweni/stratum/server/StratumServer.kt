@@ -79,7 +79,12 @@ class StratumServer(
   }
 
   private val protocols: Array<StratumProtocol> = arrayOf(
-    Stratum1Protocol(extranonce, submitCallback = submitCallback, seedSupplier = seedSupplier, coroutineContext = this.coroutineContext),
+    Stratum1Protocol(
+      extranonce,
+      submitCallback = submitCallback,
+      seedSupplier = seedSupplier,
+      coroutineContext = this.coroutineContext
+    ),
     Stratum1EthProxyProtocol(submitCallback, seedSupplier, this.coroutineContext)
   )
 

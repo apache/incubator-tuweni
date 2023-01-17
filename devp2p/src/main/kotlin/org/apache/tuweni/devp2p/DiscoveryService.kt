@@ -474,7 +474,12 @@ internal class CoroutineDiscoveryService constructor(
           for (node in ArrayList(nodes)) {
             val peer = peerRepository.get(selfEndpoint!!.address, selfEndpoint!!.udpPort, node.nodeId)
             if (!results.contains(peer)) {
-              results.orderedInsert(peer) { a, _ -> targetId.xorDistCmp(a.nodeId.bytesArray(), node.nodeId.bytesArray()) }
+              results.orderedInsert(peer) { a, _ ->
+                targetId.xorDistCmp(
+                  a.nodeId.bytesArray(),
+                  node.nodeId.bytesArray()
+                )
+              }
               results.removeAt(results.lastIndex)
             }
           }

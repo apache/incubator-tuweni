@@ -97,7 +97,11 @@ class TransactionalEVMHostContext(
   override suspend fun isEmptyAccount(address: Address): Boolean {
     logger.trace("Entering isEmptyAccount")
     val accountState = transientRepository.getAccount(address)
-    return null == accountState || (accountState.balance.isZero && accountState.nonce.isZero && EMPTY_CODE_HASH.equals(accountState.codeHash) && EMPTY_STORAGE_HASH.equals(accountState.storageRoot))
+    return null == accountState || (
+      accountState.balance.isZero && accountState.nonce.isZero && EMPTY_CODE_HASH.equals(
+        accountState.codeHash
+      ) && EMPTY_STORAGE_HASH.equals(accountState.storageRoot)
+      )
   }
 
   /**
@@ -112,7 +116,11 @@ class TransactionalEVMHostContext(
    */
   override suspend fun getStorage(address: Address, key: Bytes): Bytes32? {
     logger.trace("Entering getStorage")
-    val value = transientRepository.getAccountStoreValue(address, Hash.hash(key))?.let { UInt256.fromBytes(RLP.decodeValue(it)) }
+    val value = transientRepository.getAccountStoreValue(address, Hash.hash(key))?.let {
+      UInt256.fromBytes(
+        RLP.decodeValue(it)
+      )
+    }
     logger.trace("key $key value $value")
     return value
   }
@@ -123,7 +131,10 @@ class TransactionalEVMHostContext(
   override suspend fun incrementNonce(address: Address): UInt256 {
     val account = transientRepository.getAccount(address) ?: transientRepository.newAccountState()
     val newNonce = account.nonce.add(1)
-    transientRepository.storeAccount(address, AccountState(newNonce, account.balance, account.storageRoot, account.codeHash))
+    transientRepository.storeAccount(
+      address,
+      AccountState(newNonce, account.balance, account.storageRoot, account.codeHash)
+    )
     return newNonce
   }
 

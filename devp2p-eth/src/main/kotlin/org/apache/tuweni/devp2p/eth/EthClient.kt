@@ -84,7 +84,10 @@ open class EthClient(
     reverse: Boolean,
     connection: WireConnection
   ): AsyncResult<List<BlockHeader>> {
-    logger.info("Requesting headers hash: $blockHash maxHeaders: $maxHeaders skip: $skip reverse: $reverse with uri ${connection.uri()}")
+    logger.info(
+      "Requesting headers hash: $blockHash maxHeaders: $maxHeaders skip: $skip reverse: " +
+        "$reverse with uri ${connection.uri()}"
+    )
     val conn = connectionSelectionStrategy.selectConnection()
     val completion = AsyncResult.incomplete<List<BlockHeader>>()
     headerRequests.computeIfAbsent(connection.uri() + blockHash.toHexString()) {
@@ -193,7 +196,8 @@ open class EthClient(
   fun nodeDataWasRequested(connection: WireConnection): Request<List<Bytes?>>? =
     nodeDataRequests[connection.uri()]
 
-  fun transactionReceiptsRequested(connection: WireConnection): Request<List<List<TransactionReceipt>>>? = transactionReceiptRequests[connection.uri()]
+  fun transactionReceiptsRequested(connection: WireConnection): Request<List<List<TransactionReceipt>>>? =
+    transactionReceiptRequests[connection.uri()]
 
   override suspend fun submitPooledTransaction(vararg tx: Transaction) {
     for (t in tx) {

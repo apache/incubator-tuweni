@@ -69,13 +69,20 @@ internal class InviteTest() {
   @Test
   fun testParseFromCanonicalValid() {
     val testInvite =
-      "fake.address.com:8009:@MS/HpeAess0EGruiZjfnc+x+FkPq7qoMqSD4SdvTCtM=.ed25519~IJubWEcZM6usWncF/Lu26CyI3ZiovcHjh9+kBI1hiKI="
+      "fake.address.com:8009:@MS/HpeAess0EGruiZjfnc+x+FkPq7qoMqSD4SdvTCtM=" +
+        ".ed25519~IJubWEcZM6usWncF/Lu26CyI3ZiovcHjh9+kBI1hiKI="
     try {
       val invite = fromCanonicalForm(testInvite)
       Assertions.assertEquals(invite.host, "fake.address.com")
       Assertions.assertEquals(invite.port, 8009)
-      Assertions.assertEquals(invite.identity.publicKeyAsBase64String(), "MS/HpeAess0EGruiZjfnc+x+FkPq7qoMqSD4SdvTCtM=")
-      Assertions.assertEquals(invite.seedKey.bytes().toBase64String(), "IJubWEcZM6usWncF/Lu26CyI3ZiovcHjh9+kBI1hiKI=")
+      Assertions.assertEquals(
+        invite.identity.publicKeyAsBase64String(),
+        "MS/HpeAess0EGruiZjfnc+x+FkPq7qoMqSD4SdvTCtM="
+      )
+      Assertions.assertEquals(
+        invite.seedKey.bytes().toBase64String(),
+        "IJubWEcZM6usWncF/Lu26CyI3ZiovcHjh9+kBI1hiKI="
+      )
       Assertions.assertEquals(invite.toCanonicalForm(), testInvite)
     } catch (malformedInviteCodeException: MalformedInviteCodeException) {
       Assertions.fail<Any>("Exception while parsing into canonical form: " + malformedInviteCodeException.message)

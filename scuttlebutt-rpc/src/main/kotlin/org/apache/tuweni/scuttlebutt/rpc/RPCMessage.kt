@@ -50,7 +50,9 @@ class RPCMessage(messageBytes: Bytes) {
     }
     val bodySize = messageBytes.slice(1, 4).toInt()
     requestNumber = messageBytes.slice(5, 4).toInt()
-    require(messageBytes.size() >= bodySize + 9) { "Message body " + (messageBytes.size() - 9) + " is less than body size " + bodySize }
+    require(messageBytes.size() >= bodySize + 9) {
+      "Message body " + (messageBytes.size() - 9) + " is less than body size " + bodySize
+    }
     body = messageBytes.slice(9, bodySize)
   }
 

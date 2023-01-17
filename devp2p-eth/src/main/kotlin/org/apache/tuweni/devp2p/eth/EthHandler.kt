@@ -220,7 +220,12 @@ internal class EthHandler(
       blockHeaderRequest.skip,
       blockHeaderRequest.reverse
     )
-    service.send(connection.agreedSubprotocolVersion(ETH62.name()), MessageType.BlockHeaders.code, connection, BlockHeaders(headers).toBytes())
+    service.send(
+      connection.agreedSubprotocolVersion(ETH62.name()),
+      MessageType.BlockHeaders.code,
+      connection,
+      BlockHeaders(headers).toBytes()
+    )
   }
 
   private suspend fun handleNewBlockHashes(message: NewBlockHashes) {

@@ -130,7 +130,12 @@ class ModExpPrecompileContract : PrecompileContract {
   }
 }
 
-class AltBN128PrecompiledContract(private val operation: Byte, val inputLen: Int, val baseCost: Long, val pairingGasCost: Long) : PrecompileContract {
+class AltBN128PrecompiledContract(
+  private val operation: Byte,
+  val inputLen: Int,
+  val baseCost: Long,
+  val pairingGasCost: Long
+) : PrecompileContract {
 
   override fun run(input: Bytes): Result {
     val parameters = input.size() / 192

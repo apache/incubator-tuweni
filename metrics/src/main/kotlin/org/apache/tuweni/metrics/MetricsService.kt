@@ -52,7 +52,10 @@ class MetricsService(
   private val periodicReader: PeriodicMetricReader?
 
   init {
-    val exporter = OtlpGrpcMetricExporter.builder().setEndpoint(grpcEndpoint).setTimeout(grpcTimeout, TimeUnit.MILLISECONDS).build()
+    val exporter = OtlpGrpcMetricExporter.builder().setEndpoint(grpcEndpoint).setTimeout(
+      grpcTimeout,
+      TimeUnit.MILLISECONDS
+    ).build()
     logger.info("Starting metrics service")
     val resource = Resource.getDefault()
       .merge(

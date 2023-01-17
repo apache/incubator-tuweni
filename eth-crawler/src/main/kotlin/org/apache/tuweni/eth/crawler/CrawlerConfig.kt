@@ -24,7 +24,7 @@ import java.net.URI
 import java.nio.file.Path
 
 class CrawlerConfig(val filePath: Path) {
-
+  @Suppress("ktlint:max-line-length")
   companion object {
     val mainnetEthereumBootnodes = listOf(
       "enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303", // Singapore AWS
@@ -46,7 +46,6 @@ class CrawlerConfig(val filePath: Path) {
       // Ethereum Foundation Aleth Bootnodes
       "enode://979b7fa28feeb35a4741660a16076f1943202cb72b6af70d327f053e248bab9ba81760f39d0701ef1d8f89cc1fbd2cacba0710a12cd5314d5e0c9021aa3637f9@5.1.83.226:30303" // DE
     )
-
     val mainnetDiscoveryDNS = "enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@all.mainnet.ethdisco.net"
 
     fun schema(): Schema {
@@ -73,7 +72,12 @@ class CrawlerConfig(val filePath: Path) {
         .addInteger("ethstatsPort", 1338, "Ethstats port", null)
         .addString("ethstatsSecret", "changeme", "Ethstats shared secret", null)
         .addLong("peerCacheExpiration", 5 * 60 * 1000L, "Peer data cache expiration", null)
-        .addLong("clientIdsInterval", 24 * 60 * 60 * 1000 * 2L, "Client IDs Interval - number of milliseconds to go back in time", null)
+        .addLong(
+          "clientIdsInterval",
+          24 * 60 * 60 * 1000 * 2L,
+          "Client IDs Interval - number of milliseconds to go back in time",
+          null
+        )
         .addLong("clientsStatsDelay", 30 * 1000L, "Delay between client stats calculations", null)
         .addLong("rlpxDisconnectionDelay", 10 * 1000L, "RLPx connections disconnection delay", null)
         .addInteger("maxRequestsPerSec", 30, "Number of requests per second over HTTP", null)
@@ -81,7 +85,12 @@ class CrawlerConfig(val filePath: Path) {
         .addInteger("metricsPort", 9090, "Metric service port", PropertyValidator.isValidPort())
         .addString("metricsNetworkInterface", "localhost", "Metric service network interface", null)
         .addBoolean("metricsGrpcPushEnabled", false, "Enable pushing metrics to gRPC service", null)
-        .addBoolean("metricsPrometheusEnabled", false, "Enable exposing metrics on the Prometheus endpoint", null)
+        .addBoolean(
+          "metricsPrometheusEnabled",
+          false,
+          "Enable exposing metrics on the Prometheus endpoint",
+          null
+        )
         .addString("corsAllowedOrigins", "*", "CORS allowed domains filter for REST service", null)
 
       val upgradesSection = SchemaBuilder.create()

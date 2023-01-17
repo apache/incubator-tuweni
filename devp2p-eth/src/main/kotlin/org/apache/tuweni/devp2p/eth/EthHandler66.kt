@@ -72,12 +72,14 @@ internal class EthHandler66(
           requestIdentifier,
           GetBlockHeaders.read(payload)
         )
+
         MessageType.BlockHeaders.code -> handleHeaders(connection, requestIdentifier, BlockHeaders.read(payload))
         MessageType.GetBlockBodies.code -> handleGetBlockBodies(
           connection,
           requestIdentifier,
           GetBlockBodies.read(payload)
         )
+
         MessageType.BlockBodies.code -> handleBlockBodies(connection, requestIdentifier, BlockBodies.read(payload))
         MessageType.NewBlock.code -> handleNewBlock(NewBlock.read(message))
         MessageType.GetNodeData.code -> handleGetNodeData(connection, requestIdentifier, GetNodeData.read(payload))
@@ -88,11 +90,13 @@ internal class EthHandler66(
           connection,
           NewPooledTransactionHashes.read(message)
         )
+
         MessageType.GetPooledTransactions.code -> handleGetPooledTransactions(
           connection,
           requestIdentifier,
           GetPooledTransactions.read(payload)
         )
+
         MessageType.PooledTransactions.code -> handlePooledTransactions(PooledTransactions.read(payload))
         else -> {
           logger.warn("Unknown message type {} with request identifier {}", messageType, requestIdentifier)
@@ -106,7 +110,11 @@ internal class EthHandler66(
     controller.addNewPooledTransactions(read.transactions)
   }
 
-  private suspend fun handleGetPooledTransactions(connection: WireConnection, requestIdentifier: Bytes, read: GetPooledTransactions) {
+  private suspend fun handleGetPooledTransactions(
+    connection: WireConnection,
+    requestIdentifier: Bytes,
+    read: GetPooledTransactions
+  ) {
     val tx = controller.findPooledTransactions(read.hashes)
     logger.debug("Responding to GetPooledTransactions with {} transactions", tx.size)
     service.send(
@@ -144,7 +152,10 @@ internal class EthHandler66(
       disconnect = true
     }
     if (!status.genesisHash.equals(blockchainInfo.genesisHash())) {
-      EthHandler.logger.info("Peer with different genesisHash ${status.genesisHash} (expected ${blockchainInfo.genesisHash()})")
+      EthHandler.logger.info(
+        "Peer with different genesisHash ${status.genesisHash} " +
+          "(expected ${blockchainInfo.genesisHash()})"
+      )
       disconnect = true
     }
 
@@ -200,7 +211,11 @@ internal class EthHandler66(
     controller.addNewTransactionReceipts(connection, requestIdentifier, receipts.transactionReceipts)
   }
 
-  private suspend fun handleGetReceipts(connection: WireConnection, requestIdentifier: Bytes, getReceipts: GetReceipts) {
+  private suspend fun handleGetReceipts(
+    connection: WireConnection,
+    requestIdentifier: Bytes,
+    getReceipts: GetReceipts
+  ) {
     val receipts = controller.findTransactionReceipts(getReceipts.hashes)
     service.send(
       EthSubprotocol.ETH66,
@@ -234,7 +249,11 @@ internal class EthHandler66(
     controller.addNewBlockBodies(connection, requestIdentifier, message.bodies)
   }
 
-  private suspend fun handleGetBlockBodies(connection: WireConnection, requestIdentifier: Bytes, message: GetBlockBodies) {
+  private suspend fun handleGetBlockBodies(
+    connection: WireConnection,
+    requestIdentifier: Bytes,
+    message: GetBlockBodies
+  ) {
     if (message.hashes.isEmpty()) {
       service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
       return
@@ -255,7 +274,11 @@ internal class EthHandler66(
     controller.addNewBlockHeaders(connection, requestIdentifier, headers.headers)
   }
 
-  private suspend fun handleGetBlockHeaders(connection: WireConnection, requestIdentifier: Bytes, blockHeaderRequest: GetBlockHeaders) {
+  private suspend fun handleGetBlockHeaders(
+    connection: WireConnection,
+    requestIdentifier: Bytes,
+    blockHeaderRequest: GetBlockHeaders
+  ) {
     val headers = controller.findHeaders(
       blockHeaderRequest.block,
       blockHeaderRequest.maxHeaders,

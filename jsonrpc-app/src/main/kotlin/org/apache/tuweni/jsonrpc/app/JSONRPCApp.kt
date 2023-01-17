@@ -109,7 +109,13 @@ class JSONRPCApplication(
 
   fun run() {
     logger.info("JSON-RPC proxy starting")
-    val client = JSONRPCClient(vertx, config.endpointUrl(), basicAuthenticationEnabled = config.endpointBasicAuthEnabled(), basicAuthenticationUsername = config.endpointBasicAuthUsername(), basicAuthenticationPassword = config.endpointBasicAuthPassword())
+    val client = JSONRPCClient(
+      vertx,
+      config.endpointUrl(),
+      basicAuthenticationEnabled = config.endpointBasicAuthEnabled(),
+      basicAuthenticationUsername = config.endpointBasicAuthUsername(),
+      basicAuthenticationPassword = config.endpointBasicAuthPassword()
+    )
 
     val allowListHandler = MethodAllowListHandler(config.allowedMethods()) { req ->
       try {
@@ -131,7 +137,8 @@ class JSONRPCApplication(
         "responses",
         ConfigurationBuilder().persistence().addStore(RocksDBStoreConfigurationBuilder::class.java)
           .location(Paths.get(config.cacheStoragePath(), "storage").toAbsolutePath().toString())
-          .expiredLocation(Paths.get(config.cacheStoragePath(), "expired").toAbsolutePath().toString()).expiration().lifespan(config.cacheLifespan()).maxIdle(config.cacheMaxIdle()).build()
+          .expiredLocation(Paths.get(config.cacheStoragePath(), "expired").toAbsolutePath().toString()).expiration()
+          .lifespan(config.cacheLifespan()).maxIdle(config.cacheMaxIdle()).build()
       )
 
       val cachingHandler =
@@ -205,9 +212,11 @@ class PersistenceMarshaller : AbstractMarshaller() {
     val mapper = ObjectMapper()
   }
 
-  override fun objectFromByteBuffer(buf: ByteArray?, offset: Int, length: Int) = mapper.readValue(Bytes.wrap(buf!!, offset, length).toArrayUnsafe(), JSONRPCResponse::class.java)
+  override fun objectFromByteBuffer(buf: ByteArray?, offset: Int, length: Int) =
+    mapper.readValue(Bytes.wrap(buf!!, offset, length).toArrayUnsafe(), JSONRPCResponse::class.java)
 
-  override fun objectToBuffer(o: Any?, estimatedSize: Int): ByteBuffer = ByteBufferImpl.create(mapper.writeValueAsBytes(o))
+  override fun objectToBuffer(o: Any?, estimatedSize: Int): ByteBuffer =
+    ByteBufferImpl.create(mapper.writeValueAsBytes(o))
 
   override fun isMarshallable(o: Any?): Boolean = o is JSONRPCResponse
 

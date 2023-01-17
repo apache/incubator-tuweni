@@ -89,7 +89,8 @@ class BlockProcessor(val chainId: UInt256) {
       val txProcessor = TransactionProcessor(vm, hardFork, repository, stateChanges)
       val indexKey = RLP.encodeValue(UInt256.valueOf(counter).trimLeadingZeros())
       transactionsTrie.put(indexKey, tx.toBytes())
-      val txResult = txProcessor.execute(tx, timestamp, chainId, parentBlock, gasLimit, gasUsed, allGasUsed, coinbase, bloomFilter)
+      val txResult =
+        txProcessor.execute(tx, timestamp, chainId, parentBlock, gasLimit, gasUsed, allGasUsed, coinbase, bloomFilter)
       if (txResult.success) {
         val receipt = txResult.receipt!!
         receiptsTrie.put(indexKey, receipt.toBytes())

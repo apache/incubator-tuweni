@@ -41,7 +41,12 @@ class JSONRPCConfig(val filePath: Path? = null) {
       .addString("clientFingerprintsFile", "fingerprints.txt", "File recording client connection fingerprints", null)
       .addString("serverSecurity", "record", "Server security mode: record, allowlist, ca, tofu", null)
       .addBoolean("ssl", false, "Whether the JSON-RPC server should serve data over SSL", null)
-      .addBoolean("basicAuth", false, "Whether the JSON-RPC server should authenticate incoming requests with HTTP Basic Authentication", null)
+      .addBoolean(
+        "basicAuth",
+        false,
+        "Whether the JSON-RPC server should authenticate incoming requests with HTTP Basic Authentication",
+        null
+      )
       .addString("basicAuthUsername", "", "HTTP Basic Auth username", null)
       .addString("basicAuthPassword", "", "HTTP Basic Auth password", null)
       .addString("basicAuthRealm", "Apache Tuweni JSON-RPC proxy", "HTTP Basic Auth realm", null)
@@ -52,7 +57,19 @@ class JSONRPCConfig(val filePath: Path? = null) {
       .addBoolean("endpointBasicAuthEnabled", false, "Enable basic authentication for the endpoint", null)
       .addString("endpointBasicAuthUsername", "", "Basic authentication username for the endpoint", null)
       .addString("endpointBasicAuthPassword", "", "Basic authentication password for the endpoint", null)
-      .addListOfString("cachedMethods", listOf("eth_blockNumber", "eth_getBlockByNumber", "eth_getBlockByHash", "eth_getTransactionReceipt", "eth_getTransactionByHash", "eth_getLogs"), "Cached JSON-RPC methods", null)
+      .addListOfString(
+        "cachedMethods",
+        listOf(
+          "eth_blockNumber",
+          "eth_getBlockByNumber",
+          "eth_getBlockByHash",
+          "eth_getTransactionReceipt",
+          "eth_getTransactionByHash",
+          "eth_getLogs"
+        ),
+        "Cached JSON-RPC methods",
+        null
+      )
       .addBoolean("cacheEnabled", true, "Enable caching", null)
       .addString("cacheStoragePath", "", "Location of cache storage", null)
       .addInteger("maxConcurrentRequests", 30, "Maximum concurrent requests", null)

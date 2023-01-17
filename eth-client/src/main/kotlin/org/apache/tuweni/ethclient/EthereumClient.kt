@@ -309,10 +309,18 @@ class EthereumClient(
       }
     ).thenRun {
       for (sync in config.synchronizers()) {
-        val syncRepository = storageRepositories[sync.getRepository()] ?: throw IllegalArgumentException("Repository ${sync.getRepository()} missing for synchronizer ${sync.getName()}")
-        val syncService = rlpxServices[sync.getRlpxService()] ?: throw IllegalArgumentException("Service ${sync.getRlpxService()} missing for synchronizer ${sync.getName()}")
-        val syncPeerRepository = peerRepositories[sync.getPeerRepository()] ?: throw IllegalArgumentException("Peer repository ${sync.getPeerRepository()} missing for synchronizer ${sync.getName()}")
-        val adapter = adapters[sync.getRlpxService()] ?: throw IllegalArgumentException("Service ${sync.getRlpxService()} missing for synchronizer ${sync.getName()}")
+        val syncRepository = storageRepositories[sync.getRepository()] ?: throw IllegalArgumentException(
+          "Repository ${sync.getRepository()} missing for synchronizer ${sync.getName()}"
+        )
+        val syncService = rlpxServices[sync.getRlpxService()] ?: throw IllegalArgumentException(
+          "Service ${sync.getRlpxService()} missing for synchronizer ${sync.getName()}"
+        )
+        val syncPeerRepository = peerRepositories[sync.getPeerRepository()] ?: throw IllegalArgumentException(
+          "Peer repository ${sync.getPeerRepository()} missing for synchronizer ${sync.getName()}"
+        )
+        val adapter = adapters[sync.getRlpxService()] ?: throw IllegalArgumentException(
+          "Service ${sync.getRlpxService()} missing for synchronizer ${sync.getName()}"
+        )
 
         when (sync.getType()) {
           SynchronizerType.BEST -> {
@@ -351,7 +359,9 @@ class EthereumClient(
           }
           SynchronizerType.CANONICAL -> {
             val fromRepository = storageRepositories.get(sync.getFromRepository())
-              ?: throw IllegalArgumentException("Missing repository for canonical repository ${sync.getFromRepository()}")
+              ?: throw IllegalArgumentException(
+                "Missing repository for canonical repository ${sync.getFromRepository()}"
+              )
             val canonicalSynchronizer = CanonicalSynchronizer(
               repository = syncRepository,
               client = syncService.getClient(ETH66) as EthRequestsManager,
@@ -379,7 +389,10 @@ class EthereumClient(
             validators[validator.getName()] = chainIdValidator
           }
           ValidatorType.TRANSACTIONHASH -> {
-            val transactionsHashValidator = TransactionsHashValidator(from = validator.getFrom(), to = validator.getTo())
+            val transactionsHashValidator = TransactionsHashValidator(
+              from = validator.getFrom(),
+              to = validator.getTo()
+            )
             validators[validator.getName()] = transactionsHashValidator
           }
         }

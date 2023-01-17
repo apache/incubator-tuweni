@@ -71,7 +71,9 @@ type="memory""""
     val response3 = con3.inputStream.readAllBytes()
     assertTrue(response3.isNotEmpty())
     assertEquals(
-      """{"peerCounts":{"default":0},"bestBlocks":{"default":{"hash":"0xa08d1edb37ba1c62db764ef7c2566cbe368b850f5b3762c6c24114a3fd97b87f","number":"0x0000000000000000000000000000000000000000000000000000000000000000"}}}""",
+      """{"peerCounts":{"default":0},""" +
+        """"bestBlocks":{"default":{"hash":"0xa08d1edb37ba1c62db764ef7c2566cbe368b850f5b3762c6c24114a3fd97b87f",""" +
+        """"number":"0x0000000000000000000000000000000000000000000000000000000000000000"}}}""",
       String(response3)
     )
     ui.stop()

@@ -115,7 +115,10 @@ class StackTest {
     stack.pop()
     stack.pop()
     assertEquals(Bytes.fromHexString("0x040506"), stack.popBytes())
-    assertEquals(Bytes.fromHexString("0x0000000000000000000000000000000000000000000000000000000000000201"), stack.get(0))
+    assertEquals(
+      Bytes.fromHexString("0x0000000000000000000000000000000000000000000000000000000000000201"),
+      stack.get(0)
+    )
     assertEquals(Bytes.fromHexString("0x0201"), stack.getBytes(0))
     assertEquals(Bytes.fromHexString("0x0201"), stack.popBytes())
     assertEquals(Bytes.fromHexString("0x03"), stack.popBytes())

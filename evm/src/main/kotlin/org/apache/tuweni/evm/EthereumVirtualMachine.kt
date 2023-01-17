@@ -304,18 +304,33 @@ class EthereumVirtualMachine(
     var gasAvailable = gas
     if (depth > 1024) {
       val gasManager = GasManager(gas)
-      return EVMResult(EVMExecutionStatusCode.CALL_DEPTH_EXCEEDED, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), null))
+      return EVMResult(
+        EVMExecutionStatusCode.CALL_DEPTH_EXCEEDED,
+        hostContext,
+        NoOpExecutionChanges,
+        EVMState(gasManager, listOf(), Stack(), Memory(), null)
+      )
     }
     val senderNonce = hostContext.getNonce(sender)
 
     if (senderNonce >= MAX_NONCE) {
-      return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
+      return EVMResult(
+        EVMExecutionStatusCode.REJECTED,
+        hostContext,
+        NoOpExecutionChanges,
+        EVMState(GasManager(gas), listOf(), Stack(), Memory(), null)
+      )
     }
 
     if (callKind == CallKind.CREATE || callKind == CallKind.CREATE2) {
       val codeDepositGasFee = UInt256.valueOf(code.size() * 200L)
       if (gas < codeDepositGasFee) {
-        return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
+        return EVMResult(
+          EVMExecutionStatusCode.REJECTED,
+          hostContext,
+          NoOpExecutionChanges,
+          EVMState(GasManager(gas), listOf(), Stack(), Memory(), null)
+        )
       }
       gasAvailable = gasAvailable.subtract(codeDepositGasFee)
     }
@@ -327,7 +342,12 @@ class EthereumVirtualMachine(
       val senderBalance = hostContext.getBalance(sender)
       val amount = Wei.valueOf(UInt256.fromBytes(value))
       if (senderBalance.toUInt256() < amount.toUInt256()) {
-        return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
+        return EVMResult(
+          EVMExecutionStatusCode.REJECTED,
+          hostContext,
+          NoOpExecutionChanges,
+          EVMState(GasManager(gas), listOf(), Stack(), Memory(), null)
+        )
       }
       hostContext.setBalance(sender, senderBalance.subtract(amount))
       hostContext.setBalance(destination, destinationBalance.add(amount))
@@ -335,13 +355,23 @@ class EthereumVirtualMachine(
 
     if (precompile != null) {
       if (callKind == CallKind.CREATE || callKind == CallKind.CREATE2) {
-        return EVMResult(EVMExecutionStatusCode.REJECTED, hostContext, NoOpExecutionChanges, EVMState(GasManager(gas), listOf(), Stack(), Memory(), null))
+        return EVMResult(
+          EVMExecutionStatusCode.REJECTED,
+          hostContext,
+          NoOpExecutionChanges,
+          EVMState(GasManager(gas), listOf(), Stack(), Memory(), null)
+        )
       }
       logger.trace("Executing precompile $contractAddress")
       val result = precompile.run(inputData)
       val gasManager = GasManager(gasAvailable)
       gasManager.add(result.gas)
-      return EVMResult(if (result.output == null) EVMExecutionStatusCode.PRECOMPILE_FAILURE else EVMExecutionStatusCode.SUCCESS, hostContext, NoOpExecutionChanges, EVMState(gasManager, listOf(), Stack(), Memory(), result.output))
+      return EVMResult(
+        if (result.output == null) EVMExecutionStatusCode.PRECOMPILE_FAILURE else EVMExecutionStatusCode.SUCCESS,
+        hostContext,
+        NoOpExecutionChanges,
+        EVMState(gasManager, listOf(), Stack(), Memory(), result.output)
+      )
     } else {
       val msg =
         EVMMessage(
