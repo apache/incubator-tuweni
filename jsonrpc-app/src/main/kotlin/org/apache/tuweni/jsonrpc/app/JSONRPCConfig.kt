@@ -39,6 +39,7 @@ class JSONRPCConfig(val filePath: Path? = null) {
       .addInteger("port", 18545, "JSON-RPC server port", PropertyValidator.isValidPort())
       .addString("networkInterface", "127.0.0.1", "JSON-RPC server network interface", null)
       .addString("clientFingerprintsFile", "fingerprints.txt", "File recording client connection fingerprints", null)
+      .addString("serverSecurity", "record", "Server security mode: record, allowlist, ca, tofu", null)
       .addBoolean("ssl", false, "Whether the JSON-RPC server should serve data over SSL", null)
       .addBoolean("basicAuth", false, "Whether the JSON-RPC server should authenticate incoming requests with HTTP Basic Authentication", null)
       .addString("basicAuthUsername", "", "HTTP Basic Auth username", null)
@@ -64,6 +65,10 @@ class JSONRPCConfig(val filePath: Path? = null) {
 
   val config = if (filePath != null) Configuration.fromToml(filePath, schema()) else Configuration.empty(schema())
 
+  enum class ServerSecurity {
+    RECORD, ALLOWLIST, CA, TOFU
+  }
+
   fun numberOfThreads() = config.getInteger("numberOfThreads")
   fun metricsPort() = config.getInteger("metricsPort")
   fun metricsNetworkInterface() = config.getString("metricsNetworkInterface")
@@ -73,6 +78,7 @@ class JSONRPCConfig(val filePath: Path? = null) {
   fun port() = config.getInteger("port")
   fun networkInterface() = config.getString("networkInterface")
   fun clientFingerprintsFile(): Path = Paths.get(config.getString("clientFingerprintsFile"))
+  fun serverSecurity(): ServerSecurity = ServerSecurity.valueOf(config.getString("serverSecurity"))
   fun ssl() = config.getBoolean("ssl")
   fun useBasicAuthentication() = config.getBoolean("basicAuth")
   fun basicAuthUsername() = config.getString("basicAuthUsername")

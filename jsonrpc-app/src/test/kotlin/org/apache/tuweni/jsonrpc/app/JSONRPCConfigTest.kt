@@ -79,6 +79,8 @@ class JSONRPCConfigTest {
 #port = 18545
 ## Rejected IP ranges
 #rejectedRanges = []
+## Server security mode: record, allowlist, ca, tofu
+#serverSecurity = "record"
 ## Whether the JSON-RPC server should serve data over SSL
 #ssl = false
 """.split("\n").joinToString(System.lineSeparator()),
