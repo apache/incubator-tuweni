@@ -14,6 +14,8 @@ package org.apache.tuweni.plumtree;
 
 import org.apache.tuweni.bytes.Bytes;
 
+import java.util.Map;
+
 /**
  * Listens to an incoming message, along with its attributes.
  */
@@ -26,5 +28,5 @@ public interface MessageListener {
    * @param attributes the attributes of the message
    * @param peer the peer we received the message from
    */
-  public void listen(Bytes messageBody, String attributes, Peer peer);
+  public void listen(Bytes messageBody, Map<String, Bytes> attributes, Peer peer);
 }

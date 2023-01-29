@@ -23,6 +23,10 @@ import org.apache.tuweni.plumtree.EphemeralPeerRepository;
 import org.apache.tuweni.plumtree.MessageListener;
 import org.apache.tuweni.plumtree.Peer;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
+
 import io.vertx.core.Vertx;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +39,7 @@ class VertxGossipServerTest {
     public Bytes message;
 
     @Override
-    public void listen(Bytes messageBody, String attributes, Peer peer) {
+    public void listen(Bytes messageBody, Map<String, Bytes> attributes, Peer peer) {
       message = messageBody;
     }
   }
@@ -73,7 +77,8 @@ class VertxGossipServerTest {
     server2.start().join();
 
     server1.connectTo("127.0.0.1", 10001).join();
-    String attributes = "{\"message_type\": \"BLOCK\"}";
+    Map<String, Bytes> attributes =
+        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     server1.gossip(attributes, Bytes.fromHexString("deadbeef"));
     for (int i = 0; i < 10; i++) {
       Thread.sleep(500);
@@ -134,7 +139,8 @@ class VertxGossipServerTest {
 
     server1.connectTo("127.0.0.1", 10001).join();
     server3.connectTo("127.0.0.1", 10001).join();
-    String attributes = "{\"message_type\": \"BLOCK\"}";
+    Map<String, Bytes> attributes =
+        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     server1.gossip(attributes, Bytes.fromHexString("deadbeef"));
     for (int i = 0; i < 10; i++) {
       Thread.sleep(500);
@@ -202,7 +208,8 @@ class VertxGossipServerTest {
     server2.connectTo("127.0.0.1", 10002).join();
     server1.connectTo("127.0.0.1", 10002).join();
     assertEquals(2, peerRepository1.eagerPushPeers().size());
-    String attributes = "{\"message_type\": \"BLOCK\"}";
+    Map<String, Bytes> attributes =
+        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     server1.gossip(attributes, Bytes.fromHexString("deadbeef"));
     Thread.sleep(1000);
     assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);
@@ -250,7 +257,8 @@ class VertxGossipServerTest {
 
     server1.connectTo("127.0.0.1", 10001).join();
     assertEquals(1, peerRepository1.eagerPushPeers().size());
-    String attributes = "{\"message_type\": \"BLOCK\"}";
+    Map<String, Bytes> attributes =
+        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     server1.send(peerRepository1.peers().iterator().next(), attributes, Bytes.fromHexString("deadbeef"));
     Thread.sleep(1000);
     assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);

@@ -20,7 +20,7 @@ import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.concurrent.AsyncCompletion;
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
-import org.apache.tuweni.plumtree.MessageHashing;
+import org.apache.tuweni.plumtree.MessageIdentity;
 import org.apache.tuweni.plumtree.MessageListener;
 import org.apache.tuweni.plumtree.MessageSender;
 import org.apache.tuweni.plumtree.MessageValidator;
@@ -31,10 +31,18 @@ import org.apache.tuweni.plumtree.State;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -50,14 +58,51 @@ public class GossipServlet extends HttpServlet {
   private static final Logger logger = LoggerFactory.getLogger(GossipServlet.class);
   private static final ObjectMapper mapper = new ObjectMapper();
 
-  private void sendMessage(MessageSender.Verb verb, String attributes, Peer peer, Bytes hash, Bytes payload) {
+  private final static class BytesSerializer extends StdSerializer<Bytes> {
+
+    public BytesSerializer() {
+      super(Bytes.class);
+    }
+
+    @Override
+    public void serialize(Bytes value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+      gen.writeString(value.toHexString());
+    }
+  }
+  static class BytesDeserializer extends StdDeserializer<Bytes> {
+
+    BytesDeserializer() {
+      super(Bytes.class);
+    }
+
+    @Override
+    public Bytes deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+      String value = p.getValueAsString();
+      return Bytes.fromHexStringLenient(value);
+    }
+
+  }
+
+  static {
+    SimpleModule module = new SimpleModule();
+    module.addSerializer(Bytes.class, new BytesSerializer());
+    module.addDeserializer(Bytes.class, new BytesDeserializer());
+    mapper.registerModule(module);
+  }
+
+  private void sendMessage(
+      MessageSender.Verb verb,
+      Map<String, Bytes> attributes,
+      Peer peer,
+      Bytes hash,
+      Bytes payload) {
     Message message = new Message();
     message.verb = verb;
     message.attributes = attributes;
     message.hash = hash.toHexString();
     message.payload = payload == null ? null : payload.toHexString();
-    HttpPost postMessage = new HttpPost("http://" + ((ServletPeer) peer).getAddress());
-    postMessage.setHeader(PLUMTREE_SERVER_HEADER, this.networkInterface + ":" + this.port);
+    HttpPost postMessage = new HttpPost(((ServletPeer) peer).getAddress());
+    postMessage.setHeader(PLUMTREE_SERVER_HEADER, this.externalURL);
     try {
       ByteArrayEntity entity = new ByteArrayEntity(mapper.writeValueAsBytes(message), ContentType.APPLICATION_JSON);
       postMessage.setEntity(entity);
@@ -76,17 +121,17 @@ public class GossipServlet extends HttpServlet {
   }
 
   private static final class Message {
+
     public MessageSender.Verb verb;
-    public String attributes;
+    public Map<String, Bytes> attributes;
     public String hash;
     public String payload;
   }
 
   private final int graftDelay;
   private final int lazyQueueInterval;
-  private final MessageHashing messageHashing;
-  private final String networkInterface;
-  private final int port;
+  private final MessageIdentity messageIdentity;
+  private final String externalURL;
   private final MessageListener payloadListener;
   private final MessageValidator payloadValidator;
   private final PeerPruning peerPruningFunction;
@@ -98,18 +143,16 @@ public class GossipServlet extends HttpServlet {
   public GossipServlet(
       int graftDelay,
       int lazyQueueInterval,
-      MessageHashing messageHashing,
-      String networkInterface,
-      int port,
+      MessageIdentity messageIdentity,
+      String externalURL,
       MessageListener payloadListener,
       MessageValidator payloadValidator,
       PeerPruning peerPruningFunction,
       PeerRepository peerRepository) {
     this.graftDelay = graftDelay;
     this.lazyQueueInterval = lazyQueueInterval;
-    this.messageHashing = messageHashing;
-    this.networkInterface = networkInterface;
-    this.port = port;
+    this.messageIdentity = messageIdentity;
+    this.externalURL = externalURL;
     this.payloadListener = payloadListener;
     this.payloadValidator = payloadValidator == null ? (bytes, peer) -> true : payloadValidator;
     this.peerPruningFunction = peerPruningFunction == null ? (peer) -> true : peerPruningFunction;
@@ -125,7 +168,7 @@ public class GossipServlet extends HttpServlet {
       httpclient = HttpClients.createDefault();
       state = new State(
           peerRepository,
-          messageHashing,
+          messageIdentity,
           this::sendMessage,
           payloadListener,
           payloadValidator,
@@ -200,7 +243,7 @@ public class GossipServlet extends HttpServlet {
    * @param attributes the payload to propagate
    * @param message the payload to propagate
    */
-  public void gossip(String attributes, Bytes message) {
+  public void gossip(Map<String, Bytes> attributes, Bytes message) {
     if (!started.get()) {
       throw new IllegalStateException("Server has not started");
     }
@@ -214,14 +257,14 @@ public class GossipServlet extends HttpServlet {
    * @param attributes the payload to propagate
    * @param message the payload to propagate
    */
-  public void send(Peer peer, String attributes, Bytes message) {
+  public void send(Peer peer, Map<String, Bytes> attributes, Bytes message) {
     if (!started.get()) {
       throw new IllegalStateException("Server has not started");
     }
     state.sendMessage(peer, attributes, message);
   }
 
-  public AsyncCompletion connectTo(String host, int port) {
+  public AsyncCompletion connectTo(String url) {
     if (!started.get()) {
       throw new IllegalStateException("Server has not started");
     }
@@ -229,22 +272,22 @@ public class GossipServlet extends HttpServlet {
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
     AtomicInteger counter = new AtomicInteger(0);
 
-    roundConnect(host, port, counter, completion);
+    roundConnect(url, counter, completion);
 
     return completion;
   }
 
-  private void roundConnect(String host, int port, AtomicInteger counter, CompletableAsyncCompletion completion) {
-    ServletPeer peer = new ServletPeer(host + ":" + port);
-    HttpPost postMessage = new HttpPost("http://" + peer.getAddress());
-    postMessage.setHeader(PLUMTREE_SERVER_HEADER, this.networkInterface + ":" + this.port);
+  private void roundConnect(String url, AtomicInteger counter, CompletableAsyncCompletion completion) {
+    ServletPeer peer = new ServletPeer(url);
+    HttpPost postMessage = new HttpPost(peer.getAddress());
+    postMessage.setHeader(PLUMTREE_SERVER_HEADER, this.externalURL);
     try {
       httpclient.execute(postMessage, response -> {
         if (response.getCode() > 299) {
           if (counter.incrementAndGet() > 5) {
             completion.completeExceptionally(new RuntimeException(response.getEntity().toString()));
           } else {
-            roundConnect(host, port, counter, completion);
+            roundConnect(url, counter, completion);
           }
         } else {
           state.addPeer(peer);
@@ -256,7 +299,7 @@ public class GossipServlet extends HttpServlet {
       if (counter.incrementAndGet() > 5) {
         completion.completeExceptionally(e);
       } else {
-        roundConnect(host, port, counter, completion);
+        roundConnect(url, counter, completion);
       }
     }
   }
