@@ -28,7 +28,9 @@ class AuthMessageTest {
     val message = AuthMessage(nodeInfo, "foo", "secret")
     val mapper = ObjectMapper()
     assertEquals(
-      "{\"id\":\"foo\",\"info\":{\"api\":\"No\",\"canUpdateHistory\":true,\"client\":\"Apache Tuweni Ethstats\",\"name\":\"foo\",\"net\":\"eth\",\"node\":\"node\",\"os\":\"os\",\"os_v\":\"123\",\"port\":123,\"protocol\":\"protocol\"},\"secret\":\"secret\"}",
+      "{\"id\":\"foo\",\"info\":{\"api\":\"No\",\"canUpdateHistory\":true," +
+        "\"client\":\"Apache Tuweni Ethstats\",\"name\":\"foo\",\"net\":\"eth\",\"node\":\"node\"," +
+        "\"os\":\"os\",\"os_v\":\"123\",\"port\":123,\"protocol\":\"protocol\"},\"secret\":\"secret\"}",
       mapper.writeValueAsString(message)
     )
   }

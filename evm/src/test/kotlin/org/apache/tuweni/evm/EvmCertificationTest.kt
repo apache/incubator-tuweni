@@ -239,11 +239,25 @@ class EvmCertificationTest {
           assertTrue(changesRepository.accountsExists(address))
           val accountState = changesRepository.getAccount(address)
           val balance = accountState?.balance ?: Wei.valueOf(0)
-          assertEquals(info.balance, balance, "balance doesn't match: " + address.toHexString() + ":" + if (balance > info.balance) balance.subtract(info.balance).toString() else info.balance.subtract(balance).toString())
+          assertEquals(
+            info.balance,
+            balance,
+            "balance doesn't match: " + address.toHexString() + ":" + if (balance > info.balance) {
+              balance.subtract(
+                info.balance
+              ).toString()
+            } else {
+              info.balance.subtract(balance).toString()
+            }
+          )
           assertEquals(info.nonce, accountState!!.nonce)
 
           for (stored in info.storage) {
-            val changed = changesRepository.getAccountStoreValue(address, Hash.hash(stored.key))?.let { RLP.decodeValue(it) } ?: UInt256.ZERO
+            val changed = changesRepository.getAccountStoreValue(address, Hash.hash(stored.key))?.let {
+              RLP.decodeValue(
+                it
+              )
+            } ?: UInt256.ZERO
             assertEquals(stored.value, Bytes32.leftPad(changed)) {
               runBlocking {
                 val account = changesRepository.getAccount(address) ?: changesRepository.newAccountState()

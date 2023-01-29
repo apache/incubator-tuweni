@@ -40,7 +40,10 @@ internal fun stringDeserializer(b: Bytes): String = String(b.toArrayUnsafe(), UT
  * @constructor Creates an empty trie.
  */
 
-class MerklePatriciaTrie<V> @JvmOverloads constructor(valueSerializer: (V) -> Bytes, override val coroutineContext: CoroutineContext = Dispatchers.Default) : MerkleTrie<Bytes, V> {
+class MerklePatriciaTrie<V> @JvmOverloads constructor(
+  valueSerializer: (V) -> Bytes,
+  override val coroutineContext: CoroutineContext = Dispatchers.Default
+) : MerkleTrie<Bytes, V> {
 
   companion object {
     /**

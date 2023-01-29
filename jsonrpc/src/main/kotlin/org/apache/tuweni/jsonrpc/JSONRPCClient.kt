@@ -136,7 +136,11 @@ class JSONRPCClient(
    * @throws ConnectException if it cannot dial the remote client
    */
   suspend fun getTransactionCount_latest(address: Address): UInt256 {
-    val body = JSONRPCRequest(StringOrLong(nextId()), "eth_getTransactionCount", arrayOf(address.toHexString(), "latest"))
+    val body = JSONRPCRequest(
+      StringOrLong(nextId()),
+      "eth_getTransactionCount",
+      arrayOf(address.toHexString(), "latest")
+    )
     val jsonResponse = sendRequest(body).await()
     val err = jsonResponse.error
     if (err != null) {

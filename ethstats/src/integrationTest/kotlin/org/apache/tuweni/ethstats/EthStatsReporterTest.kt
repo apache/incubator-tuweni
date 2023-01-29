@@ -94,13 +94,18 @@ public class EthStatsReporterTest {
     assertTrue(
       server
         .messagesContain(
-          "{\"emit\":[\"hello\",{\"id\":\"foo\",\"info\":{\"api\":\"No\",\"canUpdateHistory\":true,\"client\":\"Apache Tuweni Ethstats\",\"name\":\"name\",\"net\":\"10\",\"node\":\"node\",\"os\":\"Windoz\",\"os_v\":\"64\",\"port\":33030,\"protocol\":\"eth/63\"},\"secret\":\"wat\"}]}"
+          "{\"emit\":[\"hello\",{\"id\":\"foo\",\"info\":{\"api\":\"No\",\"canUpdateHistory\":true,\"client\":" +
+            "\"Apache Tuweni Ethstats\",\"name\":\"name\",\"net\":\"10\",\"node\":\"node\",\"os\":\"Windoz\"," +
+            "\"os_v\":\"64\",\"port\":33030,\"protocol\":\"eth/63\"},\"secret\":\"wat\"}]}"
         )
     )
     assertTrue(server.messagesContain("{\"emit\":[\"node-ping\",{\"id\":\"foo\""))
     assertTrue(server.messagesContain("{\"emit\":[\"block\","), server.getResults().joinToString("\n"))
     assertTrue(server.messagesContain("\"stats\":{\"pending\":42}"), server.getResults().joinToString("\n"))
-    assertTrue(server.messagesContain("{\"emit\":[\"stats\",{\"id\":\"foo\",\"stats\":"), server.getResults().joinToString("\n"))
+    assertTrue(
+      server.messagesContain("{\"emit\":[\"stats\",{\"id\":\"foo\",\"stats\":"),
+      server.getResults().joinToString("\n")
+    )
 
     reporter.stop()
   }

@@ -35,7 +35,11 @@ interface Instruction {
   fun end(): Boolean = false
 }
 
-data class InstructionModel(val opcode: Byte, val additionalBytesToRead: Int = 0, val creator: (code: Bytes, index: Int) -> Instruction)
+data class InstructionModel(
+  val opcode: Byte,
+  val additionalBytesToRead: Int = 0,
+  val creator: (code: Bytes, index: Int) -> Instruction
+)
 
 /**
  * A registry of instructions that can be used to read code back into the DSL.

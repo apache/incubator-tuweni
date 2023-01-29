@@ -45,7 +45,11 @@ import org.slf4j.LoggerFactory
  * @param keyPair the identity of the server according to the Secure Scuttlebutt protocol
  * @param networkIdentifier the network identifier of the server according to the Secure Scuttlebutt protocol
  */
-class SecureScuttlebuttVertxClient(private val vertx: Vertx, private val keyPair: Signature.KeyPair, private val networkIdentifier: Bytes32) {
+class SecureScuttlebuttVertxClient(
+  private val vertx: Vertx,
+  private val keyPair: Signature.KeyPair,
+  private val networkIdentifier: Bytes32
+) {
   private inner class NetSocketClientHandler(
     private val socket: NetSocket,
     remotePublicKey: Signature.PublicKey?,

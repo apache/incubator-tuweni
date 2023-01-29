@@ -29,7 +29,8 @@ class NodeStatsTest {
     mapper.registerModule(EthJsonModule())
     val stats = NodeStats(true, true, true, 42, 23, 5000, 1234567)
     assertEquals(
-      "{\"active\":true,\"gasPrice\":5000,\"hashrate\":42,\"mining\":true,\"peers\":23,\"syncing\":true,\"uptime\":1234567}",
+      "{\"active\":true,\"gasPrice\":5000,\"hashrate\":42," +
+        "\"mining\":true,\"peers\":23,\"syncing\":true,\"uptime\":1234567}",
       mapper.writeValueAsString(stats)
     )
   }

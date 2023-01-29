@@ -86,7 +86,11 @@ class WireConnectionPeerRepositoryAdapter(val peerRepository: EthereumPeerReposi
   fun get(ethereumConnection: EthereumConnection): WireConnection {
     val conn = connections[ethereumConnection.identity().id()]
     if (conn == null) {
-      logger.info("Connection ${ethereumConnection.identity().id()} not found, present are: ${connections.keys.joinToString(",")}}")
+      logger.info(
+        "Connection ${
+        ethereumConnection.identity().id()
+        } not found, present are: ${connections.keys.joinToString(",")}}"
+      )
       throw NoSuchElementException("No connection available")
     }
     return conn

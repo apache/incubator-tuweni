@@ -42,8 +42,26 @@ class BlockProcessorTest {
   fun testValidBlockNoTransactions() = runBlocking {
     val processor = BlockProcessor(UInt256.ONE)
     val repository = BlockchainRepository.inMemory(Genesis.dev())
-    val result = processor.execute(Genesis.dev().header, Address.ZERO, Gas.valueOf(100), Gas.ZERO, UInt256.ZERO, listOf(), repository, Registry.istanbul, HardFork.HOMESTEAD)
-    val block = result.block.toBlock(listOf(), Address.ZERO, UInt256.ONE, Instant.now(), Bytes.EMPTY, Genesis.emptyHash, UInt64.random())
+    val result = processor.execute(
+      Genesis.dev().header,
+      Address.ZERO,
+      Gas.valueOf(100),
+      Gas.ZERO,
+      UInt256.ZERO,
+      listOf(),
+      repository,
+      Registry.istanbul,
+      HardFork.HOMESTEAD
+    )
+    val block = result.block.toBlock(
+      listOf(),
+      Address.ZERO,
+      UInt256.ONE,
+      Instant.now(),
+      Bytes.EMPTY,
+      Genesis.emptyHash,
+      UInt64.random()
+    )
     assertEquals(0, block.body.transactions.size)
   }
 }

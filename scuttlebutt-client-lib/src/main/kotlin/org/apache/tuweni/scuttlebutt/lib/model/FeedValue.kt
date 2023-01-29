@@ -31,7 +31,14 @@ import java.io.IOException
  * @param hash the hash type of the message
  * @param content the content of the message
 */
-class FeedValue(val previous: String, val author: Author, val sequence: Long, val timestamp: Long, val hash: String, private val content: JsonNode) {
+class FeedValue(
+  val previous: String,
+  val author: Author,
+  val sequence: Long,
+  val timestamp: Long,
+  val hash: String,
+  private val content: JsonNode
+) {
 
   companion object {
     private val mapper = ObjectMapper()

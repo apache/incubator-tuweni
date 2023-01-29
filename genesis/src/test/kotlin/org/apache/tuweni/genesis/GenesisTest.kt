@@ -43,7 +43,9 @@ class GenesisTest {
       extraData = Bytes.EMPTY,
       gasLimit = 0L,
       parentHash = Bytes32.leftPad(Bytes.fromHexString("0x00ff")),
-      alloc = mapOf(Pair(Address.fromHexString("0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"), mapOf(Pair("balance", UInt256.ONE)))),
+      alloc = mapOf(
+        Pair(Address.fromHexString("0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"), mapOf(Pair("balance", UInt256.ONE)))
+      ),
       config = GenesisConfig(chainId = 1337)
     )
     val mapper = JsonMapper()

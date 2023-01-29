@@ -49,7 +49,9 @@ data class JSONRPCRequest constructor(
     }
   }
 
-  override fun equals(other: Any?) = other is JSONRPCRequest && this.method == other.method && params.contentEquals(other.params)
+  override fun equals(other: Any?) = other is JSONRPCRequest && this.method == other.method && params.contentEquals(
+    other.params
+  )
   override fun hashCode() = 31 * method.hashCode() + params.contentHashCode()
 
   fun serializeRequest(): String {

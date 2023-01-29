@@ -35,9 +35,18 @@ import org.apache.tuweni.units.bigints.UInt256
 import org.apache.tuweni.units.ethereum.Gas
 import org.apache.tuweni.units.ethereum.Wei
 
-data class TransactionProcessorResult(val receipt: TransactionReceipt? = null, val success: Boolean = false, val gasUsed: Gas = Gas.ZERO)
+data class TransactionProcessorResult(
+  val receipt: TransactionReceipt? = null,
+  val success: Boolean = false,
+  val gasUsed: Gas = Gas.ZERO
+)
 
-class TransactionProcessor(val vm: EthereumVirtualMachine, val hardFork: HardFork, val repository: BlockchainRepository, val stateChanges: TransientStateRepository) {
+class TransactionProcessor(
+  val vm: EthereumVirtualMachine,
+  val hardFork: HardFork,
+  val repository: BlockchainRepository,
+  val stateChanges: TransientStateRepository
+) {
 
   fun calculateTransactionCost(payload: Bytes, hardFork: HardFork): Gas {
     var zeros = 0

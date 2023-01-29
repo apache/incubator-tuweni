@@ -107,7 +107,10 @@ open class RelationalPeerRepository(
       ) as RepositoryPeer
       val stmt =
         conn.prepareStatement(
-          "insert into nodeInfo(id, createdAt, host, port, publickey, p2pVersion, clientId, capabilities, genesisHash, bestHash, totalDifficulty, identity, disconnectReason) values(?,?,?,?,?,?,?,?,?,?,?,?,?)"
+          """insert into nodeInfo(id, createdAt, host, port, publickey, p2pVersion, clientId, capabilities,
+            | genesisHash, bestHash, totalDifficulty, identity, disconnectReason) 
+            | values(?,?,?,?,?,?,?,?,?,?,?,?,?)
+          """.trimMargin()
         )
       stmt.use {
         val peerHello = wireConnection.peerHello
@@ -163,9 +166,12 @@ open class RelationalPeerRepository(
   ): List<PeerConnectionInfoDetails> {
     dataSource.connection.use { conn ->
       var query =
-        "select distinct nodeinfo.createdAt, nodeinfo.publickey, nodeinfo.p2pversion, nodeinfo.clientId, nodeinfo.capabilities, nodeinfo.genesisHash, nodeinfo.besthash, nodeinfo.totalDifficulty from nodeinfo " +
-          "  inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen " +
-          "  on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt where createdAt < ? order by nodeInfo.createdAt desc"
+        """select distinct nodeinfo.createdAt, nodeinfo.publickey, nodeinfo.p2pversion, nodeinfo.clientId, 
+          |nodeinfo.capabilities, nodeinfo.genesisHash, nodeinfo.besthash, nodeinfo.totalDifficulty from nodeinfo 
+          |inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen 
+          |on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt 
+          |where createdAt < ? order by nodeInfo.createdAt desc
+        """.trimMargin()
       if (from != null && limit != null) {
         query += " limit $limit offset $from"
       }
@@ -207,8 +213,10 @@ open class RelationalPeerRepository(
     dataSource.connection.use { conn ->
       val stmt =
         conn.prepareStatement(
-          "select endpoint.host, endpoint.port, identity.publickey from endpoint inner " +
-            "join identity on (endpoint.identity = identity.id) where endpoint.identity NOT IN (select identity from nodeinfo) order by endpoint.lastSeen desc limit $limit offset $from"
+          """select endpoint.host, endpoint.port, identity.publickey from endpoint inner join identity on 
+            |(endpoint.identity = identity.id) where endpoint.identity NOT IN (select identity from nodeinfo) 
+            |order by endpoint.lastSeen desc limit $limit offset $from
+          """.trimMargin()
         )
       stmt.use {
         // map results.
@@ -228,7 +236,11 @@ open class RelationalPeerRepository(
   internal fun getClientIdsInternal(): List<ClientInfo> {
     dataSource.connection.use { conn ->
       val sql =
-        "select clients.clientId, count(clients.clientId) from (select nodeinfo.clientId, nodeInfo.createdAt from nodeinfo inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt) as clients where clients.createdAt > ? group by clients.clientId"
+        """select clients.clientId, count(clients.clientId) from (select nodeinfo.clientId, nodeInfo.createdAt 
+          |from nodeinfo inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) 
+          |maxSeen on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt) as clients 
+          |where clients.createdAt > ? group by clients.clientId
+        """.trimMargin()
       val stmt =
         conn.prepareStatement(sql)
       stmt.use {
@@ -250,10 +262,13 @@ open class RelationalPeerRepository(
 
   internal fun getPeerWithInfo(infoCollected: Long, publicKey: String): PeerConnectionInfoDetails? {
     dataSource.connection.use { conn ->
-      var query =
-        "select distinct nodeinfo.createdAt, nodeinfo.publickey, nodeinfo.p2pversion, nodeinfo.clientId, nodeinfo.capabilities, nodeinfo.genesisHash, nodeinfo.besthash, nodeinfo.totalDifficulty from nodeinfo " +
-          "  inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen " +
-          "  on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt where createdAt < ? and nodeinfo.publickey = ? order by nodeInfo.createdAt desc"
+      val query =
+        """select distinct nodeinfo.createdAt, nodeinfo.publickey, nodeinfo.p2pversion, nodeinfo.clientId, 
+          |nodeinfo.capabilities, nodeinfo.genesisHash, nodeinfo.besthash, nodeinfo.totalDifficulty from nodeinfo 
+          |inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen 
+          |on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt 
+          |where createdAt < ? and nodeinfo.publickey = ? order by nodeInfo.createdAt desc
+        """.trimMargin()
       val stmt =
         conn.prepareStatement(query)
       stmt.use {

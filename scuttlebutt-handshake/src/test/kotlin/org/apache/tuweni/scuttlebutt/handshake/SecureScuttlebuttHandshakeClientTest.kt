@@ -69,7 +69,8 @@ internal class SecureScuttlebuttHandshakeClientTest {
           .fromBytes(
             Bytes
               .fromHexString(
-                "0x4936543930b3d7de00ecb78952b9f6579b40b73b89512c108b35815e7b35856e9464f3d5d26fa22b3f6604cac7e41c24855fd756a326d7a22995c92bbbad1049"
+                "0x4936543930b3d7de00ecb78952b9f6579b40b73b89512c108b35815e7b35856e9464f" +
+                  "3d5d26fa22b3f6604cac7e41c24855fd756a326d7a22995c92bbbad1049"
               )
           )
       )
@@ -79,7 +80,8 @@ internal class SecureScuttlebuttHandshakeClientTest {
           .fromBytes(
             Bytes
               .fromHexString(
-                "0x05b578a14b4fef8386ffd509d6241a4a3a0a1d560603dacb6f13df01ed8a63221db3ee42b856345dde400e2f32014aed1a83c7d77ac573cce9bd32412631d607"
+                "0x05b578a14b4fef8386ffd509d6241a4a3a0a1d560603dacb6f13df01ed8a63221db3e" +
+                  "e42b856345dde400e2f32014aed1a83c7d77ac573cce9bd32412631d607"
               )
           )
       )

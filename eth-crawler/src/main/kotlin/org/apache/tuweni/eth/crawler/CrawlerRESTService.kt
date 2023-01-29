@@ -75,7 +75,10 @@ class CrawlerRESTService(
     )
 
     val apiServlet = ctx.addServlet(OpenApiServlet::class.java.name, "/api/*")
-    apiServlet.setInitParameter("openApi.configuration.resourcePackages", "org.apache.tuweni.eth.crawler.rest")
+    apiServlet.setInitParameter(
+      "openApi.configuration.resourcePackages",
+      "org.apache.tuweni.eth.crawler.rest"
+    )
     apiServlet.initOrder = 2
 
     ctx.setBaseResource(Resource.newResource(CrawlerRESTService::class.java.getResource("/webapp")))
@@ -86,7 +89,8 @@ class CrawlerRESTService(
     val swagger = ServletHolder("swagger-ui", DefaultServlet::class.java)
     swagger.setInitParameter(
       "resourceBase",
-      CrawlerRESTService::class.java.getClassLoader().getResource("META-INF/resources/webjars/swagger-ui/4.15.5/").toString()
+      CrawlerRESTService::class.java.getClassLoader().getResource("META-INF/resources/webjars/swagger-ui/4.15.5/")
+        .toString()
     )
     swagger.setInitParameter("pathInfoOnly", "true")
     ctx.addServlet(swagger, "/swagger-ui/*")

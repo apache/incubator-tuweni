@@ -102,7 +102,8 @@ class QuorumConfig(val genesis: Genesis, val validators: List<SECP256K1.KeyPair>
 
   fun validatorsToCsv(): String {
     return validatorHeader + validators.map {
-      Address.fromPublicKey(it.publicKey()).toHexString() + "," + it.publicKey().toHexString() + "," + it.secretKey().bytes().toHexString()
+      Address.fromPublicKey(it.publicKey()).toHexString() + "," + it.publicKey().toHexString() + "," + it.secretKey()
+        .bytes().toHexString()
     }.joinToString("\n")
   }
 

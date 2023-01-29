@@ -66,7 +66,13 @@ class EcroverTest {
     @JvmStatic
     @Throws(IOException::class)
     private fun findFrontierTests(): Stream<Arguments> {
-      return Stream.of(EcroverTest::class.java.getResource("/ecrecover.yaml").openConnection().getInputStream().use { input -> prepareTest(input) })
+      return Stream.of(
+        EcroverTest::class.java.getResource("/ecrecover.yaml").openConnection().getInputStream().use { input ->
+          prepareTest(
+            input
+          )
+        }
+      )
     }
 
     @Throws(IOException::class)
@@ -161,11 +167,25 @@ class EcroverTest {
           assertTrue(changesRepository.accountsExists(address), address.toHexString())
           val accountState = changesRepository.getAccount(address)
           val balance = accountState?.balance ?: Wei.valueOf(0)
-          assertEquals(info.balance, balance, "balance doesn't match: " + address.toHexString() + ":" + if (balance > info.balance) balance.subtract(info.balance).toString() else info.balance.subtract(balance).toString())
+          assertEquals(
+            info.balance,
+            balance,
+            "balance doesn't match: " + address.toHexString() + ":" + if (balance > info.balance) {
+              balance.subtract(
+                info.balance
+              ).toString()
+            } else {
+              info.balance.subtract(balance).toString()
+            }
+          )
           assertEquals(info.nonce, accountState!!.nonce)
 
           for (stored in info.storage) {
-            val changed = changesRepository.getAccountStoreValue(address, Hash.hash(stored.key))?.let { RLP.decodeValue(it) } ?: UInt256.ZERO
+            val changed = changesRepository.getAccountStoreValue(address, Hash.hash(stored.key))?.let {
+              RLP.decodeValue(
+                it
+              )
+            } ?: UInt256.ZERO
             assertEquals(stored.value, Bytes32.leftPad(changed)) {
               runBlocking {
                 val account = changesRepository.getAccount(address) ?: changesRepository.newAccountState()

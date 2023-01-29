@@ -29,7 +29,9 @@ class PersistenceMarshaller : AbstractMarshaller() {
 
   override fun objectFromByteBuffer(buf: ByteArray?, offset: Int, length: Int) = Bytes.wrap(buf!!, offset, length)
 
-  override fun objectToBuffer(o: Any?, estimatedSize: Int): ByteBuffer = ByteBufferImpl.create((o as Bytes).toArrayUnsafe())
+  override fun objectToBuffer(o: Any?, estimatedSize: Int): ByteBuffer = ByteBufferImpl.create(
+    (o as Bytes).toArrayUnsafe()
+  )
 
   override fun isMarshallable(o: Any?): Boolean = o is Bytes
 

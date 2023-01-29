@@ -90,7 +90,12 @@ class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
       val opcode = registry.get(fork, code.get(current))
       if (opcode == null) {
         logger.error("Could not find opcode for ${code.slice(current, 1)} at position $current")
-        return EVMResult(EVMExecutionStatusCode.INVALID_INSTRUCTION, hostContext, hostContext as TransactionalEVMHostContext, EVMState(gasManager, hostContext.getLogs(), stack, memory))
+        return EVMResult(
+          EVMExecutionStatusCode.INVALID_INSTRUCTION,
+          hostContext,
+          hostContext as TransactionalEVMHostContext,
+          EVMState(gasManager, hostContext.getLogs(), stack, memory)
+        )
       }
       val currentOpcodeByte = code.get(current)
       current++
@@ -103,7 +108,13 @@ class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
             "gas: ${gasManager.gasLeft()} cost: ${gasManager.lastGasCost()}"
         )
       }
-      val state = EVMState(gasManager, (hostContext as TransactionalEVMHostContext).getLogs(), stack, memory, result?.output)
+      val state = EVMState(
+        gasManager,
+        (hostContext as TransactionalEVMHostContext).getLogs(),
+        stack,
+        memory,
+        result?.output
+      )
 
       if (result?.status != null) {
         traceExecution(executionPath)
