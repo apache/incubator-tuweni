@@ -169,11 +169,9 @@ subprojects {
   apply plugin: 'com.diffplug.spotless'
   spotless {
     java {
-      target project.fileTree(project.projectDir) {
-        include '**/*.java'
-        exclude '**/generated-src/**/*.*'
-        exclude '**/SECP256K1.java'
-      }
+      target '**/*.java'
+      targetExclude '**/generated-src/**/*.*'
+      targetExclude '**/SECP256K1.java'
       removeUnusedImports()
       licenseHeaderFile rootProject.file('gradle/spotless.license.txt')
       eclipse().configFile(rootProject.file('gradle/eclipse-java-tuweni-style.xml'))
