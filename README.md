@@ -1,15 +1,13 @@
 # Tuweni: Apache Core Libraries for Java (& Kotlin)
 
-[![Discord](https://user-images.githubusercontent.com/7288322/34471967-1df7808a-efbb-11e7-9088-ed0b04151291.png)](https://discord.gg/zHHPRpT)
 [![Slack](https://img.shields.io/badge/slack-%23tuweni-72eff8?logo=slack)](https://s.apache.org/slack-invite)
 [![Github build](https://github.com/apache/incubator-tuweni/workflows/assemble/badge.svg)](https://github.com/apache/incubator-tuweni/actions)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/incubator-tuweni/blob/main/LICENSE)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.apache.tuweni/tuweni-tuweni/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/org.apache.tuweni/tuweni-tuweni)
-[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/ApacheTuweni.svg?style=social&label=Follow%20%40ApacheTuweni)](https://twitter.com/ApacheTuweni)
 
 ![logo](tuweni.png)
 
-See our [web site](https://tuweni.apache.org) for details on the project.
+See our [website](https://tuweni.apache.org) for details on the project.
 
 Tuweni is a set of libraries and other tools to aid development of blockchain and other decentralized software in Java and other JVM languages.
 
