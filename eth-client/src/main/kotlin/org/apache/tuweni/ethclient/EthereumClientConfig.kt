@@ -66,6 +66,7 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
       RLPxServiceConfigurationImpl(
         section,
         sectionConfig.getString("clientName"),
+        sectionConfig.getInteger("maxConnections"),
         sectionConfig.getInteger("port"),
         sectionConfig.getString("networkInterface"),
         sectionConfig.getInteger("advertisedPort"),
@@ -337,6 +338,12 @@ class EthereumClientConfig(private var config: Configuration = Configuration.emp
         "Port to advertise in communications as the RLPx service port",
         PropertyValidator.isValidPort()
       )
+      rlpx.addInteger(
+        "maxConnections",
+        50,
+        "Maximum number of clients",
+        PropertyValidator.isGreaterOrEqual(1)
+      )
       rlpx.addString("clientName", "Apache Tuweni", "Name of the Ethereum client", null)
       rlpx.addString("repository", "default", "Name of the blockchain repository", null)
       rlpx.addString("peerRepository", "default", "Peer repository to which records should go", null)
@@ -440,6 +447,7 @@ interface RLPxServiceConfiguration {
   fun repository(): String
   fun getName(): String
   fun clientName(): String
+  fun maxConnections(): Int
   fun peerRepository(): String
 }
 
@@ -511,6 +519,7 @@ internal class PeerRepositoryConfigurationImpl(private val repoName: String, pri
 internal data class RLPxServiceConfigurationImpl(
   private val name: String,
   val clientName: String,
+  val maxConnections: Int,
   val port: Int,
   val networkInterface: String,
   val advertisedPort: Int,
@@ -534,6 +543,7 @@ internal data class RLPxServiceConfigurationImpl(
   override fun getName(): String = name
 
   override fun clientName(): String = clientName
+  override fun maxConnections(): Int = maxConnections
 
   override fun peerRepository(): String = peerRepository
 }

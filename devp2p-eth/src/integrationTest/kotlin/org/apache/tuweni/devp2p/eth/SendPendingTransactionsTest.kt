@@ -62,7 +62,7 @@ class SendPendingTransactionsTest {
 
   @Test
   fun testSendPendingTransactions(@LuceneIndexWriter writer: IndexWriter, @VertxInstance vertx: Vertx) = runBlocking {
-    val contents = ConnectToAnotherNodeTest::class.java.getResourceAsStream("/besu-dev.json").readAllBytes()
+    val contents = ConnectToAnotherNodeTest::class.java.getResourceAsStream("/besu-dev.json")!!.readAllBytes()
     val genesisFile = GenesisFile.read(contents)
     val genesisBlock = genesisFile.toBlock()
 
@@ -97,6 +97,7 @@ class SendPendingTransactionsTest {
         )
       ),
       "Tuweni Experiment 0.1",
+      10,
       meter
     )
     service.start().await()

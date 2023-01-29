@@ -125,6 +125,7 @@ class VertxAcceptanceTest {
         kp,
         Collections.singletonList(sp),
         "Client 1",
+        10,
         meter,
         repository);
     MemoryWireConnectionsRepository secondRepository = new MemoryWireConnectionsRepository();
@@ -137,6 +138,7 @@ class VertxAcceptanceTest {
         secondKp,
         Collections.singletonList(secondSp),
         "Client 2",
+        10,
         meter,
         secondRepository);
     service.start().join();
@@ -180,6 +182,7 @@ class VertxAcceptanceTest {
         kp,
         Collections.singletonList(sp),
         "Client 1",
+        10,
         meter,
         repository);
     VertxRLPxService secondService = new VertxRLPxService(
@@ -190,6 +193,7 @@ class VertxAcceptanceTest {
         secondKp,
         Collections.singletonList(secondSp),
         "Client 2",
+        10,
         meter,
         secondRepository);
     service.start().join();
@@ -282,7 +286,7 @@ class VertxAcceptanceTest {
           public SubProtocolClient createClient(RLPxService service, SubProtocolIdentifier identifier) {
             return null;
           }
-        }), "Client 1", meter, repository);
+        }), "Client 1", 10, meter, repository);
     service.start().join();
 
     AsyncResult<WireConnection> completion = service

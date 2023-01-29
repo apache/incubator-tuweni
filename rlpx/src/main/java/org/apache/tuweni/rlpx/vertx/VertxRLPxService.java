@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
@@ -79,8 +80,12 @@ public final class VertxRLPxService implements RLPxService {
   private final int connectTimeout = 5 * 1000;
   private final int idleTimeout = 30 * 1000;
 
+  private final int maxConnections;
+
   private LinkedHashMap<SubProtocolIdentifier, SubProtocolHandler> handlers;
   private LinkedHashMap<SubProtocolIdentifier, SubProtocolClient> clients;
+
+  private AtomicInteger connectionsCount = new AtomicInteger(0);
   private NetClient client;
   private NetServer server;
 
@@ -100,6 +105,7 @@ public final class VertxRLPxService implements RLPxService {
    * @param identityKeyPair the identity of this client
    * @param subProtocols subprotocols supported
    * @param clientId the client identifier, such as "RLPX 1.2/build 389"
+   * @param maxConnections the max number of client connections allowed
    * @param meter the metric service meter used to monitor useful metrics in the service
    */
   public VertxRLPxService(
@@ -110,6 +116,7 @@ public final class VertxRLPxService implements RLPxService {
       KeyPair identityKeyPair,
       List<SubProtocol> subProtocols,
       String clientId,
+      int maxConnections,
       @Nullable Meter meter) {
     this(
         vertx,
@@ -119,6 +126,7 @@ public final class VertxRLPxService implements RLPxService {
         identityKeyPair,
         subProtocols,
         clientId,
+        maxConnections,
         meter,
         new MemoryWireConnectionsRepository());
   }
@@ -133,6 +141,7 @@ public final class VertxRLPxService implements RLPxService {
    * @param identityKeyPair the identity of this client
    * @param subProtocols subprotocols supported
    * @param clientId the client identifier, such as "RLPX 1.2/build 389"
+   * @param maxConnections the max number of client connections allowed
    * @param meter the metric service meter used to monitor useful metrics in the service
    * @param repository a wire connection repository
    */
@@ -144,12 +153,16 @@ public final class VertxRLPxService implements RLPxService {
       KeyPair identityKeyPair,
       List<SubProtocol> subProtocols,
       String clientId,
+      int maxConnections,
       @Nullable Meter meter,
       WireConnectionRepository repository) {
     checkPort(listenPort);
     checkPort(advertisedPort);
     if (clientId == null || clientId.trim().isEmpty()) {
       throw new IllegalArgumentException("Client ID must contain a valid identifier");
+    }
+    if (maxConnections <= 0) {
+      throw new IllegalArgumentException("Max connections must be a positive integer");
     }
     this.vertx = vertx;
     this.listenPort = listenPort;
@@ -158,6 +171,7 @@ public final class VertxRLPxService implements RLPxService {
     this.keyPair = identityKeyPair;
     this.subProtocols = subProtocols;
     this.clientId = clientId;
+    this.maxConnections = maxConnections;
     this.repository = repository;
     repository.addDisconnectionListener(c -> {
       if (keepAliveList.contains(c.peerPublicKey())) {
@@ -258,11 +272,19 @@ public final class VertxRLPxService implements RLPxService {
     if (connectionsCreatedCounter != null) {
       connectionsCreatedCounter.add(1);
     }
+    int newCount = connectionsCount.getAndIncrement();
+
     netSocket.closeHandler((handler) -> {
       if (connectionsDisconnectedCounter != null) {
         connectionsDisconnectedCounter.add(1);
       }
+      connectionsCount.getAndDecrement();
     });
+    if (newCount > maxConnections) {
+      logger.info("disconnecting from incoming connection {} as over max connections", netSocket.remoteAddress());
+      netSocket.close();
+      return;
+    }
     netSocket.handler(new Handler<>() {
 
       private RLPxConnection conn;
@@ -357,6 +379,12 @@ public final class VertxRLPxService implements RLPxService {
     }
 
     CompletableAsyncResult<WireConnection> connected = AsyncResult.incomplete();
+    if (connectionsCount.get() > maxConnections) {
+      logger
+          .info("Cancelling connection to {} with public key {}, max connections reached", peerAddress, peerPublicKey);
+      connected.cancel();
+      return connected;
+    }
     logger.info("Connecting to {} with public key {}", peerAddress, peerPublicKey);
     client
         .connect(
@@ -366,6 +394,7 @@ public final class VertxRLPxService implements RLPxService {
               if (connectionsCreatedCounter != null) {
                 connectionsCreatedCounter.add(1);
               }
+              connectionsCount.getAndIncrement();
               Bytes32 nonce = RLPxConnectionFactory.generateRandomBytes32();
               KeyPair ephemeralKeyPair = KeyPair.random();
               Bytes initHandshakeMessage = RLPxConnectionFactory.init(keyPair, peerPublicKey, ephemeralKeyPair, nonce);
@@ -380,6 +409,7 @@ public final class VertxRLPxService implements RLPxService {
                 if (!connected.isDone()) {
                   connected.cancel();
                 }
+                connectionsCount.getAndDecrement();
               });
 
               netSocket.handler(new Handler<>() {
