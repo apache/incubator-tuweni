@@ -53,7 +53,7 @@ class ConnectToAnotherNodeTest {
   @Disabled
   @Test
   fun testCollectHeaders(@LuceneIndexWriter writer: IndexWriter, @VertxInstance vertx: Vertx) = runBlocking {
-    val contents = ConnectToAnotherNodeTest::class.java.getResourceAsStream("/mainnet.json").readAllBytes()
+    val contents = ConnectToAnotherNodeTest::class.java.getResourceAsStream("/mainnet.json")!!.readAllBytes()
     val genesisFile = GenesisFile.read(contents)
     val genesisBlock = genesisFile.toBlock()
 
@@ -88,6 +88,7 @@ class ConnectToAnotherNodeTest {
         )
       ),
       "Tuweni Experiment 0.1",
+      10,
       meter
     )
     service.start().await()
@@ -116,7 +117,7 @@ class ConnectToAnotherNodeTest {
   @Disabled("flaky")
   @Test
   fun twoServers(@LuceneIndexWriter writer: IndexWriter, @VertxInstance vertx: Vertx) = runBlocking {
-    val contents = EthHandlerTest::class.java.getResourceAsStream("/mainnet.json").readAllBytes()
+    val contents = EthHandlerTest::class.java.getResourceAsStream("/mainnet.json")!!.readAllBytes()
     val genesisBlock = GenesisFile.read(contents).toBlock()
 
     val repository = BlockchainRepository.init(
@@ -150,6 +151,7 @@ class ConnectToAnotherNodeTest {
         )
       ),
       "Tuweni Experiment 0.1",
+      10,
       meter
     )
 
@@ -185,6 +187,7 @@ class ConnectToAnotherNodeTest {
         )
       ),
       "Tuweni Experiment 0.1",
+      10,
       meter
     )
     val result = AsyncCompletion.allOf(service.start(), service2.start()).then {

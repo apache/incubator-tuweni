@@ -54,6 +54,7 @@ class SendDataToAnotherNodeTest {
         ProxySubprotocol()
       ),
       "Tuweni Experiment 0.1",
+      10,
       meter
     )
 
@@ -66,6 +67,7 @@ class SendDataToAnotherNodeTest {
       service2kp,
       listOf(ProxySubprotocol()),
       "Tuweni Experiment 0.1",
+      10,
       meter
     )
     val recorder = RecordingClientHandler()

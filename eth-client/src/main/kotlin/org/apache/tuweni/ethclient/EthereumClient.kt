@@ -272,6 +272,7 @@ class EthereumClient(
           rlpxConfig.keyPair(),
           listOf(ethSubprotocol, proxySubprotocol),
           rlpxConfig.clientName(),
+          rlpxConfig.maxConnections(),
           meter,
           adapter
         )

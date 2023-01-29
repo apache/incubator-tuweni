@@ -193,6 +193,7 @@ class CrawlerApplication(
       SECP256K1.KeyPair.random(),
       listOf(ethHelloProtocol),
       "Apache Tuweni network crawler",
+      50,
       meter,
       wireConnectionsRepository
     )

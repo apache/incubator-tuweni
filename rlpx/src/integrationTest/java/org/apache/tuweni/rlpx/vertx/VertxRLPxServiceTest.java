@@ -65,6 +65,7 @@ class VertxRLPxServiceTest {
             SECP256K1.KeyPair.random(),
             new ArrayList<>(),
             "a",
+            10,
             meter));
   }
 
@@ -80,6 +81,7 @@ class VertxRLPxServiceTest {
             SECP256K1.KeyPair.random(),
             new ArrayList<>(),
             "a",
+            10,
             meter));
   }
 
@@ -95,6 +97,23 @@ class VertxRLPxServiceTest {
             SECP256K1.KeyPair.random(),
             new ArrayList<>(),
             null,
+            10,
+            meter));
+  }
+
+  @Test
+  void invalidMaxConnections(@VertxInstance Vertx vertx) {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new VertxRLPxService(
+            vertx,
+            34,
+            "localhost",
+            23,
+            SECP256K1.KeyPair.random(),
+            new ArrayList<>(),
+            "foo",
+            -1,
             meter));
   }
 
@@ -110,6 +129,7 @@ class VertxRLPxServiceTest {
             SECP256K1.KeyPair.random(),
             new ArrayList<>(),
             "   ",
+            10,
             meter));
   }
 
@@ -123,6 +143,7 @@ class VertxRLPxServiceTest {
         SECP256K1.KeyPair.random(),
         new ArrayList<>(),
         "a",
+        10,
         meter);
 
     service.start().join();
@@ -136,7 +157,7 @@ class VertxRLPxServiceTest {
   @Test
   void startServiceWithPortZero(@VertxInstance Vertx vertx) throws InterruptedException {
     VertxRLPxService service =
-        new VertxRLPxService(vertx, 0, "localhost", 0, SECP256K1.KeyPair.random(), new ArrayList<>(), "a", meter);
+        new VertxRLPxService(vertx, 0, "localhost", 0, SECP256K1.KeyPair.random(), new ArrayList<>(), "a", 10, meter);
 
     service.start().join();
     try {
@@ -149,8 +170,16 @@ class VertxRLPxServiceTest {
 
   @Test
   void stopServiceWithoutStartingItFirst(@VertxInstance Vertx vertx) {
-    VertxRLPxService service =
-        new VertxRLPxService(vertx, 0, "localhost", 10000, SECP256K1.KeyPair.random(), new ArrayList<>(), "abc", meter);
+    VertxRLPxService service = new VertxRLPxService(
+        vertx,
+        0,
+        "localhost",
+        10000,
+        SECP256K1.KeyPair.random(),
+        new ArrayList<>(),
+        "abc",
+        10,
+        meter);
     AsyncCompletion completion = service.stop();
     assertTrue(completion.isDone());
   }
@@ -160,11 +189,11 @@ class VertxRLPxServiceTest {
     SECP256K1.KeyPair ourPair = SECP256K1.KeyPair.random();
     SECP256K1.KeyPair peerPair = SECP256K1.KeyPair.random();
     VertxRLPxService service =
-        new VertxRLPxService(vertx, 0, "localhost", 10000, ourPair, new ArrayList<>(), "abc", meter);
+        new VertxRLPxService(vertx, 0, "localhost", 10000, ourPair, new ArrayList<>(), "abc", 10, meter);
     service.start().join();
 
     VertxRLPxService peerService =
-        new VertxRLPxService(vertx, 0, "localhost", 10000, peerPair, new ArrayList<>(), "abc", meter);
+        new VertxRLPxService(vertx, 0, "localhost", 10000, peerPair, new ArrayList<>(), "abc", 10, meter);
     peerService.start().join();
 
     WireConnection conn =
@@ -179,12 +208,12 @@ class VertxRLPxServiceTest {
     SECP256K1.KeyPair ourPair = SECP256K1.KeyPair.random();
     SECP256K1.KeyPair peerPair = SECP256K1.KeyPair.random();
     List<SubProtocol> protocols = Arrays.asList(new VertxAcceptanceTest.MyCustomSubProtocol());
-    VertxRLPxService service = new VertxRLPxService(vertx, 0, "localhost", 10000, ourPair, protocols, "abc", meter);
+    VertxRLPxService service = new VertxRLPxService(vertx, 0, "localhost", 10000, ourPair, protocols, "abc", 10, meter);
     service.start().join();
 
 
     VertxRLPxService peerService =
-        new VertxRLPxService(vertx, 0, "localhost", 10000, peerPair, protocols, "abc", meter);
+        new VertxRLPxService(vertx, 0, "localhost", 10000, peerPair, protocols, "abc", 10, meter);
     peerService.start().join();
 
     WireConnection conn = null;
@@ -234,12 +263,12 @@ class VertxRLPxServiceTest {
       }
     });
     VertxRLPxService service =
-        new VertxRLPxService(vertx, 0, "localhost", 10000, ourPair, protocols, "abc", meter, repository);
+        new VertxRLPxService(vertx, 0, "localhost", 10000, ourPair, protocols, "abc", 10, meter, repository);
     service.start().join();
 
     MemoryWireConnectionsRepository peerRepository = new MemoryWireConnectionsRepository();
     VertxRLPxService peerService =
-        new VertxRLPxService(vertx, 0, "localhost", 10000, peerPair, protocols, "abc", meter, peerRepository);
+        new VertxRLPxService(vertx, 0, "localhost", 10000, peerPair, protocols, "abc", 10, meter, peerRepository);
     peerService.start().join();
 
     try {
@@ -263,8 +292,17 @@ class VertxRLPxServiceTest {
   void getClientWhenNotReady(@VertxInstance Vertx vertx) {
     SECP256K1.KeyPair peerPair = SECP256K1.KeyPair.random();
     MemoryWireConnectionsRepository peerRepository = new MemoryWireConnectionsRepository();
-    VertxRLPxService peerService =
-        new VertxRLPxService(vertx, 0, "localhost", 10000, peerPair, new ArrayList<>(), "abc", meter, peerRepository);
+    VertxRLPxService peerService = new VertxRLPxService(
+        vertx,
+        0,
+        "localhost",
+        10000,
+        peerPair,
+        new ArrayList<>(),
+        "abc",
+        10,
+        meter,
+        peerRepository);
     assertThrows(IllegalStateException.class, () -> {
       peerService.getClient(SubProtocolIdentifier.of("foo", 1));
     });
@@ -286,6 +324,7 @@ class VertxRLPxServiceTest {
         SECP256K1.KeyPair.random(),
         Collections.singletonList(sp),
         "abc",
+        10,
         meter,
         peerRepository);
     peerService.start().join();
