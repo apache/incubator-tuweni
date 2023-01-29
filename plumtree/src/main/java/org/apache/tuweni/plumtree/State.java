@@ -37,7 +37,7 @@ public final class State {
   private static final int maxMessagesHandlers = 1000000;
 
   private final PeerRepository peerRepository;
-  private final MessageHashing messageHashingFunction;
+  private final MessageIdentity messageIdentityFunction;
   private final Map<Bytes, MessageHandler> messageHandlers = Collections.synchronizedMap(new LinkedHashMap<>() {
 
     @Override
@@ -54,8 +54,8 @@ public final class State {
   private final Timer timer = new Timer("plumtree", true);
   private final long delay;
 
-  public void sendMessage(Peer peer, String attributes, Bytes message) {
-    Bytes messageHash = messageHashingFunction.hash(message);
+  public void sendMessage(Peer peer, Map<String, Bytes> attributes, Bytes message) {
+    Bytes messageHash = messageIdentityFunction.identity(message);
     messageSender.sendMessage(MessageSender.Verb.SEND, attributes, peer, messageHash, message);
   }
 
@@ -78,7 +78,7 @@ public final class State {
      * @param sender the sender - may be null if we are submitting this message to the network
      * @param message the payload to send to the network
      */
-    void fullMessageReceived(@Nullable Peer sender, String attributes, Bytes message) {
+    void fullMessageReceived(@Nullable Peer sender, Map<String, Bytes> attributes, Bytes message) {
       if (receivedFullMessage.compareAndSet(false, true)) {
         for (TimerTask task : tasks) {
           task.cancel();
@@ -145,7 +145,7 @@ public final class State {
    * Constructor using default time constants.
    * 
    * @param peerRepository the peer repository to use to store and access peer information.
-   * @param messageHashingFunction the function to use to hash messages into hashes to compare them.
+   * @param messageIdentityFunction the function to use to hash messages into hashes to compare them.
    * @param messageSender a function abstracting sending messages to other peers.
    * @param messageListener a function consuming messages when they are gossiped.
    * @param messageValidator a function validating messages before they are gossiped to other peers.
@@ -153,14 +153,14 @@ public final class State {
    */
   public State(
       PeerRepository peerRepository,
-      MessageHashing messageHashingFunction,
+      MessageIdentity messageIdentityFunction,
       MessageSender messageSender,
       MessageListener messageListener,
       MessageValidator messageValidator,
       PeerPruning peerPruningFunction) {
     this(
         peerRepository,
-        messageHashingFunction,
+        messageIdentityFunction,
         messageSender,
         messageListener,
         messageValidator,
@@ -173,7 +173,7 @@ public final class State {
    * Default constructor.
    * 
    * @param peerRepository the peer repository to use to store and access peer information.
-   * @param messageHashingFunction the function to use to hash messages into hashes to compare them.
+   * @param messageIdentityFunction the function to use to hash messages into hashes to compare them.
    * @param messageSender a function abstracting sending messages to other peers.
    * @param messageListener a function consuming messages when they are gossiped.
    * @param messageValidator a function validating messages before they are gossiped to other peers.
@@ -184,7 +184,7 @@ public final class State {
    */
   public State(
       PeerRepository peerRepository,
-      MessageHashing messageHashingFunction,
+      MessageIdentity messageIdentityFunction,
       MessageSender messageSender,
       MessageListener messageListener,
       MessageValidator messageValidator,
@@ -192,7 +192,7 @@ public final class State {
       long graftDelay,
       long lazyQueueInterval) {
     this.peerRepository = peerRepository;
-    this.messageHashingFunction = messageHashingFunction;
+    this.messageIdentityFunction = messageIdentityFunction;
     this.messageSender = messageSender;
     this.messageListener = messageListener;
     this.messageValidator = messageValidator;
@@ -233,8 +233,8 @@ public final class State {
    * @param message the message
    * @param messageHash the hash of the message
    */
-  public void receiveGossipMessage(Peer peer, String attributes, Bytes message, Bytes messageHash) {
-    Bytes checkHash = messageHashingFunction.hash(message);
+  public void receiveGossipMessage(Peer peer, Map<String, Bytes> attributes, Bytes message, Bytes messageHash) {
+    Bytes checkHash = messageIdentityFunction.identity(message);
     if (!checkHash.equals(messageHash)) {
       return;
     }
@@ -281,8 +281,8 @@ public final class State {
    * @param attributes of the message
    * @return The associated hash of the message
    */
-  public Bytes sendGossipMessage(String attributes, Bytes message) {
-    Bytes messageHash = messageHashingFunction.hash(message);
+  public Bytes sendGossipMessage(Map<String, Bytes> attributes, Bytes message) {
+    Bytes messageHash = messageIdentityFunction.identity(message);
     MessageHandler handler = messageHandlers.computeIfAbsent(messageHash, MessageHandler::new);
     handler.fullMessageReceived(null, attributes, message);
     return messageHash;

@@ -21,6 +21,9 @@ import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.crypto.Hash;
 import org.apache.tuweni.junit.BouncyCastleExtension;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +50,7 @@ class StateTest {
     Bytes payload;
 
     @Override
-    public void sendMessage(Verb verb, String attributes, Peer peer, Bytes hash, Bytes payload) {
+    public void sendMessage(Verb verb, Map<String, Bytes> attributes, Peer peer, Bytes hash, Bytes payload) {
       this.verb = verb;
       this.peer = peer;
       this.hash = hash;
@@ -181,7 +184,8 @@ class StateTest {
     Peer otherPeer = new PeerImpl();
     state.addPeer(otherPeer);
     Bytes32 msg = Bytes32.random();
-    String attributes = "{\"message_type\": \"BLOCK\"}";
+    Map<String, Bytes> attributes =
+        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     state.receiveGossipMessage(peer, attributes, msg, Hash.keccak256(msg));
     assertEquals(msg, messageSender.payload);
     assertEquals(otherPeer, messageSender.peer);
@@ -201,7 +205,8 @@ class StateTest {
     Peer lazyPeer = new PeerImpl();
     state.addPeer(lazyPeer);
     repo.moveToLazy(lazyPeer);
-    String attributes = "{\"message_type\": \"BLOCK\"}";
+    Map<String, Bytes> attributes =
+        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     state.receiveGossipMessage(peer, attributes, msg, Hash.keccak256(msg));
     assertEquals(msg, messageSender.payload);
     assertEquals(otherPeer, messageSender.peer);
@@ -225,7 +230,8 @@ class StateTest {
     state.addPeer(lazyPeer);
     repo.moveToLazy(lazyPeer);
     Bytes message = Bytes32.random();
-    String attributes = "{\"message_type\": \"BLOCK\"}";
+    Map<String, Bytes> attributes =
+        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     state.receiveGossipMessage(peer, attributes, message, Hash.keccak256(message));
     state.receiveIHaveMessage(lazyPeer, message);
     assertNull(messageSender.payload);
@@ -279,7 +285,8 @@ class StateTest {
     Bytes message = Bytes32.random();
     state.receiveIHaveMessage(lazyPeer, Hash.keccak256(message));
     Thread.sleep(100);
-    String attributes = "{\"message_type\": \"BLOCK\"}";
+    Map<String, Bytes> attributes =
+        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     state.receiveGossipMessage(peer, attributes, message, Hash.keccak256(message));
     Thread.sleep(500);
     assertNull(messageSender.verb);
@@ -295,7 +302,8 @@ class StateTest {
         new State(repo, Hash::keccak256, messageSender, messageListener, (message, peer) -> true, (peer) -> true);
     Peer peer = new PeerImpl();
     Bytes message = Bytes32.random();
-    String attributes = "{\"message_type\": \"BLOCK\"}";
+    Map<String, Bytes> attributes =
+        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     state.receiveGossipMessage(peer, attributes, message, Hash.keccak256(message));
     assertEquals(1, repo.eagerPushPeers().size());
     assertEquals(0, repo.lazyPushPeers().size());
@@ -311,7 +319,8 @@ class StateTest {
     Peer peer = new PeerImpl();
     Peer secondPeer = new PeerImpl();
     Bytes message = Bytes32.random();
-    String attributes = "{\"message_type\": \"BLOCK\"}";
+    Map<String, Bytes> attributes =
+        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     state.receiveGossipMessage(peer, attributes, message, Hash.keccak256(message));
     state.receiveGossipMessage(secondPeer, attributes, message, Hash.keccak256(message));
     assertEquals(2, repo.eagerPushPeers().size());

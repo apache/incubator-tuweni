@@ -235,6 +235,6 @@ public final class GossipApp {
   }
 
   public void publish(Bytes message) {
-    server.gossip("", message);
+    server.gossip(Collections.emptyMap(), message);
   }
 }

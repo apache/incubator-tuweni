@@ -21,6 +21,10 @@ import org.apache.tuweni.plumtree.EphemeralPeerRepository;
 import org.apache.tuweni.plumtree.MessageListener;
 import org.apache.tuweni.plumtree.Peer;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -33,7 +37,7 @@ public class GossipServletTest {
     public Bytes message;
 
     @Override
-    public void listen(Bytes messageBody, String attributes, Peer peer) {
+    public void listen(Bytes messageBody, Map<String, Bytes> attributes, Peer peer) {
       message = messageBody;
     }
   }
@@ -59,8 +63,7 @@ public class GossipServletTest {
         200,
         200,
         bytes -> bytes,
-        "127.0.0.1",
-        10000,
+        "http://127.0.0.1:10000",
         messageReceived1,
         (message, peer) -> true,
         null,
@@ -69,8 +72,7 @@ public class GossipServletTest {
         200,
         200,
         bytes -> bytes,
-        "127.0.0.1",
-        10001,
+        "http://127.0.0.1:10001",
         messageReceived2,
         (message, peer) -> true,
         null,
@@ -83,8 +85,9 @@ public class GossipServletTest {
     server1.start();
     server2.start();
 
-    gossipServlet.connectTo("127.0.0.1", 10001).join();
-    String attributes = "{\"message_type\": \"BLOCK\"}";
+    gossipServlet.connectTo("http://127.0.0.1:10001").join();
+    Map<String, Bytes> attributes =
+        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     gossipServlet.gossip(attributes, Bytes.fromHexString("deadbeef"));
     for (int i = 0; i < 10; i++) {
       Thread.sleep(500);
@@ -107,8 +110,7 @@ public class GossipServletTest {
         200,
         200,
         bytes -> bytes,
-        "127.0.0.1",
-        10000,
+        "http://127.0.0.1:10000",
         messageReceived1,
         (message, peer) -> true,
         null,
@@ -117,8 +119,7 @@ public class GossipServletTest {
         200,
         200,
         bytes -> bytes,
-        "127.0.0.1",
-        10001,
+        "http://127.0.0.1:10001",
         messageReceived2,
         (message, peer) -> true,
         null,
@@ -127,8 +128,7 @@ public class GossipServletTest {
         200,
         200,
         bytes -> bytes,
-        "127.0.0.1",
-        10002,
+        "http://127.0.0.1:10002",
         messageReceived3,
         (message, peer) -> true,
         null,
@@ -143,9 +143,10 @@ public class GossipServletTest {
     server2.start();
     server3.start();
 
-    gossipServlet.connectTo("127.0.0.1", 10001).join();
-    gossipServlet3.connectTo("127.0.0.1", 10001).join();
-    String attributes = "{\"message_type\": \"BLOCK\"}";
+    gossipServlet.connectTo("http://127.0.0.1:10001").join();
+    gossipServlet3.connectTo("http://127.0.0.1:10001").join();
+    Map<String, Bytes> attributes =
+        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     gossipServlet.gossip(attributes, Bytes.fromHexString("deadbeef"));
     for (int i = 0; i < 10; i++) {
       Thread.sleep(500);
@@ -175,8 +176,7 @@ public class GossipServletTest {
         200,
         200,
         bytes -> bytes,
-        "127.0.0.1",
-        10000,
+        "http://127.0.0.1:10000",
         messageReceived1,
         (message, peer) -> true,
         null,
@@ -185,8 +185,7 @@ public class GossipServletTest {
         200,
         200,
         bytes -> bytes,
-        "127.0.0.1",
-        10001,
+        "http://127.0.0.1:10001",
         messageReceived2,
         (message, peer) -> true,
         null,
@@ -195,8 +194,7 @@ public class GossipServletTest {
         200,
         200,
         bytes -> bytes,
-        "127.0.0.1",
-        10002,
+        "http://127.0.0.1:10002",
         messageReceived2,
         (message, peer) -> true,
         null,
@@ -212,12 +210,13 @@ public class GossipServletTest {
 
     try {
 
-      gossipServlet.connectTo("127.0.0.1", 10001).join();
-      gossipServlet2.connectTo("127.0.0.1", 10002).join();
-      gossipServlet.connectTo("127.0.0.1", 10002).join();
+      gossipServlet.connectTo("http://127.0.0.1:10001").join();
+      gossipServlet2.connectTo("http://127.0.0.1:10002").join();
+      gossipServlet.connectTo("http://127.0.0.1:10002").join();
 
       assertEquals(2, peerRepository1.eagerPushPeers().size());
-      String attributes = "{\"message_type\": \"BLOCK\"}";
+      Map<String, Bytes> attributes =
+          Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
       gossipServlet.gossip(attributes, Bytes.fromHexString("deadbeef"));
       Thread.sleep(1000);
       assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);
@@ -243,8 +242,7 @@ public class GossipServletTest {
         200,
         200,
         bytes -> bytes,
-        "127.0.0.1",
-        10000,
+        "http://127.0.0.1:10000",
         messageReceived1,
         (message, peer) -> true,
         null,
@@ -253,8 +251,7 @@ public class GossipServletTest {
         200,
         200,
         bytes -> bytes,
-        "127.0.0.1",
-        10001,
+        "http://127.0.0.1:10001",
         messageReceived2,
         (message, peer) -> true,
         null,
@@ -266,9 +263,10 @@ public class GossipServletTest {
     server1.start();
     server2.start();
 
-    gossipServlet.connectTo("127.0.0.1", 10001).join();
+    gossipServlet.connectTo("http://127.0.0.1:10001").join();
     assertEquals(1, peerRepository1.eagerPushPeers().size());
-    String attributes = "{\"message_type\": \"BLOCK\"}";
+    Map<String, Bytes> attributes =
+        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     gossipServlet.send(peerRepository1.peers().iterator().next(), attributes, Bytes.fromHexString("deadbeef"));
     Thread.sleep(1000);
     assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);

@@ -15,7 +15,7 @@ package org.apache.tuweni.plumtree.vertx;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.concurrent.AsyncCompletion;
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
-import org.apache.tuweni.plumtree.MessageHashing;
+import org.apache.tuweni.plumtree.MessageIdentity;
 import org.apache.tuweni.plumtree.MessageListener;
 import org.apache.tuweni.plumtree.MessageSender;
 import org.apache.tuweni.plumtree.MessageValidator;
@@ -25,13 +25,20 @@ import org.apache.tuweni.plumtree.PeerRepository;
 import org.apache.tuweni.plumtree.State;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetClient;
@@ -47,10 +54,42 @@ public final class VertxGossipServer {
 
   private static final ObjectMapper mapper = new ObjectMapper();
 
+  private final static class BytesSerializer extends StdSerializer<Bytes> {
+
+    public BytesSerializer() {
+      super(Bytes.class);
+    }
+
+    @Override
+    public void serialize(Bytes value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+      gen.writeString(value.toHexString());
+    }
+  }
+  static class BytesDeserializer extends StdDeserializer<Bytes> {
+
+    BytesDeserializer() {
+      super(Bytes.class);
+    }
+
+    @Override
+    public Bytes deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+      String value = p.getValueAsString();
+      return Bytes.fromHexStringLenient(value);
+    }
+
+  }
+
+  static {
+    SimpleModule module = new SimpleModule();
+    module.addSerializer(Bytes.class, new BytesSerializer());
+    module.addDeserializer(Bytes.class, new BytesDeserializer());
+    mapper.registerModule(module);
+  }
+
   private static final class Message {
 
     public MessageSender.Verb verb;
-    public String attributes;
+    public Map<String, Bytes> attributes;
     public String hash;
     public String payload;
   }
@@ -69,8 +108,7 @@ public final class VertxGossipServer {
       buffer = Bytes.concatenate(buffer, Bytes.wrapBuffer(data));
       while (!buffer.isEmpty()) {
         Message message;
-        try {
-          JsonParser parser = mapper.getFactory().createParser(buffer.toArrayUnsafe());
+        try (JsonParser parser = mapper.getFactory().createParser(buffer.toArrayUnsafe())) {
           message = parser.readValueAs(Message.class);
           buffer = buffer.slice((int) parser.getCurrentLocation().getByteOffset());
         } catch (IOException e) {
@@ -109,7 +147,7 @@ public final class VertxGossipServer {
   private NetClient client;
   private final int graftDelay;
   private final int lazyQueueInterval;
-  private final MessageHashing messageHashing;
+  private final MessageIdentity messageIdentity;
   private final String networkInterface;
   private final MessageListener payloadListener;
   private final MessageValidator payloadValidator;
@@ -125,7 +163,7 @@ public final class VertxGossipServer {
       Vertx vertx,
       String networkInterface,
       int port,
-      MessageHashing messageHashing,
+      MessageIdentity messageIdentity,
       PeerRepository peerRepository,
       MessageListener payloadListener,
       @Nullable MessageValidator payloadValidator,
@@ -135,7 +173,7 @@ public final class VertxGossipServer {
     this.vertx = vertx;
     this.networkInterface = networkInterface;
     this.port = port;
-    this.messageHashing = messageHashing;
+    this.messageIdentity = messageIdentity;
     this.peerRepository = peerRepository;
     this.payloadListener = payloadListener;
     this.payloadValidator = payloadValidator == null ? (bytes, peer) -> true : payloadValidator;
@@ -159,7 +197,7 @@ public final class VertxGossipServer {
         if (res.failed()) {
           completion.completeExceptionally(res.cause());
         } else {
-          state = new State(peerRepository, messageHashing, (verb, attributes, peer, hash, payload) -> {
+          state = new State(peerRepository, messageIdentity, (verb, attributes, peer, hash, payload) -> {
             vertx.executeBlocking(future -> {
               Message message = new Message();
               message.verb = verb;
@@ -242,7 +280,7 @@ public final class VertxGossipServer {
    * @param attributes the payload to propagate
    * @param message the payload to propagate
    */
-  public void gossip(String attributes, Bytes message) {
+  public void gossip(Map<String, Bytes> attributes, Bytes message) {
     if (!started.get()) {
       throw new IllegalStateException("Server has not started");
     }
@@ -256,7 +294,7 @@ public final class VertxGossipServer {
    * @param attributes the payload to propagate
    * @param message the payload to propagate
    */
-  public void send(Peer peer, String attributes, Bytes message) {
+  public void send(Peer peer, Map<String, Bytes> attributes, Bytes message) {
     if (!started.get()) {
       throw new IllegalStateException("Server has not started");
     }
