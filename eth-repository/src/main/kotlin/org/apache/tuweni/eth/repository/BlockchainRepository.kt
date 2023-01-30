@@ -78,6 +78,10 @@ class BlockchainRepository(
     internal val logger = LoggerFactory.getLogger(BlockchainRepository::class.java)
     internal val GENESIS_BLOCK = Bytes.wrap("genesisBlock".toByteArray())
 
+    fun inMemoryBlocking(genesisBlock: Block) = runBlocking {
+      inMemory(genesisBlock)
+    }
+
     /**
      * Constructs a blockchain repository that resides entirely in heap.
      *

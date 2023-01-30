@@ -52,6 +52,8 @@ interface StepListener {
 class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
 
   companion object {
+    @JvmStatic
+    @JvmOverloads
     fun create(stepListener: StepListener? = null): EvmVm {
       return EvmVmImpl(stepListener)
     }

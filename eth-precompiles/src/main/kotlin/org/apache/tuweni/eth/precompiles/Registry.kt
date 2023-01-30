@@ -24,8 +24,13 @@ import org.hyperledger.besu.nativelib.bls12_381.LibEthPairings
  * Registry of precompiles organized by hard forks.
  */
 object Registry {
+  @JvmStatic
   val frontier: Map<Address, PrecompileContract>
+
+  @JvmStatic
   val bizantium: Map<Address, PrecompileContract>
+
+  @JvmStatic
   val istanbul: Map<Address, PrecompileContract>
 
   init {
