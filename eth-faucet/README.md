@@ -1,10 +1,80 @@
+<!---
+Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
+file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
+to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+License. You may obtain a copy of the License at
+ *
+http://www.apache.org/licenses/LICENSE-2.0
+ *
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+ --->
 # Ethereum Faucet
 
 This example allows you to set up a faucet with Github authentication.
 
 The application is written in Kotlin with Spring Boot, with Spring Web, Spring Security and Thymeleaf templates.
 
-The app is configured with the values in src/main/resources/application.yml.
+## Configuration
+
+The faucet works with a configuration file, `application.yml`. Here is a template of the file:
+
+```yaml
+server:
+  use-forward-headers: true
+  forward-headers-strategy: native
+spring:
+  main:
+    banner-mode: "off"
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            clientId: <your github client ID>
+            clientSecret: <your github client secret>
+html:
+  title: Faucet
+  request_message: Welcome to our faucet. You can ask for up to 1 ETH on this faucet.
+
+security:
+  oauth2:
+    client:
+      preEstablishedRedirectUri: <registered github redirect URI>
+      registeredRedirectUri: <registered github redirect URI>
+      useCurrentUri: false
+
+faucet:
+  maxETH: <the maximum amount of eth, in ETH, that you>
+  chainId: <chain id of your network>
+  rpcPort: <Ethereum client RPC port>
+  rpcHost: <Ethereum client RPC host>
+
+wallet:
+  path: wallet.key
+banner: >
+  Apache Tuweni Faucet example.
+
+
+           `:oyhdhhhhhhyo-`
+         :yds/.        ./sdy:
+       :mh:                :hm:
+     `ym:                    :my`
+     hm`                      `mh
+    +N.                        .N+
+    my :ydh/              /hdy- ym
+    Mo`MMMMM`            .MMMMN oM
+    my /hdh/              +hdh: ym
+    +N.                        .N+
+     hm`              `m:     `mh
+     `ym:    `sssssssssN:    :my`
+       :dh:   ``````````   :hd:
+         :yds/.        ./sdy:
+           `-oyhdhhhhdhyo-`
+```
+
+You should register a Github OAuth application to go along and fill the template.
 
 # Faucet
 
@@ -39,16 +109,3 @@ In the web page, note the faucet account address. Make sure to send money to tha
 Now you can send money using the faucet. Enter any valid address and press OK.
 
 The second time you ask for money, the faucet will detect the balance of the account matches the max the faucet with top up.
-
-# License
-
-Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
-file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
-to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
-License. You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
-an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
-specific language governing permissions and limitations under the License.
