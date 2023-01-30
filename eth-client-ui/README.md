@@ -22,5 +22,5 @@ The Ethereum client UI is a set of REST services and web pages associated with t
 It exposes data from the client, such as its configuration and state, over web pages.
 
 
-[prototype]:https://github.com/apache/incubator-tuweni/tree/main/docs#prototype
-[library]:https://github.com/apache/incubator-tuweni/tree/main/docs#library
+[prototype]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#prototype
+[library]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#library

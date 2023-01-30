@@ -21,6 +21,6 @@ This library implements a block processor for the Ethereum blockchain.
 
 A block processor applies the transformation of a block to the blockchain.
 
-[prototype]:https://github.com/apache/incubator-tuweni/tree/main/docs#prototype
-[library]:https://github.com/apache/incubator-tuweni/tree/main/docs#library
+[prototype]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#prototype
+[library]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#library
 

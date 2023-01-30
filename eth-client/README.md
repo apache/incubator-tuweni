@@ -20,5 +20,5 @@ specific language governing permissions and limitations under the License.
 The Ethereum client library defines the domain objects and their coordination to form an Ethereum client.
 
 
-[prototype]:https://github.com/apache/incubator-tuweni/tree/main/docs#prototype
-[library]:https://github.com/apache/incubator-tuweni/tree/main/docs#library
+[prototype]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#prototype
+[library]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#library

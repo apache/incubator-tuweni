@@ -46,5 +46,5 @@ Relay messages from a Web Socket port 2222 to a TCP server on 4444:
 hobbits-relayer -b ws://localhost:2222 -t tcp://localhost:4444
 ```
 
-[beta]:https://github.com/apache/incubator-tuweni/tree/main/docs#beta
-[example]:https://github.com/apache/incubator-tuweni/tree/main/docs#example
+[beta]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#beta
+[example]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#example

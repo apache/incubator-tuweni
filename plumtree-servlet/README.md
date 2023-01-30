@@ -17,5 +17,5 @@ specific language governing permissions and limitations under the License.
 | Stability      | [stable]  |
 | Component Type | [example] |
 
-[stable]:https://github.com/apache/incubator-tuweni/tree/main/docs#stable
-[example]:https://github.com/apache/incubator-tuweni/tree/main/docs#example
+[stable]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#stable
+[example]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#example

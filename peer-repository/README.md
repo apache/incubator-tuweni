@@ -17,5 +17,5 @@ specific language governing permissions and limitations under the License.
 | Stability      | [alpha]   |
 | Component Type | [library] |
 
-[alpha]:https://github.com/apache/incubator-tuweni/tree/main/docs#alpha
-[library]:https://github.com/apache/incubator-tuweni/tree/main/docs#library
+[alpha]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#alpha
+[library]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#library

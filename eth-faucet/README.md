@@ -115,5 +115,5 @@ Now you can send money using the faucet. Enter any valid address and press OK.
 
 The second time you ask for money, the faucet will detect the balance of the account matches the max the faucet with top up.
 
-[alpha]:https://github.com/apache/incubator-tuweni/tree/main/docs#alpha
-[application]:https://github.com/apache/incubator-tuweni/tree/main/docs#application
+[alpha]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#alpha
+[application]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#application

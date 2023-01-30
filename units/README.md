@@ -145,5 +145,5 @@ public final class Wei extends BaseUInt256Value<Wei> {
 }
 ```
 
-[stable]:https://github.com/apache/incubator-tuweni/tree/main/docs#stable
-[library]:https://github.com/apache/incubator-tuweni/tree/main/docs#library
+[stable]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#stable
+[library]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#library
