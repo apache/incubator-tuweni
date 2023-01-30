@@ -17,5 +17,14 @@ specific language governing permissions and limitations under the License.
 | Stability      | [alpha]   |
 | Component Type | [library] |
 
+This library defines [`EthStatsServer`](https://tuweni.apache.org/docs/org.apache.tuweni.ethstats/-eth-stats-server/index.html),
+a server implementing the EthStats protocol. Over a websocket connection, Ethereum clients can connect and send information
+to this server.
+
+The server accepts a [EthStatsServerController](https://tuweni.apache.org/docs/org.apache.tuweni.ethstats/-eth-stats-server-controller/index.html) which will receive all the information from clients.
+
+You will need to implement your own controller. There is a controller for OpenTelemetry provided as example in this library, `OpenTelemetryServerController`.
+
+
 [alpha]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#alpha
 [library]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#library

@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-description = 'ETHStats client library'
+description = 'ETHStats server library'
 
 
 dependencies {
@@ -22,6 +22,7 @@ dependencies {
   implementation 'org.bouncycastle:bcprov-jdk15on'
   implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
   implementation 'org.slf4j:slf4j-api'
+  compileOnly 'io.opentelemetry:opentelemetry-api'
 
   implementation project(':bytes')
   implementation project(':concurrent')
