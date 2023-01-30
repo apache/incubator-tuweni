@@ -12,6 +12,11 @@ specific language governing permissions and limitations under the License.
  --->
 # Units
 
+| Status         |           |
+|----------------|-----------|
+| Stability      | [stable]  |
+| Component Type | [library] |
+
 # Getting started
 
 Apache Tuweni provides support for manipulating unsigned integers and base Ethereum currencies.
@@ -139,3 +144,6 @@ public final class Wei extends BaseUInt256Value<Wei> {
   }
 }
 ```
+
+[stable]:https://github.com/apache/incubator-tuweni/tree/main/docs#stable
+[library]:https://github.com/apache/incubator-tuweni/tree/main/docs#library

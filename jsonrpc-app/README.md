@@ -10,7 +10,12 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
  --->
-# JSONRPC
+# JSONRPC application
+
+| Status         |               |
+|----------------|---------------|
+| Stability      | [beta]        |
+| Component Type | [application] |
 
 The `jsonrpc` application is a JSON-RPC proxy that can cache, filter, throttle, meter and authenticate requests to a JSON-RPC endpoint.
 
@@ -41,3 +46,6 @@ cachedMethods=[""] # All methods are cached
 cacheStoragePath="/var/jsonrpccache" # Cache location
 allowedMethods=[""] # All methods are enabled
 ```
+
+[beta]:https://github.com/apache/incubator-tuweni/tree/main/docs#beta
+[application]:https://github.com/apache/incubator-tuweni/tree/main/docs#application
