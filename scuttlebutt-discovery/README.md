@@ -10,33 +10,12 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
  --->
-
-# Tuweni-Toml: TOML parser for Java/Kotlin
-
+# Scuttlebutt Discovery Library
 
 | Status         |           |
 |----------------|-----------|
-| Stability      | [stable]  |
+| Stability      | [alpha]   |
 | Component Type | [library] |
 
-Tuweni-Toml is a complete TOML parser with the following attributes:
-
-* Supports TOML specification version 0.5.0.
-* Provides detailed error reporting, including error position.
-* Performs error recovery, allowing parsing to continue after an error.
-
-It uses the [ANTLR](https://github.com/antlr/antlr4/) parser-generator and
-runtime library.
-
-## Usage
-
-```
-Path source = Paths.get("/path/to/file.toml");
-TomlParseResult result = Toml.parse(source);
-result.errors().forEach(error -> System.err.println(error.toString()));
-
-String value = result.getString("a. dotted . key");
-```
-
-[stable]:https://github.com/apache/incubator-tuweni/tree/main/docs#stable
+[alpha]:https://github.com/apache/incubator-tuweni/tree/main/docs#alpha
 [library]:https://github.com/apache/incubator-tuweni/tree/main/docs#library

@@ -12,6 +12,12 @@ specific language governing permissions and limitations under the License.
  --->
 # Gossip
 
+| Status         |               |
+|----------------|---------------|
+| Stability      | [beta]        |
+| Component Type | [application] |
+
+
 The `gossip` application is an example showing how the Plumtree gossip implementation functions.
 
 `gossip` is distributed as part of the binary distribution of Apache Tuweni, which you can download from this [page](/download)
@@ -58,3 +64,6 @@ In a separate shell, you can send messages to the listener with:
 This will send 10 messages, of 32 random bytes each. Open the file `/tmp/log` to see them.
 
 You can create more complex scenarios with multiple gossip listeners, showing the path by which gossip circulates across peers.
+
+[beta]:https://github.com/apache/incubator-tuweni/tree/main/docs#beta
+[application]:https://github.com/apache/incubator-tuweni/tree/main/docs#application

@@ -12,6 +12,11 @@ specific language governing permissions and limitations under the License.
  --->
 # Net
 
+| Status         |           |
+|----------------|-----------|
+| Stability      | [stable]  |
+| Component Type | [library] |
+
 # Getting started
 
 To get started, install the `net` library.
@@ -100,3 +105,6 @@ options.setSsl(true)
 .setReusePort(true);
 client = vertx.createHttpClient(options);
 ```
+
+[stable]:https://github.com/apache/incubator-tuweni/tree/main/docs#stable
+[library]:https://github.com/apache/incubator-tuweni/tree/main/docs#library

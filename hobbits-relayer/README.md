@@ -10,6 +10,15 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
  --->
+
+# Hobbits Relayer
+
+
+| Status         |           |
+|----------------|-----------|
+| Stability      | [beta]    |
+| Component Type | [example] |
+
 The `hobbits-relayer` application showcases how to use the Hobbits protocol to pass messages between different networks.
 
 ```bash
@@ -36,3 +45,6 @@ Relay messages from a Web Socket port 2222 to a TCP server on 4444:
 ```bash
 hobbits-relayer -b ws://localhost:2222 -t tcp://localhost:4444
 ```
+
+[beta]:https://github.com/apache/incubator-tuweni/tree/main/docs#beta
+[example]:https://github.com/apache/incubator-tuweni/tree/main/docs#example

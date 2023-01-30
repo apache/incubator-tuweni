@@ -12,50 +12,13 @@ specific language governing permissions and limitations under the License.
  --->
 # Ethereum client
 
-The `tuweni` application is an Ethereum client that can run multiple chains and multiple discovery mechanisms.
+| Status         |             |
+|----------------|-------------|
+| Stability      | [prototype] |
+| Component Type | [library]   |
 
-`tuweni` can sync multiple chains at once. It also has a web UI.
+The Ethereum client library defines the domain objects and their coordination to form an Ethereum client.
 
-NOTE: everything at this point is at best a prototype. This may change at any time.
 
-Usage:
-
-```bash
-Apache Tuweni client loading
-Usage: <main class> [-h] [-c=<configPath>] [-w=<web>]
--c, --config=<configPath>
-Configuration file.
--h, --help        Prints usage prompt
--w, --web=<web>   Web console host:port
-```
-
-Most of the action happens in the configuration file, written with TOML.
-
-Example with one chain:
-
-```toml
-[storage.default]
-path="data"
-genesis="default"
-[genesis.default]
-path=default.json
-```
-
-The `default.json` file is your usual genesis configuration file.
-
-Example with two chains:
-
-Example with one chain:
-
-```toml
-[storage.foo]
-path="data"
-genesis="foo"
-[genesis.foo]
-path=default.json
-[storage.bar]
-path="data"
-genesis="bar"
-[genesis.bar]
-path=other.json
-```
+[prototype]:https://github.com/apache/incubator-tuweni/tree/main/docs#prototype
+[library]:https://github.com/apache/incubator-tuweni/tree/main/docs#library

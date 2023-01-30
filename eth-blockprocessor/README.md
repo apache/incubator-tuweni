@@ -10,16 +10,17 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
  --->
-# Ethereum crawler
+# Ethereum Block Processor
 
-| Status         |               |
-|----------------|---------------|
-| Stability      | [alpha]       |
-| Component Type | [application] |
+| Status         |             |
+|----------------|-------------|
+| Stability      | [prototype] |
+| Component Type | [library]   |
 
-The crawler is a discv5 server that constantly looks for new peers.
+This library implements a block processor for the Ethereum blockchain.
 
-Whenever it connects to peers, it asks for all their known peers, and keeps going until it has exhausted all peers it could discover, then starts all over again.
+A block processor applies the transformation of a block to the blockchain.
 
-[alpha]:https://github.com/apache/incubator-tuweni/tree/main/docs#alpha
-[application]:https://github.com/apache/incubator-tuweni/tree/main/docs#application
+[prototype]:https://github.com/apache/incubator-tuweni/tree/main/docs#prototype
+[library]:https://github.com/apache/incubator-tuweni/tree/main/docs#library
+

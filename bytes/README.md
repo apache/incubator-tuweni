@@ -12,6 +12,11 @@ specific language governing permissions and limitations under the License.
  --->
 # Bytes
 
+| Status         |           |
+|----------------|-----------|
+| Stability      | [stable]  |
+| Component Type | [library] |
+
 # Getting started
 
 Apache Tuweni provides support for manipulating bytes.
@@ -317,3 +322,6 @@ You will need to implement the following functions:
 * [`mutableCopy(offset, size)`](https://tuweni.apache.org/docs/org.apache.tuweni.bytes/-bytes/mutable-copy.html)
 
 You can choose to simplify greatly by extending the [`DelegatingBytes` class](https://tuweni.apache.org/docs/org.apache.tuweni.bytes/-delegating-bytes/index.html) instead.
+
+[stable]:https://github.com/apache/incubator-tuweni/tree/main/docs#stable
+[library]:https://github.com/apache/incubator-tuweni/tree/main/docs#library
