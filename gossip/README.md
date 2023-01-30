@@ -65,5 +65,5 @@ This will send 10 messages, of 32 random bytes each. Open the file `/tmp/log` to
 
 You can create more complex scenarios with multiple gossip listeners, showing the path by which gossip circulates across peers.
 
-[beta]:https://github.com/apache/incubator-tuweni/tree/main/docs#beta
-[application]:https://github.com/apache/incubator-tuweni/tree/main/docs#application
+[beta]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#beta
+[application]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#application

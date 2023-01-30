@@ -323,5 +323,5 @@ You will need to implement the following functions:
 
 You can choose to simplify greatly by extending the [`DelegatingBytes` class](https://tuweni.apache.org/docs/org.apache.tuweni.bytes/-delegating-bytes/index.html) instead.
 
-[stable]:https://github.com/apache/incubator-tuweni/tree/main/docs#stable
-[library]:https://github.com/apache/incubator-tuweni/tree/main/docs#library
+[stable]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#stable
+[library]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#library

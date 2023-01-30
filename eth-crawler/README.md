@@ -21,5 +21,5 @@ The crawler is a discv5 server that constantly looks for new peers.
 
 Whenever it connects to peers, it asks for all their known peers, and keeps going until it has exhausted all peers it could discover, then starts all over again.
 
-[alpha]:https://github.com/apache/incubator-tuweni/tree/main/docs#alpha
-[application]:https://github.com/apache/incubator-tuweni/tree/main/docs#application
+[alpha]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#alpha
+[application]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#application
