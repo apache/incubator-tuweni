@@ -94,6 +94,8 @@ class Genesis(
      */
     val emptyTrieHash = Hash.hash(RLP.encodeValue(Bytes.EMPTY))
 
+    @JvmStatic
+    @JvmOverloads
     fun dev(
       genesis: Genesis = Genesis(
         Bytes.ofUnsignedLong(0),

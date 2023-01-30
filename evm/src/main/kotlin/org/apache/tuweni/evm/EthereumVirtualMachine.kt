@@ -16,8 +16,13 @@
  */
 package org.apache.tuweni.evm
 
+import kotlinx.coroutines.runBlocking
 import org.apache.tuweni.bytes.Bytes
 import org.apache.tuweni.bytes.Bytes32
+import org.apache.tuweni.concurrent.AsyncCompletion
+import org.apache.tuweni.concurrent.AsyncResult
+import org.apache.tuweni.concurrent.coroutines.asyncCompletion
+import org.apache.tuweni.concurrent.coroutines.asyncResult
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.Log
 import org.apache.tuweni.eth.precompiles.PrecompileContract
@@ -169,7 +174,9 @@ data class EVMMessage(
 /**
  * An Ethereum Virtual Machine.
  *
+ * @param transientRepository the state repository
  * @param repository the blockchain repository
+ * @param precompiles the registry of precompiled contracts
  * @param evmVmFactory factory to create the EVM
  * @param options the options to set on the EVM, specific to the library
  */
@@ -191,6 +198,12 @@ class EthereumVirtualMachine(
 
   private fun vm() = vm!!
 
+  fun startAsync(): AsyncCompletion = runBlocking {
+    asyncCompletion {
+      start()
+    }
+  }
+
   /**
    * Start the EVM
    */
@@ -211,8 +224,73 @@ class EthereumVirtualMachine(
   /**
    * Stop the EVM
    */
+  fun stopAsync() = runBlocking {
+    asyncCompletion {
+      vm().close()
+    }
+  }
+
+  /**
+   * Stop the EVM
+   */
   suspend fun stop() {
     vm().close()
+  }
+
+  /**
+   * Execute an operation in the EVM asynchronously.
+   * @param sender the sender of the transaction
+   * @param destination the destination of the transaction
+   * @param code the code to execute
+   * @param inputData the execution input
+   * @param gas the gas available for the operation
+   * @param gasPrice current gas price
+   * @param currentCoinbase the coinbase address to reward
+   * @param currentNumber current block number
+   * @param currentTimestamp current block timestamp
+   * @param currentGasLimit current gas limit
+   * @param currentDifficulty block current total difficulty
+   * @param chainId the ID of the current chain
+   * @param callKind the type of call
+   * @param revision the hard fork revision in which to execute
+   * @return the result of the execution
+   */
+  fun executeAsync(
+    sender: Address,
+    destination: Address,
+    value: Bytes,
+    code: Bytes,
+    inputData: Bytes,
+    gas: Gas,
+    gasPrice: Wei,
+    currentCoinbase: Address,
+    currentNumber: UInt256,
+    currentTimestamp: UInt256,
+    currentGasLimit: Long,
+    currentDifficulty: UInt256,
+    chainId: UInt256,
+    callKind: CallKind,
+    revision: HardFork = latestHardFork
+  ): AsyncResult<EVMResult> = runBlocking {
+    asyncResult {
+      execute(
+        sender,
+        destination,
+        value,
+        code,
+        inputData,
+        gas,
+        gasPrice,
+        currentCoinbase,
+        currentNumber,
+        currentTimestamp,
+        currentGasLimit,
+        currentDifficulty,
+        chainId,
+        callKind,
+        revision
+      )
+    }
   }
 
   /**
