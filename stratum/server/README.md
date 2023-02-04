@@ -17,5 +17,11 @@ specific language governing permissions and limitations under the License.
 | Stability      | [beta]    |
 | Component Type | [library] |
 
+This library introduces a [Stratum server](https://tuweni.apache.org/docs/org.apache.tuweni.stratum.server/-stratum-server/index.html) which listens on a TCP port for connections from stratum clients.
+
+The server is compatible with the eth-proxy and Stratum1 protocols.
+
+The server accepts new work with the `setNewWork(powInput: PoWInput)` method, with a parameter of type [PowInput](https://tuweni.apache.org/docs/org.apache.tuweni.stratum.server/-po-w-input/index.html).
+
 [beta]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#beta
 [library]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#library
