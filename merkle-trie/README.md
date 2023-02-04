@@ -17,5 +17,25 @@ specific language governing permissions and limitations under the License.
 | Stability      | [stable]  |
 | Component Type | [library] |
 
+This library introduces a [Patricia Merkle tree](https://en.wikipedia.org/wiki/Merkle_tree) [implementation](https://tuweni.apache.org/docs/org.apache.tuweni.trie/-merkle-patricia-trie/index.html).
+
+It can be backed in memory or using a [key-value store](https://tuweni.apache.org/docs/org.apache.tuweni.kv/index.html).
+
+The library offers a few methods to define a trie in memory quickly:
+
+* [`MerklePatriaTrie.storingStrings()`](https://tuweni.apache.org/docs/org.apache.tuweni.trie/-merkle-patricia-trie/storing-strings.html) defines a trie using keys and values as Strings.
+* [`MerklePatriaTrie.storingBytes()`](https://tuweni.apache.org/docs/org.apache.tuweni.trie/-merkle-patricia-trie/storing-bytes.html) defines a trie using keys and values as Bytes.
+
+The same approach works with a stored trie:
+
+* [`StoredMerklePatriciaTrie.storingStrings(storage: MerkleStorage)`](https://tuweni.apache.org/docs/org.apache.tuweni.trie/-stored-merkle-patricia-trie/storing-strings.html)
+* [`StoredMerklePatriciaTrie.storingBytes(storage: MerkleStorage)`](https://tuweni.apache.org/docs/org.apache.tuweni.trie/-stored-merkle-patricia-trie/storing-bytes.html)
+
+You will need to provide a storage in this case, which you will define by implementing [`MerkleStorage`](https://tuweni.apache.org/docs/org.apache.tuweni.trie/-merkle-storage/index.html).
+
+Note in Java, you should use [`AsyncMerkleStorage`](https://tuweni.apache.org/docs/org.apache.tuweni.trie/-async-merkle-storage/index.html) instead to avoid dealing with coroutines.
+
+An easy way to provide storage is to rely on a key-value store as defined in the [kv](https://tuweni.apache.org/docs/org.apache.tuweni.kv/index.html) library.
+
 [stable]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#stable
 [library]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#library

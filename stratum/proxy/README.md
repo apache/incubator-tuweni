@@ -12,10 +12,24 @@ specific language governing permissions and limitations under the License.
  --->
 # Stratum Proxy
 
-| Status         |           |
-|----------------|-----------|
-| Stability      | [beta]    |
-| Component Type | [library] |
+| Status         |               |
+|----------------|---------------|
+| Stability      | [beta]        |
+| Component Type | [application] |
+
+This application acts as a proxy between an Ethereum client and miners.
+
+It connects to the client over JSON-RPC (using http://localhost:8545), polling for new work periodically, and submitting work sent by clients.
+
+It runs a [Stratum server](https://tuweni.apache.org/docs/org.apache.tuweni.stratum.server/-stratum-server/index.html) to which miners can connect to over Stratum.
+
+Usage:
+* Expose a Stratum server on 0.0.0.0:16000:
+```bash
+$> stratum-proxy 16000
+```
+
+
 
 [beta]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#beta
 [library]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#library

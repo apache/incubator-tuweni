@@ -17,5 +17,11 @@ specific language governing permissions and limitations under the License.
 | Stability      | [alpha]   |
 | Component Type | [library] |
 
+This library defines a wallet you can use to sign transactions using a private key on the SECP256K1 curve.
+
+The library handles storing the private key of the wallet using symmetric encryption via an AES256 key.
+
+The library holds the private key in memory, and therefore is susceptible to memory dumps.
+
 [alpha]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#alpha
 [library]:https://github.com/apache/incubator-tuweni/tree/main/docs/index.md#library

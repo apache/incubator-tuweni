@@ -92,6 +92,13 @@ class StratumServer(
   private var tcpServer: NetServer? = null
   private val denyList = ExpiringSet<String>(denyTimeout)
 
+  /**
+   * Accepts new work. sending it to all connected clients. New clients will also be notified of this work.
+   *
+   * This method returns immediately, all messages are sent asynchronously.
+   *
+   * @param powInput the new work
+   */
   fun setNewWork(powInput: PoWInput) {
     for (protocol in protocols) {
       launch {
