@@ -1094,13 +1094,13 @@ public final class Box implements AutoCloseable {
    * Decrypt a sealed message using a given key.
    *
    * @param cipherText The cipher text to decrypt.
-   * @param sender The public key of the sender.
+   * @param receiver The public key of the receiver.
    * @param receiver The secret key of the receiver.
    * @return The decrypted data, or {@code null} if verification failed.
    */
   @Nullable
-  public static byte[] decryptSealed(byte[] cipherText, PublicKey sender, SecretKey receiver) {
-    if (sender.isDestroyed()) {
+  public static byte[] decryptSealed(byte[] cipherText, PublicKey receiverPk, SecretKey receiver) {
+    if (receiver.isDestroyed()) {
       throw new IllegalArgumentException("SecretKey has been destroyed");
     }
     long sealbytes = Sodium.crypto_box_sealbytes();
@@ -1117,7 +1117,7 @@ public final class Box implements AutoCloseable {
             clearText,
             cipherText,
             cipherText.length,
-            sender.value.pointer(),
+            receiverPk.value.pointer(),
             receiver.value.pointer());
     if (rc == -1) {
       return null;

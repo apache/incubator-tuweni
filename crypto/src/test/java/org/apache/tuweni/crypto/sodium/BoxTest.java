@@ -89,9 +89,9 @@ class BoxTest {
 
   @Test
   void encryptDecryptSealed() {
-    Box.KeyPair keyPair = Box.KeyPair.random();
-    Bytes encrypted = Box.encryptSealed(Bytes.fromHexString("deadbeef"), keyPair.publicKey());
-    Bytes decrypted = Box.decryptSealed(encrypted, keyPair.publicKey(), keyPair.secretKey());
+    Box.KeyPair receiver = Box.KeyPair.random();
+    Bytes encrypted = Box.encryptSealed(Bytes.fromHexString("deadbeef"), receiver.publicKey());
+    Bytes decrypted = Box.decryptSealed(encrypted, receiver.publicKey(), receiver.secretKey());
     assertEquals(Bytes.fromHexString("deadbeef"), decrypted);
   }
 
