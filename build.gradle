@@ -211,7 +211,6 @@ subprojects {
 
       useJUnitPlatform() { includeEngines 'spek', 'junit-jupiter' }
       timeout = Duration.ofMinutes(30)
-
     }
 
     rootProject.integrationTest.dependsOn integrationTest
@@ -645,7 +644,6 @@ dokkaHtml {
       // List of files with module and package documentation
       // https://kotlinlang.org/docs/reference/kotlin-doc.html#module-and-package-documentation
       includes.from('docs.md')
-
     }
   }
 }
