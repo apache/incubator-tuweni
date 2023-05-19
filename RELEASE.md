@@ -4,6 +4,8 @@ This guide comprises of all the steps to prepare, run a release and follow up on
 
 ## One-time setup
 
+Add your gpg keys to KEYS before you do anything else.
+
 Open the file `~/.gradle/gradle.properties` and add the following information:
 
 ```
