@@ -708,4 +708,17 @@ public interface SSZWriter {
   default void writeBooleanList(List<Boolean> elements) {
     SSZ.encodeBooleanListTo(elements, this::writeSSZ);
   }
+
+  default void writeAsContainer(SSZWritable... elements) {
+    SSZ.encodeAsContainerTo(this::writeSSZ, elements);
+  }
+
+  default <T extends SSZWritable> void writeTypedList(List<T> elements) {
+    SSZ.encodeAsFixedTypeListTo(elements, this::writeSSZ);
+  }
+
+  default <T extends SSZWritable> void writeTypedVector(List<T> elements) {
+    SSZ.encodeAsFixedTypeVectorTo(elements, this::writeSSZ);
+  }
+
 }

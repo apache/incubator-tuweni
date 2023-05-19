@@ -43,7 +43,7 @@ description = 'A set of libraries and other tools to aid development of blockcha
 //////
 // Version numbering
 
-def versionNumber = '2.3.1'
+def versionNumber = '2.3.2'
 def buildVersion = versionNumber + buildTag(buildRelease)
 
 static String buildTag(releaseBuild) {
@@ -136,7 +136,8 @@ if (file('.git').exists()) {
         'tuweni.png',
         'eth-crawler/src/main/resources/webapp/bootstrap-nightfall.css',
         'eth/src/main/resources/genesis/*.json',
-        'evm-dsl/src/test/resources/contract.txt'
+        'evm-dsl/src/test/resources/contract.txt',
+        'ssz/src/test/resources/org/apache/tuweni/ssz/signedBlobTransaction.hex'
       ])
       return list
     }

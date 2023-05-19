@@ -20,6 +20,7 @@ import org.apache.tuweni.units.bigints.UInt384;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -742,4 +743,36 @@ public interface SSZReader {
    * @return {@code true} if all values have been read.
    */
   boolean isComplete();
+
+  /**
+   * Read a SSZ container from the SSZ source and calls populate method on the elements with a sliced SSZReader in case
+   * of variable size elements to provide a way to detect a list size.
+   */
+  void readAsContainer(SSZReadable... elements);
+
+  /**
+   * Read a List of Fixed size type from the SSZ source.
+   * <p>
+   * The size of the list is not encoded in the SSZ and cannot be calculated from the data either. This method will read
+   * until the end of the SSZReader. It is the responsibility of the caller to properly slice the parent container
+   * SSZReader. The Lists are a variable type and therefore start of the scope is specified in parent container using an
+   * offset. The end is offset of the next variable element, or end of the parent scope if this list is the last in the
+   * scope.
+   */
+  <T extends SSZReadable> List<T> readFixedTypedList(int elementSize, Supplier<T> supplier);
+
+  /**
+   * Reads a Vector from the SSZ source, gets a new instance of T from supplier and calls the populate method on it.
+   */
+  <T extends SSZReadable> List<T> readTypedVector(int listSize, int elementSize, Supplier<T> supplier);
+
+  /**
+   * Returns the remaining bytes in the SSZReader without any manipulation or checks.
+   */
+  Bytes consumeRemainingBytes(int limit);
+
+  /**
+   * Reads a List of Variable size type from the SSZ source.
+   */
+  <T extends SSZReadable> List<T> readVariableSizeTypeList(Supplier<T> supplier);
 }

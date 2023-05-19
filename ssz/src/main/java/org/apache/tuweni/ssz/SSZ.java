@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Simple Serialize (SSZ) encoding and decoding.
@@ -1262,6 +1263,72 @@ public final class SSZ {
       appender.accept(encodeBoolean(value));
     }
   }
+
+  public static <T extends SSZWritable> void encodeAsFixedTypeListTo(List<T> elements, Consumer<Bytes> appender) {
+    for (T value : elements) {
+      appender.accept(SSZ.encode(value::writeTo));
+    }
+  }
+
+  public static <T extends SSZWritable> void encodeAsFixedTypeVectorTo(List<T> elements, Consumer<Bytes> appender) {
+    for (T value : elements) {
+      appender.accept(SSZ.encode(value::writeTo));
+    }
+  }
+
+  public static void encodeAsContainerTo(Consumer<Bytes> consumer, SSZWritable... elements) {
+    long written = 0;
+    long variableOffset = 0;
+    List<Supplier<Bytes>> fixedParts = new ArrayList<>();
+    List<OffsetSupplier> offsetSuppliers = new ArrayList<>();
+    List<Bytes> variableParts = new ArrayList<>();
+
+    for (SSZWritable element : elements) {
+      BytesSSZWriter fixedWriter = new BytesSSZWriter();
+      element.writeTo(fixedWriter);
+      Bytes bytes = fixedWriter.toBytes();
+      if (element.isFixed()) {
+        fixedParts.add(() -> bytes);
+        written += bytes.size();
+      } else {
+        var offsetProvider = new OffsetSupplier(variableOffset);
+        fixedParts.add(offsetProvider);
+        offsetSuppliers.add(offsetProvider);
+        written += 4;
+        variableParts.add(bytes);
+        variableOffset += bytes.size();
+      }
+    }
+    for (OffsetSupplier offsetSupplier : offsetSuppliers) {
+      offsetSupplier.addWritten(written);
+    }
+    for (Supplier<Bytes> fixedPart : fixedParts) {
+      consumer.accept(fixedPart.get());
+    }
+    for (Bytes bytes : variableParts) {
+      consumer.accept(bytes);
+    }
+  }
+
+  private static class OffsetSupplier implements Supplier<Bytes> {
+
+    private final long offset;
+    private long written;
+
+    public OffsetSupplier(long offset) {
+      this.offset = offset;
+    }
+
+    @Override
+    public Bytes get() {
+      return SSZ.encodeUInt32(written + offset);
+    }
+
+    public void addWritten(long written) {
+      this.written = written;
+    }
+  }
+
 
   private static byte[] listLengthPrefix(long nElements, int elementBytes) {
     long listSize;
