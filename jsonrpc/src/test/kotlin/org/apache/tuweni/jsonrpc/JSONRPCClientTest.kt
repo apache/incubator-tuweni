@@ -16,7 +16,6 @@
  */
 package org.apache.tuweni.jsonrpc
 
-import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -27,7 +26,6 @@ import org.apache.tuweni.crypto.SECP256K1
 import org.apache.tuweni.eth.Address
 import org.apache.tuweni.eth.JSONRPCRequest
 import org.apache.tuweni.eth.JSONRPCResponse
-import org.apache.tuweni.eth.StringOrLong
 import org.apache.tuweni.eth.Transaction
 import org.apache.tuweni.junit.BouncyCastleExtension
 import org.apache.tuweni.junit.VertxExtension
@@ -50,7 +48,7 @@ import java.util.concurrent.atomic.AtomicReference
 class JSONRPCClientTest {
 
   companion object {
-    val handler = AtomicReference<Handler<JSONRPCRequest>>()
+    val handler = AtomicReference<(JSONRPCRequest) -> JSONRPCResponse>()
     var server: JSONRPCServer? = null
 
     @JvmStatic
@@ -64,8 +62,7 @@ class JSONRPCClientTest {
         vertx,
         port = 0,
         methodHandler = {
-          handler.get().handle(it)
-          JSONRPCResponse(StringOrLong(3), "")
+          handler.get()(it)
         },
         coroutineContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
       )
@@ -116,6 +113,23 @@ class JSONRPCClientTest {
     JSONRPCClient(vertx, "http://localhost:1234").use {
       assertThrows<ConnectException> {
         runBlocking { it.getBalance_latest(Address.fromHexString("0x0102030405060708090a0b0c0d0e0f0102030405")) }
+      }
+    }
+  }
+
+  @Test
+  fun testGetBlockByNumber(@VertxInstance vertx: Vertx) {
+    JSONRPCClient(vertx, "http://localhost:" + server!!.port()).use {
+      val sent = CompletableDeferred<Any>()
+      handler.set { request ->
+        sent.complete(request.params.get(0))
+        JSONRPCResponse(request.id, mapOf(Pair("foo", "bar")))
+      }
+
+      runBlocking {
+        val block = it.getBlockByBlockNumber(32, true)
+        assertEquals(block["foo"], "bar")
+        sent.await()
       }
     }
   }

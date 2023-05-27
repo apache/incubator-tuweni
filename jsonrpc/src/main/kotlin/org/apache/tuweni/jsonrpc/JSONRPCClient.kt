@@ -68,7 +68,7 @@ class JSONRPCClient(
   val authorizationHeader = "Basic " + Base64.getEncoder()
     .encode((basicAuthenticationUsername + ":" + basicAuthenticationPassword).toByteArray())
 
-  suspend fun sendRequest(request: JSONRPCRequest): Deferred<JSONRPCResponse> {
+  fun sendRequest(request: JSONRPCRequest): Deferred<JSONRPCResponse> {
     val deferred = CompletableDeferred<JSONRPCResponse>()
     val httpRequest = client.postAbs(endpointUrl)
       .putHeader("Content-Type", "application/json")
@@ -81,7 +81,6 @@ class JSONRPCClient(
       if (response.failed()) {
         deferred.completeExceptionally(response.cause())
       } else {
-        println(response.result().bodyAsString())
         val jsonResponse = mapper.readValue(response.result().bodyAsString(), JSONRPCResponse::class.java)
         deferred.complete(jsonResponse)
       }
@@ -148,6 +147,28 @@ class JSONRPCClient(
       throw ClientRequestException(errorMessage)
     } else {
       return UInt256.fromHexString(jsonResponse.result.toString())
+    }
+  }
+
+  /**
+   * Gets block data by block number
+   * @param blockNumber the block number
+   * @param includeTransactions whether to include transactions detail
+   * @return the whole block information as a JSON document.
+   */
+  suspend fun getBlockByBlockNumber(blockNumber: Int, includeTransactions: Boolean): Map<*, *> {
+    val body = JSONRPCRequest(
+      StringOrLong(nextId()),
+      "eth_getBlockByNumber",
+      arrayOf(blockNumber, includeTransactions)
+    )
+    val jsonResponse = sendRequest(body).await()
+    val err = jsonResponse.error
+    if (err != null) {
+      val errorMessage = "Code ${err.code}: ${err.message}"
+      throw ClientRequestException(errorMessage)
+    } else {
+      return jsonResponse.result as Map<*, *>
     }
   }
 
