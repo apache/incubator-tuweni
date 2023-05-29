@@ -385,8 +385,8 @@ allprojects {
       repositories {
         maven {
           def isRelease = buildVersion.endsWith('SNAPSHOT')
-          def releasesRepoUrl = "https://repository.apache.org/service/local/staging/deploy/maven2"
-          def snapshotsRepoUrl = "https://repository.apache.org/content/repositories/snapshots"
+          def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+          def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
           url = isRelease ? snapshotsRepoUrl : releasesRepoUrl
 
           def settingsXml = new File(System.getProperty('user.home'), '.m2/settings.xml')
