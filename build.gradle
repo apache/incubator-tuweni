@@ -423,7 +423,7 @@ allprojects {
             from components.java
             artifact sourcesJar { classifier 'sources' }
           }
-          groupId 'org.apache.tuweni'
+          groupId 'io.tmio'
           artifactId 'tuweni-' + project.name
           version project.version
 
@@ -439,7 +439,7 @@ allprojects {
           pom {
             name = project.name
             afterEvaluate { description = project.description }
-            url = 'https://github.com/apache/incubator-tuweni'
+            url = 'https://github.com/tmio/incubator-tuweni'
             licenses {
               license {
                 name = "The Apache License, Version 2.0"
@@ -447,32 +447,21 @@ allprojects {
               }
             }
             scm {
-              connection = 'scm:https://github.com/apache/incubator-tuweni.git'
-              developerConnection = 'scm:git@github.com:apache/incubator-tuweni.git'
-              url = 'https://github.com/apache/incubator-tuweni'
+              connection = 'scm:https://github.com/tmio/incubator-tuweni.git'
+              developerConnection = 'scm:git@github.com:tmio/incubator-tuweni.git'
+              url = 'https://github.com/tmio/incubator-tuweni'
             }
             developers {
               developer {
                 name = 'Antoine Toulme'
                 email = 'antoine@lunar-ocean.com'
-                organization = 'Apache'
-                organizationUrl = 'https://tuweni.apache.org'
-              }
-              developer {
-                name = 'Jonny Rhea'
-                organization = 'Apache'
-                organizationUrl = 'https://tuweni.apache.org'
-              }
-              developer {
-                name = 'Steven J Schroeder'
-                email = 'sjs@apache.org'
-                organization = 'Apache'
-                organizationUrl = 'https://tuweni.apache.org'
+                organization = 'The Machine Consultancy, LLC'
+                organizationUrl = 'https://themachine.io'
               }
             }
             issueManagement {
               system = "github"
-              url = "https://www.github.com/apache/incubator-tuweni/issues"
+              url = "https://www.github.com/tmio/incubator-tuweni/issues"
             }
           }
 
@@ -582,7 +571,7 @@ allprojects {
         name = project.hasProperty('bintrayName') ? project.property('bintrayName') : 'invalid'
         userOrg = project.hasProperty('bintrayOrg') ? project.property('bintrayOrg') : 'invalid'
         licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/apache/incubator-tuweni.git'
+        vcsUrl = 'https://github.com/tmio/incubator-tuweni.git'
       }
     }
   }
