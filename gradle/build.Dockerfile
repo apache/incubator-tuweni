@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 # Build image used for github actions
-FROM eclipse-temurin:11-jdk
+FROM eclipse-temurin:17-jdk
 
 CMD ["gradle"]
 
