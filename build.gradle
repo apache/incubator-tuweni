@@ -476,7 +476,7 @@ allprojects {
             def addDependencyNode = { dep, optional, scope ->
               def dependencyNode = dependenciesNode.appendNode('dependency')
               if (dep instanceof ProjectDependency) {
-                dependencyNode.appendNode('groupId', 'org.apache.tuweni')
+                dependencyNode.appendNode('groupId', 'io.tmio')
                 dependencyNode.appendNode('artifactId', rootProject.name + '-' + dep.name)
                 dependencyNode.appendNode('version', dep.version)
               } else {
