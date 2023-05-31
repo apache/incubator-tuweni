@@ -522,7 +522,10 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
       val topDocs = searcher!!.search(query, HITS)
       val docs = mutableListOf<Document>()
       if (topDocs.scoreDocs.isNotEmpty()) {
-        val doc = searcher.indexReader.storedFields().document(topDocs.scoreDocs.elementAt(0).doc, setOf("_id") + fields)
+        val doc = searcher.indexReader.storedFields().document(
+          topDocs.scoreDocs.elementAt(0).doc,
+          setOf("_id") + fields
+        )
         docs += doc
       }
       return docs
@@ -658,7 +661,10 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
         return UInt256.ZERO
       }
 
-      val doc = searcher.indexReader.storedFields().document(topDocs.scoreDocs[0].doc, setOf(TOTAL_DIFFICULTY.fieldName))
+      val doc = searcher.indexReader.storedFields().document(
+        topDocs.scoreDocs[0].doc,
+        setOf(TOTAL_DIFFICULTY.fieldName)
+      )
       val fieldValue = doc.getBinaryValue(TOTAL_DIFFICULTY.fieldName)
 
       return UInt256.fromBytes(Bytes32.wrap(fieldValue.bytes))
