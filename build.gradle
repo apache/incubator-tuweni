@@ -28,11 +28,11 @@ buildscript {
 plugins {
   id 'com.diffplug.spotless' version '6.19.0'
   id 'net.ltgt.errorprone' version '3.1.0'
-  id 'org.springframework.boot' version '2.7.7'
+  id 'org.springframework.boot' version '3.1.0'
   id 'io.spring.dependency-management' version '1.1.0'
   id 'org.gradle.crypto.checksum' version '1.4.0'
-  id 'org.jetbrains.kotlin.jvm' version '1.8.21'
-  id 'org.jetbrains.kotlin.plugin.spring' version '1.8.21'
+  id 'org.jetbrains.kotlin.jvm' version '1.9.0-Beta'
+  id 'org.jetbrains.kotlin.plugin.spring' version '1.9.0-Beta'
   id 'org.jetbrains.dokka' version '1.8.10'
   id 'maven-publish'
   id 'com.jfrog.bintray' version '1.8.5'
@@ -270,8 +270,8 @@ allprojects {
   //////
   // Compiler arguments
 
-  sourceCompatibility = '1.11'
-  targetCompatibility = '1.11'
+  sourceCompatibility = '1.17'
+  targetCompatibility = '1.17'
 
   dependencies {
     errorprone 'com.google.errorprone:error_prone_core'
@@ -305,7 +305,7 @@ allprojects {
 
   tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
-      jvmTarget = "11"
+      jvmTarget = "17"
       allWarningsAsErrors = true
       freeCompilerArgs = [
         '-Xjsr305=strict',

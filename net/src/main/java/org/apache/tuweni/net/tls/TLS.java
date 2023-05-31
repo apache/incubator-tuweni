@@ -35,6 +35,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.bouncycastle.asn1.x500.X500Name;
@@ -193,7 +194,7 @@ public final class TLS {
    * @throws IOException If an IO error occurs.
    */
   public static String certificateHexFingerprint(Path certificate) throws IOException {
-    return Bytes.wrap(certificateFingerprint(certificate)).toHexString().substring(2).toLowerCase();
+    return Bytes.wrap(certificateFingerprint(certificate)).toHexString().substring(2).toLowerCase(Locale.ENGLISH);
   }
 
   /**
@@ -215,6 +216,6 @@ public final class TLS {
    * @throws CertificateEncodingException If the certificate cannot be encoded.
    */
   public static String certificateHexFingerprint(Certificate certificate) throws CertificateEncodingException {
-    return Bytes.wrap(certificateFingerprint(certificate)).toHexString().substring(2).toLowerCase();
+    return Bytes.wrap(certificateFingerprint(certificate)).toHexString().substring(2).toLowerCase(Locale.ENGLISH);
   }
 }

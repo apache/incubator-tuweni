@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Locale;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedTrustManager;
 
@@ -102,7 +103,7 @@ final class ServerFingerprintTrustManager extends X509ExtendedTrustManager {
                 "Remote host identification has changed!!" + " Certificate for %s (%s) has fingerprint %s",
                 identifier,
                 cert.getSubjectDN(),
-                fingerprint.toHexString().substring(2).toLowerCase()));
+                fingerprint.toHexString().substring(2).toLowerCase(Locale.ENGLISH)));
       }
     } else if (!acceptNewFingerprints) {
       throw new CertificateException(
@@ -110,7 +111,7 @@ final class ServerFingerprintTrustManager extends X509ExtendedTrustManager {
               "Certificate for %s (%s) has unknown fingerprint %s",
               identifier,
               cert.getSubjectDN(),
-              fingerprint.toHexString().substring(2).toLowerCase()));
+              fingerprint.toHexString().substring(2).toLowerCase(Locale.ENGLISH)));
     }
 
     repository.addFingerprint(identifier, fingerprint);
@@ -122,6 +123,6 @@ final class ServerFingerprintTrustManager extends X509ExtendedTrustManager {
   }
 
   private String hostIdentifier(String host, int port) {
-    return host.trim().toLowerCase() + ":" + port;
+    return host.trim().toLowerCase(Locale.ENGLISH) + ":" + port;
   }
 }

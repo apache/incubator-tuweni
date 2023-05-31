@@ -20,6 +20,7 @@ import org.apache.tuweni.bytes.Bytes;
 import java.net.Socket;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Locale;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedTrustManager;
 
@@ -111,7 +112,7 @@ final class ClientFingerprintTrustManager extends X509ExtendedTrustManager {
                 "Client identification has changed!!" + " Certificate for %s (%s) has fingerprint %s",
                 host,
                 cert.getSubjectDN(),
-                fingerprint.toHexString().substring(2).toLowerCase()));
+                fingerprint.toHexString().substring(2).toLowerCase(Locale.ENGLISH)));
       }
     } else if (!acceptNewFingerprints) {
       throw new CertificateException(
@@ -119,7 +120,7 @@ final class ClientFingerprintTrustManager extends X509ExtendedTrustManager {
               "Certificate for %s (%s) has unknown fingerprint %s",
               host,
               cert.getSubjectDN(),
-              fingerprint.toHexString().substring(2).toLowerCase()));
+              fingerprint.toHexString().substring(2).toLowerCase(Locale.ENGLISH)));
     }
 
     repository.addFingerprint(host, fingerprint);

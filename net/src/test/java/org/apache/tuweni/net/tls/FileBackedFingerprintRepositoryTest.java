@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -75,7 +76,7 @@ class FileBackedFingerprintRepositoryTest {
     repo.addFingerprint("foo", fingerprint);
     assertTrue(repo.contains("foo", fingerprint));
     assertEquals(
-        "foo " + fingerprint.toHexString().substring(2).toLowerCase(),
+        "foo " + fingerprint.toHexString().substring(2).toLowerCase(Locale.ENGLISH),
         Files.readAllLines(tempFolder.resolve("repo")).get(0));
     return repo;
   }
@@ -87,7 +88,7 @@ class FileBackedFingerprintRepositoryTest {
     repo.addFingerprint("foo", fingerprint);
     assertTrue(repo.contains("foo", fingerprint));
     assertEquals(
-        "foo " + fingerprint.toHexString().substring(2).toLowerCase(),
+        "foo " + fingerprint.toHexString().substring(2).toLowerCase(Locale.ENGLISH),
         Files.readAllLines(tempFolder.resolve("repo")).get(0));
   }
 

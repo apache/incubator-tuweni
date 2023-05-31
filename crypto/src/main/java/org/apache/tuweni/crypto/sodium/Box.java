@@ -1252,9 +1252,4 @@ public final class Box implements AutoCloseable {
       ctx = null;
     }
   }
-
-  @Override
-  protected void finalize() {
-    close();
-  }
 }
