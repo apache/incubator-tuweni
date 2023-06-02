@@ -234,15 +234,15 @@ class EthStatsReporter(
   }
 
   private fun reportPeriodically(uri: URI, ws: WebSocket) {
-    val reportingStream = vertx.periodicStream(REPORTING_PERIOD).handler {
+    val reportingStream = vertx.setPeriodic(REPORTING_PERIOD) {
       report(ws)
     }
-    val pingStream = vertx.periodicStream(PING_PERIOD).handler {
+    val pingStream = vertx.setPeriodic(PING_PERIOD) {
       writePing(ws)
     }
     ws.closeHandler {
-      reportingStream.cancel()
-      pingStream.cancel()
+      vertx.cancelTimer(reportingStream)
+      vertx.cancelTimer(pingStream)
       launch {
         attemptConnect(uri)
       }

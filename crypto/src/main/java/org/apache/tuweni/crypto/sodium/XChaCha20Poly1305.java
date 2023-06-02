@@ -559,11 +559,6 @@ public final class XChaCha20Poly1305 {
     }
 
     @Override
-    protected void finalize() {
-      destroy();
-    }
-
-    @Override
     public void destroy() {
       if (state != null) {
         Pointer p = state;
@@ -845,11 +840,6 @@ public final class XChaCha20Poly1305 {
         throw e;
       }
       this.state = state;
-    }
-
-    @Override
-    protected void finalize() {
-      destroy();
     }
 
     @Override

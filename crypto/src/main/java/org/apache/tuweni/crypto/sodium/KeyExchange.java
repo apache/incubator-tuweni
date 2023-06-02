@@ -473,11 +473,6 @@ public final class KeyExchange {
     }
 
     @Override
-    protected void finalize() {
-      destroy();
-    }
-
-    @Override
     public void destroy() {
       if (ptr != null) {
         Pointer p = ptr;

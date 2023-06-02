@@ -1045,9 +1045,4 @@ public final class AES256GCM implements AutoCloseable {
       ctx = null;
     }
   }
-
-  @Override
-  protected void finalize() {
-    close();
-  }
 }

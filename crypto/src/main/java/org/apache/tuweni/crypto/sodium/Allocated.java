@@ -113,11 +113,6 @@ public final class Allocated implements Destroyable {
   }
 
   @Override
-  protected void finalize() {
-    Sodium.sodium_free(ptr);
-  }
-
-  @Override
   public boolean equals(Object obj) {
     if (obj == this) {
       return true;

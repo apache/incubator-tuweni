@@ -444,11 +444,6 @@ public final class SECP256K1 {
     private Bytes32 keyBytes;
 
     @Override
-    protected void finalize() {
-      destroy();
-    }
-
-    @Override
     public void destroy() {
       if (keyBytes != null) {
         byte[] b = keyBytes.toArrayUnsafe();

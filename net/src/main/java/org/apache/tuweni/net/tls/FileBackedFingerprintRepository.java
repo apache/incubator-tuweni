@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 final class FileBackedFingerprintRepository implements FingerprintRepository {
@@ -132,7 +133,7 @@ final class FileBackedFingerprintRepository implements FingerprintRepository {
 
           writer.write(identifier);
           writer.write(' ');
-          writer.write(fingerprint.toHexString().substring(2).toLowerCase());
+          writer.write(fingerprint.toHexString().substring(2).toLowerCase(Locale.ENGLISH));
           writer.write(System.lineSeparator());
         }
 
@@ -142,7 +143,7 @@ final class FileBackedFingerprintRepository implements FingerprintRepository {
           fingerprints.put(identifier, fingerprint);
           writer.write(identifier);
           writer.write(' ');
-          writer.write(fingerprint.toHexString().substring(2).toLowerCase());
+          writer.write(fingerprint.toHexString().substring(2).toLowerCase(Locale.ENGLISH));
           writer.write(System.lineSeparator());
         }
       });
