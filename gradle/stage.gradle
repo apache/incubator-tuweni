@@ -80,69 +80,6 @@ class StageBuildTask extends DefaultTask {
   }
 }
 
-class SubversionStageTask extends DefaultTask {
-  @TaskAction
-  def run() {
-    if (!new File("_staged/$project.version-incubating").exists())
-      // create _staged folder
-      project.exec { commandLine "mkdir", "-p", "_staged" }
-
-    // create the folder in SVN where we will stage the binaries
-    project.exec {
-      commandLine "svn", "mkdir", "-m", "Add new Apache Tuweni folder for release $project.version", "https://dist.apache.org/repos/dist/dev/incubator/tuweni/$project.version-incubating", "--force-interactive"
-    }
-
-    // check out the SVN repository where we will store the binaries
-    project.exec {
-      commandLine "svn", "checkout", "https://dist.apache.org/repos/dist/dev/incubator/tuweni/$project.version-incubating", "_staged/$project.version-incubating", "--force-interactive"
-    }
-  }
-}
-
-class CopyStagedTask extends DefaultTask {
-
-  @TaskAction
-  def copy() {
-    // copy distributions over to the folder
-    project.exec {
-      commandLine "bash", "-c", "cp dist/build/distributions/tuweni-* _staged/$project.version-incubating/"
-    }
-
-    // add incubating to the version.
-    def fileNames = []
-    def fileOutput = new ByteArrayOutputStream()
-    project.exec {
-      commandLine "ls", "_staged/$project.version-incubating/"
-      standardOutput fileOutput
-    }
-    fileOutput.toString().split("\n").each {
-      fileNames.add([
-        it,
-        it.replace(project.version, "$project.version-incubating")
-      ])
-    }
-
-    fileNames.each {
-      def src = it[0]
-      def target = it[1]
-      project.exec {
-        workingDir "_staged/$project.version-incubating/"
-        commandLine "mv", src, target
-      }
-    }
-
-    // now commit the staged files
-    project.exec {
-      workingDir "_staged/$project.version-incubating/"
-      commandLine 'bash', '-c', 'svn add tuweni-*'
-    }
-    project.exec {
-      workingDir "_staged/$project.version-incubating/"
-      commandLine 'svn', 'ci', '-m', "Add Apache Tuweni $project.version release candidate", "--force-interactive"
-    }
-  }
-}
-
 class GitStageTask extends DefaultTask {
   @TaskAction
   def run() {
@@ -154,7 +91,7 @@ class GitStageTask extends DefaultTask {
     def branch = branchOutput.toString().trim()
     // tag the repo
     project.exec {
-      commandLine 'git', 'tag', '-m', "Release $project.version-incubating", "v$project.version-incubating-rc"
+      commandLine 'git', 'tag', '-m', "Release $project.version", "v$project.version-rc"
     }
     project.exec {
       commandLine 'git', 'push', 'origin', branch, '--tags'
@@ -162,29 +99,11 @@ class GitStageTask extends DefaultTask {
   }
 }
 
-class EmailPromptTask extends DefaultTask {
-  @TaskAction
-  def run() {
-    println("""
-To: dev@tuweni.apache.org
-Subject:[VOTE] Tuweni $project.version-incubating release
-We're voting on the source distributions available here:
-https://dist.apache.org/repos/dist/dev/incubator/tuweni/$project.version-incubating/
-The release tag is present here:
-https://github.com/apache/incubator-tuweni/releases/tag/v$project.version-incubating-rc
-
-This release includes the following changes:
-
-// TODO fill changes
-""")
-  }
-}
-
 class StageTask extends DefaultTask {
 
   @TaskAction
   def stage() {
-    project.exec { commandLine "./gradlew", "stageVerify", "stageBuild", "stageSVN", "stageCopy", "stageGitTag", "stageEmail" }
+    project.exec { commandLine "./gradlew", "stageVerify", "stageBuild", "stageGitTag" }
   }
 }
 
@@ -196,37 +115,22 @@ class StagePlugin implements Plugin<Project> {
     Task stageTask = project.task("stage",
     type: StageTask,
     group: 'Build',
-    description: 'Stages Apache Tuweni.')
+    description: 'Stages Tuweni.')
 
     Task verifyStage = project.task("stageVerify",
     type: VerifyStageTask,
     group: "Build",
-    description: 'Verifies Apache Tuweni can be staged.')
+    description: 'Verifies Tuweni can be staged.')
 
     Task buildStage = project.task("stageBuild",
     type: StageBuildTask,
     group: "Build",
-    description: 'Builds Apache Tuweni to be staged.')
-
-    Task subversionStage = project.task("stageSVN",
-    type: SubversionStageTask,
-    group: "Build",
-    description: 'Creates staging folder on SVN and checks it out')
-
-    Task copyStage = project.task("stageCopy",
-    type: CopyStagedTask,
-    group: 'Build',
-    description: 'Copy over distributions to staged area and push them to SVN')
+    description: 'Builds Tuweni to be staged.')
 
     Task gitStageTask = project.task("stageGitTag",
     type: GitStageTask,
     group: 'Build',
     description: 'Tag in git the current stage')
-
-    Task emailPrompt = project.task("stageEmail",
-    type: EmailPromptTask,
-    group: 'Build',
-    description: 'Email example to console showing what to send')
   }
 
   void configureDependencies(final Project project) {
