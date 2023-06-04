@@ -1,13 +1,12 @@
-# Tuweni: Apache Core Libraries for Java (& Kotlin)
+# Tuweni: Blockchain Libraries for Java (& Kotlin)
 
-[![Slack](https://img.shields.io/badge/slack-%23tuweni-72eff8?logo=slack)](https://s.apache.org/slack-invite)
-[![Github build](https://github.com/apache/incubator-tuweni/workflows/assemble/badge.svg)](https://github.com/apache/incubator-tuweni/actions)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/incubator-tuweni/blob/main/LICENSE)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.apache.tuweni/tuweni-tuweni/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/org.apache.tuweni/tuweni-tuweni)
+[![Github build](https://github.com/tmio/incubator-tuweni/workflows/assemble/badge.svg)](https://github.com/tmio/tuweni/actions)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/tmio/tuweni/blob/main/LICENSE)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.tmio/tuweni-tuweni/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.tmio/tuweni-tuweni)
 
 ![logo](tuweni.png)
 
-See our [website](https://tuweni.apache.org) for details on the project.
+See our [website](https://tuweni.tmio.io) for details on the project.
 
 Tuweni is a set of libraries and other tools to aid development of blockchain and other decentralized software in Java and other JVM languages.
 
@@ -34,19 +33,13 @@ After a successful build, libraries will be available in `build/libs`.
 
 Your contributions are very welcome! Here are a few links to help you:
 
-- [Issue tracker: Report a defect or feature request](https://issues.apache.org/jira/projects/TUWENI/issues)
+- [Issue tracker: Report a defect or feature request](https://www.github.com/tmio/tuweni/issues)
 - [StackOverflow: Ask "how-to" and "why-didn't-it-work" questions](https://stackoverflow.com/questions/ask?tags=tuweni)
-
-## Mailing lists
-
-- [users@tuweni.incubator.apache.org](users@tuweni.apache.org) is for usage questions, help, and announcements. [subscribe](users-subscribe@tuweni.apache.org?subject=send%20this%20email%20to%20subscribe), [unsubscribe](dev-unsubscribe@tuweni.apache.org?subject=send%20this%20email%20to%20unsubscribe), [archives](https://www.mail-archive.com/users@tuweni.apache.org/)
-- [dev@tuweni.incubator.apache.org](dev@tuweni.apache.org) is for people who want to contribute code to Tuweni. [subscribe](dev-subscribe@tuweni.apache.org?subject=send%20this%20email%20to%20subscribe), [unsubscribe](dev-unsubscribe@tuweni.apache.org?subject=send%20this%20email%20to%20unsubscribe), [archives](https://www.mail-archive.com/dev@tuweni.apache.org/)
-- [commits@tuweni.incubator.apache.org](commits@tuweni.apache.org) is for commit messages and patches to Tuweni. [subscribe](commits-subscribe@tuweni.apache.org?subject=send%20this%20email%20to%20subscribe), [unsubscribe](commits-unsubscribe@tuweni.apache.org?subject=send%20this%20email%20to%20unsubscribe), [archives](https://www.mail-archive.com/commits@tuweni.apache.org/)
 
 ## More information
 
-- [Official website](https://tuweni.apache.org)
-- [GitHub project](https://github.com/apache/incubator-tuweni)
+- [Official website](https://tuweni.tmio.io)
+- [GitHub project](https://github.com/tmio/tuweni)
 
 # License
 
@@ -80,4 +73,4 @@ Export Administration Regulations, Section 742.15(b)) for both object code and
 source code.
 The following provides more details on the included cryptographic software:
 * [Bouncy Castle](http://bouncycastle.org/)
-* [Apache Tuweni crypto](./crypto)
+* [Tuweni crypto](./crypto)
