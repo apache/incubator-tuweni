@@ -20,13 +20,15 @@ final class JsonSerializer {
     appendable.append(System.lineSeparator());
   }
 
-  private static void toJson(TomlTable table, Appendable appendable, int indent) throws IOException {
+  private static void toJson(TomlTable table, Appendable appendable, int indent)
+      throws IOException {
     if (table.isEmpty()) {
       appendable.append("{}");
       return;
     }
     appendLine(appendable, "{");
-    for (Iterator<String> iterator = table.keySet().stream().sorted().iterator(); iterator.hasNext();) {
+    for (Iterator<String> iterator = table.keySet().stream().sorted().iterator();
+        iterator.hasNext(); ) {
       String key = iterator.next();
       append(appendable, indent + 2, "\"" + escape(key) + "\" : ");
       Object value = table.get(Collections.singletonList(key));
@@ -46,14 +48,15 @@ final class JsonSerializer {
     appendable.append(System.lineSeparator());
   }
 
-  private static void toJson(TomlArray array, Appendable appendable, int indent) throws IOException {
+  private static void toJson(TomlArray array, Appendable appendable, int indent)
+      throws IOException {
     if (array.isEmpty()) {
       appendable.append("[]");
       return;
     }
     if (array.containsTables()) {
       append(appendable, 0, "[");
-      for (Iterator<Object> iterator = array.toList().iterator(); iterator.hasNext();) {
+      for (Iterator<Object> iterator = array.toList().iterator(); iterator.hasNext(); ) {
         toJson((TomlTable) iterator.next(), appendable, indent);
         if (iterator.hasNext()) {
           appendable.append(",");
@@ -62,7 +65,7 @@ final class JsonSerializer {
       append(appendable, 0, "]");
     } else {
       appendLine(appendable, "[");
-      for (Iterator<Object> iterator = array.toList().iterator(); iterator.hasNext();) {
+      for (Iterator<Object> iterator = array.toList().iterator(); iterator.hasNext(); ) {
         indentLine(appendable, indent + 2);
         appendTomlValue(iterator.next(), appendable, indent);
         if (iterator.hasNext()) {
@@ -75,7 +78,8 @@ final class JsonSerializer {
     }
   }
 
-  private static void appendTomlValue(Object value, Appendable appendable, int indent) throws IOException {
+  private static void appendTomlValue(Object value, Appendable appendable, int indent)
+      throws IOException {
     Optional<TomlType> tomlType = typeFor(value);
     assert tomlType.isPresent();
     switch (tomlType.get()) {

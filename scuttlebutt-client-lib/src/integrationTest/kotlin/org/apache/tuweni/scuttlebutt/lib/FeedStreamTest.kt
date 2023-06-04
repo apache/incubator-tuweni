@@ -70,7 +70,7 @@ internal class FeedStreamTest {
     Assertions.assertEquals(lastStreamedMessage.get().value.sequence, lastPosted.get().value.sequence)
     val content = lastStreamedMessage.get().value.getContentAs(
       ObjectMapper(),
-      TestScuttlebuttSerializationModel::class.java
+      TestScuttlebuttSerializationModel::class.java,
     )
     Assertions.assertEquals("serialization-test", content.type)
     val result = scuttlebuttClient
@@ -87,8 +87,8 @@ internal class FeedStreamTest {
     for (i in 0..9) {
       val result: FeedMessage = feedService.publish(
         TestScuttlebuttSerializationModel(
-          "test: $i"
-        )
+          "test: $i",
+        ),
       )
       results.add(result)
     }

@@ -78,7 +78,7 @@ object JSONRPCApp {
       enableGrpcPush = config.metricsGrpcPushEnabled(),
       enablePrometheus = config.metricsPrometheusEnabled(),
       grpcEndpoint = config.metricsGrpcEndpoint(),
-      grpcTimeout = config.metricsGrpcTimeout()
+      grpcTimeout = config.metricsGrpcTimeout(),
     )
     val vertx = Vertx.vertx(VertxOptions().setTracingOptions(OpenTelemetryOptions(metricsService.openTelemetry)))
     val app = JSONRPCApplication(vertx, config, metricsService)
@@ -90,7 +90,7 @@ class JSONRPCApplication(
   val vertx: Vertx,
   val config: JSONRPCConfig,
   val metricsService: MetricsService,
-  override val coroutineContext: CoroutineContext = Dispatchers.Unconfined
+  override val coroutineContext: CoroutineContext = Dispatchers.Unconfined,
 ) : CoroutineScope {
 
   fun run() {
@@ -100,7 +100,7 @@ class JSONRPCApplication(
       config.endpointUrl(),
       basicAuthenticationEnabled = config.endpointBasicAuthEnabled(),
       basicAuthenticationUsername = config.endpointBasicAuthUsername(),
-      basicAuthenticationPassword = config.endpointBasicAuthPassword()
+      basicAuthenticationPassword = config.endpointBasicAuthPassword(),
     )
 
     val allowListHandler = MethodAllowListHandler(config.allowedMethods()) { req ->
@@ -124,7 +124,7 @@ class JSONRPCApplication(
         ConfigurationBuilder().persistence().addStore(RocksDBStoreConfigurationBuilder::class.java)
           .location(Paths.get(config.cacheStoragePath(), "storage").toAbsolutePath().toString())
           .expiredLocation(Paths.get(config.cacheStoragePath(), "expired").toAbsolutePath().toString()).expiration()
-          .lifespan(config.cacheLifespan()).maxIdle(config.cacheMaxIdle()).build()
+          .lifespan(config.cacheLifespan()).maxIdle(config.cacheMaxIdle()).build(),
       )
 
       val cachingHandler =
@@ -133,7 +133,7 @@ class JSONRPCApplication(
           InfinispanKeyValueStore(cache),
           meter.counterBuilder("cacheHits").build(),
           meter.counterBuilder("cacheMisses").build(),
-          allowListHandler::handleRequest
+          allowListHandler::handleRequest,
         )
       cachingHandler::handleRequest
     } else {
@@ -169,13 +169,13 @@ class JSONRPCApplication(
       IPRangeChecker.create(config.allowedRanges(), config.rejectedRanges()),
       metricsService.openTelemetry,
       Executors.newFixedThreadPool(
-        config.numberOfThreads()
+        config.numberOfThreads(),
       ) {
         val thread = Thread("jsonrpc")
         thread.isDaemon = true
         thread
       }.asCoroutineDispatcher(),
-      handler::handleRequest
+      handler::handleRequest,
     )
     Runtime.getRuntime().addShutdownHook(
       Thread {
@@ -183,7 +183,7 @@ class JSONRPCApplication(
           server.stop()
           client.close()
         }
-      }
+      },
     )
     runBlocking {
       server.start()

@@ -74,7 +74,7 @@ class EthHandlerTest {
         Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
         Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
         Hash.fromBytes(Bytes32.random()),
-        UInt64.ZERO
+        UInt64.ZERO,
       )
       val body = BlockBody(
         listOf(
@@ -85,10 +85,10 @@ class EthHandlerTest {
             Address.fromBytes(Bytes.random(20)),
             Wei.valueOf(2),
             Bytes.random(12),
-            SECP256K1.KeyPair.random()
-          )
+            SECP256K1.KeyPair.random(),
+          ),
         ),
-        listOf(header)
+        listOf(header),
       )
       genesisBlock = Block(header, body)
       repository = BlockchainRepository.init(
@@ -99,7 +99,7 @@ class EthHandlerTest {
         MapKeyValueStore(),
         MapKeyValueStore(),
         BlockchainIndex(writer),
-        genesisBlock
+        genesisBlock,
       )
       service = mock(RLPxService::class.java)
       val requestsManager = mock(EthRequestsManager::class.java)
@@ -110,10 +110,10 @@ class EthHandlerTest {
           genesisBlock.header.hash,
           UInt256.valueOf(42L),
           genesisBlock.header.hash,
-          emptyList()
+          emptyList(),
         ),
         service = service,
-        controller = EthController(repository, MemoryTransactionPool(), requestsManager)
+        controller = EthController(repository, MemoryTransactionPool(), requestsManager),
       )
 
       for (i in 1..10) {
@@ -126,11 +126,11 @@ class EthHandlerTest {
               Bytes32.random(),
               32L,
               LogsBloomFilter(),
-              emptyList()
+              emptyList(),
             ),
             txIndex,
             tx.hash,
-            newBlock.header.hash
+            newBlock.header.hash,
           )
           txIndex++
         }
@@ -156,7 +156,7 @@ class EthHandlerTest {
         Instant.now(),
         Bytes.random(45),
         Hash.fromBytes(Bytes32.random()),
-        UInt64.ZERO
+        UInt64.ZERO,
       )
       val block = Block(
         header,
@@ -169,11 +169,11 @@ class EthHandlerTest {
               Address.fromBytes(Bytes.random(20)),
               Wei.valueOf(1000),
               Bytes.EMPTY,
-              SECP256K1.KeyPair.random()
-            )
+              SECP256K1.KeyPair.random(),
+            ),
           ),
-          emptyList()
-        )
+          emptyList(),
+        ),
       )
       return block
     }
@@ -186,7 +186,7 @@ class EthHandlerTest {
     handler.handle(
       conn,
       MessageType.GetBlockHeaders.code,
-      GetBlockHeaders(genesisBlock.header.hash, 3, 1, false).toBytes()
+      GetBlockHeaders(genesisBlock.header.hash, 3, 1, false).toBytes(),
     ).await()
 
     val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
@@ -206,7 +206,7 @@ class EthHandlerTest {
     handler.handle(
       conn,
       MessageType.GetBlockHeaders.code,
-      GetBlockHeaders(genesisBlock.header.hash, 100, 1, false).toBytes()
+      GetBlockHeaders(genesisBlock.header.hash, 100, 1, false).toBytes(),
     ).await()
 
     val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
@@ -223,7 +223,7 @@ class EthHandlerTest {
     handler.handle(
       conn,
       MessageType.GetBlockHeaders.code,
-      GetBlockHeaders(genesisBlock.header.hash, 100, 2, false).toBytes()
+      GetBlockHeaders(genesisBlock.header.hash, 100, 2, false).toBytes(),
     ).await()
 
     val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
@@ -243,7 +243,7 @@ class EthHandlerTest {
     handler.handle(
       conn,
       MessageType.GetBlockBodies.code,
-      GetBlockBodies(listOf(genesisBlock.header.hash)).toBytes()
+      GetBlockBodies(listOf(genesisBlock.header.hash)).toBytes(),
     ).await()
 
     val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
@@ -265,7 +265,7 @@ class EthHandlerTest {
     handler.handle(
       conn,
       MessageType.GetReceipts.code,
-      GetReceipts(listOf(block7!!.header.hash)).toBytes()
+      GetReceipts(listOf(block7!!.header.hash)).toBytes(),
     ).await()
 
     val messageCapture = ArgumentCaptor.forClass(Bytes::class.java)
@@ -282,7 +282,7 @@ class EthHandlerTest {
     handler.handle(
       conn,
       MessageType.GetBlockBodies.code,
-      GetBlockBodies(listOf()).toBytes()
+      GetBlockBodies(listOf()).toBytes(),
     ).await()
 
     verify(service).disconnect(conn, DisconnectReason.SUBPROTOCOL_REASON)

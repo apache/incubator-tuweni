@@ -7,10 +7,9 @@ import java.util.List;
 /**
  * A validator for a configuration.
  *
- * <p>
- * Validators of this type are invoked during verification after all property validators. However, errors returned by
- * property validators do not prevent this validator being evaluated, so properties of the configuration may be missing
- * or invalid.
+ * <p>Validators of this type are invoked during verification after all property validators.
+ * However, errors returned by property validators do not prevent this validator being evaluated, so
+ * properties of the configuration may be missing or invalid.
  */
 public interface ConfigurationValidator {
 

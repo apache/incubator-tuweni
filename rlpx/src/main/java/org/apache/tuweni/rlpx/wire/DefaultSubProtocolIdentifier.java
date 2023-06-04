@@ -4,9 +4,7 @@ package org.apache.tuweni.rlpx.wire;
 
 import java.util.Objects;
 
-/**
- * Default implementation of a sub protocol identifier
- */
+/** Default implementation of a sub protocol identifier */
 final class DefaultSubProtocolIdentifier implements SubProtocolIdentifier {
 
   private final String name;
@@ -36,10 +34,8 @@ final class DefaultSubProtocolIdentifier implements SubProtocolIdentifier {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     DefaultSubProtocolIdentifier that = (DefaultSubProtocolIdentifier) o;
     return version == that.version && name.equals(that.name);
   }

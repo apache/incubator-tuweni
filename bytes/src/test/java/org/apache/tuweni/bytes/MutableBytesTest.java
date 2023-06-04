@@ -70,17 +70,21 @@ class MutableBytesTest {
   @Test
   void setIntOverflow() {
     MutableBytes b = MutableBytes.create(2);
-    assertThrows(IndexOutOfBoundsException.class, () -> {
-      b.setInt(0, 18096);
-    });
+    assertThrows(
+        IndexOutOfBoundsException.class,
+        () -> {
+          b.setInt(0, 18096);
+        });
   }
 
   @Test
   void setLongOverflow() {
     MutableBytes b = MutableBytes.create(6);
-    assertThrows(IndexOutOfBoundsException.class, () -> {
-      b.setLong(0, Long.MAX_VALUE);
-    });
+    assertThrows(
+        IndexOutOfBoundsException.class,
+        () -> {
+          b.setLong(0, Long.MAX_VALUE);
+        });
   }
 
   @Test

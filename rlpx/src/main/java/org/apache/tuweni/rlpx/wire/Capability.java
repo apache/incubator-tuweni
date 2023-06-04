@@ -10,7 +10,6 @@ public final class Capability {
 
   private final int version;
 
-
   Capability(String name, int version) {
     this.name = name;
     this.version = version;
@@ -26,10 +25,8 @@ public final class Capability {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     Capability that = (Capability) o;
     return Objects.equals(name, that.name) && version == that.version;
   }

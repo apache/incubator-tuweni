@@ -21,7 +21,7 @@ class TcpDownstream(
   val host: String,
   val port: Int,
   val client: ProxyClient,
-  override val coroutineContext: CoroutineContext = Dispatchers.Default
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope {
 
   companion object {

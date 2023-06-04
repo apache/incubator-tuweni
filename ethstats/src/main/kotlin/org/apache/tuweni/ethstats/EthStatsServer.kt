@@ -24,7 +24,7 @@ class EthStatsServer(
   val secret: String,
   private val timeSupplier: () -> Instant = Instant::now,
   private val controller: EthStatsServerController,
-  override val coroutineContext: CoroutineContext = Dispatchers.Default
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope {
 
   companion object {
@@ -82,7 +82,7 @@ class EthStatsServer(
           logger.info(
             "Client {} connected with wrong secret {}, disconnecting",
             websocket.remoteAddress(),
-            clientSecret
+            clientSecret,
           )
           websocket.close()
           return

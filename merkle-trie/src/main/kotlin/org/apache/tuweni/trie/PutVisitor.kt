@@ -6,7 +6,7 @@ import org.apache.tuweni.bytes.Bytes
 
 internal class PutVisitor<V>(
   private val nodeFactory: NodeFactory<V>,
-  private val value: V
+  private val value: V,
 ) : NodeVisitor<V> {
 
   override suspend fun visit(extensionNode: ExtensionNode<V>, path: Bytes): Node<V> {
@@ -59,7 +59,7 @@ internal class PutVisitor<V>(
 
     assert(
       commonPathLength < leafPath.size() && commonPathLength < path.size(),
-      { "Should not have consumed non-matching terminator" }
+      { "Should not have consumed non-matching terminator" },
     )
 
     // The current leaf path must be split to accommodate the new value.

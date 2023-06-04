@@ -46,8 +46,8 @@ fun main(args: Array<String>) {
           params = arrayOf(
             Bytes.ofUnsignedLong(solution.nonce).toHexString(),
             solution.powHash.toHexString(),
-            solution.mixHash.toHexString()
-          )
+            solution.mixHash.toHexString(),
+          ),
         )
         logger.info("Sending work back to client $req")
         val response = client.sendRequest(req)
@@ -58,7 +58,7 @@ fun main(args: Array<String>) {
       }
     },
     seedSupplier = { seedReference.get() },
-    sslOptions = null
+    sslOptions = null,
   )
   runBlocking {
     server.start()
@@ -71,8 +71,8 @@ fun main(args: Array<String>) {
             JSONRPCRequest(
               id = StringOrLong(idCounter.incrementAndGet()),
               method = "eth_getWork",
-              params = arrayOf()
-            )
+              params = arrayOf(),
+            ),
           ).await()
           val error = response.error
           if (error != null) {
@@ -100,6 +100,6 @@ fun main(args: Array<String>) {
         server.stop()
         vertx.close()
       }
-    }
+    },
   )
 }

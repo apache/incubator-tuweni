@@ -24,7 +24,7 @@ interface Instruction {
 data class InstructionModel(
   val opcode: Byte,
   val additionalBytesToRead: Int = 0,
-  val creator: (code: Bytes, index: Int) -> Instruction
+  val creator: (code: Bytes, index: Int) -> Instruction,
 )
 
 /**

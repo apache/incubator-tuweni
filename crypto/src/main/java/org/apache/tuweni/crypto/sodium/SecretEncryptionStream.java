@@ -6,14 +6,12 @@ import org.apache.tuweni.bytes.Bytes;
 
 import javax.security.auth.Destroyable;
 
-/**
- * Used to encrypt a sequence of messages, or a single message split into arbitrary chunks.
- */
+/** Used to encrypt a sequence of messages, or a single message split into arbitrary chunks. */
 public interface SecretEncryptionStream extends Destroyable {
 
   /**
    * Returns the header for the stream
-   * 
+   *
    * @return The header for the stream.
    */
   default Bytes header() {
@@ -22,7 +20,7 @@ public interface SecretEncryptionStream extends Destroyable {
 
   /**
    * Returns the header for the stream
-   * 
+   *
    * @return The header for the stream.
    */
   byte[] headerArray();

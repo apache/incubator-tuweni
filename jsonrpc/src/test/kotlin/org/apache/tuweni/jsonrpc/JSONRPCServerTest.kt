@@ -30,7 +30,7 @@ class JSONRPCServerTest {
     fun checkNotWindows() {
       Assumptions.assumeTrue(
         !System.getProperty("os.name").toLowerCase().contains("win"),
-        "Server ports cannot bind on Windows"
+        "Server ports cannot bind on Windows",
       )
     }
   }
@@ -43,7 +43,7 @@ class JSONRPCServerTest {
       methodHandler = {
         JSONRPCResponse(StringOrLong(3), "")
       },
-      coroutineContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+      coroutineContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher(),
     )
     server.start()
     try {
@@ -68,7 +68,7 @@ class JSONRPCServerTest {
       basicAuthenticationPassword = "pass",
       basicAuthenticationUsername = "user",
       basicAuthRealm = "my realm",
-      coroutineContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+      coroutineContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher(),
     )
     server.start()
     try {
@@ -86,7 +86,7 @@ class JSONRPCServerTest {
         val authedRequest = client.request(HttpMethod.POST, server.port(), server.networkInterface, "/").await()
         authedRequest.putHeader(
           "Authorization",
-          "Basic " + Base64.encodeBytes("user:passbad".toByteArray())
+          "Basic " + Base64.encodeBytes("user:passbad".toByteArray()),
         )
         val authedResponse = authedRequest.send("{\"id\":1,\"method\":\"eth_client\",\"params\":[]}").await()
         assertEquals(401, authedResponse.statusCode())

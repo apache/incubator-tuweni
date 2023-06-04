@@ -67,7 +67,7 @@ internal class VertxIntegrationTest {
       vertx,
       InetSocketAddress("localhost", 20000),
       serverKeyPair,
-      networkIdentifier
+      networkIdentifier,
     ) { _, _ ->
       serverHandlerRef.set(MyServerHandler())
       serverHandlerRef.get()
@@ -78,11 +78,11 @@ internal class VertxIntegrationTest {
       20000,
       "localhost",
       serverKeyPair.publicKey(),
-      null
+      null,
     ) { sender, terminationFn ->
       MyClientHandler(
         sender,
-        terminationFn
+        terminationFn,
       )
     } as MyClientHandler
     delay(1000)

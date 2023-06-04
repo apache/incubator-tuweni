@@ -28,7 +28,7 @@ internal fun stringDeserializer(b: Bytes): String = String(b.toArrayUnsafe(), UT
 
 class MerklePatriciaTrie<V> @JvmOverloads constructor(
   valueSerializer: (V) -> Bytes,
-  override val coroutineContext: CoroutineContext = Dispatchers.Default
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : MerkleTrie<Bytes, V> {
 
   companion object {

@@ -34,7 +34,7 @@ class MedallaTest {
       SECP256K1.KeyPair.random(),
       localPort = 0,
       bindAddress = InetSocketAddress("0.0.0.0", 10000),
-      bootstrapENRList = listOf(enrRec)
+      bootstrapENRList = listOf(enrRec),
     )
     service.start().join()
 
@@ -52,7 +52,7 @@ class MedallaTest {
       keyPair,
       localPort = 10000,
       bindAddress = InetSocketAddress("192.168.88.236", 10000),
-      bootstrapENRList = emptyList()
+      bootstrapENRList = emptyList(),
     )
     service.start().join()
     println(Base64URLSafe.encode(service.enr().toRLP()))

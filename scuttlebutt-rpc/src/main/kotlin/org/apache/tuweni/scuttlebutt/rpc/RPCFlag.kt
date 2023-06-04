@@ -42,7 +42,8 @@ interface RPCFlag {
     /**
      * Stream flag
      */
-    STREAM(1 shl 3);
+    STREAM(1 shl 3),
+    ;
 
     override fun value(): Int {
       return value
@@ -56,7 +57,8 @@ interface RPCFlag {
     /**
      * End flag
      */
-    END(1 shl 2);
+    END(1 shl 2),
+    ;
 
     override fun value(): Int {
       return value
@@ -80,7 +82,8 @@ interface RPCFlag {
     /**
      * JSON content
      */
-    JSON(1 shl 1);
+    JSON(1 shl 1),
+    ;
 
     override fun value(): Int {
       return value

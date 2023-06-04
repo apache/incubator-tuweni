@@ -47,13 +47,11 @@ import io.vertx.core.net.NetSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Implementation of RLPx service using Vert.x.
- */
+/** Implementation of RLPx service using Vert.x. */
 public final class VertxRLPxService implements RLPxService {
 
-  private final static int DEVP2P_VERSION = 5;
-  private final static Logger logger = LoggerFactory.getLogger(VertxRLPxService.class);
+  private static final int DEVP2P_VERSION = 5;
+  private static final Logger logger = LoggerFactory.getLogger(VertxRLPxService.class);
 
   private final AtomicBoolean started = new AtomicBoolean(false);
   private final Vertx vertx;
@@ -163,17 +161,24 @@ public final class VertxRLPxService implements RLPxService {
     this.clientId = clientId;
     this.maxConnections = maxConnections;
     this.repository = repository;
-    repository.addDisconnectionListener(c -> {
-      if (keepAliveList.contains(c.peerPublicKey())) {
+    repository.addDisconnectionListener(
+        c -> {
+          if (keepAliveList.contains(c.peerPublicKey())) {
 
-        tryConnect(c.peerPublicKey(), new InetSocketAddress(c.peerHost(), c.peerPort()));
-      }
-    });
+            tryConnect(c.peerPublicKey(), new InetSocketAddress(c.peerHost(), c.peerPort()));
+          }
+        });
     if (meter != null) {
       this.connectionsCreatedCounter =
-          meter.counterBuilder("connections_created").setDescription("Number of connections created").build();
+          meter
+              .counterBuilder("connections_created")
+              .setDescription("Number of connections created")
+              .build();
       this.connectionsDisconnectedCounter =
-          meter.counterBuilder("connections_disconnected").setDescription("Number of connections disconnected").build();
+          meter
+              .counterBuilder("connections_disconnected")
+              .setDescription("Number of connections disconnected")
+              .build();
     } else {
       this.connectionsCreatedCounter = null;
       this.connectionsDisconnectedCounter = null;
@@ -181,14 +186,25 @@ public final class VertxRLPxService implements RLPxService {
   }
 
   private void tryConnect(SECP256K1.PublicKey peerPublicKey, InetSocketAddress inetSocketAddress) {
-    vertx.runOnContext(event -> connectTo(peerPublicKey, inetSocketAddress).whenComplete((result, e) -> {
-      if (e != null) {
-        logger.warn("Error reconnecting to peer {}@{}: {}", peerPublicKey, inetSocketAddress, e);
-        tryConnect(peerPublicKey, inetSocketAddress);
-      } else {
-        logger.info("Connected successfully to keep alive peer {}@{}", peerPublicKey, inetSocketAddress);
-      }
-    }));
+    vertx.runOnContext(
+        event ->
+            connectTo(peerPublicKey, inetSocketAddress)
+                .whenComplete(
+                    (result, e) -> {
+                      if (e != null) {
+                        logger.warn(
+                            "Error reconnecting to peer {}@{}: {}",
+                            peerPublicKey,
+                            inetSocketAddress,
+                            e);
+                        tryConnect(peerPublicKey, inetSocketAddress);
+                      } else {
+                        logger.info(
+                            "Connected successfully to keep alive peer {}@{}",
+                            peerPublicKey,
+                            inetSocketAddress);
+                      }
+                    }));
   }
 
   @Override
@@ -209,28 +225,30 @@ public final class VertxRLPxService implements RLPxService {
         }
       }
 
-      client = vertx
-          .createNetClient(
+      client =
+          vertx.createNetClient(
               new NetClientOptions()
                   .setTcpKeepAlive(true)
                   .setConnectTimeout(connectTimeout)
                   .setIdleTimeout(idleTimeout));
-      server = vertx
-          .createNetServer(
-              new NetServerOptions()
-                  .setPort(listenPort)
-                  .setHost(networkInterface)
-                  .setTcpKeepAlive(true)
-                  .setIdleTimeout(idleTimeout))
-          .connectHandler(this::receiveMessage);
+      server =
+          vertx
+              .createNetServer(
+                  new NetServerOptions()
+                      .setPort(listenPort)
+                      .setHost(networkInterface)
+                      .setTcpKeepAlive(true)
+                      .setIdleTimeout(idleTimeout))
+              .connectHandler(this::receiveMessage);
       CompletableAsyncCompletion complete = AsyncCompletion.incomplete();
-      server.listen(res -> {
-        if (res.succeeded()) {
-          complete.complete();
-        } else {
-          complete.completeExceptionally(res.cause());
-        }
-      });
+      server.listen(
+          res -> {
+            if (res.succeeded()) {
+              complete.complete();
+            } else {
+              complete.completeExceptionally(res.cause());
+            }
+          });
       logger.info("Initialized rlpx service " + clientId);
       return complete;
     } else {
@@ -264,39 +282,43 @@ public final class VertxRLPxService implements RLPxService {
     }
     int newCount = connectionsCount.getAndIncrement();
 
-    netSocket.closeHandler((handler) -> {
-      if (connectionsDisconnectedCounter != null) {
-        connectionsDisconnectedCounter.add(1);
-      }
-      connectionsCount.getAndDecrement();
-    });
+    netSocket.closeHandler(
+        (handler) -> {
+          if (connectionsDisconnectedCounter != null) {
+            connectionsDisconnectedCounter.add(1);
+          }
+          connectionsCount.getAndDecrement();
+        });
     if (newCount > maxConnections) {
-      logger.info("disconnecting from incoming connection {} as over max connections", netSocket.remoteAddress());
+      logger.info(
+          "disconnecting from incoming connection {} as over max connections",
+          netSocket.remoteAddress());
       netSocket.close();
       return;
     }
-    netSocket.handler(new Handler<>() {
+    netSocket.handler(
+        new Handler<>() {
 
-      private RLPxConnection conn;
+          private RLPxConnection conn;
 
-      private DefaultWireConnection wireConnection;
+          private DefaultWireConnection wireConnection;
 
-      @Override
-      public void handle(Buffer buffer) {
-        if (conn == null) {
-          conn = RLPxConnectionFactory
-              .respondToHandshake(
-                  Bytes.wrapBuffer(buffer),
-                  keyPair,
-                  bytes -> netSocket.write(Buffer.buffer(bytes.toArrayUnsafe())));
-          if (wireConnection == null) {
-            this.wireConnection = createConnection(conn, netSocket, AsyncResult.incomplete());
+          @Override
+          public void handle(Buffer buffer) {
+            if (conn == null) {
+              conn =
+                  RLPxConnectionFactory.respondToHandshake(
+                      Bytes.wrapBuffer(buffer),
+                      keyPair,
+                      bytes -> netSocket.write(Buffer.buffer(bytes.toArrayUnsafe())));
+              if (wireConnection == null) {
+                this.wireConnection = createConnection(conn, netSocket, AsyncResult.incomplete());
+              }
+            } else {
+              conn.stream(Bytes.wrapBuffer(buffer), wireConnection::messageReceived);
+            }
           }
-        } else {
-          conn.stream(Bytes.wrapBuffer(buffer), wireConnection::messageReceived);
-        }
-      }
-    });
+        });
   }
 
   @Override
@@ -309,16 +331,20 @@ public final class VertxRLPxService implements RLPxService {
       client.close();
 
       AsyncCompletion handlersCompletion =
-          AsyncCompletion.allOf(handlers.values().stream().map(SubProtocolHandler::stop).collect(Collectors.toList()));
+          AsyncCompletion.allOf(
+              handlers.values().stream()
+                  .map(SubProtocolHandler::stop)
+                  .collect(Collectors.toList()));
 
       CompletableAsyncCompletion completableAsyncCompletion = AsyncCompletion.incomplete();
-      server.close(res -> {
-        if (res.succeeded()) {
-          completableAsyncCompletion.complete();
-        } else {
-          completableAsyncCompletion.completeExceptionally(res.cause());
-        }
-      });
+      server.close(
+          res -> {
+            if (res.succeeded()) {
+              completableAsyncCompletion.complete();
+            } else {
+              completableAsyncCompletion.completeExceptionally(res.cause());
+            }
+          });
       return handlersCompletion.thenCombine(completableAsyncCompletion);
     } else {
       return AsyncCompletion.completed();
@@ -363,111 +389,122 @@ public final class VertxRLPxService implements RLPxService {
   }
 
   @Override
-  public AsyncResult<WireConnection> connectTo(PublicKey peerPublicKey, InetSocketAddress peerAddress) {
+  public AsyncResult<WireConnection> connectTo(
+      PublicKey peerPublicKey, InetSocketAddress peerAddress) {
     if (!started.get()) {
       throw new IllegalStateException("The RLPx service is not active");
     }
 
     CompletableAsyncResult<WireConnection> connected = AsyncResult.incomplete();
     if (connectionsCount.get() > maxConnections) {
-      logger
-          .info("Cancelling connection to {} with public key {}, max connections reached", peerAddress, peerPublicKey);
+      logger.info(
+          "Cancelling connection to {} with public key {}, max connections reached",
+          peerAddress,
+          peerPublicKey);
       connected.cancel();
       return connected;
     }
     logger.info("Connecting to {} with public key {}", peerAddress, peerPublicKey);
-    client
-        .connect(
-            peerAddress.getPort(),
-            peerAddress.getHostString(),
-            netSocketFuture -> netSocketFuture.map(netSocket -> {
-              if (connectionsCreatedCounter != null) {
-                connectionsCreatedCounter.add(1);
-              }
-              connectionsCount.getAndIncrement();
-              Bytes32 nonce = RLPxConnectionFactory.generateRandomBytes32();
-              KeyPair ephemeralKeyPair = KeyPair.random();
-              Bytes initHandshakeMessage = RLPxConnectionFactory.init(keyPair, peerPublicKey, ephemeralKeyPair, nonce);
-              logger.debug("Initiating handshake to {}", peerAddress);
-              netSocket.write(Buffer.buffer(initHandshakeMessage.toArrayUnsafe()));
-
-              netSocket.closeHandler(event -> {
-                if (connectionsDisconnectedCounter != null) {
-                  connectionsDisconnectedCounter.add(1);
-                }
-                logger.debug("Connection {} closed", peerAddress);
-                if (!connected.isDone()) {
-                  connected.cancel();
-                }
-                connectionsCount.getAndDecrement();
-              });
-
-              netSocket.handler(new Handler<>() {
-
-                private RLPxConnection conn;
-
-                private DefaultWireConnection wireConnection;
-
-                @Override
-                public void handle(Buffer buffer) {
-                  try {
-                    Bytes messageBytes = Bytes.wrapBuffer(buffer);
-                    if (conn == null) {
-                      int messageSize = RLPxConnectionFactory.messageSize(messageBytes);
-                      Bytes responseBytes = messageBytes;
-                      if (messageBytes.size() > messageSize) {
-                        responseBytes = responseBytes.slice(0, messageSize);
-                      }
-                      messageBytes = messageBytes.slice(messageSize);
-                      HandshakeMessage responseMessage =
-                          RLPxConnectionFactory.readResponse(responseBytes, keyPair.secretKey());
-                      conn = RLPxConnectionFactory
-                          .createConnection(
-                              true,
-                              initHandshakeMessage,
-                              responseBytes,
-                              ephemeralKeyPair.secretKey(),
-                              responseMessage.ephemeralPublicKey(),
-                              nonce,
-                              responseMessage.nonce(),
-                              keyPair.publicKey(),
-                              peerPublicKey);
-
-                      this.wireConnection = createConnection(conn, netSocket, connected);
-                      if (messageBytes.isEmpty()) {
-                        return;
-                      }
-                    }
-                    if (conn != null) {
-                      conn.stream(messageBytes, wireConnection::messageReceived);
-                    }
-                  } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                    connected.completeExceptionally(e);
-                    netSocket.close();
+    client.connect(
+        peerAddress.getPort(),
+        peerAddress.getHostString(),
+        netSocketFuture ->
+            netSocketFuture.map(
+                netSocket -> {
+                  if (connectionsCreatedCounter != null) {
+                    connectionsCreatedCounter.add(1);
                   }
-                }
-              });
-              return null;
-            }));
+                  connectionsCount.getAndIncrement();
+                  Bytes32 nonce = RLPxConnectionFactory.generateRandomBytes32();
+                  KeyPair ephemeralKeyPair = KeyPair.random();
+                  Bytes initHandshakeMessage =
+                      RLPxConnectionFactory.init(keyPair, peerPublicKey, ephemeralKeyPair, nonce);
+                  logger.debug("Initiating handshake to {}", peerAddress);
+                  netSocket.write(Buffer.buffer(initHandshakeMessage.toArrayUnsafe()));
+
+                  netSocket.closeHandler(
+                      event -> {
+                        if (connectionsDisconnectedCounter != null) {
+                          connectionsDisconnectedCounter.add(1);
+                        }
+                        logger.debug("Connection {} closed", peerAddress);
+                        if (!connected.isDone()) {
+                          connected.cancel();
+                        }
+                        connectionsCount.getAndDecrement();
+                      });
+
+                  netSocket.handler(
+                      new Handler<>() {
+
+                        private RLPxConnection conn;
+
+                        private DefaultWireConnection wireConnection;
+
+                        @Override
+                        public void handle(Buffer buffer) {
+                          try {
+                            Bytes messageBytes = Bytes.wrapBuffer(buffer);
+                            if (conn == null) {
+                              int messageSize = RLPxConnectionFactory.messageSize(messageBytes);
+                              Bytes responseBytes = messageBytes;
+                              if (messageBytes.size() > messageSize) {
+                                responseBytes = responseBytes.slice(0, messageSize);
+                              }
+                              messageBytes = messageBytes.slice(messageSize);
+                              HandshakeMessage responseMessage =
+                                  RLPxConnectionFactory.readResponse(
+                                      responseBytes, keyPair.secretKey());
+                              conn =
+                                  RLPxConnectionFactory.createConnection(
+                                      true,
+                                      initHandshakeMessage,
+                                      responseBytes,
+                                      ephemeralKeyPair.secretKey(),
+                                      responseMessage.ephemeralPublicKey(),
+                                      nonce,
+                                      responseMessage.nonce(),
+                                      keyPair.publicKey(),
+                                      peerPublicKey);
+
+                              this.wireConnection = createConnection(conn, netSocket, connected);
+                              if (messageBytes.isEmpty()) {
+                                return;
+                              }
+                            }
+                            if (conn != null) {
+                              conn.stream(messageBytes, wireConnection::messageReceived);
+                            }
+                          } catch (Exception e) {
+                            logger.error(e.getMessage(), e);
+                            connected.completeExceptionally(e);
+                            netSocket.close();
+                          }
+                        }
+                      });
+                  return null;
+                }));
     return connected;
   }
 
   private DefaultWireConnection createConnection(
-      RLPxConnection conn,
-      NetSocket netSocket,
-      CompletableAsyncResult<WireConnection> ready) {
+      RLPxConnection conn, NetSocket netSocket, CompletableAsyncResult<WireConnection> ready) {
 
     String host = netSocket.remoteAddress().host();
     int port = netSocket.remoteAddress().port();
 
     DefaultWireConnection wireConnection =
-        new DefaultWireConnection(conn.publicKey().bytes(), conn.peerPublicKey().bytes(), message -> {
-          synchronized (conn) {
-            Bytes bytes = conn.write(message);
-            vertx.eventBus().send(netSocket.writeHandlerID(), Buffer.buffer(bytes.toArrayUnsafe()));
-          }
-        },
+        new DefaultWireConnection(
+            conn.publicKey().bytes(),
+            conn.peerPublicKey().bytes(),
+            message -> {
+              synchronized (conn) {
+                Bytes bytes = conn.write(message);
+                vertx
+                    .eventBus()
+                    .send(netSocket.writeHandlerID(), Buffer.buffer(bytes.toArrayUnsafe()));
+              }
+            },
             conn::configureAfterHandshake,
             netSocket::end,
             handlers,

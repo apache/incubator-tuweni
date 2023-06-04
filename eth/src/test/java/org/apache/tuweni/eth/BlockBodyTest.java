@@ -19,10 +19,14 @@ class BlockBodyTest {
 
   @Test
   void testRLPRoundtrip() {
-    BlockBody blockBody = new BlockBody(
-        Arrays.asList(generateTransaction(), generateTransaction(), generateTransaction(), generateTransaction()),
-        Arrays
-            .asList(
+    BlockBody blockBody =
+        new BlockBody(
+            Arrays.asList(
+                generateTransaction(),
+                generateTransaction(),
+                generateTransaction(),
+                generateTransaction()),
+            Arrays.asList(
                 generateBlockHeader(),
                 generateBlockHeader(),
                 generateBlockHeader(),
@@ -33,5 +37,4 @@ class BlockBodyTest {
     BlockBody read = BlockBody.fromBytes(encoded);
     assertEquals(blockBody, read);
   }
-
 }

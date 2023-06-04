@@ -59,7 +59,7 @@ class JSONRPCServer(
   val ipRangeChecker: IPRangeChecker = IPRangeChecker.allowAll(),
   val openTelemetry: OpenTelemetry = OpenTelemetry.noop(),
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
-  val methodHandler: suspend (JSONRPCRequest) -> JSONRPCResponse
+  val methodHandler: suspend (JSONRPCRequest) -> JSONRPCResponse,
 ) : CoroutineScope {
 
   companion object {
@@ -115,7 +115,7 @@ class JSONRPCServer(
             resultHandler.handle(Future.failedFuture("Invalid credentials"))
           }
         },
-        basicAuthRealm
+        basicAuthRealm,
       )
       router.route().handler(basicAuthHandler)
     }

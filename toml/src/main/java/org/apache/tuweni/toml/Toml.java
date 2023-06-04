@@ -16,9 +16,7 @@ import java.util.regex.Pattern;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 
-/**
- * Methods for parsing data stored in Tom's Obvious, Minimal Language (TOML).
- */
+/** Methods for parsing data stored in Tom's Obvious, Minimal Language (TOML). */
 public final class Toml {
   private static final Pattern simpleKeyPattern = Pattern.compile("^[A-Za-z0-9_-]+$");
 
@@ -137,7 +135,8 @@ public final class Toml {
    * @return The parse result.
    * @throws IOException If an IO error occurs.
    */
-  public static TomlParseResult parse(ReadableByteChannel channel, TomlVersion version) throws IOException {
+  public static TomlParseResult parse(ReadableByteChannel channel, TomlVersion version)
+      throws IOException {
     CharStream stream = CharStreams.fromChannel(channel);
     return Parser.parse(stream, version.canonical);
   }

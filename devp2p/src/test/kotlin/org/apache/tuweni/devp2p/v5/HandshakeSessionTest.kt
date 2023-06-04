@@ -38,7 +38,7 @@ class HandshakeSessionTest {
           peerKeyPair.publicKey(),
           { _, message -> runBlocking { peerSession!!.processMessage(message) } },
           { enr },
-          Dispatchers.Default
+          Dispatchers.Default,
         )
       peerSession =
         HandshakeSession(
@@ -47,7 +47,7 @@ class HandshakeSessionTest {
           keyPair.publicKey(),
           { _, message -> runBlocking { session.processMessage(message) } },
           { peerEnr },
-          Dispatchers.Default
+          Dispatchers.Default,
         )
 
       val key = session.connect().await()
@@ -72,7 +72,7 @@ class HandshakeSessionTest {
       session.initiatorKey,
       authTag,
       Bytes.wrap("hello world".toByteArray()),
-      token
+      token,
     )
     val decryptedMessage = AES128GCM.decrypt(peerSession.initiatorKey, authTag, encryptedMessage, token)
     assertEquals(Bytes.wrap("hello world".toByteArray()), decryptedMessage)

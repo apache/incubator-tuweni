@@ -38,7 +38,11 @@ final class BytesValues {
     if (destSize < 0) {
       destSize = size;
     } else {
-      checkArgument(size <= destSize, "Hex value is too large: expected at most %s bytes but got %s", destSize, size);
+      checkArgument(
+          size <= destSize,
+          "Hex value is too large: expected at most %s bytes but got %s",
+          destSize,
+          size);
     }
 
     byte[] out = new byte[destSize];
@@ -48,26 +52,21 @@ final class BytesValues {
       int h = Character.digit(hex.charAt(j), 16);
       if (h == -1) {
         throw new IllegalArgumentException(
-            String
-                .format(
-                    "Illegal character '%c' found at index %d in hex binary representation",
-                    hex.charAt(j),
-                    j - idxShift));
+            String.format(
+                "Illegal character '%c' found at index %d in hex binary representation",
+                hex.charAt(j), j - idxShift));
       }
       j++;
       int l = Character.digit(hex.charAt(j), 16);
       if (l == -1) {
         throw new IllegalArgumentException(
-            String
-                .format(
-                    "Illegal character '%c' found at index %d in hex binary representation",
-                    hex.charAt(j),
-                    j - idxShift));
+            String.format(
+                "Illegal character '%c' found at index %d in hex binary representation",
+                hex.charAt(j), j - idxShift));
       }
       j++;
       out[i] = (byte) ((h << 4) + l);
     }
     return out;
   }
-
 }

@@ -9,7 +9,7 @@ import org.apache.tuweni.rlp.RLP
 internal data class BlockHeadersMessage(
   val reqID: Long,
   val bufferValue: Long,
-  val blockHeaders: List<BlockHeader>
+  val blockHeaders: List<BlockHeader>,
 ) {
 
   fun toBytes(): Bytes {

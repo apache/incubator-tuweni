@@ -11,10 +11,7 @@ import org.apache.tuweni.units.ethereum.Wei;
 
 import java.util.Objects;
 
-/**
- * State of an account as stored on chain.
- *
- */
+/** State of an account as stored on chain. */
 public final class AccountState {
 
   private static final int DEFAULT_VERSION = 0;
@@ -30,16 +27,16 @@ public final class AccountState {
 
   /**
    * Reads an account state from a RLP representation.
-   * 
+   *
    * @param bytes the bytes of the serialized acount state.
    * @return the AccountState read from the bytes.
    */
   public static AccountState fromBytes(Bytes bytes) {
     requireNonNull(bytes);
-    return RLP
-        .decodeList(
-            bytes,
-            reader -> new AccountState(
+    return RLP.decodeList(
+        bytes,
+        reader ->
+            new AccountState(
                 reader.readUInt256(),
                 Wei.valueOf(reader.readUInt256()),
                 Hash.fromBytes(reader.readValue()),
@@ -61,7 +58,7 @@ public final class AccountState {
 
   /**
    * Default constructor for account state.
-   * 
+   *
    * @param nonce the nonce of the account.
    * @param balance the balance of the account.
    * @param storageRoot the root hash of the storage.
@@ -77,15 +74,16 @@ public final class AccountState {
   }
 
   public Bytes toBytes() {
-    return RLP.encodeList(writer -> {
-      writer.writeValue(nonce.toMinimalBytes());
-      writer.writeValue(balance.toMinimalBytes());
-      writer.writeValue(storageRoot);
-      writer.writeValue(codeHash);
-      if (version != DEFAULT_VERSION) {
-        writer.writeInt(version);
-      }
-    });
+    return RLP.encodeList(
+        writer -> {
+          writer.writeValue(nonce.toMinimalBytes());
+          writer.writeValue(balance.toMinimalBytes());
+          writer.writeValue(storageRoot);
+          writer.writeValue(codeHash);
+          if (version != DEFAULT_VERSION) {
+            writer.writeInt(version);
+          }
+        });
   }
 
   public Hash getCodeHash() {
@@ -110,10 +108,8 @@ public final class AccountState {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     AccountState that = (AccountState) o;
     return version == that.version
         && Objects.equals(nonce, that.nonce)

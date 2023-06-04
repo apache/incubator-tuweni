@@ -36,7 +36,7 @@ class MethodsRouter(val methodsMap: Map<String, suspend (JSONRPCRequest) -> JSON
 class MeteredHandler(
   private val successCounter: LongCounter,
   private val failCounter: LongCounter,
-  private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse
+  private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse,
 ) {
 
   suspend fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
@@ -53,7 +53,7 @@ class MeteredHandler(
 
 class MethodAllowListHandler(
   private val allowedMethods: List<String>,
-  private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse
+  private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse,
 ) {
 
   suspend fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
@@ -73,7 +73,7 @@ class MethodAllowListHandler(
 
 class ThrottlingHandler(
   private val threshold: Int,
-  private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse
+  private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse,
 ) {
 
   private val limiter: SimpleLimiter<Void> = SimpleLimiter
@@ -103,7 +103,7 @@ class CachingHandler(
   private val cacheStore: KeyValueStore<String, JSONRPCResponse>,
   private val cacheHitCounter: LongCounter,
   private val cacheMissCounter: LongCounter,
-  private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse
+  private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse,
 ) {
 
   suspend fun handleRequest(request: JSONRPCRequest): JSONRPCResponse {
@@ -141,7 +141,7 @@ class CachingPollingHandler(
   private val cacheHitCounter: LongCounter,
   private val cacheMissCounter: LongCounter,
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
-  private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse
+  private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse,
 ) : CoroutineScope {
 
   companion object {
@@ -199,7 +199,7 @@ class CachingPollingHandler(
 
 class LoggingHandler(
   private val delegateHandler: suspend (JSONRPCRequest) -> JSONRPCResponse,
-  loggerName: String
+  loggerName: String,
 ) {
 
   private val logger = LoggerFactory.getLogger(loggerName)

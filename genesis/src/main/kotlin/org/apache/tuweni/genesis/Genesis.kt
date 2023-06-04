@@ -25,7 +25,7 @@ open class GenesisConfig(
   val eip155Block: Int = 0,
   val eip158Block: Int = 0,
   val byzantiumBlock: Int = 0,
-  val constantinopleBlock: Int = 0
+  val constantinopleBlock: Int = 0,
 )
 
 /**
@@ -45,7 +45,7 @@ open class GenesisConfig(
   "mixHash",
   "coinbase",
   "parentHash",
-  "alloc"
+  "alloc",
 )
 class Genesis(
   val nonce: Bytes,
@@ -57,7 +57,7 @@ class Genesis(
   val extraData: Bytes,
   private val gasLimit: Long,
   val alloc: Map<Address, Map<String, UInt256>>,
-  val config: GenesisConfig
+  val config: GenesisConfig,
 ) {
 
   companion object {
@@ -72,7 +72,7 @@ class Genesis(
     val emptyHash = Hash.hash(
       RLP.encode { writer: RLPWriter ->
         writer.writeValue(Bytes.EMPTY)
-      }
+      },
     )
 
     /**
@@ -93,8 +93,8 @@ class Genesis(
         Bytes.EMPTY,
         1_000_000L,
         emptyMap(),
-        GenesisConfig(1337, 0, 0, 0, 0)
-      )
+        GenesisConfig(1337, 0, 0, 0, 0),
+      ),
     ): Block {
       return Block(
         BlockHeader(
@@ -112,9 +112,9 @@ class Genesis(
           Instant.ofEpochSecond(genesis.timestamp),
           genesis.extraData,
           Hash.fromBytes(genesis.mixHash),
-          UInt64.fromBytes(genesis.nonce)
+          UInt64.fromBytes(genesis.nonce),
         ),
-        BlockBody(ArrayList(), ArrayList())
+        BlockBody(ArrayList(), ArrayList()),
       )
     }
   }

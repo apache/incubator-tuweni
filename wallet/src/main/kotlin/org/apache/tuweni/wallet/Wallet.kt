@@ -41,7 +41,7 @@ class Wallet(file: Path, password: String) {
     val decrypted = AES256GCM.decrypt(encrypted, key, nonce)
     keyPair =
       SECP256K1.KeyPair.fromSecretKey(
-        SECP256K1.SecretKey.fromBytes(Bytes32.secure(decrypted!!.toArrayUnsafe()))
+        SECP256K1.SecretKey.fromBytes(Bytes32.secure(decrypted!!.toArrayUnsafe())),
       )
   }
 
@@ -64,7 +64,7 @@ class Wallet(file: Path, password: String) {
         encrypted.toHexString().encodeToByteArray(),
         StandardOpenOption.CREATE,
         StandardOpenOption.TRUNCATE_EXISTING,
-        StandardOpenOption.WRITE
+        StandardOpenOption.WRITE,
       )
       return open(file, password)
     }
@@ -90,7 +90,7 @@ class Wallet(file: Path, password: String) {
     to: Address?,
     value: Wei,
     payload: Bytes,
-    chainId: Int?
+    chainId: Int?,
   ): Transaction {
     return Transaction(nonce, gasPrice, gasLimit, to, value, payload, keyPair, chainId)
   }

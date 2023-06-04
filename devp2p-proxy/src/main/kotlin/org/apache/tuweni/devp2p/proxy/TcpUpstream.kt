@@ -18,7 +18,7 @@ class TcpUpstream(
   val vertx: Vertx,
   val host: String,
   val port: Int,
-  override val coroutineContext: CoroutineContext = Dispatchers.Default
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope,
   ClientHandler {
 

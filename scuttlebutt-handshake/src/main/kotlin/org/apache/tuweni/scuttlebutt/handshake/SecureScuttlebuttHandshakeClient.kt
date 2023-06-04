@@ -30,7 +30,7 @@ import org.apache.tuweni.scuttlebutt.Invite
 class SecureScuttlebuttHandshakeClient private constructor(
   private val longTermKeyPair: Signature.KeyPair,
   networkIdentifier: Bytes32,
-  serverLongTermPublicKey: Signature.PublicKey?
+  serverLongTermPublicKey: Signature.PublicKey?,
 ) {
   private val ephemeralKeyPair: Box.KeyPair
   private val networkIdentifier: HMACSHA512256.Key
@@ -76,17 +76,17 @@ class SecureScuttlebuttHandshakeClient private constructor(
     sharedSecret = DiffieHelman.Secret
       .forKeys(
         DiffieHelman.SecretKey.forBoxSecretKey(ephemeralKeyPair.secretKey()),
-        DiffieHelman.PublicKey.forBoxPublicKey(serverEphemeralPublicKey!!)
+        DiffieHelman.PublicKey.forBoxPublicKey(serverEphemeralPublicKey!!),
       )
     sharedSecret2 = DiffieHelman.Secret
       .forKeys(
         DiffieHelman.SecretKey.forBoxSecretKey(ephemeralKeyPair.secretKey()),
-        DiffieHelman.PublicKey.forSignaturePublicKey(serverLongTermPublicKey!!)
+        DiffieHelman.PublicKey.forSignaturePublicKey(serverLongTermPublicKey!!),
       )
     sharedSecret3 = DiffieHelman.Secret
       .forKeys(
         DiffieHelman.SecretKey.forSignatureSecretKey(longTermKeyPair.secretKey()),
-        DiffieHelman.PublicKey.forBoxPublicKey(serverEphemeralPublicKey!!)
+        DiffieHelman.PublicKey.forBoxPublicKey(serverEphemeralPublicKey!!),
       )
   }
 
@@ -126,11 +126,11 @@ class SecureScuttlebuttHandshakeClient private constructor(
                       .add(networkIdentifier)
                       .add(sharedSecret!!)
                       .add(sharedSecret2!!)
-                      .concatenate()
-                  )
-              )
+                      .concatenate(),
+                  ),
+              ),
           ),
-        SecretBox.Nonce.fromBytes(ByteArray(24))
+        SecretBox.Nonce.fromBytes(ByteArray(24)),
       )
       .bytes()
   }
@@ -155,11 +155,11 @@ class SecureScuttlebuttHandshakeClient private constructor(
                       .add(sharedSecret!!)
                       .add(sharedSecret2!!)
                       .add(sharedSecret3!!)
-                      .concatenate()
-                  )
-              )
+                      .concatenate(),
+                  ),
+              ),
           ),
-        SecretBox.Nonce.fromBytes(ByteArray(24))
+        SecretBox.Nonce.fromBytes(ByteArray(24)),
       )
       ?: throw HandshakeException("Could not decrypt accept message with our shared secrets")
     val verified = serverLongTermPublicKey!!
@@ -170,7 +170,7 @@ class SecureScuttlebuttHandshakeClient private constructor(
           .add(longTermKeyPair.publicKey())
           .add(SHA256Hash.hash(SHA256Hash.Input.fromSecret(sharedSecret!!)))
           .concatenate(),
-        serverSignature
+        serverSignature,
       )
     if (!verified) {
       throw HandshakeException("Accept message signature does not match")
@@ -203,15 +203,15 @@ class SecureScuttlebuttHandshakeClient private constructor(
                                   .add(sharedSecret!!)
                                   .add(sharedSecret2!!)
                                   .add(sharedSecret3!!)
-                                  .concatenate()
-                              )
-                          )
-                      )
-                  )
+                                  .concatenate(),
+                              ),
+                          ),
+                      ),
+                  ),
               )
               .add(serverLongTermPublicKey!!)
-              .concatenate()
-          )
+              .concatenate(),
+          ),
       )
   }
 
@@ -251,15 +251,15 @@ class SecureScuttlebuttHandshakeClient private constructor(
                                   .add(sharedSecret!!)
                                   .add(sharedSecret2!!)
                                   .add(sharedSecret3!!)
-                                  .concatenate()
-                              )
-                          )
-                      )
-                  )
+                                  .concatenate(),
+                              ),
+                          ),
+                      ),
+                  ),
               )
               .add(longTermKeyPair.publicKey())
-              .concatenate()
-          )
+              .concatenate(),
+          ),
       )
   }
 
@@ -283,7 +283,7 @@ class SecureScuttlebuttHandshakeClient private constructor(
       clientToServerSecretBoxKey(),
       clientToServerNonce(),
       serverToClientSecretBoxKey(),
-      serverToClientNonce()
+      serverToClientNonce(),
     )
   }
 
@@ -300,7 +300,7 @@ class SecureScuttlebuttHandshakeClient private constructor(
     fun create(
       ourKeyPair: Signature.KeyPair,
       networkIdentifier: Bytes32,
-      serverLongTermPublicKey: Signature.PublicKey?
+      serverLongTermPublicKey: Signature.PublicKey?,
     ): SecureScuttlebuttHandshakeClient {
       return SecureScuttlebuttHandshakeClient(ourKeyPair, networkIdentifier, serverLongTermPublicKey)
     }
@@ -318,7 +318,7 @@ class SecureScuttlebuttHandshakeClient private constructor(
       return SecureScuttlebuttHandshakeClient(
         Signature.KeyPair.fromSeed(invite.seedKey),
         networkIdentifier,
-        invite.identity.ed25519PublicKey()
+        invite.identity.ed25519PublicKey(),
       )
     }
   }

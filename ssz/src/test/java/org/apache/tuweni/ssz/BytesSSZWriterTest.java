@@ -37,18 +37,23 @@ class BytesSSZWriterTest {
   void shouldWriteFullObjects() {
     SomeObject bob = new SomeObject("Bob", 4, BigInteger.valueOf(1234563434344L));
 
-    Bytes bytes = SSZ.encode(writer -> {
-      writer.writeString(bob.name);
-      writer.writeInt(bob.number, 8);
-      writer.writeBigInteger(bob.longNumber, 256);
-    });
+    Bytes bytes =
+        SSZ.encode(
+            writer -> {
+              writer.writeString(bob.name);
+              writer.writeInt(bob.number, 8);
+              writer.writeBigInteger(bob.longNumber, 256);
+            });
 
-    assertTrue(SSZ.<Boolean>decode(bytes, reader -> {
-      assertEquals("Bob", reader.readString());
-      assertEquals(4, reader.readInt(8));
-      assertEquals(BigInteger.valueOf(1234563434344L), reader.readBigInteger(256));
-      return true;
-    }));
+    assertTrue(
+        SSZ.<Boolean>decode(
+            bytes,
+            reader -> {
+              assertEquals("Bob", reader.readString());
+              assertEquals(4, reader.readInt(8));
+              assertEquals(BigInteger.valueOf(1234563434344L), reader.readBigInteger(256));
+              return true;
+            }));
   }
 
   @Test
@@ -112,21 +117,31 @@ class BytesSSZWriterTest {
     assertEquals(fromHexString("0004"), SSZ.encode(writer -> writer.writeLong(1024, 16)));
     assertEquals(fromHexString("A08601"), SSZ.encode(writer -> writer.writeLong(100000L, 24)));
     assertEquals(fromHexString("A0860100"), SSZ.encode(writer -> writer.writeLong(100000L, 32)));
-    assertEquals(fromHexString("A086010000000000"), SSZ.encode(writer -> writer.writeLong(100000L, 64)));
-    assertEquals(fromHexString("A086010000000000"), SSZ.encode(writer -> writer.writeInt64(100000L)));
+    assertEquals(
+        fromHexString("A086010000000000"), SSZ.encode(writer -> writer.writeLong(100000L, 64)));
+    assertEquals(
+        fromHexString("A086010000000000"), SSZ.encode(writer -> writer.writeInt64(100000L)));
 
     assertEquals(fromHexString("FF"), SSZ.encode(writer -> writer.writeLong(-1, 8)));
     assertEquals(fromHexString("FFFF"), SSZ.encode(writer -> writer.writeLong(-1, 16)));
     assertEquals(fromHexString("80"), SSZ.encode(writer -> writer.writeLong(-128, 8)));
     assertEquals(fromHexString("0080"), SSZ.encode(writer -> writer.writeLong(-32768, 16)));
-    assertEquals(fromHexString("0000000000000080"), SSZ.encode(writer -> writer.writeInt64(-9223372036854775808L)));
+    assertEquals(
+        fromHexString("0000000000000080"),
+        SSZ.encode(writer -> writer.writeInt64(-9223372036854775808L)));
   }
 
   @Test
   void shouldWriteSignedBigIntegers() {
-    assertEquals(fromHexString("A08601"), SSZ.encode(writer -> writer.writeBigInteger(BigInteger.valueOf(100000), 24)));
-    assertEquals(fromHexString("16EB"), SSZ.encode(writer -> writer.writeBigInteger(BigInteger.valueOf(-5354), 16)));
-    assertEquals(fromHexString("0080"), SSZ.encode(writer -> writer.writeBigInteger(BigInteger.valueOf(-32768), 16)));
+    assertEquals(
+        fromHexString("A08601"),
+        SSZ.encode(writer -> writer.writeBigInteger(BigInteger.valueOf(100000), 24)));
+    assertEquals(
+        fromHexString("16EB"),
+        SSZ.encode(writer -> writer.writeBigInteger(BigInteger.valueOf(-5354), 16)));
+    assertEquals(
+        fromHexString("0080"),
+        SSZ.encode(writer -> writer.writeBigInteger(BigInteger.valueOf(-32768), 16)));
     assertEquals(
         fromHexString("01F81D7AF1971CEDD9BBA5EFCEE1"),
         SSZ.encode(writer -> writer.writeBigInteger(BigInteger.valueOf(127).pow(16), 112)));
@@ -178,16 +193,21 @@ class BytesSSZWriterTest {
     assertEquals(fromHexString("0004"), SSZ.encode(writer -> writer.writeULong(1024, 16)));
     assertEquals(fromHexString("A08601"), SSZ.encode(writer -> writer.writeULong(100000L, 24)));
     assertEquals(fromHexString("A0860100"), SSZ.encode(writer -> writer.writeULong(100000L, 32)));
-    assertEquals(fromHexString("A086010000000000"), SSZ.encode(writer -> writer.writeULong(100000L, 64)));
-    assertEquals(fromHexString("A086010000000000"), SSZ.encode(writer -> writer.writeUInt64(100000L)));
+    assertEquals(
+        fromHexString("A086010000000000"), SSZ.encode(writer -> writer.writeULong(100000L, 64)));
+    assertEquals(
+        fromHexString("A086010000000000"), SSZ.encode(writer -> writer.writeUInt64(100000L)));
 
     assertEquals(fromHexString("FF"), SSZ.encode(writer -> writer.writeULong(255, 8)));
     assertEquals(fromHexString("FFFF"), SSZ.encode(writer -> writer.writeULong(65535, 16)));
     assertEquals(fromHexString("80"), SSZ.encode(writer -> writer.writeULong(128, 8)));
     assertEquals(fromHexString("0080"), SSZ.encode(writer -> writer.writeULong(32768, 16)));
-    assertEquals(fromHexString("0000000000000080"), SSZ.encode(writer -> {
-      writer.writeUInt64(Long.parseUnsignedLong("9223372036854775808"));
-    }));
+    assertEquals(
+        fromHexString("0000000000000080"),
+        SSZ.encode(
+            writer -> {
+              writer.writeUInt64(Long.parseUnsignedLong("9223372036854775808"));
+            }));
   }
 
   @Test
@@ -200,11 +220,11 @@ class BytesSSZWriterTest {
         SSZ.encode(writer -> writer.writeUInt256(UInt256.valueOf(100000L))));
     assertEquals(
         fromHexString("AB00000000F10000000000000000000000000000000000000000000000000004"),
-        SSZ
-            .encode(
-                writer -> writer
-                    .writeUInt256(
-                        UInt256.fromHexString("0x0400000000000000000000000000000000000000000000000000f100000000ab"))));
+        SSZ.encode(
+            writer ->
+                writer.writeUInt256(
+                    UInt256.fromHexString(
+                        "0x0400000000000000000000000000000000000000000000000000f100000000ab"))));
   }
 
   @Test
@@ -217,7 +237,10 @@ class BytesSSZWriterTest {
   void shouldWriteAddresses() {
     assertEquals(
         fromHexString("8EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C97"),
-        SSZ.encode(writer -> writer.writeAddress(Bytes.fromHexString("8EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C97"))));
+        SSZ.encode(
+            writer ->
+                writer.writeAddress(
+                    Bytes.fromHexString("8EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C97"))));
     assertThrows(
         IllegalArgumentException.class,
         () -> SSZ.encode(writer -> writer.writeAddress(Bytes.fromHexString("beef"))));
@@ -227,11 +250,11 @@ class BytesSSZWriterTest {
   void shouldWriteHashes() {
     assertEquals(
         fromHexString("ED1C978EE1CEEFA5BBD9ED1C8EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C97"),
-        SSZ
-            .encode(
-                writer -> writer
-                    .writeHash(
-                        Bytes32.fromHexString("ED1C978EE1CEEFA5BBD9ED1C8EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C97"))));
+        SSZ.encode(
+            writer ->
+                writer.writeHash(
+                    Bytes32.fromHexString(
+                        "ED1C978EE1CEEFA5BBD9ED1C8EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C97"))));
     assertThrows(
         IllegalArgumentException.class,
         () -> SSZ.encode(writer -> writer.writeAddress(Bytes.fromHexString("beef"))));
@@ -263,17 +286,16 @@ class BytesSSZWriterTest {
   void shouldWriteVarargsListsOfBigIntegers() {
     assertEquals(
         fromHexString("03000000030405"),
-        SSZ.encodeBigIntegerList(8, BigInteger.valueOf(3), BigInteger.valueOf(4), BigInteger.valueOf(5)));
+        SSZ.encodeBigIntegerList(
+            8, BigInteger.valueOf(3), BigInteger.valueOf(4), BigInteger.valueOf(5)));
   }
 
   @Test
   void shouldWriteUtilListsOfBigIntegers() {
     assertEquals(
         fromHexString("03000000030405"),
-        SSZ
-            .encodeBigIntegerList(
-                8,
-                Arrays.asList(BigInteger.valueOf(3), BigInteger.valueOf(4), BigInteger.valueOf(5))));
+        SSZ.encodeBigIntegerList(
+            8, Arrays.asList(BigInteger.valueOf(3), BigInteger.valueOf(4), BigInteger.valueOf(5))));
   }
 
   @Test
@@ -283,7 +305,8 @@ class BytesSSZWriterTest {
 
   @Test
   void shouldWriteUtilListsOfUnsignedInts() {
-    assertEquals(fromHexString("03000000FDFEFF"), SSZ.encodeUIntList(8, Arrays.asList(253, 254, 255)));
+    assertEquals(
+        fromHexString("03000000FDFEFF"), SSZ.encodeUIntList(8, Arrays.asList(253, 254, 255)));
   }
 
   @Test
@@ -311,7 +334,8 @@ class BytesSSZWriterTest {
     assertEquals(
         fromHexString(
             "0x60000000030000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000"),
-        SSZ.encodeUInt256List(Arrays.asList(UInt256.valueOf(3L), UInt256.valueOf(4L), UInt256.valueOf(5L))));
+        SSZ.encodeUInt256List(
+            Arrays.asList(UInt256.valueOf(3L), UInt256.valueOf(4L), UInt256.valueOf(5L))));
   }
 
   @Test
@@ -332,24 +356,21 @@ class BytesSSZWriterTest {
   void shouldWriteVarargsListsOfBytes() {
     assertEquals(
         fromHexString("1800000003000000626F62040000006A616E65050000006A616E6574"),
-        SSZ
-            .encodeBytesList(
-                Bytes.wrap("bob".getBytes(Charsets.UTF_8)),
-                Bytes.wrap("jane".getBytes(Charsets.UTF_8)),
-                Bytes.wrap("janet".getBytes(Charsets.UTF_8))));
+        SSZ.encodeBytesList(
+            Bytes.wrap("bob".getBytes(Charsets.UTF_8)),
+            Bytes.wrap("jane".getBytes(Charsets.UTF_8)),
+            Bytes.wrap("janet".getBytes(Charsets.UTF_8))));
   }
 
   @Test
   void shouldWriteUtilListOfBytes() {
     assertEquals(
         fromHexString("1800000003000000626F62040000006A616E65050000006A616E6574"),
-        SSZ
-            .encodeBytesList(
-                Arrays
-                    .asList(
-                        Bytes.wrap("bob".getBytes(Charsets.UTF_8)),
-                        Bytes.wrap("jane".getBytes(Charsets.UTF_8)),
-                        Bytes.wrap("janet".getBytes(Charsets.UTF_8)))));
+        SSZ.encodeBytesList(
+            Arrays.asList(
+                Bytes.wrap("bob".getBytes(Charsets.UTF_8)),
+                Bytes.wrap("jane".getBytes(Charsets.UTF_8)),
+                Bytes.wrap("janet".getBytes(Charsets.UTF_8)))));
   }
 
   @Test
@@ -357,13 +378,11 @@ class BytesSSZWriterTest {
     assertEquals(
         fromHexString(
             "0x6C000000200000000000000000000000000000000000000000000000000000000000000000626F6220000000000000000000000000000000000000000000000000000000000000006A616E65200000000000000000000000000000000000000000000000000000000000006A616E6574"),
-        SSZ
-            .encodeBytesList(
-                Arrays
-                    .asList(
-                        Bytes32.leftPad(Bytes.wrap("bob".getBytes(Charsets.UTF_8))),
-                        Bytes32.leftPad(Bytes.wrap("jane".getBytes(Charsets.UTF_8))),
-                        Bytes32.leftPad(Bytes.wrap("janet".getBytes(Charsets.UTF_8))))));
+        SSZ.encodeBytesList(
+            Arrays.asList(
+                Bytes32.leftPad(Bytes.wrap("bob".getBytes(Charsets.UTF_8))),
+                Bytes32.leftPad(Bytes.wrap("jane".getBytes(Charsets.UTF_8))),
+                Bytes32.leftPad(Bytes.wrap("janet".getBytes(Charsets.UTF_8))))));
   }
 
   @Test
@@ -371,11 +390,10 @@ class BytesSSZWriterTest {
     assertEquals(
         fromHexString(
             "0x60000000ED1C978EE1CEEFA5BBD9ED1C8EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C978B40CA3893681B062BC06760A4863AFAFA6C4D6226D4C6AFAFA3684A06760CB26B30567B2281FF3BD582B0A633B33A376B95BD3333DB59B673A33B336A0B285D"),
-        SSZ
-            .encodeHashList(
-                fromHexString("0xED1C978EE1CEEFA5BBD9ED1C8EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C97"),
-                fromHexString("0x8B40CA3893681B062BC06760A4863AFAFA6C4D6226D4C6AFAFA3684A06760CB2"),
-                fromHexString("0x6B30567B2281FF3BD582B0A633B33A376B95BD3333DB59B673A33B336A0B285D")));
+        SSZ.encodeHashList(
+            fromHexString("0xED1C978EE1CEEFA5BBD9ED1C8EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C97"),
+            fromHexString("0x8B40CA3893681B062BC06760A4863AFAFA6C4D6226D4C6AFAFA3684A06760CB2"),
+            fromHexString("0x6B30567B2281FF3BD582B0A633B33A376B95BD3333DB59B673A33B336A0B285D")));
   }
 
   @Test
@@ -383,13 +401,12 @@ class BytesSSZWriterTest {
     assertEquals(
         fromHexString(
             "0x60000000ED1C978EE1CEEFA5BBD9ED1C8EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C978B40CA3893681B062BC06760A4863AFAFA6C4D6226D4C6AFAFA3684A06760CB26B30567B2281FF3BD582B0A633B33A376B95BD3333DB59B673A33B336A0B285D"),
-        SSZ
-            .encodeHashList(
-                Arrays
-                    .asList(
-                        fromHexString("0xED1C978EE1CEEFA5BBD9ED1C8EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C97"),
-                        fromHexString("0x8B40CA3893681B062BC06760A4863AFAFA6C4D6226D4C6AFAFA3684A06760CB2"),
-                        fromHexString("0x6B30567B2281FF3BD582B0A633B33A376B95BD3333DB59B673A33B336A0B285D"))));
+        SSZ.encodeHashList(
+            Arrays.asList(
+                fromHexString("0xED1C978EE1CEEFA5BBD9ED1C8EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C97"),
+                fromHexString("0x8B40CA3893681B062BC06760A4863AFAFA6C4D6226D4C6AFAFA3684A06760CB2"),
+                fromHexString(
+                    "0x6B30567B2281FF3BD582B0A633B33A376B95BD3333DB59B673A33B336A0B285D"))));
   }
 
   @Test
@@ -397,11 +414,10 @@ class BytesSSZWriterTest {
     assertEquals(
         fromHexString(
             "0x3C0000008EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C9779C1DE9DBB5AFEEC1EE8BBD9ED1C978EE1CEEFA5BBD9ED1C978EE1CEEFA5"),
-        SSZ
-            .encodeAddressList(
-                fromHexString("0x8EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C97"),
-                fromHexString("0x8EE1CEEFA5BBD9ED1C9779C1DE9DBB5AFEEC1EE8"),
-                fromHexString("0xBBD9ED1C978EE1CEEFA5BBD9ED1C978EE1CEEFA5")));
+        SSZ.encodeAddressList(
+            fromHexString("0x8EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C97"),
+            fromHexString("0x8EE1CEEFA5BBD9ED1C9779C1DE9DBB5AFEEC1EE8"),
+            fromHexString("0xBBD9ED1C978EE1CEEFA5BBD9ED1C978EE1CEEFA5")));
   }
 
   @Test
@@ -409,30 +425,31 @@ class BytesSSZWriterTest {
     assertEquals(
         fromHexString(
             "0x3C0000008EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C9779C1DE9DBB5AFEEC1EE8BBD9ED1C978EE1CEEFA5BBD9ED1C978EE1CEEFA5"),
-        SSZ
-            .encodeAddressList(
-                Arrays
-                    .asList(
-                        fromHexString("0x8EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C97"),
-                        fromHexString("0x8EE1CEEFA5BBD9ED1C9779C1DE9DBB5AFEEC1EE8"),
-                        fromHexString("0xBBD9ED1C978EE1CEEFA5BBD9ED1C978EE1CEEFA5"))));
+        SSZ.encodeAddressList(
+            Arrays.asList(
+                fromHexString("0x8EE1CEEFA5BBD9ED1C978EE1CEEFA5BBD9ED1C97"),
+                fromHexString("0x8EE1CEEFA5BBD9ED1C9779C1DE9DBB5AFEEC1EE8"),
+                fromHexString("0xBBD9ED1C978EE1CEEFA5BBD9ED1C978EE1CEEFA5"))));
   }
 
   @Test
   void shouldWriteVaragsListsOfBooleans() {
-    assertEquals(fromHexString("0400000000010100"), SSZ.encodeBooleanList(false, true, true, false));
+    assertEquals(
+        fromHexString("0400000000010100"), SSZ.encodeBooleanList(false, true, true, false));
   }
 
   @Test
   void shouldWriteUtilListsOfBooleans() {
-    assertEquals(fromHexString("0400000000010100"), SSZ.encodeBooleanList(Arrays.asList(false, true, true, false)));
+    assertEquals(
+        fromHexString("0400000000010100"),
+        SSZ.encodeBooleanList(Arrays.asList(false, true, true, false)));
   }
 
   @Test
   void shouldWriteVectorOfHomogeneousBytes() {
     // Per the pre-SOS SSZ spec, neither the vector nor the bytes should have a mixin.
-    List<Bytes32> elements = Arrays
-        .asList(
+    List<Bytes32> elements =
+        Arrays.asList(
             Bytes32.fromHexString("0x01"),
             Bytes32.fromHexString("0x02"),
             Bytes32.fromHexString("0x03"),
@@ -450,9 +467,10 @@ class BytesSSZWriterTest {
 
   @Test
   void shouldWriteVectorOfNonHomogeneousBytes() {
-    // Per the pre-SOS SSZ spec, the vector itself should not have a mixin, but the individual bytes elements should.
-    List<Bytes32> elements = Arrays
-        .asList(
+    // Per the pre-SOS SSZ spec, the vector itself should not have a mixin, but the individual bytes
+    // elements should.
+    List<Bytes32> elements =
+        Arrays.asList(
             Bytes32.fromHexString("0x01"),
             Bytes32.fromHexString("0x02"),
             Bytes32.fromHexString("0x03"),
@@ -470,9 +488,10 @@ class BytesSSZWriterTest {
 
   @Test
   void shouldWriteListOfHomogeneousBytes() {
-    // Per the pre-SOS SSZ spec, the list iself should have a mixin, but the bytes elements should not.
-    List<Bytes32> elements = Arrays
-        .asList(
+    // Per the pre-SOS SSZ spec, the list iself should have a mixin, but the bytes elements should
+    // not.
+    List<Bytes32> elements =
+        Arrays.asList(
             Bytes32.fromHexString("0x01"),
             Bytes32.fromHexString("0x02"),
             Bytes32.fromHexString("0x03"),
@@ -491,9 +510,10 @@ class BytesSSZWriterTest {
 
   @Test
   void shouldWriteListOfNonHomogeneousBytes() {
-    // Per the pre-SOS SSZ spec, both the vector itself and the individual bytes elements should have a length mixin.
-    List<Bytes32> elements = Arrays
-        .asList(
+    // Per the pre-SOS SSZ spec, both the vector itself and the individual bytes elements should
+    // have a length mixin.
+    List<Bytes32> elements =
+        Arrays.asList(
             Bytes32.fromHexString("0x01"),
             Bytes32.fromHexString("0x02"),
             Bytes32.fromHexString("0x03"),
@@ -512,7 +532,8 @@ class BytesSSZWriterTest {
 
   @Test
   void shouldWritePreviouslyEncodedValues() {
-    Bytes output = SSZ.encode(writer -> writer.writeSSZ(SSZ.encodeByteArray("abc".getBytes(UTF_8))));
+    Bytes output =
+        SSZ.encode(writer -> writer.writeSSZ(SSZ.encodeByteArray("abc".getBytes(UTF_8))));
     assertEquals("abc", SSZ.decodeString(output));
   }
 }

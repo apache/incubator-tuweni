@@ -9,7 +9,7 @@ import java.net.InetAddress
 
 internal class FindNodeMessage(
   val requestId: Bytes = Message.requestId(),
-  val distance: Int = 0
+  val distance: Int = 0,
 ) : Message {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x03")
@@ -37,7 +37,7 @@ internal class FindNodeMessage(
 internal class NodesMessage(
   val requestId: Bytes = Message.requestId(),
   val total: Int,
-  val nodeRecords: List<EthereumNodeRecord>
+  val nodeRecords: List<EthereumNodeRecord>,
 ) : Message {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x04")
@@ -72,7 +72,7 @@ internal class NodesMessage(
 
 internal class PingMessage(
   val requestId: Bytes = Message.requestId(),
-  val enrSeq: Long = 0
+  val enrSeq: Long = 0,
 ) : Message {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x01")
@@ -99,7 +99,7 @@ internal class PingMessage(
 
 internal class RandomMessage(
   val authTag: Bytes = Message.authTag(),
-  val data: Bytes = randomData()
+  val data: Bytes = randomData(),
 ) : Message {
 
   companion object {
@@ -120,7 +120,7 @@ internal class RandomMessage(
 internal class TicketMessage(
   val requestId: Bytes = Message.requestId(),
   val ticket: Bytes,
-  val waitTime: Long
+  val waitTime: Long,
 ) : Message {
 
   override fun type(): MessageType = MessageType.TICKET
@@ -149,7 +149,7 @@ internal class WhoAreYouMessage(
   val magic: Bytes,
   val token: Bytes,
   val idNonce: Bytes,
-  val enrSeq: Long = 0
+  val enrSeq: Long = 0,
 ) : Message {
 
   companion object {
@@ -172,14 +172,14 @@ internal class WhoAreYouMessage(
         w.writeValue(token)
         w.writeValue(idNonce)
         w.writeLong(enrSeq)
-      }
+      },
     )
   }
 }
 
 internal class TopicQueryMessage(
   val requestId: Bytes = Message.requestId(),
-  val topic: Bytes
+  val topic: Bytes,
 ) : Message {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x08")
@@ -211,7 +211,7 @@ internal class RegTopicMessage(
   val requestId: Bytes = Message.requestId(),
   val nodeRecord: EthereumNodeRecord,
   val topic: Bytes,
-  val ticket: Bytes
+  val ticket: Bytes,
 ) : Message {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x05")
@@ -246,7 +246,7 @@ internal class PongMessage(
   val requestId: Bytes = Message.requestId(),
   val enrSeq: Long = 0,
   val recipientIp: String,
-  val recipientPort: Int
+  val recipientPort: Int,
 ) : Message {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x02")
@@ -279,7 +279,7 @@ internal class PongMessage(
 
 internal class RegConfirmationMessage(
   val requestId: Bytes = Message.requestId(),
-  val topic: Bytes
+  val topic: Bytes,
 ) : Message {
 
   private val encodedMessageType: Bytes = Bytes.fromHexString("0x07")

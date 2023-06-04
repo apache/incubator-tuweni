@@ -51,12 +51,14 @@ class ServerRecordTest {
   private HttpServer httpServer;
 
   @BeforeAll
-  static void setupClients(@TempDirectory Path tempDir, @VertxInstance Vertx vertx) throws Exception {
+  static void setupClients(@TempDirectory Path tempDir, @VertxInstance Vertx vertx)
+      throws Exception {
     SelfSignedCertificate caClientCert = SelfSignedCertificate.create("example.com");
-    caFingerprint = certificateHexFingerprint(Paths.get(caClientCert.keyCertOptions().getCertPath()));
+    caFingerprint =
+        certificateHexFingerprint(Paths.get(caClientCert.keyCertOptions().getCertPath()));
     SecurityTestUtils.configureJDKTrustStore(tempDir, caClientCert);
-    caClient = vertx
-        .createHttpClient(
+    caClient =
+        vertx.createHttpClient(
             new HttpClientOptions()
                 .setTrustOptions(InsecureTrustOptions.INSTANCE)
                 .setSsl(true)
@@ -87,7 +89,8 @@ class ServerRecordTest {
     barClient = vertx.createHttpClient(barClientOptions);
 
     SelfSignedCertificate foobarCert = SelfSignedCertificate.create("foobar.com");
-    foobarFingerprint = certificateHexFingerprint(Paths.get(foobarCert.keyCertOptions().getCertPath()));
+    foobarFingerprint =
+        certificateHexFingerprint(Paths.get(foobarCert.keyCertOptions().getCertPath()));
     HttpClientOptions foobarClientOptions = new HttpClientOptions();
     foobarClientOptions
         .setSsl(true)

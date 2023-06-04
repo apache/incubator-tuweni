@@ -24,7 +24,7 @@ interface Identity {
     /**
      * SECP256K1 curve
      */
-    SECP256K1("secp256k1");
+    SECP256K1("secp256k1"),
   }
 
   /**
@@ -126,8 +126,8 @@ interface Identity {
     fun fromSecretKey(secretKey: Signature.SecretKey): Identity {
       return fromKeyPair(
         Signature.KeyPair.forSecretKey(
-          secretKey
-        )
+          secretKey,
+        ),
       )
     }
 

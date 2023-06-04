@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.apache.tuweni.units.bigints;
 
-
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes48;
 
@@ -11,21 +10,18 @@ import java.math.BigInteger;
 /**
  * Represents a 384-bit (48 bytes) unsigned integer value.
  *
- * <p>
- * A {@link UInt384Value} is an unsigned integer value stored with 48 bytes, so whose value can range between 0 and
- * 2^384-1.
+ * <p>A {@link UInt384Value} is an unsigned integer value stored with 48 bytes, so whose value can
+ * range between 0 and 2^384-1.
  *
- * <p>
- * This interface defines operations for value types with a 384-bit precision range. The methods provided by this
- * interface take parameters of the same type (and also {@code long}. This provides type safety by ensuring calculations
- * cannot mix different {@code UInt384Value} types.
+ * <p>This interface defines operations for value types with a 384-bit precision range. The methods
+ * provided by this interface take parameters of the same type (and also {@code long}. This provides
+ * type safety by ensuring calculations cannot mix different {@code UInt384Value} types.
  *
- * <p>
- * Where only a pure numerical 384-bit value is required, {@link UInt384} should be used.
+ * <p>Where only a pure numerical 384-bit value is required, {@link UInt384} should be used.
  *
- * <p>
- * It is strongly advised to extend {@link BaseUInt384Value} rather than implementing this interface directly. Doing so
- * provides type safety in that quantities of different units cannot be mixed accidentally.
+ * <p>It is strongly advised to extend {@link BaseUInt384Value} rather than implementing this
+ * interface directly. Doing so provides type safety in that quantities of different units cannot be
+ * mixed accidentally.
  *
  * @param <T> The concrete type of the value.
  */
@@ -230,11 +226,9 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
   /**
    * Returns a value that is {@code (this<sup>exponent</sup> mod 2<sup>384</sup>)}
    *
-   * <p>
-   * This calculates an exponentiation over the modulus of {@code 2^384}.
+   * <p>This calculates an exponentiation over the modulus of {@code 2^384}.
    *
-   * <p>
-   * Note that {@code exponent} is an {@link UInt384} rather than of the type {@code T}.
+   * <p>Note that {@code exponent} is an {@link UInt384} rather than of the type {@code T}.
    *
    * @param exponent The exponent to which this value is to be raised.
    * @return {@code this<sup>exponent</sup> mod 2<sup>384</sup>}
@@ -244,8 +238,7 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
   /**
    * Returns a value that is {@code (this<sup>exponent</sup> mod 2<sup>384</sup>)}
    *
-   * <p>
-   * This calculates an exponentiation over the modulus of {@code 2^384}.
+   * <p>This calculates an exponentiation over the modulus of {@code 2^384}.
    *
    * @param exponent The exponent to which this value is to be raised.
    * @return {@code this<sup>exponent</sup> mod 2<sup>384</sup>}
@@ -273,14 +266,14 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
   /**
    * Returns true if this value fits an int
    *
-   * @return True if this value fits a java {@code int} (i.e. is less or equal to {@code Integer.MAX_VALUE}).
+   * @return True if this value fits a java {@code int} (i.e. is less or equal to {@code
+   *     Integer.MAX_VALUE}).
    */
   default boolean fitsInt() {
     // Ints are 4 bytes, so anything but the 4 last bytes must be zeroes
     Bytes48 bytes = toBytes();
     for (int i = 0; i < Bytes48.SIZE - 4; i++) {
-      if (bytes.get(i) != 0)
-        return false;
+      if (bytes.get(i) != 0) return false;
     }
     // Lastly, the left-most byte of the int must not start with a 1.
     return bytes.get(Bytes48.SIZE - 4) >= 0;
@@ -290,7 +283,8 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
    * Returns the value as an int.
    *
    * @return This value as a java {@code int} assuming it is small enough to fit an {@code int}.
-   * @throws ArithmeticException If the value does not fit an {@code int}, that is if {@code !fitsInt()}.
+   * @throws ArithmeticException If the value does not fit an {@code int}, that is if {@code
+   *     !fitsInt()}.
    */
   default int intValue() {
     if (!fitsInt()) {
@@ -301,14 +295,14 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
 
   /**
    * Returns true if this value fits in a long.
-   * 
-   * @return True if this value fits a java {@code long} (i.e. is less or equal to {@code Long.MAX_VALUE}).
+   *
+   * @return True if this value fits a java {@code long} (i.e. is less or equal to {@code
+   *     Long.MAX_VALUE}).
    */
   default boolean fitsLong() {
     // Longs are 8 bytes, so anything but the 8 last bytes must be zeroes
     for (int i = 0; i < Bytes48.SIZE - 8; i++) {
-      if (toBytes().get(i) != 0)
-        return false;
+      if (toBytes().get(i) != 0) return false;
     }
     // Lastly, the left-most byte of the long must not start with a 1.
     return toBytes().get(Bytes48.SIZE - 8) >= 0;
@@ -318,7 +312,8 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
    * Returns this value as a long.
    *
    * @return This value as a java {@code long} assuming it is small enough to fit a {@code long}.
-   * @throws ArithmeticException If the value does not fit a {@code long}, that is if {@code !fitsLong()}.
+   * @throws ArithmeticException If the value does not fit a {@code long}, that is if {@code
+   *     !fitsLong()}.
    */
   default long toLong() {
     if (!fitsLong()) {
@@ -329,7 +324,7 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
 
   /**
    * Returns this value as a {@link BigInteger}.
-   * 
+   *
    * @return This value as a {@link BigInteger}.
    */
   default BigInteger toBigInteger() {
@@ -339,10 +334,9 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
   /**
    * This value represented as an hexadecimal string.
    *
-   * <p>
-   * Note that this representation includes all the 48 underlying bytes, no matter what the integer actually represents
-   * (in other words, it can have many leading zeros). For a shorter representation that don't include leading zeros,
-   * use {@link #toShortHexString}.
+   * <p>Note that this representation includes all the 48 underlying bytes, no matter what the
+   * integer actually represents (in other words, it can have many leading zeros). For a shorter
+   * representation that don't include leading zeros, use {@link #toShortHexString}.
    *
    * @return This value represented as an hexadecimal string.
    */
@@ -352,7 +346,7 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
 
   /**
    * Returns this value represented as a minimal hexadecimal string (without any leading zero).
-   * 
+   *
    * @return This value represented as a minimal hexadecimal string (without any leading zero).
    */
   default String toShortHexString() {
@@ -368,23 +362,23 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
 
   /**
    * Returns the value as bytes
-   * 
+   *
    * @return The value as bytes.
    */
   Bytes48 toBytes();
 
   /**
    * Retuns the value as bytes without any leading zero bytes.
-   * 
+   *
    * @return The value as bytes without any leading zero bytes.
    */
   Bytes toMinimalBytes();
 
   /**
    * Returns the number of zero bits preceding the highest-order ("leftmost") one-bit
-   * 
-   * @return the number of zero bits preceding the highest-order ("leftmost") one-bit in the binary representation of
-   *         this value, or 384 if the value is equal to zero.
+   *
+   * @return the number of zero bits preceding the highest-order ("leftmost") one-bit in the binary
+   *     representation of this value, or 384 if the value is equal to zero.
    */
   default int numberOfLeadingZeros() {
     return toBytes().numberOfLeadingZeros();
@@ -392,9 +386,9 @@ public interface UInt384Value<T extends UInt384Value<T>> extends Comparable<T> {
 
   /**
    * Returns the number of bits following and including the highest-order ("leftmost") one-bit
-   * 
-   * @return The number of bits following and including the highest-order ("leftmost") one-bit in the binary
-   *         representation of this value, or zero if all bits are zero.
+   *
+   * @return The number of bits following and including the highest-order ("leftmost") one-bit in
+   *     the binary representation of this value, or zero if all bits are zero.
    */
   default int bitLength() {
     return toBytes().bitLength();

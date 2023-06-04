@@ -31,7 +31,7 @@ fun main() = runBlocking {
     networkInterface = "0.0.0.0",
     sslOptions = selfSignedCertificate.keyCertOptions(),
     submitCallback = { true },
-    seedSupplier = { Bytes32.random() }
+    seedSupplier = { Bytes32.random() },
   )
   server.start()
   Runtime.getRuntime().addShutdownHook(
@@ -40,7 +40,7 @@ fun main() = runBlocking {
         StratumServer.logger.info("Shutting down...")
         server.stop()
       }
-    }
+    },
   )
 }
 
@@ -57,7 +57,7 @@ class StratumServer(
   seedSupplier: () -> Bytes32,
   private val errorThreshold: Int = 3,
   denyTimeout: Long = 600000, // 10 minutes in milliseconds
-  override val coroutineContext: CoroutineContext = vertx.dispatcher()
+  override val coroutineContext: CoroutineContext = vertx.dispatcher(),
 ) : CoroutineScope {
 
   companion object {
@@ -69,9 +69,9 @@ class StratumServer(
       extranonce,
       submitCallback = submitCallback,
       seedSupplier = seedSupplier,
-      coroutineContext = this.coroutineContext
+      coroutineContext = this.coroutineContext,
     ),
-    Stratum1EthProxyProtocol(submitCallback, seedSupplier, this.coroutineContext)
+    Stratum1EthProxyProtocol(submitCallback, seedSupplier, this.coroutineContext),
   )
 
   private val started = AtomicBoolean(false)
@@ -125,7 +125,7 @@ class StratumServer(
       },
       name = name,
       threshold = errorThreshold,
-      sender = { bytes -> socket.write(Buffer.buffer(bytes)) }
+      sender = { bytes -> socket.write(Buffer.buffer(bytes)) },
     )
     socket.handler(conn::handleBuffer)
     socket.closeHandler {

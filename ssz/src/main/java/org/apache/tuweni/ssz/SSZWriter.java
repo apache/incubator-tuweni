@@ -9,16 +9,15 @@ import org.apache.tuweni.units.bigints.UInt384;
 import java.math.BigInteger;
 import java.util.List;
 
-/**
- * A writer for encoding values to SSZ.
- */
+/** A writer for encoding values to SSZ. */
 public interface SSZWriter {
 
   /**
    * Append an already SSZ encoded value.
    *
-   * Note that this method <b>may not</b> validate that {@code value} is a valid SSZ sequence. Appending an invalid SSZ
-   * sequence will cause the entire SSZ encoding produced by this writer to also be invalid.
+   * <p>Note that this method <b>may not</b> validate that {@code value} is a valid SSZ sequence.
+   * Appending an invalid SSZ sequence will cause the entire SSZ encoding produced by this writer to
+   * also be invalid.
    *
    * @param value the SSZ encoded bytes to append
    */
@@ -27,8 +26,9 @@ public interface SSZWriter {
   /**
    * Append an already SSZ encoded value.
    *
-   * Note that this method <b>may not</b> validate that {@code value} is a valid SSZ sequence. Appending an invalid SSZ
-   * sequence will cause the entire SSZ encoding produced by this writer to also be invalid.
+   * <p>Note that this method <b>may not</b> validate that {@code value} is a valid SSZ sequence.
+   * Appending an invalid SSZ sequence will cause the entire SSZ encoding produced by this writer to
+   * also be invalid.
    *
    * @param value the SSZ encoded bytes to append
    */
@@ -147,7 +147,8 @@ public interface SSZWriter {
   /**
    * Write an unsigned integer to the output.
    *
-   * Note that the argument {@code value} is a native signed int but will be interpreted as an unsigned value.
+   * <p>Note that the argument {@code value} is a native signed int but will be interpreted as an
+   * unsigned value.
    *
    * @param value the integer to write
    * @param bitLength the bit length of the integer value
@@ -160,7 +161,8 @@ public interface SSZWriter {
   /**
    * Write an unsigned long to the output.
    *
-   * Note that the argument {@code value} is a native signed long but will be interpreted as an unsigned value.
+   * <p>Note that the argument {@code value} is a native signed long but will be interpreted as an
+   * unsigned value.
    *
    * @param value the long value to write
    * @param bitLength the bit length of the integer value
@@ -175,7 +177,8 @@ public interface SSZWriter {
    *
    * @param value the integer to write
    * @param bitLength the bit length of the integer value
-   * @throws IllegalArgumentException if the value is too large for the specified bit length or the value is negative
+   * @throws IllegalArgumentException if the value is too large for the specified bit length or the
+   *     value is negative
    */
   default void writeUBigInteger(BigInteger value, int bitLength) {
     writeSSZ(SSZ.encodeUBigIntegerToByteArray(value, bitLength));
@@ -213,7 +216,8 @@ public interface SSZWriter {
   /**
    * Write a 64-bit unsigned integer to the output.
    *
-   * Note that the argument {@code value} is a native signed long but will be interpreted as an unsigned value.
+   * <p>Note that the argument {@code value} is a native signed long but will be interpreted as an
+   * unsigned value.
    *
    * @param value the long to write
    */
@@ -295,7 +299,8 @@ public interface SSZWriter {
   }
 
   /**
-   * Write a list of known-size homogenous bytes. The list itself WILL have a length mixin, but the elements WILL NOT.
+   * Write a list of known-size homogenous bytes. The list itself WILL have a length mixin, but the
+   * elements WILL NOT.
    *
    * @param elements the known-size bytes to write as a list
    */
@@ -304,8 +309,8 @@ public interface SSZWriter {
   }
 
   /**
-   * Write a known-size fixed-length list of known-size homogenous bytes. Neither the list nor the elements in the list
-   * will have a length mixin.
+   * Write a known-size fixed-length list of known-size homogenous bytes. Neither the list nor the
+   * elements in the list will have a length mixin.
    *
    * @param elements the bytes to write as a list
    */
@@ -476,7 +481,8 @@ public interface SSZWriter {
   /**
    * Write a list of unsigned integers.
    *
-   * Note that the {@code elements} are native signed ints, but will be interpreted as an unsigned values.
+   * <p>Note that the {@code elements} are native signed ints, but will be interpreted as an
+   * unsigned values.
    *
    * @param bitLength the bit length of the encoded integers (must be a multiple of 8)
    * @param elements the integers to write as a list
@@ -489,7 +495,8 @@ public interface SSZWriter {
   /**
    * Write a list of unsigned integers.
    *
-   * Note that the {@code elements} are native signed ints, but will be interpreted as an unsigned values.
+   * <p>Note that the {@code elements} are native signed ints, but will be interpreted as an
+   * unsigned values.
    *
    * @param bitLength the bit length of the encoded integers (must be a multiple of 8)
    * @param elements the integers to write as a list
@@ -502,7 +509,8 @@ public interface SSZWriter {
   /**
    * Write a list of unsigned long integers.
    *
-   * Note that the {@code elements} are native signed longs, but will be interpreted as an unsigned values.
+   * <p>Note that the {@code elements} are native signed longs, but will be interpreted as an
+   * unsigned values.
    *
    * @param bitLength the bit length of the encoded integers (must be a multiple of 8)
    * @param elements the long integers to write as a list
@@ -515,7 +523,8 @@ public interface SSZWriter {
   /**
    * Write a list of unsigned long integers.
    *
-   * Note that the {@code elements} are native signed longs, but will be interpreted as an unsigned values.
+   * <p>Note that the {@code elements} are native signed longs, but will be interpreted as an
+   * unsigned values.
    *
    * @param bitLength the bit length of the encoded integers (must be a multiple of 8)
    * @param elements the long integers to write as a list
@@ -588,7 +597,8 @@ public interface SSZWriter {
   /**
    * Write a list of 64-bit unsigned integers.
    *
-   * Note that the {@code elements} are native signed longs, but will be interpreted as an unsigned values.
+   * <p>Note that the {@code elements} are native signed longs, but will be interpreted as an
+   * unsigned values.
    *
    * @param elements the integers to write as a list
    */
@@ -599,7 +609,8 @@ public interface SSZWriter {
   /**
    * Write a list of 64-bit unsigned integers.
    *
-   * Note that the {@code elements} are native signed longs, but will be interpreted as an unsigned values.
+   * <p>Note that the {@code elements} are native signed longs, but will be interpreted as an
+   * unsigned values.
    *
    * @param elements the integers to write as a list
    */
@@ -710,5 +721,4 @@ public interface SSZWriter {
   default <T extends SSZWritable> void writeTypedVector(List<T> elements) {
     SSZ.encodeAsFixedTypeVectorTo(elements, this::writeSSZ);
   }
-
 }

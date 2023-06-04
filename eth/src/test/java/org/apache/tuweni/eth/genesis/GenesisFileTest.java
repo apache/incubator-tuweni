@@ -42,11 +42,13 @@ class GenesisFileTest {
     assertEquals(8893, file.getAllocations().size());
     assertEquals(
         Wei.valueOf(new BigInteger("327600000000000000000")),
-        file.getAllocations().get(Address.fromHexString("c951900c341abbb3bafbf7ee2029377071dbc36a")));
+        file.getAllocations()
+            .get(Address.fromHexString("c951900c341abbb3bafbf7ee2029377071dbc36a")));
     assertEquals(
         Hash.fromHexString("0xd7f8974fb5ac78d9ac099b9ad5018bedc2ce0a72dad1827a1709da30580f0544"),
         file.toBlock().getHeader().getStateRoot());
-    Hash expectedHash = Hash.fromHexString("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3");
+    Hash expectedHash =
+        Hash.fromHexString("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3");
     assertEquals(8, file.getForks().size());
     assertEquals((Long) 1150000L, file.getForks().get(0));
     assertEquals(expectedHash, file.toBlock().getHeader().getHash());
@@ -79,19 +81,24 @@ class GenesisFileTest {
     assertEquals(
         Hash.fromHexString("0x0000000000000000000000000000000000000000000000000000000000000000"),
         file.toBlock().getHeader().getMixHash());
-    assertEquals(Gas.valueOf(UInt256.fromHexString("0x1fffffffffffff")), file.toBlock().getHeader().getGasLimit());
+    assertEquals(
+        Gas.valueOf(UInt256.fromHexString("0x1fffffffffffff")),
+        file.toBlock().getHeader().getGasLimit());
     assertEquals(UInt256.fromHexString("0x10000"), file.toBlock().getHeader().getDifficulty());
     assertEquals(
         Bytes.fromHexString("0x11bbe8db4e347b4e8c937c1c8370e4b5ed33adb3db69cbdb7a38e1e50b1b82fa"),
         file.toBlock().getHeader().getExtraData());
     assertEquals(
-        file.getAllocations().get(Address.fromHexString("fe3b557e8fb62b89f4916b721be55ceb828dbd73")),
+        file.getAllocations()
+            .get(Address.fromHexString("fe3b557e8fb62b89f4916b721be55ceb828dbd73")),
         Wei.valueOf(UInt256.fromHexString("0xad78ebc5ac6200000")));
     assertEquals(
-        file.getAllocations().get(Address.fromHexString("627306090abaB3A6e1400e9345bC60c78a8BEf57")),
+        file.getAllocations()
+            .get(Address.fromHexString("627306090abaB3A6e1400e9345bC60c78a8BEf57")),
         Wei.valueOf(new BigInteger("90000000000000000000000")));
     assertEquals(
-        file.getAllocations().get(Address.fromHexString("f17f52151EbEF6C7334FAD080c5704D77216b732")),
+        file.getAllocations()
+            .get(Address.fromHexString("f17f52151EbEF6C7334FAD080c5704D77216b732")),
         Wei.valueOf(new BigInteger("90000000000000000000000")));
     assertEquals(
         Hash.fromHexString("0x166ed98eea93ab2b6f6b1a425526994adc2d675bf9a0d77d600ed1e02d8f77df"),
@@ -110,5 +117,4 @@ class GenesisFileTest {
         Hash.fromHexString("0xf9c534ad514bc380e23a74e788c3d1f2446f9ad1cb74f0dbb48ea56c0315f5bc"),
         file.toBlock().getHeader().getHash());
   }
-
 }

@@ -7,12 +7,10 @@ import static java.util.Objects.requireNonNull;
 
 import org.apache.tuweni.bytes.Bytes;
 
-/**
- * Utility methods for encoding and decoding base32 strings.
- */
+/** Utility methods for encoding and decoding base32 strings. */
 public final class Base32 {
-  private static final org.apache.commons.codec.binary.Base32 codec = new org.apache.commons.codec.binary.Base32();
-
+  private static final org.apache.commons.codec.binary.Base32 codec =
+      new org.apache.commons.codec.binary.Base32();
 
   private Base32() {}
 

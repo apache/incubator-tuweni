@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class SSZFixedSizeVector<T extends SSZReadable & SSZWritable> implements SSZReadable, SSZWritable {
+public class SSZFixedSizeVector<T extends SSZReadable & SSZWritable>
+    implements SSZReadable, SSZWritable {
 
   private final int listSize;
   private final int elementSize;

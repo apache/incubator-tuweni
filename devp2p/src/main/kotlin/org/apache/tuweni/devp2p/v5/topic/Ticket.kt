@@ -13,7 +13,7 @@ internal data class Ticket(
   val srcIp: String,
   val requestTime: Long,
   val waitTime: Long,
-  val cumTime: Long
+  val cumTime: Long,
 ) {
 
   companion object {
@@ -59,7 +59,7 @@ internal data class Ticket(
     srcNodeId: Bytes,
     srcIp: String,
     now: Long,
-    topic: Bytes
+    topic: Bytes,
   ) {
     require(this.srcNodeId == srcNodeId) { TICKET_INVALID_MSG }
     require(this.srcIp == srcIp) { TICKET_INVALID_MSG }

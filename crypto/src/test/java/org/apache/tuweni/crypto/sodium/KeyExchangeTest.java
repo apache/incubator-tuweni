@@ -20,8 +20,10 @@ class KeyExchangeTest {
   void testMatchingSession() {
     KeyExchange.KeyPair clientKeyPair = KeyExchange.KeyPair.random();
     KeyExchange.KeyPair serverKeyPair = KeyExchange.KeyPair.random();
-    KeyExchange.SessionKeyPair clientSessionKeyPair = KeyExchange.client(clientKeyPair, serverKeyPair.publicKey());
-    KeyExchange.SessionKeyPair serverSessionKeyPair = KeyExchange.server(serverKeyPair, clientKeyPair.publicKey());
+    KeyExchange.SessionKeyPair clientSessionKeyPair =
+        KeyExchange.client(clientKeyPair, serverKeyPair.publicKey());
+    KeyExchange.SessionKeyPair serverSessionKeyPair =
+        KeyExchange.server(serverKeyPair, clientKeyPair.publicKey());
 
     assertEquals(clientSessionKeyPair.rx().bytes(), serverSessionKeyPair.tx().bytes());
     assertEquals(clientSessionKeyPair.tx().bytes(), serverSessionKeyPair.rx().bytes());

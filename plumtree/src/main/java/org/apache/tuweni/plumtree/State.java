@@ -20,21 +20,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
-/**
- * Local state to our peer, representing the make-up of the tree of peers.
- */
+/** Local state to our peer, representing the make-up of the tree of peers. */
 public final class State {
   private static final int maxMessagesHandlers = 1000000;
 
   private final PeerRepository peerRepository;
   private final MessageIdentity messageIdentityFunction;
-  private final Map<Bytes, MessageHandler> messageHandlers = Collections.synchronizedMap(new LinkedHashMap<>() {
+  private final Map<Bytes, MessageHandler> messageHandlers =
+      Collections.synchronizedMap(
+          new LinkedHashMap<>() {
 
-    @Override
-    protected boolean removeEldestEntry(final Map.Entry<Bytes, MessageHandler> eldest) {
-      return super.size() > maxMessagesHandlers;
-    }
-  });
+            @Override
+            protected boolean removeEldestEntry(final Map.Entry<Bytes, MessageHandler> eldest) {
+              return super.size() > maxMessagesHandlers;
+            }
+          });
 
   private final MessageSender messageSender;
   private final MessageListener messageListener;
@@ -64,7 +64,7 @@ public final class State {
 
     /**
      * Acts on receiving the full message.
-     * 
+     *
      * @param sender the sender - may be null if we are submitting this message to the network
      * @param message the payload to send to the network
      */
@@ -80,16 +80,16 @@ public final class State {
               messageSender.sendMessage(MessageSender.Verb.GOSSIP, attributes, peer, hash, message);
             }
           }
-          lazyQueue
-              .addAll(
-                  peerRepository
-                      .lazyPushPeers()
-                      .stream()
-                      .filter(p -> !lazyPeers.contains(p))
-                      .map(
-                          peer -> (Runnable) (() -> messageSender
-                              .sendMessage(MessageSender.Verb.IHAVE, null, peer, hash, null)))
-                      .collect(Collectors.toList()));
+          lazyQueue.addAll(
+              peerRepository.lazyPushPeers().stream()
+                  .filter(p -> !lazyPeers.contains(p))
+                  .map(
+                      peer ->
+                          (Runnable)
+                              (() ->
+                                  messageSender.sendMessage(
+                                      MessageSender.Verb.IHAVE, null, peer, hash, null)))
+                  .collect(Collectors.toList()));
           if (sender != null) {
             messageListener.listen(message, attributes, sender);
           }
@@ -104,18 +104,20 @@ public final class State {
     }
 
     private void scheduleGraftMessage(Iterator<Peer> peerIterator) {
-      TimerTask timerTask = new TimerTask() {
-        @Override
-        public void run() {
-          Iterator<Peer> localPeerIterator = peerIterator;
-          // rotate back to first peer if we still haven't grafted
-          if (!localPeerIterator.hasNext()) {
-            localPeerIterator = lazyPeers.iterator();
-          }
-          messageSender.sendMessage(MessageSender.Verb.GRAFT, null, localPeerIterator.next(), hash, null);
-          scheduleGraftMessage(localPeerIterator);
-        }
-      };
+      TimerTask timerTask =
+          new TimerTask() {
+            @Override
+            public void run() {
+              Iterator<Peer> localPeerIterator = peerIterator;
+              // rotate back to first peer if we still haven't grafted
+              if (!localPeerIterator.hasNext()) {
+                localPeerIterator = lazyPeers.iterator();
+              }
+              messageSender.sendMessage(
+                  MessageSender.Verb.GRAFT, null, localPeerIterator.next(), hash, null);
+              scheduleGraftMessage(localPeerIterator);
+            }
+          };
       tasks.add(timerTask);
       timer.schedule(timerTask, delay);
     }
@@ -133,9 +135,10 @@ public final class State {
 
   /**
    * Constructor using default time constants.
-   * 
+   *
    * @param peerRepository the peer repository to use to store and access peer information.
-   * @param messageIdentityFunction the function to use to hash messages into hashes to compare them.
+   * @param messageIdentityFunction the function to use to hash messages into hashes to compare
+   *     them.
    * @param messageSender a function abstracting sending messages to other peers.
    * @param messageListener a function consuming messages when they are gossiped.
    * @param messageValidator a function validating messages before they are gossiped to other peers.
@@ -161,15 +164,16 @@ public final class State {
 
   /**
    * Default constructor.
-   * 
+   *
    * @param peerRepository the peer repository to use to store and access peer information.
-   * @param messageIdentityFunction the function to use to hash messages into hashes to compare them.
+   * @param messageIdentityFunction the function to use to hash messages into hashes to compare
+   *     them.
    * @param messageSender a function abstracting sending messages to other peers.
    * @param messageListener a function consuming messages when they are gossiped.
    * @param messageValidator a function validating messages before they are gossiped to other peers.
    * @param peerPruningFunction a function deciding whether to prune peers.
-   * @param graftDelay delay in milliseconds to apply before this peer grafts an other peer when it finds that peer has
-   *        data it misses.
+   * @param graftDelay delay in milliseconds to apply before this peer grafts an other peer when it
+   *     finds that peer has data it misses.
    * @param lazyQueueInterval the interval in milliseconds between sending messages to lazy peers.
    */
   public State(
@@ -188,12 +192,15 @@ public final class State {
     this.messageValidator = messageValidator;
     this.peerPruningFunction = peerPruningFunction;
     this.delay = graftDelay;
-    timer.schedule(new TimerTask() {
-      @Override
-      public void run() {
-        processQueue();
-      }
-    }, lazyQueueInterval, lazyQueueInterval);
+    timer.schedule(
+        new TimerTask() {
+          @Override
+          public void run() {
+            processQueue();
+          }
+        },
+        lazyQueueInterval,
+        lazyQueueInterval);
   }
 
   /**
@@ -212,7 +219,6 @@ public final class State {
    */
   public void removePeer(Peer peer) {
     peerRepository.removePeer(peer);
-
   }
 
   /**
@@ -223,7 +229,8 @@ public final class State {
    * @param message the message
    * @param messageHash the hash of the message
    */
-  public void receiveGossipMessage(Peer peer, Map<String, Bytes> attributes, Bytes message, Bytes messageHash) {
+  public void receiveGossipMessage(
+      Peer peer, Map<String, Bytes> attributes, Bytes message, Bytes messageHash) {
     Bytes checkHash = messageIdentityFunction.identity(message);
     if (!checkHash.equals(messageHash)) {
       return;
@@ -266,7 +273,7 @@ public final class State {
 
   /**
    * Sends a gossip message to all peers, according to their status.
-   * 
+   *
    * @param message the message to propagate
    * @param attributes of the message
    * @return The associated hash of the message
@@ -287,9 +294,7 @@ public final class State {
     lazyQueue.removeAll(executed);
   }
 
-  /**
-   * Stops the gossip network state, cancelling all in progress tasks.
-   */
+  /** Stops the gossip network state, cancelling all in progress tasks. */
   public void stop() {
     timer.cancel();
   }

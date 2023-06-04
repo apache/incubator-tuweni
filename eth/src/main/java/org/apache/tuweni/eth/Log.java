@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A log entry is a tuple of a logger’s address (the address of the contract that added the logs), a series of 32-bytes
- * log topics, and some number of bytes of data.
+ * A log entry is a tuple of a logger’s address (the address of the contract that added the logs), a
+ * series of 32-bytes log topics, and some number of bytes of data.
  */
 public final class Log {
 
@@ -24,12 +24,14 @@ public final class Log {
    * @return the read log entry.
    */
   public static Log readFrom(final RLPReader in) {
-    return in.readList(reader -> {
-      final Address logger = Address.fromBytes(reader.readValue());
-      final List<Bytes32> topics = reader.readListContents(topicsReader -> Bytes32.wrap(topicsReader.readValue()));
-      final Bytes data = reader.readValue();
-      return new Log(logger, data, topics);
-    });
+    return in.readList(
+        reader -> {
+          final Address logger = Address.fromBytes(reader.readValue());
+          final List<Bytes32> topics =
+              reader.readListContents(topicsReader -> Bytes32.wrap(topicsReader.readValue()));
+          final Bytes data = reader.readValue();
+          return new Log(logger, data, topics);
+        });
   }
 
   private final Address logger;
@@ -53,15 +55,17 @@ public final class Log {
    * @param writer the output in which to encode the log entry.
    */
   public void writeTo(final RLPWriter writer) {
-    writer.writeList(out -> {
-      out.writeValue(logger);
-      out.writeList(topicsWriter -> {
-        for (Bytes32 topic : topics) {
-          topicsWriter.writeValue(topic);
-        }
-      });
-      out.writeValue(data);
-    });
+    writer.writeList(
+        out -> {
+          out.writeValue(logger);
+          out.writeList(
+              topicsWriter -> {
+                for (Bytes32 topic : topics) {
+                  topicsWriter.writeValue(topic);
+                }
+              });
+          out.writeValue(data);
+        });
   }
 
   /**
@@ -75,7 +79,7 @@ public final class Log {
 
   /**
    * Provides the logger's address
-   * 
+   *
    * @return the address of the contract that produced this log.
    */
   public Address getLogger() {
@@ -84,7 +88,7 @@ public final class Log {
 
   /**
    * Provides the data of the log
-   * 
+   *
    * @return data associated with this log.
    */
   public Bytes getData() {
@@ -93,7 +97,7 @@ public final class Log {
 
   /**
    * Provides the topics of the log
-   * 
+   *
    * @return indexable topics associated with this log.
    */
   public List<Bytes32> getTopics() {
@@ -102,11 +106,12 @@ public final class Log {
 
   @Override
   public boolean equals(final Object other) {
-    if (!(other instanceof Log))
-      return false;
+    if (!(other instanceof Log)) return false;
 
     final Log that = (Log) other;
-    return this.data.equals(that.data) && this.logger.equals(that.logger) && this.topics.equals(that.topics);
+    return this.data.equals(that.data)
+        && this.logger.equals(that.logger)
+        && this.topics.equals(that.topics);
   }
 
   @Override

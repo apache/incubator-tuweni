@@ -106,7 +106,7 @@ class RPCMessage(messageBytes: Bytes) {
     return if (isErrorMessage) {
       val exception = getErrorBody(objectMapper).map { errorBody: RPCErrorBody ->
         RPCRequestFailedException(
-          errorBody.message!!
+          errorBody.message!!,
         )
       }
       if (!exception.isPresent) {

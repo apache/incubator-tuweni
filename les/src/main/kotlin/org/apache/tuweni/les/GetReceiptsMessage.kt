@@ -19,11 +19,11 @@ internal data class GetReceiptsMessage(val reqID: Long, val blockHashes: List<Ha
 
     fun read(bytes: Bytes): GetReceiptsMessage {
       return RLP.decodeList(
-        bytes
+        bytes,
       ) { reader ->
         GetReceiptsMessage(
           reader.readLong(),
-          reader.readListContents { elementReader -> Hash.fromBytes(elementReader.readValue()) }
+          reader.readListContents { elementReader -> Hash.fromBytes(elementReader.readValue()) },
         )
       }
     }

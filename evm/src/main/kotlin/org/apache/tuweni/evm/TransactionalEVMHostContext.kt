@@ -37,7 +37,7 @@ class TransactionalEVMHostContext(
   val currentTimestamp: UInt256,
   val currentGasLimit: Long,
   val currentDifficulty: UInt256,
-  val chainId: UInt256
+  val chainId: UInt256,
 ) : HostContext, ExecutionChanges {
 
   companion object {
@@ -85,7 +85,7 @@ class TransactionalEVMHostContext(
     val accountState = transientRepository.getAccount(address)
     return null == accountState || (
       accountState.balance.isZero && accountState.nonce.isZero && EMPTY_CODE_HASH.equals(
-        accountState.codeHash
+        accountState.codeHash,
       ) && EMPTY_STORAGE_HASH.equals(accountState.storageRoot)
       )
   }
@@ -104,7 +104,7 @@ class TransactionalEVMHostContext(
     logger.trace("Entering getStorage")
     val value = transientRepository.getAccountStoreValue(address, Hash.hash(key))?.let {
       UInt256.fromBytes(
-        RLP.decodeValue(it)
+        RLP.decodeValue(it),
       )
     }
     logger.trace("key $key value $value")
@@ -119,7 +119,7 @@ class TransactionalEVMHostContext(
     val newNonce = account.nonce.add(1)
     transientRepository.storeAccount(
       address,
-      AccountState(newNonce, account.balance, account.storageRoot, account.codeHash)
+      AccountState(newNonce, account.balance, account.storageRoot, account.codeHash),
     )
     return newNonce
   }
@@ -296,8 +296,8 @@ class TransactionalEVMHostContext(
           beneficiaryAccountState.nonce,
           beneficiaryAccountState.balance.add(account.balance),
           beneficiaryAccountState.storageRoot,
-          beneficiaryAccountState.codeHash
-        )
+          beneficiaryAccountState.codeHash,
+        ),
       )
       val resetBalance = AccountState(this.nonce, Wei.valueOf(0), this.storageRoot, this.codeHash, this.version)
       transientRepository.storeAccount(address, resetBalance)
@@ -326,7 +326,7 @@ class TransactionalEVMHostContext(
       evmMessage.gas,
       evmMessage.kind,
       depth = evmMessage.depth,
-      hostContext = this
+      hostContext = this,
     )
     return result
   }
@@ -345,7 +345,7 @@ class TransactionalEVMHostContext(
       evmMessage.gas,
       evmMessage.kind,
       depth = evmMessage.depth,
-      hostContext = this
+      hostContext = this,
     )
     return result
   }
@@ -368,7 +368,7 @@ class TransactionalEVMHostContext(
       currentTimestamp,
       Bytes.ofUnsignedLong(currentGasLimit),
       currentDifficulty.toBytes(),
-      UInt256.ONE.toBytes()
+      UInt256.ONE.toBytes(),
     )
   }
 

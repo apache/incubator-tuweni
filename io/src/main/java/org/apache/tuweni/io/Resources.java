@@ -37,7 +37,7 @@ import com.google.errorprone.annotations.MustBeClosed;
 /**
  * Methods for resolving resources.
  *
- * Supports recursive discovery and glob matching on the filesystem and in jar archives.
+ * <p>Supports recursive discovery and glob matching on the filesystem and in jar archives.
  */
 public final class Resources {
 
@@ -84,7 +84,8 @@ public final class Resources {
    */
   @MustBeClosed
   @SuppressWarnings("MustBeClosedChecker")
-  public static Stream<URL> find(@Nullable ClassLoader classLoader, String glob) throws IOException {
+  public static Stream<URL> find(@Nullable ClassLoader classLoader, String glob)
+      throws IOException {
     if (glob.isEmpty()) {
       return Stream.empty();
     }
@@ -96,7 +97,9 @@ public final class Resources {
     }
 
     Enumeration<URL> resources =
-        (classLoader != null) ? classLoader.getResources(root) : ClassLoader.getSystemResources(root);
+        (classLoader != null)
+            ? classLoader.getResources(root)
+            : ClassLoader.getSystemResources(root);
     Stream<URL> stream = enumerationStream(resources);
 
     if ("".equals(root)) {
@@ -110,31 +113,35 @@ public final class Resources {
 
     String rest = globParts[1];
     try {
-      return stream.flatMap(url -> {
-        try {
-          // the mapped stream is closed after its contents have been placed into this stream
-          return find(url, rest);
-        } catch (IOException e) {
-          throw new UncheckedIOException(e);
-        }
-      });
+      return stream.flatMap(
+          url -> {
+            try {
+              // the mapped stream is closed after its contents have been placed into this stream
+              return find(url, rest);
+            } catch (IOException e) {
+              throw new UncheckedIOException(e);
+            }
+          });
     } catch (UncheckedIOException e) {
       throw e.getCause();
     }
   }
 
   private static Stream<URL> classLoaderJarRoots(@Nullable ClassLoader classLoader) {
-    return classLoaderJarRoots(classLoader, new HashMap<>()).stream().map(uri -> {
-      try {
-        return uri.toURL();
-      } catch (MalformedURLException e) {
-        // Should not happen
-        throw new RuntimeException(e);
-      }
-    });
+    return classLoaderJarRoots(classLoader, new HashMap<>()).stream()
+        .map(
+            uri -> {
+              try {
+                return uri.toURL();
+              } catch (MalformedURLException e) {
+                // Should not happen
+                throw new RuntimeException(e);
+              }
+            });
   }
 
-  private static Collection<URI> classLoaderJarRoots(@Nullable ClassLoader classLoader, Map<String, URI> results) {
+  private static Collection<URI> classLoaderJarRoots(
+      @Nullable ClassLoader classLoader, Map<String, URI> results) {
     if (classLoader instanceof URLClassLoader) {
       URL[] urls = ((URLClassLoader) classLoader).getURLs();
       for (URL url : urls) {
@@ -146,7 +153,9 @@ public final class Resources {
           throw new RuntimeException(e);
         }
         if (!Files.isRegularFile(Paths.get(urlPath))
-            || !(urlPath.endsWith(".jar") || urlPath.endsWith(".war") || urlPath.endsWith(".zip"))) {
+            || !(urlPath.endsWith(".jar")
+                || urlPath.endsWith(".war")
+                || urlPath.endsWith(".zip"))) {
           continue;
         }
         URI jarUri;
@@ -226,17 +235,17 @@ public final class Resources {
     }
 
     PathMatcher pathMatcher = rootDir.getFileSystem().getPathMatcher("glob:" + glob);
-    return Files
-        .walk(rootDir, FileVisitOption.FOLLOW_LINKS)
+    return Files.walk(rootDir, FileVisitOption.FOLLOW_LINKS)
         .filter(path -> pathMatcher.matches(rootDir.relativize(path)))
-        .map(path -> {
-          try {
-            return path.toUri().toURL();
-          } catch (MalformedURLException e) {
-            // should not happen
-            throw new RuntimeException(e);
-          }
-        });
+        .map(
+            path -> {
+              try {
+                return path.toUri().toURL();
+              } catch (MalformedURLException e) {
+                // should not happen
+                throw new RuntimeException(e);
+              }
+            });
   }
 
   private static Stream<URL> findJarResources(URL baseUrl, String glob) throws IOException {
@@ -252,28 +261,31 @@ public final class Resources {
     String rootEntryPath = (jarEntry == null) ? "" : jarEntry.getName();
     int rootEntryLength = rootEntryPath.length();
 
-    // Use a PathMatcher for the default filesystem, which should be ok for the path segments from the resource URIs
+    // Use a PathMatcher for the default filesystem, which should be ok for the path segments from
+    // the resource URIs
     FileSystem fileSystem = FileSystems.getDefault();
     PathMatcher pathMatcher = fileSystem.getPathMatcher("glob:" + glob);
 
-    return enumerationStream(jarFile.entries()).flatMap(entry -> {
-      String entryPath = entry.getName();
-      if (!entryPath.startsWith(rootEntryPath) || entryPath.length() == rootEntryLength) {
-        return Stream.empty();
-      }
-      String relativePath = entryPath.substring(rootEntryLength);
-      if (!pathMatcher.matches(fileSystem.getPath(relativePath))) {
-        return Stream.empty();
-      }
-      URL entryURL;
-      try {
-        entryURL = new URL(baseUrl, relativePath);
-      } catch (MalformedURLException e) {
-        // should not happen
-        throw new RuntimeException(e);
-      }
-      return Stream.of(entryURL);
-    });
+    return enumerationStream(jarFile.entries())
+        .flatMap(
+            entry -> {
+              String entryPath = entry.getName();
+              if (!entryPath.startsWith(rootEntryPath) || entryPath.length() == rootEntryLength) {
+                return Stream.empty();
+              }
+              String relativePath = entryPath.substring(rootEntryLength);
+              if (!pathMatcher.matches(fileSystem.getPath(relativePath))) {
+                return Stream.empty();
+              }
+              URL entryURL;
+              try {
+                entryURL = new URL(baseUrl, relativePath);
+              } catch (MalformedURLException e) {
+                // should not happen
+                throw new RuntimeException(e);
+              }
+              return Stream.of(entryURL);
+            });
   }
 
   @VisibleForTesting
@@ -289,7 +301,8 @@ public final class Resources {
         case '\\':
           i++;
           if (i >= length) {
-            throw new PatternSyntaxException("Invalid escape character at end of glob pattern", glob, length - 1);
+            throw new PatternSyntaxException(
+                "Invalid escape character at end of glob pattern", glob, length - 1);
           }
           break;
         case '*':

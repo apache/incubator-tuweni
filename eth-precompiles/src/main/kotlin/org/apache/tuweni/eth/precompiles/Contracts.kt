@@ -120,7 +120,7 @@ class AltBN128PrecompiledContract(
   private val operation: Byte,
   val inputLen: Int,
   val baseCost: Long,
-  val pairingGasCost: Long
+  val pairingGasCost: Long,
 ) : PrecompileContract {
 
   override fun run(input: Bytes): Result {
@@ -139,7 +139,7 @@ class AltBN128PrecompiledContract(
       result,
       o_len,
       error,
-      err_len
+      err_len,
     )
     return if (errorNo == 0) {
       Result(gasCost, Bytes.wrap(result, 0, o_len.getValue()))

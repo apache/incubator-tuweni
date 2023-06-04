@@ -10,32 +10,34 @@ import java.nio.ByteOrder;
 final class Keccakf800 {
 
   private static int[] keccakRoundConstants = {
-      0x00000001,
-      0x00008082,
-      0x0000808A,
-      0x80008000,
-      0x0000808B,
-      0x80000001,
-      0x80008081,
-      0x00008009,
-      0x0000008A,
-      0x00000088,
-      0x80008009,
-      0x8000000A,
-      0x8000808B,
-      0x0000008B,
-      0x00008089,
-      0x00008003,
-      0x00008002,
-      0x00000080,
-      0x0000800A,
-      0x8000000A,
-      0x80008081,
-      0x00008080,};
+    0x00000001,
+    0x00008082,
+    0x0000808A,
+    0x80008000,
+    0x0000808B,
+    0x80000001,
+    0x80008081,
+    0x00008009,
+    0x0000008A,
+    0x00000088,
+    0x80008009,
+    0x8000000A,
+    0x8000808B,
+    0x0000008B,
+    0x00008089,
+    0x00008003,
+    0x00008002,
+    0x00000080,
+    0x0000800A,
+    0x8000000A,
+    0x80008081,
+    0x00008080,
+  };
 
   /**
-   * Derived from {#link org.bouncycastle.crypto.digests.KeccakDigest#KeccakPermutation()}. Copyright (c) 2000-2017 The
-   * Legion Of The Bouncy Castle Inc. (http://www.bouncycastle.org) The original source is licensed under a MIT license.
+   * Derived from {#link org.bouncycastle.crypto.digests.KeccakDigest#KeccakPermutation()}.
+   * Copyright (c) 2000-2017 The Legion Of The Bouncy Castle Inc. (http://www.bouncycastle.org) The
+   * original source is licensed under a MIT license.
    */
   static void keccakf800(int[] state) {
     int a00 = state[0], a01 = state[1], a02 = state[2], a03 = state[3], a04 = state[4];

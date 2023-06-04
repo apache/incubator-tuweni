@@ -44,7 +44,7 @@ import kotlin.coroutines.resumeWithException
 fun CoroutineScope.asyncCompletion(
   context: CoroutineContext = Dispatchers.Default,
   start: CoroutineStart = CoroutineStart.DEFAULT,
-  block: suspend CoroutineScope.() -> Unit
+  block: suspend CoroutineScope.() -> Unit,
 ): AsyncCompletion {
   val completion = AsyncCompletion.incomplete()
   try {
@@ -156,7 +156,7 @@ suspend fun AsyncCompletion.await() {
 
 private class ContinuationConsumer(
   @Volatile @JvmField
-  var cont: Continuation<Unit>?
+  var cont: Continuation<Unit>?,
 ) : Consumer<Throwable?> {
   override fun accept(exception: Throwable?) {
     val cont = this.cont ?: return // atomically read current value unless null

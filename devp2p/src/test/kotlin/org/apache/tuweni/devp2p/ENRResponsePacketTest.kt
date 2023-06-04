@@ -26,7 +26,7 @@ internal class ENRResponsePacketTest {
       emptyMap(),
       InetAddress.getByName("localhost"),
       3000,
-      12000
+      12000,
     )
     val now = System.currentTimeMillis()
     val pong = ENRResponsePacket.create(keyPair, now, requestHash, enr)

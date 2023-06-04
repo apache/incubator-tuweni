@@ -12,23 +12,23 @@ import jnr.ffi.Pointer;
 /**
  * SHA-512 hashing.
  *
- * The SHA-256 and SHA-512 functions are provided for interoperability with other applications. If you are looking for a
- * generic hash function and not specifically SHA-2, using crypto_generichash() (BLAKE2b) might be a better choice.
- * <p>
- * These functions are also not suitable for hashing passwords or deriving keys from passwords. Use one of the password
- * hashing APIs instead.
- * <p>
- * These functions are not keyed and are thus deterministic. In addition, the untruncated versions are vulnerable to
- * length extension attacks.
+ * <p>The SHA-256 and SHA-512 functions are provided for interoperability with other applications.
+ * If you are looking for a generic hash function and not specifically SHA-2, using
+ * crypto_generichash() (BLAKE2b) might be a better choice.
+ *
+ * <p>These functions are also not suitable for hashing passwords or deriving keys from passwords.
+ * Use one of the password hashing APIs instead.
+ *
+ * <p>These functions are not keyed and are thus deterministic. In addition, the untruncated
+ * versions are vulnerable to length extension attacks.
+ *
  * <p>
  *
  * @see <a href="https://libsodium.gitbook.io/doc/advanced/sha-2_hash_function">SHA-2</a>
  */
 public class SHA512Hash {
 
-  /**
-   * Input of a SHA-512 hash function
-   */
+  /** Input of a SHA-512 hash function */
   public static final class Input implements Destroyable {
     /**
      * Create a hash input from a Diffie-Helman secret
@@ -49,7 +49,8 @@ public class SHA512Hash {
      * @return An input.
      */
     public static SHA512Hash.Input fromPointer(Allocated allocated) {
-      return new SHA512Hash.Input(Sodium.dup(allocated.pointer(), allocated.length()), allocated.length());
+      return new SHA512Hash.Input(
+          Sodium.dup(allocated.pointer(), allocated.length()), allocated.length());
     }
 
     /**
@@ -59,7 +60,8 @@ public class SHA512Hash {
      * @return An input.
      */
     public static SHA512Hash.Input fromHash(SHA512Hash.Hash hash) {
-      return new SHA512Hash.Input(Sodium.dup(hash.value.pointer(), hash.value.length()), hash.value.length());
+      return new SHA512Hash.Input(
+          Sodium.dup(hash.value.pointer(), hash.value.length()), hash.value.length());
     }
 
     /**
@@ -100,7 +102,7 @@ public class SHA512Hash {
 
     /**
      * Provides the length of the input
-     * 
+     *
      * @return the length of the input
      */
     public int length() {
@@ -126,7 +128,7 @@ public class SHA512Hash {
 
     /**
      * Provides the bytes of this key
-     * 
+     *
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -135,7 +137,7 @@ public class SHA512Hash {
 
     /**
      * Provides the bytes of this key
-     * 
+     *
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {
@@ -143,16 +145,13 @@ public class SHA512Hash {
     }
   }
 
-  /**
-   * SHA-512 hash output
-   */
+  /** SHA-512 hash output */
   public static final class Hash implements Destroyable {
     Allocated value;
 
     Hash(Pointer ptr, int length) {
       this.value = new Allocated(ptr, length);
     }
-
 
     @Override
     public void destroy() {
@@ -184,7 +183,7 @@ public class SHA512Hash {
     /**
      * Obtain the bytes of this hash.
      *
-     * WARNING: This will cause the hash to be copied into heap memory.
+     * <p>WARNING: This will cause the hash to be copied into heap memory.
      *
      * @return The bytes of this hash.
      */
@@ -195,8 +194,8 @@ public class SHA512Hash {
     /**
      * Obtain the bytes of this hash.
      *
-     * WARNING: This will cause the hash to be copied into heap memory. The returned array should be overwritten when no
-     * longer required.
+     * <p>WARNING: This will cause the hash to be copied into heap memory. The returned array should
+     * be overwritten when no longer required.
      *
      * @return The bytes of this hash.
      */
@@ -220,7 +219,7 @@ public class SHA512Hash {
 
   /**
    * Hashes input to a SHA-512 hash
-   * 
+   *
    * @param input the input of the hash function
    * @return a SHA-512 hash of the input
    */

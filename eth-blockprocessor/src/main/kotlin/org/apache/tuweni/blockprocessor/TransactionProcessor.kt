@@ -24,14 +24,14 @@ import org.apache.tuweni.units.ethereum.Wei
 data class TransactionProcessorResult(
   val receipt: TransactionReceipt? = null,
   val success: Boolean = false,
-  val gasUsed: Gas = Gas.ZERO
+  val gasUsed: Gas = Gas.ZERO,
 )
 
 class TransactionProcessor(
   val vm: EthereumVirtualMachine,
   val hardFork: HardFork,
   val repository: BlockchainRepository,
-  val stateChanges: TransientStateRepository
+  val stateChanges: TransientStateRepository,
 ) {
 
   fun calculateTransactionCost(payload: Bytes, hardFork: HardFork): Gas {
@@ -64,7 +64,7 @@ class TransactionProcessor(
     gasUsed: Gas,
     allGasUsed: Gas,
     coinbase: Address,
-    blockBloomFilter: LogsBloomFilter
+    blockBloomFilter: LogsBloomFilter,
   ): TransactionProcessorResult {
     val sender = tx.sender
     if (sender === null) {
@@ -91,7 +91,7 @@ class TransactionProcessor(
         UInt256.ONE,
         Wei.valueOf(0),
         Hash.fromBytes(MerkleTrie.EMPTY_TRIE_ROOT_HASH),
-        Hash.hash(tx.payload)
+        Hash.hash(tx.payload),
       )
       stateChanges.storeAccount(contractAddress, state)
       stateChanges.storeCode(tx.payload)
@@ -116,7 +116,7 @@ class TransactionProcessor(
       parentBlock.difficulty,
       chainId,
       CallKind.CALL,
-      hardFork
+      hardFork,
     )
     result.state.gasManager.add(gasCost)
     if (result.statusCode != EVMExecutionStatusCode.SUCCESS) {
@@ -133,7 +133,7 @@ class TransactionProcessor(
       senderAccountAfter.nonce.add(1),
       senderAccountAfter.balance.subtract(pay),
       senderAccountAfter.storageRoot,
-      senderAccountAfter.codeHash
+      senderAccountAfter.codeHash,
     )
     stateChanges.storeAccount(sender, newSenderAccountState)
 
@@ -142,7 +142,7 @@ class TransactionProcessor(
       coinbaseAccountState.nonce,
       coinbaseAccountState.balance.add(pay),
       coinbaseAccountState.storageRoot,
-      coinbaseAccountState.codeHash
+      coinbaseAccountState.codeHash,
     )
     stateChanges.storeAccount(coinbase, newCoinbaseAccountState)
 
@@ -159,7 +159,7 @@ class TransactionProcessor(
       1,
       result.state.gasManager.gasCost.toLong(),
       txLogsBloomFilter,
-      result.changes.getLogs()
+      result.changes.getLogs(),
     )
     return TransactionProcessorResult(receipt = receipt, success = true, gasUsed = gasUsed)
   }

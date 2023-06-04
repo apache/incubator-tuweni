@@ -36,7 +36,7 @@ class JSONRPCClient(
   val basicAuthenticationEnabled: Boolean = false,
   val basicAuthenticationUsername: String = "",
   val basicAuthenticationPassword: String = "",
-  override val coroutineContext: CoroutineContext = vertx.dispatcher()
+  override val coroutineContext: CoroutineContext = vertx.dispatcher(),
 ) : Closeable, CoroutineScope {
 
   companion object {
@@ -49,7 +49,7 @@ class JSONRPCClient(
   val client = WebClient.create(
     vertx,
     WebClientOptions().setUserAgent(userAgent).setTryUseCompression(true)
-      .setTracingPolicy(TracingPolicy.ALWAYS) as WebClientOptions
+      .setTracingPolicy(TracingPolicy.ALWAYS) as WebClientOptions,
   )
   val authorizationHeader = "Basic " + Base64.getEncoder()
     .encode((basicAuthenticationUsername + ":" + basicAuthenticationPassword).toByteArray())
@@ -124,7 +124,7 @@ class JSONRPCClient(
     val body = JSONRPCRequest(
       StringOrLong(nextId()),
       "eth_getTransactionCount",
-      arrayOf(address.toHexString(), "latest")
+      arrayOf(address.toHexString(), "latest"),
     )
     val jsonResponse = sendRequest(body).await()
     val err = jsonResponse.error
@@ -146,7 +146,7 @@ class JSONRPCClient(
     val body = JSONRPCRequest(
       StringOrLong(nextId()),
       "eth_getBlockByNumber",
-      arrayOf(blockNumber, includeTransactions)
+      arrayOf(blockNumber, includeTransactions),
     )
     val jsonResponse = sendRequest(body).await()
     val err = jsonResponse.error

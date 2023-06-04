@@ -62,7 +62,7 @@ object DiscoveryService {
     enrSeq: Long = Instant.now().toEpochMilli(),
     bootstrapENRList: List<String> = emptyList(),
     enrStorage: ENRStorage = DefaultENRStorage(),
-    coroutineContext: CoroutineContext = Dispatchers.Default
+    coroutineContext: CoroutineContext = Dispatchers.Default,
   ): DiscoveryV5Service {
     val selfENR = EthereumNodeRecord.create(
       keyPair,
@@ -71,7 +71,7 @@ object DiscoveryService {
       emptyMap(),
       bindAddress.address,
       bindAddress.port, // TODO allow override
-      bindAddress.port
+      bindAddress.port,
     )
     // val connector = UdpConnector(bindAddress, keyPair, selfENR, enrStorage)
     return DefaultDiscoveryV5Service(
@@ -81,7 +81,7 @@ object DiscoveryService {
       enrStorage,
       keyPair,
       selfENR,
-      coroutineContext = coroutineContext
+      coroutineContext = coroutineContext,
     )
   }
 }
@@ -135,7 +135,7 @@ interface DiscoveryV5Service : CoroutineScope {
    */
   suspend fun addPeer(
     enr: EthereumNodeRecord,
-    address: SocketAddress = SocketAddress.inetSocketAddress(enr.udp()!!, enr.ip().hostAddress)
+    address: SocketAddress = SocketAddress.inetSocketAddress(enr.udp()!!, enr.ip().hostAddress),
   ): AsyncCompletion
 
   /**
@@ -146,7 +146,7 @@ interface DiscoveryV5Service : CoroutineScope {
    */
   suspend fun requestNodes(
     distance: Int = 1,
-    maxSecondsToWait: Long = 10
+    maxSecondsToWait: Long = 10,
   ): AsyncResult<Map<EthereumNodeRecord, List<EthereumNodeRecord>>>
 }
 
@@ -159,7 +159,7 @@ internal class DefaultDiscoveryV5Service(
   private val selfEnr: EthereumNodeRecord,
   private val routingTable: RoutingTable = RoutingTable(selfEnr),
   private val topicTable: TopicTable = TopicTable(),
-  override val coroutineContext: CoroutineContext = Dispatchers.Default
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : DiscoveryV5Service {
 
   companion object {
@@ -220,7 +220,7 @@ internal class DefaultDiscoveryV5Service(
       }
       val rlpENR = Base64URLSafe.decode(encodedEnr)
       addPeer(rlpENR)
-    }
+    },
   )
 
   private fun receiveDatagram(packet: DatagramPacket) {
@@ -250,7 +250,7 @@ internal class DefaultDiscoveryV5Service(
   private fun createHandshake(
     address: SocketAddress,
     publicKey: SECP256K1.PublicKey? = null,
-    receivedEnr: EthereumNodeRecord? = null
+    receivedEnr: EthereumNodeRecord? = null,
   ): HandshakeSession {
     logger.trace("Creating new handshake with {}", address)
     val newSession = HandshakeSession(keyPair, address, publicKey, this::send, this::enr, coroutineContext)
@@ -269,7 +269,7 @@ internal class DefaultDiscoveryV5Service(
     newSession: HandshakeSession,
     address: SocketAddress,
     sessionKey: SessionKey,
-    receivedEnr: EthereumNodeRecord
+    receivedEnr: EthereumNodeRecord,
   ): Session {
     val session = Session(
       receivedEnr,
@@ -285,7 +285,7 @@ internal class DefaultDiscoveryV5Service(
       { missedPings ->
         missedPings > 5
       },
-      coroutineContext
+      coroutineContext,
     )
     logger.trace("Adding ENR discovered by connecting to peer")
     enrStorage.set(receivedEnr)
@@ -295,7 +295,7 @@ internal class DefaultDiscoveryV5Service(
 
   override suspend fun requestNodes(
     distance: Int,
-    maxSecondsToWait: Long
+    maxSecondsToWait: Long,
   ): AsyncResult<Map<EthereumNodeRecord, List<EthereumNodeRecord>>> =
     asyncResult {
       val results = ConcurrentHashMap<EthereumNodeRecord, List<EthereumNodeRecord>>()

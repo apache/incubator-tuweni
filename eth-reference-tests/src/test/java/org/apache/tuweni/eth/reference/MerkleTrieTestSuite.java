@@ -42,7 +42,8 @@ class MerkleTrieTestSuite {
     MerklePatriciaTrie<String> trie = MerklePatriciaTrie.create(this::readFromString);
     for (Object entry : input.entrySet()) {
       Map.Entry keyValue = (Map.Entry) entry;
-      trie.putAsync(readFromString((String) keyValue.getKey()), (String) keyValue.getValue()).join();
+      trie.putAsync(readFromString((String) keyValue.getKey()), (String) keyValue.getValue())
+          .join();
     }
     assertEquals(Bytes.fromHexString(root), trie.rootHash());
   }
@@ -73,21 +74,24 @@ class MerkleTrieTestSuite {
 
   @MustBeClosed
   private static Stream<Arguments> findTests(String glob) throws IOException {
-    return Resources.find(glob).flatMap(url -> {
-      try (InputStream in = url.openConnection().getInputStream()) {
-        return prepareTests(in);
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
-    });
+    return Resources.find(glob)
+        .flatMap(
+            url -> {
+              try (InputStream in = url.openConnection().getInputStream()) {
+                return prepareTests(in);
+              } catch (IOException e) {
+                throw new UncheckedIOException(e);
+              }
+            });
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   private static Stream<Arguments> prepareTests(InputStream in) throws IOException {
     Map<String, Map> allTests = new ObjectMapper().readerFor(Map.class).readValue(in);
-    return allTests
-        .entrySet()
-        .stream()
-        .map(entry -> Arguments.of(entry.getKey(), entry.getValue().get("in"), entry.getValue().get("root")));
+    return allTests.entrySet().stream()
+        .map(
+            entry ->
+                Arguments.of(
+                    entry.getKey(), entry.getValue().get("in"), entry.getValue().get("root")));
   }
 }

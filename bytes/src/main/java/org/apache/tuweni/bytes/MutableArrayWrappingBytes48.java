@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.apache.tuweni.bytes;
 
-final class MutableArrayWrappingBytes48 extends MutableArrayWrappingBytes implements MutableBytes48 {
+final class MutableArrayWrappingBytes48 extends MutableArrayWrappingBytes
+    implements MutableBytes48 {
 
   MutableArrayWrappingBytes48(byte[] bytes) {
     this(bytes, 0);

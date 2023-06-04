@@ -19,14 +19,14 @@ import kotlin.coroutines.CoroutineContext
 
 class EthstatsDataRepository(
   val ds: DataSource,
-  override val coroutineContext: CoroutineContext = Dispatchers.Default
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope {
   fun storeNodeInfo(remoteAddress: String, id: String, nodeInfo: NodeInfo) = async {
     ds.connection.use { conn ->
       val stmt =
         conn.prepareStatement(
           "insert into ethstats_peer(address, id, name, client, net, api, protocol, os, osVer, node, port) " +
-            "values(?,?,?,?,?,?,?,?,?,?,?)"
+            "values(?,?,?,?,?,?,?,?,?,?,?)",
         )
       stmt.use {
         it.setString(1, remoteAddress)
@@ -49,10 +49,10 @@ class EthstatsDataRepository(
     ds.connection.use { conn ->
       val stmt =
         conn.prepareStatement(
-          """insert into ethstats_block(address, id, number, hash, parentHash, timestamp, miner, gasUsed, 
-            |gasLimit, difficulty, totalDifficulty, transactions, transactionsRoot, stateRoot, uncles) 
+          """insert into ethstats_block(address, id, number, hash, parentHash, timestamp, miner, gasUsed,
+            |gasLimit, difficulty, totalDifficulty, transactions, transactionsRoot, stateRoot, uncles)
             |values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-          """.trimMargin()
+          """.trimMargin(),
         )
       stmt.use {
         val txArray = conn.createArrayOf("bytea", block.transactions.map { it.hash.toArrayUnsafe() }.toTypedArray())
@@ -82,7 +82,7 @@ class EthstatsDataRepository(
     ds.connection.use { conn ->
       val stmt =
         conn.prepareStatement(
-          "insert into latency(address, id, value) values(?,?,?)"
+          "insert into latency(address, id, value) values(?,?,?)",
         )
       stmt.use {
         it.setString(1, remoteAddress)
@@ -97,9 +97,9 @@ class EthstatsDataRepository(
     ds.connection.use { conn ->
       val stmt =
         conn.prepareStatement(
-          """insert into ethstats_nodestats(address, id, gasPrice, hashrate, mining, syncing, active, 
+          """insert into ethstats_nodestats(address, id, gasPrice, hashrate, mining, syncing, active,
             |uptime, peers) values(?,?,?,?,?,?,?,?,?)
-          """.trimMargin()
+          """.trimMargin(),
         )
       stmt.use {
         it.setString(1, remoteAddress)
@@ -120,7 +120,7 @@ class EthstatsDataRepository(
     ds.connection.use { conn ->
       val stmt =
         conn.prepareStatement(
-          "insert into pendingtx(address, id, value) values(?,?,?)"
+          "insert into pendingtx(address, id, value) values(?,?,?)",
         )
       stmt.use {
         it.setString(1, remoteAddress)
@@ -135,7 +135,7 @@ class EthstatsDataRepository(
     ds.connection.use { conn ->
       val stmt =
         conn.prepareStatement(
-          "update ethstats_peer set disconnect_time=now() where address=? and id=?"
+          "update ethstats_peer set disconnect_time=now() where address=? and id=?",
         )
       stmt.use {
         it.setString(1, remoteAddress)
@@ -149,10 +149,10 @@ class EthstatsDataRepository(
     return@async ds.connection.use { conn ->
       val stmt =
         conn.prepareStatement(
-          """select number, hash, parentHash, timestamp, miner, gasUsed, gasLimit, difficulty, totalDifficulty, 
-            |transactions, transactionsRoot, stateRoot, uncles from ethstats_block where id=? order by createdAt 
+          """select number, hash, parentHash, timestamp, miner, gasUsed, gasLimit, difficulty, totalDifficulty,
+            |transactions, transactionsRoot, stateRoot, uncles from ethstats_block where id=? order by createdAt
             |desc limit 1
-          """.trimMargin()
+          """.trimMargin(),
         )
       stmt.use {
         it.setString(1, id)
@@ -173,7 +173,7 @@ class EthstatsDataRepository(
             },
             Hash.fromBytes(Bytes.wrap(rs.getBytes(11))),
             Hash.fromBytes(Bytes.wrap(rs.getBytes(12))),
-            (rs.getArray(13).array as Array<*>).map { Hash.fromBytes(Bytes.wrap(it as ByteArray)) }
+            (rs.getArray(13).array as Array<*>).map { Hash.fromBytes(Bytes.wrap(it as ByteArray)) },
           )
         } else {
           null
@@ -186,7 +186,7 @@ class EthstatsDataRepository(
     return@async ds.connection.use { conn ->
       val stmt =
         conn.prepareStatement(
-          "select latency.value from latency where latency.id=? order by latency.createdAt desc limit 1"
+          "select latency.value from latency where latency.id=? order by latency.createdAt desc limit 1",
         )
       val latency = stmt.use {
         it.setString(1, id)
@@ -199,7 +199,7 @@ class EthstatsDataRepository(
       }
       val pendingtxStmt =
         conn.prepareStatement(
-          "select pendingtx.value from pendingtx where pendingtx.id=? order by pendingtx.createdAt desc limit 1"
+          "select pendingtx.value from pendingtx where pendingtx.id=? order by pendingtx.createdAt desc limit 1",
         )
       val pendingTx = pendingtxStmt.use {
         it.setString(1, id)
@@ -212,9 +212,9 @@ class EthstatsDataRepository(
       }
       val nodeInfoStmt =
         conn.prepareStatement(
-          """select name, node, port, net, protocol, api, os, osVer, client from 
+          """select name, node, port, net, protocol, api, os, osVer, client from
           |ethstats_peer where id=? order by createdAt desc limit 1
-          """.trimMargin()
+          """.trimMargin(),
         )
       val nodeInfo = nodeInfoStmt.use {
         it.setString(1, id)
@@ -229,7 +229,7 @@ class EthstatsDataRepository(
             rs.getString(6),
             rs.getString(7),
             rs.getString(8),
-            client = rs.getString(9)
+            client = rs.getString(9),
           )
         } else {
           null
@@ -237,9 +237,9 @@ class EthstatsDataRepository(
       }
 
       val nodeStatsStmt = conn.prepareStatement(
-        """select active, syncing, mining, hashrate, peers, gasPrice, uptime from ethstats_nodestats 
+        """select active, syncing, mining, hashrate, peers, gasPrice, uptime from ethstats_nodestats
           |where id=? order by createdAt desc limit 1
-        """.trimMargin()
+        """.trimMargin(),
       )
       val nodeStats = nodeStatsStmt.use {
         it.setString(1, id)
@@ -252,7 +252,7 @@ class EthstatsDataRepository(
             rs.getInt(4),
             rs.getInt(5),
             rs.getInt(6),
-            rs.getInt(7)
+            rs.getInt(7),
           )
         } else {
           null

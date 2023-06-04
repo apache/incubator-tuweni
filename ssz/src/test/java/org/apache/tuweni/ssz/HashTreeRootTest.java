@@ -47,17 +47,19 @@ class HashTreeRootTest {
 
   @Test
   void list() {
-    Bytes[] list = new Bytes[] {
-        Bytes.wrap(new byte[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}),
-        Bytes.wrap(new byte[] {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}),
-        Bytes.wrap(new byte[] {3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3}),
-        Bytes.wrap(new byte[] {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4}),
-        Bytes.wrap(new byte[] {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}),
-        Bytes.wrap(new byte[] {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6}),
-        Bytes.wrap(new byte[] {7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7}),
-        Bytes.wrap(new byte[] {8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8}),
-        Bytes.wrap(new byte[] {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9}),
-        Bytes.wrap(new byte[] {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10})};
+    Bytes[] list =
+        new Bytes[] {
+          Bytes.wrap(new byte[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}),
+          Bytes.wrap(new byte[] {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}),
+          Bytes.wrap(new byte[] {3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3}),
+          Bytes.wrap(new byte[] {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4}),
+          Bytes.wrap(new byte[] {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}),
+          Bytes.wrap(new byte[] {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6}),
+          Bytes.wrap(new byte[] {7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7}),
+          Bytes.wrap(new byte[] {8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8}),
+          Bytes.wrap(new byte[] {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9}),
+          Bytes.wrap(new byte[] {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10})
+        };
     assertEquals(
         Bytes.fromHexString("0x839D98509E2EFC53BD1DEA17403921A89856E275BBF4D56C600CC3F6730AAFFA"),
         SSZ.hashTreeRoot(list));
@@ -88,17 +90,16 @@ class HashTreeRootTest {
 
     assertEquals(
         Bytes.fromHexString("0x55DC6699E7B5713DD9102224C302996F931836C6DAE9A4EC6AB49C966F394685"),
-        SSZ
-            .hashTreeRoot(
-                Bytes.wrap(_1s),
-                Bytes.wrap(_2s),
-                Bytes.wrap(_3s),
-                Bytes.wrap(_4s),
-                Bytes.wrap(_5s),
-                Bytes.wrap(_6s),
-                Bytes.wrap(_7s),
-                Bytes.wrap(_8s),
-                Bytes.wrap(_9s),
-                Bytes.wrap(_as)));
+        SSZ.hashTreeRoot(
+            Bytes.wrap(_1s),
+            Bytes.wrap(_2s),
+            Bytes.wrap(_3s),
+            Bytes.wrap(_4s),
+            Bytes.wrap(_5s),
+            Bytes.wrap(_6s),
+            Bytes.wrap(_7s),
+            Bytes.wrap(_8s),
+            Bytes.wrap(_9s),
+            Bytes.wrap(_as)));
   }
 }

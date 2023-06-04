@@ -13,7 +13,7 @@ internal data class GetBlockHeadersMessage(val reqID: Long, val queries: List<Bl
     val blockNumberOrBlockHash: Bytes32,
     val maxHeaders: UInt256,
     val skip: UInt256,
-    val direction: Direction
+    val direction: Direction,
   ) {
 
     internal enum class Direction {
@@ -52,9 +52,9 @@ internal data class GetBlockHeadersMessage(val reqID: Long, val queries: List<Bl
                   BlockHeaderQuery.Direction.BACKWARDS
                 } else {
                   BlockHeaderQuery.Direction.FORWARD
-                }
+                },
               )
-            }
+            },
           )
         }
         GetBlockHeadersMessage(reqId, queries)

@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * Class representing the identifier of a JSON-RPC request or response.
  *
- * The identifier can be a string or a number, but not both at the same time.
+ * <p>The identifier can be a string or a number, but not both at the same time.
  */
 public class StringOrLong {
 
@@ -32,12 +32,11 @@ public class StringOrLong {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (!(o instanceof StringOrLong))
-      return false;
+    if (this == o) return true;
+    if (!(o instanceof StringOrLong)) return false;
     StringOrLong that = (StringOrLong) o;
-    return Objects.equals(valueAsLong, that.valueAsLong) || Objects.equals(valueAsString, that.valueAsString);
+    return Objects.equals(valueAsLong, that.valueAsLong)
+        || Objects.equals(valueAsString, that.valueAsString);
   }
 
   @Override

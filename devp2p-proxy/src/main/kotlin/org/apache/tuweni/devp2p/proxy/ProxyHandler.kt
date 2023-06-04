@@ -26,7 +26,7 @@ const val RESPONSE = 2
 class ProxyHandler(
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
   val service: SubprotocolService,
-  val client: ProxyClient
+  val client: ProxyClient,
 ) : CoroutineScope, SubProtocolHandler {
 
   companion object {

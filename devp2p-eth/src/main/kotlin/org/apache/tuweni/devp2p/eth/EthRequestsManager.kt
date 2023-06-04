@@ -31,7 +31,7 @@ interface EthRequestsManager {
    */
   fun requestBlockHeader(
     blockHash: Hash,
-    connection: WireConnection = connectionSelectionStrategy().selectConnection()
+    connection: WireConnection = connectionSelectionStrategy().selectConnection(),
   ): AsyncResult<BlockHeader>
 
   /**
@@ -42,7 +42,7 @@ interface EthRequestsManager {
    */
   fun requestBlockHeaders(
     blockHashes: List<Hash>,
-    connection: WireConnection = connectionSelectionStrategy().selectConnection()
+    connection: WireConnection = connectionSelectionStrategy().selectConnection(),
   ): AsyncResult<List<BlockHeader>>
 
   /**
@@ -59,7 +59,7 @@ interface EthRequestsManager {
     maxHeaders: Long,
     skip: Long,
     reverse: Boolean,
-    connection: WireConnection = connectionSelectionStrategy().selectConnection()
+    connection: WireConnection = connectionSelectionStrategy().selectConnection(),
   ): AsyncResult<List<BlockHeader>>
 
   /**
@@ -76,7 +76,7 @@ interface EthRequestsManager {
     maxHeaders: Long,
     skip: Long,
     reverse: Boolean,
-    connection: WireConnection = connectionSelectionStrategy().selectConnection()
+    connection: WireConnection = connectionSelectionStrategy().selectConnection(),
   ): AsyncResult<List<BlockHeader>>
 
   /**
@@ -87,7 +87,7 @@ interface EthRequestsManager {
    */
   fun requestBlockBodies(
     blockHashes: List<Hash>,
-    connection: WireConnection = connectionSelectionStrategy().selectConnection()
+    connection: WireConnection = connectionSelectionStrategy().selectConnection(),
   ): AsyncResult<List<BlockBody>>
 
   /**
@@ -98,7 +98,7 @@ interface EthRequestsManager {
    */
   fun requestBlock(
     blockHash: Hash,
-    connection: WireConnection = connectionSelectionStrategy().selectConnection()
+    connection: WireConnection = connectionSelectionStrategy().selectConnection(),
   ): AsyncResult<Block>
 
   /**
@@ -109,7 +109,7 @@ interface EthRequestsManager {
    */
   fun requestTransactionReceipts(
     blockHashes: List<Hash>,
-    connection: WireConnection = connectionSelectionStrategy().selectConnection()
+    connection: WireConnection = connectionSelectionStrategy().selectConnection(),
   ): AsyncResult<List<List<TransactionReceipt>>>
 
   /**

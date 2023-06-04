@@ -27,7 +27,7 @@ import org.apache.tuweni.crypto.sodium.Signature
  */
 class SecureScuttlebuttHandshakeServer private constructor(
   private val longTermKeyPair: Signature.KeyPair,
-  networkIdentifier: Bytes32
+  networkIdentifier: Bytes32,
 ) {
   private val ephemeralKeyPair: Box.KeyPair
   private val networkIdentifier: HMACSHA512256.Key
@@ -90,12 +90,12 @@ class SecureScuttlebuttHandshakeServer private constructor(
     sharedSecret = DiffieHelman.Secret
       .forKeys(
         DiffieHelman.SecretKey.forBoxSecretKey(ephemeralKeyPair.secretKey()),
-        DiffieHelman.PublicKey.forBoxPublicKey(clientEphemeralPublicKey!!)
+        DiffieHelman.PublicKey.forBoxPublicKey(clientEphemeralPublicKey!!),
       )
     sharedSecret2 = DiffieHelman.Secret
       .forKeys(
         DiffieHelman.SecretKey.forSignatureSecretKey(longTermKeyPair.secretKey()),
-        DiffieHelman.PublicKey.forBoxPublicKey(clientEphemeralPublicKey!!)
+        DiffieHelman.PublicKey.forBoxPublicKey(clientEphemeralPublicKey!!),
       )
   }
 
@@ -134,11 +134,11 @@ class SecureScuttlebuttHandshakeServer private constructor(
                       .add(networkIdentifier)
                       .add(sharedSecret!!)
                       .add(sharedSecret2!!)
-                      .concatenate()
-                  )
-              )
+                      .concatenate(),
+                  ),
+              ),
           ),
-        SecretBox.Nonce.fromBytes(ByteArray(24))
+        SecretBox.Nonce.fromBytes(ByteArray(24)),
       )
       ?: throw HandshakeException("Could not decrypt the plaintext with our shared secrets")
     if (plaintext.size() != 96) {
@@ -153,7 +153,7 @@ class SecureScuttlebuttHandshakeServer private constructor(
           .add(longTermKeyPair.publicKey())
           .add(SHA256Hash.hash(SHA256Hash.Input.fromSecret(sharedSecret!!)))
           .concatenate(),
-        detachedSignature!!
+        detachedSignature!!,
       )
     if (!verified) {
       throw HandshakeException("Identity message signature does not match")
@@ -161,7 +161,7 @@ class SecureScuttlebuttHandshakeServer private constructor(
     sharedSecret3 = DiffieHelman.Secret
       .forKeys(
         DiffieHelman.SecretKey.forBoxSecretKey(ephemeralKeyPair.secretKey()),
-        DiffieHelman.PublicKey.forSignaturePublicKey(clientLongTermPublicKey!!)
+        DiffieHelman.PublicKey.forSignaturePublicKey(clientLongTermPublicKey!!),
       )
   }
 
@@ -179,7 +179,7 @@ class SecureScuttlebuttHandshakeServer private constructor(
           .add(clientLongTermPublicKey!!)
           .add(SHA256Hash.hash(SHA256Hash.Input.fromSecret(sharedSecret!!)))
           .concatenate(),
-        longTermKeyPair.secretKey()
+        longTermKeyPair.secretKey(),
       )
     return SecretBox
       .encrypt(
@@ -195,11 +195,11 @@ class SecureScuttlebuttHandshakeServer private constructor(
                       .add(sharedSecret!!)
                       .add(sharedSecret2!!)
                       .add(sharedSecret3!!)
-                      .concatenate()
-                  )
-              )
+                      .concatenate(),
+                  ),
+              ),
           ),
-        SecretBox.Nonce.fromBytes(ByteArray(24))
+        SecretBox.Nonce.fromBytes(ByteArray(24)),
       )
       .bytes()
   }
@@ -230,15 +230,15 @@ class SecureScuttlebuttHandshakeServer private constructor(
                                   .add(sharedSecret!!)
                                   .add(sharedSecret2!!)
                                   .add(sharedSecret3!!)
-                                  .concatenate()
-                              )
-                          )
-                      )
-                  )
+                                  .concatenate(),
+                              ),
+                          ),
+                      ),
+                  ),
               )
               .add(longTermKeyPair.publicKey())
-              .concatenate()
-          )
+              .concatenate(),
+          ),
       )
   }
 
@@ -278,15 +278,15 @@ class SecureScuttlebuttHandshakeServer private constructor(
                                   .add(sharedSecret!!)
                                   .add(sharedSecret2!!)
                                   .add(sharedSecret3!!)
-                                  .concatenate()
-                              )
-                          )
-                      )
-                  )
+                                  .concatenate(),
+                              ),
+                          ),
+                      ),
+                  ),
               )
               .add(clientLongTermPublicKey!!)
-              .concatenate()
-          )
+              .concatenate(),
+          ),
       )
   }
 
@@ -310,7 +310,7 @@ class SecureScuttlebuttHandshakeServer private constructor(
       clientToServerSecretBoxKey(),
       clientToServerNonce(),
       serverToClientSecretBoxKey(),
-      serverToClientNonce()
+      serverToClientNonce(),
     )
   }
 }

@@ -22,7 +22,7 @@ internal sealed class Packet(
   val nodeId: SECP256K1.PublicKey,
   private val signature: SECP256K1.Signature,
   val hash: Bytes32,
-  val expiration: Long
+  val expiration: Long,
 ) {
 
   companion object {
@@ -42,19 +42,19 @@ internal sealed class Packet(
       val packetType = PacketType.forType(typeByte) ?: throw DecodingException("Unrecognized packet type: $typeByte")
 
       val signature = SECP256K1.Signature.fromBytes(
-        datagram.slice(SIGNATURE_INDEX, PACKET_TYPE_INDEX - SIGNATURE_INDEX)
+        datagram.slice(SIGNATURE_INDEX, PACKET_TYPE_INDEX - SIGNATURE_INDEX),
       )
 
       val publicKey = SECP256K1.PublicKey.recoverFromSignature(
         datagram.slice(PACKET_TYPE_INDEX, datagram.size() - PACKET_TYPE_INDEX),
-        signature
+        signature,
       ) ?: throw DecodingException("Invalid packet signature")
 
       val hash = Bytes32.wrap(
         datagram.slice(
           HASH_INDEX,
-          SIGNATURE_INDEX
-        )
+          SIGNATURE_INDEX,
+        ),
       )
       if (Hash.keccak256(datagram.slice(SIGNATURE_INDEX)) != hash) {
         throw DecodingException("Invalid packet hash")
@@ -70,7 +70,7 @@ internal sealed class Packet(
     protected fun createSignature(
       packetType: PacketType,
       keyPair: SECP256K1.KeyPair,
-      encoder: (RLPWriter) -> Unit
+      encoder: (RLPWriter) -> Unit,
     ): SigHash {
       val typeByte = Bytes.of(packetType.typeId)
       val dataBytes = RLP.encodeList { writer -> encoder(writer) }
@@ -97,7 +97,7 @@ internal class PingPacket private constructor(
   val from: Endpoint,
   val to: Endpoint,
   expiration: Long,
-  val enrSeq: Long?
+  val enrSeq: Long?,
 ) : Packet(nodeId, signature, hash, expiration) {
 
   companion object {
@@ -107,7 +107,7 @@ internal class PingPacket private constructor(
       val expiration = expirationFor(now)
       val sigHash = createSignature(
         PacketType.PING,
-        keyPair
+        keyPair,
       ) { writer ->
         encodeTo(writer, from, to, expiration, seq)
       }
@@ -118,7 +118,7 @@ internal class PingPacket private constructor(
         from,
         to,
         expiration,
-        seq
+        seq,
       )
     }
 
@@ -126,7 +126,7 @@ internal class PingPacket private constructor(
       payload: Bytes,
       hash: Bytes32,
       publicKey: SECP256K1.PublicKey,
-      signature: SECP256K1.Signature
+      signature: SECP256K1.Signature,
     ): PingPacket {
       try {
         return RLP.decodeList(payload) { reader ->
@@ -174,7 +174,7 @@ internal class PongPacket private constructor(
   val to: Endpoint,
   val pingHash: Bytes32,
   expiration: Long,
-  val enrSeq: Long?
+  val enrSeq: Long?,
 ) : Packet(nodeId, signature, hash, expiration) {
 
   companion object {
@@ -182,7 +182,7 @@ internal class PongPacket private constructor(
       val expiration = expirationFor(now)
       val sigHash = createSignature(
         PacketType.PONG,
-        keyPair
+        keyPair,
       ) { writer ->
         encodeTo(writer, to, pingHash, expiration, enrSeq)
       }
@@ -193,7 +193,7 @@ internal class PongPacket private constructor(
         to,
         pingHash,
         expiration,
-        enrSeq
+        enrSeq,
       )
     }
 
@@ -201,7 +201,7 @@ internal class PongPacket private constructor(
       payload: Bytes,
       hash: Bytes32,
       publicKey: SECP256K1.PublicKey,
-      signature: SECP256K1.Signature
+      signature: SECP256K1.Signature,
     ): PongPacket {
       try {
         return RLP.decodeList(payload) { reader ->
@@ -239,7 +239,7 @@ internal class FindNodePacket private constructor(
   signature: SECP256K1.Signature,
   hash: Bytes32,
   val target: SECP256K1.PublicKey,
-  expiration: Long
+  expiration: Long,
 ) : Packet(nodeId, signature, hash, expiration) {
 
   companion object {
@@ -247,7 +247,7 @@ internal class FindNodePacket private constructor(
       val expiration = expirationFor(now)
       val sigHash = createSignature(
         PacketType.FIND_NODE,
-        keyPair
+        keyPair,
       ) { writer ->
         encodeTo(writer, target, expiration)
       }
@@ -256,7 +256,7 @@ internal class FindNodePacket private constructor(
         sigHash.signature,
         sigHash.hash,
         target,
-        expiration
+        expiration,
       )
     }
 
@@ -264,7 +264,7 @@ internal class FindNodePacket private constructor(
       payload: Bytes,
       hash: Bytes32,
       publicKey: SECP256K1.PublicKey,
-      signature: SECP256K1.Signature
+      signature: SECP256K1.Signature,
     ): FindNodePacket {
       try {
         return RLP.decodeList(payload) { reader ->
@@ -293,7 +293,7 @@ internal class NeighborsPacket private constructor(
   signature: SECP256K1.Signature,
   hash: Bytes32,
   val nodes: List<Node>,
-  expiration: Long
+  expiration: Long,
 ) : Packet(nodeId, signature, hash, expiration) {
 
   companion object {
@@ -304,7 +304,7 @@ internal class NeighborsPacket private constructor(
       val expiration = expirationFor(now)
       val sigHash = createSignature(
         PacketType.NEIGHBORS,
-        keyPair
+        keyPair,
       ) { writer ->
         encodeTo(writer, nodes, expiration)
       }
@@ -313,7 +313,7 @@ internal class NeighborsPacket private constructor(
         sigHash.signature,
         sigHash.hash,
         nodes,
-        expiration
+        expiration,
       )
     }
 
@@ -339,7 +339,7 @@ internal class NeighborsPacket private constructor(
       payload: Bytes,
       hash: Bytes32,
       publicKey: SECP256K1.PublicKey,
-      signature: SECP256K1.Signature
+      signature: SECP256K1.Signature,
     ): NeighborsPacket {
       try {
         return RLP.decodeList(payload) { reader ->
@@ -373,7 +373,7 @@ internal class ENRRequestPacket private constructor(
   nodeId: SECP256K1.PublicKey,
   signature: SECP256K1.Signature,
   hash: Bytes32,
-  expiration: Long
+  expiration: Long,
 ) : Packet(nodeId, signature, hash, expiration) {
 
   companion object {
@@ -381,7 +381,7 @@ internal class ENRRequestPacket private constructor(
       payload: Bytes,
       hash: Bytes32,
       publicKey: SECP256K1.PublicKey,
-      signature: SECP256K1.Signature
+      signature: SECP256K1.Signature,
     ): ENRRequestPacket {
       try {
         return RLP.decodeList(payload) { reader ->
@@ -401,7 +401,7 @@ internal class ENRRequestPacket private constructor(
       val expiration = expirationFor(now)
       val sigHash = createSignature(
         PacketType.ENRRESPONSE,
-        keyPair
+        keyPair,
       ) { writer ->
         ENRRequestPacket.encodeTo(writer, expiration)
       }
@@ -409,7 +409,7 @@ internal class ENRRequestPacket private constructor(
         keyPair.publicKey(),
         sigHash.signature,
         sigHash.hash,
-        expiration
+        expiration,
       )
     }
   }
@@ -425,7 +425,7 @@ internal class ENRResponsePacket private constructor(
   hash: Bytes32,
   expiration: Long,
   val requestHash: Bytes,
-  val enr: Bytes
+  val enr: Bytes,
 ) : Packet(nodeId, signature, hash, expiration) {
 
   companion object {
@@ -434,7 +434,7 @@ internal class ENRResponsePacket private constructor(
       val expiration = expirationFor(now)
       val sigHash = createSignature(
         PacketType.ENRRESPONSE,
-        keyPair
+        keyPair,
       ) { writer ->
         encodeTo(writer, requestHash, enr, expiration)
       }
@@ -444,7 +444,7 @@ internal class ENRResponsePacket private constructor(
         sigHash.hash,
         expiration,
         requestHash,
-        enr
+        enr,
       )
     }
 
@@ -452,7 +452,7 @@ internal class ENRResponsePacket private constructor(
       payload: Bytes,
       hash: Bytes32,
       publicKey: SECP256K1.PublicKey,
-      signature: SECP256K1.Signature
+      signature: SECP256K1.Signature,
     ): ENRResponsePacket {
       try {
         return RLP.decodeList(payload) { reader ->

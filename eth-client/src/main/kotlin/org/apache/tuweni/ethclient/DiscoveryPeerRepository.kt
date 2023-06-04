@@ -43,7 +43,7 @@ class DiscoveryPeerRepository(private val repository: org.apache.tuweni.peer.rep
 
 internal class DelegatePeer(
   val repository: org.apache.tuweni.peer.repository.PeerRepository,
-  val peer: org.apache.tuweni.peer.repository.Peer
+  val peer: org.apache.tuweni.peer.repository.Peer,
 ) : Peer {
   override val nodeId: SECP256K1.PublicKey
     get() = peer.id().publicKey()

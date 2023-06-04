@@ -22,7 +22,7 @@ class Message(
   val version: Int = 3,
   val protocol: Protocol,
   val headers: Bytes,
-  val body: Bytes
+  val body: Bytes,
 ) {
 
   companion object {
@@ -107,7 +107,8 @@ enum class Protocol(val code: Byte) {
   /**
    * RPC message
    */
-  RPC(0);
+  RPC(0),
+  ;
 
   companion object {
     /**

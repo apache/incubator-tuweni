@@ -4,14 +4,12 @@ package org.apache.tuweni.toml;
 
 import java.util.List;
 
-/**
- * The result from parsing a TOML document.
- */
+/** The result from parsing a TOML document. */
 public interface TomlParseResult extends TomlTable {
 
   /**
    * Returns true if the TOML document contained errors.
-   * 
+   *
    * @return {@code true} if the TOML document contained errors.
    */
   default boolean hasErrors() {

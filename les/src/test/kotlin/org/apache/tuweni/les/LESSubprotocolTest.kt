@@ -32,7 +32,7 @@ internal class LESSubprotocolTest {
     Hash.fromBytes(Bytes32.random()),
     UInt256.valueOf(42L),
     Hash.fromBytes(Bytes32.random()),
-    emptyList()
+    emptyList(),
   )
 
   @Test
@@ -49,7 +49,7 @@ internal class LESSubprotocolTest {
       UInt256.ZERO,
       BlockchainRepository.inMemory(Genesis.dev()),
       MemoryTransactionPool(),
-      RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository())
+      RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository()),
     )
     assertTrue(sp.supports(SubProtocolIdentifier.of("les", 2)))
   }
@@ -68,7 +68,7 @@ internal class LESSubprotocolTest {
       UInt256.ZERO,
       BlockchainRepository.inMemory(Genesis.dev()),
       MemoryTransactionPool(),
-      RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository())
+      RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository()),
     )
     assertFalse(sp.supports(SubProtocolIdentifier.of("les", 3)))
   }
@@ -87,7 +87,7 @@ internal class LESSubprotocolTest {
       UInt256.ZERO,
       BlockchainRepository.inMemory(Genesis.dev()),
       MemoryTransactionPool(),
-      RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository())
+      RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository()),
     )
     assertFalse(sp.supports(SubProtocolIdentifier.of("eth", 2)))
   }

@@ -46,22 +46,24 @@ class TransactionTest {
   @Test
   void shouldGetSenderFromSignature() {
     SECP256K1.KeyPair keyPair = SECP256K1.KeyPair.random();
-    Address sender = Address.fromBytes(Bytes.wrap(keccak256(keyPair.publicKey().bytesArray()), 12, 20));
+    Address sender =
+        Address.fromBytes(Bytes.wrap(keccak256(keyPair.publicKey().bytesArray()), 12, 20));
     Transaction tx = generateTransaction(keyPair);
     assertEquals(sender, tx.getSender());
   }
 
   @Test
   void supportVMoreThanOneByte() {
-    Transaction tx = new Transaction(
-        UInt256.valueOf(0),
-        Wei.valueOf(BigInteger.valueOf(5L)),
-        Gas.valueOf(10L),
-        Address.fromBytes(Bytes.fromHexString("0x0102030405060708091011121314151617181920")),
-        Wei.valueOf(10L),
-        Bytes.of(1, 2, 3, 4),
-        SECP256K1.KeyPair.random(),
-        16 * 16 * 3);
+    Transaction tx =
+        new Transaction(
+            UInt256.valueOf(0),
+            Wei.valueOf(BigInteger.valueOf(5L)),
+            Gas.valueOf(10L),
+            Address.fromBytes(Bytes.fromHexString("0x0102030405060708091011121314151617181920")),
+            Wei.valueOf(10L),
+            Bytes.of(1, 2, 3, 4),
+            SECP256K1.KeyPair.random(),
+            16 * 16 * 3);
     Bytes bytes = tx.toBytes();
     Transaction read = Transaction.fromBytes(bytes);
     assertEquals(16 * 16 * 3, (int) read.getChainId());

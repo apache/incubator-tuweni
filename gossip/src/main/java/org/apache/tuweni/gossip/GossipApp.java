@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.apache.tuweni.gossip;
 
-
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.concurrent.AsyncCompletion;
 import org.apache.tuweni.concurrent.CompletableAsyncCompletion;
@@ -37,8 +36,8 @@ import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
 /**
- * Application running a gossip client, taking configuration from command line or a configuration file.
- *
+ * Application running a gossip client, taking configuration from command line or a configuration
+ * file.
  */
 public final class GossipApp {
 
@@ -46,7 +45,8 @@ public final class GossipApp {
 
   public static void main(String[] args) {
     Security.addProvider(new BouncyCastleProvider());
-    GossipCommandLineOptions opts = CommandLine.populateCommand(new GossipCommandLineOptions(), args);
+    GossipCommandLineOptions opts =
+        CommandLine.populateCommand(new GossipCommandLineOptions(), args);
     try {
       opts.validate();
     } catch (IllegalArgumentException e) {
@@ -58,16 +58,19 @@ public final class GossipApp {
       new CommandLine(opts).usage(System.out);
       System.exit(0);
     }
-    GossipApp gossipApp = new GossipApp(Vertx.vertx(), opts, System.err, System.out, () -> System.exit(1));
+    GossipApp gossipApp =
+        new GossipApp(Vertx.vertx(), opts, System.err, System.out, () -> System.exit(1));
     Runtime.getRuntime().addShutdownHook(new Thread(gossipApp::stop));
     gossipApp.start();
   }
 
-  private final ExecutorService senderThreadPool = Executors.newSingleThreadExecutor(r -> {
-    Thread t = new Thread(r, "sender");
-    t.setDaemon(false);
-    return t;
-  });
+  private final ExecutorService senderThreadPool =
+      Executors.newSingleThreadExecutor(
+          r -> {
+            Thread t = new Thread(r, "sender");
+            t.setDaemon(false);
+            return t;
+          });
   private final GossipCommandLineOptions opts;
   private final Runnable terminateFunction;
   private final PrintStream errStream;
@@ -84,17 +87,18 @@ public final class GossipApp {
       Runnable terminateFunction) {
     LoggingPeerRepository repository = new LoggingPeerRepository();
     logger.info("Setting up server on {}:{}", opts.networkInterface(), opts.listenPort());
-    server = new VertxGossipServer(
-        vertx,
-        opts.networkInterface(),
-        opts.listenPort(),
-        Hash::keccak256,
-        repository,
-        (bytes, attr, peer) -> readMessage(opts.messageLog(), errStream, bytes),
-        null,
-        new CountingPeerPruningFunction(10),
-        100,
-        100);
+    server =
+        new VertxGossipServer(
+            vertx,
+            opts.networkInterface(),
+            opts.listenPort(),
+            Hash::keccak256,
+            repository,
+            (bytes, attr, peer) -> readMessage(opts.messageLog(), errStream, bytes),
+            null,
+            new CountingPeerPruningFunction(10),
+            100,
+            100);
     this.opts = opts;
     this.errStream = errStream;
     this.outStream = outStream;
@@ -114,13 +118,18 @@ public final class GossipApp {
     logger.info("TCP server started");
 
     CompletableAsyncCompletion rpcCompletion = AsyncCompletion.incomplete();
-    rpcServer.requestHandler(this::handleRPCRequest).listen(opts.rpcPort(), opts.networkInterface(), res -> {
-      if (res.failed()) {
-        rpcCompletion.completeExceptionally(res.cause());
-      } else {
-        rpcCompletion.complete();
-      }
-    });
+    rpcServer
+        .requestHandler(this::handleRPCRequest)
+        .listen(
+            opts.rpcPort(),
+            opts.networkInterface(),
+            res -> {
+              if (res.failed()) {
+                rpcCompletion.completeExceptionally(res.cause());
+              } else {
+                rpcCompletion.complete();
+              }
+            });
     try {
       rpcCompletion.join();
     } catch (CompletionException | InterruptedException e) {
@@ -130,8 +139,8 @@ public final class GossipApp {
     logger.info("RPC server started");
 
     try {
-      AsyncCompletion
-          .allOf(opts.peers().stream().map(peer -> server.connectTo(peer.getHost(), peer.getPort())))
+      AsyncCompletion.allOf(
+              opts.peers().stream().map(peer -> server.connectTo(peer.getHost(), peer.getPort())))
           .join(60, TimeUnit.SECONDS);
     } catch (TimeoutException | InterruptedException e) {
       errStream.println("Server could not connect to other peers: " + e.getMessage());
@@ -140,32 +149,34 @@ public final class GossipApp {
 
     if (opts.sending()) {
       logger.info("Start sending messages");
-      senderThreadPool.submit(() -> {
-        for (int i = 0; i < opts.numberOfMessages(); i++) {
-          if (Thread.currentThread().isInterrupted()) {
-            return;
-          }
-          Bytes payload = Bytes.random(opts.payloadSize());
-          publish(payload);
-          try {
-            Thread.sleep(opts.sendInterval());
-          } catch (InterruptedException e) {
-            return;
-          }
-        }
-      });
+      senderThreadPool.submit(
+          () -> {
+            for (int i = 0; i < opts.numberOfMessages(); i++) {
+              if (Thread.currentThread().isInterrupted()) {
+                return;
+              }
+              Bytes payload = Bytes.random(opts.payloadSize());
+              publish(payload);
+              try {
+                Thread.sleep(opts.sendInterval());
+              } catch (InterruptedException e) {
+                return;
+              }
+            }
+          });
     }
   }
 
   private void handleRPCRequest(HttpServerRequest httpServerRequest) {
     if (HttpMethod.POST.equals(httpServerRequest.method())) {
       if ("/publish".equals(httpServerRequest.path())) {
-        httpServerRequest.bodyHandler(body -> {
-          Bytes message = Bytes.wrapBuffer(body);
-          outStream.println("Message to publish " + message.toHexString());
-          publish(message);
-          httpServerRequest.response().setStatusCode(200).end();
-        });
+        httpServerRequest.bodyHandler(
+            body -> {
+              Bytes message = Bytes.wrapBuffer(body);
+              outStream.println("Message to publish " + message.toHexString());
+              publish(message);
+              httpServerRequest.response().setStatusCode(200).end();
+            });
       } else {
         httpServerRequest.response().setStatusCode(404).end();
       }
@@ -186,13 +197,14 @@ public final class GossipApp {
     }
 
     CompletableAsyncCompletion rpcCompletion = AsyncCompletion.incomplete();
-    rpcServer.close(res -> {
-      if (res.failed()) {
-        rpcCompletion.completeExceptionally(res.cause());
-      } else {
-        rpcCompletion.complete();
-      }
-    });
+    rpcServer.close(
+        res -> {
+          if (res.failed()) {
+            rpcCompletion.completeExceptionally(res.cause());
+          } else {
+            rpcCompletion.complete();
+          }
+        });
     try {
       rpcCompletion.join();
     } catch (CompletionException | InterruptedException e) {
@@ -205,23 +217,23 @@ public final class GossipApp {
   }
 
   private void readMessage(String messageLog, PrintStream err, Bytes bytes) {
-    fileWriter.submit(() -> {
-      ObjectMapper mapper = new ObjectMapper();
-      ObjectNode node = mapper.createObjectNode();
-      node.put("timestamp", Instant.now().toString());
-      node.put("value", bytes.toHexString());
-      try {
-        Path path = Paths.get(messageLog);
-        Files
-            .write(
+    fileWriter.submit(
+        () -> {
+          ObjectMapper mapper = new ObjectMapper();
+          ObjectNode node = mapper.createObjectNode();
+          node.put("timestamp", Instant.now().toString());
+          node.put("value", bytes.toHexString());
+          try {
+            Path path = Paths.get(messageLog);
+            Files.write(
                 path,
                 Collections.singletonList(mapper.writeValueAsString(node)),
                 StandardCharsets.UTF_8,
                 Files.exists(path) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);
-      } catch (IOException e) {
-        err.println(e.getMessage());
-      }
-    });
+          } catch (IOException e) {
+            err.println(e.getMessage());
+          }
+        });
   }
 
   public void publish(Bytes message) {

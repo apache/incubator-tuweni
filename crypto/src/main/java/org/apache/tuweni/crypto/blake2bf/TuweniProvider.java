@@ -6,9 +6,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.Provider;
 
-/**
- * Bouncy Castle Security Provider for specific Apache Tuweni message digests.
- */
+/** Bouncy Castle Security Provider for specific Apache Tuweni message digests. */
 public final class TuweniProvider extends Provider {
 
   private static final String info = "Tuweni Security Provider v1.0";
@@ -18,9 +16,11 @@ public final class TuweniProvider extends Provider {
   @SuppressWarnings({"unchecked", "removal"})
   public TuweniProvider() {
     super(PROVIDER_NAME, "1.0", info);
-    AccessController.doPrivileged((PrivilegedAction) () -> {
-      put("MessageDigest.Blake2bf", Blake2bfMessageDigest.class.getName());
-      return null;
-    });
+    AccessController.doPrivileged(
+        (PrivilegedAction)
+            () -> {
+              put("MessageDigest.Blake2bf", Blake2bfMessageDigest.class.getName());
+              return null;
+            });
   }
 }

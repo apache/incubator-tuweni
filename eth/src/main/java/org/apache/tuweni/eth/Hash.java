@@ -9,16 +9,13 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.bytes.DelegatingBytes32;
 
-/**
- * An Ethereum hash.
- */
+/** An Ethereum hash. */
 public final class Hash extends DelegatingBytes32 {
 
   /**
    * Create a Hash from Bytes.
    *
-   * <p>
-   * The hash must be exactly 32 bytes.
+   * <p>The hash must be exactly 32 bytes.
    *
    * @param bytes The bytes for this hash.
    * @return A hash.
@@ -27,7 +24,8 @@ public final class Hash extends DelegatingBytes32 {
   public static Hash fromBytes(Bytes bytes) {
     requireNonNull(bytes);
     if (bytes.size() != SIZE) {
-      throw new IllegalArgumentException(String.format("Expected %s bytes but got %s", SIZE, bytes.size()));
+      throw new IllegalArgumentException(
+          String.format("Expected %s bytes but got %s", SIZE, bytes.size()));
     }
     return new Hash(Bytes32.wrap(bytes));
   }
@@ -49,11 +47,12 @@ public final class Hash extends DelegatingBytes32 {
   /**
    * Parse a hexadecimal string into a {@link Hash}.
    *
-   * @param str The hexadecimal string to parse, which may or may not start with "0x". That representation may contain
-   *        less than 32 bytes, in which case the result is left padded with zeros.
+   * @param str The hexadecimal string to parse, which may or may not start with "0x". That
+   *     representation may contain less than 32 bytes, in which case the result is left padded with
+   *     zeros.
    * @return The value corresponding to {@code str}.
-   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal representation or
-   *         contains more than 32 bytes.
+   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal
+   *     representation or contains more than 32 bytes.
    */
   public static Hash fromHexString(String str) {
     return new Hash(Bytes32.fromHexStringLenient(str));

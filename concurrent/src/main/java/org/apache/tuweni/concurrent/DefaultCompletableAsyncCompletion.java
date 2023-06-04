@@ -63,12 +63,14 @@ final class DefaultCompletableAsyncCompletion implements CompletableAsyncComplet
     try {
       join(10, TimeUnit.SECONDS);
     } catch (TimeoutException ex) {
-      throw new RuntimeException("Default timeout triggered for blocking call to AsyncCompletion::join()", ex);
+      throw new RuntimeException(
+          "Default timeout triggered for blocking call to AsyncCompletion::join()", ex);
     }
   }
 
   @Override
-  public void join(long timeout, TimeUnit unit) throws CompletionException, TimeoutException, InterruptedException {
+  public void join(long timeout, TimeUnit unit)
+      throws CompletionException, TimeoutException, InterruptedException {
     requireNonNull(unit);
     try {
       future.get(timeout, unit);
@@ -81,23 +83,26 @@ final class DefaultCompletableAsyncCompletion implements CompletableAsyncComplet
   public <U> AsyncResult<U> then(Supplier<? extends AsyncResult<U>> fn) {
     requireNonNull(fn);
     CompletableAsyncResult<U> asyncResult = AsyncResult.incomplete();
-    future.whenComplete((v, ex1) -> {
-      if (ex1 == null) {
-        try {
-          fn.get().whenComplete((u, ex3) -> {
-            if (ex3 == null) {
-              asyncResult.complete(u);
-            } else {
-              asyncResult.completeExceptionally(ex3);
+    future.whenComplete(
+        (v, ex1) -> {
+          if (ex1 == null) {
+            try {
+              fn.get()
+                  .whenComplete(
+                      (u, ex3) -> {
+                        if (ex3 == null) {
+                          asyncResult.complete(u);
+                        } else {
+                          asyncResult.completeExceptionally(ex3);
+                        }
+                      });
+            } catch (Throwable ex2) {
+              asyncResult.completeExceptionally(ex2);
             }
-          });
-        } catch (Throwable ex2) {
-          asyncResult.completeExceptionally(ex2);
-        }
-      } else {
-        asyncResult.completeExceptionally(ex1);
-      }
-    });
+          } else {
+            asyncResult.completeExceptionally(ex1);
+          }
+        });
     return asyncResult;
   }
 
@@ -106,29 +111,33 @@ final class DefaultCompletableAsyncCompletion implements CompletableAsyncComplet
     requireNonNull(vertx);
     requireNonNull(fn);
     CompletableAsyncResult<U> asyncResult = AsyncResult.incomplete();
-    future.whenComplete((v, ex1) -> {
-      if (ex1 == null) {
-        try {
-          vertx.runOnContext(ev -> {
+    future.whenComplete(
+        (v, ex1) -> {
+          if (ex1 == null) {
             try {
-              fn.get().whenComplete((u, ex4) -> {
-                if (ex4 == null) {
-                  asyncResult.complete(u);
-                } else {
-                  asyncResult.completeExceptionally(ex4);
-                }
-              });
-            } catch (Throwable ex3) {
-              asyncResult.completeExceptionally(ex3);
+              vertx.runOnContext(
+                  ev -> {
+                    try {
+                      fn.get()
+                          .whenComplete(
+                              (u, ex4) -> {
+                                if (ex4 == null) {
+                                  asyncResult.complete(u);
+                                } else {
+                                  asyncResult.completeExceptionally(ex4);
+                                }
+                              });
+                    } catch (Throwable ex3) {
+                      asyncResult.completeExceptionally(ex3);
+                    }
+                  });
+            } catch (Throwable ex2) {
+              asyncResult.completeExceptionally(ex2);
             }
-          });
-        } catch (Throwable ex2) {
-          asyncResult.completeExceptionally(ex2);
-        }
-      } else {
-        asyncResult.completeExceptionally(ex1);
-      }
-    });
+          } else {
+            asyncResult.completeExceptionally(ex1);
+          }
+        });
     return asyncResult;
   }
 
@@ -136,23 +145,26 @@ final class DefaultCompletableAsyncCompletion implements CompletableAsyncComplet
   public AsyncCompletion thenCompose(Supplier<? extends AsyncCompletion> fn) {
     requireNonNull(fn);
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-    future.whenComplete((v, ex1) -> {
-      if (ex1 == null) {
-        try {
-          fn.get().whenComplete(ex3 -> {
-            if (ex3 == null) {
-              completion.complete();
-            } else {
-              completion.completeExceptionally(ex3);
+    future.whenComplete(
+        (v, ex1) -> {
+          if (ex1 == null) {
+            try {
+              fn.get()
+                  .whenComplete(
+                      ex3 -> {
+                        if (ex3 == null) {
+                          completion.complete();
+                        } else {
+                          completion.completeExceptionally(ex3);
+                        }
+                      });
+            } catch (Throwable ex2) {
+              completion.completeExceptionally(ex2);
             }
-          });
-        } catch (Throwable ex2) {
-          completion.completeExceptionally(ex2);
-        }
-      } else {
-        completion.completeExceptionally(ex1);
-      }
-    });
+          } else {
+            completion.completeExceptionally(ex1);
+          }
+        });
     return completion;
   }
 
@@ -167,25 +179,27 @@ final class DefaultCompletableAsyncCompletion implements CompletableAsyncComplet
     requireNonNull(vertx);
     requireNonNull(runnable);
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-    future.whenComplete((t, ex1) -> {
-      if (ex1 == null) {
-        try {
-          vertx.runOnContext(ev -> {
+    future.whenComplete(
+        (t, ex1) -> {
+          if (ex1 == null) {
             try {
-              runnable.run();
-            } catch (Throwable ex3) {
-              completion.completeExceptionally(ex3);
-              return;
+              vertx.runOnContext(
+                  ev -> {
+                    try {
+                      runnable.run();
+                    } catch (Throwable ex3) {
+                      completion.completeExceptionally(ex3);
+                      return;
+                    }
+                    completion.complete();
+                  });
+            } catch (Throwable ex2) {
+              completion.completeExceptionally(ex2);
             }
-            completion.complete();
-          });
-        } catch (Throwable ex2) {
-          completion.completeExceptionally(ex2);
-        }
-      } else {
-        completion.completeExceptionally(ex1);
-      }
-    });
+          } else {
+            completion.completeExceptionally(ex1);
+          }
+        });
     return completion;
   }
 
@@ -194,26 +208,30 @@ final class DefaultCompletableAsyncCompletion implements CompletableAsyncComplet
     requireNonNull(vertx);
     requireNonNull(runnable);
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-    future.whenComplete((t, ex1) -> {
-      if (ex1 == null) {
-        try {
-          vertx.executeBlocking(vertxFuture -> {
-            runnable.run();
-            vertxFuture.complete(null);
-          }, false, res -> {
-            if (res.succeeded()) {
-              completion.complete();
-            } else {
-              completion.completeExceptionally(res.cause());
+    future.whenComplete(
+        (t, ex1) -> {
+          if (ex1 == null) {
+            try {
+              vertx.executeBlocking(
+                  vertxFuture -> {
+                    runnable.run();
+                    vertxFuture.complete(null);
+                  },
+                  false,
+                  res -> {
+                    if (res.succeeded()) {
+                      completion.complete();
+                    } else {
+                      completion.completeExceptionally(res.cause());
+                    }
+                  });
+            } catch (Throwable ex2) {
+              completion.completeExceptionally(ex2);
             }
-          });
-        } catch (Throwable ex2) {
-          completion.completeExceptionally(ex2);
-        }
-      } else {
-        completion.completeExceptionally(ex1);
-      }
-    });
+          } else {
+            completion.completeExceptionally(ex1);
+          }
+        });
     return completion;
   }
 
@@ -222,26 +240,30 @@ final class DefaultCompletableAsyncCompletion implements CompletableAsyncComplet
     requireNonNull(executor);
     requireNonNull(runnable);
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-    future.whenComplete((t, ex1) -> {
-      if (ex1 == null) {
-        try {
-          executor.executeBlocking(vertxFuture -> {
-            runnable.run();
-            vertxFuture.complete(null);
-          }, false, res -> {
-            if (res.succeeded()) {
-              completion.complete();
-            } else {
-              completion.completeExceptionally(res.cause());
+    future.whenComplete(
+        (t, ex1) -> {
+          if (ex1 == null) {
+            try {
+              executor.executeBlocking(
+                  vertxFuture -> {
+                    runnable.run();
+                    vertxFuture.complete(null);
+                  },
+                  false,
+                  res -> {
+                    if (res.succeeded()) {
+                      completion.complete();
+                    } else {
+                      completion.completeExceptionally(res.cause());
+                    }
+                  });
+            } catch (Throwable ex2) {
+              completion.completeExceptionally(ex2);
             }
-          });
-        } catch (Throwable ex2) {
-          completion.completeExceptionally(ex2);
-        }
-      } else {
-        completion.completeExceptionally(ex1);
-      }
-    });
+          } else {
+            completion.completeExceptionally(ex1);
+          }
+        });
     return completion;
   }
 
@@ -256,55 +278,62 @@ final class DefaultCompletableAsyncCompletion implements CompletableAsyncComplet
     requireNonNull(vertx);
     requireNonNull(supplier);
     CompletableAsyncResult<U> completion = AsyncResult.incomplete();
-    future.whenComplete((t, ex1) -> {
-      if (ex1 == null) {
-        try {
-          vertx.runOnContext(ev -> {
+    future.whenComplete(
+        (t, ex1) -> {
+          if (ex1 == null) {
             try {
-              completion.complete(supplier.get());
-            } catch (Throwable ex3) {
-              completion.completeExceptionally(ex3);
+              vertx.runOnContext(
+                  ev -> {
+                    try {
+                      completion.complete(supplier.get());
+                    } catch (Throwable ex3) {
+                      completion.completeExceptionally(ex3);
+                    }
+                  });
+            } catch (Throwable ex2) {
+              completion.completeExceptionally(ex2);
             }
-          });
-        } catch (Throwable ex2) {
-          completion.completeExceptionally(ex2);
-        }
-      } else {
-        completion.completeExceptionally(ex1);
-      }
-    });
+          } else {
+            completion.completeExceptionally(ex1);
+          }
+        });
     return completion;
   }
 
   @Override
-  public <U> AsyncCompletion thenConsume(AsyncResult<? extends U> other, Consumer<? super U> consumer) {
+  public <U> AsyncCompletion thenConsume(
+      AsyncResult<? extends U> other, Consumer<? super U> consumer) {
     requireNonNull(other);
     requireNonNull(consumer);
-    return new DefaultCompletableAsyncCompletion(future.thenAccept(v -> other.thenAccept(consumer)));
+    return new DefaultCompletableAsyncCompletion(
+        future.thenAccept(v -> other.thenAccept(consumer)));
   }
 
   @Override
-  public <U, V> AsyncResult<V> thenApply(AsyncResult<? extends U> other, Function<? super U, ? extends V> fn) {
+  public <U, V> AsyncResult<V> thenApply(
+      AsyncResult<? extends U> other, Function<? super U, ? extends V> fn) {
     requireNonNull(other);
     requireNonNull(fn);
     CompletableAsyncResult<V> asyncResult = AsyncResult.incomplete();
-    future.whenComplete((v, ex1) -> {
-      if (ex1 == null) {
-        try {
-          other.whenComplete((u, ex3) -> {
-            if (ex3 == null) {
-              asyncResult.complete(fn.apply(u));
-            } else {
-              asyncResult.completeExceptionally(ex3);
+    future.whenComplete(
+        (v, ex1) -> {
+          if (ex1 == null) {
+            try {
+              other.whenComplete(
+                  (u, ex3) -> {
+                    if (ex3 == null) {
+                      asyncResult.complete(fn.apply(u));
+                    } else {
+                      asyncResult.completeExceptionally(ex3);
+                    }
+                  });
+            } catch (Throwable ex2) {
+              asyncResult.completeExceptionally(ex2);
             }
-          });
-        } catch (Throwable ex2) {
-          asyncResult.completeExceptionally(ex2);
-        }
-      } else {
-        asyncResult.completeExceptionally(ex1);
-      }
-    });
+          } else {
+            asyncResult.completeExceptionally(ex1);
+          }
+        });
     return asyncResult;
   }
 
@@ -312,39 +341,44 @@ final class DefaultCompletableAsyncCompletion implements CompletableAsyncComplet
   public AsyncCompletion thenCombine(AsyncCompletion other) {
     requireNonNull(other);
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-    future.whenComplete((v, ex1) -> {
-      if (ex1 == null) {
-        try {
-          other.whenComplete(ex3 -> {
-            if (ex3 == null) {
-              completion.complete();
-            } else {
-              completion.completeExceptionally(ex3);
+    future.whenComplete(
+        (v, ex1) -> {
+          if (ex1 == null) {
+            try {
+              other.whenComplete(
+                  ex3 -> {
+                    if (ex3 == null) {
+                      completion.complete();
+                    } else {
+                      completion.completeExceptionally(ex3);
+                    }
+                  });
+            } catch (Throwable ex2) {
+              completion.completeExceptionally(ex2);
             }
-          });
-        } catch (Throwable ex2) {
-          completion.completeExceptionally(ex2);
-        }
-      } else {
-        completion.completeExceptionally(ex1);
-      }
-    });
+          } else {
+            completion.completeExceptionally(ex1);
+          }
+        });
     return completion;
   }
 
   @Override
   public AsyncCompletion exceptionally(Consumer<? super Throwable> consumer) {
     requireNonNull(consumer);
-    return new DefaultCompletableAsyncCompletion(future.exceptionally(ex -> {
-      consumer.accept(ex);
-      return null;
-    }));
+    return new DefaultCompletableAsyncCompletion(
+        future.exceptionally(
+            ex -> {
+              consumer.accept(ex);
+              return null;
+            }));
   }
 
   @Override
   public AsyncCompletion whenComplete(Consumer<? super Throwable> consumer) {
     requireNonNull(consumer);
-    return new DefaultCompletableAsyncCompletion(future.whenComplete((v, ex) -> consumer.accept(ex)));
+    return new DefaultCompletableAsyncCompletion(
+        future.whenComplete((v, ex) -> consumer.accept(ex)));
   }
 
   @Override
@@ -356,10 +390,12 @@ final class DefaultCompletableAsyncCompletion implements CompletableAsyncComplet
   @Override
   public AsyncCompletion accept(Consumer<? super Throwable> consumer) {
     requireNonNull(consumer);
-    return new DefaultCompletableAsyncCompletion(future.handle((v, ex) -> {
-      consumer.accept(ex);
-      return null;
-    }));
+    return new DefaultCompletableAsyncCompletion(
+        future.handle(
+            (v, ex) -> {
+              consumer.accept(ex);
+              return null;
+            }));
   }
 
   @Override

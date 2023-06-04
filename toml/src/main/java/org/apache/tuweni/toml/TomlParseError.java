@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.apache.tuweni.toml;
 
-/**
- * An error that occurred while parsing.
- */
+/** An error that occurred while parsing. */
 public final class TomlParseError extends RuntimeException {
 
   private final TomlPosition position;
@@ -21,7 +19,7 @@ public final class TomlParseError extends RuntimeException {
 
   /**
    * Provides the position in the input where the error occurred.
-   * 
+   *
    * @return The position in the input where the error occurred.
    */
   public TomlPosition position() {

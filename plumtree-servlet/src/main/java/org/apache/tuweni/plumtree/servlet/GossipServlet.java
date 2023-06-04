@@ -48,17 +48,19 @@ public class GossipServlet extends HttpServlet {
   private static final Logger logger = LoggerFactory.getLogger(GossipServlet.class);
   private static final ObjectMapper mapper = new ObjectMapper();
 
-  private final static class BytesSerializer extends StdSerializer<Bytes> {
+  private static final class BytesSerializer extends StdSerializer<Bytes> {
 
     public BytesSerializer() {
       super(Bytes.class);
     }
 
     @Override
-    public void serialize(Bytes value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(Bytes value, JsonGenerator gen, SerializerProvider provider)
+        throws IOException {
       gen.writeString(value.toHexString());
     }
   }
+
   static class BytesDeserializer extends StdDeserializer<Bytes> {
 
     BytesDeserializer() {
@@ -70,7 +72,6 @@ public class GossipServlet extends HttpServlet {
       String value = p.getValueAsString();
       return Bytes.fromHexStringLenient(value);
     }
-
   }
 
   static {
@@ -94,17 +95,22 @@ public class GossipServlet extends HttpServlet {
     HttpPost postMessage = new HttpPost(((ServletPeer) peer).getAddress());
     postMessage.setHeader(PLUMTREE_SERVER_HEADER, this.externalURL);
     try {
-      ByteArrayEntity entity = new ByteArrayEntity(mapper.writeValueAsBytes(message), ContentType.APPLICATION_JSON);
+      ByteArrayEntity entity =
+          new ByteArrayEntity(mapper.writeValueAsBytes(message), ContentType.APPLICATION_JSON);
       postMessage.setEntity(entity);
-      httpclient.execute(postMessage, response -> {
-        ((ServletPeer) peer).getErrorsCounter().set(0);
-        return null;
-      });
+      httpclient.execute(
+          postMessage,
+          response -> {
+            ((ServletPeer) peer).getErrorsCounter().set(0);
+            return null;
+          });
     } catch (IOException e) {
-      logger.info("Error sending to peer " + ((ServletPeer) peer).getAddress() + " : " + e.getMessage(), e);
+      logger.info(
+          "Error sending to peer " + ((ServletPeer) peer).getAddress() + " : " + e.getMessage(), e);
       int newErrCount = ((ServletPeer) peer).getErrorsCounter().addAndGet(1);
       if (newErrCount > 5) {
-        logger.error("Too many errors with peer {}, disconnecting ", ((ServletPeer) peer).getAddress());
+        logger.error(
+            "Too many errors with peer {}, disconnecting ", ((ServletPeer) peer).getAddress());
         state.removePeer(peer);
       }
     }
@@ -156,20 +162,22 @@ public class GossipServlet extends HttpServlet {
     super.init(config);
     if (started.compareAndSet(false, true)) {
       httpclient = HttpClients.createDefault();
-      state = new State(
-          peerRepository,
-          messageIdentity,
-          this::sendMessage,
-          payloadListener,
-          payloadValidator,
-          peerPruningFunction,
-          graftDelay,
-          lazyQueueInterval);
+      state =
+          new State(
+              peerRepository,
+              messageIdentity,
+              this::sendMessage,
+              payloadListener,
+              payloadValidator,
+              peerPruningFunction,
+              graftDelay,
+              lazyQueueInterval);
     }
   }
 
   @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
     String peerServerAddress = req.getHeader(PLUMTREE_SERVER_HEADER);
     if (peerServerAddress == null || peerServerAddress.isBlank()) {
       resp.sendError(500);
@@ -195,12 +203,11 @@ public class GossipServlet extends HttpServlet {
         state.receiveIHaveMessage(peer, Bytes.fromHexString(message.hash));
         break;
       case GOSSIP:
-        state
-            .receiveGossipMessage(
-                peer,
-                message.attributes,
-                Bytes.fromHexString(message.payload),
-                Bytes.fromHexString(message.hash));
+        state.receiveGossipMessage(
+            peer,
+            message.attributes,
+            Bytes.fromHexString(message.payload),
+            Bytes.fromHexString(message.hash));
         break;
       case GRAFT:
         state.receiveGraftMessage(peer, Bytes.fromHexString(message.payload));
@@ -267,24 +274,28 @@ public class GossipServlet extends HttpServlet {
     return completion;
   }
 
-  private void roundConnect(String url, AtomicInteger counter, CompletableAsyncCompletion completion) {
+  private void roundConnect(
+      String url, AtomicInteger counter, CompletableAsyncCompletion completion) {
     ServletPeer peer = new ServletPeer(url);
     HttpPost postMessage = new HttpPost(peer.getAddress());
     postMessage.setHeader(PLUMTREE_SERVER_HEADER, this.externalURL);
     try {
-      httpclient.execute(postMessage, response -> {
-        if (response.getCode() > 299) {
-          if (counter.incrementAndGet() > 5) {
-            completion.completeExceptionally(new RuntimeException(response.getEntity().toString()));
-          } else {
-            roundConnect(url, counter, completion);
-          }
-        } else {
-          state.addPeer(peer);
-          completion.complete();
-        }
-        return null;
-      });
+      httpclient.execute(
+          postMessage,
+          response -> {
+            if (response.getCode() > 299) {
+              if (counter.incrementAndGet() > 5) {
+                completion.completeExceptionally(
+                    new RuntimeException(response.getEntity().toString()));
+              } else {
+                roundConnect(url, counter, completion);
+              }
+            } else {
+              state.addPeer(peer);
+              completion.complete();
+            }
+            return null;
+          });
     } catch (IOException e) {
       if (counter.incrementAndGet() > 5) {
         completion.completeExceptionally(e);

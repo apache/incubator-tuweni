@@ -31,7 +31,8 @@ public class EthJsonModule extends SimpleModule {
     }
 
     @Override
-    public void serialize(Hash value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(Hash value, JsonGenerator gen, SerializerProvider provider)
+        throws IOException {
       gen.writeString(value.toHexString());
     }
   }
@@ -55,7 +56,8 @@ public class EthJsonModule extends SimpleModule {
     }
 
     @Override
-    public void serialize(Address value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(Address value, JsonGenerator gen, SerializerProvider provider)
+        throws IOException {
       gen.writeString(value.toHexString());
     }
   }
@@ -67,7 +69,8 @@ public class EthJsonModule extends SimpleModule {
     }
 
     @Override
-    public void serialize(Address value, JsonGenerator g, SerializerProvider provider) throws IOException {
+    public void serialize(Address value, JsonGenerator g, SerializerProvider provider)
+        throws IOException {
       g.writeFieldName(value.toHexString());
     }
   }
@@ -79,7 +82,8 @@ public class EthJsonModule extends SimpleModule {
     }
 
     @Override
-    public void serialize(Bytes value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(Bytes value, JsonGenerator gen, SerializerProvider provider)
+        throws IOException {
       gen.writeString(value.toHexString());
     }
   }
@@ -91,7 +95,8 @@ public class EthJsonModule extends SimpleModule {
     }
 
     @Override
-    public void serialize(Bytes32 value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(Bytes32 value, JsonGenerator gen, SerializerProvider provider)
+        throws IOException {
       gen.writeString(value.toHexString());
     }
   }
@@ -116,7 +121,8 @@ public class EthJsonModule extends SimpleModule {
     }
 
     @Override
-    public void serialize(Gas value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(Gas value, JsonGenerator gen, SerializerProvider provider)
+        throws IOException {
       gen.writeString(value.toBytes().toHexString());
     }
   }
@@ -128,7 +134,8 @@ public class EthJsonModule extends SimpleModule {
     }
 
     @Override
-    public void serialize(UInt256 value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(UInt256 value, JsonGenerator gen, SerializerProvider provider)
+        throws IOException {
       gen.writeString(value.toHexString());
     }
   }
@@ -140,7 +147,8 @@ public class EthJsonModule extends SimpleModule {
     }
 
     @Override
-    public void serialize(Instant value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(Instant value, JsonGenerator gen, SerializerProvider provider)
+        throws IOException {
       gen.writeNumber(value.toEpochMilli());
     }
   }
@@ -259,8 +267,8 @@ public class EthJsonModule extends SimpleModule {
     }
 
     @Override
-    public StringOrLong deserialize(JsonParser p, DeserializationContext ctxt) throws IOException,
-        JsonProcessingException {
+    public StringOrLong deserialize(JsonParser p, DeserializationContext ctxt)
+        throws IOException, JsonProcessingException {
       if (p.currentToken().isNumeric()) {
         return new StringOrLong(p.getLongValue());
       } else {
@@ -276,7 +284,8 @@ public class EthJsonModule extends SimpleModule {
     }
 
     @Override
-    public void serialize(StringOrLong value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(StringOrLong value, JsonGenerator gen, SerializerProvider provider)
+        throws IOException {
       if (value.getValueAsString() == null) {
         gen.writeNumber(value.getValueAsLong());
       } else {

@@ -10,13 +10,15 @@ import org.junit.jupiter.api.Test;
 public class JsonRpcTest {
 
   private static final ObjectMapper mapper = new ObjectMapper();
+
   static {
     mapper.registerModule(new EthJsonModule());
   }
 
   @Test
   void testJsonRpcRequestRoundtrip() throws Exception {
-    JSONRPCRequest req = new JSONRPCRequest(new StringOrLong("3"), "foo_method", new Object[] {"foo", "bar"}, "2.0");
+    JSONRPCRequest req =
+        new JSONRPCRequest(new StringOrLong("3"), "foo_method", new Object[] {"foo", "bar"}, "2.0");
     String value = mapper.writeValueAsString(req);
     JSONRPCRequest req2 = mapper.readValue(value, JSONRPCRequest.class);
     assertEquals(req, req2);

@@ -18,7 +18,9 @@ class XChaCha20Poly1305Test {
   @BeforeAll
   static void checkAvailable() {
     assumeTrue(Sodium.isAvailable(), "Sodium native library is not available");
-    assumeTrue(XChaCha20Poly1305.isAvailable(), "XChaCha20Poly1305 support is not available (requires >= 10.0.12");
+    assumeTrue(
+        XChaCha20Poly1305.isAvailable(),
+        "XChaCha20Poly1305 support is not available (requires >= 10.0.12");
   }
 
   @Test
@@ -47,13 +49,16 @@ class XChaCha20Poly1305Test {
     byte[] data = "123456".getBytes(UTF_8);
 
     DetachedEncryptionResult result = XChaCha20Poly1305.encryptDetached(message, data, key, nonce);
-    byte[] clearText = XChaCha20Poly1305.decryptDetached(result.cipherTextArray(), result.macArray(), data, key, nonce);
+    byte[] clearText =
+        XChaCha20Poly1305.decryptDetached(
+            result.cipherTextArray(), result.macArray(), data, key, nonce);
 
     assertNotNull(clearText);
     assertArrayEquals(message, clearText);
 
     clearText =
-        XChaCha20Poly1305.decryptDetached(result.cipherTextArray(), result.macArray(), data, key, nonce.increment());
+        XChaCha20Poly1305.decryptDetached(
+            result.cipherTextArray(), result.macArray(), data, key, nonce.increment());
     assertNull(clearText);
   }
 

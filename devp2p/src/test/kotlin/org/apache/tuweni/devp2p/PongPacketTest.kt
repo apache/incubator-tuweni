@@ -64,7 +64,7 @@ internal class PongPacketTest {
         "216fbe870f43ed0909009882e176a46b0102f846d79020010db885a308d313198a2e037073488208" +
         "ae82823aa0fbc914b16819237dcd8801d7e53f69e9719adecb3cc0e790c57e91ca4461c9548443b9" +
         "a355c6010203c2040506a0c969a58f6f9095004c0177a6b47f451530cab38966a25cca5cb58f0555" +
-        "42124e"
+        "42124e",
     )
     val packet = Packet.decodeFrom(datagram)
 

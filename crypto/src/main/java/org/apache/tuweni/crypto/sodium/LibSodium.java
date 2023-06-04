@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.apache.tuweni.crypto.sodium;
 
-
 import jnr.ffi.Pointer;
 import jnr.ffi.annotations.In;
 import jnr.ffi.annotations.Out;
@@ -64,7 +63,9 @@ public interface LibSodium {
   @ssize_t
   long crypto_aead_aes256gcm_statebytes();
 
-  // int crypto_aead_aes256gcm_encrypt(unsigned char * c, unsigned long long * clen_p, const unsigned char * m, unsigned long long mlen, const unsigned char * ad, unsigned long long adlen, const unsigned char * nsec, const unsigned char * npub, const unsigned char * k);
+  // int crypto_aead_aes256gcm_encrypt(unsigned char * c, unsigned long long * clen_p, const
+  // unsigned char * m, unsigned long long mlen, const unsigned char * ad, unsigned long long adlen,
+  // const unsigned char * nsec, const unsigned char * npub, const unsigned char * k);
   int crypto_aead_aes256gcm_encrypt(
       @Out byte[] c,
       @Out LongLongByReference clen_p,
@@ -76,7 +77,9 @@ public interface LibSodium {
       @In Pointer npub,
       @In Pointer k);
 
-  // int crypto_aead_aes256gcm_decrypt(unsigned char * m, unsigned long long * mlen_p, unsigned char * nsec, const unsigned char * c, unsigned long long clen, const unsigned char * ad, unsigned long long adlen, const unsigned char * npub, const unsigned char * k);
+  // int crypto_aead_aes256gcm_decrypt(unsigned char * m, unsigned long long * mlen_p, unsigned char
+  // * nsec, const unsigned char * c, unsigned long long clen, const unsigned char * ad, unsigned
+  // long long adlen, const unsigned char * npub, const unsigned char * k);
   int crypto_aead_aes256gcm_decrypt(
       @Out byte[] m,
       @Out LongLongByReference mlen_p,
@@ -88,7 +91,10 @@ public interface LibSodium {
       @In Pointer npub,
       @In Pointer k);
 
-  // int crypto_aead_aes256gcm_encrypt_detached(unsigned char * c, unsigned char * mac, unsigned long long * maclen_p, const unsigned char * m, unsigned long long mlen, const unsigned char * ad, unsigned long long adlen, const unsigned char * nsec, const unsigned char * npub, const unsigned char * k);
+  // int crypto_aead_aes256gcm_encrypt_detached(unsigned char * c, unsigned char * mac, unsigned
+  // long long * maclen_p, const unsigned char * m, unsigned long long mlen, const unsigned char *
+  // ad, unsigned long long adlen, const unsigned char * nsec, const unsigned char * npub, const
+  // unsigned char * k);
   int crypto_aead_aes256gcm_encrypt_detached(
       @Out byte[] c,
       @Out byte[] mac,
@@ -101,7 +107,9 @@ public interface LibSodium {
       @In Pointer npub,
       @In Pointer k);
 
-  // int crypto_aead_aes256gcm_decrypt_detached(unsigned char * m, unsigned char * nsec, const unsigned char * c, unsigned long long clen, const unsigned char * mac, const unsigned char * ad, unsigned long long adlen, const unsigned char * npub, const unsigned char * k);
+  // int crypto_aead_aes256gcm_decrypt_detached(unsigned char * m, unsigned char * nsec, const
+  // unsigned char * c, unsigned long long clen, const unsigned char * mac, const unsigned char *
+  // ad, unsigned long long adlen, const unsigned char * npub, const unsigned char * k);
   int crypto_aead_aes256gcm_decrypt_detached(
       @Out byte[] m,
       /*null*/ Pointer nsec,
@@ -113,10 +121,14 @@ public interface LibSodium {
       @In Pointer npub,
       @In Pointer k);
 
-  // int crypto_aead_aes256gcm_beforenm(crypto_aead_aes256gcm_state * ctx_, const unsigned char * k);
+  // int crypto_aead_aes256gcm_beforenm(crypto_aead_aes256gcm_state * ctx_, const unsigned char *
+  // k);
   int crypto_aead_aes256gcm_beforenm(@Out Pointer ctx_, @In Pointer k);
 
-  // int crypto_aead_aes256gcm_encrypt_afternm(unsigned char * c, unsigned long long * clen_p, const unsigned char * m, unsigned long long mlen, const unsigned char * ad, unsigned long long adlen, const unsigned char * nsec, const unsigned char * npub, const crypto_aead_aes256gcm_state * ctx_);
+  // int crypto_aead_aes256gcm_encrypt_afternm(unsigned char * c, unsigned long long * clen_p, const
+  // unsigned char * m, unsigned long long mlen, const unsigned char * ad, unsigned long long adlen,
+  // const unsigned char * nsec, const unsigned char * npub, const crypto_aead_aes256gcm_state *
+  // ctx_);
   int crypto_aead_aes256gcm_encrypt_afternm(
       @Out byte[] c,
       @Out LongLongByReference clen_p,
@@ -128,7 +140,10 @@ public interface LibSodium {
       @In Pointer npub,
       @In Pointer ctx_);
 
-  // int crypto_aead_aes256gcm_decrypt_afternm(unsigned char * m, unsigned long long * mlen_p, unsigned char * nsec, const unsigned char * c, unsigned long long clen, const unsigned char * ad, unsigned long long adlen, const unsigned char * npub, const crypto_aead_aes256gcm_state * ctx_);
+  // int crypto_aead_aes256gcm_decrypt_afternm(unsigned char * m, unsigned long long * mlen_p,
+  // unsigned char * nsec, const unsigned char * c, unsigned long long clen, const unsigned char *
+  // ad, unsigned long long adlen, const unsigned char * npub, const crypto_aead_aes256gcm_state *
+  // ctx_);
   int crypto_aead_aes256gcm_decrypt_afternm(
       @Out byte[] m,
       @Out LongLongByReference mlen_p,
@@ -140,7 +155,10 @@ public interface LibSodium {
       @In Pointer npub,
       @In Pointer ctx_);
 
-  // int crypto_aead_aes256gcm_encrypt_detached_afternm(unsigned char * c, unsigned char * mac, unsigned long long * maclen_p, const unsigned char * m, unsigned long long mlen, const unsigned char * ad, unsigned long long adlen, const unsigned char * nsec, const unsigned char * npub, const crypto_aead_aes256gcm_state * ctx_);
+  // int crypto_aead_aes256gcm_encrypt_detached_afternm(unsigned char * c, unsigned char * mac,
+  // unsigned long long * maclen_p, const unsigned char * m, unsigned long long mlen, const unsigned
+  // char * ad, unsigned long long adlen, const unsigned char * nsec, const unsigned char * npub,
+  // const crypto_aead_aes256gcm_state * ctx_);
   int crypto_aead_aes256gcm_encrypt_detached_afternm(
       @Out byte[] c,
       @Out byte[] mac,
@@ -153,7 +171,10 @@ public interface LibSodium {
       @In Pointer npub,
       @In Pointer ctx_);
 
-  // int crypto_aead_aes256gcm_decrypt_detached_afternm(unsigned char * m, unsigned char * nsec, const unsigned char * c, unsigned long long clen, const unsigned char * mac, const unsigned char * ad, unsigned long long adlen, const unsigned char * npub, const crypto_aead_aes256gcm_state * ctx_);
+  // int crypto_aead_aes256gcm_decrypt_detached_afternm(unsigned char * m, unsigned char * nsec,
+  // const unsigned char * c, unsigned long long clen, const unsigned char * mac, const unsigned
+  // char * ad, unsigned long long adlen, const unsigned char * npub, const
+  // crypto_aead_aes256gcm_state * ctx_);
   int crypto_aead_aes256gcm_decrypt_detached_afternm(
       @Out byte[] m,
       /*null*/ Pointer nsec,
@@ -188,7 +209,9 @@ public interface LibSodium {
   @ssize_t
   long crypto_aead_chacha20poly1305_ietf_messagebytes_max();
 
-  // int crypto_aead_chacha20poly1305_ietf_encrypt(unsigned char * c, unsigned long long * clen_p, const unsigned char * m, unsigned long long mlen, const unsigned char * ad, unsigned long long adlen, const unsigned char * nsec, const unsigned char * npub, const unsigned char * k);
+  // int crypto_aead_chacha20poly1305_ietf_encrypt(unsigned char * c, unsigned long long * clen_p,
+  // const unsigned char * m, unsigned long long mlen, const unsigned char * ad, unsigned long long
+  // adlen, const unsigned char * nsec, const unsigned char * npub, const unsigned char * k);
   int crypto_aead_chacha20poly1305_ietf_encrypt(
       @Out byte[] c,
       @Out LongLongByReference clen_p,
@@ -200,7 +223,9 @@ public interface LibSodium {
       @In byte[] npub,
       @In byte[] k);
 
-  // int crypto_aead_chacha20poly1305_ietf_decrypt(unsigned char * m, unsigned long long * mlen_p, unsigned char * nsec, const unsigned char * c, unsigned long long clen, const unsigned char * ad, unsigned long long adlen, const unsigned char * npub, const unsigned char * k);
+  // int crypto_aead_chacha20poly1305_ietf_decrypt(unsigned char * m, unsigned long long * mlen_p,
+  // unsigned char * nsec, const unsigned char * c, unsigned long long clen, const unsigned char *
+  // ad, unsigned long long adlen, const unsigned char * npub, const unsigned char * k);
   int crypto_aead_chacha20poly1305_ietf_decrypt(
       @Out byte[] m,
       @Out LongLongByReference mlen_p,
@@ -212,7 +237,10 @@ public interface LibSodium {
       @In byte[] npub,
       @In byte[] k);
 
-  // int crypto_aead_chacha20poly1305_ietf_encrypt_detached(unsigned char * c, unsigned char * mac, unsigned long long * maclen_p, const unsigned char * m, unsigned long long mlen, const unsigned char * ad, unsigned long long adlen, const unsigned char * nsec, const unsigned char * npub, const unsigned char * k);
+  // int crypto_aead_chacha20poly1305_ietf_encrypt_detached(unsigned char * c, unsigned char * mac,
+  // unsigned long long * maclen_p, const unsigned char * m, unsigned long long mlen, const unsigned
+  // char * ad, unsigned long long adlen, const unsigned char * nsec, const unsigned char * npub,
+  // const unsigned char * k);
   int crypto_aead_chacha20poly1305_ietf_encrypt_detached(
       @Out byte[] c,
       @Out byte[] mac,
@@ -225,7 +253,9 @@ public interface LibSodium {
       @In byte[] npub,
       @In byte[] k);
 
-  // int crypto_aead_chacha20poly1305_ietf_decrypt_detached(unsigned char * m, unsigned char * nsec, const unsigned char * c, unsigned long long clen, const unsigned char * mac, const unsigned char * ad, unsigned long long adlen, const unsigned char * npub, const unsigned char * k);
+  // int crypto_aead_chacha20poly1305_ietf_decrypt_detached(unsigned char * m, unsigned char * nsec,
+  // const unsigned char * c, unsigned long long clen, const unsigned char * mac, const unsigned
+  // char * ad, unsigned long long adlen, const unsigned char * npub, const unsigned char * k);
   int crypto_aead_chacha20poly1305_ietf_decrypt_detached(
       @Out byte[] m,
       /*null*/ byte[] nsec,
@@ -260,7 +290,9 @@ public interface LibSodium {
   @ssize_t
   long crypto_aead_chacha20poly1305_messagebytes_max();
 
-  // int crypto_aead_chacha20poly1305_encrypt(unsigned char * c, unsigned long long * clen_p, const unsigned char * m, unsigned long long mlen, const unsigned char * ad, unsigned long long adlen, const unsigned char * nsec, const unsigned char * npub, const unsigned char * k);
+  // int crypto_aead_chacha20poly1305_encrypt(unsigned char * c, unsigned long long * clen_p, const
+  // unsigned char * m, unsigned long long mlen, const unsigned char * ad, unsigned long long adlen,
+  // const unsigned char * nsec, const unsigned char * npub, const unsigned char * k);
   int crypto_aead_chacha20poly1305_encrypt(
       @Out byte[] c,
       @Out LongLongByReference clen_p,
@@ -272,7 +304,9 @@ public interface LibSodium {
       @In byte[] npub,
       @In byte[] k);
 
-  // int crypto_aead_chacha20poly1305_decrypt(unsigned char * m, unsigned long long * mlen_p, unsigned char * nsec, const unsigned char * c, unsigned long long clen, const unsigned char * ad, unsigned long long adlen, const unsigned char * npub, const unsigned char * k);
+  // int crypto_aead_chacha20poly1305_decrypt(unsigned char * m, unsigned long long * mlen_p,
+  // unsigned char * nsec, const unsigned char * c, unsigned long long clen, const unsigned char *
+  // ad, unsigned long long adlen, const unsigned char * npub, const unsigned char * k);
   int crypto_aead_chacha20poly1305_decrypt(
       @Out byte[] m,
       @Out LongLongByReference mlen_p,
@@ -284,7 +318,10 @@ public interface LibSodium {
       @In byte[] npub,
       @In byte[] k);
 
-  // int crypto_aead_chacha20poly1305_encrypt_detached(unsigned char * c, unsigned char * mac, unsigned long long * maclen_p, const unsigned char * m, unsigned long long mlen, const unsigned char * ad, unsigned long long adlen, const unsigned char * nsec, const unsigned char * npub, const unsigned char * k);
+  // int crypto_aead_chacha20poly1305_encrypt_detached(unsigned char * c, unsigned char * mac,
+  // unsigned long long * maclen_p, const unsigned char * m, unsigned long long mlen, const unsigned
+  // char * ad, unsigned long long adlen, const unsigned char * nsec, const unsigned char * npub,
+  // const unsigned char * k);
   int crypto_aead_chacha20poly1305_encrypt_detached(
       @Out byte[] c,
       /*null*/ byte[] mac,
@@ -297,7 +334,9 @@ public interface LibSodium {
       @In byte[] npub,
       @In byte[] k);
 
-  // int crypto_aead_chacha20poly1305_decrypt_detached(unsigned char * m, unsigned char * nsec, const unsigned char * c, unsigned long long clen, const unsigned char * mac, const unsigned char * ad, unsigned long long adlen, const unsigned char * npub, const unsigned char * k);
+  // int crypto_aead_chacha20poly1305_decrypt_detached(unsigned char * m, unsigned char * nsec,
+  // const unsigned char * c, unsigned long long clen, const unsigned char * mac, const unsigned
+  // char * ad, unsigned long long adlen, const unsigned char * npub, const unsigned char * k);
   int crypto_aead_chacha20poly1305_decrypt_detached(
       @Out byte[] m,
       /*null*/ byte[] nsec,
@@ -332,7 +371,9 @@ public interface LibSodium {
   @ssize_t
   long crypto_aead_xchacha20poly1305_ietf_messagebytes_max();
 
-  // int crypto_aead_xchacha20poly1305_ietf_encrypt(unsigned char * c, unsigned long long * clen_p, const unsigned char * m, unsigned long long mlen, const unsigned char * ad, unsigned long long adlen, const unsigned char * nsec, const unsigned char * npub, const unsigned char * k);
+  // int crypto_aead_xchacha20poly1305_ietf_encrypt(unsigned char * c, unsigned long long * clen_p,
+  // const unsigned char * m, unsigned long long mlen, const unsigned char * ad, unsigned long long
+  // adlen, const unsigned char * nsec, const unsigned char * npub, const unsigned char * k);
   int crypto_aead_xchacha20poly1305_ietf_encrypt(
       @Out byte[] c,
       @Out LongLongByReference clen_p,
@@ -344,7 +385,9 @@ public interface LibSodium {
       @In Pointer npub,
       @In Pointer k);
 
-  // int crypto_aead_xchacha20poly1305_ietf_decrypt(unsigned char * m, unsigned long long * mlen_p, unsigned char * nsec, const unsigned char * c, unsigned long long clen, const unsigned char * ad, unsigned long long adlen, const unsigned char * npub, const unsigned char * k);
+  // int crypto_aead_xchacha20poly1305_ietf_decrypt(unsigned char * m, unsigned long long * mlen_p,
+  // unsigned char * nsec, const unsigned char * c, unsigned long long clen, const unsigned char *
+  // ad, unsigned long long adlen, const unsigned char * npub, const unsigned char * k);
   int crypto_aead_xchacha20poly1305_ietf_decrypt(
       @Out byte[] m,
       @Out LongLongByReference mlen_p,
@@ -356,7 +399,10 @@ public interface LibSodium {
       @In Pointer npub,
       @In Pointer k);
 
-  // int crypto_aead_xchacha20poly1305_ietf_encrypt_detached(unsigned char * c, unsigned char * mac, unsigned long long * maclen_p, const unsigned char * m, unsigned long long mlen, const unsigned char * ad, unsigned long long adlen, const unsigned char * nsec, const unsigned char * npub, const unsigned char * k);
+  // int crypto_aead_xchacha20poly1305_ietf_encrypt_detached(unsigned char * c, unsigned char * mac,
+  // unsigned long long * maclen_p, const unsigned char * m, unsigned long long mlen, const unsigned
+  // char * ad, unsigned long long adlen, const unsigned char * nsec, const unsigned char * npub,
+  // const unsigned char * k);
   int crypto_aead_xchacha20poly1305_ietf_encrypt_detached(
       @Out byte[] c,
       /*null*/ byte[] mac,
@@ -369,7 +415,10 @@ public interface LibSodium {
       @In Pointer npub,
       @In Pointer k);
 
-  // int crypto_aead_xchacha20poly1305_ietf_decrypt_detached(unsigned char * m, unsigned char * nsec, const unsigned char * c, unsigned long long clen, const unsigned char * mac, const unsigned char * ad, unsigned long long adlen, const unsigned char * npub, const unsigned char * k);
+  // int crypto_aead_xchacha20poly1305_ietf_decrypt_detached(unsigned char * m, unsigned char *
+  // nsec, const unsigned char * c, unsigned long long clen, const unsigned char * mac, const
+  // unsigned char * ad, unsigned long long adlen, const unsigned char * npub, const unsigned char *
+  // k);
   int crypto_aead_xchacha20poly1305_ietf_decrypt_detached(
       @Out byte[] m,
       /*null*/ byte[] nsec,
@@ -392,13 +441,15 @@ public interface LibSodium {
   @ssize_t
   long crypto_hash_sha512_bytes();
 
-  // int crypto_hash_sha512(unsigned char * out, const unsigned char * in, unsigned long long inlen);
+  // int crypto_hash_sha512(unsigned char * out, const unsigned char * in, unsigned long long
+  // inlen);
   int crypto_hash_sha512(@Out Pointer out, @In Pointer in, @In @u_int64_t long inlen);
 
   // int crypto_hash_sha512_init(crypto_hash_sha512_state * state);
   int crypto_hash_sha512_init(@Out Pointer state);
 
-  // int crypto_hash_sha512_update(crypto_hash_sha512_state * state, const unsigned char * in, unsigned long long inlen);
+  // int crypto_hash_sha512_update(crypto_hash_sha512_state * state, const unsigned char * in,
+  // unsigned long long inlen);
   int crypto_hash_sha512_update(/*both*/ Pointer state, @In byte[] in, @In @u_int64_t long inlen);
 
   // int crypto_hash_sha512_final(crypto_hash_sha512_state * state, unsigned char * out);
@@ -412,21 +463,28 @@ public interface LibSodium {
   @ssize_t
   long crypto_auth_hmacsha512_keybytes();
 
-  // int crypto_auth_hmacsha512(unsigned char * out, const unsigned char * in, unsigned long long inlen, const unsigned char * k);
-  int crypto_auth_hmacsha512(@Out byte[] out, @In byte[] in, @In @u_int64_t long inlen, @In Pointer k);
+  // int crypto_auth_hmacsha512(unsigned char * out, const unsigned char * in, unsigned long long
+  // inlen, const unsigned char * k);
+  int crypto_auth_hmacsha512(
+      @Out byte[] out, @In byte[] in, @In @u_int64_t long inlen, @In Pointer k);
 
-  // int crypto_auth_hmacsha512_verify(const unsigned char * h, const unsigned char * in, unsigned long long inlen, const unsigned char * k);
-  int crypto_auth_hmacsha512_verify(@In byte[] h, @In byte[] in, @In @u_int64_t long inlen, @In Pointer k);
+  // int crypto_auth_hmacsha512_verify(const unsigned char * h, const unsigned char * in, unsigned
+  // long long inlen, const unsigned char * k);
+  int crypto_auth_hmacsha512_verify(
+      @In byte[] h, @In byte[] in, @In @u_int64_t long inlen, @In Pointer k);
 
   // size_t crypto_auth_hmacsha512_statebytes(void);
   @ssize_t
   long crypto_auth_hmacsha512_statebytes();
 
-  // int crypto_auth_hmacsha512_init(crypto_auth_hmacsha512_state * state, const unsigned char * key, size_t keylen);
+  // int crypto_auth_hmacsha512_init(crypto_auth_hmacsha512_state * state, const unsigned char *
+  // key, size_t keylen);
   int crypto_auth_hmacsha512_init(@Out Pointer state, @In byte[] key, @In @ssize_t long keylen);
 
-  // int crypto_auth_hmacsha512_update(crypto_auth_hmacsha512_state * state, const unsigned char * in, unsigned long long inlen);
-  int crypto_auth_hmacsha512_update(/*both*/ Pointer state, @In byte[] in, @In @u_int64_t long inlen);
+  // int crypto_auth_hmacsha512_update(crypto_auth_hmacsha512_state * state, const unsigned char *
+  // in, unsigned long long inlen);
+  int crypto_auth_hmacsha512_update(
+      /*both*/ Pointer state, @In byte[] in, @In @u_int64_t long inlen);
 
   // int crypto_auth_hmacsha512_final(crypto_auth_hmacsha512_state * state, unsigned char * out);
   int crypto_auth_hmacsha512_final(/*both*/ Pointer state, @Out byte[] out);
@@ -442,23 +500,31 @@ public interface LibSodium {
   @ssize_t
   long crypto_auth_hmacsha512256_keybytes();
 
-  // int crypto_auth_hmacsha512256(unsigned char * out, const unsigned char * in, unsigned long long inlen, const unsigned char * k);
-  int crypto_auth_hmacsha512256(@Out byte[] out, @In byte[] in, @In @u_int64_t long inlen, @In Pointer k);
+  // int crypto_auth_hmacsha512256(unsigned char * out, const unsigned char * in, unsigned long long
+  // inlen, const unsigned char * k);
+  int crypto_auth_hmacsha512256(
+      @Out byte[] out, @In byte[] in, @In @u_int64_t long inlen, @In Pointer k);
 
-  // int crypto_auth_hmacsha512256_verify(const unsigned char * h, const unsigned char * in, unsigned long long inlen, const unsigned char * k);
-  int crypto_auth_hmacsha512256_verify(@In byte[] h, @In byte[] in, @In @u_int64_t long inlen, @In Pointer k);
+  // int crypto_auth_hmacsha512256_verify(const unsigned char * h, const unsigned char * in,
+  // unsigned long long inlen, const unsigned char * k);
+  int crypto_auth_hmacsha512256_verify(
+      @In byte[] h, @In byte[] in, @In @u_int64_t long inlen, @In Pointer k);
 
   // size_t crypto_auth_hmacsha512256_statebytes(void);
   @ssize_t
   long crypto_auth_hmacsha512256_statebytes();
 
-  // int crypto_auth_hmacsha512256_init(crypto_auth_hmacsha512256_state * state, const unsigned char * key, size_t keylen);
+  // int crypto_auth_hmacsha512256_init(crypto_auth_hmacsha512256_state * state, const unsigned char
+  // * key, size_t keylen);
   int crypto_auth_hmacsha512256_init(@Out Pointer state, @In byte[] key, @In @ssize_t long keylen);
 
-  // int crypto_auth_hmacsha512256_update(crypto_auth_hmacsha512256_state * state, const unsigned char * in, unsigned long long inlen);
-  int crypto_auth_hmacsha512256_update(/*both*/ Pointer state, @In byte[] in, @In @u_int64_t long inlen);
+  // int crypto_auth_hmacsha512256_update(crypto_auth_hmacsha512256_state * state, const unsigned
+  // char * in, unsigned long long inlen);
+  int crypto_auth_hmacsha512256_update(
+      /*both*/ Pointer state, @In byte[] in, @In @u_int64_t long inlen);
 
-  // int crypto_auth_hmacsha512256_final(crypto_auth_hmacsha512256_state * state, unsigned char * out);
+  // int crypto_auth_hmacsha512256_final(crypto_auth_hmacsha512256_state * state, unsigned char *
+  // out);
   int crypto_auth_hmacsha512256_final(/*both*/ Pointer state, @Out byte[] out);
 
   // void crypto_auth_hmacsha512256_keygen(unsigned char[] k);
@@ -475,10 +541,12 @@ public interface LibSodium {
   // const char * crypto_auth_primitive(void);
   String crypto_auth_primitive();
 
-  // int crypto_auth(unsigned char * out, const unsigned char * in, unsigned long long inlen, const unsigned char * k);
+  // int crypto_auth(unsigned char * out, const unsigned char * in, unsigned long long inlen, const
+  // unsigned char * k);
   int crypto_auth(@Out byte[] out, @In byte[] in, @In @u_int64_t long inlen, @In Pointer k);
 
-  // int crypto_auth_verify(const unsigned char * h, const unsigned char * in, unsigned long long inlen, const unsigned char * k);
+  // int crypto_auth_verify(const unsigned char * h, const unsigned char * in, unsigned long long
+  // inlen, const unsigned char * k);
   int crypto_auth_verify(@In byte[] h, @In byte[] in, @In @u_int64_t long inlen, @In Pointer k);
 
   // void crypto_auth_keygen(unsigned char[] k);
@@ -492,16 +560,19 @@ public interface LibSodium {
   @ssize_t
   long crypto_hash_sha256_bytes();
 
-  // int crypto_hash_sha256(unsigned char * out, const unsigned char * in, unsigned long long inlen);
+  // int crypto_hash_sha256(unsigned char * out, const unsigned char * in, unsigned long long
+  // inlen);
   int crypto_hash_sha256(@Out byte[] out, @In byte[] in, @In @u_int64_t long inlen);
 
-  // int crypto_hash_sha256(unsigned char * out, const unsigned char * in, unsigned long long inlen);
+  // int crypto_hash_sha256(unsigned char * out, const unsigned char * in, unsigned long long
+  // inlen);
   int crypto_hash_sha256(@Out Pointer out, @In Pointer in, @In @u_int64_t long inlen);
 
   // int crypto_hash_sha256_init(crypto_hash_sha256_state * state);
   int crypto_hash_sha256_init(@Out Pointer state);
 
-  // int crypto_hash_sha256_update(crypto_hash_sha256_state * state, const unsigned char * in, unsigned long long inlen);
+  // int crypto_hash_sha256_update(crypto_hash_sha256_state * state, const unsigned char * in,
+  // unsigned long long inlen);
   int crypto_hash_sha256_update(/*both*/ Pointer state, @In byte[] in, @In @u_int64_t long inlen);
 
   // int crypto_hash_sha256_final(crypto_hash_sha256_state * state, unsigned char * out);
@@ -515,21 +586,28 @@ public interface LibSodium {
   @ssize_t
   long crypto_auth_hmacsha256_keybytes();
 
-  // int crypto_auth_hmacsha256(unsigned char * out, const unsigned char * in, unsigned long long inlen, const unsigned char * k);
-  int crypto_auth_hmacsha256(@Out byte[] out, @In byte[] in, @In @u_int64_t long inlen, @In Pointer k);
+  // int crypto_auth_hmacsha256(unsigned char * out, const unsigned char * in, unsigned long long
+  // inlen, const unsigned char * k);
+  int crypto_auth_hmacsha256(
+      @Out byte[] out, @In byte[] in, @In @u_int64_t long inlen, @In Pointer k);
 
-  // int crypto_auth_hmacsha256_verify(const unsigned char * h, const unsigned char * in, unsigned long long inlen, const unsigned char * k);
-  int crypto_auth_hmacsha256_verify(@In byte[] h, @In byte[] in, @In @u_int64_t long inlen, @In Pointer k);
+  // int crypto_auth_hmacsha256_verify(const unsigned char * h, const unsigned char * in, unsigned
+  // long long inlen, const unsigned char * k);
+  int crypto_auth_hmacsha256_verify(
+      @In byte[] h, @In byte[] in, @In @u_int64_t long inlen, @In Pointer k);
 
   // size_t crypto_auth_hmacsha256_statebytes(void);
   @ssize_t
   long crypto_auth_hmacsha256_statebytes();
 
-  // int crypto_auth_hmacsha256_init(crypto_auth_hmacsha256_state * state, const unsigned char * key, size_t keylen);
+  // int crypto_auth_hmacsha256_init(crypto_auth_hmacsha256_state * state, const unsigned char *
+  // key, size_t keylen);
   int crypto_auth_hmacsha256_init(@Out Pointer state, @In byte[] key, @In @ssize_t long keylen);
 
-  // int crypto_auth_hmacsha256_update(crypto_auth_hmacsha256_state * state, const unsigned char * in, unsigned long long inlen);
-  int crypto_auth_hmacsha256_update(/*both*/ Pointer state, @In byte[] in, @In @u_int64_t long inlen);
+  // int crypto_auth_hmacsha256_update(crypto_auth_hmacsha256_state * state, const unsigned char *
+  // in, unsigned long long inlen);
+  int crypto_auth_hmacsha256_update(
+      /*both*/ Pointer state, @In byte[] in, @In @u_int64_t long inlen);
 
   // int crypto_auth_hmacsha256_final(crypto_auth_hmacsha256_state * state, unsigned char * out);
   int crypto_auth_hmacsha256_final(/*both*/ Pointer state, @Out byte[] out);
@@ -549,13 +627,17 @@ public interface LibSodium {
   @ssize_t
   long crypto_stream_xsalsa20_messagebytes_max();
 
-  // int crypto_stream_xsalsa20(unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
+  // int crypto_stream_xsalsa20(unsigned char * c, unsigned long long clen, const unsigned char * n,
+  // const unsigned char * k);
   int crypto_stream_xsalsa20(@Out byte[] c, @In @u_int64_t long clen, @In byte[] n, @In byte[] k);
 
-  // int crypto_stream_xsalsa20_xor(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
-  int crypto_stream_xsalsa20_xor(@Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
+  // int crypto_stream_xsalsa20_xor(unsigned char * c, const unsigned char * m, unsigned long long
+  // mlen, const unsigned char * n, const unsigned char * k);
+  int crypto_stream_xsalsa20_xor(
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
 
-  // int crypto_stream_xsalsa20_xor_ic(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, uint64_t ic, const unsigned char * k);
+  // int crypto_stream_xsalsa20_xor_ic(unsigned char * c, const unsigned char * m, unsigned long
+  // long mlen, const unsigned char * n, uint64_t ic, const unsigned char * k);
   int crypto_stream_xsalsa20_xor_ic(
       @Out byte[] c,
       @In byte[] m,
@@ -595,13 +677,16 @@ public interface LibSodium {
   @ssize_t
   long crypto_box_curve25519xsalsa20poly1305_messagebytes_max();
 
-  // int crypto_box_curve25519xsalsa20poly1305_seed_keypair(unsigned char * pk, unsigned char * sk, const unsigned char * seed);
-  int crypto_box_curve25519xsalsa20poly1305_seed_keypair(@Out byte[] pk, @Out byte[] sk, @In byte[] seed);
+  // int crypto_box_curve25519xsalsa20poly1305_seed_keypair(unsigned char * pk, unsigned char * sk,
+  // const unsigned char * seed);
+  int crypto_box_curve25519xsalsa20poly1305_seed_keypair(
+      @Out byte[] pk, @Out byte[] sk, @In byte[] seed);
 
   // int crypto_box_curve25519xsalsa20poly1305_keypair(unsigned char * pk, unsigned char * sk);
   int crypto_box_curve25519xsalsa20poly1305_keypair(@Out byte[] pk, @Out byte[] sk);
 
-  // int crypto_box_curve25519xsalsa20poly1305_beforenm(unsigned char * k, const unsigned char * pk, const unsigned char * sk);
+  // int crypto_box_curve25519xsalsa20poly1305_beforenm(unsigned char * k, const unsigned char * pk,
+  // const unsigned char * sk);
   int crypto_box_curve25519xsalsa20poly1305_beforenm(@Out Pointer k, @In byte[] pk, @In byte[] sk);
 
   // size_t crypto_box_curve25519xsalsa20poly1305_boxzerobytes(void);
@@ -612,7 +697,8 @@ public interface LibSodium {
   @ssize_t
   long crypto_box_curve25519xsalsa20poly1305_zerobytes();
 
-  // int crypto_box_curve25519xsalsa20poly1305(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * pk, const unsigned char * sk);
+  // int crypto_box_curve25519xsalsa20poly1305(unsigned char * c, const unsigned char * m, unsigned
+  // long long mlen, const unsigned char * n, const unsigned char * pk, const unsigned char * sk);
   int crypto_box_curve25519xsalsa20poly1305(
       @Out byte[] c,
       @In byte[] m,
@@ -621,7 +707,9 @@ public interface LibSodium {
       @In byte[] pk,
       @In byte[] sk);
 
-  // int crypto_box_curve25519xsalsa20poly1305_open(unsigned char * m, const unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * pk, const unsigned char * sk);
+  // int crypto_box_curve25519xsalsa20poly1305_open(unsigned char * m, const unsigned char * c,
+  // unsigned long long clen, const unsigned char * n, const unsigned char * pk, const unsigned char
+  // * sk);
   int crypto_box_curve25519xsalsa20poly1305_open(
       @Out byte[] m,
       @In byte[] c,
@@ -630,21 +718,15 @@ public interface LibSodium {
       @In byte[] pk,
       @In byte[] sk);
 
-  // int crypto_box_curve25519xsalsa20poly1305_afternm(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
+  // int crypto_box_curve25519xsalsa20poly1305_afternm(unsigned char * c, const unsigned char * m,
+  // unsigned long long mlen, const unsigned char * n, const unsigned char * k);
   int crypto_box_curve25519xsalsa20poly1305_afternm(
-      @Out byte[] c,
-      @In byte[] m,
-      @In @u_int64_t long mlen,
-      @In byte[] n,
-      @In Pointer k);
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In Pointer k);
 
-  // int crypto_box_curve25519xsalsa20poly1305_open_afternm(unsigned char * m, const unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
+  // int crypto_box_curve25519xsalsa20poly1305_open_afternm(unsigned char * m, const unsigned char *
+  // c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
   int crypto_box_curve25519xsalsa20poly1305_open_afternm(
-      @Out byte[] m,
-      @In byte[] c,
-      @In @u_int64_t long clen,
-      @In byte[] n,
-      @In Pointer k);
+      @Out byte[] m, @In byte[] c, @In @u_int64_t long clen, @In byte[] n, @In Pointer k);
 
   // size_t crypto_box_seedbytes(void);
   @ssize_t
@@ -673,13 +755,15 @@ public interface LibSodium {
   // const char * crypto_box_primitive(void);
   String crypto_box_primitive();
 
-  // int crypto_box_seed_keypair(unsigned char * pk, unsigned char * sk, const unsigned char * seed);
+  // int crypto_box_seed_keypair(unsigned char * pk, unsigned char * sk, const unsigned char *
+  // seed);
   int crypto_box_seed_keypair(@Out Pointer pk, @Out Pointer sk, @In Pointer seed);
 
   // int crypto_box_keypair(unsigned char * pk, unsigned char * sk);
   int crypto_box_keypair(@Out Pointer pk, @Out Pointer sk);
 
-  // int crypto_box_easy(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * pk, const unsigned char * sk);
+  // int crypto_box_easy(unsigned char * c, const unsigned char * m, unsigned long long mlen, const
+  // unsigned char * n, const unsigned char * pk, const unsigned char * sk);
   int crypto_box_easy(
       @Out byte[] c,
       @In byte[] m,
@@ -688,7 +772,8 @@ public interface LibSodium {
       @In Pointer pk,
       @In Pointer sk);
 
-  // int crypto_box_open_easy(unsigned char * m, const unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * pk, const unsigned char * sk);
+  // int crypto_box_open_easy(unsigned char * m, const unsigned char * c, unsigned long long clen,
+  // const unsigned char * n, const unsigned char * pk, const unsigned char * sk);
   int crypto_box_open_easy(
       @Out byte[] m,
       @In byte[] c,
@@ -697,7 +782,9 @@ public interface LibSodium {
       @In Pointer pk,
       @In Pointer sk);
 
-  // int crypto_box_detached(unsigned char * c, unsigned char * mac, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * pk, const unsigned char * sk);
+  // int crypto_box_detached(unsigned char * c, unsigned char * mac, const unsigned char * m,
+  // unsigned long long mlen, const unsigned char * n, const unsigned char * pk, const unsigned char
+  // * sk);
   int crypto_box_detached(
       @Out byte[] c,
       @Out byte[] mac,
@@ -707,7 +794,9 @@ public interface LibSodium {
       @In Pointer pk,
       @In Pointer sk);
 
-  // int crypto_box_open_detached(unsigned char * m, const unsigned char * c, const unsigned char * mac, unsigned long long clen, const unsigned char * n, const unsigned char * pk, const unsigned char * sk);
+  // int crypto_box_open_detached(unsigned char * m, const unsigned char * c, const unsigned char *
+  // mac, unsigned long long clen, const unsigned char * n, const unsigned char * pk, const unsigned
+  // char * sk);
   int crypto_box_open_detached(
       @Out byte[] m,
       @In byte[] c,
@@ -724,13 +813,18 @@ public interface LibSodium {
   // int crypto_box_beforenm(unsigned char * k, const unsigned char * pk, const unsigned char * sk);
   int crypto_box_beforenm(@Out Pointer k, @In Pointer pk, @In Pointer sk);
 
-  // int crypto_box_easy_afternm(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
-  int crypto_box_easy_afternm(@Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In Pointer n, @In Pointer k);
+  // int crypto_box_easy_afternm(unsigned char * c, const unsigned char * m, unsigned long long
+  // mlen, const unsigned char * n, const unsigned char * k);
+  int crypto_box_easy_afternm(
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In Pointer n, @In Pointer k);
 
-  // int crypto_box_open_easy_afternm(unsigned char * m, const unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
-  int crypto_box_open_easy_afternm(@Out byte[] m, @In byte[] c, @In @u_int64_t long clen, @In Pointer n, @In Pointer k);
+  // int crypto_box_open_easy_afternm(unsigned char * m, const unsigned char * c, unsigned long long
+  // clen, const unsigned char * n, const unsigned char * k);
+  int crypto_box_open_easy_afternm(
+      @Out byte[] m, @In byte[] c, @In @u_int64_t long clen, @In Pointer n, @In Pointer k);
 
-  // int crypto_box_detached_afternm(unsigned char * c, unsigned char * mac, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
+  // int crypto_box_detached_afternm(unsigned char * c, unsigned char * mac, const unsigned char *
+  // m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
   int crypto_box_detached_afternm(
       @Out byte[] c,
       @Out byte[] mac,
@@ -739,7 +833,8 @@ public interface LibSodium {
       @In Pointer n,
       @In Pointer k);
 
-  // int crypto_box_open_detached_afternm(unsigned char * m, const unsigned char * c, const unsigned char * mac, unsigned long long clen, const unsigned char * n, const unsigned char * k);
+  // int crypto_box_open_detached_afternm(unsigned char * m, const unsigned char * c, const unsigned
+  // char * mac, unsigned long long clen, const unsigned char * n, const unsigned char * k);
   int crypto_box_open_detached_afternm(
       @Out byte[] m,
       @In byte[] c,
@@ -752,11 +847,14 @@ public interface LibSodium {
   @ssize_t
   long crypto_box_sealbytes();
 
-  // int crypto_box_seal(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * pk);
+  // int crypto_box_seal(unsigned char * c, const unsigned char * m, unsigned long long mlen, const
+  // unsigned char * pk);
   int crypto_box_seal(@Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In Pointer pk);
 
-  // int crypto_box_seal_open(unsigned char * m, const unsigned char * c, unsigned long long clen, const unsigned char * pk, const unsigned char * sk);
-  int crypto_box_seal_open(@Out byte[] m, @In byte[] c, @In @u_int64_t long clen, @In Pointer pk, @In Pointer sk);
+  // int crypto_box_seal_open(unsigned char * m, const unsigned char * c, unsigned long long clen,
+  // const unsigned char * pk, const unsigned char * sk);
+  int crypto_box_seal_open(
+      @Out byte[] m, @In byte[] c, @In @u_int64_t long clen, @In Pointer pk, @In Pointer sk);
 
   // size_t crypto_box_zerobytes(void);
   @ssize_t
@@ -766,10 +864,18 @@ public interface LibSodium {
   @ssize_t
   long crypto_box_boxzerobytes();
 
-  // int crypto_box(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * pk, const unsigned char * sk);
-  int crypto_box(@Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] pk, @In byte[] sk);
+  // int crypto_box(unsigned char * c, const unsigned char * m, unsigned long long mlen, const
+  // unsigned char * n, const unsigned char * pk, const unsigned char * sk);
+  int crypto_box(
+      @Out byte[] c,
+      @In byte[] m,
+      @In @u_int64_t long mlen,
+      @In byte[] n,
+      @In byte[] pk,
+      @In byte[] sk);
 
-  // int crypto_box_open(unsigned char * m, const unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * pk, const unsigned char * sk);
+  // int crypto_box_open(unsigned char * m, const unsigned char * c, unsigned long long clen, const
+  // unsigned char * n, const unsigned char * pk, const unsigned char * sk);
   int crypto_box_open(
       @Out byte[] m,
       @In byte[] c,
@@ -778,11 +884,15 @@ public interface LibSodium {
       @In byte[] pk,
       @In byte[] sk);
 
-  // int crypto_box_afternm(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
-  int crypto_box_afternm(@Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In Pointer k);
+  // int crypto_box_afternm(unsigned char * c, const unsigned char * m, unsigned long long mlen,
+  // const unsigned char * n, const unsigned char * k);
+  int crypto_box_afternm(
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In Pointer k);
 
-  // int crypto_box_open_afternm(unsigned char * m, const unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
-  int crypto_box_open_afternm(@Out byte[] m, @In byte[] c, @In @u_int64_t long clen, @In byte[] n, @In Pointer k);
+  // int crypto_box_open_afternm(unsigned char * m, const unsigned char * c, unsigned long long
+  // clen, const unsigned char * n, const unsigned char * k);
+  int crypto_box_open_afternm(
+      @Out byte[] m, @In byte[] c, @In @u_int64_t long clen, @In byte[] n, @In Pointer k);
 
   // size_t crypto_core_hsalsa20_outputbytes(void);
   @ssize_t
@@ -800,7 +910,8 @@ public interface LibSodium {
   @ssize_t
   long crypto_core_hsalsa20_constbytes();
 
-  // int crypto_core_hsalsa20(unsigned char * out, const unsigned char * in, const unsigned char * k, const unsigned char * c);
+  // int crypto_core_hsalsa20(unsigned char * out, const unsigned char * in, const unsigned char *
+  // k, const unsigned char * c);
   int crypto_core_hsalsa20(@Out byte[] out, @In byte[] in, @In byte[] k, @In byte[] c);
 
   // size_t crypto_core_hchacha20_outputbytes(void);
@@ -819,7 +930,8 @@ public interface LibSodium {
   @ssize_t
   long crypto_core_hchacha20_constbytes();
 
-  // int crypto_core_hchacha20(unsigned char * out, const unsigned char * in, const unsigned char * k, const unsigned char * c);
+  // int crypto_core_hchacha20(unsigned char * out, const unsigned char * in, const unsigned char *
+  // k, const unsigned char * c);
   int crypto_core_hchacha20(@Out byte[] out, @In byte[] in, @In byte[] k, @In byte[] c);
 
   // size_t crypto_core_salsa20_outputbytes(void);
@@ -838,7 +950,8 @@ public interface LibSodium {
   @ssize_t
   long crypto_core_salsa20_constbytes();
 
-  // int crypto_core_salsa20(unsigned char * out, const unsigned char * in, const unsigned char * k, const unsigned char * c);
+  // int crypto_core_salsa20(unsigned char * out, const unsigned char * in, const unsigned char * k,
+  // const unsigned char * c);
   int crypto_core_salsa20(@Out byte[] out, @In byte[] in, @In byte[] k, @In byte[] c);
 
   // size_t crypto_core_salsa2012_outputbytes(void);
@@ -857,7 +970,8 @@ public interface LibSodium {
   @ssize_t
   long crypto_core_salsa2012_constbytes();
 
-  // int crypto_core_salsa2012(unsigned char * out, const unsigned char * in, const unsigned char * k, const unsigned char * c);
+  // int crypto_core_salsa2012(unsigned char * out, const unsigned char * in, const unsigned char *
+  // k, const unsigned char * c);
   int crypto_core_salsa2012(@Out byte[] out, @In byte[] in, @In byte[] k, @In byte[] c);
 
   // size_t crypto_core_salsa208_outputbytes(void);
@@ -876,7 +990,8 @@ public interface LibSodium {
   @ssize_t
   long crypto_core_salsa208_constbytes();
 
-  // int crypto_core_salsa208(unsigned char * out, const unsigned char * in, const unsigned char * k, const unsigned char * c);
+  // int crypto_core_salsa208(unsigned char * out, const unsigned char * in, const unsigned char *
+  // k, const unsigned char * c);
   int crypto_core_salsa208(@Out byte[] out, @In byte[] in, @In byte[] k, @In byte[] c);
 
   // size_t crypto_generichash_blake2b_bytes_min(void);
@@ -915,7 +1030,8 @@ public interface LibSodium {
   @ssize_t
   long crypto_generichash_blake2b_statebytes();
 
-  // int crypto_generichash_blake2b(unsigned char * out, size_t outlen, const unsigned char * in, unsigned long long inlen, const unsigned char * key, size_t keylen);
+  // int crypto_generichash_blake2b(unsigned char * out, size_t outlen, const unsigned char * in,
+  // unsigned long long inlen, const unsigned char * key, size_t keylen);
   int crypto_generichash_blake2b(
       @Out byte[] out,
       @In @ssize_t long outlen,
@@ -924,7 +1040,9 @@ public interface LibSodium {
       @In byte[] key,
       @In @ssize_t long keylen);
 
-  // int crypto_generichash_blake2b_salt_personal(unsigned char * out, size_t outlen, const unsigned char * in, unsigned long long inlen, const unsigned char * key, size_t keylen, const unsigned char * salt, const unsigned char * personal);
+  // int crypto_generichash_blake2b_salt_personal(unsigned char * out, size_t outlen, const unsigned
+  // char * in, unsigned long long inlen, const unsigned char * key, size_t keylen, const unsigned
+  // char * salt, const unsigned char * personal);
   int crypto_generichash_blake2b_salt_personal(
       @Out byte[] out,
       @In @ssize_t long outlen,
@@ -935,14 +1053,14 @@ public interface LibSodium {
       @In byte[] salt,
       @In byte[] personal);
 
-  // int crypto_generichash_blake2b_init(crypto_generichash_blake2b_state * state, const unsigned char * key, const size_t keylen, const size_t outlen);
+  // int crypto_generichash_blake2b_init(crypto_generichash_blake2b_state * state, const unsigned
+  // char * key, const size_t keylen, const size_t outlen);
   int crypto_generichash_blake2b_init(
-      @Out Pointer state,
-      @In byte[] key,
-      @In @ssize_t long keylen,
-      @In @ssize_t long outlen);
+      @Out Pointer state, @In byte[] key, @In @ssize_t long keylen, @In @ssize_t long outlen);
 
-  // int crypto_generichash_blake2b_init_salt_personal(crypto_generichash_blake2b_state * state, const unsigned char * key, const size_t keylen, const size_t outlen, const unsigned char * salt, const unsigned char * personal);
+  // int crypto_generichash_blake2b_init_salt_personal(crypto_generichash_blake2b_state * state,
+  // const unsigned char * key, const size_t keylen, const size_t outlen, const unsigned char *
+  // salt, const unsigned char * personal);
   int crypto_generichash_blake2b_init_salt_personal(
       /*both*/ Pointer state,
       @In byte[] key,
@@ -951,11 +1069,15 @@ public interface LibSodium {
       @In byte[] salt,
       @In byte[] personal);
 
-  // int crypto_generichash_blake2b_update(crypto_generichash_blake2b_state * state, const unsigned char * in, unsigned long long inlen);
-  int crypto_generichash_blake2b_update(/*both*/ Pointer state, @In byte[] in, @In @u_int64_t long inlen);
+  // int crypto_generichash_blake2b_update(crypto_generichash_blake2b_state * state, const unsigned
+  // char * in, unsigned long long inlen);
+  int crypto_generichash_blake2b_update(
+      /*both*/ Pointer state, @In byte[] in, @In @u_int64_t long inlen);
 
-  // int crypto_generichash_blake2b_final(crypto_generichash_blake2b_state * state, unsigned char * out, const size_t outlen);
-  int crypto_generichash_blake2b_final(/*both*/ Pointer state, @Out byte[] out, @In @ssize_t long outlen);
+  // int crypto_generichash_blake2b_final(crypto_generichash_blake2b_state * state, unsigned char *
+  // out, const size_t outlen);
+  int crypto_generichash_blake2b_final(
+      /*both*/ Pointer state, @Out byte[] out, @In @ssize_t long outlen);
 
   // void crypto_generichash_blake2b_keygen(unsigned char[] k);
   void crypto_generichash_blake2b_keygen(@Out byte[] k);
@@ -991,7 +1113,8 @@ public interface LibSodium {
   @ssize_t
   long crypto_generichash_statebytes();
 
-  // int crypto_generichash(unsigned char * out, size_t outlen, const unsigned char * in, unsigned long long inlen, const unsigned char * key, size_t keylen);
+  // int crypto_generichash(unsigned char * out, size_t outlen, const unsigned char * in, unsigned
+  // long long inlen, const unsigned char * key, size_t keylen);
   int crypto_generichash(
       @Out Pointer out,
       @In @ssize_t long outlen,
@@ -1000,13 +1123,17 @@ public interface LibSodium {
       @In Pointer key,
       @In @ssize_t long keylen);
 
-  // int crypto_generichash_init(crypto_generichash_state * state, const unsigned char * key, const size_t keylen, const size_t outlen);
-  int crypto_generichash_init(@Out Pointer state, @In byte[] key, @In @ssize_t long keylen, @In @ssize_t long outlen);
+  // int crypto_generichash_init(crypto_generichash_state * state, const unsigned char * key, const
+  // size_t keylen, const size_t outlen);
+  int crypto_generichash_init(
+      @Out Pointer state, @In byte[] key, @In @ssize_t long keylen, @In @ssize_t long outlen);
 
-  // int crypto_generichash_update(crypto_generichash_state * state, const unsigned char * in, unsigned long long inlen);
+  // int crypto_generichash_update(crypto_generichash_state * state, const unsigned char * in,
+  // unsigned long long inlen);
   int crypto_generichash_update(/*both*/ Pointer state, @In byte[] in, @In @u_int64_t long inlen);
 
-  // int crypto_generichash_final(crypto_generichash_state * state, unsigned char * out, const size_t outlen);
+  // int crypto_generichash_final(crypto_generichash_state * state, unsigned char * out, const
+  // size_t outlen);
   int crypto_generichash_final(/*both*/ Pointer state, @Out byte[] out, @In @ssize_t long outlen);
 
   // void crypto_generichash_keygen(unsigned char[] k);
@@ -1038,7 +1165,8 @@ public interface LibSodium {
   @ssize_t
   long crypto_kdf_blake2b_keybytes();
 
-  // int crypto_kdf_blake2b_derive_from_key(unsigned char * subkey, size_t subkey_len, uint64_t subkey_id, const char[] ctx, const unsigned char[] key);
+  // int crypto_kdf_blake2b_derive_from_key(unsigned char * subkey, size_t subkey_len, uint64_t
+  // subkey_id, const char[] ctx, const unsigned char[] key);
   int crypto_kdf_blake2b_derive_from_key(
       @Out byte[] subkey,
       @In @ssize_t long subkey_len,
@@ -1065,7 +1193,8 @@ public interface LibSodium {
   // const char * crypto_kdf_primitive(void);
   String crypto_kdf_primitive();
 
-  // int crypto_kdf_derive_from_key(unsigned char * subkey, size_t subkey_len, uint64_t subkey_id, const char[] ctx, const unsigned char[] key);
+  // int crypto_kdf_derive_from_key(unsigned char * subkey, size_t subkey_len, uint64_t subkey_id,
+  // const char[] ctx, const unsigned char[] key);
   int crypto_kdf_derive_from_key(
       @Out byte[] subkey,
       @In @ssize_t long subkey_len,
@@ -1101,7 +1230,8 @@ public interface LibSodium {
   // int crypto_kx_keypair(unsigned char[] pk, unsigned char[] sk);
   int crypto_kx_keypair(@Out Pointer pk, @Out Pointer sk);
 
-  // int crypto_kx_client_session_keys(unsigned char[] rx, unsigned char[] tx, const unsigned char[] client_pk, const unsigned char[] client_sk, const unsigned char[] server_pk);
+  // int crypto_kx_client_session_keys(unsigned char[] rx, unsigned char[] tx, const unsigned char[]
+  // client_pk, const unsigned char[] client_sk, const unsigned char[] server_pk);
   int crypto_kx_client_session_keys(
       @Out Pointer rx,
       @Out Pointer tx,
@@ -1109,7 +1239,8 @@ public interface LibSodium {
       @In Pointer client_sk,
       @In Pointer server_pk);
 
-  // int crypto_kx_server_session_keys(unsigned char[] rx, unsigned char[] tx, const unsigned char[] server_pk, const unsigned char[] server_sk, const unsigned char[] client_pk);
+  // int crypto_kx_server_session_keys(unsigned char[] rx, unsigned char[] tx, const unsigned char[]
+  // server_pk, const unsigned char[] server_sk, const unsigned char[] client_pk);
   int crypto_kx_server_session_keys(
       @Out Pointer rx,
       @Out Pointer tx,
@@ -1129,19 +1260,27 @@ public interface LibSodium {
   @ssize_t
   long crypto_onetimeauth_poly1305_keybytes();
 
-  // int crypto_onetimeauth_poly1305(unsigned char * out, const unsigned char * in, unsigned long long inlen, const unsigned char * k);
-  int crypto_onetimeauth_poly1305(@Out byte[] out, @In byte[] in, @In @u_int64_t long inlen, @In byte[] k);
+  // int crypto_onetimeauth_poly1305(unsigned char * out, const unsigned char * in, unsigned long
+  // long inlen, const unsigned char * k);
+  int crypto_onetimeauth_poly1305(
+      @Out byte[] out, @In byte[] in, @In @u_int64_t long inlen, @In byte[] k);
 
-  // int crypto_onetimeauth_poly1305_verify(const unsigned char * h, const unsigned char * in, unsigned long long inlen, const unsigned char * k);
-  int crypto_onetimeauth_poly1305_verify(@In byte[] h, @In byte[] in, @In @u_int64_t long inlen, @In byte[] k);
+  // int crypto_onetimeauth_poly1305_verify(const unsigned char * h, const unsigned char * in,
+  // unsigned long long inlen, const unsigned char * k);
+  int crypto_onetimeauth_poly1305_verify(
+      @In byte[] h, @In byte[] in, @In @u_int64_t long inlen, @In byte[] k);
 
-  // int crypto_onetimeauth_poly1305_init(crypto_onetimeauth_poly1305_state * state, const unsigned char * key);
+  // int crypto_onetimeauth_poly1305_init(crypto_onetimeauth_poly1305_state * state, const unsigned
+  // char * key);
   int crypto_onetimeauth_poly1305_init(@Out Pointer state, @In byte[] key);
 
-  // int crypto_onetimeauth_poly1305_update(crypto_onetimeauth_poly1305_state * state, const unsigned char * in, unsigned long long inlen);
-  int crypto_onetimeauth_poly1305_update(/*both*/ Pointer state, @In byte[] in, @In @u_int64_t long inlen);
+  // int crypto_onetimeauth_poly1305_update(crypto_onetimeauth_poly1305_state * state, const
+  // unsigned char * in, unsigned long long inlen);
+  int crypto_onetimeauth_poly1305_update(
+      /*both*/ Pointer state, @In byte[] in, @In @u_int64_t long inlen);
 
-  // int crypto_onetimeauth_poly1305_final(crypto_onetimeauth_poly1305_state * state, unsigned char * out);
+  // int crypto_onetimeauth_poly1305_final(crypto_onetimeauth_poly1305_state * state, unsigned char
+  // * out);
   int crypto_onetimeauth_poly1305_final(/*both*/ Pointer state, @Out byte[] out);
 
   // void crypto_onetimeauth_poly1305_keygen(unsigned char[] k);
@@ -1162,16 +1301,20 @@ public interface LibSodium {
   // const char * crypto_onetimeauth_primitive(void);
   String crypto_onetimeauth_primitive();
 
-  // int crypto_onetimeauth(unsigned char * out, const unsigned char * in, unsigned long long inlen, const unsigned char * k);
+  // int crypto_onetimeauth(unsigned char * out, const unsigned char * in, unsigned long long inlen,
+  // const unsigned char * k);
   int crypto_onetimeauth(@Out byte[] out, @In byte[] in, @In @u_int64_t long inlen, @In byte[] k);
 
-  // int crypto_onetimeauth_verify(const unsigned char * h, const unsigned char * in, unsigned long long inlen, const unsigned char * k);
-  int crypto_onetimeauth_verify(@In byte[] h, @In byte[] in, @In @u_int64_t long inlen, @In byte[] k);
+  // int crypto_onetimeauth_verify(const unsigned char * h, const unsigned char * in, unsigned long
+  // long inlen, const unsigned char * k);
+  int crypto_onetimeauth_verify(
+      @In byte[] h, @In byte[] in, @In @u_int64_t long inlen, @In byte[] k);
 
   // int crypto_onetimeauth_init(crypto_onetimeauth_state * state, const unsigned char * key);
   int crypto_onetimeauth_init(@Out Pointer state, @In byte[] key);
 
-  // int crypto_onetimeauth_update(crypto_onetimeauth_state * state, const unsigned char * in, unsigned long long inlen);
+  // int crypto_onetimeauth_update(crypto_onetimeauth_state * state, const unsigned char * in,
+  // unsigned long long inlen);
   int crypto_onetimeauth_update(/*both*/ Pointer state, @In byte[] in, @In @u_int64_t long inlen);
 
   // int crypto_onetimeauth_final(crypto_onetimeauth_state * state, unsigned char * out);
@@ -1250,7 +1393,9 @@ public interface LibSodium {
   @ssize_t
   long crypto_pwhash_argon2i_memlimit_sensitive();
 
-  // int crypto_pwhash_argon2i(unsigned char *const out, unsigned long long outlen, const char *const passwd, unsigned long long passwdlen, const unsigned char *const salt, unsigned long long opslimit, size_t memlimit, int alg);
+  // int crypto_pwhash_argon2i(unsigned char *const out, unsigned long long outlen, const char
+  // *const passwd, unsigned long long passwdlen, const unsigned char *const salt, unsigned long
+  // long opslimit, size_t memlimit, int alg);
   int crypto_pwhash_argon2i(
       @Out byte[] out,
       @In @u_int64_t long outlen,
@@ -1261,7 +1406,8 @@ public interface LibSodium {
       @In @ssize_t long memlimit,
       @In int alg);
 
-  // int crypto_pwhash_argon2i_str(char[] out, const char *const passwd, unsigned long long passwdlen, unsigned long long opslimit, size_t memlimit);
+  // int crypto_pwhash_argon2i_str(char[] out, const char *const passwd, unsigned long long
+  // passwdlen, unsigned long long opslimit, size_t memlimit);
   int crypto_pwhash_argon2i_str(
       @Out byte[] out,
       @In byte[] passwd,
@@ -1269,11 +1415,15 @@ public interface LibSodium {
       @In @u_int64_t long opslimit,
       @In @ssize_t long memlimit);
 
-  // int crypto_pwhash_argon2i_str_verify(const char[] str, const char *const passwd, unsigned long long passwdlen);
-  int crypto_pwhash_argon2i_str_verify(@In byte[] str, @In byte[] passwd, @In @u_int64_t long passwdlen);
+  // int crypto_pwhash_argon2i_str_verify(const char[] str, const char *const passwd, unsigned long
+  // long passwdlen);
+  int crypto_pwhash_argon2i_str_verify(
+      @In byte[] str, @In byte[] passwd, @In @u_int64_t long passwdlen);
 
-  // int crypto_pwhash_argon2i_str_needs_rehash(const char[] str, unsigned long long opslimit, size_t memlimit);
-  int crypto_pwhash_argon2i_str_needs_rehash(@In byte[] str, @In @u_int64_t long opslimit, @In @ssize_t long memlimit);
+  // int crypto_pwhash_argon2i_str_needs_rehash(const char[] str, unsigned long long opslimit,
+  // size_t memlimit);
+  int crypto_pwhash_argon2i_str_needs_rehash(
+      @In byte[] str, @In @u_int64_t long opslimit, @In @ssize_t long memlimit);
 
   // int crypto_pwhash_argon2id_alg_argon2id13(void);
   int crypto_pwhash_argon2id_alg_argon2id13();
@@ -1345,7 +1495,9 @@ public interface LibSodium {
   @ssize_t
   long crypto_pwhash_argon2id_memlimit_sensitive();
 
-  // int crypto_pwhash_argon2id(unsigned char *const out, unsigned long long outlen, const char *const passwd, unsigned long long passwdlen, const unsigned char *const salt, unsigned long long opslimit, size_t memlimit, int alg);
+  // int crypto_pwhash_argon2id(unsigned char *const out, unsigned long long outlen, const char
+  // *const passwd, unsigned long long passwdlen, const unsigned char *const salt, unsigned long
+  // long opslimit, size_t memlimit, int alg);
   int crypto_pwhash_argon2id(
       @Out byte[] out,
       @In @u_int64_t long outlen,
@@ -1356,7 +1508,8 @@ public interface LibSodium {
       @In @ssize_t long memlimit,
       @In int alg);
 
-  // int crypto_pwhash_argon2id_str(char[] out, const char *const passwd, unsigned long long passwdlen, unsigned long long opslimit, size_t memlimit);
+  // int crypto_pwhash_argon2id_str(char[] out, const char *const passwd, unsigned long long
+  // passwdlen, unsigned long long opslimit, size_t memlimit);
   int crypto_pwhash_argon2id_str(
       @Out byte[] out,
       @In byte[] passwd,
@@ -1364,11 +1517,15 @@ public interface LibSodium {
       @In @u_int64_t long opslimit,
       @In @ssize_t long memlimit);
 
-  // int crypto_pwhash_argon2id_str_verify(const char[] str, const char *const passwd, unsigned long long passwdlen);
-  int crypto_pwhash_argon2id_str_verify(@In byte[] str, @In byte[] passwd, @In @u_int64_t long passwdlen);
+  // int crypto_pwhash_argon2id_str_verify(const char[] str, const char *const passwd, unsigned long
+  // long passwdlen);
+  int crypto_pwhash_argon2id_str_verify(
+      @In byte[] str, @In byte[] passwd, @In @u_int64_t long passwdlen);
 
-  // int crypto_pwhash_argon2id_str_needs_rehash(const char[] str, unsigned long long opslimit, size_t memlimit);
-  int crypto_pwhash_argon2id_str_needs_rehash(@In byte[] str, @In @u_int64_t long opslimit, @In @ssize_t long memlimit);
+  // int crypto_pwhash_argon2id_str_needs_rehash(const char[] str, unsigned long long opslimit,
+  // size_t memlimit);
+  int crypto_pwhash_argon2id_str_needs_rehash(
+      @In byte[] str, @In @u_int64_t long opslimit, @In @ssize_t long memlimit);
 
   // int crypto_pwhash_alg_argon2i13(void);
   int crypto_pwhash_alg_argon2i13();
@@ -1446,7 +1603,9 @@ public interface LibSodium {
   @ssize_t
   long crypto_pwhash_memlimit_sensitive();
 
-  // int crypto_pwhash(unsigned char *const out, unsigned long long outlen, const char *const passwd, unsigned long long passwdlen, const unsigned char *const salt, unsigned long long opslimit, size_t memlimit, int alg);
+  // int crypto_pwhash(unsigned char *const out, unsigned long long outlen, const char *const
+  // passwd, unsigned long long passwdlen, const unsigned char *const salt, unsigned long long
+  // opslimit, size_t memlimit, int alg);
   int crypto_pwhash(
       @Out byte[] out,
       @In @u_int64_t long outlen,
@@ -1457,7 +1616,8 @@ public interface LibSodium {
       @In @ssize_t long memlimit,
       @In int alg);
 
-  // int crypto_pwhash_str(char[] out, const char *const passwd, unsigned long long passwdlen, unsigned long long opslimit, size_t memlimit);
+  // int crypto_pwhash_str(char[] out, const char *const passwd, unsigned long long passwdlen,
+  // unsigned long long opslimit, size_t memlimit);
   int crypto_pwhash_str(
       @Out byte[] out,
       @In byte[] passwd,
@@ -1465,7 +1625,8 @@ public interface LibSodium {
       @In @u_int64_t long opslimit,
       @In @ssize_t long memlimit);
 
-  // int crypto_pwhash_str_alg(char[] out, const char *const passwd, unsigned long long passwdlen, unsigned long long opslimit, size_t memlimit, int alg);
+  // int crypto_pwhash_str_alg(char[] out, const char *const passwd, unsigned long long passwdlen,
+  // unsigned long long opslimit, size_t memlimit, int alg);
   int crypto_pwhash_str_alg(
       @Out byte[] out,
       @In byte[] passwd,
@@ -1474,11 +1635,14 @@ public interface LibSodium {
       @In @ssize_t long memlimit,
       @In int alg);
 
-  // int crypto_pwhash_str_verify(const char[] str, const char *const passwd, unsigned long long passwdlen);
+  // int crypto_pwhash_str_verify(const char[] str, const char *const passwd, unsigned long long
+  // passwdlen);
   int crypto_pwhash_str_verify(@In Pointer str, @In byte[] passwd, @In @u_int64_t long passwdlen);
 
-  // int crypto_pwhash_str_needs_rehash(const char[] str, unsigned long long opslimit, size_t memlimit);
-  int crypto_pwhash_str_needs_rehash(@In Pointer str, @In @u_int64_t long opslimit, @In @ssize_t long memlimit);
+  // int crypto_pwhash_str_needs_rehash(const char[] str, unsigned long long opslimit, size_t
+  // memlimit);
+  int crypto_pwhash_str_needs_rehash(
+      @In Pointer str, @In @u_int64_t long opslimit, @In @ssize_t long memlimit);
 
   // const char * crypto_pwhash_primitive(void);
   String crypto_pwhash_primitive();
@@ -1491,7 +1655,8 @@ public interface LibSodium {
   @ssize_t
   long crypto_scalarmult_curve25519_scalarbytes();
 
-  // int crypto_scalarmult_curve25519(unsigned char * q, const unsigned char * n, const unsigned char * p);
+  // int crypto_scalarmult_curve25519(unsigned char * q, const unsigned char * n, const unsigned
+  // char * p);
   int crypto_scalarmult_curve25519(@Out byte[] q, @In byte[] n, @In byte[] p);
 
   // int crypto_scalarmult_curve25519_base(unsigned char * q, const unsigned char * n);
@@ -1530,21 +1695,15 @@ public interface LibSodium {
   @ssize_t
   long crypto_secretbox_xsalsa20poly1305_messagebytes_max();
 
-  // int crypto_secretbox_xsalsa20poly1305(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
+  // int crypto_secretbox_xsalsa20poly1305(unsigned char * c, const unsigned char * m, unsigned long
+  // long mlen, const unsigned char * n, const unsigned char * k);
   int crypto_secretbox_xsalsa20poly1305(
-      @Out byte[] c,
-      @In byte[] m,
-      @In @u_int64_t long mlen,
-      @In byte[] n,
-      @In byte[] k);
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
 
-  // int crypto_secretbox_xsalsa20poly1305_open(unsigned char * m, const unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
+  // int crypto_secretbox_xsalsa20poly1305_open(unsigned char * m, const unsigned char * c, unsigned
+  // long long clen, const unsigned char * n, const unsigned char * k);
   int crypto_secretbox_xsalsa20poly1305_open(
-      @Out byte[] m,
-      @In byte[] c,
-      @In @u_int64_t long clen,
-      @In byte[] n,
-      @In byte[] k);
+      @Out byte[] m, @In byte[] c, @In @u_int64_t long clen, @In byte[] n, @In byte[] k);
 
   // void crypto_secretbox_xsalsa20poly1305_keygen(unsigned char[] k);
   void crypto_secretbox_xsalsa20poly1305_keygen(@Out byte[] k);
@@ -1576,19 +1735,28 @@ public interface LibSodium {
   @ssize_t
   long crypto_secretbox_messagebytes_max();
 
-  // int crypto_secretbox_easy(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
-  int crypto_secretbox_easy(@Out Pointer c, @In Pointer m, @In @u_int64_t long mlen, @In Pointer n, @In Pointer k);
+  // int crypto_secretbox_easy(unsigned char * c, const unsigned char * m, unsigned long long mlen,
+  // const unsigned char * n, const unsigned char * k);
+  int crypto_secretbox_easy(
+      @Out Pointer c, @In Pointer m, @In @u_int64_t long mlen, @In Pointer n, @In Pointer k);
 
-  // int crypto_secretbox_easy(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
-  int crypto_secretbox_easy(@Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In Pointer n, @In Pointer k);
+  // int crypto_secretbox_easy(unsigned char * c, const unsigned char * m, unsigned long long mlen,
+  // const unsigned char * n, const unsigned char * k);
+  int crypto_secretbox_easy(
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In Pointer n, @In Pointer k);
 
-  // int crypto_secretbox_open_easy(unsigned char * m, const unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
-  int crypto_secretbox_open_easy(@Out byte[] m, @In byte[] c, @In @u_int64_t long clen, @In Pointer n, @In Pointer k);
+  // int crypto_secretbox_open_easy(unsigned char * m, const unsigned char * c, unsigned long long
+  // clen, const unsigned char * n, const unsigned char * k);
+  int crypto_secretbox_open_easy(
+      @Out byte[] m, @In byte[] c, @In @u_int64_t long clen, @In Pointer n, @In Pointer k);
 
-  // int crypto_secretbox_open_easy(unsigned char * m, const unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
-  int crypto_secretbox_open_easy(@Out Pointer m, @In Pointer c, @In @u_int64_t long clen, @In Pointer n, @In Pointer k);
+  // int crypto_secretbox_open_easy(unsigned char * m, const unsigned char * c, unsigned long long
+  // clen, const unsigned char * n, const unsigned char * k);
+  int crypto_secretbox_open_easy(
+      @Out Pointer m, @In Pointer c, @In @u_int64_t long clen, @In Pointer n, @In Pointer k);
 
-  // int crypto_secretbox_detached(unsigned char * c, unsigned char * mac, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
+  // int crypto_secretbox_detached(unsigned char * c, unsigned char * mac, const unsigned char * m,
+  // unsigned long long mlen, const unsigned char * n, const unsigned char * k);
   int crypto_secretbox_detached(
       @Out byte[] c,
       @Out byte[] mac,
@@ -1597,7 +1765,8 @@ public interface LibSodium {
       @In Pointer n,
       @In Pointer k);
 
-  // int crypto_secretbox_open_detached(unsigned char * m, const unsigned char * c, const unsigned char * mac, unsigned long long clen, const unsigned char * n, const unsigned char * k);
+  // int crypto_secretbox_open_detached(unsigned char * m, const unsigned char * c, const unsigned
+  // char * mac, unsigned long long clen, const unsigned char * n, const unsigned char * k);
   int crypto_secretbox_open_detached(
       @Out byte[] m,
       @In byte[] c,
@@ -1617,11 +1786,15 @@ public interface LibSodium {
   @ssize_t
   long crypto_secretbox_boxzerobytes();
 
-  // int crypto_secretbox(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
-  int crypto_secretbox(@Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
+  // int crypto_secretbox(unsigned char * c, const unsigned char * m, unsigned long long mlen, const
+  // unsigned char * n, const unsigned char * k);
+  int crypto_secretbox(
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
 
-  // int crypto_secretbox_open(unsigned char * m, const unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
-  int crypto_secretbox_open(@Out byte[] m, @In byte[] c, @In @u_int64_t long clen, @In byte[] n, @In byte[] k);
+  // int crypto_secretbox_open(unsigned char * m, const unsigned char * c, unsigned long long clen,
+  // const unsigned char * n, const unsigned char * k);
+  int crypto_secretbox_open(
+      @Out byte[] m, @In byte[] c, @In @u_int64_t long clen, @In byte[] n, @In byte[] k);
 
   // size_t crypto_stream_chacha20_keybytes(void);
   @ssize_t
@@ -1635,13 +1808,17 @@ public interface LibSodium {
   @ssize_t
   long crypto_stream_chacha20_messagebytes_max();
 
-  // int crypto_stream_chacha20(unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
+  // int crypto_stream_chacha20(unsigned char * c, unsigned long long clen, const unsigned char * n,
+  // const unsigned char * k);
   int crypto_stream_chacha20(@Out byte[] c, @In @u_int64_t long clen, @In byte[] n, @In byte[] k);
 
-  // int crypto_stream_chacha20_xor(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
-  int crypto_stream_chacha20_xor(@Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
+  // int crypto_stream_chacha20_xor(unsigned char * c, const unsigned char * m, unsigned long long
+  // mlen, const unsigned char * n, const unsigned char * k);
+  int crypto_stream_chacha20_xor(
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
 
-  // int crypto_stream_chacha20_xor_ic(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, uint64_t ic, const unsigned char * k);
+  // int crypto_stream_chacha20_xor_ic(unsigned char * c, const unsigned char * m, unsigned long
+  // long mlen, const unsigned char * n, uint64_t ic, const unsigned char * k);
   int crypto_stream_chacha20_xor_ic(
       @Out byte[] c,
       @In byte[] m,
@@ -1665,18 +1842,18 @@ public interface LibSodium {
   @ssize_t
   long crypto_stream_chacha20_ietf_messagebytes_max();
 
-  // int crypto_stream_chacha20_ietf(unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
-  int crypto_stream_chacha20_ietf(@Out byte[] c, @In @u_int64_t long clen, @In byte[] n, @In byte[] k);
+  // int crypto_stream_chacha20_ietf(unsigned char * c, unsigned long long clen, const unsigned char
+  // * n, const unsigned char * k);
+  int crypto_stream_chacha20_ietf(
+      @Out byte[] c, @In @u_int64_t long clen, @In byte[] n, @In byte[] k);
 
-  // int crypto_stream_chacha20_ietf_xor(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
+  // int crypto_stream_chacha20_ietf_xor(unsigned char * c, const unsigned char * m, unsigned long
+  // long mlen, const unsigned char * n, const unsigned char * k);
   int crypto_stream_chacha20_ietf_xor(
-      @Out byte[] c,
-      @In byte[] m,
-      @In @u_int64_t long mlen,
-      @In byte[] n,
-      @In byte[] k);
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
 
-  // int crypto_stream_chacha20_ietf_xor_ic(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, uint32_t ic, const unsigned char * k);
+  // int crypto_stream_chacha20_ietf_xor_ic(unsigned char * c, const unsigned char * m, unsigned
+  // long long mlen, const unsigned char * n, uint32_t ic, const unsigned char * k);
   int crypto_stream_chacha20_ietf_xor_ic(
       @Out byte[] c,
       @In byte[] m,
@@ -1727,10 +1904,14 @@ public interface LibSodium {
   // void crypto_secretstream_xchacha20poly1305_keygen(unsigned char[] k);
   void crypto_secretstream_xchacha20poly1305_keygen(@Out Pointer k);
 
-  // int crypto_secretstream_xchacha20poly1305_init_push(crypto_secretstream_xchacha20poly1305_state * state, unsigned char[] header, const unsigned char[] k);
-  int crypto_secretstream_xchacha20poly1305_init_push(/*both*/ Pointer state, @Out byte[] header, @In Pointer k);
+  // int crypto_secretstream_xchacha20poly1305_init_push(crypto_secretstream_xchacha20poly1305_state
+  // * state, unsigned char[] header, const unsigned char[] k);
+  int crypto_secretstream_xchacha20poly1305_init_push(
+      /*both*/ Pointer state, @Out byte[] header, @In Pointer k);
 
-  // int crypto_secretstream_xchacha20poly1305_push(crypto_secretstream_xchacha20poly1305_state * state, unsigned char * c, unsigned long long * clen_p, const unsigned char * m, unsigned long long mlen, const unsigned char * ad, unsigned long long adlen, unsigned char tag);
+  // int crypto_secretstream_xchacha20poly1305_push(crypto_secretstream_xchacha20poly1305_state *
+  // state, unsigned char * c, unsigned long long * clen_p, const unsigned char * m, unsigned long
+  // long mlen, const unsigned char * ad, unsigned long long adlen, unsigned char tag);
   int crypto_secretstream_xchacha20poly1305_push(
       /*both*/ Pointer state,
       @Out byte[] c,
@@ -1741,10 +1922,14 @@ public interface LibSodium {
       @In @u_int64_t long adlen,
       @In @u_int8_t byte tag);
 
-  // int crypto_secretstream_xchacha20poly1305_init_pull(crypto_secretstream_xchacha20poly1305_state * state, const unsigned char[] header, const unsigned char[] k);
-  int crypto_secretstream_xchacha20poly1305_init_pull(/*both*/ Pointer state, @In byte[] header, @In Pointer k);
+  // int crypto_secretstream_xchacha20poly1305_init_pull(crypto_secretstream_xchacha20poly1305_state
+  // * state, const unsigned char[] header, const unsigned char[] k);
+  int crypto_secretstream_xchacha20poly1305_init_pull(
+      /*both*/ Pointer state, @In byte[] header, @In Pointer k);
 
-  // int crypto_secretstream_xchacha20poly1305_pull(crypto_secretstream_xchacha20poly1305_state * state, unsigned char * m, unsigned long long * mlen_p, unsigned char * tag_p, const unsigned char * c, unsigned long long clen, const unsigned char * ad, unsigned long long adlen);
+  // int crypto_secretstream_xchacha20poly1305_pull(crypto_secretstream_xchacha20poly1305_state *
+  // state, unsigned char * m, unsigned long long * mlen_p, unsigned char * tag_p, const unsigned
+  // char * c, unsigned long long clen, const unsigned char * ad, unsigned long long adlen);
   int crypto_secretstream_xchacha20poly1305_pull(
       /*both*/ Pointer state,
       @Out byte[] m,
@@ -1755,7 +1940,8 @@ public interface LibSodium {
       @In byte[] ad,
       @In @u_int64_t long adlen);
 
-  // void crypto_secretstream_xchacha20poly1305_rekey(crypto_secretstream_xchacha20poly1305_state * state);
+  // void crypto_secretstream_xchacha20poly1305_rekey(crypto_secretstream_xchacha20poly1305_state *
+  // state);
   void crypto_secretstream_xchacha20poly1305_rekey(/*both*/ Pointer state);
 
   // size_t crypto_shorthash_siphash24_bytes(void);
@@ -1766,8 +1952,10 @@ public interface LibSodium {
   @ssize_t
   long crypto_shorthash_siphash24_keybytes();
 
-  // int crypto_shorthash_siphash24(unsigned char * out, const unsigned char * in, unsigned long long inlen, const unsigned char * k);
-  int crypto_shorthash_siphash24(@Out byte[] out, @In byte[] in, @In @u_int64_t long inlen, @In byte[] k);
+  // int crypto_shorthash_siphash24(unsigned char * out, const unsigned char * in, unsigned long
+  // long inlen, const unsigned char * k);
+  int crypto_shorthash_siphash24(
+      @Out byte[] out, @In byte[] in, @In @u_int64_t long inlen, @In byte[] k);
 
   // size_t crypto_shorthash_siphashx24_bytes(void);
   @ssize_t
@@ -1777,8 +1965,10 @@ public interface LibSodium {
   @ssize_t
   long crypto_shorthash_siphashx24_keybytes();
 
-  // int crypto_shorthash_siphashx24(unsigned char * out, const unsigned char * in, unsigned long long inlen, const unsigned char * k);
-  int crypto_shorthash_siphashx24(@Out byte[] out, @In byte[] in, @In @u_int64_t long inlen, @In byte[] k);
+  // int crypto_shorthash_siphashx24(unsigned char * out, const unsigned char * in, unsigned long
+  // long inlen, const unsigned char * k);
+  int crypto_shorthash_siphashx24(
+      @Out byte[] out, @In byte[] in, @In @u_int64_t long inlen, @In byte[] k);
 
   // size_t crypto_shorthash_bytes(void);
   @ssize_t
@@ -1791,7 +1981,8 @@ public interface LibSodium {
   // const char * crypto_shorthash_primitive(void);
   String crypto_shorthash_primitive();
 
-  // int crypto_shorthash(unsigned char * out, const unsigned char * in, unsigned long long inlen, const unsigned char * k);
+  // int crypto_shorthash(unsigned char * out, const unsigned char * in, unsigned long long inlen,
+  // const unsigned char * k);
   int crypto_shorthash(@Out byte[] out, @In byte[] in, @In @u_int64_t long inlen, @In byte[] k);
 
   // void crypto_shorthash_keygen(unsigned char[] k);
@@ -1821,7 +2012,8 @@ public interface LibSodium {
   @ssize_t
   long crypto_sign_ed25519_messagebytes_max();
 
-  // int crypto_sign_ed25519(unsigned char * sm, unsigned long long * smlen_p, const unsigned char * m, unsigned long long mlen, const unsigned char * sk);
+  // int crypto_sign_ed25519(unsigned char * sm, unsigned long long * smlen_p, const unsigned char *
+  // m, unsigned long long mlen, const unsigned char * sk);
   int crypto_sign_ed25519(
       @Out byte[] sm,
       @Out LongLongByReference smlen_p,
@@ -1829,7 +2021,8 @@ public interface LibSodium {
       @In @u_int64_t long mlen,
       @In byte[] sk);
 
-  // int crypto_sign_ed25519_open(unsigned char * m, unsigned long long * mlen_p, const unsigned char * sm, unsigned long long smlen, const unsigned char * pk);
+  // int crypto_sign_ed25519_open(unsigned char * m, unsigned long long * mlen_p, const unsigned
+  // char * sm, unsigned long long smlen, const unsigned char * pk);
   int crypto_sign_ed25519_open(
       @Out byte[] m,
       @Out LongLongByReference mlen_p,
@@ -1837,7 +2030,8 @@ public interface LibSodium {
       @In @u_int64_t long smlen,
       @In byte[] pk);
 
-  // int crypto_sign_ed25519_detached(unsigned char * sig, unsigned long long * siglen_p, const unsigned char * m, unsigned long long mlen, const unsigned char * sk);
+  // int crypto_sign_ed25519_detached(unsigned char * sig, unsigned long long * siglen_p, const
+  // unsigned char * m, unsigned long long mlen, const unsigned char * sk);
   int crypto_sign_ed25519_detached(
       @Out byte[] sig,
       @Out LongLongByReference siglen_p,
@@ -1845,19 +2039,24 @@ public interface LibSodium {
       @In @u_int64_t long mlen,
       @In byte[] sk);
 
-  // int crypto_sign_ed25519_verify_detached(const unsigned char * sig, const unsigned char * m, unsigned long long mlen, const unsigned char * pk);
-  int crypto_sign_ed25519_verify_detached(@In byte[] sig, @In byte[] m, @In @u_int64_t long mlen, @In byte[] pk);
+  // int crypto_sign_ed25519_verify_detached(const unsigned char * sig, const unsigned char * m,
+  // unsigned long long mlen, const unsigned char * pk);
+  int crypto_sign_ed25519_verify_detached(
+      @In byte[] sig, @In byte[] m, @In @u_int64_t long mlen, @In byte[] pk);
 
   // int crypto_sign_ed25519_keypair(unsigned char * pk, unsigned char * sk);
   int crypto_sign_ed25519_keypair(@Out byte[] pk, @Out byte[] sk);
 
-  // int crypto_sign_ed25519_seed_keypair(unsigned char * pk, unsigned char * sk, const unsigned char * seed);
+  // int crypto_sign_ed25519_seed_keypair(unsigned char * pk, unsigned char * sk, const unsigned
+  // char * seed);
   int crypto_sign_ed25519_seed_keypair(@Out byte[] pk, @Out byte[] sk, @In byte[] seed);
 
-  // int crypto_sign_ed25519_pk_to_curve25519(unsigned char * curve25519_pk, const unsigned char * ed25519_pk);
+  // int crypto_sign_ed25519_pk_to_curve25519(unsigned char * curve25519_pk, const unsigned char *
+  // ed25519_pk);
   int crypto_sign_ed25519_pk_to_curve25519(@Out Pointer curve25519_pk, @In Pointer ed25519_pk);
 
-  // int crypto_sign_ed25519_sk_to_curve25519(unsigned char * curve25519_sk, const unsigned char * ed25519_sk);
+  // int crypto_sign_ed25519_sk_to_curve25519(unsigned char * curve25519_sk, const unsigned char *
+  // ed25519_sk);
   int crypto_sign_ed25519_sk_to_curve25519(@Out Pointer curve25519_sk, @In Pointer ed25519_sk);
 
   // int crypto_sign_ed25519_sk_to_seed(unsigned char * seed, const unsigned char * sk);
@@ -1869,17 +2068,17 @@ public interface LibSodium {
   // int crypto_sign_ed25519ph_init(crypto_sign_ed25519ph_state * state);
   int crypto_sign_ed25519ph_init(@Out Pointer state);
 
-  // int crypto_sign_ed25519ph_update(crypto_sign_ed25519ph_state * state, const unsigned char * m, unsigned long long mlen);
+  // int crypto_sign_ed25519ph_update(crypto_sign_ed25519ph_state * state, const unsigned char * m,
+  // unsigned long long mlen);
   int crypto_sign_ed25519ph_update(/*both*/ Pointer state, @In byte[] m, @In @u_int64_t long mlen);
 
-  // int crypto_sign_ed25519ph_final_create(crypto_sign_ed25519ph_state * state, unsigned char * sig, unsigned long long * siglen_p, const unsigned char * sk);
+  // int crypto_sign_ed25519ph_final_create(crypto_sign_ed25519ph_state * state, unsigned char *
+  // sig, unsigned long long * siglen_p, const unsigned char * sk);
   int crypto_sign_ed25519ph_final_create(
-      /*both*/ Pointer state,
-      @Out byte[] sig,
-      @Out LongLongByReference siglen_p,
-      @In byte[] sk);
+      /*both*/ Pointer state, @Out byte[] sig, @Out LongLongByReference siglen_p, @In byte[] sk);
 
-  // int crypto_sign_ed25519ph_final_verify(crypto_sign_ed25519ph_state * state, unsigned char * sig, const unsigned char * pk);
+  // int crypto_sign_ed25519ph_final_verify(crypto_sign_ed25519ph_state * state, unsigned char *
+  // sig, const unsigned char * pk);
   int crypto_sign_ed25519ph_final_verify(/*both*/ Pointer state, @In byte[] sig, @In byte[] pk);
 
   // size_t crypto_sign_statebytes(void);
@@ -1909,13 +2108,15 @@ public interface LibSodium {
   // const char * crypto_sign_primitive(void);
   String crypto_sign_primitive();
 
-  // int crypto_sign_seed_keypair(unsigned char * pk, unsigned char * sk, const unsigned char * seed);
+  // int crypto_sign_seed_keypair(unsigned char * pk, unsigned char * sk, const unsigned char *
+  // seed);
   int crypto_sign_seed_keypair(@Out Pointer pk, @Out Pointer sk, @In Pointer seed);
 
   // int crypto_sign_keypair(unsigned char * pk, unsigned char * sk);
   int crypto_sign_keypair(@Out Pointer pk, @Out Pointer sk);
 
-  // int crypto_sign(unsigned char * sm, unsigned long long * smlen_p, const unsigned char * m, unsigned long long mlen, const unsigned char * sk);
+  // int crypto_sign(unsigned char * sm, unsigned long long * smlen_p, const unsigned char * m,
+  // unsigned long long mlen, const unsigned char * sk);
   int crypto_sign(
       @Out byte[] sm,
       @Nullable @Out LongLongByReference smlen_p,
@@ -1923,7 +2124,8 @@ public interface LibSodium {
       @In @u_int64_t long mlen,
       @In Pointer sk);
 
-  // int crypto_sign_open(unsigned char * m, unsigned long long * mlen_p, const unsigned char * sm, unsigned long long smlen, const unsigned char * pk);
+  // int crypto_sign_open(unsigned char * m, unsigned long long * mlen_p, const unsigned char * sm,
+  // unsigned long long smlen, const unsigned char * pk);
   int crypto_sign_open(
       @Out byte[] m,
       @Out LongLongByReference mlen_p,
@@ -1931,7 +2133,8 @@ public interface LibSodium {
       @In @u_int64_t long smlen,
       @In Pointer pk);
 
-  // int crypto_sign_detached(unsigned char * sig, unsigned long long * siglen_p, const unsigned char * m, unsigned long long mlen, const unsigned char * sk);
+  // int crypto_sign_detached(unsigned char * sig, unsigned long long * siglen_p, const unsigned
+  // char * m, unsigned long long mlen, const unsigned char * sk);
   int crypto_sign_detached(
       @Out byte[] sig,
       @Nullable @Out LongLongByReference siglen_p,
@@ -1939,7 +2142,8 @@ public interface LibSodium {
       @In @u_int64_t long mlen,
       @In Pointer sk);
 
-  // int crypto_sign_detached(unsigned char * sig, unsigned long long * siglen_p, const unsigned char * m, unsigned long long mlen, const unsigned char * sk);
+  // int crypto_sign_detached(unsigned char * sig, unsigned long long * siglen_p, const unsigned
+  // char * m, unsigned long long mlen, const unsigned char * sk);
   int crypto_sign_detached(
       @Out Pointer sig,
       @Nullable @Out LongLongByReference siglen_p,
@@ -1947,26 +2151,30 @@ public interface LibSodium {
       @In @u_int64_t long mlen,
       @In Pointer sk);
 
-  // int crypto_sign_verify_detached(const unsigned char * sig, const unsigned char * m, unsigned long long mlen, const unsigned char * pk);
-  int crypto_sign_verify_detached(@In Pointer sig, @In Pointer m, @In @u_int64_t long mlen, @In Pointer pk);
+  // int crypto_sign_verify_detached(const unsigned char * sig, const unsigned char * m, unsigned
+  // long long mlen, const unsigned char * pk);
+  int crypto_sign_verify_detached(
+      @In Pointer sig, @In Pointer m, @In @u_int64_t long mlen, @In Pointer pk);
 
-  // int crypto_sign_verify_detached(const unsigned char * sig, const unsigned char * m, unsigned long long mlen, const unsigned char * pk);
-  int crypto_sign_verify_detached(@In byte[] sig, @In byte[] m, @In @u_int64_t long mlen, @In Pointer pk);
+  // int crypto_sign_verify_detached(const unsigned char * sig, const unsigned char * m, unsigned
+  // long long mlen, const unsigned char * pk);
+  int crypto_sign_verify_detached(
+      @In byte[] sig, @In byte[] m, @In @u_int64_t long mlen, @In Pointer pk);
 
   // int crypto_sign_init(crypto_sign_state * state);
   int crypto_sign_init(@Out Pointer state);
 
-  // int crypto_sign_update(crypto_sign_state * state, const unsigned char * m, unsigned long long mlen);
+  // int crypto_sign_update(crypto_sign_state * state, const unsigned char * m, unsigned long long
+  // mlen);
   int crypto_sign_update(/*both*/ Pointer state, @In byte[] m, @In @u_int64_t long mlen);
 
-  // int crypto_sign_final_create(crypto_sign_state * state, unsigned char * sig, unsigned long long * siglen_p, const unsigned char * sk);
+  // int crypto_sign_final_create(crypto_sign_state * state, unsigned char * sig, unsigned long long
+  // * siglen_p, const unsigned char * sk);
   int crypto_sign_final_create(
-      /*both*/ Pointer state,
-      @Out byte[] sig,
-      @Out LongLongByReference siglen_p,
-      @In byte[] sk);
+      /*both*/ Pointer state, @Out byte[] sig, @Out LongLongByReference siglen_p, @In byte[] sk);
 
-  // int crypto_sign_final_verify(crypto_sign_state * state, unsigned char * sig, const unsigned char * pk);
+  // int crypto_sign_final_verify(crypto_sign_state * state, unsigned char * sig, const unsigned
+  // char * pk);
   int crypto_sign_final_verify(/*both*/ Pointer state, @In byte[] sig, @In byte[] pk);
 
   // size_t crypto_stream_keybytes(void);
@@ -1984,11 +2192,14 @@ public interface LibSodium {
   // const char * crypto_stream_primitive(void);
   String crypto_stream_primitive();
 
-  // int crypto_stream(unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
+  // int crypto_stream(unsigned char * c, unsigned long long clen, const unsigned char * n, const
+  // unsigned char * k);
   int crypto_stream(@Out byte[] c, @In @u_int64_t long clen, @In byte[] n, @In byte[] k);
 
-  // int crypto_stream_xor(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
-  int crypto_stream_xor(@Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
+  // int crypto_stream_xor(unsigned char * c, const unsigned char * m, unsigned long long mlen,
+  // const unsigned char * n, const unsigned char * k);
+  int crypto_stream_xor(
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
 
   // void crypto_stream_keygen(unsigned char[] k);
   void crypto_stream_keygen(@Out byte[] k);
@@ -2005,13 +2216,17 @@ public interface LibSodium {
   @ssize_t
   long crypto_stream_salsa20_messagebytes_max();
 
-  // int crypto_stream_salsa20(unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
+  // int crypto_stream_salsa20(unsigned char * c, unsigned long long clen, const unsigned char * n,
+  // const unsigned char * k);
   int crypto_stream_salsa20(@Out byte[] c, @In @u_int64_t long clen, @In byte[] n, @In byte[] k);
 
-  // int crypto_stream_salsa20_xor(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
-  int crypto_stream_salsa20_xor(@Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
+  // int crypto_stream_salsa20_xor(unsigned char * c, const unsigned char * m, unsigned long long
+  // mlen, const unsigned char * n, const unsigned char * k);
+  int crypto_stream_salsa20_xor(
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
 
-  // int crypto_stream_salsa20_xor_ic(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, uint64_t ic, const unsigned char * k);
+  // int crypto_stream_salsa20_xor_ic(unsigned char * c, const unsigned char * m, unsigned long long
+  // mlen, const unsigned char * n, uint64_t ic, const unsigned char * k);
   int crypto_stream_salsa20_xor_ic(
       @Out byte[] c,
       @In byte[] m,
@@ -2071,7 +2286,8 @@ public interface LibSodium {
   // void randombytes_buf(void *const buf, const size_t size);
   void randombytes_buf(@Out Pointer buf, @In @ssize_t long size);
 
-  // void randombytes_buf_deterministic(void *const buf, const size_t size, const unsigned char[] seed);
+  // void randombytes_buf_deterministic(void *const buf, const size_t size, const unsigned char[]
+  // seed);
   void randombytes_buf_deterministic(@Out byte[] buf, @In @ssize_t long size, @In byte[] seed);
 
   // uint32_t randombytes_random(void);
@@ -2157,11 +2373,15 @@ public interface LibSodium {
   // void sodium_sub(unsigned char * a, const unsigned char * b, const size_t len);
   void sodium_sub(/*@In @Out*/ byte[] a, @In byte[] b, @In @ssize_t long len);
 
-  // char * sodium_bin2hex(char *const hex, const size_t hex_maxlen, const unsigned char *const bin, const size_t bin_len);
+  // char * sodium_bin2hex(char *const hex, const size_t hex_maxlen, const unsigned char *const bin,
+  // const size_t bin_len);
   // FIXME: JNR-FFI code generation fails for this method
-  //  byte[] sodium_bin2hex(@Out byte[] hex, @In @ssize_t long hex_maxlen, @In byte[] bin, @In @ssize_t long bin_len);
+  //  byte[] sodium_bin2hex(@Out byte[] hex, @In @ssize_t long hex_maxlen, @In byte[] bin, @In
+  // @ssize_t long bin_len);
 
-  // int sodium_hex2bin(unsigned char *const bin, const size_t bin_maxlen, const char *const hex, const size_t hex_len, const char *const ignore, size_t *const bin_len, const char * *const hex_end);
+  // int sodium_hex2bin(unsigned char *const bin, const size_t bin_maxlen, const char *const hex,
+  // const size_t hex_len, const char *const ignore, size_t *const bin_len, const char * *const
+  // hex_end);
   int sodium_hex2bin(
       @Out byte[] bin,
       @In @ssize_t long bin_maxlen,
@@ -2175,7 +2395,8 @@ public interface LibSodium {
   @ssize_t
   long sodium_base64_encoded_len(@In @ssize_t long bin_len, @In int variant);
 
-  // char * sodium_bin2base64(char *const b64, const size_t b64_maxlen, const unsigned char *const bin, const size_t bin_len, const int variant);
+  // char * sodium_bin2base64(char *const b64, const size_t b64_maxlen, const unsigned char *const
+  // bin, const size_t bin_len, const int variant);
   // FIXME: JNR-FFI code generation fails for this method
   //  byte[] sodium_bin2base64(
   //      @Out byte[] b64,
@@ -2184,7 +2405,9 @@ public interface LibSodium {
   //      @In @ssize_t long bin_len,
   //      @In int variant);
 
-  // int sodium_base642bin(unsigned char *const bin, const size_t bin_maxlen, const char *const b64, const size_t b64_len, const char *const ignore, size_t *const bin_len, const char * *const b64_end, const int variant);
+  // int sodium_base642bin(unsigned char *const bin, const size_t bin_maxlen, const char *const b64,
+  // const size_t b64_len, const char *const ignore, size_t *const bin_len, const char * *const
+  // b64_end, const int variant);
   int sodium_base642bin(
       @Out byte[] bin,
       @In @ssize_t long bin_maxlen,
@@ -2219,7 +2442,8 @@ public interface LibSodium {
   // int sodium_mprotect_readwrite(void * ptr);
   int sodium_mprotect_readwrite(/*@In @Out*/ Pointer ptr);
 
-  // int sodium_pad(size_t * padded_buflen_p, unsigned char * buf, size_t unpadded_buflen, size_t blocksize, size_t max_buflen);
+  // int sodium_pad(size_t * padded_buflen_p, unsigned char * buf, size_t unpadded_buflen, size_t
+  // blocksize, size_t max_buflen);
   int sodium_pad(
       @Out LongLongByReference padded_buflen_p,
       /*@In @Out*/ byte[] buf,
@@ -2227,7 +2451,8 @@ public interface LibSodium {
       @In @ssize_t long blocksize,
       @In @ssize_t long max_buflen);
 
-  // int sodium_unpad(size_t * unpadded_buflen_p, const unsigned char * buf, size_t padded_buflen, size_t blocksize);
+  // int sodium_unpad(size_t * unpadded_buflen_p, const unsigned char * buf, size_t padded_buflen,
+  // size_t blocksize);
   int sodium_unpad(
       @Out LongLongByReference unpadded_buflen_p,
       @In byte[] buf,
@@ -2249,13 +2474,17 @@ public interface LibSodium {
   @ssize_t
   long crypto_stream_xchacha20_messagebytes_max();
 
-  // int crypto_stream_xchacha20(unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
+  // int crypto_stream_xchacha20(unsigned char * c, unsigned long long clen, const unsigned char *
+  // n, const unsigned char * k);
   int crypto_stream_xchacha20(@Out byte[] c, @In @u_int64_t long clen, @In byte[] n, @In byte[] k);
 
-  // int crypto_stream_xchacha20_xor(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
-  int crypto_stream_xchacha20_xor(@Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
+  // int crypto_stream_xchacha20_xor(unsigned char * c, const unsigned char * m, unsigned long long
+  // mlen, const unsigned char * n, const unsigned char * k);
+  int crypto_stream_xchacha20_xor(
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
 
-  // int crypto_stream_xchacha20_xor_ic(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, uint64_t ic, const unsigned char * k);
+  // int crypto_stream_xchacha20_xor_ic(unsigned char * c, const unsigned char * m, unsigned long
+  // long mlen, const unsigned char * n, uint64_t ic, const unsigned char * k);
   int crypto_stream_xchacha20_xor_ic(
       @Out byte[] c,
       @In byte[] m,
@@ -2295,13 +2524,17 @@ public interface LibSodium {
   @ssize_t
   long crypto_box_curve25519xchacha20poly1305_messagebytes_max();
 
-  // int crypto_box_curve25519xchacha20poly1305_seed_keypair(unsigned char * pk, unsigned char * sk, const unsigned char * seed);
-  int crypto_box_curve25519xchacha20poly1305_seed_keypair(@Out byte[] pk, @Out byte[] sk, @In byte[] seed);
+  // int crypto_box_curve25519xchacha20poly1305_seed_keypair(unsigned char * pk, unsigned char * sk,
+  // const unsigned char * seed);
+  int crypto_box_curve25519xchacha20poly1305_seed_keypair(
+      @Out byte[] pk, @Out byte[] sk, @In byte[] seed);
 
   // int crypto_box_curve25519xchacha20poly1305_keypair(unsigned char * pk, unsigned char * sk);
   int crypto_box_curve25519xchacha20poly1305_keypair(@Out byte[] pk, @Out byte[] sk);
 
-  // int crypto_box_curve25519xchacha20poly1305_easy(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * pk, const unsigned char * sk);
+  // int crypto_box_curve25519xchacha20poly1305_easy(unsigned char * c, const unsigned char * m,
+  // unsigned long long mlen, const unsigned char * n, const unsigned char * pk, const unsigned char
+  // * sk);
   int crypto_box_curve25519xchacha20poly1305_easy(
       @Out byte[] c,
       @In byte[] m,
@@ -2310,7 +2543,9 @@ public interface LibSodium {
       @In byte[] pk,
       @In byte[] sk);
 
-  // int crypto_box_curve25519xchacha20poly1305_open_easy(unsigned char * m, const unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * pk, const unsigned char * sk);
+  // int crypto_box_curve25519xchacha20poly1305_open_easy(unsigned char * m, const unsigned char *
+  // c, unsigned long long clen, const unsigned char * n, const unsigned char * pk, const unsigned
+  // char * sk);
   int crypto_box_curve25519xchacha20poly1305_open_easy(
       @Out byte[] m,
       @In byte[] c,
@@ -2319,7 +2554,9 @@ public interface LibSodium {
       @In byte[] pk,
       @In byte[] sk);
 
-  // int crypto_box_curve25519xchacha20poly1305_detached(unsigned char * c, unsigned char * mac, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * pk, const unsigned char * sk);
+  // int crypto_box_curve25519xchacha20poly1305_detached(unsigned char * c, unsigned char * mac,
+  // const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char
+  // * pk, const unsigned char * sk);
   int crypto_box_curve25519xchacha20poly1305_detached(
       @Out byte[] c,
       /*@In @Out*/ byte[] mac,
@@ -2329,7 +2566,9 @@ public interface LibSodium {
       @In byte[] pk,
       @In byte[] sk);
 
-  // int crypto_box_curve25519xchacha20poly1305_open_detached(unsigned char * m, const unsigned char * c, const unsigned char * mac, unsigned long long clen, const unsigned char * n, const unsigned char * pk, const unsigned char * sk);
+  // int crypto_box_curve25519xchacha20poly1305_open_detached(unsigned char * m, const unsigned char
+  // * c, const unsigned char * mac, unsigned long long clen, const unsigned char * n, const
+  // unsigned char * pk, const unsigned char * sk);
   int crypto_box_curve25519xchacha20poly1305_open_detached(
       @Out byte[] m,
       @In byte[] c,
@@ -2339,26 +2578,23 @@ public interface LibSodium {
       @In byte[] pk,
       @In byte[] sk);
 
-  // int crypto_box_curve25519xchacha20poly1305_beforenm(unsigned char * k, const unsigned char * pk, const unsigned char * sk);
+  // int crypto_box_curve25519xchacha20poly1305_beforenm(unsigned char * k, const unsigned char *
+  // pk, const unsigned char * sk);
   int crypto_box_curve25519xchacha20poly1305_beforenm(@Out Pointer k, @In byte[] pk, @In byte[] sk);
 
-  // int crypto_box_curve25519xchacha20poly1305_easy_afternm(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
+  // int crypto_box_curve25519xchacha20poly1305_easy_afternm(unsigned char * c, const unsigned char
+  // * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
   int crypto_box_curve25519xchacha20poly1305_easy_afternm(
-      @Out byte[] c,
-      @In byte[] m,
-      @In @u_int64_t long mlen,
-      @In byte[] n,
-      @In Pointer k);
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In Pointer k);
 
-  // int crypto_box_curve25519xchacha20poly1305_open_easy_afternm(unsigned char * m, const unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
+  // int crypto_box_curve25519xchacha20poly1305_open_easy_afternm(unsigned char * m, const unsigned
+  // char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
   int crypto_box_curve25519xchacha20poly1305_open_easy_afternm(
-      @Out byte[] m,
-      @In byte[] c,
-      @In @u_int64_t long clen,
-      @In byte[] n,
-      @In Pointer k);
+      @Out byte[] m, @In byte[] c, @In @u_int64_t long clen, @In byte[] n, @In Pointer k);
 
-  // int crypto_box_curve25519xchacha20poly1305_detached_afternm(unsigned char * c, unsigned char * mac, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
+  // int crypto_box_curve25519xchacha20poly1305_detached_afternm(unsigned char * c, unsigned char *
+  // mac, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned
+  // char * k);
   int crypto_box_curve25519xchacha20poly1305_detached_afternm(
       @Out byte[] c,
       /*@In @Out*/ byte[] mac,
@@ -2367,7 +2603,9 @@ public interface LibSodium {
       @In byte[] n,
       @In Pointer k);
 
-  // int crypto_box_curve25519xchacha20poly1305_open_detached_afternm(unsigned char * m, const unsigned char * c, const unsigned char * mac, unsigned long long clen, const unsigned char * n, const unsigned char * k);
+  // int crypto_box_curve25519xchacha20poly1305_open_detached_afternm(unsigned char * m, const
+  // unsigned char * c, const unsigned char * mac, unsigned long long clen, const unsigned char * n,
+  // const unsigned char * k);
   int crypto_box_curve25519xchacha20poly1305_open_detached_afternm(
       @Out byte[] m,
       @In byte[] c,
@@ -2380,16 +2618,15 @@ public interface LibSodium {
   @ssize_t
   long crypto_box_curve25519xchacha20poly1305_sealbytes();
 
-  // int crypto_box_curve25519xchacha20poly1305_seal(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * pk);
-  int crypto_box_curve25519xchacha20poly1305_seal(@Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] pk);
+  // int crypto_box_curve25519xchacha20poly1305_seal(unsigned char * c, const unsigned char * m,
+  // unsigned long long mlen, const unsigned char * pk);
+  int crypto_box_curve25519xchacha20poly1305_seal(
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] pk);
 
-  // int crypto_box_curve25519xchacha20poly1305_seal_open(unsigned char * m, const unsigned char * c, unsigned long long clen, const unsigned char * pk, const unsigned char * sk);
+  // int crypto_box_curve25519xchacha20poly1305_seal_open(unsigned char * m, const unsigned char *
+  // c, unsigned long long clen, const unsigned char * pk, const unsigned char * sk);
   int crypto_box_curve25519xchacha20poly1305_seal_open(
-      @Out byte[] m,
-      @In byte[] c,
-      @In @u_int64_t long clen,
-      @In byte[] pk,
-      @In byte[] sk);
+      @Out byte[] m, @In byte[] c, @In @u_int64_t long clen, @In byte[] pk, @In byte[] sk);
 
   // size_t crypto_core_ed25519_bytes(void);
   @ssize_t
@@ -2414,10 +2651,12 @@ public interface LibSodium {
   // int crypto_core_ed25519_is_valid_point(const unsigned char * p);
   int crypto_core_ed25519_is_valid_point(@In byte[] p);
 
-  // int crypto_core_ed25519_add(unsigned char * r, const unsigned char * p, const unsigned char * q);
+  // int crypto_core_ed25519_add(unsigned char * r, const unsigned char * p, const unsigned char *
+  // q);
   int crypto_core_ed25519_add(@Out byte[] r, @In byte[] p, @In byte[] q);
 
-  // int crypto_core_ed25519_sub(unsigned char * r, const unsigned char * p, const unsigned char * q);
+  // int crypto_core_ed25519_sub(unsigned char * r, const unsigned char * p, const unsigned char *
+  // q);
   int crypto_core_ed25519_sub(@Out byte[] r, @In byte[] p, @In byte[] q);
 
   // int crypto_core_ed25519_from_uniform(unsigned char * p, const unsigned char * r);
@@ -2441,13 +2680,16 @@ public interface LibSodium {
   // void crypto_core_ed25519_scalar_complement(unsigned char * comp, const unsigned char * s);
   void crypto_core_ed25519_scalar_complement(@Out byte[] comp, @In byte[] s);
 
-  // void crypto_core_ed25519_scalar_add(unsigned char * z, const unsigned char * x, const unsigned char * y);
+  // void crypto_core_ed25519_scalar_add(unsigned char * z, const unsigned char * x, const unsigned
+  // char * y);
   void crypto_core_ed25519_scalar_add(@Out byte[] z, @In byte[] x, @In byte[] y);
 
-  // void crypto_core_ed25519_scalar_sub(unsigned char * z, const unsigned char * x, const unsigned char * y);
+  // void crypto_core_ed25519_scalar_sub(unsigned char * z, const unsigned char * x, const unsigned
+  // char * y);
   void crypto_core_ed25519_scalar_sub(@Out byte[] z, @In byte[] x, @In byte[] y);
 
-  // void crypto_core_ed25519_scalar_mul(unsigned char * z, const unsigned char * x, const unsigned char * y);
+  // void crypto_core_ed25519_scalar_mul(unsigned char * z, const unsigned char * x, const unsigned
+  // char * y);
   void crypto_core_ed25519_scalar_mul(@Out byte[] z, @In byte[] x, @In byte[] y);
 
   // void crypto_core_ed25519_scalar_reduce(unsigned char * r, const unsigned char * s);
@@ -2472,10 +2714,12 @@ public interface LibSodium {
   // int crypto_core_ristretto255_is_valid_point(const unsigned char * p);
   int crypto_core_ristretto255_is_valid_point(@In byte[] p);
 
-  // int crypto_core_ristretto255_add(unsigned char * r, const unsigned char * p, const unsigned char * q);
+  // int crypto_core_ristretto255_add(unsigned char * r, const unsigned char * p, const unsigned
+  // char * q);
   int crypto_core_ristretto255_add(@Out byte[] r, @In byte[] p, @In byte[] q);
 
-  // int crypto_core_ristretto255_sub(unsigned char * r, const unsigned char * p, const unsigned char * q);
+  // int crypto_core_ristretto255_sub(unsigned char * r, const unsigned char * p, const unsigned
+  // char * q);
   int crypto_core_ristretto255_sub(@Out byte[] r, @In byte[] p, @In byte[] q);
 
   // int crypto_core_ristretto255_from_hash(unsigned char * p, const unsigned char * r);
@@ -2496,13 +2740,16 @@ public interface LibSodium {
   // void crypto_core_ristretto255_scalar_complement(unsigned char * comp, const unsigned char * s);
   void crypto_core_ristretto255_scalar_complement(@Out byte[] comp, @In byte[] s);
 
-  // void crypto_core_ristretto255_scalar_add(unsigned char * z, const unsigned char * x, const unsigned char * y);
+  // void crypto_core_ristretto255_scalar_add(unsigned char * z, const unsigned char * x, const
+  // unsigned char * y);
   void crypto_core_ristretto255_scalar_add(@Out byte[] z, @In byte[] x, @In byte[] y);
 
-  // void crypto_core_ristretto255_scalar_sub(unsigned char * z, const unsigned char * x, const unsigned char * y);
+  // void crypto_core_ristretto255_scalar_sub(unsigned char * z, const unsigned char * x, const
+  // unsigned char * y);
   void crypto_core_ristretto255_scalar_sub(@Out byte[] z, @In byte[] x, @In byte[] y);
 
-  // void crypto_core_ristretto255_scalar_mul(unsigned char * z, const unsigned char * x, const unsigned char * y);
+  // void crypto_core_ristretto255_scalar_mul(unsigned char * z, const unsigned char * x, const
+  // unsigned char * y);
   void crypto_core_ristretto255_scalar_mul(@Out byte[] z, @In byte[] x, @In byte[] y);
 
   // void crypto_core_ristretto255_scalar_reduce(unsigned char * r, const unsigned char * s);
@@ -2516,10 +2763,12 @@ public interface LibSodium {
   @ssize_t
   long crypto_scalarmult_ed25519_scalarbytes();
 
-  // int crypto_scalarmult_ed25519(unsigned char * q, const unsigned char * n, const unsigned char * p);
+  // int crypto_scalarmult_ed25519(unsigned char * q, const unsigned char * n, const unsigned char *
+  // p);
   int crypto_scalarmult_ed25519(@Out byte[] q, @In byte[] n, @In byte[] p);
 
-  // int crypto_scalarmult_ed25519_noclamp(unsigned char * q, const unsigned char * n, const unsigned char * p);
+  // int crypto_scalarmult_ed25519_noclamp(unsigned char * q, const unsigned char * n, const
+  // unsigned char * p);
   int crypto_scalarmult_ed25519_noclamp(@Out byte[] q, @In byte[] n, @In byte[] p);
 
   // int crypto_scalarmult_ed25519_base(unsigned char * q, const unsigned char * n);
@@ -2536,7 +2785,8 @@ public interface LibSodium {
   @ssize_t
   long crypto_scalarmult_ristretto255_scalarbytes();
 
-  // int crypto_scalarmult_ristretto255(unsigned char * q, const unsigned char * n, const unsigned char * p);
+  // int crypto_scalarmult_ristretto255(unsigned char * q, const unsigned char * n, const unsigned
+  // char * p);
   int crypto_scalarmult_ristretto255(@Out byte[] q, @In byte[] n, @In byte[] p);
 
   // int crypto_scalarmult_ristretto255_base(unsigned char * q, const unsigned char * n);
@@ -2558,23 +2808,18 @@ public interface LibSodium {
   @ssize_t
   long crypto_secretbox_xchacha20poly1305_messagebytes_max();
 
-  // int crypto_secretbox_xchacha20poly1305_easy(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
+  // int crypto_secretbox_xchacha20poly1305_easy(unsigned char * c, const unsigned char * m,
+  // unsigned long long mlen, const unsigned char * n, const unsigned char * k);
   int crypto_secretbox_xchacha20poly1305_easy(
-      @Out byte[] c,
-      @In byte[] m,
-      @In @u_int64_t long mlen,
-      @In byte[] n,
-      @In byte[] k);
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
 
-  // int crypto_secretbox_xchacha20poly1305_open_easy(unsigned char * m, const unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
+  // int crypto_secretbox_xchacha20poly1305_open_easy(unsigned char * m, const unsigned char * c,
+  // unsigned long long clen, const unsigned char * n, const unsigned char * k);
   int crypto_secretbox_xchacha20poly1305_open_easy(
-      @Out byte[] m,
-      @In byte[] c,
-      @In @u_int64_t long clen,
-      @In byte[] n,
-      @In byte[] k);
+      @Out byte[] m, @In byte[] c, @In @u_int64_t long clen, @In byte[] n, @In byte[] k);
 
-  // int crypto_secretbox_xchacha20poly1305_detached(unsigned char * c, unsigned char * mac, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
+  // int crypto_secretbox_xchacha20poly1305_detached(unsigned char * c, unsigned char * mac, const
+  // unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
   int crypto_secretbox_xchacha20poly1305_detached(
       @Out byte[] c,
       @Out byte[] mac,
@@ -2583,7 +2828,9 @@ public interface LibSodium {
       @In byte[] n,
       @In byte[] k);
 
-  // int crypto_secretbox_xchacha20poly1305_open_detached(unsigned char * m, const unsigned char * c, const unsigned char * mac, unsigned long long clen, const unsigned char * n, const unsigned char * k);
+  // int crypto_secretbox_xchacha20poly1305_open_detached(unsigned char * m, const unsigned char *
+  // c, const unsigned char * mac, unsigned long long clen, const unsigned char * n, const unsigned
+  // char * k);
   int crypto_secretbox_xchacha20poly1305_open_detached(
       @Out byte[] m,
       @In byte[] c,
@@ -2651,7 +2898,9 @@ public interface LibSodium {
   @ssize_t
   long crypto_pwhash_scryptsalsa208sha256_memlimit_sensitive();
 
-  // int crypto_pwhash_scryptsalsa208sha256(unsigned char *const out, unsigned long long outlen, const char *const passwd, unsigned long long passwdlen, const unsigned char *const salt, unsigned long long opslimit, size_t memlimit);
+  // int crypto_pwhash_scryptsalsa208sha256(unsigned char *const out, unsigned long long outlen,
+  // const char *const passwd, unsigned long long passwdlen, const unsigned char *const salt,
+  // unsigned long long opslimit, size_t memlimit);
   int crypto_pwhash_scryptsalsa208sha256(
       @Out byte[] out,
       @In @u_int64_t long outlen,
@@ -2661,7 +2910,8 @@ public interface LibSodium {
       @In @u_int64_t long opslimit,
       @In @ssize_t long memlimit);
 
-  // int crypto_pwhash_scryptsalsa208sha256_str(char[] out, const char *const passwd, unsigned long long passwdlen, unsigned long long opslimit, size_t memlimit);
+  // int crypto_pwhash_scryptsalsa208sha256_str(char[] out, const char *const passwd, unsigned long
+  // long passwdlen, unsigned long long opslimit, size_t memlimit);
   int crypto_pwhash_scryptsalsa208sha256_str(
       @Out byte[] out,
       @In byte[] passwd,
@@ -2669,10 +2919,14 @@ public interface LibSodium {
       @In @u_int64_t long opslimit,
       @In @ssize_t long memlimit);
 
-  // int crypto_pwhash_scryptsalsa208sha256_str_verify(const char[] str, const char *const passwd, unsigned long long passwdlen);
-  int crypto_pwhash_scryptsalsa208sha256_str_verify(@In byte[] str, @In byte[] passwd, @In @u_int64_t long passwdlen);
+  // int crypto_pwhash_scryptsalsa208sha256_str_verify(const char[] str, const char *const passwd,
+  // unsigned long long passwdlen);
+  int crypto_pwhash_scryptsalsa208sha256_str_verify(
+      @In byte[] str, @In byte[] passwd, @In @u_int64_t long passwdlen);
 
-  // int crypto_pwhash_scryptsalsa208sha256_ll(const uint8_t * passwd, size_t passwdlen, const uint8_t * salt, size_t saltlen, uint64_t N, uint32_t r, uint32_t p, uint8_t * buf, size_t buflen);
+  // int crypto_pwhash_scryptsalsa208sha256_ll(const uint8_t * passwd, size_t passwdlen, const
+  // uint8_t * salt, size_t saltlen, uint64_t N, uint32_t r, uint32_t p, uint8_t * buf, size_t
+  // buflen);
   int crypto_pwhash_scryptsalsa208sha256_ll(
       @In byte[] passwd,
       @In @ssize_t long passwdlen,
@@ -2684,11 +2938,10 @@ public interface LibSodium {
       @Out byte[] buf,
       @In @ssize_t long buflen);
 
-  // int crypto_pwhash_scryptsalsa208sha256_str_needs_rehash(const char[] str, unsigned long long opslimit, size_t memlimit);
+  // int crypto_pwhash_scryptsalsa208sha256_str_needs_rehash(const char[] str, unsigned long long
+  // opslimit, size_t memlimit);
   int crypto_pwhash_scryptsalsa208sha256_str_needs_rehash(
-      @In byte[] str,
-      @In @u_int64_t long opslimit,
-      @In @ssize_t long memlimit);
+      @In byte[] str, @In @u_int64_t long opslimit, @In @ssize_t long memlimit);
 
   // size_t crypto_stream_salsa2012_keybytes(void);
   @ssize_t
@@ -2702,11 +2955,14 @@ public interface LibSodium {
   @ssize_t
   long crypto_stream_salsa2012_messagebytes_max();
 
-  // int crypto_stream_salsa2012(unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
+  // int crypto_stream_salsa2012(unsigned char * c, unsigned long long clen, const unsigned char *
+  // n, const unsigned char * k);
   int crypto_stream_salsa2012(@Out byte[] c, @In @u_int64_t long clen, @In byte[] n, @In byte[] k);
 
-  // int crypto_stream_salsa2012_xor(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
-  int crypto_stream_salsa2012_xor(@Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
+  // int crypto_stream_salsa2012_xor(unsigned char * c, const unsigned char * m, unsigned long long
+  // mlen, const unsigned char * n, const unsigned char * k);
+  int crypto_stream_salsa2012_xor(
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
 
   // void crypto_stream_salsa2012_keygen(unsigned char[] k);
   void crypto_stream_salsa2012_keygen(@Out byte[] k);
@@ -2723,11 +2979,14 @@ public interface LibSodium {
   @ssize_t
   long crypto_stream_salsa208_messagebytes_max();
 
-  // int crypto_stream_salsa208(unsigned char * c, unsigned long long clen, const unsigned char * n, const unsigned char * k);
+  // int crypto_stream_salsa208(unsigned char * c, unsigned long long clen, const unsigned char * n,
+  // const unsigned char * k);
   int crypto_stream_salsa208(@Out byte[] c, @In @u_int64_t long clen, @In byte[] n, @In byte[] k);
 
-  // int crypto_stream_salsa208_xor(unsigned char * c, const unsigned char * m, unsigned long long mlen, const unsigned char * n, const unsigned char * k);
-  int crypto_stream_salsa208_xor(@Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
+  // int crypto_stream_salsa208_xor(unsigned char * c, const unsigned char * m, unsigned long long
+  // mlen, const unsigned char * n, const unsigned char * k);
+  int crypto_stream_salsa208_xor(
+      @Out byte[] c, @In byte[] m, @In @u_int64_t long mlen, @In byte[] n, @In byte[] k);
 
   // void crypto_stream_salsa208_keygen(unsigned char[] k);
   void crypto_stream_salsa208_keygen(@Out byte[] k);

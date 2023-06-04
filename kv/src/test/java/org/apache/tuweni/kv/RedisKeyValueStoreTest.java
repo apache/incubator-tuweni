@@ -29,14 +29,20 @@ class RedisKeyValueStoreTest {
   @Test
   void testPutAndGet(@RedisPort Integer redisPort) throws Exception {
     System.out.println(Bytes.wrap("\r\n".getBytes(StandardCharsets.US_ASCII)));
-    KeyValueStore<Bytes, Bytes> store = RedisKeyValueStore
-        .open(redisPort, Function.identity(), Function.identity(), Function.identity(), Function.identity());
+    KeyValueStore<Bytes, Bytes> store =
+        RedisKeyValueStore.open(
+            redisPort,
+            Function.identity(),
+            Function.identity(),
+            Function.identity(),
+            Function.identity());
     Bytes32 key = Bytes32.random();
     Bytes32 expectedValue = Bytes32.random();
     AsyncCompletion completion = store.putAsync(key, expectedValue);
     completion.join();
     try (JedisPool client =
-        new JedisPool(new JedisPoolConfig(), InetAddress.getLoopbackAddress().getHostAddress(), redisPort)) {
+        new JedisPool(
+            new JedisPoolConfig(), InetAddress.getLoopbackAddress().getHostAddress(), redisPort)) {
       try (Jedis conn = client.getResource()) {
         assertArrayEquals(expectedValue.toArray(), conn.get(key.toArray()));
       }
@@ -48,8 +54,8 @@ class RedisKeyValueStoreTest {
 
   @Test
   void testNoValue(@RedisPort Integer redisPort) throws Exception {
-    KeyValueStore<Bytes, Bytes> store = RedisKeyValueStore
-        .open(
+    KeyValueStore<Bytes, Bytes> store =
+        RedisKeyValueStore.open(
             redisPort,
             InetAddress.getLoopbackAddress(),
             Function.identity(),
@@ -61,8 +67,8 @@ class RedisKeyValueStoreTest {
 
   @Test
   void testRedisCloseable(@RedisPort Integer redisPort) throws Exception {
-    try (RedisKeyValueStore<Bytes, Bytes> redis = RedisKeyValueStore
-        .open(
+    try (RedisKeyValueStore<Bytes, Bytes> redis =
+        RedisKeyValueStore.open(
             "redis://127.0.0.1:" + redisPort,
             Function.identity(),
             Function.identity(),

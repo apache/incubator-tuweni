@@ -4,7 +4,6 @@ package org.apache.tuweni.bytes;
 
 import static org.apache.tuweni.bytes.Checks.checkArgument;
 
-
 final class DelegatingMutableBytes48 extends DelegatingMutableBytes implements MutableBytes48 {
 
   private DelegatingMutableBytes48(MutableBytes delegate) {

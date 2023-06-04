@@ -12,14 +12,10 @@ import java.nio.ByteBuffer;
 import io.netty.buffer.ByteBuf;
 import io.vertx.core.buffer.Buffer;
 
-/**
- * A mutable {@link Bytes} value.
- */
+/** A mutable {@link Bytes} value. */
 public interface MutableBytes extends Bytes {
 
-  /**
-   * The empty value (with 0 bytes).
-   */
+  /** The empty value (with 0 bytes). */
   MutableBytes EMPTY = wrap(new byte[0]);
 
   /**
@@ -49,16 +45,15 @@ public interface MutableBytes extends Bytes {
   /**
    * Wrap a slice of a byte array as a {@link MutableBytes} value.
    *
-   * <p>
-   * Note that value is not copied and thus any future update to {@code value} within the slice will be reflected in the
-   * returned value.
+   * <p>Note that value is not copied and thus any future update to {@code value} within the slice
+   * will be reflected in the returned value.
    *
    * @param value The value to wrap.
-   * @param offset The index (inclusive) in {@code value} of the first byte exposed by the returned value. In other
-   *        words, you will have {@code wrap(value, o, l).get(0) == value[o]}.
+   * @param offset The index (inclusive) in {@code value} of the first byte exposed by the returned
+   *     value. In other words, you will have {@code wrap(value, o, l).get(0) == value[o]}.
    * @param length The length of the resulting value.
-   * @return A {@link Bytes} value that expose the bytes of {@code value} from {@code offset} (inclusive) to
-   *         {@code offset + length} (exclusive).
+   * @return A {@link Bytes} value that expose the bytes of {@code value} from {@code offset}
+   *     (inclusive) to {@code offset + length} (exclusive).
    * @throws IndexOutOfBoundsException if {@code offset < 0 || (value.length > 0 && offset >=
    *     value.length)}.
    * @throws IllegalArgumentException if {@code length < 0 || offset + length > value.length}.
@@ -74,8 +69,7 @@ public interface MutableBytes extends Bytes {
   /**
    * Wrap a full Vert.x {@link Buffer} as a {@link MutableBytes} value.
    *
-   * <p>
-   * Note that any change to the content of the buffer may be reflected in the returned value.
+   * <p>Note that any change to the content of the buffer may be reflected in the returned value.
    *
    * @param buffer The buffer to wrap.
    * @return A {@link MutableBytes} value.
@@ -91,13 +85,12 @@ public interface MutableBytes extends Bytes {
   /**
    * Wrap a slice of a Vert.x {@link Buffer} as a {@link MutableBytes} value.
    *
-   * <p>
-   * Note that any change to the content of the buffer may be reflected in the returned value, and any change to the
-   * returned value will be reflected in the buffer.
+   * <p>Note that any change to the content of the buffer may be reflected in the returned value,
+   * and any change to the returned value will be reflected in the buffer.
    *
    * @param buffer The buffer to wrap.
-   * @param offset The offset in {@code buffer} from which to expose the bytes in the returned value. That is,
-   *        {@code wrapBuffer(buffer, i, 1).get(0) == buffer.getByte(i)}.
+   * @param offset The offset in {@code buffer} from which to expose the bytes in the returned
+   *     value. That is, {@code wrapBuffer(buffer, i, 1).get(0) == buffer.getByte(i)}.
    * @param size The size of the returned value.
    * @return A {@link MutableBytes} value.
    * @throws IndexOutOfBoundsException if {@code offset < 0 || (buffer.length() > 0 && offset >=
@@ -115,8 +108,7 @@ public interface MutableBytes extends Bytes {
   /**
    * Wrap a full Netty {@link ByteBuf} as a {@link MutableBytes} value.
    *
-   * <p>
-   * Note that any change to the content of the buffer may be reflected in the returned value.
+   * <p>Note that any change to the content of the buffer may be reflected in the returned value.
    *
    * @param byteBuf The {@link ByteBuf} to wrap.
    * @return A {@link MutableBytes} value.
@@ -132,13 +124,12 @@ public interface MutableBytes extends Bytes {
   /**
    * Wrap a slice of a Netty {@link ByteBuf} as a {@link MutableBytes} value.
    *
-   * <p>
-   * Note that any change to the content of the buffer may be reflected in the returned value, and any change to the
-   * returned value will be reflected in the buffer.
+   * <p>Note that any change to the content of the buffer may be reflected in the returned value,
+   * and any change to the returned value will be reflected in the buffer.
    *
    * @param byteBuf The {@link ByteBuf} to wrap.
-   * @param offset The offset in {@code byteBuf} from which to expose the bytes in the returned value. That is,
-   *        {@code wrapByteBuf(byteBuf, i, 1).get(0) == byteBuf.getByte(i)}.
+   * @param offset The offset in {@code byteBuf} from which to expose the bytes in the returned
+   *     value. That is, {@code wrapByteBuf(byteBuf, i, 1).get(0) == byteBuf.getByte(i)}.
    * @param size The size of the returned value.
    * @return A {@link MutableBytes} value.
    * @throws IndexOutOfBoundsException if {@code offset < 0 || (byteBuf.capacity() > 0 && offset >=
@@ -156,8 +147,7 @@ public interface MutableBytes extends Bytes {
   /**
    * Wrap a full Java NIO {@link ByteBuffer} as a {@link MutableBytes} value.
    *
-   * <p>
-   * Note that any change to the content of the buffer may be reflected in the returned value.
+   * <p>Note that any change to the content of the buffer may be reflected in the returned value.
    *
    * @param byteBuffer The {@link ByteBuffer} to wrap.
    * @return A {@link MutableBytes} value.
@@ -173,13 +163,12 @@ public interface MutableBytes extends Bytes {
   /**
    * Wrap a slice of a Java NIO {@link ByteBuffer} as a {@link MutableBytes} value.
    *
-   * <p>
-   * Note that any change to the content of the buffer may be reflected in the returned value, and any change to the
-   * returned value will be reflected in the buffer.
+   * <p>Note that any change to the content of the buffer may be reflected in the returned value,
+   * and any change to the returned value will be reflected in the buffer.
    *
    * @param byteBuffer The {@link ByteBuffer} to wrap.
-   * @param offset The offset in {@code byteBuffer} from which to expose the bytes in the returned value. That is,
-   *        {@code wrapByteBuffer(byteBuffer, i, 1).get(0) == byteBuffer.getByte(i)}.
+   * @param offset The offset in {@code byteBuffer} from which to expose the bytes in the returned
+   *     value. That is, {@code wrapByteBuffer(byteBuffer, i, 1).get(0) == byteBuffer.getByte(i)}.
    * @param size The size of the returned value.
    * @return A {@link MutableBytes} value.
    * @throws IndexOutOfBoundsException if {@code offset < 0 || (byteBuffer.limit() > 0 && offset >=
@@ -209,7 +198,8 @@ public interface MutableBytes extends Bytes {
    *
    * @param bytes The bytes.
    * @return A value containing bytes are the one from {@code bytes}.
-   * @throws IllegalArgumentException if any of the specified would be truncated when storing as a byte.
+   * @throws IllegalArgumentException if any of the specified would be truncated when storing as a
+   *     byte.
    */
   static MutableBytes of(int... bytes) {
     byte[] result = new byte[bytes.length];
@@ -255,7 +245,9 @@ public interface MutableBytes extends Bytes {
     checkElementIndex(i, size);
     if (i > (size - 4)) {
       throw new IndexOutOfBoundsException(
-          format("Value of size %s has not enough bytes to write a 4 bytes int from index %s", size, i));
+          format(
+              "Value of size %s has not enough bytes to write a 4 bytes int from index %s",
+              size, i));
     }
 
     set(i++, (byte) (value >>> 24));
@@ -276,7 +268,9 @@ public interface MutableBytes extends Bytes {
     checkElementIndex(i, size);
     if (i > (size - 8)) {
       throw new IndexOutOfBoundsException(
-          format("Value of size %s has not enough bytes to write a 8 bytes long from index %s", size, i));
+          format(
+              "Value of size %s has not enough bytes to write a 8 bytes long from index %s",
+              size, i));
     }
 
     set(i++, (byte) (value >>> 56));
@@ -292,7 +286,8 @@ public interface MutableBytes extends Bytes {
   /**
    * Increments the value of the bytes by 1, treating the value as big endian.
    *
-   * If incrementing overflows the value then all bits flip, i.e. incrementing 0xFFFF will return 0x0000.
+   * <p>If incrementing overflows the value then all bits flip, i.e. incrementing 0xFFFF will return
+   * 0x0000.
    *
    * @return this value
    */
@@ -312,7 +307,8 @@ public interface MutableBytes extends Bytes {
   /**
    * Decrements the value of the bytes by 1, treating the value as big endian.
    *
-   * If decrementing underflows the value then all bits flip, i.e. decrementing 0x0000 will return 0xFFFF.
+   * <p>If decrementing underflows the value then all bits flip, i.e. decrementing 0x0000 will
+   * return 0xFFFF.
    *
    * @return this value
    */
@@ -332,14 +328,14 @@ public interface MutableBytes extends Bytes {
   /**
    * Create a mutable slice of the bytes of this value.
    *
-   * <p>
-   * Note: the resulting slice is only a view over the original value. Holding a reference to the returned slice may
-   * hold more memory than the slide represents. Use {@link #copy} on the returned slice to avoid this.
+   * <p>Note: the resulting slice is only a view over the original value. Holding a reference to the
+   * returned slice may hold more memory than the slide represents. Use {@link #copy} on the
+   * returned slice to avoid this.
    *
    * @param i The start index for the slice.
    * @param length The length of the resulting value.
-   * @return A new mutable view over the bytes of this value from index {@code i} (included) to index {@code i + length}
-   *         (excluded).
+   * @return A new mutable view over the bytes of this value from index {@code i} (included) to
+   *     index {@code i + length} (excluded).
    * @throws IllegalArgumentException if {@code length < 0}.
    * @throws IndexOutOfBoundsException if {@code i < 0} or {i >= size()} or {i + length > size()} .
    */
@@ -357,9 +353,7 @@ public interface MutableBytes extends Bytes {
     }
   }
 
-  /**
-   * Set all bytes in this value to 0.
-   */
+  /** Set all bytes in this value to 0. */
   default void clear() {
     fill((byte) 0);
   }

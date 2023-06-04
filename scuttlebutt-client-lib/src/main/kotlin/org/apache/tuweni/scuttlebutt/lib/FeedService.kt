@@ -48,7 +48,7 @@ class FeedService(private val multiplexer: Multiplexer) {
     val response = multiplexer.makeAsyncRequest(asyncRequest)
     return response.asJSON(
       objectMapper,
-      FeedMessage::class.java
+      FeedMessage::class.java,
     )
   }
 
@@ -66,7 +66,7 @@ class FeedService(private val multiplexer: Multiplexer) {
   fun createFeedStream(streamHandler: Function<Runnable, StreamHandler<FeedMessage>>) {
     val streamRequest = RPCStreamRequest(RPCFunction("createFeedStream"), Arrays.asList())
     multiplexer.openStream(
-      streamRequest
+      streamRequest,
     ) { closer: Runnable ->
       object : ScuttlebuttStreamHandler {
         var handler =
@@ -77,8 +77,8 @@ class FeedService(private val multiplexer: Multiplexer) {
             handler.onMessage(
               message.asJSON(
                 objectMapper,
-                FeedMessage::class.java
-              )
+                FeedMessage::class.java,
+              ),
             )
           } catch (e: IOException) {
             handler.onStreamError(e)

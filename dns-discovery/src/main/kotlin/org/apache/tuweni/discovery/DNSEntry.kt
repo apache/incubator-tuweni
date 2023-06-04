@@ -102,8 +102,8 @@ internal class ENRTreeRoot(attrs: Map<String, String>) : DNSEntry {
     sig = SECP256K1.Signature.fromBytes(
       Bytes.concatenate(
         sigBytes,
-        Bytes.wrap(ByteArray(Math.max(0, 65 - sigBytes.size())))
-      )
+        Bytes.wrap(ByteArray(Math.max(0, 65 - sigBytes.size()))),
+      ),
     )
     enrRoot = attrs["e"]!!
     linkRoot = attrs["l"]!!

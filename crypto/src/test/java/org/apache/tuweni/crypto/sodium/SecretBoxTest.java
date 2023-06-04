@@ -57,14 +57,18 @@ class SecretBoxTest {
     byte[] message = "This is a test message".getBytes(UTF_8);
 
     DetachedEncryptionResult result = SecretBox.encryptDetached(message, key, nonce);
-    byte[] clearText = SecretBox.decryptDetached(result.cipherTextArray(), result.macArray(), key, nonce);
+    byte[] clearText =
+        SecretBox.decryptDetached(result.cipherTextArray(), result.macArray(), key, nonce);
 
     assertNotNull(clearText);
     assertArrayEquals(message, clearText);
 
-    assertNull(SecretBox.decryptDetached(result.cipherTextArray(), result.macArray(), key, nonce.increment()));
+    assertNull(
+        SecretBox.decryptDetached(
+            result.cipherTextArray(), result.macArray(), key, nonce.increment()));
     SecretBox.Key otherKey = SecretBox.Key.random();
-    assertNull(SecretBox.decryptDetached(result.cipherTextArray(), result.macArray(), otherKey, nonce));
+    assertNull(
+        SecretBox.decryptDetached(result.cipherTextArray(), result.macArray(), otherKey, nonce));
   }
 
   @Test
@@ -73,7 +77,8 @@ class SecretBoxTest {
     SecretBox.Nonce nonce = SecretBox.Nonce.random().increment();
 
     DetachedEncryptionResult result = SecretBox.encryptDetached(new byte[0], key, nonce);
-    byte[] clearText = SecretBox.decryptDetached(result.cipherTextArray(), result.macArray(), key, nonce);
+    byte[] clearText =
+        SecretBox.decryptDetached(result.cipherTextArray(), result.macArray(), key, nonce);
 
     assertNotNull(clearText);
     assertEquals(0, clearText.length);
@@ -85,15 +90,15 @@ class SecretBoxTest {
 
     byte[] message = "This is a test message".getBytes(UTF_8);
 
-    byte[] cipherText = SecretBox
-        .encrypt(
+    byte[] cipherText =
+        SecretBox.encrypt(
             message,
             password,
             PasswordHash.interactiveOpsLimit(),
             PasswordHash.interactiveMemLimit(),
             PasswordHash.Algorithm.recommended());
-    byte[] clearText = SecretBox
-        .decrypt(
+    byte[] clearText =
+        SecretBox.decrypt(
             cipherText,
             password,
             PasswordHash.interactiveOpsLimit(),
@@ -105,28 +110,27 @@ class SecretBoxTest {
 
     String otherPassword = "a different password";
     assertNull(
-        SecretBox
-            .decrypt(
-                cipherText,
-                otherPassword,
-                PasswordHash.interactiveOpsLimit(),
-                PasswordHash.interactiveMemLimit(),
-                PasswordHash.Algorithm.recommended()));
+        SecretBox.decrypt(
+            cipherText,
+            otherPassword,
+            PasswordHash.interactiveOpsLimit(),
+            PasswordHash.interactiveMemLimit(),
+            PasswordHash.Algorithm.recommended()));
   }
 
   @Test
   void checkCombinedEncryptDecryptEmptyMessageWithPassword() {
     String password = "a random password";
 
-    byte[] cipherText = SecretBox
-        .encrypt(
+    byte[] cipherText =
+        SecretBox.encrypt(
             new byte[0],
             password,
             PasswordHash.interactiveOpsLimit(),
             PasswordHash.interactiveMemLimit(),
             PasswordHash.Algorithm.recommended());
-    byte[] clearText = SecretBox
-        .decrypt(
+    byte[] clearText =
+        SecretBox.decrypt(
             cipherText,
             password,
             PasswordHash.interactiveOpsLimit(),
@@ -143,15 +147,15 @@ class SecretBoxTest {
 
     byte[] message = "This is a test message".getBytes(UTF_8);
 
-    DetachedEncryptionResult result = SecretBox
-        .encryptDetached(
+    DetachedEncryptionResult result =
+        SecretBox.encryptDetached(
             message,
             password,
             PasswordHash.interactiveOpsLimit(),
             PasswordHash.interactiveMemLimit(),
             PasswordHash.Algorithm.recommended());
-    byte[] clearText = SecretBox
-        .decryptDetached(
+    byte[] clearText =
+        SecretBox.decryptDetached(
             result.cipherTextArray(),
             result.macArray(),
             password,
@@ -164,29 +168,28 @@ class SecretBoxTest {
 
     String otherPassword = "a different password";
     assertNull(
-        SecretBox
-            .decryptDetached(
-                result.cipherTextArray(),
-                result.macArray(),
-                otherPassword,
-                PasswordHash.interactiveOpsLimit(),
-                PasswordHash.interactiveMemLimit(),
-                PasswordHash.Algorithm.recommended()));
+        SecretBox.decryptDetached(
+            result.cipherTextArray(),
+            result.macArray(),
+            otherPassword,
+            PasswordHash.interactiveOpsLimit(),
+            PasswordHash.interactiveMemLimit(),
+            PasswordHash.Algorithm.recommended()));
   }
 
   @Test
   void checkDetachedEncryptDecryptEmptyMessageWithPassword() {
     String password = "a random password";
 
-    DetachedEncryptionResult result = SecretBox
-        .encryptDetached(
+    DetachedEncryptionResult result =
+        SecretBox.encryptDetached(
             new byte[0],
             password,
             PasswordHash.interactiveOpsLimit(),
             PasswordHash.interactiveMemLimit(),
             PasswordHash.Algorithm.recommended());
-    byte[] clearText = SecretBox
-        .decryptDetached(
+    byte[] clearText =
+        SecretBox.decryptDetached(
             result.cipherTextArray(),
             result.macArray(),
             password,

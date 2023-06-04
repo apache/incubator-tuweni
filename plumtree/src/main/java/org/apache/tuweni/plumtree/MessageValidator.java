@@ -7,7 +7,7 @@ import org.apache.tuweni.bytes.Bytes;
 /**
  * Validator for a message and a peer.
  *
- * This validator is called prior to gossiping the message from that peer to other peers.
+ * <p>This validator is called prior to gossiping the message from that peer to other peers.
  */
 public interface MessageValidator {
 

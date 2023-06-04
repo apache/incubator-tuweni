@@ -88,7 +88,7 @@ class Memory {
         val l = max.intValue() - localMemoryData.size()
         return Bytes.concatenate(
           localMemoryData.slice(from.intValue(), length.intValue() - l),
-          Bytes.repeat(0, l)
+          Bytes.repeat(0, l),
         )
       }
       return localMemoryData.slice(from.intValue(), length.intValue())

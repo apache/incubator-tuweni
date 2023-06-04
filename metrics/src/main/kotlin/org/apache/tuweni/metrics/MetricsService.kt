@@ -24,7 +24,7 @@ class MetricsService(
   enablePrometheus: Boolean = true,
   enableGrpcPush: Boolean = true,
   grpcEndpoint: String = "http://localhost:4317",
-  grpcTimeout: Long = 2000
+  grpcTimeout: Long = 2000,
 ) {
 
   companion object {
@@ -40,14 +40,14 @@ class MetricsService(
   init {
     val exporter = OtlpGrpcMetricExporter.builder().setEndpoint(grpcEndpoint).setTimeout(
       grpcTimeout,
-      TimeUnit.MILLISECONDS
+      TimeUnit.MILLISECONDS,
     ).build()
     logger.info("Starting metrics service")
     val resource = Resource.getDefault()
       .merge(
         Resource.create(
-          Attributes.builder().put(ResourceAttributes.SERVICE_NAME, jobName).build()
-        )
+          Attributes.builder().put(ResourceAttributes.SERVICE_NAME, jobName).build(),
+        ),
       )
     val sdkMeterProviderBuilder = SdkMeterProvider.builder().setResource(resource)
     if (enableGrpcPush) {
@@ -62,7 +62,7 @@ class MetricsService(
 
     spanProcessor = BatchSpanProcessor.builder(
       OtlpGrpcSpanExporter.builder().setEndpoint(grpcEndpoint)
-        .setTimeout(grpcTimeout, TimeUnit.MILLISECONDS).build()
+        .setTimeout(grpcTimeout, TimeUnit.MILLISECONDS).build(),
     ).build()
     openTelemetry = OpenTelemetrySdk.builder()
       .setTracerProvider(SdkTracerProvider.builder().setResource(resource).addSpanProcessor(spanProcessor).build())

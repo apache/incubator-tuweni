@@ -29,7 +29,7 @@ private fun parseInetAddress(address: String): InetAddress {
 data class Endpoint(
   val address: String,
   val udpPort: Int = DEFAULT_PORT,
-  val tcpPort: Int? = null
+  val tcpPort: Int? = null,
 ) {
 
   /**

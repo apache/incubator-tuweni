@@ -31,7 +31,7 @@ class QuorumTest {
       numberAllocations = 10,
       amount = UInt256.valueOf(123),
       numberValidators = 4,
-      vanity = Bytes32.leftPad(Bytes.fromHexString("0xdeadbeef"))
+      vanity = Bytes32.leftPad(Bytes.fromHexString("0xdeadbeef")),
     )
     val genesis = quorum.genesis
     assertEquals(12, quorum.allocsToCsv().split("\n").size)

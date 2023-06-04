@@ -62,9 +62,12 @@ class MutableTomlTableTest {
   void cannotReplaceProperty() {
     MutableTomlTable table = new MutableTomlTable();
     table.set("foo.bar", "one", positionAt(1, 3));
-    TomlParseError e = assertThrows(TomlParseError.class, () -> {
-      table.set("foo.bar", "two", positionAt(2, 5));
-    });
+    TomlParseError e =
+        assertThrows(
+            TomlParseError.class,
+            () -> {
+              table.set("foo.bar", "two", positionAt(2, 5));
+            });
 
     assertEquals("foo.bar previously defined at line 1, column 3", e.getMessageWithoutPosition());
   }
@@ -74,30 +77,38 @@ class MutableTomlTableTest {
   void quotesComplexKeysInError(List<String> path, String expected) {
     MutableTomlTable table = new MutableTomlTable();
     table.set(path, "one", positionAt(1, 3));
-    TomlParseError e = assertThrows(TomlParseError.class, () -> {
-      table.set(path, "two", positionAt(2, 5));
-    });
-    assertEquals(expected + " previously defined at line 1, column 3", e.getMessageWithoutPosition());
+    TomlParseError e =
+        assertThrows(
+            TomlParseError.class,
+            () -> {
+              table.set(path, "two", positionAt(2, 5));
+            });
+    assertEquals(
+        expected + " previously defined at line 1, column 3", e.getMessageWithoutPosition());
   }
 
   @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> quotesComplexKeyInErrorSupplier() {
-    return Stream
-        .of(
-            Arguments.of(Arrays.asList("", "bar"), "\"\".bar"),
-            Arguments.of(Arrays.asList("foo ", "bar"), "\"foo \".bar"),
-            Arguments.of(Arrays.asList("foo\n", "bar"), "\"foo\\n\".bar"));
+    return Stream.of(
+        Arguments.of(Arrays.asList("", "bar"), "\"\".bar"),
+        Arguments.of(Arrays.asList("foo ", "bar"), "\"foo \".bar"),
+        Arguments.of(Arrays.asList("foo\n", "bar"), "\"foo\\n\".bar"));
   }
 
   @Test
   void cannotTreatNonTableAsTable() {
     MutableTomlTable table = new MutableTomlTable();
     table.set("foo.bar", "one", positionAt(5, 3));
-    TomlParseError e = assertThrows(TomlParseError.class, () -> {
-      table.set("foo.bar.baz", "two", positionAt(2, 5));
-    });
+    TomlParseError e =
+        assertThrows(
+            TomlParseError.class,
+            () -> {
+              table.set("foo.bar.baz", "two", positionAt(2, 5));
+            });
 
-    assertEquals("foo.bar is not a table (previously defined at line 5, column 3)", e.getMessageWithoutPosition());
+    assertEquals(
+        "foo.bar is not a table (previously defined at line 5, column 3)",
+        e.getMessageWithoutPosition());
   }
 
   @Test
@@ -112,10 +123,15 @@ class MutableTomlTableTest {
   @Test
   void throwsForInvalidKey() {
     MutableTomlTable table = new MutableTomlTable();
-    IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
-      table.get("foo.=bar");
-    });
-    assertEquals("Invalid key: Unexpected '=', expected a-z, A-Z, 0-9, ', or \" (line 1, column 5)", e.getMessage());
+    IllegalArgumentException e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              table.get("foo.=bar");
+            });
+    assertEquals(
+        "Invalid key: Unexpected '=', expected a-z, A-Z, 0-9, ', or \" (line 1, column 5)",
+        e.getMessage());
   }
 
   @Test
@@ -147,7 +163,8 @@ class MutableTomlTableTest {
     assertEquals(
         new HashSet<>(Arrays.asList("bar", "foo", "foo.baz", "foo.buz", "foo.buz.bar")),
         table.dottedKeySet(true));
-    assertEquals(new HashSet<>(Arrays.asList("bar", "foo.baz", "foo.buz.bar")), table.dottedKeySet());
+    assertEquals(
+        new HashSet<>(Arrays.asList("bar", "foo.baz", "foo.buz.bar")), table.dottedKeySet());
   }
 
   @Test
@@ -165,22 +182,23 @@ class MutableTomlTableTest {
     table.set("glad", LocalDateTime.parse("1937-07-18T03:25:43"), positionAt(5, 2));
     table.set("zoo", LocalDate.parse("1937-07-18"), positionAt(5, 2));
     table.set("alpha", LocalTime.parse("03:25:43"), positionAt(5, 2));
-    String expected = "{\n"
-        + "  \"alpha\" : \"03:25:43\",\n"
-        + "  \"bar\" : \"one\",\n"
-        + "  \"buz\" : \"1937-07-18T03:25:43-04:00\",\n"
-        + "  \"foo\" : {\n"
-        + "    \"baz\" : \"two\",\n"
-        + "    \"blah\" : [\n"
-        + "      \"hello\\nthere\",\n"
-        + "      \"goodbye\"\n"
-        + "    ],\n"
-        + "    \"buz\" : [],\n"
-        + "    \"foo\" : {}\n"
-        + "  },\n"
-        + "  \"glad\" : \"1937-07-18T03:25:43\",\n"
-        + "  \"zoo\" : \"1937-07-18\"\n"
-        + "}\n";
+    String expected =
+        "{\n"
+            + "  \"alpha\" : \"03:25:43\",\n"
+            + "  \"bar\" : \"one\",\n"
+            + "  \"buz\" : \"1937-07-18T03:25:43-04:00\",\n"
+            + "  \"foo\" : {\n"
+            + "    \"baz\" : \"two\",\n"
+            + "    \"blah\" : [\n"
+            + "      \"hello\\nthere\",\n"
+            + "      \"goodbye\"\n"
+            + "    ],\n"
+            + "    \"buz\" : [],\n"
+            + "    \"foo\" : {}\n"
+            + "  },\n"
+            + "  \"glad\" : \"1937-07-18T03:25:43\",\n"
+            + "  \"zoo\" : \"1937-07-18\"\n"
+            + "}\n";
     assertEquals(expected.replace("\n", System.lineSeparator()), table.toJson());
   }
 
@@ -194,15 +212,16 @@ class MutableTomlTableTest {
     table.set("egg", "bread\rham", positionAt(5, 1));
     table.set("pet", "dog\fcat", positionAt(6, 1));
     table.set("red", "black\nwhite", positionAt(7, 1));
-    String expected = "{\n"
-        + "  \"bar\" : \"hello\\\"there\",\n"
-        + "  \"bug\" : \"alpha\\bbeta\",\n"
-        + "  \"buz\" : \"good\\tbye\",\n"
-        + "  \"egg\" : \"bread\\rham\",\n"
-        + "  \"foo\" : \"one'two\",\n"
-        + "  \"pet\" : \"dog\\fcat\",\n"
-        + "  \"red\" : \"black\\nwhite\"\n"
-        + "}\n";
+    String expected =
+        "{\n"
+            + "  \"bar\" : \"hello\\\"there\",\n"
+            + "  \"bug\" : \"alpha\\bbeta\",\n"
+            + "  \"buz\" : \"good\\tbye\",\n"
+            + "  \"egg\" : \"bread\\rham\",\n"
+            + "  \"foo\" : \"one'two\",\n"
+            + "  \"pet\" : \"dog\\fcat\",\n"
+            + "  \"red\" : \"black\\nwhite\"\n"
+            + "}\n";
     assertEquals(expected.replace("\n", System.lineSeparator()), table.toJson());
   }
 }

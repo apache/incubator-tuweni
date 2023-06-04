@@ -167,7 +167,8 @@ final class DelegatingTrustManagerFactory extends SimpleTrustManagerFactory {
     }
 
     @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+    public void checkClientTrusted(X509Certificate[] chain, String authType)
+        throws CertificateException {
       CertificateException caException = null;
       try {
         for (TrustManager trustManager : delegate.getTrustManagers()) {
@@ -191,7 +192,8 @@ final class DelegatingTrustManagerFactory extends SimpleTrustManagerFactory {
     }
 
     @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+    public void checkServerTrusted(X509Certificate[] chain, String authType)
+        throws CertificateException {
       CertificateException caException = null;
       try {
         for (TrustManager trustManager : delegate.getTrustManagers()) {

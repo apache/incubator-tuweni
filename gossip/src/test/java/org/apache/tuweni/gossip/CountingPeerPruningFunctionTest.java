@@ -18,6 +18,5 @@ class CountingPeerPruningFunctionTest {
     assertFalse(fn.prunePeer(peer));
     assertFalse(fn.prunePeer(peer));
     assertTrue(fn.prunePeer(peer));
-
   }
 }

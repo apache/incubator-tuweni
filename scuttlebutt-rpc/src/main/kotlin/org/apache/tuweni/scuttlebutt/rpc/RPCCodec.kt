@@ -73,7 +73,7 @@ object RPCCodec {
         Bytes.of(encodedFlags),
         Bytes.ofUnsignedInt(body.size().toLong()),
         Bytes.ofUnsignedInt(requestNumber.toLong()),
-        body
+        body,
       )
   }
 
@@ -91,7 +91,7 @@ object RPCCodec {
         Bytes.of(flags),
         Bytes.ofUnsignedInt(body.size().toLong()),
         Bytes.ofUnsignedInt(requestNumber.toLong()),
-        body
+        body,
       )
   }
 
@@ -110,7 +110,7 @@ object RPCCodec {
         Bytes.of(flagByte),
         Bytes.ofUnsignedInt(body.size().toLong()),
         Bytes.wrap(ByteBuffer.allocate(4).putInt(-requestNumber).array()),
-        body
+        body,
       )
   }
 
@@ -147,7 +147,7 @@ object RPCCodec {
       requestNumber,
       RPCFlag.EndOrError.END,
       RPCFlag.BodyType.JSON,
-      RPCFlag.Stream.STREAM
+      RPCFlag.Stream.STREAM,
     )
   }
 

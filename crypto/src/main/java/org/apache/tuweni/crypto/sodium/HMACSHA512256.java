@@ -10,18 +10,16 @@ import jnr.ffi.Pointer;
 
 /**
  * Message authentication code support for HMAC-SHA-512-256.
- * <p>
- * HMAC-SHA-512-256 is implemented as HMAC-SHA-512 with the output truncated to 256 bits. This is slightly faster than
- * HMAC-SHA-256. Note that this construction is not the same as HMAC-SHA-512/256, which is HMAC using the SHA-512/256
- * function.
+ *
+ * <p>HMAC-SHA-512-256 is implemented as HMAC-SHA-512 with the output truncated to 256 bits. This is
+ * slightly faster than HMAC-SHA-256. Note that this construction is not the same as
+ * HMAC-SHA-512/256, which is HMAC using the SHA-512/256 function.
  */
 public final class HMACSHA512256 {
 
   private HMACSHA512256() {}
 
-  /**
-   * A HMACSHA512256 secret key.
-   */
+  /** A HMACSHA512256 secret key. */
   public static final class Key implements Destroyable {
     final Allocated value;
 
@@ -42,8 +40,7 @@ public final class HMACSHA512256 {
     /**
      * Create a {@link Key} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the secret key.
      * @return A secret key.
@@ -55,8 +52,7 @@ public final class HMACSHA512256 {
     /**
      * Create a {@link Key} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the secret key.
      * @return A secret key.
@@ -64,7 +60,10 @@ public final class HMACSHA512256 {
     public static Key fromBytes(byte[] bytes) {
       if (bytes.length != Sodium.crypto_auth_hmacsha512256_keybytes()) {
         throw new IllegalArgumentException(
-            "key must be " + Sodium.crypto_auth_hmacsha512256_keybytes() + " bytes, got " + bytes.length);
+            "key must be "
+                + Sodium.crypto_auth_hmacsha512256_keybytes()
+                + " bytes, got "
+                + bytes.length);
       }
       return Sodium.dup(bytes, Key::new);
     }
@@ -86,7 +85,8 @@ public final class HMACSHA512256 {
     public static int length() {
       long keybytes = Sodium.crypto_auth_hmacsha512256_keybytes();
       if (keybytes > Integer.MAX_VALUE) {
-        throw new SodiumException("crypto_auth_hmacsha512256_keybytes: " + keybytes + " is too large");
+        throw new SodiumException(
+            "crypto_auth_hmacsha512256_keybytes: " + keybytes + " is too large");
       }
       return (int) keybytes;
     }
@@ -110,7 +110,7 @@ public final class HMACSHA512256 {
 
     /**
      * Provides the bytes of this key.
-     * 
+     *
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -119,7 +119,7 @@ public final class HMACSHA512256 {
 
     /**
      * Provides the bytes of this key.
-     * 
+     *
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {
@@ -187,7 +187,8 @@ public final class HMACSHA512256 {
               + authenticator.length
               + " instead");
     }
-    int rc = Sodium.crypto_auth_hmacsha512256_verify(authenticator, in, in.length, key.value.pointer());
+    int rc =
+        Sodium.crypto_auth_hmacsha512256_verify(authenticator, in, in.length, key.value.pointer());
     return rc == 0;
   }
 }

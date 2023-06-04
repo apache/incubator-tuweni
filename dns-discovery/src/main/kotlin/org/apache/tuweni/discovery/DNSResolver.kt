@@ -47,8 +47,8 @@ class DNSResolver @JvmOverloads constructor(
       if (dnsServer != null) {
         this.host = dnsServer
       }
-    }
-  )
+    },
+  ),
 ) {
 
   companion object {

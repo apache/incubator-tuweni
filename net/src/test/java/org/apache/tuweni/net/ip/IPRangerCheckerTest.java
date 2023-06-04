@@ -22,7 +22,8 @@ class IPRangerCheckerTest {
   @Test
   void testRejectRange() {
     IPRangeChecker checker =
-        IPRangeChecker.create(Collections.singletonList("0.0.0.0/0"), Collections.singletonList("10.0.0.0/24"));
+        IPRangeChecker.create(
+            Collections.singletonList("0.0.0.0/0"), Collections.singletonList("10.0.0.0/24"));
     assertTrue(checker.check("127.0.0.1"));
     assertTrue(checker.check("192.168.0.1"));
     assertFalse(checker.check("10.0.0.2"));

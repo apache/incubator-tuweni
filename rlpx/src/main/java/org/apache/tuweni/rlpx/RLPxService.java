@@ -11,9 +11,7 @@ import org.apache.tuweni.rlpx.wire.WireConnection;
 
 import java.net.InetSocketAddress;
 
-/**
- * Service allowing connections to remote peers over RLPx connections.
- */
+/** Service allowing connections to remote peers over RLPx connections. */
 public interface RLPxService extends SubprotocolService {
 
   /**
@@ -21,10 +19,11 @@ public interface RLPxService extends SubprotocolService {
    *
    * @param peerPublicKey the peer public key
    * @param peerAddress the peer host and port
-   * @return a handle that completes when the connection has occurred. The connection itself may be marked as
-   *         disconnected as it was deemed invalid or useless.
+   * @return a handle that completes when the connection has occurred. The connection itself may be
+   *     marked as disconnected as it was deemed invalid or useless.
    */
-  AsyncResult<WireConnection> connectTo(SECP256K1.PublicKey peerPublicKey, InetSocketAddress peerAddress);
+  AsyncResult<WireConnection> connectTo(
+      SECP256K1.PublicKey peerPublicKey, InetSocketAddress peerAddress);
 
   /**
    * Provides the actual port in use.
@@ -59,21 +58,21 @@ public interface RLPxService extends SubprotocolService {
 
   /**
    * Starts the service.
-   * 
+   *
    * @return a future handler tracking starting the service.
    */
   AsyncCompletion start();
 
   /**
    * Stops the service.
-   * 
+   *
    * @return a future handler tracking stopping the service.
    */
   AsyncCompletion stop();
 
   /**
    * Gets a subprotocol client associated with the given subprotocol.
-   * 
+   *
    * @param subProtocolIdentifier the subprotocol identifier
    * @return the client of the subprotocol.
    */

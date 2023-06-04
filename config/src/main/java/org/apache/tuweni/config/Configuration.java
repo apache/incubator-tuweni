@@ -20,9 +20,7 @@ import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Represents collection of configuration properties, optionally validated against a schema.
- */
+/** Represents collection of configuration properties, optionally validated against a schema. */
 public interface Configuration {
 
   /**
@@ -118,7 +116,7 @@ public interface Configuration {
 
   /**
    * Returns true if the document has errors.
-   * 
+   *
    * @return {@code true} if the TOML document contained errors.
    */
   default boolean hasErrors() {
@@ -151,8 +149,7 @@ public interface Configuration {
   /**
    * Save a configuration to a TOML-formatted file.
    *
-   * <p>
-   * If necessary, parent directories for the output file will be created.
+   * <p>If necessary, parent directories for the output file will be created.
    *
    * @param path The file path to write the TOML-formatted output to.
    * @throws IOException If the file cannot be written.
@@ -202,7 +199,6 @@ public interface Configuration {
    * @return the section of the configuration.
    */
   Configuration getConfigurationSection(String name);
-
 
   /**
    * Check if a key is set in this configuration.

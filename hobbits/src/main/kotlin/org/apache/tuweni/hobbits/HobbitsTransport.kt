@@ -38,7 +38,7 @@ import kotlin.coroutines.CoroutineContext
 class HobbitsTransport(
   private val vertx: Vertx,
   private val incompleteMessageHandler: (Bytes) -> Unit = {},
-  override val coroutineContext: CoroutineContext = Dispatchers.Default
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope {
 
   private val started = AtomicBoolean(false)
@@ -81,7 +81,7 @@ class HobbitsTransport(
     requestURI: String? = null,
     tls: Boolean = false,
     handler: (Message) -> Unit,
-    portUpdateListener: (Int) -> Unit = {}
+    portUpdateListener: (Int) -> Unit = {},
   ) {
     checkNotStarted()
     httpEndpoints[id] = Endpoint(networkInterface, port, requestURI, tls, handler, portUpdateListener)
@@ -100,7 +100,7 @@ class HobbitsTransport(
     port: Int = 9237,
     tls: Boolean = false,
     handler: (Message) -> Unit,
-    portUpdateListener: (Int) -> Unit = {}
+    portUpdateListener: (Int) -> Unit = {},
   ) {
     checkNotStarted()
     tcpEndpoints[id] = Endpoint(networkInterface, port, null, tls, handler, portUpdateListener)
@@ -117,7 +117,7 @@ class HobbitsTransport(
     id: String = "default",
     networkInterface: String = "0.0.0.0",
     port: Int = 9137,
-    handler: (Message) -> Unit
+    handler: (Message) -> Unit,
   ) {
     checkNotStarted()
     udpEndpoints[id] = Endpoint(networkInterface, port, null, false, handler)
@@ -138,7 +138,7 @@ class HobbitsTransport(
     requestURI: String? = null,
     tls: Boolean = false,
     handler: (Message) -> Unit,
-    portUpdateListener: (Int) -> Unit = {}
+    portUpdateListener: (Int) -> Unit = {},
   ) {
     checkNotStarted()
     wsEndpoints[id] = Endpoint(networkInterface, port, requestURI, tls, handler, portUpdateListener)
@@ -186,7 +186,7 @@ class HobbitsTransport(
           val websocket = httpClient!!.webSocket(
             port,
             host,
-            requestURI
+            requestURI,
           ).await()
           websocket.exceptionHandler(exceptionHandler)
           websocket.writeBinaryMessage(Buffer.buffer(message.toBytes().toArrayUnsafe())).await()
@@ -410,7 +410,7 @@ internal data class Endpoint(
   val requestURI: String?,
   val tls: Boolean,
   val handler: (Message) -> Unit,
-  val portUpdateListener: (Int) -> Unit = {}
+  val portUpdateListener: (Int) -> Unit = {},
 ) {
 
   fun updatePort(newPort: Int) {
@@ -441,5 +441,5 @@ enum class Transport() {
   /**
    * Websocket transport
    */
-  WS
+  WS,
 }

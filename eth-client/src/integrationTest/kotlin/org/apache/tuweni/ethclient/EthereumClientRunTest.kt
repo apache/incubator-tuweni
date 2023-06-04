@@ -44,7 +44,7 @@ class EthereumClientRunTest {
       type="status"
       from=0
       to=100
-      """.trimMargin()
+      """.trimMargin(),
     )
     val client = EthereumClient(vertx, config)
     client.start()
@@ -68,7 +68,7 @@ class EthereumClientRunTest {
       networkInterface="127.0.0.1"
       port=30301
       key="${keyPair.secretKey().bytes().toHexString()}"
-      """.trimMargin()
+      """.trimMargin(),
     )
     val config2 = EthereumClientConfig.fromString(
       """
@@ -86,7 +86,7 @@ class EthereumClientRunTest {
       networkInterface="127.0.0.1"
       port=30304
       key="${SECP256K1.KeyPair.random().secretKey().bytes().toHexString()}"
-      """.trimMargin()
+      """.trimMargin(),
     )
     val client1 = EthereumClient(vertx, config1)
     val client2 = EthereumClient(vertx, config2)
@@ -118,7 +118,7 @@ class EthereumClientRunTest {
         path=classpath:/mainnet.json
         [dns.default]
         enrLink="enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@all.mainnet.ethdisco.net"
-      """.trimMargin()
+      """.trimMargin(),
     )
     val client = EthereumClient(vertx, config)
     client.start()

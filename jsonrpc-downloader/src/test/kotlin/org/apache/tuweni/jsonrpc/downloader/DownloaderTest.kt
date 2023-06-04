@@ -19,7 +19,7 @@ class DownloaderTest {
       start=10
       end=20
       url="example.com"
-      """.trimIndent()
+      """.trimIndent(),
     )
     val downloader = Downloader(vertx, config, Dispatchers.Default)
     var intervals = downloader.createMissingIntervals(DownloadState(0, 0))

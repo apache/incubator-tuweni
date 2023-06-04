@@ -56,7 +56,7 @@ class BlockProcessor(val chainId: UInt256) {
     repository: BlockchainRepository,
     precompiles: Map<Address, PrecompileContract>,
     hardFork: HardFork,
-    stepListener: StepListener? = null
+    stepListener: StepListener? = null,
   ): BlockProcessorResult {
     val stateChanges = TransientStateRepository(repository)
     val vm = EthereumVirtualMachine(stateChanges, repository, precompiles, { EvmVmImpl.create(stepListener) })
@@ -97,11 +97,11 @@ class BlockProcessor(val chainId: UInt256) {
         bloomFilter.toBytes(),
         parentBlock.number.add(1),
         parentBlock.gasLimit,
-        allGasUsed
+        allGasUsed,
       ),
       ProtoBlockBody(transactions),
       allReceipts,
-      stateChanges
+      stateChanges,
     )
     return BlockProcessorResult(block, success)
   }

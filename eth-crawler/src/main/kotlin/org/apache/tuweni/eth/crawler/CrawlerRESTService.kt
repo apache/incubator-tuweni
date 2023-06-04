@@ -34,7 +34,7 @@ class CrawlerRESTService(
   val repository: RelationalPeerRepository,
   val stats: StatsJob,
   val meter: Meter,
-  override val coroutineContext: CoroutineContext = Dispatchers.Default
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope {
 
   companion object {
@@ -57,13 +57,13 @@ class CrawlerRESTService(
     serHol.initOrder = 1
     serHol.setInitParameter(
       "jersey.config.server.provider.packages",
-      "org.apache.tuweni.eth.crawler.rest"
+      "org.apache.tuweni.eth.crawler.rest",
     )
 
     val apiServlet = ctx.addServlet(OpenApiServlet::class.java.name, "/api/*")
     apiServlet.setInitParameter(
       "openApi.configuration.resourcePackages",
-      "org.apache.tuweni.eth.crawler.rest"
+      "org.apache.tuweni.eth.crawler.rest",
     )
     apiServlet.initOrder = 2
 
@@ -76,7 +76,7 @@ class CrawlerRESTService(
     swagger.setInitParameter(
       "resourceBase",
       CrawlerRESTService::class.java.getClassLoader().getResource("META-INF/resources/webjars/swagger-ui/4.18.2/")
-        .toString()
+        .toString(),
     )
     swagger.setInitParameter("pathInfoOnly", "true")
     ctx.addServlet(swagger, "/swagger-ui/*")
@@ -97,7 +97,7 @@ class CrawlerRESTService(
     serHol.servlet.servletConfig.servletContext.setAttribute("stats", stats)
     val restMetrics = RESTMetrics(
       meter.counterBuilder("peers").setDescription("Number of times peers have been requested").build(),
-      meter.counterBuilder("clients").setDescription("Number of times client stats have been requested").build()
+      meter.counterBuilder("clients").setDescription("Number of times client stats have been requested").build(),
     )
     serHol.servlet.servletConfig.servletContext.setAttribute("metrics", restMetrics)
     server = newServer

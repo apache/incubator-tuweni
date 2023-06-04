@@ -8,9 +8,6 @@ import org.apache.tuweni.bytes.Bytes
 
 /**
  * The request payload of an RPC request to another node. The fields are as specified in the scuttlebutt protocol docs
- */
-class RPCRequestBody
-/**
  *
  * @param name the function to be in invoked. If the function is in a namespace, the first n-1 items in the array are
  * the namespace followed by the function name (e.g. 'blobs.get' becomes ['blobs', 'get']). If the function is
@@ -18,7 +15,8 @@ class RPCRequestBody
  * @param type the type of the request (e.g. stream or async.)
  * @param args The args passed to the function being invoked. Each item can be any arbitrary object which is JSON
  * serializable (e.g. String, Int, list, object.)
- */(val name: List<String>, val type: RPCRequestType, val args: List<Any>) {
+ */
+class RPCRequestBody(val name: List<String>, val type: RPCRequestType, val args: List<Any>) {
 
   /**
    * Serialize body to bytes.

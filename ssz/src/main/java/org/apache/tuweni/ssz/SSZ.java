@@ -24,9 +24,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-/**
- * Simple Serialize (SSZ) encoding and decoding.
- */
+/** Simple Serialize (SSZ) encoding and decoding. */
 public final class SSZ {
 
   private static final Bytes TRUE = Bytes.of((byte) 1);
@@ -57,7 +55,6 @@ public final class SSZ {
    * Hashes a list of homogeneous values.
    *
    * @param values a list of homogeneous values
-   *
    * @return the merkle hash of the list of values
    */
   static Bytes merkleHash(List<Bytes> values) {
@@ -74,7 +71,9 @@ public final class SSZ {
 
       for (int i = 0; i * itemsPerChunk < values.size(); i++) {
         Bytes[] chunkItems =
-            values.subList(i * itemsPerChunk, Math.min((i + 1) * itemsPerChunk, values.size())).toArray(new Bytes[0]);
+            values
+                .subList(i * itemsPerChunk, Math.min((i + 1) * itemsPerChunk, values.size()))
+                .toArray(new Bytes[0]);
         chunks.add(Bytes.concatenate(chunkItems));
       }
     } else {
@@ -117,7 +116,8 @@ public final class SSZ {
    * @param fn A consumer that will be provided with a {@link SSZWriter} that can consume values.
    * @param <T> The type of the buffer.
    * @return The buffer.
-   * @throws BufferOverflowException if the writer attempts to write more than the provided buffer can hold
+   * @throws BufferOverflowException if the writer attempts to write more than the provided buffer
+   *     can hold
    * @throws ReadOnlyBufferException if the provided buffer is read-only
    */
   public static <T extends ByteBuffer> T encodeTo(T buffer, Consumer<SSZWriter> fn) {
@@ -205,7 +205,8 @@ public final class SSZ {
     if (bitLength % 8 != 0) {
       throw new IllegalArgumentException("bitLength must be a multiple of 8");
     }
-    int zeros = (value >= 0) ? Long.numberOfLeadingZeros(value) : Long.numberOfLeadingZeros(-1 - value) - 1;
+    int zeros =
+        (value >= 0) ? Long.numberOfLeadingZeros(value) : Long.numberOfLeadingZeros(-1 - value) - 1;
     int valueBytes = 8 - (zeros / 8);
 
     int byteLength = bitLength / 8;
@@ -326,7 +327,8 @@ public final class SSZ {
   /**
    * Encode an unsigned integer to a {@link Bytes} value.
    *
-   * Note that {@code value} is a native signed int, but will be interpreted as an unsigned value.
+   * <p>Note that {@code value} is a native signed int, but will be interpreted as an unsigned
+   * value.
    *
    * @param value the integer to encode
    * @param bitLength the bit length of the encoded integer value (must be a multiple of 8)
@@ -340,7 +342,8 @@ public final class SSZ {
   /**
    * Encode an unsigned long integer to a {@link Bytes} value.
    *
-   * Note that {@code value} is a native signed long, but will be interpreted as an unsigned value.
+   * <p>Note that {@code value} is a native signed long, but will be interpreted as an unsigned
+   * value.
    *
    * @param value the long to encode
    * @param bitLength the bit length of the integer value (must be a multiple of 8)
@@ -430,7 +433,8 @@ public final class SSZ {
   /**
    * Encode a 64-bit unsigned integer to a {@link Bytes} value.
    *
-   * Note that {@code value} is a native signed long, but will be interpreted as an unsigned value.
+   * <p>Note that {@code value} is a native signed long, but will be interpreted as an unsigned
+   * value.
    *
    * @param value the integer to encode
    * @return the SSZ encoding in a {@link Bytes} value
@@ -518,7 +522,8 @@ public final class SSZ {
   }
 
   static void encodeBytesListTo(Bytes[] elements, Consumer<Bytes> appender) {
-    // pre-calculate the list size - relies on knowing how encodeBytesTo does its serialization, but is worth it
+    // pre-calculate the list size - relies on knowing how encodeBytesTo does its serialization, but
+    // is worth it
     // to avoid having to pre-serialize all the elements
     long listSize = 0;
     for (Bytes bytes : elements) {
@@ -535,7 +540,8 @@ public final class SSZ {
   }
 
   static void encodeBytesListTo(List<? extends Bytes> elements, Consumer<Bytes> appender) {
-    // pre-calculate the list size - relies on knowing how encodeBytesTo does its serialization, but is worth it
+    // pre-calculate the list size - relies on knowing how encodeBytesTo does its serialization, but
+    // is worth it
     // to avoid having to pre-serialize all the elements
     long listSize = 0;
     for (Bytes bytes : elements) {
@@ -565,7 +571,8 @@ public final class SSZ {
   }
 
   static void encodeFixedBytesListTo(List<? extends Bytes> elements, Consumer<Bytes> appender) {
-    // pre-calculate the list size - relies on knowing how encodeBytesTo does its serialization, but is worth it
+    // pre-calculate the list size - relies on knowing how encodeBytesTo does its serialization, but
+    // is worth it
     // to avoid having to pre-serialize all the elements
     long listSize = 0;
     for (Bytes bytes : elements) {
@@ -626,7 +633,8 @@ public final class SSZ {
    * @param bitLength the bit length of the encoded integers (must be a multiple of 8)
    * @param elements the integers to write
    * @return SSZ encoding in a {@link Bytes} value
-   * @throws IllegalArgumentException if any values are too large for the specified {@code bitLength}
+   * @throws IllegalArgumentException if any values are too large for the specified {@code
+   *     bitLength}
    */
   public static Bytes encodeIntList(int bitLength, int... elements) {
     ArrayList<Bytes> encoded = new ArrayList<>(elements.length + 1);
@@ -640,7 +648,8 @@ public final class SSZ {
    * @param bitLength the bit length of the encoded integers (must be a multiple of 8)
    * @param elements the list of Integers to write
    * @return SSZ encoding in a {@link Bytes} value
-   * @throws IllegalArgumentException if any values are too large for the specified {@code bitLength}
+   * @throws IllegalArgumentException if any values are too large for the specified {@code
+   *     bitLength}
    */
   public static Bytes encodeIntList(int bitLength, List<Integer> elements) {
     ArrayList<Bytes> encoded = new ArrayList<>(elements.size() + 1);
@@ -674,7 +683,8 @@ public final class SSZ {
    * @param bitLength the bit length of the encoded integers (must be a multiple of 8)
    * @param elements the integers to write
    * @return SSZ encoding in a {@link Bytes} value
-   * @throws IllegalArgumentException if any values are too large for the specified {@code bitLength}
+   * @throws IllegalArgumentException if any values are too large for the specified {@code
+   *     bitLength}
    */
   public static Bytes encodeLongIntList(int bitLength, long... elements) {
     ArrayList<Bytes> encoded = new ArrayList<>(elements.length + 1);
@@ -688,7 +698,8 @@ public final class SSZ {
    * @param bitLength the bit length of the encoded integers (must be a multiple of 8)
    * @param elements the list of Longs to write
    * @return SSZ encoding in a {@link Bytes} value
-   * @throws IllegalArgumentException if any values are too large for the specified {@code bitLength}
+   * @throws IllegalArgumentException if any values are too large for the specified {@code
+   *     bitLength}
    */
   public static Bytes encodeLongIntList(int bitLength, List<Long> elements) {
     ArrayList<Bytes> encoded = new ArrayList<>(elements.size() + 1);
@@ -722,7 +733,8 @@ public final class SSZ {
    * @param bitLength The bit length of the encoded integers (must be a multiple of 8).
    * @param elements The integers to write.
    * @return SSZ encoding in a {@link Bytes} value.
-   * @throws IllegalArgumentException If any values are too large for the specified {@code bitLength}.
+   * @throws IllegalArgumentException If any values are too large for the specified {@code
+   *     bitLength}.
    */
   public static Bytes encodeBigIntegerList(int bitLength, BigInteger... elements) {
     ArrayList<Bytes> encoded = new ArrayList<>(elements.length + 1);
@@ -736,7 +748,8 @@ public final class SSZ {
    * @param bitLength The bit length of the encoded integers (must be a multiple of 8).
    * @param elements The list of BigIntegers to write.
    * @return SSZ encoding in a {@link Bytes} value.
-   * @throws IllegalArgumentException If any values are too large for the specified {@code bitLength}.
+   * @throws IllegalArgumentException If any values are too large for the specified {@code
+   *     bitLength}.
    */
   public static Bytes encodeBigIntegerList(int bitLength, List<BigInteger> elements) {
     ArrayList<Bytes> encoded = new ArrayList<>(elements.size() + 1);
@@ -744,7 +757,8 @@ public final class SSZ {
     return Bytes.wrap(encoded.toArray(new Bytes[0]));
   }
 
-  static void encodeBigIntegerListTo(int bitLength, BigInteger[] elements, Consumer<byte[]> appender) {
+  static void encodeBigIntegerListTo(
+      int bitLength, BigInteger[] elements, Consumer<byte[]> appender) {
     if (bitLength % 8 != 0) {
       throw new IllegalArgumentException("bitLength must be a multiple of 8");
     }
@@ -754,7 +768,8 @@ public final class SSZ {
     }
   }
 
-  static void encodeBigIntegerListTo(int bitLength, List<BigInteger> elements, Consumer<byte[]> appender) {
+  static void encodeBigIntegerListTo(
+      int bitLength, List<BigInteger> elements, Consumer<byte[]> appender) {
     if (bitLength % 8 != 0) {
       throw new IllegalArgumentException("bitLength must be a multiple of 8");
     }
@@ -851,12 +866,14 @@ public final class SSZ {
   /**
    * Encode a list of unsigned integers.
    *
-   * Note that the {@code elements} are native signed ints, but will be interpreted as an unsigned values.
+   * <p>Note that the {@code elements} are native signed ints, but will be interpreted as an
+   * unsigned values.
    *
    * @param bitLength the bit length of the encoded integers (must be a multiple of 8)
    * @param elements the integers to write
    * @return SSZ encoding in a {@link Bytes} value
-   * @throws IllegalArgumentException if any values are too large for the specified {@code bitLength}
+   * @throws IllegalArgumentException if any values are too large for the specified {@code
+   *     bitLength}
    */
   public static Bytes encodeUIntList(int bitLength, int... elements) {
     ArrayList<Bytes> encoded = new ArrayList<>(elements.length + 1);
@@ -867,12 +884,14 @@ public final class SSZ {
   /**
    * Encode a list of unsigned integers.
    *
-   * Note that the {@code elements} are native signed ints, but will be interpreted as an unsigned values.
+   * <p>Note that the {@code elements} are native signed ints, but will be interpreted as an
+   * unsigned values.
    *
    * @param bitLength the bit length of the encoded integers (must be a multiple of 8)
    * @param elements the integers to write
    * @return SSZ encoding in a {@link Bytes} value
-   * @throws IllegalArgumentException if any values are too large for the specified {@code bitLength}
+   * @throws IllegalArgumentException if any values are too large for the specified {@code
+   *     bitLength}
    */
   public static Bytes encodeUIntList(int bitLength, List<Integer> elements) {
     ArrayList<Bytes> encoded = new ArrayList<>(elements.size() + 1);
@@ -903,12 +922,14 @@ public final class SSZ {
   /**
    * Encode a list of unsigned long integers.
    *
-   * Note that the {@code elements} are native signed longs, but will be interpreted as an unsigned values.
+   * <p>Note that the {@code elements} are native signed longs, but will be interpreted as an
+   * unsigned values.
    *
    * @param bitLength the bit length of the encoded integers (must be a multiple of 8)
    * @param elements the integers to write
    * @return SSZ encoding in a {@link Bytes} value
-   * @throws IllegalArgumentException if any values are too large for the specified {@code bitLength}
+   * @throws IllegalArgumentException if any values are too large for the specified {@code
+   *     bitLength}
    */
   public static Bytes encodeULongIntList(int bitLength, long... elements) {
     ArrayList<Bytes> encoded = new ArrayList<>(elements.length + 1);
@@ -919,12 +940,14 @@ public final class SSZ {
   /**
    * Encode a list of unsigned long integers.
    *
-   * Note that the {@code elements} are native signed longs, but will be interpreted as an unsigned values.
+   * <p>Note that the {@code elements} are native signed longs, but will be interpreted as an
+   * unsigned values.
    *
    * @param bitLength the bit length of the encoded integers (must be a multiple of 8)
    * @param elements the integers to write
    * @return SSZ encoding in a {@link Bytes} value
-   * @throws IllegalArgumentException if any values are too large for the specified {@code bitLength}
+   * @throws IllegalArgumentException if any values are too large for the specified {@code
+   *     bitLength}
    */
   public static Bytes encodeULongIntList(int bitLength, List<Long> elements) {
     ArrayList<Bytes> encoded = new ArrayList<>(elements.size() + 1);
@@ -1021,7 +1044,8 @@ public final class SSZ {
   /**
    * Encode a list of 64-bit unsigned integers.
    *
-   * Note that the {@code elements} are native signed longs, but will be interpreted as an unsigned values.
+   * <p>Note that the {@code elements} are native signed longs, but will be interpreted as an
+   * unsigned values.
    *
    * @param elements the integers to write
    * @return SSZ encoding in a {@link Bytes} value
@@ -1033,7 +1057,8 @@ public final class SSZ {
   /**
    * Encode a list of 64-bit unsigned integers.
    *
-   * Note that the {@code elements} are native signed longs, but will be interpreted as an unsigned values.
+   * <p>Note that the {@code elements} are native signed longs, but will be interpreted as an
+   * unsigned values.
    *
    * @param elements the integers to write
    * @return SSZ encoding in a {@link Bytes} value
@@ -1254,13 +1279,15 @@ public final class SSZ {
     }
   }
 
-  public static <T extends SSZWritable> void encodeAsFixedTypeListTo(List<T> elements, Consumer<Bytes> appender) {
+  public static <T extends SSZWritable> void encodeAsFixedTypeListTo(
+      List<T> elements, Consumer<Bytes> appender) {
     for (T value : elements) {
       appender.accept(SSZ.encode(value::writeTo));
     }
   }
 
-  public static <T extends SSZWritable> void encodeAsFixedTypeVectorTo(List<T> elements, Consumer<Bytes> appender) {
+  public static <T extends SSZWritable> void encodeAsFixedTypeVectorTo(
+      List<T> elements, Consumer<Bytes> appender) {
     for (T value : elements) {
       appender.accept(SSZ.encode(value::writeTo));
     }
@@ -1319,7 +1346,6 @@ public final class SSZ {
     }
   }
 
-
   private static byte[] listLengthPrefix(long nElements, int elementBytes) {
     long listSize;
     try {
@@ -1332,7 +1358,6 @@ public final class SSZ {
     }
     return encodeLongToByteArray(listSize, 32);
   }
-
 
   // Decoding
 
@@ -1353,12 +1378,13 @@ public final class SSZ {
   /**
    * Read a SSZ encoded bytes from a {@link Bytes} value.
    *
-   * Note: prefer to use {@link #decodeBytes(Bytes, int)} instead, especially when reading untrusted data.
+   * <p>Note: prefer to use {@link #decodeBytes(Bytes, int)} instead, especially when reading
+   * untrusted data.
    *
    * @param source the SSZ encoded bytes
    * @return the bytes
-   * @throws InvalidSSZTypeException if the next SSZ value is not a byte array, or is too large (greater than 2^32
-   *         bytes)
+   * @throws InvalidSSZTypeException if the next SSZ value is not a byte array, or is too large
+   *     (greater than 2^32 bytes)
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static Bytes decodeBytes(Bytes source) {
@@ -1371,7 +1397,8 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param limit the maximum number of bytes to read
    * @return the bytes
-   * @throws InvalidSSZTypeException if the next SSZ value is not a byte array, or would exceed the limit
+   * @throws InvalidSSZTypeException if the next SSZ value is not a byte array, or would exceed the
+   *     limit
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static Bytes decodeBytes(Bytes source, int limit) {
@@ -1381,12 +1408,13 @@ public final class SSZ {
   /**
    * Read a SSZ encoded string from a {@link Bytes} value.
    *
-   * Note: prefer to use {@link #decodeString(Bytes, int)} instead, especially when reading untrusted data.
+   * <p>Note: prefer to use {@link #decodeString(Bytes, int)} instead, especially when reading
+   * untrusted data.
    *
    * @param source the SSZ encoded bytes
    * @return a string
-   * @throws InvalidSSZTypeException if the next SSZ value is not a byte array, or is too large (greater than 2^32
-   *         bytes)
+   * @throws InvalidSSZTypeException if the next SSZ value is not a byte array, or is too large
+   *     (greater than 2^32 bytes)
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static String decodeString(Bytes source) {
@@ -1399,7 +1427,8 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param limit the maximum number of bytes to read
    * @return a string
-   * @throws InvalidSSZTypeException if the next SSZ value is not a byte array, or would exceed the limit
+   * @throws InvalidSSZTypeException if the next SSZ value is not a byte array, or would exceed the
+   *     limit
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static String decodeString(Bytes source, int limit) {
@@ -1412,8 +1441,8 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param bitLength the bit length of the integer to read (a multiple of 8)
    * @return an int
-   * @throws InvalidSSZTypeException if there are insufficient encoded bytes for the desired bit length, or the decoded
-   *         value was too large to fit into an int
+   * @throws InvalidSSZTypeException if there are insufficient encoded bytes for the desired bit
+   *     length, or the decoded value was too large to fit into an int
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static int decodeInt(Bytes source, int bitLength) {
@@ -1426,8 +1455,8 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param bitLength the bit length of the integer to read (a multiple of 8)
    * @return a long
-   * @throws InvalidSSZTypeException if there are insufficient encoded bytes for the desired bit length, or the decoded
-   *         value was too large to fit into a long
+   * @throws InvalidSSZTypeException if there are insufficient encoded bytes for the desired bit
+   *     length, or the decoded value was too large to fit into a long
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static long decodeLong(Bytes source, int bitLength) {
@@ -1440,7 +1469,8 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param bitLength the bit length of the integer to read (a multiple of 8)
    * @return a string
-   * @throws InvalidSSZTypeException if there are insufficient encoded bytes for the desired bit length
+   * @throws InvalidSSZTypeException if there are insufficient encoded bytes for the desired bit
+   *     length
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static BigInteger decodeBigInteger(Bytes source, int bitLength) {
@@ -1501,8 +1531,8 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param bitLength the bit length of the integers to read (a multiple of 8)
    * @return an unsigned int
-   * @throws InvalidSSZTypeException if there are insufficient encoded bytes for the desired bit length, or the decoded
-   *         value was too large to fit into an int
+   * @throws InvalidSSZTypeException if there are insufficient encoded bytes for the desired bit
+   *     length, or the decoded value was too large to fit into an int
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static int decodeUInt(Bytes source, int bitLength) {
@@ -1515,8 +1545,8 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param bitLength the bit length of the integers to read (a multiple of 8)
    * @return an unsigned long
-   * @throws InvalidSSZTypeException if there are insufficient encoded bytes for the desired bit length, or the decoded
-   *         value was too large to fit into a long
+   * @throws InvalidSSZTypeException if there are insufficient encoded bytes for the desired bit
+   *     length, or the decoded value was too large to fit into a long
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static long decodeULong(Bytes source, int bitLength) {
@@ -1529,7 +1559,8 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param bitLength the bit length of the integers to read (a multiple of 8)
    * @return a string
-   * @throws InvalidSSZTypeException if there are insufficient encoded bytes for the desired bit length
+   * @throws InvalidSSZTypeException if there are insufficient encoded bytes for the desired bit
+   *     length
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static BigInteger decodeUnsignedBigInteger(Bytes source, int bitLength) {
@@ -1648,12 +1679,13 @@ public final class SSZ {
   /**
    * Read a list of {@link Bytes} from the SSZ source.
    *
-   * Note: prefer to use {@link #decodeBytesList(Bytes, int)} instead, especially when reading untrusted data.
+   * <p>Note: prefer to use {@link #decodeBytesList(Bytes, int)} instead, especially when reading
+   * untrusted data.
    *
    * @param source the SSZ encoded bytes
    * @return a list of {@link Bytes}
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, any value in the list is not a byte array, or
-   *         any byte array is too large (greater than 2^32 bytes)
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, any value in the list is
+   *     not a byte array, or any byte array is too large (greater than 2^32 bytes)
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Bytes> decodeBytesList(Bytes source) {
@@ -1666,8 +1698,8 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param limit the maximum number of bytes to read for each list element
    * @return a list of {@link Bytes}
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, any value in the list is not a byte array, or
-   *         any byte array is too large (greater than 2^32 bytes)
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, any value in the list is
+   *     not a byte array, or any byte array is too large (greater than 2^32 bytes)
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Bytes> decodeBytesList(Bytes source, int limit) {
@@ -1677,12 +1709,13 @@ public final class SSZ {
   /**
    * Read a list of byte arrays from the SSZ source.
    *
-   * Note: prefer to use {@link #decodeByteArrayList(Bytes, int)} instead, especially when reading untrusted data.
+   * <p>Note: prefer to use {@link #decodeByteArrayList(Bytes, int)} instead, especially when
+   * reading untrusted data.
    *
    * @param source the SSZ encoded bytes
    * @return a list of byte arrays
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, any value in the list is not a byte array, or
-   *         any byte array is too large (greater than 2^32 bytes)
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, any value in the list is
+   *     not a byte array, or any byte array is too large (greater than 2^32 bytes)
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<byte[]> decodeByteArrayList(Bytes source) {
@@ -1695,8 +1728,8 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param limit The maximum number of bytes to read for each list element.
    * @return a list of byte arrays
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, any value in the list is not a byte array, or
-   *         any byte array is too large (greater than 2^32 bytes)
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, any value in the list is
+   *     not a byte array, or any byte array is too large (greater than 2^32 bytes)
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<byte[]> decodeByteArrayList(Bytes source, int limit) {
@@ -1706,12 +1739,13 @@ public final class SSZ {
   /**
    * Read a list of strings from the SSZ source.
    *
-   * Note: prefer to use {@link #decodeStringList(Bytes, int)} instead, especially when reading untrusted data.
+   * <p>Note: prefer to use {@link #decodeStringList(Bytes, int)} instead, especially when reading
+   * untrusted data.
    *
    * @param source the SSZ encoded bytes
    * @return a list of strings
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, any value in the list is not a string, or any
-   *         string is too large (greater than 2^32 bytes)
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, any value in the list is
+   *     not a string, or any string is too large (greater than 2^32 bytes)
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<String> decodeStringList(Bytes source) {
@@ -1724,8 +1758,8 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param limit The maximum number of bytes to read for each list element.
    * @return a list of strings
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, any value in the list is not a string, or any
-   *         string is too large (greater than 2^32 bytes)
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, any value in the list is
+   *     not a string, or any string is too large (greater than 2^32 bytes)
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<String> decodeStringList(Bytes source, int limit) {
@@ -1738,8 +1772,9 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param bitLength the bit length of the integers to read (a multiple of 8)
    * @return a list of ints
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for the desired bit length or any value in the list, or any decoded value was
+   *     too large to fit into an int
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Integer> decodeIntList(Bytes source, int bitLength) {
@@ -1752,8 +1787,9 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param bitLength the bit length of the integers to read (a multiple of 8)
    * @return a list of longs
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into a long
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for the desired bit length or any value in the list, or any decoded value was
+   *     too large to fit into a long
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Long> decodeLongIntList(Bytes source, int bitLength) {
@@ -1766,8 +1802,8 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param bitLength the bit length of the integers to read (a multiple of 8)
    * @return a list of ints
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, or there are insufficient encoded bytes for
-   *         the desired bit length or any value in the list
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, or there are insufficient
+   *     encoded bytes for the desired bit length or any value in the list
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<BigInteger> decodeBigIntegerList(Bytes source, int bitLength) {
@@ -1779,8 +1815,9 @@ public final class SSZ {
    *
    * @param source the SSZ encoded bytes
    * @return a list of ints
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for the desired bit length or any value in the list, or any decoded value was
+   *     too large to fit into an int
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Integer> decodeInt8List(Bytes source) {
@@ -1792,8 +1829,9 @@ public final class SSZ {
    *
    * @param source the SSZ encoded bytes
    * @return a list of ints
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for the desired bit length or any value in the list, or any decoded value was
+   *     too large to fit into an int
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Integer> decodeInt16List(Bytes source) {
@@ -1805,8 +1843,9 @@ public final class SSZ {
    *
    * @param source the SSZ encoded bytes
    * @return a list of ints
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for the desired bit length or any value in the list, or any decoded value was
+   *     too large to fit into an int
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Integer> decodeInt32List(Bytes source) {
@@ -1818,8 +1857,9 @@ public final class SSZ {
    *
    * @param source the SSZ encoded bytes
    * @return a list of ints
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for the desired bit length or any value in the list, or any decoded value was
+   *     too large to fit into an int
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Long> decodeInt64List(Bytes source) {
@@ -1832,8 +1872,9 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param bitLength the bit length of the integers to read (a multiple of 8)
    * @return a list of ints
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into an int
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for the desired bit length or any value in the list, or any decoded value was
+   *     too large to fit into an int
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Integer> decodeUIntList(Bytes source, int bitLength) {
@@ -1846,8 +1887,9 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param bitLength the bit length of the integers to read (a multiple of 8)
    * @return a list of longs
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length or any value in the list, or any decoded value was too large to fit into a long
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for the desired bit length or any value in the list, or any decoded value was
+   *     too large to fit into a long
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Long> decodeULongIntList(Bytes source, int bitLength) {
@@ -1860,8 +1902,8 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param bitLength the bit length of the integers to read (a multiple of 8)
    * @return a list of ints
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, or there are insufficient encoded bytes for
-   *         the desired bit length of any value in the list
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, or there are insufficient
+   *     encoded bytes for the desired bit length of any value in the list
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<BigInteger> decodeUnsignedBigIntegerList(Bytes source, int bitLength) {
@@ -1873,8 +1915,9 @@ public final class SSZ {
    *
    * @param source the SSZ encoded bytes
    * @return a list of ints
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length of any value in the list, or any decoded value was too large to fit into an int
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for the desired bit length of any value in the list, or any decoded value was
+   *     too large to fit into an int
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Integer> decodeUInt8List(Bytes source) {
@@ -1886,8 +1929,9 @@ public final class SSZ {
    *
    * @param source the SSZ encoded bytes
    * @return a list of ints
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length of any value in the list, or any decoded value was too large to fit into an int
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for the desired bit length of any value in the list, or any decoded value was
+   *     too large to fit into an int
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Integer> decodeUInt16List(Bytes source) {
@@ -1899,8 +1943,9 @@ public final class SSZ {
    *
    * @param source the SSZ encoded bytes
    * @return a list of ints
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length of any value in the list, or any decoded value was too large to fit into a long
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for the desired bit length of any value in the list, or any decoded value was
+   *     too large to fit into a long
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Long> decodeUInt32List(Bytes source) {
@@ -1912,8 +1957,9 @@ public final class SSZ {
    *
    * @param source the SSZ encoded bytes
    * @return a list of ints
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length of any value in the list, or any decoded value was too large to fit into a long
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for the desired bit length of any value in the list, or any decoded value was
+   *     too large to fit into a long
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Long> decodeUInt64List(Bytes source) {
@@ -1925,8 +1971,9 @@ public final class SSZ {
    *
    * @param source the SSZ encoded bytes
    * @return a list of {@link UInt256}
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length of any value in the list, or any decoded value was too large to fit into {@link UInt256}
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for the desired bit length of any value in the list, or any decoded value was
+   *     too large to fit into {@link UInt256}
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<UInt256> decodeUInt256List(Bytes source) {
@@ -1938,9 +1985,9 @@ public final class SSZ {
    *
    * @param source the SSZ encoded bytes
    * @return a list of {@link UInt384}
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for the
-   *         desired bit length of any value in the list, or any decoded value was too large to fit into a
-   *         {@link UInt384}
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for the desired bit length of any value in the list, or any decoded value was
+   *     too large to fit into a {@link UInt384}
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<UInt384> decodeUInt384List(Bytes source) {
@@ -1952,8 +1999,8 @@ public final class SSZ {
    *
    * @param source the SSZ encoded bytes
    * @return a list of 20-byte addresses
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for any
-   *         address in the list
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for any address in the list
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Bytes> decodeAddressList(Bytes source) {
@@ -1966,8 +2013,8 @@ public final class SSZ {
    * @param source the SSZ encoded bytes
    * @param hashLength The length of the hash (in bytes).
    * @return a list of 32-byte hashes
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for any
-   *         hash in the list
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for any hash in the list
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Bytes> decodeHashList(Bytes source, int hashLength) {
@@ -1979,8 +2026,8 @@ public final class SSZ {
    *
    * @param source the SSZ encoded bytes
    * @return a list of booleans
-   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient encoded bytes for all
-   *         the booleans in the list
+   * @throws InvalidSSZTypeException if the next SSZ value is not a list, there are insufficient
+   *     encoded bytes for all the booleans in the list
    * @throws EndOfSSZException if there are no more SSZ values to read
    */
   public static List<Boolean> decodeBooleanList(Bytes source) {

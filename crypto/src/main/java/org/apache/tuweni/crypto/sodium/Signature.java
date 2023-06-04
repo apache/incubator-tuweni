@@ -17,33 +17,27 @@ import jnr.ffi.byref.LongLongByReference;
 /**
  * Public-key signatures.
  *
- * <p>
- * In this system, a signer generates a key pair:
+ * <p>In this system, a signer generates a key pair:
+ *
  * <ul>
- *
- * <li>a secret key, that will be used to append a signature to any number of messages</li>
- *
- * <li>a public key, that anybody can use to verify that the signature appended to a message was actually issued by the
- * creator of the public key.</li>
- *
+ *   <li>a secret key, that will be used to append a signature to any number of messages
+ *   <li>a public key, that anybody can use to verify that the signature appended to a message was
+ *       actually issued by the creator of the public key.
  * </ul>
  *
- * <p>
- * Verifiers need to already know and ultimately trust a public key before messages signed using it can be verified.
+ * <p>Verifiers need to already know and ultimately trust a public key before messages signed using
+ * it can be verified.
  *
- * <p>
- * Warning: this is different from authenticated encryption. Appending a signature does not change the representation of
- * the message itself.
+ * <p>Warning: this is different from authenticated encryption. Appending a signature does not
+ * change the representation of the message itself.
  *
- * <p>
- * This class depends upon the JNR-FFI library being available on the classpath, along with its dependencies. See
- * https://github.com/jnr/jnr-ffi. JNR-FFI can be included using the gradle dependency 'com.github.jnr:jnr-ffi'.
+ * <p>This class depends upon the JNR-FFI library being available on the classpath, along with its
+ * dependencies. See https://github.com/jnr/jnr-ffi. JNR-FFI can be included using the gradle
+ * dependency 'com.github.jnr:jnr-ffi'.
  */
 public final class Signature {
 
-  /**
-   * A signing public key.
-   */
+  /** A signing public key. */
   public static final class PublicKey implements Destroyable {
     final Allocated value;
 
@@ -54,7 +48,7 @@ public final class Signature {
     /**
      * Create a {@link Signature.PublicKey} from an array of bytes.
      *
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the public key.
      * @return A public key.
@@ -66,7 +60,7 @@ public final class Signature {
     /**
      * Create a {@link Signature.PublicKey} from an array of bytes.
      *
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the public key.
      * @return A public key.
@@ -133,7 +127,7 @@ public final class Signature {
 
     /**
      * Provides the bytes of this key.
-     * 
+     *
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -142,7 +136,7 @@ public final class Signature {
 
     /**
      * Provides the bytes of this key.
-     * 
+     *
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {
@@ -160,9 +154,7 @@ public final class Signature {
     }
   }
 
-  /**
-   * A Signature secret key.
-   */
+  /** A Signature secret key. */
   public static final class SecretKey implements Destroyable {
     Allocated value;
 
@@ -183,8 +175,7 @@ public final class Signature {
     /**
      * Create a {@link Signature.SecretKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the secret key.
      * @return A secret key.
@@ -196,8 +187,7 @@ public final class Signature {
     /**
      * Create a {@link Signature.SecretKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the secret key.
      * @return A secret key.
@@ -248,7 +238,7 @@ public final class Signature {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory.
+     * <p>WARNING: This will cause the key to be copied into heap memory.
      *
      * @return The bytes of this key.
      */
@@ -259,8 +249,8 @@ public final class Signature {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory. The returned array should be overwritten when no
-     * longer required.
+     * <p>WARNING: This will cause the key to be copied into heap memory. The returned array should
+     * be overwritten when no longer required.
      *
      * @return The bytes of this key.
      */
@@ -269,9 +259,7 @@ public final class Signature {
     }
   }
 
-  /**
-   * A Signature key pair seed.
-   */
+  /** A Signature key pair seed. */
   public static final class Seed {
     private final Allocated value;
 
@@ -282,8 +270,7 @@ public final class Signature {
     /**
      * Create a {@link Seed} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the seed.
      * @return A seed.
@@ -295,8 +282,7 @@ public final class Signature {
     /**
      * Create a {@link Seed} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the seed.
      * @return A seed.
@@ -350,7 +336,7 @@ public final class Signature {
 
     /**
      * Provides the bytes of this seed.
-     * 
+     *
      * @return The bytes of this seed.
      */
     public Bytes bytes() {
@@ -359,7 +345,7 @@ public final class Signature {
 
     /**
      * Provides the bytes of this seed.
-     * 
+     *
      * @return The bytes of this seed.
      */
     public byte[] bytesArray() {
@@ -367,9 +353,7 @@ public final class Signature {
     }
   }
 
-  /**
-   * A Signature key pair.
-   */
+  /** A Signature key pair. */
   public static final class KeyPair {
 
     private final PublicKey publicKey;
@@ -481,7 +465,7 @@ public final class Signature {
 
     /**
      * Provides the public key.
-     * 
+     *
      * @return The public key of the key pair.
      */
     public PublicKey publicKey() {
@@ -490,7 +474,7 @@ public final class Signature {
 
     /**
      * Provides the secret key.
-     * 
+     *
      * @return The secret key of the key pair.
      */
     public SecretKey secretKey() {
@@ -540,8 +524,8 @@ public final class Signature {
       throw new IllegalStateException("SecretKey has been destroyed");
     }
     Allocated signature = Allocated.allocate(Sodium.crypto_sign_bytes());
-    int rc = Sodium
-        .crypto_sign_detached(
+    int rc =
+        Sodium.crypto_sign_detached(
             signature.pointer(),
             new LongLongByReference(Sodium.crypto_sign_bytes()),
             message.pointer(),
@@ -566,7 +550,9 @@ public final class Signature {
       throw new IllegalStateException("SecretKey has been destroyed");
     }
     byte[] signature = new byte[(int) Sodium.crypto_sign_bytes()];
-    int rc = Sodium.crypto_sign_detached(signature, null, message, message.length, secretKey.value.pointer());
+    int rc =
+        Sodium.crypto_sign_detached(
+            signature, null, message, message.length, secretKey.value.pointer());
     if (rc != 0) {
       throw new SodiumException("crypto_sign_detached: failed with result " + rc);
     }
@@ -594,13 +580,11 @@ public final class Signature {
    * @param publicKey The secret key of the receiver.
    * @return whether the signature matches the message according to the public key.
    */
-  public static boolean verifyDetached(Allocated message, Allocated signature, PublicKey publicKey) {
-    int rc = Sodium
-        .crypto_sign_verify_detached(
-            signature.pointer(),
-            message.pointer(),
-            message.length(),
-            publicKey.value.pointer());
+  public static boolean verifyDetached(
+      Allocated message, Allocated signature, PublicKey publicKey) {
+    int rc =
+        Sodium.crypto_sign_verify_detached(
+            signature.pointer(), message.pointer(), message.length(), publicKey.value.pointer());
     if (rc == -1) {
       return false;
     }
@@ -620,7 +604,9 @@ public final class Signature {
    * @return whether the signature matches the message according to the public key.
    */
   public static boolean verifyDetached(byte[] message, byte[] signature, PublicKey publicKey) {
-    int rc = Sodium.crypto_sign_verify_detached(signature, message, message.length, publicKey.value.pointer());
+    int rc =
+        Sodium.crypto_sign_verify_detached(
+            signature, message, message.length, publicKey.value.pointer());
     if (rc == -1) {
       return false;
     }
@@ -654,7 +640,8 @@ public final class Signature {
       throw new IllegalStateException("SecretKey has been destroyed");
     }
     byte[] signature = new byte[(int) Sodium.crypto_sign_bytes() + message.length];
-    int rc = Sodium.crypto_sign(signature, null, message, message.length, secretKey.value.pointer());
+    int rc =
+        Sodium.crypto_sign(signature, null, message, message.length, secretKey.value.pointer());
     if (rc != 0) {
       throw new SodiumException("crypto_sign: failed with result " + rc);
     }
@@ -683,7 +670,9 @@ public final class Signature {
   public static byte[] verify(byte[] signed, PublicKey publicKey) {
     byte[] message = new byte[signed.length];
     LongLongByReference messageLongReference = new LongLongByReference();
-    int rc = Sodium.crypto_sign_open(message, messageLongReference, signed, signed.length, publicKey.value.pointer());
+    int rc =
+        Sodium.crypto_sign_open(
+            message, messageLongReference, signed, signed.length, publicKey.value.pointer());
     if (rc != 0) {
       throw new SodiumException("crypto_sign_open: failed with result " + rc);
     }

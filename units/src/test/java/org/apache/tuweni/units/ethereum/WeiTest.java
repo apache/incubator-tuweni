@@ -42,16 +42,20 @@ class WeiTest {
 
   @Test
   void testNegativeLong() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      Wei.valueOf(-1L);
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          Wei.valueOf(-1L);
+        });
   }
 
   @Test
   void testNegativeBigInteger() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      Wei.valueOf(BigInteger.valueOf(-123L));
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          Wei.valueOf(BigInteger.valueOf(-123L));
+        });
   }
 
   @Test

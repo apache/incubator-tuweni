@@ -37,24 +37,26 @@ import io.vertx.core.net.NetServer;
 /**
  * Vert.x implementation of the plumtree gossip.
  *
- * This implementation is provided as an example and relies on a simplistic JSON serialization of messages.
- *
+ * <p>This implementation is provided as an example and relies on a simplistic JSON serialization of
+ * messages.
  */
 public final class VertxGossipServer {
 
   private static final ObjectMapper mapper = new ObjectMapper();
 
-  private final static class BytesSerializer extends StdSerializer<Bytes> {
+  private static final class BytesSerializer extends StdSerializer<Bytes> {
 
     public BytesSerializer() {
       super(Bytes.class);
     }
 
     @Override
-    public void serialize(Bytes value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(Bytes value, JsonGenerator gen, SerializerProvider provider)
+        throws IOException {
       gen.writeString(value.toHexString());
     }
   }
+
   static class BytesDeserializer extends StdDeserializer<Bytes> {
 
     BytesDeserializer() {
@@ -66,7 +68,6 @@ public final class VertxGossipServer {
       String value = p.getValueAsString();
       return Bytes.fromHexStringLenient(value);
     }
-
   }
 
   static {
@@ -83,6 +84,7 @@ public final class VertxGossipServer {
     public String hash;
     public String payload;
   }
+
   private final class SocketHandler {
 
     private final Peer peer;
@@ -110,12 +112,11 @@ public final class VertxGossipServer {
             state.receiveIHaveMessage(peer, Bytes.fromHexString(message.hash));
             break;
           case GOSSIP:
-            state
-                .receiveGossipMessage(
-                    peer,
-                    message.attributes,
-                    Bytes.fromHexString(message.payload),
-                    Bytes.fromHexString(message.hash));
+            state.receiveGossipMessage(
+                peer,
+                message.attributes,
+                Bytes.fromHexString(message.payload),
+                Bytes.fromHexString(message.hash));
             break;
           case GRAFT:
             state.receiveGraftMessage(peer, Bytes.fromHexString(message.payload));
@@ -177,37 +178,55 @@ public final class VertxGossipServer {
       CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
       server = vertx.createNetServer();
       client = vertx.createNetClient();
-      server.connectHandler(socket -> {
-        Peer peer = new SocketPeer(socket);
-        SocketHandler handler = new SocketHandler(peer);
-        socket.handler(handler::handle).closeHandler(handler::close).exceptionHandler(Throwable::printStackTrace);
-      });
+      server.connectHandler(
+          socket -> {
+            Peer peer = new SocketPeer(socket);
+            SocketHandler handler = new SocketHandler(peer);
+            socket
+                .handler(handler::handle)
+                .closeHandler(handler::close)
+                .exceptionHandler(Throwable::printStackTrace);
+          });
       server.exceptionHandler(Throwable::printStackTrace);
-      server.listen(port, networkInterface, res -> {
-        if (res.failed()) {
-          completion.completeExceptionally(res.cause());
-        } else {
-          state = new State(peerRepository, messageIdentity, (verb, attributes, peer, hash, payload) -> {
-            vertx.executeBlocking(future -> {
-              Message message = new Message();
-              message.verb = verb;
-              message.attributes = attributes;
-              message.hash = hash.toHexString();
-              message.payload = payload == null ? null : payload.toHexString();
-              try {
-                ((SocketPeer) peer).socket().write(Buffer.buffer(mapper.writeValueAsBytes(message)));
-                future.complete();
-              } catch (JsonProcessingException e) {
-                future.fail(e);
-              }
+      server.listen(
+          port,
+          networkInterface,
+          res -> {
+            if (res.failed()) {
+              completion.completeExceptionally(res.cause());
+            } else {
+              state =
+                  new State(
+                      peerRepository,
+                      messageIdentity,
+                      (verb, attributes, peer, hash, payload) -> {
+                        vertx.executeBlocking(
+                            future -> {
+                              Message message = new Message();
+                              message.verb = verb;
+                              message.attributes = attributes;
+                              message.hash = hash.toHexString();
+                              message.payload = payload == null ? null : payload.toHexString();
+                              try {
+                                ((SocketPeer) peer)
+                                    .socket()
+                                    .write(Buffer.buffer(mapper.writeValueAsBytes(message)));
+                                future.complete();
+                              } catch (JsonProcessingException e) {
+                                future.fail(e);
+                              }
+                            },
+                            done -> {});
+                      },
+                      payloadListener,
+                      payloadValidator,
+                      peerPruningFunction,
+                      graftDelay,
+                      lazyQueueInterval);
 
-            }, done -> {
-            });
-          }, payloadListener, payloadValidator, peerPruningFunction, graftDelay, lazyQueueInterval);
-
-          completion.complete();
-        }
-      });
+              completion.complete();
+            }
+          });
 
       return completion;
     } else {
@@ -221,13 +240,14 @@ public final class VertxGossipServer {
 
       state.stop();
       client.close();
-      server.close(res -> {
-        if (res.failed()) {
-          completion.completeExceptionally(res.cause());
-        } else {
-          completion.complete();
-        }
-      });
+      server.close(
+          res -> {
+            if (res.failed()) {
+              completion.completeExceptionally(res.cause());
+            } else {
+              completion.complete();
+            }
+          });
 
       return completion;
     }
@@ -247,26 +267,30 @@ public final class VertxGossipServer {
     return completion;
   }
 
-  private void roundConnect(String host, int port, AtomicInteger counter, CompletableAsyncCompletion completion) {
-    client.connect(port, host, res -> {
-      if (res.failed()) {
-        if (counter.incrementAndGet() > 5) {
-          completion.completeExceptionally(res.cause());
-        } else {
-          roundConnect(host, port, counter, completion);
-        }
-      } else {
-        Peer peer = new SocketPeer(res.result());
-        SocketHandler handler = new SocketHandler(peer);
-        res.result().handler(handler::handle).closeHandler(handler::close);
-        completion.complete();
-      }
-    });
+  private void roundConnect(
+      String host, int port, AtomicInteger counter, CompletableAsyncCompletion completion) {
+    client.connect(
+        port,
+        host,
+        res -> {
+          if (res.failed()) {
+            if (counter.incrementAndGet() > 5) {
+              completion.completeExceptionally(res.cause());
+            } else {
+              roundConnect(host, port, counter, completion);
+            }
+          } else {
+            Peer peer = new SocketPeer(res.result());
+            SocketHandler handler = new SocketHandler(peer);
+            res.result().handler(handler::handle).closeHandler(handler::close);
+            completion.complete();
+          }
+        });
   }
 
   /**
    * Gossip a message to all known peers.
-   * 
+   *
    * @param attributes the payload to propagate
    * @param message the payload to propagate
    */

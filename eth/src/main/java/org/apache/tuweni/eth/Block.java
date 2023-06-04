@@ -12,9 +12,7 @@ import org.apache.tuweni.rlp.RLPWriter;
 
 import java.util.Objects;
 
-/**
- * An Ethereum block.
- */
+/** An Ethereum block. */
 public final class Block {
 
   /**
@@ -33,7 +31,8 @@ public final class Block {
    *
    * @param str The hexadecimal string to parse, which may or may not start with "0x".
    * @return The value corresponding to {@code str}.
-   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal representation.
+   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal
+   *     representation.
    * @throws RLPException If there is an error decoding the block.
    */
   public static Block fromHexString(String str) {
@@ -71,7 +70,7 @@ public final class Block {
 
   /**
    * Provides the block body
-   * 
+   *
    * @return the block body.
    */
   public BlockBody getBody() {
@@ -80,7 +79,7 @@ public final class Block {
 
   /**
    * Provides the block header
-   * 
+   *
    * @return the block header.
    */
   public BlockHeader getHeader() {
@@ -111,7 +110,7 @@ public final class Block {
 
   /**
    * Provides the block bytes
-   * 
+   *
    * @return The RLP serialized form of this block.
    */
   public Bytes toBytes() {

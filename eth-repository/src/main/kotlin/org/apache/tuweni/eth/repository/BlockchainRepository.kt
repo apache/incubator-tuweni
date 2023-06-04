@@ -56,7 +56,7 @@ class BlockchainRepository(
   internal val stateStore: KeyValueStore<Bytes, Bytes>,
   private val blockchainIndex: BlockchainIndex,
   private val meter: Meter? = null,
-  override val coroutineContext: CoroutineContext = Dispatchers.Default
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope, StateRepository {
 
   companion object {
@@ -84,7 +84,7 @@ class BlockchainRepository(
         MapKeyValueStore(),
         MapKeyValueStore(),
         MapKeyValueStore(),
-        BlockchainIndex(writer)
+        BlockchainIndex(writer),
       )
       repo.setGenesisBlock(genesisBlock)
       repo.storeBlock(genesisBlock)
@@ -106,7 +106,7 @@ class BlockchainRepository(
       stateStore: KeyValueStore<Bytes, Bytes>,
       blockchainIndex: BlockchainIndex,
       genesisBlock: Block,
-      meter: Meter? = null
+      meter: Meter? = null,
     ): BlockchainRepository {
       val repo = BlockchainRepository(
         chainMetadata,
@@ -116,7 +116,7 @@ class BlockchainRepository(
         transactionStore,
         stateStore,
         blockchainIndex,
-        meter
+        meter,
       )
       repo.setGenesisBlock(genesisBlock)
       repo.storeBlock(genesisBlock)
@@ -148,7 +148,7 @@ class BlockchainRepository(
           stateStore.put(hash, content)
         }
       },
-      latestBlock.header.stateRoot
+      latestBlock.header.stateRoot,
     )
   }
 
@@ -205,7 +205,7 @@ class BlockchainRepository(
     transactionReceipt: TransactionReceipt,
     txIndex: Int,
     txHash: Bytes,
-    blockHash: Bytes
+    blockHash: Bytes,
   ) {
     transactionReceiptStore.put(txHash, transactionReceipt.toBytes())
     indexTransactionReceipt(transactionReceipt, txIndex, txHash, blockHash)
@@ -272,7 +272,7 @@ class BlockchainRepository(
     txReceipt: TransactionReceipt,
     txIndex: Int,
     txHash: Bytes,
-    blockHash: Bytes
+    blockHash: Bytes,
   ) {
     blockchainIndex.index {
       it.indexTransactionReceipt(txReceipt, txIndex, txHash, blockHash)
@@ -511,7 +511,7 @@ class BlockchainRepository(
           stateStore.put(hash, content)
         }
       },
-      accountState.storageRoot
+      accountState.storageRoot,
     )
     return tree.get(key)
   }
@@ -537,14 +537,14 @@ class BlockchainRepository(
           stateStore.put(hash, content)
         }
       },
-      accountState.storageRoot
+      accountState.storageRoot,
     )
     tree.put(key, value)
     val newAccountState = AccountState(
       accountState.nonce,
       accountState.balance,
       Hash.fromBytes(tree.rootHash()),
-      accountState.codeHash
+      accountState.codeHash,
     )
     worldState!!.put(addrHash, newAccountState.toBytes())
   }
@@ -563,14 +563,14 @@ class BlockchainRepository(
           stateStore.put(hash, content)
         }
       },
-      accountState.storageRoot
+      accountState.storageRoot,
     )
     tree.remove(key)
     val newAccountState = AccountState(
       accountState.nonce,
       accountState.balance,
       Hash.fromBytes(tree.rootHash()),
-      accountState.codeHash
+      accountState.codeHash,
     )
     worldState!!.put(addrHash, newAccountState.toBytes())
   }

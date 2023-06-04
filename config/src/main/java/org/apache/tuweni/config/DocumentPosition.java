@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.apache.tuweni.config;
 
-
-/**
- * A position in an input document.
- */
+/** A position in an input document. */
 public final class DocumentPosition {
   private final int line;
   private final int column;
@@ -35,8 +32,7 @@ public final class DocumentPosition {
   /**
    * The line number.
    *
-   * <p>
-   * The first line of the document is line 1.
+   * <p>The first line of the document is line 1.
    *
    * @return The line number (1..).
    */
@@ -47,8 +43,7 @@ public final class DocumentPosition {
   /**
    * The column number.
    *
-   * <p>
-   * The first column of the document is column 1.
+   * <p>The first column of the document is column 1.
    *
    * @return The column number (1..).
    */

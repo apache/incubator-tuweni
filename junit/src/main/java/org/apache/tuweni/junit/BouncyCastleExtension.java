@@ -10,10 +10,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-/**
- * A junit5 extension, that installs a BouncyCastle security provider.
- *
- */
+/** A junit5 extension, that installs a BouncyCastle security provider. */
 public class BouncyCastleExtension implements BeforeAllCallback {
 
   @Override

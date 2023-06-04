@@ -29,8 +29,8 @@ class PasswordHashTest {
     String password = "A very insecure password";
     Salt salt = Salt.random();
 
-    Bytes hash = PasswordHash
-        .hash(
+    Bytes hash =
+        PasswordHash.hash(
             password,
             20,
             salt,
@@ -39,8 +39,8 @@ class PasswordHashTest {
             Algorithm.recommended());
     assertEquals(20, hash.size());
 
-    Bytes generated = PasswordHash
-        .hash(
+    Bytes generated =
+        PasswordHash.hash(
             password,
             20,
             salt,
@@ -49,8 +49,8 @@ class PasswordHashTest {
             Algorithm.recommended());
     assertEquals(hash, generated);
 
-    generated = PasswordHash
-        .hash(
+    generated =
+        PasswordHash.hash(
             password,
             20,
             Salt.random(),
@@ -59,8 +59,8 @@ class PasswordHashTest {
             Algorithm.recommended());
     assertNotEquals(hash, generated);
 
-    generated = PasswordHash
-        .hash(
+    generated =
+        PasswordHash.hash(
             password,
             20,
             salt,
@@ -72,21 +72,24 @@ class PasswordHashTest {
 
   @Test
   void shouldThrowForLowOpsLimitWithArgon2i() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      PasswordHash
-          .hash(
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          PasswordHash.hash(
               "A very insecure password",
               20,
               Salt.random(),
               1,
               PasswordHash.moderateMemLimit(),
               Algorithm.argon2i13());
-    });
+        });
   }
 
   @Test
   void checkHashAndVerify() {
-    assumeTrue(Sodium.supportsVersion(Sodium.VERSION_10_0_14), "Requires sodium native library >= 10.0.14");
+    assumeTrue(
+        Sodium.supportsVersion(Sodium.VERSION_10_0_14),
+        "Requires sodium native library >= 10.0.14");
     String password = "A very insecure password";
 
     String hash = PasswordHash.hashInteractive(password);
@@ -103,7 +106,9 @@ class PasswordHashTest {
 
   @Test
   void checkHashAndVerifyNeedingRehash() {
-    assumeTrue(Sodium.supportsVersion(Sodium.VERSION_10_0_14), "Requires sodium native library >= 10.0.14");
+    assumeTrue(
+        Sodium.supportsVersion(Sodium.VERSION_10_0_14),
+        "Requires sodium native library >= 10.0.14");
     String password = "A very insecure password";
     String hash = PasswordHash.hashInteractive(password);
     assertTrue(PasswordHash.needsRehash(hash));

@@ -60,7 +60,7 @@ import kotlin.coroutines.CoroutineContext
 class EthereumClient(
   val vertx: Vertx,
   val config: EthereumClientConfig,
-  override val coroutineContext: CoroutineContext = Dispatchers.Unconfined
+  override val coroutineContext: CoroutineContext = Dispatchers.Unconfined,
 ) : CoroutineScope {
 
   companion object {
@@ -84,7 +84,7 @@ class EthereumClient(
       name,
       ConfigurationBuilder().persistence().addStore(RocksDBStoreConfigurationBuilder::class.java)
         .location(dataStorage.resolve(name).toAbsolutePath().toString())
-        .expiredLocation(dataStorage.resolve("$name-expired").toAbsolutePath().toString()).build()
+        .expiredLocation(dataStorage.resolve("$name-expired").toAbsolutePath().toString()).build(),
     )
     return InfinispanKeyValueStore.open(headersCache)
   }
@@ -97,7 +97,7 @@ class EthereumClient(
         port = config.metricsPort(),
         networkInterface = config.metricsNetworkInterface(),
         enableGrpcPush = config.metricsGrpcPushEnabled(),
-        enablePrometheus = config.metricsPrometheusEnabled()
+        enablePrometheus = config.metricsPrometheusEnabled(),
       )
       this.metricsService = metricsService
     }
@@ -137,7 +137,7 @@ class EthereumClient(
         createStore(dataStorage, manager, "state"),
         BlockchainIndex(writer),
         genesisBlock,
-        metricsService?.meterSdkProvider?.get("${dataStore.getName()}_storage")
+        metricsService?.meterSdkProvider?.get("${dataStore.getName()}_storage"),
       )
       storageRepositories[dataStore.getName()] = repository
       repoToGenesisFile[repository] = genesisFile
@@ -151,12 +151,12 @@ class EthereumClient(
             "none"
           } else {
             peerRepositories.keys.joinToString(
-              ","
+              ",",
             )
           }
           ) + " defined"
         throw IllegalArgumentException(
-          "Repository $peerRepository not found, $message"
+          "Repository $peerRepository not found, $message",
         )
       }
       val dnsClient = DNSClient(vertx, it, MapKeyValueStore.open(), peerRepository)
@@ -173,12 +173,12 @@ class EthereumClient(
             "none"
           } else {
             peerRepositories.keys.joinToString(
-              ","
+              ",",
             )
           }
           ) + " defined"
         throw IllegalArgumentException(
-          "Repository $peerRepository not found, $message"
+          "Repository $peerRepository not found, $message",
         )
       }
       // TODO right now this doesn't use the peer repository since there is no impl satisfying both libraries.
@@ -186,7 +186,7 @@ class EthereumClient(
         vertx,
         keyPair = it.getIdentity(),
         port = it.getPort(),
-        host = it.getNetworkInterface()
+        host = it.getNetworkInterface(),
       )
       discoveryServices[it.getName()] = discoveryService
       logger.info("Started discovery service ${it.getName()}")
@@ -203,12 +203,12 @@ class EthereumClient(
               "none"
             } else {
               peerRepositories.keys.joinToString(
-                ","
+                ",",
               )
             }
             ) + " defined"
           throw IllegalArgumentException(
-            "Repository ${rlpxConfig.peerRepository()} not found, $message"
+            "Repository ${rlpxConfig.peerRepository()} not found, $message",
           )
         }
         val repository = storageRepositories[rlpxConfig.repository()]
@@ -218,17 +218,17 @@ class EthereumClient(
               "none"
             } else {
               storageRepositories.keys.joinToString(
-                ","
+                ",",
               )
             }
             ) + " defined"
           throw IllegalArgumentException(
-            "Repository ${rlpxConfig.repository()} not found, $message"
+            "Repository ${rlpxConfig.repository()} not found, $message",
           )
         }
         val genesisFile = repoToGenesisFile[repository]
           ?: throw IllegalArgumentException(
-            "Genesis file associated with repository ${rlpxConfig.repository()} not found"
+            "Genesis file associated with repository ${rlpxConfig.repository()} not found",
           )
         val genesisBlock = repository.retrieveGenesisBlock()
         val adapter = WireConnectionPeerRepositoryAdapter(peerRepository)
@@ -238,7 +238,7 @@ class EthereumClient(
           genesisBlock.header.hash,
           genesisBlock.header.number,
           genesisBlock.header.hash,
-          genesisFile.forks
+          genesisFile.forks,
         )
         logger.info("Initializing with blockchain information $blockchainInfo")
         val ethSubprotocol = EthSubprotocol(
@@ -246,7 +246,7 @@ class EthereumClient(
           blockchainInfo = blockchainInfo,
           pendingTransactionsPool = MemoryTransactionPool(),
           listener = adapter::listenToStatus,
-          selectionStrategy = { ConnectionManagementStrategy(peerRepositoryAdapter = adapter) }
+          selectionStrategy = { ConnectionManagementStrategy(peerRepositoryAdapter = adapter) },
         )
         val meter = metricsService?.meterSdkProvider?.get("${rlpxConfig.getName()}_rlpx")
         val proxySubprotocol = ProxySubprotocol()
@@ -260,14 +260,14 @@ class EthereumClient(
           rlpxConfig.clientName(),
           rlpxConfig.maxConnections(),
           meter,
-          adapter
+          adapter,
         )
         adapters[rlpxConfig.getName()] = adapter
         rlpxServices[rlpxConfig.getName()] = service
         peerRepository.addIdentityListener {
           service.connectTo(
             it.publicKey(),
-            InetSocketAddress(it.networkInterface(), it.port())
+            InetSocketAddress(it.networkInterface(), it.port()),
           )
         }
         service.start().thenRun {
@@ -293,20 +293,20 @@ class EthereumClient(
           }
           logger.info("Finished configuring Ethereum client ${rlpxConfig.getName()}")
         }
-      }
+      },
     ).thenRun {
       for (sync in config.synchronizers()) {
         val syncRepository = storageRepositories[sync.getRepository()] ?: throw IllegalArgumentException(
-          "Repository ${sync.getRepository()} missing for synchronizer ${sync.getName()}"
+          "Repository ${sync.getRepository()} missing for synchronizer ${sync.getName()}",
         )
         val syncService = rlpxServices[sync.getRlpxService()] ?: throw IllegalArgumentException(
-          "Service ${sync.getRlpxService()} missing for synchronizer ${sync.getName()}"
+          "Service ${sync.getRlpxService()} missing for synchronizer ${sync.getName()}",
         )
         val syncPeerRepository = peerRepositories[sync.getPeerRepository()] ?: throw IllegalArgumentException(
-          "Peer repository ${sync.getPeerRepository()} missing for synchronizer ${sync.getName()}"
+          "Peer repository ${sync.getPeerRepository()} missing for synchronizer ${sync.getName()}",
         )
         val adapter = adapters[sync.getRlpxService()] ?: throw IllegalArgumentException(
-          "Service ${sync.getRlpxService()} missing for synchronizer ${sync.getName()}"
+          "Service ${sync.getRlpxService()} missing for synchronizer ${sync.getName()}",
         )
 
         when (sync.getType()) {
@@ -316,7 +316,7 @@ class EthereumClient(
               client = syncService.getClient(ETH66) as EthRequestsManager,
               peerRepository = syncPeerRepository,
               from = sync.getFrom(),
-              to = sync.getTo()
+              to = sync.getTo(),
             )
             bestSynchronizer.start()
             synchronizers[sync.getName()] = bestSynchronizer
@@ -328,7 +328,7 @@ class EthereumClient(
               peerRepository = syncPeerRepository,
               adapter = adapter,
               from = sync.getFrom(),
-              to = sync.getTo()
+              to = sync.getTo(),
             )
             synchronizer.start()
             synchronizers[sync.getName()] = synchronizer
@@ -339,7 +339,7 @@ class EthereumClient(
               client = syncService.getClient(ETH66) as EthRequestsManager,
               peerRepository = syncPeerRepository,
               from = sync.getFrom(),
-              to = sync.getTo()
+              to = sync.getTo(),
             )
             parentSynchronizer.start()
             synchronizers[sync.getName()] = parentSynchronizer
@@ -347,7 +347,7 @@ class EthereumClient(
           SynchronizerType.CANONICAL -> {
             val fromRepository = storageRepositories.get(sync.getFromRepository())
               ?: throw IllegalArgumentException(
-                "Missing repository for canonical repository ${sync.getFromRepository()}"
+                "Missing repository for canonical repository ${sync.getFromRepository()}",
               )
             val canonicalSynchronizer = CanonicalSynchronizer(
               repository = syncRepository,
@@ -355,7 +355,7 @@ class EthereumClient(
               peerRepository = syncPeerRepository,
               from = sync.getFrom(),
               to = sync.getTo(),
-              fromRepository = fromRepository
+              fromRepository = fromRepository,
             )
             canonicalSynchronizer.start()
             synchronizers[sync.getName()] = canonicalSynchronizer
@@ -371,14 +371,14 @@ class EthereumClient(
             val chainIdValidator = ChainIdValidator(
               from = validator.getFrom(),
               to = validator.getTo(),
-              chainId = chainId
+              chainId = chainId,
             )
             validators[validator.getName()] = chainIdValidator
           }
           ValidatorType.TRANSACTIONHASH -> {
             val transactionsHashValidator = TransactionsHashValidator(
               from = validator.getFrom(),
-              to = validator.getTo()
+              to = validator.getTo(),
             )
             validators[validator.getName()] = transactionsHashValidator
           }
@@ -394,12 +394,12 @@ class EthereumClient(
             "none"
           } else {
             peerRepositories.keys.joinToString(
-              ","
+              ",",
             )
           }
           ) + " defined"
         throw IllegalArgumentException(
-          "Repository ${staticPeers.peerRepository()} not found, $message"
+          "Repository ${staticPeers.peerRepository()} not found, $message",
         )
       }
       for (enode in staticPeers.enodes()) {

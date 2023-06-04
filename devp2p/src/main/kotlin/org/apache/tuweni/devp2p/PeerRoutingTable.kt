@@ -62,7 +62,7 @@ internal class DevP2PPeerRoutingTable(selfId: SECP256K1.PublicKey) : PeerRouting
   private val table = KademliaRoutingTable<Peer>(
     selfId = hashForId(selfId)!!,
     k = DEVP2P_BUCKET_SIZE,
-    nodeId = { p -> hashForId(p.nodeId)!! }
+    nodeId = { p -> hashForId(p.nodeId)!! },
   )
 
   override val size: Int

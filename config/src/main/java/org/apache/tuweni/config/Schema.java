@@ -14,17 +14,16 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
-/**
- * A schema for a configuration, providing default values and validation rules.
- */
+/** A schema for a configuration, providing default values and validation rules. */
 public final class Schema {
 
-  static final Schema EMPTY = new Schema(
-      Collections.emptyMap(),
-      Collections.emptyMap(),
-      Collections.emptyMap(),
-      Collections.emptyList(),
-      Collections.emptyMap());
+  static final Schema EMPTY =
+      new Schema(
+          Collections.emptyMap(),
+          Collections.emptyMap(),
+          Collections.emptyMap(),
+          Collections.emptyList(),
+          Collections.emptyMap());
 
   private final Map<String, String> propertyDescriptions;
   private final Map<String, Object> propertyDefaults;
@@ -61,7 +60,9 @@ public final class Schema {
    * @return The keys for all defaults provided by this schema.
    */
   public Set<String> defaultsKeySet(String prefix) {
-    return propertyDefaults.keySet().stream().filter((key) -> key.startsWith(prefix)).collect(Collectors.toSet());
+    return propertyDefaults.keySet().stream()
+        .filter((key) -> key.startsWith(prefix))
+        .collect(Collectors.toSet());
   }
 
   /**
@@ -132,12 +133,12 @@ public final class Schema {
       Long longValue = (Long) obj;
       if (longValue > Integer.MAX_VALUE) {
         throw new InvalidConfigurationPropertyTypeException(
-            null,
-            "Value of property '" + key + "' is too large for an integer");
+            null, "Value of property '" + key + "' is too large for an integer");
       }
       return longValue.intValue();
     }
-    throw new InvalidConfigurationPropertyTypeException(null, "Property at '" + key + "' was not an integer");
+    throw new InvalidConfigurationPropertyTypeException(
+        null, "Property at '" + key + "' was not an integer");
   }
 
   /**
@@ -160,7 +161,8 @@ public final class Schema {
     if (obj instanceof Integer) {
       return ((Integer) obj).longValue();
     }
-    throw new InvalidConfigurationPropertyTypeException(null, "Property at '" + key + "' was not a long");
+    throw new InvalidConfigurationPropertyTypeException(
+        null, "Property at '" + key + "' was not a long");
   }
 
   /**
@@ -222,7 +224,8 @@ public final class Schema {
     if (obj instanceof List) {
       return (List<Object>) obj;
     }
-    throw new InvalidConfigurationPropertyTypeException(null, "Property at '" + key + "' is not a list");
+    throw new InvalidConfigurationPropertyTypeException(
+        null, "Property at '" + key + "' is not a list");
   }
 
   /**
@@ -230,7 +233,8 @@ public final class Schema {
    *
    * @param key A configuration key (e.g. {@code "server.common_names"}).
    * @return The value, or null if no default was available.
-   * @throws InvalidConfigurationPropertyTypeException If the default value is not a list of strings.
+   * @throws InvalidConfigurationPropertyTypeException If the default value is not a list of
+   *     strings.
    */
   @Nullable
   public List<String> getDefaultListOfString(String key) {
@@ -243,7 +247,8 @@ public final class Schema {
    *
    * @param key A configuration key (e.g. {@code "server.address.ports"}).
    * @return The value, or null if no default was available.
-   * @throws InvalidConfigurationPropertyTypeException If the default value is not a list of integers.
+   * @throws InvalidConfigurationPropertyTypeException If the default value is not a list of
+   *     integers.
    */
   @SuppressWarnings("unchecked")
   @Nullable
@@ -259,21 +264,29 @@ public final class Schema {
         return (List<Integer>) list;
       }
       if (list.get(0) instanceof Long) {
-        return IntStream.range(0, list.size()).mapToObj(i -> {
-          Long longValue = (Long) list.get(i);
-          if (longValue == null) {
-            return null;
-          }
-          if (longValue > Integer.MAX_VALUE) {
-            throw new InvalidConfigurationPropertyTypeException(
-                null,
-                "Value of property '" + key + "', index " + i + ", is too large for an integer");
-          }
-          return longValue.intValue();
-        }).collect(Collectors.toList());
+        return IntStream.range(0, list.size())
+            .mapToObj(
+                i -> {
+                  Long longValue = (Long) list.get(i);
+                  if (longValue == null) {
+                    return null;
+                  }
+                  if (longValue > Integer.MAX_VALUE) {
+                    throw new InvalidConfigurationPropertyTypeException(
+                        null,
+                        "Value of property '"
+                            + key
+                            + "', index "
+                            + i
+                            + ", is too large for an integer");
+                  }
+                  return longValue.intValue();
+                })
+            .collect(Collectors.toList());
       }
     }
-    throw new InvalidConfigurationPropertyTypeException(null, "Property at '" + key + "' was not a list of integers");
+    throw new InvalidConfigurationPropertyTypeException(
+        null, "Property at '" + key + "' was not a list of integers");
   }
 
   /**
@@ -297,15 +310,20 @@ public final class Schema {
         return (List<Long>) list;
       }
       if (list.get(0) instanceof Integer) {
-        return ((List<Integer>) list).stream().map(i -> {
-          if (i == null) {
-            return null;
-          }
-          return i.longValue();
-        }).collect(Collectors.toList());
+        return ((List<Integer>) list)
+            .stream()
+                .map(
+                    i -> {
+                      if (i == null) {
+                        return null;
+                      }
+                      return i.longValue();
+                    })
+                .collect(Collectors.toList());
       }
     }
-    throw new InvalidConfigurationPropertyTypeException(null, "Property at '" + key + "' was not a list of longs");
+    throw new InvalidConfigurationPropertyTypeException(
+        null, "Property at '" + key + "' was not a list of longs");
   }
 
   /**
@@ -313,7 +331,8 @@ public final class Schema {
    *
    * @param key A configuration key (e.g. {@code "server.priorities"}).
    * @return The value, or null if no default was available.
-   * @throws InvalidConfigurationPropertyTypeException If the default value is not a list of doubles.
+   * @throws InvalidConfigurationPropertyTypeException If the default value is not a list of
+   *     doubles.
    */
   @Nullable
   public List<Double> getDefaultListOfDouble(String key) {
@@ -326,7 +345,8 @@ public final class Schema {
    *
    * @param key A configuration key (e.g. {@code "server.flags"}).
    * @return The value, or null if no default was available.
-   * @throws InvalidConfigurationPropertyTypeException If the default value is not a list of booleans.
+   * @throws InvalidConfigurationPropertyTypeException If the default value is not a list of
+   *     booleans.
    */
   @Nullable
   public List<Boolean> getDefaultListOfBoolean(String key) {
@@ -356,7 +376,8 @@ public final class Schema {
     if (clazz.isInstance(obj)) {
       return clazz.cast(obj);
     }
-    throw new InvalidConfigurationPropertyTypeException(null, "Property at '" + key + "' was not a " + typeName);
+    throw new InvalidConfigurationPropertyTypeException(
+        null, "Property at '" + key + "' was not a " + typeName);
   }
 
   @SuppressWarnings("unchecked")
@@ -373,16 +394,14 @@ public final class Schema {
       }
     }
     throw new InvalidConfigurationPropertyTypeException(
-        null,
-        "Property at '" + key + "' was not a list of " + typeName);
+        null, "Property at '" + key + "' was not a list of " + typeName);
   }
 
   /**
    * Validate a configuration against this schema.
    *
-   * <p>
-   * The validations are done incrementally as the stream is consumed. Use {@code .limit(...)} on the stream to control
-   * the maximum number of validation errors to receive.
+   * <p>The validations are done incrementally as the stream is consumed. Use {@code .limit(...)} on
+   * the stream to control the maximum number of validation errors to receive.
    *
    * @param configuration The configuration to validate.
    * @return A stream containing any errors encountered during validation.
@@ -390,25 +409,31 @@ public final class Schema {
   public Stream<ConfigurationError> validate(Configuration configuration) {
     requireNonNull(configuration);
 
-    Stream<ConfigurationError> propertyErrors = propertyValidators.entrySet().stream().flatMap(e -> {
-      String key = e.getKey();
-      PropertyValidator<Object> validator = e.getValue();
-      Object value = configuration.get(key);
-      DocumentPosition position = configuration.inputPositionOf(key);
-      List<ConfigurationError> errors = validator.validate(key, position, value);
-      if (errors == null) {
-        return Stream.empty();
-      }
-      return errors.stream();
-    });
+    Stream<ConfigurationError> propertyErrors =
+        propertyValidators.entrySet().stream()
+            .flatMap(
+                e -> {
+                  String key = e.getKey();
+                  PropertyValidator<Object> validator = e.getValue();
+                  Object value = configuration.get(key);
+                  DocumentPosition position = configuration.inputPositionOf(key);
+                  List<ConfigurationError> errors = validator.validate(key, position, value);
+                  if (errors == null) {
+                    return Stream.empty();
+                  }
+                  return errors.stream();
+                });
 
-    Stream<ConfigurationError> configErrors = configurationValidators.stream().flatMap(v -> {
-      List<ConfigurationError> errors = v.validate(configuration);
-      if (errors == null) {
-        return Stream.empty();
-      }
-      return errors.stream();
-    });
+    Stream<ConfigurationError> configErrors =
+        configurationValidators.stream()
+            .flatMap(
+                v -> {
+                  List<ConfigurationError> errors = v.validate(configuration);
+                  if (errors == null) {
+                    return Stream.empty();
+                  }
+                  return errors.stream();
+                });
 
     return Stream.concat(propertyErrors, configErrors);
   }

@@ -20,7 +20,7 @@ class RegTopicMessageTest {
         requestId,
         EthereumNodeRecord.create(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress()),
         Bytes.random(32),
-        Bytes.random(16)
+        Bytes.random(16),
       )
 
     val encodingResult = message.toRLP()

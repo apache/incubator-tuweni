@@ -18,7 +18,7 @@ class DNSClient(
   private val vertx: Vertx,
   private val config: DNSConfiguration,
   private val metadataStore: KeyValueStore<String, String>,
-  private val peerRepository: PeerRepository
+  private val peerRepository: PeerRepository,
 ) {
 
   companion object {
@@ -64,7 +64,7 @@ class DNSClient(
               }
             }
           }
-        }
+        },
       )
       daemon.start()
       dnsDaemon = daemon

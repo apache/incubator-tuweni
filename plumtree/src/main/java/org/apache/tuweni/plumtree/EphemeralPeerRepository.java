@@ -8,9 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * In-memory peer repository.
- */
+/** In-memory peer repository. */
 public final class EphemeralPeerRepository implements PeerRepository {
 
   private final Set<Peer> eagerPushPeers = ConcurrentHashMap.newKeySet();
@@ -62,6 +60,5 @@ public final class EphemeralPeerRepository implements PeerRepository {
     if (!lazyPushPeers.contains(peer)) {
       eagerPushPeers.add(peer);
     }
-
   }
 }

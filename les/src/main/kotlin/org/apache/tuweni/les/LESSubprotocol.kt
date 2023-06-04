@@ -51,7 +51,7 @@ class LESSubprotocol(
   private val repo: BlockchainRepository,
   private val pendingTransactionsPool: TransactionPool,
   private val connectionSelectionStrategy: ConnectionSelectionStrategy,
-  private val listener: (WireConnection, Status) -> Unit = { _, _ -> }
+  private val listener: (WireConnection, Status) -> Unit = { _, _ -> },
 ) : SubProtocol {
 
   override fun createClient(service: RLPxService, subProtocolIdentifier: SubProtocolIdentifier): SubProtocolClient {
@@ -79,7 +79,7 @@ class LESSubprotocol(
       flowControlMaximumRequestCostTable,
       flowControlMinimumRateOfRecharge,
       controller,
-      coroutineContext
+      coroutineContext,
     )
   }
 

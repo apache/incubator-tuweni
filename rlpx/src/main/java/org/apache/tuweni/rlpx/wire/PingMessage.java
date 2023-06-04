@@ -19,5 +19,4 @@ final class PingMessage implements WireProtocolMessage {
   public int messageType() {
     throw new UnsupportedOperationException();
   }
-
 }

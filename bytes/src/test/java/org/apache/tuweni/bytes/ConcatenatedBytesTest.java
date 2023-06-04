@@ -34,12 +34,11 @@ class ConcatenatedBytesTest {
 
   @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> concatenatedWrapProvider() {
-    return Stream
-        .of(
-            Arguments.of(new byte[] {}, new byte[] {}),
-            Arguments.of(new byte[] {}, new byte[] {1, 2, 3}),
-            Arguments.of(new byte[] {1, 2, 3}, new byte[] {}),
-            Arguments.of(new byte[] {1, 2, 3}, new byte[] {4, 5}));
+    return Stream.of(
+        Arguments.of(new byte[] {}, new byte[] {}),
+        Arguments.of(new byte[] {}, new byte[] {1, 2, 3}),
+        Arguments.of(new byte[] {1, 2, 3}, new byte[] {}),
+        Arguments.of(new byte[] {1, 2, 3}, new byte[] {4, 5}));
   }
 
   @Test
@@ -65,11 +64,12 @@ class ConcatenatedBytesTest {
 
   @Test
   void shouldSliceConcatenatedValue() {
-    Bytes bytes = wrap(
-        fromHexString("0x01234567"),
-        fromHexString("0x89ABCDEF"),
-        fromHexString("0x01234567"),
-        fromHexString("0x89ABCDEF"));
+    Bytes bytes =
+        wrap(
+            fromHexString("0x01234567"),
+            fromHexString("0x89ABCDEF"),
+            fromHexString("0x01234567"),
+            fromHexString("0x89ABCDEF"));
     assertEquals("0x", bytes.slice(4, 0).toHexString());
     assertEquals("0x0123456789abcdef0123456789abcdef", bytes.slice(0, 16).toHexString());
     assertEquals("0x01234567", bytes.slice(0, 4).toHexString());
@@ -85,11 +85,12 @@ class ConcatenatedBytesTest {
 
   @Test
   void shouldReadDeepConcatenatedValue() {
-    Bytes bytes = wrap(
-        wrap(fromHexString("0x01234567"), fromHexString("0x89ABCDEF")),
-        wrap(fromHexString("0x01234567"), fromHexString("0x89ABCDEF")),
-        fromHexString("0x01234567"),
-        fromHexString("0x89ABCDEF"));
+    Bytes bytes =
+        wrap(
+            wrap(fromHexString("0x01234567"), fromHexString("0x89ABCDEF")),
+            wrap(fromHexString("0x01234567"), fromHexString("0x89ABCDEF")),
+            fromHexString("0x01234567"),
+            fromHexString("0x89ABCDEF"));
     assertEquals(24, bytes.size());
     assertEquals("0x0123456789abcdef0123456789abcdef0123456789abcdef", bytes.toHexString());
   }
@@ -106,7 +107,9 @@ class ConcatenatedBytesTest {
     Bytes bytes = wrap(fromHexString("0x0123"), fromHexString("0x4567"));
     MutableBytes dest = MutableBytes.create(32);
     bytes.copyTo(dest, 10);
-    assertEquals(Bytes.fromHexString("0x0000000000000000000001234567000000000000000000000000000000000000"), dest);
+    assertEquals(
+        Bytes.fromHexString("0x0000000000000000000001234567000000000000000000000000000000000000"),
+        dest);
   }
 
   @Test

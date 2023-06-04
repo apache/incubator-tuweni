@@ -28,25 +28,36 @@ class SchemaBuilderTest {
         () -> schemaBuilder.addListOfLong("longs", Arrays.asList(1L, 2L, null), null, null));
     assertThrows(
         IllegalArgumentException.class,
-        () -> schemaBuilder.addListOfDouble("doubles", Arrays.asList(1.0, 2.0, 3.0, null), null, null));
+        () ->
+            schemaBuilder.addListOfDouble(
+                "doubles", Arrays.asList(1.0, 2.0, 3.0, null), null, null));
     assertThrows(
         IllegalArgumentException.class,
-        () -> schemaBuilder.addListOfBoolean("bools", Arrays.asList(true, null, false), null, null));
+        () ->
+            schemaBuilder.addListOfBoolean("bools", Arrays.asList(true, null, false), null, null));
     assertThrows(
         IllegalArgumentException.class,
-        () -> schemaBuilder
-            .addListOfMap("maps", Arrays.asList(Collections.emptyMap(), null, Collections.emptyMap()), null, null));
+        () ->
+            schemaBuilder.addListOfMap(
+                "maps",
+                Arrays.asList(Collections.emptyMap(), null, Collections.emptyMap()),
+                null,
+                null));
   }
 
   @Test
   void validateListOfStrings() {
     SchemaBuilder schemaBuilder = new SchemaBuilder();
-    schemaBuilder.addListOfString("key", Collections.emptyList(), "Some description here", (key, pos, value) -> {
-      if (value.size() == 2 && value.get(0).startsWith("no")) {
-        return singleError("This won't work out");
-      }
-      return noErrors();
-    });
+    schemaBuilder.addListOfString(
+        "key",
+        Collections.emptyList(),
+        "Some description here",
+        (key, pos, value) -> {
+          if (value.size() == 2 && value.get(0).startsWith("no")) {
+            return singleError("This won't work out");
+          }
+          return noErrors();
+        });
     Configuration config = Configuration.fromToml("key=[\"no\",\"yes\"]", schemaBuilder.toSchema());
 
     assertEquals(1, config.errors().size());
@@ -55,13 +66,18 @@ class SchemaBuilderTest {
   @Test
   void validateListOfMaps() {
     SchemaBuilder schemaBuilder = new SchemaBuilder();
-    schemaBuilder.addListOfMap("key", Collections.emptyList(), "Some description here", (key, pos, value) -> {
-      if (value.size() == 2 && value.get(0).size() == 1 && (Long) value.get(0).get("a") == 1L) {
-        return singleError("This won't work out");
-      }
-      return noErrors();
-    });
-    Configuration config = Configuration.fromToml("key=[{a = 1},{a = 2}]", schemaBuilder.toSchema());
+    schemaBuilder.addListOfMap(
+        "key",
+        Collections.emptyList(),
+        "Some description here",
+        (key, pos, value) -> {
+          if (value.size() == 2 && value.get(0).size() == 1 && (Long) value.get(0).get("a") == 1L) {
+            return singleError("This won't work out");
+          }
+          return noErrors();
+        });
+    Configuration config =
+        Configuration.fromToml("key=[{a = 1},{a = 2}]", schemaBuilder.toSchema());
 
     assertEquals(1, config.errors().size());
   }
@@ -125,7 +141,8 @@ class SchemaBuilderTest {
   @Test
   void subSectionList() {
     SchemaBuilder sectionBuilder = new SchemaBuilder();
-    sectionBuilder.addListOfString("bar", Collections.singletonList("foobar"), "some description", null);
+    sectionBuilder.addListOfString(
+        "bar", Collections.singletonList("foobar"), "some description", null);
     SchemaBuilder schemaBuilder = new SchemaBuilder();
     schemaBuilder.addSection("foo", sectionBuilder.toSchema());
 

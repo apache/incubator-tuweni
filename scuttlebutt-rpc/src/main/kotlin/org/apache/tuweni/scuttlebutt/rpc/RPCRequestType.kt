@@ -18,5 +18,5 @@ enum class RPCRequestType {
    * A 'source' type request, which begins a stream of results
    */
   @JsonProperty("source")
-  SOURCE
+  SOURCE,
 }

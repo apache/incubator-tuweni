@@ -9,5 +9,5 @@ import org.apache.tuweni.rlpx.wire.SubProtocolClient
  * Client of the ETH subprotocol, allowing to request block and node data
  */
 class EthHelloClient(
-  private val service: RLPxService
+  private val service: RLPxService,
 ) : SubProtocolClient

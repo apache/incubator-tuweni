@@ -11,7 +11,6 @@ import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.jcajce.provider.digest.BCMessageDigest;
 import org.bouncycastle.util.Pack;
 
-
 public class Blake2bfMessageDigest extends BCMessageDigest implements Cloneable {
 
   public Blake2bfMessageDigest() {
@@ -21,41 +20,40 @@ public class Blake2bfMessageDigest extends BCMessageDigest implements Cloneable 
   /**
    * Implementation of the `F` compression function of the Blake2b cryptographic hash function.
    *
-   * <p>
-   * RFC - https://tools.ietf.org/html/rfc7693
+   * <p>RFC - https://tools.ietf.org/html/rfc7693
    *
-   * <p>
-   * Copied from -
+   * <p>Copied from -
    * https://github.com/hyperledger/besu/blob/main/crypto/src/main/java/org/hyperledger/besu/crypto/Blake2bfMessageDigest.java
    *
-   * <p>
-   * Optimized for 64-bit platforms
+   * <p>Optimized for 64-bit platforms
    */
   public static class Blake2bfDigest implements Digest {
 
     public static final int MESSAGE_LENGTH_BYTES = 213;
 
     private static final long[] IV = {
-        0x6a09e667f3bcc908L,
-        0xbb67ae8584caa73bL,
-        0x3c6ef372fe94f82bL,
-        0xa54ff53a5f1d36f1L,
-        0x510e527fade682d1L,
-        0x9b05688c2b3e6c1fL,
-        0x1f83d9abfb41bd6bL,
-        0x5be0cd19137e2179L};
+      0x6a09e667f3bcc908L,
+      0xbb67ae8584caa73bL,
+      0x3c6ef372fe94f82bL,
+      0xa54ff53a5f1d36f1L,
+      0x510e527fade682d1L,
+      0x9b05688c2b3e6c1fL,
+      0x1f83d9abfb41bd6bL,
+      0x5be0cd19137e2179L
+    };
 
     private static final byte[][] PRECOMPUTED = {
-        {0, 2, 4, 6, 1, 3, 5, 7, 8, 10, 12, 14, 9, 11, 13, 15},
-        {14, 4, 9, 13, 10, 8, 15, 6, 1, 0, 11, 5, 12, 2, 7, 3},
-        {11, 12, 5, 15, 8, 0, 2, 13, 10, 3, 7, 9, 14, 6, 1, 4},
-        {7, 3, 13, 11, 9, 1, 12, 14, 2, 5, 4, 15, 6, 10, 0, 8},
-        {9, 5, 2, 10, 0, 7, 4, 15, 14, 11, 6, 3, 1, 12, 8, 13},
-        {2, 6, 0, 8, 12, 10, 11, 3, 4, 7, 15, 1, 13, 5, 14, 9},
-        {12, 1, 14, 4, 5, 15, 13, 10, 0, 6, 9, 8, 7, 3, 2, 11},
-        {13, 7, 12, 3, 11, 14, 1, 9, 5, 15, 8, 2, 0, 4, 6, 10},
-        {6, 14, 11, 0, 15, 9, 3, 8, 12, 13, 1, 10, 2, 7, 4, 5},
-        {10, 8, 7, 1, 2, 4, 6, 5, 15, 9, 3, 13, 11, 14, 12, 0}};
+      {0, 2, 4, 6, 1, 3, 5, 7, 8, 10, 12, 14, 9, 11, 13, 15},
+      {14, 4, 9, 13, 10, 8, 15, 6, 1, 0, 11, 5, 12, 2, 7, 3},
+      {11, 12, 5, 15, 8, 0, 2, 13, 10, 3, 7, 9, 14, 6, 1, 4},
+      {7, 3, 13, 11, 9, 1, 12, 14, 2, 5, 4, 15, 6, 10, 0, 8},
+      {9, 5, 2, 10, 0, 7, 4, 15, 14, 11, 6, 3, 1, 12, 8, 13},
+      {2, 6, 0, 8, 12, 10, 11, 3, 4, 7, 15, 1, 13, 5, 14, 9},
+      {12, 1, 14, 4, 5, 15, 13, 10, 0, 6, 9, 8, 7, 3, 2, 11},
+      {13, 7, 12, 3, 11, 14, 1, 9, 5, 15, 8, 2, 0, 4, 6, 10},
+      {6, 14, 11, 0, 15, 9, 3, 8, 12, 13, 1, 10, 2, 7, 4, 5},
+      {10, 8, 7, 1, 2, 4, 6, 5, 15, 9, 3, 13, 11, 14, 12, 0}
+    };
 
     private static final int DIGEST_LENGTH = 64;
 
@@ -67,7 +65,8 @@ public class Blake2bfMessageDigest extends BCMessageDigest implements Cloneable 
     Blake2bfDigest() {}
 
     // for tests
-    Blake2bfDigest(final long[] h, final long[] m, final long[] t, final boolean f, final long rounds) {
+    Blake2bfDigest(
+        final long[] h, final long[] m, final long[] t, final boolean f, final long rounds) {
       assert rounds <= 4294967295L; // uint max value
     }
 
@@ -147,9 +146,10 @@ public class Blake2bfMessageDigest extends BCMessageDigest implements Cloneable 
     }
 
     /**
-     * F is a compression function for BLAKE2b. It takes as an argument the state vector `h`, message block vector `m`,
-     * offset counter `t`, final block indicator flag `f`, and number of rounds `rounds`. The state vector provided as
-     * the first parameter is modified by the function.
+     * F is a compression function for BLAKE2b. It takes as an argument the state vector `h`,
+     * message block vector `m`, offset counter `t`, final block indicator flag `f`, and number of
+     * rounds `rounds`. The state vector provided as the first parameter is modified by the
+     * function.
      */
     private void compress(byte[] out) {
       long rounds = Integer.toUnsignedLong(buffer.getInt(0));
@@ -211,7 +211,14 @@ public class Blake2bfMessageDigest extends BCMessageDigest implements Cloneable 
       }
     }
 
-    private void mix(final long[] v, final long a, final long b, final int i, final int j, final int k, final int l) {
+    private void mix(
+        final long[] v,
+        final long a,
+        final long b,
+        final int i,
+        final int j,
+        final int k,
+        final int l) {
       v[i] += a + v[j];
       v[l] = Long.rotateLeft(v[l] ^ v[i], -32);
       v[k] += v[l];

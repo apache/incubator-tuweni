@@ -5,9 +5,7 @@ package org.apache.tuweni.rlpx.wire;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.concurrent.AsyncCompletion;
 
-/**
- * Handler managing messages and new connections of peers related for a given subprotocol.
- */
+/** Handler managing messages and new connections of peers related for a given subprotocol. */
 public interface SubProtocolHandler {
 
   /**
@@ -22,7 +20,7 @@ public interface SubProtocolHandler {
 
   /**
    * Handle a new peer connection
-   * 
+   *
    * @param connection the new peer connection
    * @return a handle to the completion of the addition of the new peer.
    */

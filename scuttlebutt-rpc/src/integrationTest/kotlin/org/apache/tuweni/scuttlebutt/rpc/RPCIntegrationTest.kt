@@ -65,11 +65,11 @@ internal class RPCIntegrationTest {
       port,
       host,
       publicKey,
-      null
+      null,
     ) { sender, terminationFn ->
       MyClientHandler(
         sender,
-        terminationFn
+        terminationFn,
       )
     }
     val clientHandler = onConnect as MyClientHandler?
@@ -131,7 +131,7 @@ internal class RPCIntegrationTest {
     params["text"] = longString
     val asyncRequest = RPCAsyncRequest(RPCFunction("publish"), listOf(params))
     val exception = Assertions.assertThrows(
-      RPCRequestFailedException::class.java
+      RPCRequestFailedException::class.java,
     ) {
       runBlocking {
         rpcHandler.makeAsyncRequest(asyncRequest)
@@ -139,7 +139,7 @@ internal class RPCIntegrationTest {
     }
     Assertions.assertEquals(
       "Encoded message must not be larger than 8192 bytes. Current size is 40264",
-      exception.cause!!.message
+      exception.cause!!.message,
     )
   }
 
@@ -157,12 +157,12 @@ internal class RPCIntegrationTest {
         port,
         host,
         keyPair.publicKey(),
-        null
+        null,
       ) { sender, terminationFn ->
         RPCHandler(
           vertx,
           sender,
-          terminationFn
+          terminationFn,
         )
       } as RPCHandler
     return onConnect
@@ -179,7 +179,7 @@ internal class RPCIntegrationTest {
     val streamEnded = AsyncResult.incomplete<Void>()
     val streamRequest = RPCStreamRequest(RPCFunction("createUserStream"), listOf<Map<String, String>>(params))
     handler.openStream(
-      streamRequest
+      streamRequest,
     ) {
       object : ScuttlebuttStreamHandler {
         override fun onMessage(message: RPCResponse) {

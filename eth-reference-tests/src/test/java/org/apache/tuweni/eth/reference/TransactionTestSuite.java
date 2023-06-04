@@ -72,7 +72,9 @@ class TransactionTestSuite {
       return;
     }
 
-    if ("Constantinople".equals(milestone) || "Byzantium".equals(milestone) || "EIP158".equals(milestone)) {
+    if ("Constantinople".equals(milestone)
+        || "Byzantium".equals(milestone)
+        || "EIP158".equals(milestone)) {
       if (tx.getChainId() == null) {
         return;
       }
@@ -88,48 +90,54 @@ class TransactionTestSuite {
   @SuppressWarnings("UnusedMethod")
   @MustBeClosed
   private static Stream<Arguments> readTransactionTests() throws IOException {
-    return Resources
-        .find("**/TransactionTests/**/*.json")
+    return Resources.find("**/TransactionTests/**/*.json")
         .filter(
-            url -> !url.getPath().contains("GasLimitOverflow")
-                && !url.getPath().contains("GasLimitxPriceOverflow")
-                && !url.getPath().contains("NotEnoughGas")
-                && !url.getPath().contains("NotEnoughGAS")
-                && !url.getPath().contains("EmptyTransaction"))
-        .flatMap(url -> {
-          try (InputStream in = url.openConnection().getInputStream()) {
-            return readTestCase(in);
-          } catch (IOException e) {
-            throw new UncheckedIOException(e);
-          }
-        })
+            url ->
+                !url.getPath().contains("GasLimitOverflow")
+                    && !url.getPath().contains("GasLimitxPriceOverflow")
+                    && !url.getPath().contains("NotEnoughGas")
+                    && !url.getPath().contains("NotEnoughGAS")
+                    && !url.getPath().contains("EmptyTransaction"))
+        .flatMap(
+            url -> {
+              try (InputStream in = url.openConnection().getInputStream()) {
+                return readTestCase(in);
+              } catch (IOException e) {
+                throw new UncheckedIOException(e);
+              }
+            })
         .sorted(Comparator.comparing(a -> ((String) a.get()[0])));
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   private static Stream<Arguments> readTestCase(InputStream in) throws IOException {
     Map<String, Map> tests = mapper.readerFor(Map.class).readValue(in);
-    return tests.entrySet().stream().flatMap(entry -> {
-      String name = entry.getKey();
-      Map testData = entry.getValue();
-      String rlp = (String) testData.get("rlp");
-      List<Arguments> arguments = new ArrayList<>();
-      for (String milestone : new String[] {
-          "Byzantium",
-          "Constantinople",
-          "EIP150",
-          "EIP158",
-          "Frontier",
-          "Homestead"}) {
-        Map milestoneData = (Map) testData.get(milestone);
-        if (!milestoneData.isEmpty()) {
-          arguments.add(Arguments.of(name, milestone, rlp, milestoneData.get("hash"), milestoneData.get("sender")));
-        }
-      }
-      if (arguments.isEmpty()) {
-        arguments.add(Arguments.of(name, "(no milestone)", rlp, null, null));
-      }
-      return arguments.stream();
-    });
+    return tests.entrySet().stream()
+        .flatMap(
+            entry -> {
+              String name = entry.getKey();
+              Map testData = entry.getValue();
+              String rlp = (String) testData.get("rlp");
+              List<Arguments> arguments = new ArrayList<>();
+              for (String milestone :
+                  new String[] {
+                    "Byzantium", "Constantinople", "EIP150", "EIP158", "Frontier", "Homestead"
+                  }) {
+                Map milestoneData = (Map) testData.get(milestone);
+                if (!milestoneData.isEmpty()) {
+                  arguments.add(
+                      Arguments.of(
+                          name,
+                          milestone,
+                          rlp,
+                          milestoneData.get("hash"),
+                          milestoneData.get("sender")));
+                }
+              }
+              if (arguments.isEmpty()) {
+                arguments.add(Arguments.of(name, "(no milestone)", rlp, null, null));
+              }
+              return arguments.stream();
+            });
   }
 }

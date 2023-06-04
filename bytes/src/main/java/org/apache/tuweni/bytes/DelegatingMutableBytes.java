@@ -2,19 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.apache.tuweni.bytes;
 
-
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
 import io.vertx.core.buffer.Buffer;
 
-
 /**
  * A class that holds and delegates all operations to its inner bytes field.
  *
- * <p>
- * This class may be used to create more types that represent bytes, but need a different name for business logic.
+ * <p>This class may be used to create more types that represent bytes, but need a different name
+ * for business logic.
  */
 public class DelegatingMutableBytes implements MutableBytes {
 

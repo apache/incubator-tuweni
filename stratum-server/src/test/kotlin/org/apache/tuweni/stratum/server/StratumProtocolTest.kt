@@ -23,7 +23,7 @@ class StratumProtocolTest {
       submitCallback = { true },
       seedSupplier = Bytes32::random,
       coroutineContext = Dispatchers.Default,
-      subscriptionIdCreator = { "1234" }
+      subscriptionIdCreator = { "1234" },
     )
     val conn = StratumConnection(emptyArray(), {}, {}, "foo")
     assertFalse(protocol.canHandle("", conn))
@@ -40,7 +40,7 @@ class StratumProtocolTest {
       seedSupplier = { Bytes32.repeat(1) },
       coroutineContext = Dispatchers.Default,
       subscriptionIdCreator = { "1234" },
-      jobIdSupplier = { "5678" }
+      jobIdSupplier = { "5678" },
     )
     val ref = AtomicReference<String>()
     val conn = StratumConnection(emptyArray(), {}, ref::set, "foo")
@@ -50,21 +50,21 @@ class StratumProtocolTest {
     assertEquals(
       """{"id":1,"jsonrpc":"2.0","result":[["mining.notify","1234","EthereumStratum/1.0.0"],""]}
 """,
-      ref.get()
+      ref.get(),
     )
     // authorize:
     protocol.handle(conn, """{"method": "mining.authorize", "id": 2, "params": []}""")
     assertEquals(
       """{"jsonrpc":"2.0","method":"mining.notify","params":["5678","0x0202020202020202020202020202020202020202020202020202020202020202","0x0101010101010101010101010101010101010101010101010101010101010101","0x0000000000000000000000000000000000000000000000000000000000000000",true],"id":32}
 """,
-      ref.get()
+      ref.get(),
     )
     // set new work
     protocol.setCurrentWorkTask(PoWInput(UInt256.ZERO, Bytes32.ZERO, 0L))
     assertEquals(
       """{"jsonrpc":"2.0","method":"mining.notify","params":["5678","0x0000000000000000000000000000000000000000000000000000000000000000","0x0101010101010101010101010101010101010101010101010101010101010101","0x0000000000000000000000000000000000000000000000000000000000000000",true],"id":32}
 """,
-      ref.get()
+      ref.get(),
     )
   }
 
@@ -76,7 +76,7 @@ class StratumProtocolTest {
       seedSupplier = { Bytes32.repeat(1) },
       coroutineContext = Dispatchers.Default,
       subscriptionIdCreator = { "1234" },
-      jobIdSupplier = { "5678" }
+      jobIdSupplier = { "5678" },
     )
     val ref = AtomicReference<String>()
     val conn = StratumConnection(emptyArray(), {}, ref::set, "foo")
@@ -86,14 +86,14 @@ class StratumProtocolTest {
     assertEquals(
       """{"id":1,"jsonrpc":"2.0","result":[["mining.notify","1234","EthereumStratum/1.0.0"],""]}
 """,
-      ref.get()
+      ref.get(),
     )
     // authorize:
     protocol.handle(conn, """{"method": "mining.authorize", "id": 2, "params": []}""")
     assertEquals(
       """{"jsonrpc":"2.0","method":"mining.notify","params":["5678","0x0202020202020202020202020202020202020202020202020202020202020202","0x0101010101010101010101010101010101010101010101010101010101010101","0x0000000000000000000000000000000000000000000000000000000000000000",true],"id":32}
 """,
-      ref.get()
+      ref.get(),
     )
   }
 
@@ -104,7 +104,7 @@ class StratumProtocolTest {
       submitCallback = { true },
       seedSupplier = Bytes32::random,
       coroutineContext = Dispatchers.Default,
-      subscriptionIdCreator = { "1234" }
+      subscriptionIdCreator = { "1234" },
     )
     val ref = AtomicReference<String>()
     protocol.setCurrentWorkTask(PoWInput(UInt256.ZERO, Bytes32.ZERO, 0L))
@@ -113,7 +113,7 @@ class StratumProtocolTest {
     assertEquals(
       """{"id":1,"jsonrpc":"2.0","result":[["mining.notify","1234","EthereumStratum/1.0.0"],""]}
 """,
-      ref.get()
+      ref.get(),
     )
   }
 
@@ -122,7 +122,7 @@ class StratumProtocolTest {
     val protocol = Stratum1EthProxyProtocol(
       submitCallback = { true },
       seedSupplier = Bytes32::random,
-      Dispatchers.Default
+      Dispatchers.Default,
     )
     val conn = StratumConnection(emptyArray(), {}, {}, "foo")
     assertFalse(protocol.canHandle("", conn))
@@ -136,7 +136,7 @@ class StratumProtocolTest {
     val protocol = Stratum1EthProxyProtocol(
       submitCallback = { true },
       seedSupplier = { Bytes32.ZERO },
-      Dispatchers.Default
+      Dispatchers.Default,
     )
     val ref = AtomicReference<String>()
     val conn = StratumConnection(emptyArray(), {}, ref::set, "foo")
@@ -145,7 +145,7 @@ class StratumProtocolTest {
     assertEquals(
       """{"id":0,"jsonrpc":"2.0","result":["0x0000000000000000000000000000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000000000000000000000000000"]}
 """,
-      ref.get()
+      ref.get(),
     )
   }
 
@@ -154,7 +154,7 @@ class StratumProtocolTest {
     val protocol = Stratum1EthProxyProtocol(
       submitCallback = { true },
       seedSupplier = { Bytes32.ZERO },
-      Dispatchers.Default
+      Dispatchers.Default,
     )
     val ref = AtomicReference<String>()
     val conn = StratumConnection(emptyArray(), {}, ref::set, "foo")
@@ -162,7 +162,7 @@ class StratumProtocolTest {
     assertEquals(
       """{"id":1,"jsonrpc":"2.0","result":true}
 """,
-      ref.get()
+      ref.get(),
     )
     ref.set(null)
     protocol.handle(conn, """{"method": "eth_getWork", "id": 2, "params": []}""")
@@ -174,7 +174,7 @@ class StratumProtocolTest {
     val protocol = Stratum1EthProxyProtocol(
       submitCallback = { true },
       seedSupplier = { Bytes32.ZERO },
-      Dispatchers.Default
+      Dispatchers.Default,
     )
     val ref = AtomicReference<String>()
     protocol.setCurrentWorkTask(PoWInput(UInt256.ZERO, Bytes32.ZERO, 0L))
@@ -183,13 +183,13 @@ class StratumProtocolTest {
     assertEquals(
       """{"id":1,"jsonrpc":"2.0","result":true}
 """,
-      ref.get()
+      ref.get(),
     )
     protocol.handle(conn, """{"method": "eth_getWork", "id": 2, "params": []}""")
     assertEquals(
       """{"id":2,"jsonrpc":"2.0","result":["0x0000000000000000000000000000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000000000000000000000000000"]}
 """,
-      ref.get()
+      ref.get(),
     )
   }
 
@@ -198,7 +198,7 @@ class StratumProtocolTest {
     val protocol = Stratum1EthProxyProtocol(
       submitCallback = { false },
       seedSupplier = { Bytes32.ZERO },
-      Dispatchers.Default
+      Dispatchers.Default,
     )
     val ref = AtomicReference<String>()
     protocol.setCurrentWorkTask(PoWInput(UInt256.ZERO, Bytes32.ZERO, 0L))
@@ -208,13 +208,13 @@ class StratumProtocolTest {
     assertEquals(
       """{"id":1,"jsonrpc":"2.0","result":true}
 """,
-      ref.get()
+      ref.get(),
     )
     protocol.handle(conn, """{"method": "eth_getWork", "id": 2, "params": []}""")
     assertEquals(
       """{"id":2,"jsonrpc":"2.0","result":["0x0000000000000000000000000000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000000000000000000000000000"]}
 """,
-      ref.get()
+      ref.get(),
     )
     protocol.handle(conn, """{"method": "eth_submitWork", "id": 3, "params": []}""")
     assertTrue(closeRef.get())
@@ -225,7 +225,7 @@ class StratumProtocolTest {
     val protocol = Stratum1EthProxyProtocol(
       submitCallback = { false },
       seedSupplier = { Bytes32.ZERO },
-      Dispatchers.Default
+      Dispatchers.Default,
     )
     val ref = AtomicReference<String>()
     protocol.setCurrentWorkTask(PoWInput(UInt256.ZERO, Bytes32.ZERO, 0L))
@@ -235,33 +235,33 @@ class StratumProtocolTest {
     assertEquals(
       """{"id":1,"jsonrpc":"2.0","result":true}
 """,
-      ref.get()
+      ref.get(),
     )
     protocol.handle(conn, """{"method": "eth_getWork", "id": 2, "params": []}""")
     assertEquals(
       """{"id":2,"jsonrpc":"2.0","result":["0x0000000000000000000000000000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000000000000000000000000000"]}
 """,
-      ref.get()
+      ref.get(),
     )
     protocol.handle(
       conn,
       """{"method": "eth_submitWork", "id": 3, "params": ["${Bytes.random(8)}","${Bytes.random(32)}","${Bytes.random(32)}"]}
-"""
+""",
     )
     protocol.handle(
       conn,
       """{"method": "eth_submitWork", "id": 4, "params": ["${Bytes.random(8)}","${Bytes.random(32)}","${Bytes.random(32)}"]}
-      """.trimMargin()
+      """.trimMargin(),
     )
     protocol.handle(
       conn,
       """{"method": "eth_submitWork", "id": 5, "params": ["${Bytes.random(8)}","${Bytes.random(32)}","${Bytes.random(32)}"]}
-      """.trimMargin()
+      """.trimMargin(),
     )
     protocol.handle(
       conn,
       """{"method": "eth_submitWork", "id": 6, "params": ["${Bytes.random(8)}","${Bytes.random(32)}","${Bytes.random(32)}"]}
-      """.trimMargin()
+      """.trimMargin(),
     )
     assertTrue(closeRef.get())
   }
@@ -275,7 +275,7 @@ class StratumProtocolTest {
         counter == 2
       },
       seedSupplier = { Bytes32.ZERO },
-      Dispatchers.Default
+      Dispatchers.Default,
     )
     val ref = AtomicReference<String>()
     protocol.setCurrentWorkTask(PoWInput(UInt256.ZERO, Bytes32.ZERO, 0L))
@@ -285,34 +285,34 @@ class StratumProtocolTest {
     assertEquals(
       """{"id":1,"jsonrpc":"2.0","result":true}
 """,
-      ref.get()
+      ref.get(),
     )
     protocol.handle(conn, """{"method": "eth_getWork", "id": 2, "params": []}""")
     assertEquals(
       """{"id":2,"jsonrpc":"2.0","result":["0x0000000000000000000000000000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000000000000000000000000000"]}
 """,
-      ref.get()
+      ref.get(),
     )
     protocol.setCurrentWorkTask(PoWInput(UInt256.ZERO, Bytes32.ZERO, 8L))
     protocol.handle(
       conn,
       """{"method": "eth_submitWork", "id": 3, "params": ["${Bytes.random(8)}","${Bytes32.ZERO}","${Bytes.random(32)}"]}
-"""
+""",
     )
     protocol.handle(
       conn,
       """{"method": "eth_submitWork", "id": 4, "params": ["${Bytes.random(8)}","${Bytes32.ZERO}","${Bytes.random(32)}"]}
-      """.trimMargin()
+      """.trimMargin(),
     )
     protocol.handle(
       conn,
       """{"method": "eth_submitWork", "id": 5, "params": ["${Bytes.random(8)}","${Bytes32.ZERO}","${Bytes.random(32)}"]}
-      """.trimMargin()
+      """.trimMargin(),
     )
     protocol.handle(
       conn,
       """{"method": "eth_submitWork", "id": 6, "params": ["${Bytes.random(8)}","${Bytes32.ZERO}","${Bytes.random(32)}"]}
-      """.trimMargin()
+      """.trimMargin(),
     )
     assertFalse(closeRef.get())
   }

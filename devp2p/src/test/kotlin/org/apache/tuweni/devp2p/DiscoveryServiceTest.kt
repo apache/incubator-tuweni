@@ -38,7 +38,7 @@ internal class DiscoveryServiceTest {
     val discoveryService = DiscoveryService.open(
       vertx,
       host = "127.0.0.1",
-      keyPair = SECP256K1.KeyPair.random()
+      keyPair = SECP256K1.KeyPair.random(),
     )
     discoveryService.awaitBootstrap()
     assertFalse(discoveryService.isShutdown)
@@ -53,7 +53,7 @@ internal class DiscoveryServiceTest {
       vertx,
       host = "127.0.0.1",
       keyPair = SECP256K1.KeyPair.random(),
-      peerRepository = peerRepository
+      peerRepository = peerRepository,
     )
     discoveryService.awaitBootstrap()
     val address = SocketAddress.inetSocketAddress(discoveryService.localPort, "127.0.0.1")
@@ -68,7 +68,7 @@ internal class DiscoveryServiceTest {
       System.currentTimeMillis(),
       clientEndpoint,
       Endpoint(address),
-      null
+      null,
     )
     client.send(Buffer.buffer(ping.encode().toArrayUnsafe()), address.port(), address.host()).await()
     val datagram = reference.await()
@@ -104,11 +104,11 @@ internal class DiscoveryServiceTest {
       bootstrapURIs = listOf(
         URI(
           "enode://" + bootstrapKeyPair.publicKey().toHexString() + "@127.0.0.1:" + bootstrapClient.localAddress()
-            .port()
-        )
+            .port(),
+        ),
       ),
       peerRepository = peerRepository,
-      routingTable = routingTable
+      routingTable = routingTable,
     )
 
     val datagram = reference.get().await()
@@ -118,7 +118,7 @@ internal class DiscoveryServiceTest {
     assertEquals(discoveryService.nodeId, ping.nodeId)
     assertEquals(
       ping.to,
-      Endpoint("127.0.0.1", bootstrapClient.localAddress().port(), bootstrapClient.localAddress().port())
+      Endpoint("127.0.0.1", bootstrapClient.localAddress().port(), bootstrapClient.localAddress().port()),
     )
     assertEquals(discoveryService.localPort, ping.from.udpPort)
     assertNull(ping.from.tcpPort)
@@ -128,7 +128,7 @@ internal class DiscoveryServiceTest {
       System.currentTimeMillis(),
       ping.from,
       ping.hash,
-      null
+      null,
     )
     reference.set(AsyncResult.incomplete())
     val address = SocketAddress.inetSocketAddress(discoveryService.localPort, "127.0.0.1")
@@ -144,8 +144,8 @@ internal class DiscoveryServiceTest {
       peerRepository.get(
         URI(
           "enode://" + bootstrapKeyPair.publicKey().toHexString() +
-            "@127.0.0.1:" + bootstrapClient.localAddress().port()
-        )
+            "@127.0.0.1:" + bootstrapClient.localAddress().port(),
+        ),
       )
     assertNotNull(bootstrapPeer.lastVerified)
     assertNotNull(bootstrapPeer.endpoint)
@@ -176,11 +176,11 @@ internal class DiscoveryServiceTest {
       bootstrapURIs = listOf(
         URI(
           "enode://" + bootstrapKeyPair.publicKey().toHexString() + "@127.0.0.1:" + bootstrapClient.localAddress()
-            .port()
-        )
+            .port(),
+        ),
       ),
       peerRepository = peerRepository,
-      routingTable = routingTable
+      routingTable = routingTable,
     )
     val datagram = reference.await()
     val buffer = ByteBuffer.allocate(datagram.length())
@@ -189,7 +189,7 @@ internal class DiscoveryServiceTest {
     assertEquals(discoveryService.nodeId, ping.nodeId)
     assertEquals(
       ping.to,
-      Endpoint("127.0.0.1", bootstrapClient.localAddress().port(), bootstrapClient.localAddress().port())
+      Endpoint("127.0.0.1", bootstrapClient.localAddress().port(), bootstrapClient.localAddress().port()),
     )
     assertEquals(discoveryService.localPort, ping.from.udpPort)
     assertNull(ping.from.tcpPort)
@@ -199,7 +199,7 @@ internal class DiscoveryServiceTest {
       System.currentTimeMillis(),
       ping.from,
       ping.hash,
-      null
+      null,
     )
     val address = SocketAddress.inetSocketAddress(discoveryService.localPort, "127.0.0.1")
     bootstrapClient.send(Buffer.buffer(pong.encode().toArrayUnsafe()), address.port(), address.host()).await()
@@ -209,8 +209,8 @@ internal class DiscoveryServiceTest {
       peerRepository.get(
         URI(
           "enode://" + bootstrapKeyPair.publicKey().toHexString() +
-            "@127.0.0.1:" + bootstrapClient.localAddress().port()
-        )
+            "@127.0.0.1:" + bootstrapClient.localAddress().port(),
+        ),
       )
     assertNull(bootstrapPeer.lastVerified)
     assertFalse(routingTable.contains(bootstrapPeer))
@@ -234,12 +234,12 @@ internal class DiscoveryServiceTest {
       bootstrapURIs = listOf(
         URI(
           "enode://" + bootstrapKeyPair.publicKey().bytes()
-            .toHexString() + "@127.0.0.1:" + bootstrapClient.localAddress().port()
-        )
+            .toHexString() + "@127.0.0.1:" + bootstrapClient.localAddress().port(),
+        ),
       ),
       advertiseAddress = "192.168.66.55",
       advertiseUdpPort = 3836,
-      advertiseTcpPort = 8765
+      advertiseTcpPort = 8765,
     )
 
     val datagram = reference.await()
@@ -249,7 +249,7 @@ internal class DiscoveryServiceTest {
     assertEquals(discoveryService.nodeId, ping.nodeId)
     assertEquals(
       Endpoint("127.0.0.1", bootstrapClient.localAddress().port(), bootstrapClient.localAddress().port()),
-      ping.to
+      ping.to,
     )
     assertEquals(Endpoint("192.168.66.55", 3836, 8765), ping.from)
 
@@ -273,9 +273,9 @@ internal class DiscoveryServiceTest {
       bootstrapURIs = listOf(
         URI(
           "enode://" + bootstrapKeyPair.publicKey().bytes()
-            .toHexString() + "@127.0.0.1:" + bootstrapClient.localAddress().port()
-        )
-      )
+            .toHexString() + "@127.0.0.1:" + bootstrapClient.localAddress().port(),
+        ),
+      ),
     )
     val datagram1 = reference.get().await()
     reference.set(AsyncResult.incomplete())
@@ -285,7 +285,7 @@ internal class DiscoveryServiceTest {
     assertEquals(discoveryService.nodeId, ping1.nodeId)
     assertEquals(
       Endpoint("127.0.0.1", bootstrapClient.localAddress().port(), bootstrapClient.localAddress().port()),
-      ping1.to
+      ping1.to,
     )
     val datagram2 = reference.get().await()
     reference.set(AsyncResult.incomplete())
@@ -295,7 +295,7 @@ internal class DiscoveryServiceTest {
     assertEquals(discoveryService.nodeId, ping2.nodeId)
     assertEquals(
       Endpoint("127.0.0.1", bootstrapClient.localAddress().port(), bootstrapClient.localAddress().port()),
-      ping2.to
+      ping2.to,
     )
     val datagram3 = reference.get().await()
     reference.set(AsyncResult.incomplete())
@@ -305,7 +305,7 @@ internal class DiscoveryServiceTest {
     assertEquals(discoveryService.nodeId, ping3.nodeId)
     assertEquals(
       Endpoint("127.0.0.1", bootstrapClient.localAddress().port(), bootstrapClient.localAddress().port()),
-      ping3.to
+      ping3.to,
     )
     discoveryService.shutdown()
     bootstrapClient.close()
@@ -318,7 +318,7 @@ internal class DiscoveryServiceTest {
       vertx,
       host = "127.0.0.1",
       keyPair = SECP256K1.KeyPair.random(),
-      peerRepository = peerRepository
+      peerRepository = peerRepository,
     )
     discoveryService.awaitBootstrap()
     val address = SocketAddress.inetSocketAddress(discoveryService.localPort, "127.0.0.1")
@@ -333,7 +333,7 @@ internal class DiscoveryServiceTest {
       FindNodePacket.create(
         clientKeyPair,
         System.currentTimeMillis(),
-        SECP256K1.KeyPair.random().publicKey()
+        SECP256K1.KeyPair.random().publicKey(),
       )
     client.send(Buffer.buffer(findNodes.encode().toArrayUnsafe()), address.port(), address.host()).await()
 
@@ -351,7 +351,7 @@ internal class DiscoveryServiceTest {
       System.currentTimeMillis(),
       ping.from,
       ping.hash,
-      null
+      null,
     )
 
     reference.set(AsyncResult.incomplete())
@@ -367,8 +367,8 @@ internal class DiscoveryServiceTest {
       peerRepository.get(
         URI(
           "enode://" + clientKeyPair.publicKey().toHexString() +
-            "@127.0.0.1:" + discoveryService.localPort
-        )
+            "@127.0.0.1:" + discoveryService.localPort,
+        ),
       )
     assertNotNull(peer.lastVerified)
     assertNotNull(peer.endpoint)
@@ -390,7 +390,7 @@ internal class DiscoveryServiceTest {
       vertx,
       host = "127.0.0.1",
       keyPair = SECP256K1.KeyPair.random(),
-      bootstrapURIs = boostrapNodes
+      bootstrapURIs = boostrapNodes,
     )
 
     runBlocking {

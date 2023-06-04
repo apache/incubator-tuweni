@@ -53,37 +53,50 @@ class ClientTofuTest {
   private HttpClient client;
 
   @BeforeAll
-  static void startServers(@TempDirectory Path tempDir, @VertxInstance Vertx vertx) throws Exception {
+  static void startServers(@TempDirectory Path tempDir, @VertxInstance Vertx vertx)
+      throws Exception {
     SelfSignedCertificate caSignedCert = SelfSignedCertificate.create("localhost");
     SecurityTestUtils.configureJDKTrustStore(tempDir, caSignedCert);
-    caValidFingerprint = certificateHexFingerprint(Paths.get(caSignedCert.keyCertOptions().getCertPath()));
-    caValidServer = vertx
-        .createHttpServer(new HttpServerOptions().setSsl(true).setPemKeyCertOptions(caSignedCert.keyCertOptions()))
-        .requestHandler(context -> context.response().end("OK"));
+    caValidFingerprint =
+        certificateHexFingerprint(Paths.get(caSignedCert.keyCertOptions().getCertPath()));
+    caValidServer =
+        vertx
+            .createHttpServer(
+                new HttpServerOptions()
+                    .setSsl(true)
+                    .setPemKeyCertOptions(caSignedCert.keyCertOptions()))
+            .requestHandler(context -> context.response().end("OK"));
     startServer(caValidServer);
 
     SelfSignedCertificate fooCert = SelfSignedCertificate.create("foo.com");
     fooFingerprint = certificateHexFingerprint(Paths.get(fooCert.keyCertOptions().getCertPath()));
-    fooServer = vertx
-        .createHttpServer(new HttpServerOptions().setSsl(true).setPemKeyCertOptions(fooCert.keyCertOptions()))
-        .requestHandler(context -> context.response().end("OK"));
+    fooServer =
+        vertx
+            .createHttpServer(
+                new HttpServerOptions().setSsl(true).setPemKeyCertOptions(fooCert.keyCertOptions()))
+            .requestHandler(context -> context.response().end("OK"));
     startServer(fooServer);
 
     SelfSignedCertificate foobarCert = SelfSignedCertificate.create("foobar.com");
-    foobarFingerprint = certificateHexFingerprint(Paths.get(foobarCert.keyCertOptions().getCertPath()));
-    foobarServer = vertx
-        .createHttpServer(new HttpServerOptions().setSsl(true).setPemKeyCertOptions(foobarCert.keyCertOptions()))
-        .requestHandler(context -> context.response().end("OK"));
+    foobarFingerprint =
+        certificateHexFingerprint(Paths.get(foobarCert.keyCertOptions().getCertPath()));
+    foobarServer =
+        vertx
+            .createHttpServer(
+                new HttpServerOptions()
+                    .setSsl(true)
+                    .setPemKeyCertOptions(foobarCert.keyCertOptions()))
+            .requestHandler(context -> context.response().end("OK"));
     startServer(foobarServer);
   }
 
   @BeforeEach
   void setupClient(@TempDirectory Path tempDir, @VertxInstance Vertx vertx) throws Exception {
     knownServersFile = tempDir.resolve("known-hosts.txt");
-    Files
-        .write(
-            knownServersFile,
-            Arrays.asList("#First line", "localhost:" + foobarServer.actualPort() + " " + DUMMY_FINGERPRINT));
+    Files.write(
+        knownServersFile,
+        Arrays.asList(
+            "#First line", "localhost:" + foobarServer.actualPort() + " " + DUMMY_FINGERPRINT));
 
     HttpClientOptions options = new HttpClientOptions();
     options
@@ -114,15 +127,18 @@ class ClientTofuTest {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
     client
         .request(HttpMethod.POST, caValidServer.actualPort(), "localhost", "/sample")
-        .onSuccess((req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
+        .onSuccess(
+            (req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
         .onFailure(statusCode::completeExceptionally);
     assertEquals((Integer) 200, statusCode.join());
 
     List<String> knownServers = Files.readAllLines(knownServersFile);
     assertEquals(3, knownServers.size(), "Host was verified via TOFU and not CA");
     assertEquals("#First line", knownServers.get(0));
-    assertEquals("localhost:" + foobarServer.actualPort() + " " + DUMMY_FINGERPRINT, knownServers.get(1));
-    assertEquals("localhost:" + caValidServer.actualPort() + " " + caValidFingerprint, knownServers.get(2));
+    assertEquals(
+        "localhost:" + foobarServer.actualPort() + " " + DUMMY_FINGERPRINT, knownServers.get(1));
+    assertEquals(
+        "localhost:" + caValidServer.actualPort() + " " + caValidFingerprint, knownServers.get(2));
   }
 
   @Test
@@ -130,14 +146,16 @@ class ClientTofuTest {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
     client
         .request(HttpMethod.POST, fooServer.actualPort(), "localhost", "/sample")
-        .onSuccess((req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
+        .onSuccess(
+            (req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
         .onFailure(statusCode::completeExceptionally);
     assertEquals((Integer) 200, statusCode.join());
 
     List<String> knownServers = Files.readAllLines(knownServersFile);
     assertEquals(3, knownServers.size());
     assertEquals("#First line", knownServers.get(0));
-    assertEquals("localhost:" + foobarServer.actualPort() + " " + DUMMY_FINGERPRINT, knownServers.get(1));
+    assertEquals(
+        "localhost:" + foobarServer.actualPort() + " " + DUMMY_FINGERPRINT, knownServers.get(1));
     assertEquals("localhost:" + fooServer.actualPort() + " " + fooFingerprint, knownServers.get(2));
   }
 
@@ -146,7 +164,8 @@ class ClientTofuTest {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
     client
         .request(HttpMethod.POST, foobarServer.actualPort(), "localhost", "/sample")
-        .onSuccess((req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
+        .onSuccess(
+            (req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
         .onFailure(statusCode::completeExceptionally);
     Throwable e = assertThrows(CompletionException.class, statusCode::join);
     e = e.getCause();

@@ -26,7 +26,7 @@ open class ClientUIApplication(@Autowired val config: Config) {
       client: EthereumClient,
       port: Int = 0,
       networkInterface: String = "127.0.0.1",
-      contextPath: String = ""
+      contextPath: String = "",
     ): ConfigurableApplicationContext {
       val parentContext = GenericApplicationContext()
       parentContext.beanFactory.registerSingleton("ethereumClient", client)

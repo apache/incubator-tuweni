@@ -7,15 +7,14 @@ import org.apache.tuweni.units.bigints.UInt256;
 
 import java.math.BigInteger;
 
-/**
- * A unit measure of Gas as used by the Ethereum VM.
- */
+/** A unit measure of Gas as used by the Ethereum VM. */
 public final class Gas extends BaseUInt256Value<Gas> {
 
-  private final static int MAX_CONSTANT = 64;
-  private final static BigInteger BI_MAX_CONSTANT = BigInteger.valueOf(MAX_CONSTANT);
-  private final static UInt256 UINT256_MAX_CONSTANT = UInt256.valueOf(MAX_CONSTANT);
+  private static final int MAX_CONSTANT = 64;
+  private static final BigInteger BI_MAX_CONSTANT = BigInteger.valueOf(MAX_CONSTANT);
+  private static final UInt256 UINT256_MAX_CONSTANT = UInt256.valueOf(MAX_CONSTANT);
   private static final Gas[] CONSTANTS = new Gas[MAX_CONSTANT + 1];
+
   static {
     CONSTANTS[0] = new Gas(UInt256.ZERO);
     for (int i = 1; i <= MAX_CONSTANT; ++i) {
@@ -23,8 +22,8 @@ public final class Gas extends BaseUInt256Value<Gas> {
     }
   }
 
-  public final static Gas ZERO = Gas.valueOf(0);
-  public final static Gas MAX = Gas.valueOf(Long.MAX_VALUE);
+  public static final Gas ZERO = Gas.valueOf(0);
+  public static final Gas MAX = Gas.valueOf(Long.MAX_VALUE);
 
   private Gas(UInt256 bytes) {
     super(bytes, Gas::new);
@@ -84,7 +83,7 @@ public final class Gas extends BaseUInt256Value<Gas> {
 
   /**
    * Provides the minimum value between 2 gas objects.
-   * 
+   *
    * @param one a gas object
    * @param two another gas object
    * @return the minimum between the 2 gas objects
@@ -105,7 +104,7 @@ public final class Gas extends BaseUInt256Value<Gas> {
 
   /**
    * Returns true if the gas value is past the maximum allowed gas, 2^63 -1
-   * 
+   *
    * @return true if gas is past allowed maximum
    */
   public boolean tooHigh() {

@@ -41,7 +41,8 @@ class MemoryWireConnectionsRepositoryTest {
   void testListeners() {
     MemoryWireConnectionsRepository repo = new MemoryWireConnectionsRepository();
     WireConnection conn = mock(WireConnection.class);
-    ArgumentCaptor<WireConnection.EventListener> listener = ArgumentCaptor.forClass(WireConnection.EventListener.class);
+    ArgumentCaptor<WireConnection.EventListener> listener =
+        ArgumentCaptor.forClass(WireConnection.EventListener.class);
     repo.add(conn);
     verify(conn).registerListener(listener.capture());
     AtomicBoolean called = new AtomicBoolean(false);
@@ -53,5 +54,4 @@ class MemoryWireConnectionsRepositoryTest {
     listener.getValue().onEvent(WireConnection.Event.DISCONNECTED);
     assertTrue(calledDisconnect.get());
   }
-
 }

@@ -45,12 +45,12 @@ class ByteBufferWriterTest {
         Bytes.wrapByteBuffer(buffer));
 
     buffer.clear();
-    SSZ
-        .encodeTo(
-            buffer,
-            writer -> writer
-                .writeUInt256(
-                    UInt256.fromHexString("0x0400000000000000000000000000000000000000000000000000f100000000ab")));
+    SSZ.encodeTo(
+        buffer,
+        writer ->
+            writer.writeUInt256(
+                UInt256.fromHexString(
+                    "0x0400000000000000000000000000000000000000000000000000f100000000ab")));
     buffer.flip();
     assertEquals(
         fromHexString("AB00000000F10000000000000000000000000000000000000000000000000004"),
@@ -97,7 +97,9 @@ class ByteBufferWriterTest {
   @Test
   void shouldWriteShortLists() {
     String[] strings =
-        new String[] {"asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer"};
+        new String[] {
+          "asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer"
+        };
 
     ByteBuffer buffer = ByteBuffer.allocate(256);
     SSZ.encodeTo(buffer, w -> w.writeStringList(strings));

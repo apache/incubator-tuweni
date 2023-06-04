@@ -21,12 +21,11 @@ import java.util.stream.Stream;
 import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 
-/**
- * A completion that will be complete at a future time.
- */
+/** A completion that will be complete at a future time. */
 public interface AsyncCompletion {
 
-  AsyncCompletion COMPLETED = new DefaultCompletableAsyncCompletion(CompletableFuture.completedFuture(null));
+  AsyncCompletion COMPLETED =
+      new DefaultCompletableAsyncCompletion(CompletableFuture.completedFuture(null));
 
   /**
    * Return an already completed completion.
@@ -60,8 +59,9 @@ public interface AsyncCompletion {
   }
 
   /**
-   * Returns an {@link AsyncCompletion} that completes when all of the given completions complete. If any completions
-   * complete exceptionally, then the resulting completion also completes exceptionally.
+   * Returns an {@link AsyncCompletion} that completes when all of the given completions complete.
+   * If any completions complete exceptionally, then the resulting completion also completes
+   * exceptionally.
    *
    * @param cs The completions to combine.
    * @return A completion.
@@ -71,8 +71,9 @@ public interface AsyncCompletion {
   }
 
   /**
-   * Returns an {@link AsyncCompletion} that completes when all of the given completions complete. If any completions
-   * complete exceptionally, then the resulting completion also completes exceptionally.
+   * Returns an {@link AsyncCompletion} that completes when all of the given completions complete.
+   * If any completions complete exceptionally, then the resulting completion also completes
+   * exceptionally.
    *
    * @param cs The completions to combine.
    * @return A completion.
@@ -82,31 +83,38 @@ public interface AsyncCompletion {
   }
 
   /**
-   * Returns an {@link AsyncCompletion} that completes when all of the given completions complete. If any completions
-   * complete exceptionally, then the resulting completion also completes exceptionally.
+   * Returns an {@link AsyncCompletion} that completes when all of the given completions complete.
+   * If any completions complete exceptionally, then the resulting completion also completes
+   * exceptionally.
    *
    * @param cs The completions to combine.
    * @return A completion.
    */
   static AsyncCompletion allOf(Stream<AsyncCompletion> cs) {
     @SuppressWarnings("rawtypes")
-    java.util.concurrent.CompletableFuture[] completableFutures = cs.map(completion -> {
-      java.util.concurrent.CompletableFuture<Void> javaFuture = new java.util.concurrent.CompletableFuture<>();
-      completion.whenComplete(ex -> {
-        if (ex == null) {
-          javaFuture.complete(null);
-        } else {
-          javaFuture.completeExceptionally(ex);
-        }
-      });
-      return javaFuture;
-    }).toArray(java.util.concurrent.CompletableFuture[]::new);
-    return new DefaultCompletableAsyncCompletion(java.util.concurrent.CompletableFuture.allOf(completableFutures));
+    java.util.concurrent.CompletableFuture[] completableFutures =
+        cs.map(
+                completion -> {
+                  java.util.concurrent.CompletableFuture<Void> javaFuture =
+                      new java.util.concurrent.CompletableFuture<>();
+                  completion.whenComplete(
+                      ex -> {
+                        if (ex == null) {
+                          javaFuture.complete(null);
+                        } else {
+                          javaFuture.completeExceptionally(ex);
+                        }
+                      });
+                  return javaFuture;
+                })
+            .toArray(java.util.concurrent.CompletableFuture[]::new);
+    return new DefaultCompletableAsyncCompletion(
+        java.util.concurrent.CompletableFuture.allOf(completableFutures));
   }
 
   /**
-   * Returns a completion that, after the given function executes on a vertx context and returns a completion, completes
-   * when the completion from the function does.
+   * Returns a completion that, after the given function executes on a vertx context and returns a
+   * completion, completes when the completion from the function does.
    *
    * @param vertx The vertx context.
    * @param fn The function returning a completion.
@@ -115,31 +123,33 @@ public interface AsyncCompletion {
   static AsyncCompletion runOnContext(Vertx vertx, Supplier<? extends AsyncCompletion> fn) {
     requireNonNull(fn);
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-    vertx.runOnContext(ev -> {
-      try {
-        fn.get().whenComplete(ex2 -> {
-          if (ex2 == null) {
-            try {
-              completion.complete();
-            } catch (Throwable ex3) {
-              completion.completeExceptionally(ex3);
-            }
-          } else {
-            completion.completeExceptionally(ex2);
+    vertx.runOnContext(
+        ev -> {
+          try {
+            fn.get()
+                .whenComplete(
+                    ex2 -> {
+                      if (ex2 == null) {
+                        try {
+                          completion.complete();
+                        } catch (Throwable ex3) {
+                          completion.completeExceptionally(ex3);
+                        }
+                      } else {
+                        completion.completeExceptionally(ex2);
+                      }
+                    });
+          } catch (Throwable ex1) {
+            completion.completeExceptionally(ex1);
           }
         });
-      } catch (Throwable ex1) {
-        completion.completeExceptionally(ex1);
-      }
-    });
     return completion;
   }
 
   /**
    * Returns a completion that completes after the given action executes on a vertx context.
    *
-   * <p>
-   * Note that the given function is run directly on the context and should not block.
+   * <p>Note that the given function is run directly on the context and should not block.
    *
    * @param vertx The vertx context.
    * @param action The action to execute.
@@ -148,14 +158,15 @@ public interface AsyncCompletion {
   static AsyncCompletion runOnContext(Vertx vertx, Runnable action) {
     requireNonNull(action);
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-    vertx.runOnContext(ev -> {
-      try {
-        action.run();
-        completion.complete();
-      } catch (Throwable ex) {
-        completion.completeExceptionally(ex);
-      }
-    });
+    vertx.runOnContext(
+        ev -> {
+          try {
+            action.run();
+            completion.complete();
+          } catch (Throwable ex) {
+            completion.completeExceptionally(ex);
+          }
+        });
     return completion;
   }
 
@@ -169,19 +180,22 @@ public interface AsyncCompletion {
   static AsyncCompletion executeBlocking(Runnable action) {
     requireNonNull(action);
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-    ForkJoinPool.commonPool().execute(() -> {
-      try {
-        action.run();
-        completion.complete();
-      } catch (Throwable ex) {
-        completion.completeExceptionally(ex);
-      }
-    });
+    ForkJoinPool.commonPool()
+        .execute(
+            () -> {
+              try {
+                action.run();
+                completion.complete();
+              } catch (Throwable ex) {
+                completion.completeExceptionally(ex);
+              }
+            });
     return completion;
   }
 
   /**
-   * Returns a completion that completes after the given blocking action executes asynchronously on an {@link Executor}.
+   * Returns a completion that completes after the given blocking action executes asynchronously on
+   * an {@link Executor}.
    *
    * @param executor The executor.
    * @param action The blocking action to execute.
@@ -190,19 +204,21 @@ public interface AsyncCompletion {
   static AsyncCompletion executeBlocking(Executor executor, Runnable action) {
     requireNonNull(action);
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-    executor.execute(() -> {
-      try {
-        action.run();
-        completion.complete();
-      } catch (Throwable ex) {
-        completion.completeExceptionally(ex);
-      }
-    });
+    executor.execute(
+        () -> {
+          try {
+            action.run();
+            completion.complete();
+          } catch (Throwable ex) {
+            completion.completeExceptionally(ex);
+          }
+        });
     return completion;
   }
 
   /**
-   * Returns a completion that completes after the given blocking action executes asynchronously on a vertx context.
+   * Returns a completion that completes after the given blocking action executes asynchronously on
+   * a vertx context.
    *
    * @param vertx The vertx context.
    * @param action The blocking action to execute.
@@ -211,21 +227,25 @@ public interface AsyncCompletion {
   static AsyncCompletion executeBlocking(Vertx vertx, Runnable action) {
     requireNonNull(action);
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-    vertx.executeBlocking(future -> {
-      action.run();
-      future.complete();
-    }, false, res -> {
-      if (res.succeeded()) {
-        completion.complete();
-      } else {
-        completion.completeExceptionally(res.cause());
-      }
-    });
+    vertx.executeBlocking(
+        future -> {
+          action.run();
+          future.complete();
+        },
+        false,
+        res -> {
+          if (res.succeeded()) {
+            completion.complete();
+          } else {
+            completion.completeExceptionally(res.cause());
+          }
+        });
     return completion;
   }
 
   /**
-   * Returns a completion that completes after the given blocking action executes asynchronously on a vertx executor.
+   * Returns a completion that completes after the given blocking action executes asynchronously on
+   * a vertx executor.
    *
    * @param executor A vertx executor.
    * @param action The blocking action to execute.
@@ -234,16 +254,19 @@ public interface AsyncCompletion {
   static AsyncCompletion executeBlocking(WorkerExecutor executor, Runnable action) {
     requireNonNull(action);
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-    executor.executeBlocking(future -> {
-      action.run();
-      future.complete();
-    }, false, res -> {
-      if (res.succeeded()) {
-        completion.complete();
-      } else {
-        completion.completeExceptionally(res.cause());
-      }
-    });
+    executor.executeBlocking(
+        future -> {
+          action.run();
+          future.complete();
+        },
+        false,
+        res -> {
+          if (res.succeeded()) {
+            completion.complete();
+          } else {
+            completion.completeExceptionally(res.cause());
+          }
+        });
     return completion;
   }
 
@@ -264,14 +287,13 @@ public interface AsyncCompletion {
   /**
    * Attempt to cancel execution of this task.
    *
-   * <p>
-   * This attempt will fail if the task has already completed, has already been cancelled, or could not be cancelled for
-   * some other reason. If successful, and this task has not started when {@code cancel} is called, this task should
-   * never run.
+   * <p>This attempt will fail if the task has already completed, has already been cancelled, or
+   * could not be cancelled for some other reason. If successful, and this task has not started when
+   * {@code cancel} is called, this task should never run.
    *
-   * <p>
-   * After this method returns, subsequent calls to {@link #isDone()} will always return {@code true}. Subsequent calls
-   * to {@link #isCancelled()} will always return {@code true} if this method returned {@code true}.
+   * <p>After this method returns, subsequent calls to {@link #isDone()} will always return {@code
+   * true}. Subsequent calls to {@link #isCancelled()} will always return {@code true} if this
+   * method returned {@code true}.
    *
    * @return {@code true} if this completion transitioned to a cancelled state.
    */
@@ -301,11 +323,12 @@ public interface AsyncCompletion {
    * @throws TimeoutException If the wait timed out.
    * @throws InterruptedException If the current thread was interrupted while waiting.
    */
-  void join(long timeout, TimeUnit unit) throws CompletionException, TimeoutException, InterruptedException;
+  void join(long timeout, TimeUnit unit)
+      throws CompletionException, TimeoutException, InterruptedException;
 
   /**
-   * Returns a new completion that, when this completion completes normally, completes with the same value or exception
-   * as the result returned after executing the given function.
+   * Returns a new completion that, when this completion completes normally, completes with the same
+   * value or exception as the result returned after executing the given function.
    *
    * @param fn The function returning a new result.
    * @param <U> The type of the returned result's value.
@@ -314,8 +337,9 @@ public interface AsyncCompletion {
   <U> AsyncResult<U> then(Supplier<? extends AsyncResult<U>> fn);
 
   /**
-   * Returns a new result that, when this completion completes normally, completes with the same value or exception as
-   * the completion returned after executing the given function on the vertx context.
+   * Returns a new result that, when this completion completes normally, completes with the same
+   * value or exception as the completion returned after executing the given function on the vertx
+   * context.
    *
    * @param vertx The vertx context.
    * @param fn The function returning a new result.
@@ -325,7 +349,8 @@ public interface AsyncCompletion {
   <U> AsyncResult<U> thenSchedule(Vertx vertx, Supplier<? extends AsyncResult<U>> fn);
 
   /**
-   * Returns a new completion that, when this completion completes normally, completes after given action is executed.
+   * Returns a new completion that, when this completion completes normally, completes after given
+   * action is executed.
    *
    * @param runnable Te action to perform before completing the returned {@link AsyncCompletion}.
    * @return A completion.
@@ -333,38 +358,41 @@ public interface AsyncCompletion {
   AsyncCompletion thenRun(Runnable runnable);
 
   /**
-   * Returns a new completion that, when this completion completes normally, completes after the given action is
-   * executed on the vertx context.
+   * Returns a new completion that, when this completion completes normally, completes after the
+   * given action is executed on the vertx context.
    *
    * @param vertx The vertx context.
-   * @param runnable The action to execute on the vertx context before completing the returned completion.
+   * @param runnable The action to execute on the vertx context before completing the returned
+   *     completion.
    * @return A completion.
    */
   AsyncCompletion thenScheduleRun(Vertx vertx, Runnable runnable);
 
   /**
-   * Returns a new completion that, when this completion completes normally, completes after the given blocking action
-   * is executed on the vertx context.
+   * Returns a new completion that, when this completion completes normally, completes after the
+   * given blocking action is executed on the vertx context.
    *
    * @param vertx The vertx context.
-   * @param runnable The action to execute on the vertx context before completing the returned completion.
+   * @param runnable The action to execute on the vertx context before completing the returned
+   *     completion.
    * @return A completion.
    */
   AsyncCompletion thenScheduleBlockingRun(Vertx vertx, Runnable runnable);
 
   /**
-   * Returns a new completion that, when this completion completes normally, completes after the given blocking action
-   * is executed on the vertx executor.
+   * Returns a new completion that, when this completion completes normally, completes after the
+   * given blocking action is executed on the vertx executor.
    *
    * @param executor The vertx executor.
-   * @param runnable The action to execute on the vertx context before completing the returned completion.
+   * @param runnable The action to execute on the vertx context before completing the returned
+   *     completion.
    * @return A completion.
    */
   AsyncCompletion thenScheduleBlockingRun(WorkerExecutor executor, Runnable runnable);
 
   /**
-   * When this result completes normally, invokes the given function with the resulting value and obtain a new
-   * {@link AsyncCompletion}.
+   * When this result completes normally, invokes the given function with the resulting value and
+   * obtain a new {@link AsyncCompletion}.
    *
    * @param fn The function returning a new completion.
    * @return A completion.
@@ -372,8 +400,8 @@ public interface AsyncCompletion {
   AsyncCompletion thenCompose(Supplier<? extends AsyncCompletion> fn);
 
   /**
-   * Returns a completion that, when this result completes normally, completes with the value obtained after executing
-   * the supplied function.
+   * Returns a completion that, when this result completes normally, completes with the value
+   * obtained after executing the supplied function.
    *
    * @param supplier The function to use to compute the value of the returned result.
    * @param <U> The function's return type.
@@ -382,8 +410,8 @@ public interface AsyncCompletion {
   <U> AsyncResult<U> thenSupply(Supplier<? extends U> supplier);
 
   /**
-   * Returns a completion that, when this result completes normally, completes with the value obtained after executing
-   * the supplied function on the vertx context.
+   * Returns a completion that, when this result completes normally, completes with the value
+   * obtained after executing the supplied function on the vertx context.
    *
    * @param vertx The vertx context.
    * @param supplier The function to use to compute the value of the returned result.
@@ -393,8 +421,9 @@ public interface AsyncCompletion {
   <U> AsyncResult<U> thenSupply(Vertx vertx, Supplier<? extends U> supplier);
 
   /**
-   * Returns a completion that, when this completion and the supplied result both complete normally, completes after
-   * executing the supplied function with the value from the supplied result as an argument.
+   * Returns a completion that, when this completion and the supplied result both complete normally,
+   * completes after executing the supplied function with the value from the supplied result as an
+   * argument.
    *
    * @param other The other result.
    * @param consumer The function to execute.
@@ -404,8 +433,9 @@ public interface AsyncCompletion {
   <U> AsyncCompletion thenConsume(AsyncResult<? extends U> other, Consumer<? super U> consumer);
 
   /**
-   * Returns a result that, when this completion and the other result both complete normally, completes with the value
-   * obtained from executing the supplied function with the value from the other result as an argument.
+   * Returns a result that, when this completion and the other result both complete normally,
+   * completes with the value obtained from executing the supplied function with the value from the
+   * other result as an argument.
    *
    * @param other The other result.
    * @param fn The function to execute.
@@ -413,7 +443,8 @@ public interface AsyncCompletion {
    * @param <V> The type of the value returned by the function.
    * @return A new result.
    */
-  <U, V> AsyncResult<V> thenApply(AsyncResult<? extends U> other, Function<? super U, ? extends V> fn);
+  <U, V> AsyncResult<V> thenApply(
+      AsyncResult<? extends U> other, Function<? super U, ? extends V> fn);
 
   /**
    * Returns a completion that completes when both this completion and the other complete normally.
@@ -424,9 +455,9 @@ public interface AsyncCompletion {
   AsyncCompletion thenCombine(AsyncCompletion other);
 
   /**
-   * Returns a new completion that, when this result completes exceptionally, completes after executing the supplied
-   * function. Otherwise, if this result completes normally, then the returned result also completes normally with the
-   * same value.
+   * Returns a new completion that, when this result completes exceptionally, completes after
+   * executing the supplied function. Otherwise, if this result completes normally, then the
+   * returned result also completes normally with the same value.
    *
    * @param consumer The function to execute.
    * @return A new result.
@@ -434,10 +465,11 @@ public interface AsyncCompletion {
   AsyncCompletion exceptionally(Consumer<? super Throwable> consumer);
 
   /**
-   * Returns a new completion that completes in the same manner as this completion, after executing the given function
-   * with this completion's exception (if any).
-   * <p>
-   * The exception supplied to the function will be {@code null} if this completion completes successfully.
+   * Returns a new completion that completes in the same manner as this completion, after executing
+   * the given function with this completion's exception (if any).
+   *
+   * <p>The exception supplied to the function will be {@code null} if this completion completes
+   * successfully.
    *
    * @param consumer The action to execute.
    * @return A new result.
@@ -445,10 +477,12 @@ public interface AsyncCompletion {
   AsyncCompletion whenComplete(Consumer<? super Throwable> consumer);
 
   /**
-   * Returns a new result that, when this result completes either normally or exceptionally, completes with the value
-   * obtained from executing the supplied function with this result's exception (if any) as an argument.
-   * <p>
-   * The exception supplied to the function will be {@code null} if this completion completes successfully.
+   * Returns a new result that, when this result completes either normally or exceptionally,
+   * completes with the value obtained from executing the supplied function with this result's
+   * exception (if any) as an argument.
+   *
+   * <p>The exception supplied to the function will be {@code null} if this completion completes
+   * successfully.
    *
    * @param fn The function to execute.
    * @param <U> The type of the value returned from the function.
@@ -457,10 +491,11 @@ public interface AsyncCompletion {
   <U> AsyncResult<U> handle(Function<? super Throwable, ? extends U> fn);
 
   /**
-   * Returns a new completion that completes successfully, after executing the given function with this completion's
-   * exception (if any).
-   * <p>
-   * The exception supplied to the function will be {@code null} if this completion completes successfully.
+   * Returns a new completion that completes successfully, after executing the given function with
+   * this completion's exception (if any).
+   *
+   * <p>The exception supplied to the function will be {@code null} if this completion completes
+   * successfully.
    *
    * @param consumer The action to execute.
    * @return A new result.
@@ -470,8 +505,8 @@ public interface AsyncCompletion {
   /**
    * Returns the underlying future associated with this instance.
    *
-   * Note taking action directly on this future will impact this object.
-   * 
+   * <p>Note taking action directly on this future will impact this object.
+   *
    * @return the underlying future
    */
   Future<Void> toFuture();

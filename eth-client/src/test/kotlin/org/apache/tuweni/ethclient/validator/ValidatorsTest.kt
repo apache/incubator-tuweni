@@ -38,7 +38,7 @@ class TransactionsHashValidatorTest {
       Address.fromBytes(Bytes.random(20)),
       Wei.valueOf(2),
       Bytes.random(12),
-      SECP256K1.KeyPair.random()
+      SECP256K1.KeyPair.random(),
     )
 
     val block = Block(
@@ -57,9 +57,9 @@ class TransactionsHashValidatorTest {
         Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
         Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
         Hash.fromBytes(Bytes32.random()),
-        UInt64.ZERO
+        UInt64.ZERO,
       ),
-      BlockBody(listOf(tx), listOf())
+      BlockBody(listOf(tx), listOf()),
     )
 
     assertFalse(TransactionsHashValidator(from = null, to = null).validate(block))
@@ -74,7 +74,7 @@ class TransactionsHashValidatorTest {
       Address.fromBytes(Bytes.random(20)),
       Wei.valueOf(2),
       Bytes.random(12),
-      SECP256K1.KeyPair.random()
+      SECP256K1.KeyPair.random(),
     )
 
     val transactionsTrie = MerklePatriciaTrie.storingBytes()
@@ -98,9 +98,9 @@ class TransactionsHashValidatorTest {
         Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
         Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
         Hash.fromBytes(Bytes32.random()),
-        UInt64.ZERO
+        UInt64.ZERO,
       ),
-      BlockBody(listOf(tx), listOf())
+      BlockBody(listOf(tx), listOf()),
     )
 
     assertTrue(TransactionsHashValidator().validate(block))
@@ -120,7 +120,7 @@ class ChainIdValidatorTest {
       Wei.valueOf(2),
       Bytes.random(12),
       SECP256K1.KeyPair.random(),
-      34
+      34,
     )
 
     val goodTx = Transaction(
@@ -131,7 +131,7 @@ class ChainIdValidatorTest {
       Wei.valueOf(2),
       Bytes.random(12),
       SECP256K1.KeyPair.random(),
-      35
+      35,
     )
 
     val block = Block(
@@ -150,9 +150,9 @@ class ChainIdValidatorTest {
         Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
         Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
         Hash.fromBytes(Bytes32.random()),
-        UInt64.ZERO
+        UInt64.ZERO,
       ),
-      BlockBody(listOf(goodTx, tx), listOf())
+      BlockBody(listOf(goodTx, tx), listOf()),
     )
 
     assertFalse(ChainIdValidator(chainId = 35).validate(block))
@@ -168,7 +168,7 @@ class ChainIdValidatorTest {
       Wei.valueOf(2),
       Bytes.random(12),
       SECP256K1.KeyPair.random(),
-      34
+      34,
     )
 
     val block = Block(
@@ -187,9 +187,9 @@ class ChainIdValidatorTest {
         Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
         Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
         Hash.fromBytes(Bytes32.random()),
-        UInt64.ZERO
+        UInt64.ZERO,
       ),
-      BlockBody(listOf(tx, tx, tx), listOf())
+      BlockBody(listOf(tx, tx, tx), listOf()),
     )
 
     assertTrue(ChainIdValidator(chainId = 34).validate(block))

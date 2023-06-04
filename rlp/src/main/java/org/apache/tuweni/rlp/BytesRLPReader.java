@@ -47,11 +47,15 @@ final class BytesRLPReader implements RLPReader {
       int length = prefix - 0x80;
       if (remaining < length) {
         throw new InvalidRLPEncodingException(
-            "Insufficient bytes in RLP encoding: expected " + length + " but have only " + remaining);
+            "Insufficient bytes in RLP encoding: expected "
+                + length
+                + " but have only "
+                + remaining);
       }
       Bytes bytes = content.slice(index + 1, length);
       if (!lenient && length == 1 && (bytes.get(0) & 0xFF) <= 0x7f) {
-        throw new InvalidRLPEncodingException("Value should have been encoded as a single byte " + bytes.toHexString());
+        throw new InvalidRLPEncodingException(
+            "Value should have been encoded as a single byte " + bytes.toHexString());
       }
       index += 1 + length;
       return bytes;
@@ -60,7 +64,10 @@ final class BytesRLPReader implements RLPReader {
       int lengthOfLength = prefix - 0xb7;
       if (remaining < lengthOfLength) {
         throw new InvalidRLPEncodingException(
-            "Insufficient bytes in RLP encoding: expected " + lengthOfLength + " but have only " + remaining);
+            "Insufficient bytes in RLP encoding: expected "
+                + lengthOfLength
+                + " but have only "
+                + remaining);
       }
 
       remaining -= lengthOfLength;
@@ -68,7 +75,10 @@ final class BytesRLPReader implements RLPReader {
 
       if (remaining < length) {
         throw new InvalidRLPEncodingException(
-            "Insufficient bytes in RLP encoding: expected " + length + " but have only " + remaining);
+            "Insufficient bytes in RLP encoding: expected "
+                + length
+                + " but have only "
+                + remaining);
       }
 
       index += 1 + lengthOfLength;
@@ -121,11 +131,15 @@ final class BytesRLPReader implements RLPReader {
       int length = prefix - 0x80;
       if (remaining < length) {
         throw new InvalidRLPEncodingException(
-            "Insufficient bytes in RLP encoding: expected " + length + " but have only " + remaining);
+            "Insufficient bytes in RLP encoding: expected "
+                + length
+                + " but have only "
+                + remaining);
       }
       if (!lenient && length == 1 && (content.get(index + 1) & 0xFF) <= 0x7f) {
         throw new InvalidRLPEncodingException(
-            "Value should have been encoded as a single byte " + content.slice(index + 1, 1).toHexString());
+            "Value should have been encoded as a single byte "
+                + content.slice(index + 1, 1).toHexString());
       }
       index += 1 + length;
       return;
@@ -134,7 +148,10 @@ final class BytesRLPReader implements RLPReader {
       int lengthOfLength = prefix - 0xb7;
       if (remaining < lengthOfLength) {
         throw new InvalidRLPEncodingException(
-            "Insufficient bytes in RLP encoding: expected " + lengthOfLength + " but have only " + remaining);
+            "Insufficient bytes in RLP encoding: expected "
+                + lengthOfLength
+                + " but have only "
+                + remaining);
       }
 
       remaining -= lengthOfLength;
@@ -142,7 +159,10 @@ final class BytesRLPReader implements RLPReader {
 
       if (remaining < length) {
         throw new InvalidRLPEncodingException(
-            "Insufficient bytes in RLP encoding: expected " + length + " but have only " + remaining);
+            "Insufficient bytes in RLP encoding: expected "
+                + length
+                + " but have only "
+                + remaining);
       }
 
       index += 1 + lengthOfLength + length;
@@ -152,7 +172,10 @@ final class BytesRLPReader implements RLPReader {
       int length = prefix - 0xc0;
       if (remaining < length) {
         throw new InvalidRLPEncodingException(
-            "Insufficient bytes in RLP encoding: expected " + length + " but have only " + remaining);
+            "Insufficient bytes in RLP encoding: expected "
+                + length
+                + " but have only "
+                + remaining);
       }
       index += 1 + length;
       return;
@@ -161,7 +184,10 @@ final class BytesRLPReader implements RLPReader {
     int lengthOfLength = prefix - 0xf7;
     if (remaining < lengthOfLength) {
       throw new InvalidRLPEncodingException(
-          "Insufficient bytes in RLP encoding: expected " + lengthOfLength + " but have only " + remaining);
+          "Insufficient bytes in RLP encoding: expected "
+              + lengthOfLength
+              + " but have only "
+              + remaining);
     }
 
     remaining -= lengthOfLength;
@@ -169,7 +195,10 @@ final class BytesRLPReader implements RLPReader {
 
     if (remaining < length) {
       throw new InvalidRLPEncodingException(
-          "Insufficient bytes in RLP encoding: expected " + lengthOfLength + " but have only " + remaining);
+          "Insufficient bytes in RLP encoding: expected "
+              + lengthOfLength
+              + " but have only "
+              + remaining);
     }
 
     index += 1 + lengthOfLength + length;
@@ -215,7 +244,10 @@ final class BytesRLPReader implements RLPReader {
       int length = prefix - 0xc0;
       if (remaining < length) {
         throw new InvalidRLPEncodingException(
-            "Insufficient bytes in RLP encoding: expected " + length + " but have only " + remaining);
+            "Insufficient bytes in RLP encoding: expected "
+                + length
+                + " but have only "
+                + remaining);
       }
       index++;
       Bytes bytes = content.slice(index, length);
@@ -226,7 +258,10 @@ final class BytesRLPReader implements RLPReader {
     int lengthOfLength = prefix - 0xf7;
     if (remaining < lengthOfLength) {
       throw new InvalidRLPEncodingException(
-          "Insufficient bytes in RLP encoding: expected " + lengthOfLength + " but have only " + remaining);
+          "Insufficient bytes in RLP encoding: expected "
+              + lengthOfLength
+              + " but have only "
+              + remaining);
     }
 
     remaining -= lengthOfLength;
@@ -247,7 +282,8 @@ final class BytesRLPReader implements RLPReader {
     Bytes lengthBytes = content.slice(index + 1, lengthOfLength);
     if (!lenient) {
       if (lengthBytes.hasLeadingZeroByte()) {
-        throw new InvalidRLPEncodingException("RLP " + type + " length contains leading zero bytes");
+        throw new InvalidRLPEncodingException(
+            "RLP " + type + " length contains leading zero bytes");
       }
     } else {
       lengthBytes = lengthBytes.trimLeadingZeros();
@@ -266,7 +302,8 @@ final class BytesRLPReader implements RLPReader {
     }
     assert length > 0;
     if (!lenient && length <= 55) {
-      throw new InvalidRLPEncodingException("RLP " + type + " length of " + length + " was not minimally encoded");
+      throw new InvalidRLPEncodingException(
+          "RLP " + type + " length of " + length + " was not minimally encoded");
     }
     return length;
   }

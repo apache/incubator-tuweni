@@ -25,7 +25,7 @@ internal class SubProtocolServiceImpl() : SubprotocolService {
     subProtocolIdentifier: SubProtocolIdentifier,
     messageType: Int,
     connection: WireConnection,
-    message: Bytes
+    message: Bytes,
   ) {
     handler?.handle(connection, messageType, message)
   }

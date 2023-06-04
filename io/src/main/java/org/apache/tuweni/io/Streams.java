@@ -11,9 +11,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-/**
- * Utilities for working with streams.
- */
+/** Utilities for working with streams. */
 public final class Streams {
   private Streams() {}
 
@@ -27,15 +25,17 @@ public final class Streams {
   @SuppressWarnings("JdkObsolete")
   public static <T> Stream<T> enumerationStream(Enumeration<T> enumeration) {
     requireNonNull(enumeration);
-    return StreamSupport.stream(new Spliterators.AbstractSpliterator<>(Long.MAX_VALUE, Spliterator.ORDERED) {
-      @Override
-      public boolean tryAdvance(Consumer<? super T> action) {
-        if (enumeration.hasMoreElements()) {
-          action.accept(enumeration.nextElement());
-          return true;
-        }
-        return false;
-      }
-    }, false);
+    return StreamSupport.stream(
+        new Spliterators.AbstractSpliterator<>(Long.MAX_VALUE, Spliterator.ORDERED) {
+          @Override
+          public boolean tryAdvance(Consumer<? super T> action) {
+            if (enumeration.hasMoreElements()) {
+              action.accept(enumeration.nextElement());
+              return true;
+            }
+            return false;
+          }
+        },
+        false);
   }
 }

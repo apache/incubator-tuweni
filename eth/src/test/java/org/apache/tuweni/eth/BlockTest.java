@@ -19,12 +19,16 @@ class BlockTest {
 
   @Test
   void testRoundtripRLP() {
-    Block block = new Block(
-        generateBlockHeader(),
-        new BlockBody(
-            Arrays.asList(generateTransaction(), generateTransaction(), generateTransaction(), generateTransaction()),
-            Arrays
-                .asList(
+    Block block =
+        new Block(
+            generateBlockHeader(),
+            new BlockBody(
+                Arrays.asList(
+                    generateTransaction(),
+                    generateTransaction(),
+                    generateTransaction(),
+                    generateTransaction()),
+                Arrays.asList(
                     generateBlockHeader(),
                     generateBlockHeader(),
                     generateBlockHeader(),

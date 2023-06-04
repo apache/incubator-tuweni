@@ -28,23 +28,20 @@ import io.vertx.core.buffer.Buffer;
 /**
  * A value made of bytes.
  *
- * <p>
- * This interface makes no thread-safety guarantee, and a {@link Bytes} value is generally not thread safe. However,
- * specific implementations may be thread-safe. For instance, the value returned by {@link #copy} is guaranteed to be
- * thread-safe as it is immutable.
+ * <p>This interface makes no thread-safety guarantee, and a {@link Bytes} value is generally not
+ * thread safe. However, specific implementations may be thread-safe. For instance, the value
+ * returned by {@link #copy} is guaranteed to be thread-safe as it is immutable.
  */
 public interface Bytes extends Comparable<Bytes> {
 
-  /**
-   * The empty value (with 0 bytes).
-   */
+  /** The empty value (with 0 bytes). */
   Bytes EMPTY = wrap(new byte[0]);
 
   /**
    * Wrap the provided byte array as a {@link Bytes} value.
    *
-   * <p>
-   * Note that value is not copied and thus any future update to {@code value} will be reflected in the returned value.
+   * <p>Note that value is not copied and thus any future update to {@code value} will be reflected
+   * in the returned value.
    *
    * @param value The value to wrap.
    * @return A {@link Bytes} value wrapping {@code value}.
@@ -56,16 +53,15 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Wrap a slice of a byte array as a {@link Bytes} value.
    *
-   * <p>
-   * Note that value is not copied and thus any future update to {@code value} within the slice will be reflected in the
-   * returned value.
+   * <p>Note that value is not copied and thus any future update to {@code value} within the slice
+   * will be reflected in the returned value.
    *
    * @param value The value to wrap.
-   * @param offset The index (inclusive) in {@code value} of the first byte exposed by the returned value. In other
-   *        words, you will have {@code wrap(value, o, l).get(0) == value[o]}.
+   * @param offset The index (inclusive) in {@code value} of the first byte exposed by the returned
+   *     value. In other words, you will have {@code wrap(value, o, l).get(0) == value[o]}.
    * @param length The length of the resulting value.
-   * @return A {@link Bytes} value that expose the bytes of {@code value} from {@code offset} (inclusive) to
-   *         {@code offset + length} (exclusive).
+   * @return A {@link Bytes} value that expose the bytes of {@code value} from {@code offset}
+   *     (inclusive) to {@code offset + length} (exclusive).
    * @throws IndexOutOfBoundsException if {@code offset < 0 || (value.length > 0 && offset >=
    *     value.length)}.
    * @throws IllegalArgumentException if {@code length < 0 || offset + length > value.length}.
@@ -81,7 +77,6 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Wrap the provided byte array as a {@link Bytes} value, encrypted in memory.
    *
-   *
    * @param value The value to secure.
    * @return A {@link Bytes} value securing {@code value}.
    */
@@ -92,13 +87,12 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Wrap a slice of a byte array as a {@link Bytes} value, encrypted in memory.
    *
-   *
    * @param value The value to secure.
-   * @param offset The index (inclusive) in {@code value} of the first byte exposed by the returned value. In other
-   *        words, you will have {@code wrap(value, o, l).get(0) == value[o]}.
+   * @param offset The index (inclusive) in {@code value} of the first byte exposed by the returned
+   *     value. In other words, you will have {@code wrap(value, o, l).get(0) == value[o]}.
    * @param length The length of the resulting value.
-   * @return A {@link Bytes} value that holds securely the bytes of {@code value} from {@code offset} (inclusive) to
-   *         {@code offset + length} (exclusive).
+   * @return A {@link Bytes} value that holds securely the bytes of {@code value} from {@code
+   *     offset} (inclusive) to {@code offset + length} (exclusive).
    * @throws IndexOutOfBoundsException if {@code offset < 0 || (value.length > 0 && offset >=
    *     value.length)}.
    * @throws IllegalArgumentException if {@code length < 0 || offset + length > value.length}.
@@ -111,9 +105,9 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Wrap a list of other values into a concatenated view.
    *
-   * <p>
-   * Note that the values are not copied and thus any future update to the values will be reflected in the returned
-   * value. If copying the inputs is desired, use {@link #concatenate(Bytes...)}.
+   * <p>Note that the values are not copied and thus any future update to the values will be
+   * reflected in the returned value. If copying the inputs is desired, use {@link
+   * #concatenate(Bytes...)}.
    *
    * @param values The values to wrap.
    * @return A value representing a view over the concatenation of all {@code values}.
@@ -126,9 +120,9 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Wrap a list of other values into a concatenated view.
    *
-   * <p>
-   * Note that the values are not copied and thus any future update to the values will be reflected in the returned
-   * value. If copying the inputs is desired, use {@link #concatenate(Bytes...)}.
+   * <p>Note that the values are not copied and thus any future update to the values will be
+   * reflected in the returned value. If copying the inputs is desired, use {@link
+   * #concatenate(Bytes...)}.
    *
    * @param values The values to wrap.
    * @return A value representing a view over the concatenation of all {@code values}.
@@ -142,7 +136,8 @@ public interface Bytes extends Comparable<Bytes> {
    * Create a value containing the concatenation of the values provided.
    *
    * @param values The values to copy and concatenate.
-   * @return A value containing the result of concatenating the value from {@code values} in their provided order.
+   * @return A value containing the result of concatenating the value from {@code values} in their
+   *     provided order.
    * @throws IllegalArgumentException if the result overflows an int.
    */
   static Bytes concatenate(List<Bytes> values) {
@@ -154,7 +149,8 @@ public interface Bytes extends Comparable<Bytes> {
     try {
       size = values.stream().mapToInt(Bytes::size).reduce(0, Math::addExact);
     } catch (ArithmeticException e) {
-      throw new IllegalArgumentException("Combined length of values is too long (> Integer.MAX_VALUE)");
+      throw new IllegalArgumentException(
+          "Combined length of values is too long (> Integer.MAX_VALUE)");
     }
 
     MutableBytes result = MutableBytes.create(size);
@@ -170,7 +166,8 @@ public interface Bytes extends Comparable<Bytes> {
    * Create a value containing the concatenation of the values provided.
    *
    * @param values The values to copy and concatenate.
-   * @return A value containing the result of concatenating the value from {@code values} in their provided order.
+   * @return A value containing the result of concatenating the value from {@code values} in their
+   *     provided order.
    * @throws IllegalArgumentException if the result overflows an int.
    */
   static Bytes concatenate(Bytes... values) {
@@ -182,7 +179,8 @@ public interface Bytes extends Comparable<Bytes> {
     try {
       size = Arrays.stream(values).mapToInt(Bytes::size).reduce(0, Math::addExact);
     } catch (ArithmeticException e) {
-      throw new IllegalArgumentException("Combined length of values is too long (> Integer.MAX_VALUE)");
+      throw new IllegalArgumentException(
+          "Combined length of values is too long (> Integer.MAX_VALUE)");
     }
 
     MutableBytes result = MutableBytes.create(size);
@@ -197,8 +195,7 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Wrap a full Vert.x {@link Buffer} as a {@link Bytes} value.
    *
-   * <p>
-   * Note that any change to the content of the buffer may be reflected in the returned value.
+   * <p>Note that any change to the content of the buffer may be reflected in the returned value.
    *
    * @param buffer The buffer to wrap.
    * @return A {@link Bytes} value.
@@ -214,12 +211,11 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Wrap a slice of a Vert.x {@link Buffer} as a {@link Bytes} value.
    *
-   * <p>
-   * Note that any change to the content of the buffer may be reflected in the returned value.
+   * <p>Note that any change to the content of the buffer may be reflected in the returned value.
    *
    * @param buffer The buffer to wrap.
-   * @param offset The offset in {@code buffer} from which to expose the bytes in the returned value. That is,
-   *        {@code wrapBuffer(buffer, i, 1).get(0) == buffer.getByte(i)}.
+   * @param offset The offset in {@code buffer} from which to expose the bytes in the returned
+   *     value. That is, {@code wrapBuffer(buffer, i, 1).get(0) == buffer.getByte(i)}.
    * @param size The size of the returned value.
    * @return A {@link Bytes} value.
    * @throws IndexOutOfBoundsException if {@code offset < 0 || (buffer.length() > 0 && offset >=
@@ -237,8 +233,7 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Wrap a full Netty {@link ByteBuf} as a {@link Bytes} value.
    *
-   * <p>
-   * Note that any change to the content of the byteBuf may be reflected in the returned value.
+   * <p>Note that any change to the content of the byteBuf may be reflected in the returned value.
    *
    * @param byteBuf The {@link ByteBuf} to wrap.
    * @return A {@link Bytes} value.
@@ -254,12 +249,11 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Wrap a slice of a Netty {@link ByteBuf} as a {@link Bytes} value.
    *
-   * <p>
-   * Note that any change to the content of the buffer may be reflected in the returned value.
+   * <p>Note that any change to the content of the buffer may be reflected in the returned value.
    *
    * @param byteBuf The {@link ByteBuf} to wrap.
-   * @param offset The offset in {@code byteBuf} from which to expose the bytes in the returned value. That is,
-   *        {@code wrapByteBuf(byteBuf, i, 1).get(0) == byteBuf.getByte(i)}.
+   * @param offset The offset in {@code byteBuf} from which to expose the bytes in the returned
+   *     value. That is, {@code wrapByteBuf(byteBuf, i, 1).get(0) == byteBuf.getByte(i)}.
    * @param size The size of the returned value.
    * @return A {@link Bytes} value.
    * @throws IndexOutOfBoundsException if {@code offset < 0 || (byteBuf.capacity() > 0 && offset >=
@@ -277,8 +271,7 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Wrap a full Java NIO {@link ByteBuffer} as a {@link Bytes} value.
    *
-   * <p>
-   * Note that any change to the content of the byteBuf may be reflected in the returned value.
+   * <p>Note that any change to the content of the byteBuf may be reflected in the returned value.
    *
    * @param byteBuffer The {@link ByteBuffer} to wrap.
    * @return A {@link Bytes} value.
@@ -294,12 +287,11 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Wrap a slice of a Java NIO {@link ByteBuf} as a {@link Bytes} value.
    *
-   * <p>
-   * Note that any change to the content of the buffer may be reflected in the returned value.
+   * <p>Note that any change to the content of the buffer may be reflected in the returned value.
    *
    * @param byteBuffer The {@link ByteBuffer} to wrap.
-   * @param offset The offset in {@code byteBuffer} from which to expose the bytes in the returned value. That is,
-   *        {@code wrapByteBuffer(byteBuffer, i, 1).get(0) == byteBuffer.getByte(i)}.
+   * @param offset The offset in {@code byteBuffer} from which to expose the bytes in the returned
+   *     value. That is, {@code wrapByteBuffer(byteBuffer, i, 1).get(0) == byteBuffer.getByte(i)}.
    * @param size The size of the returned value.
    * @return A {@link Bytes} value.
    * @throws IndexOutOfBoundsException if {@code offset < 0 || (byteBuffer.limit() > 0 && offset >=
@@ -329,7 +321,8 @@ public interface Bytes extends Comparable<Bytes> {
    *
    * @param bytes The bytes.
    * @return A value containing bytes are the one from {@code bytes}.
-   * @throws IllegalArgumentException if any of the specified would be truncated when storing as a byte.
+   * @throws IllegalArgumentException if any of the specified would be truncated when storing as a
+   *     byte.
    */
   static Bytes of(int... bytes) {
     byte[] result = new byte[bytes.length];
@@ -346,8 +339,8 @@ public interface Bytes extends Comparable<Bytes> {
    *
    * @param value The value, which must be no larger than an unsigned short.
    * @return A 2 bytes value corresponding to {@code value}.
-   * @throws IllegalArgumentException if {@code value < 0} or {@code value} is too big to fit an unsigned 2-byte short
-   *         (that is, if {@code value >= (1 << 16)}).
+   * @throws IllegalArgumentException if {@code value < 0} or {@code value} is too big to fit an
+   *     unsigned 2-byte short (that is, if {@code value >= (1 << 16)}).
    */
   static Bytes ofUnsignedShort(int value) {
     return ofUnsignedShort(value, BIG_ENDIAN);
@@ -359,8 +352,8 @@ public interface Bytes extends Comparable<Bytes> {
    * @param value The value, which must be no larger than an unsigned short.
    * @param order The byte-order for the integer encoding.
    * @return A 2 bytes value corresponding to {@code value}.
-   * @throws IllegalArgumentException if {@code value < 0} or {@code value} is too big to fit an unsigned 2-byte short
-   *         (that is, if {@code value >= (1 << 16)}).
+   * @throws IllegalArgumentException if {@code value < 0} or {@code value} is too big to fit an
+   *     unsigned 2-byte short (that is, if {@code value >= (1 << 16)}).
    */
   static Bytes ofUnsignedShort(int value, ByteOrder order) {
     checkArgument(
@@ -383,8 +376,8 @@ public interface Bytes extends Comparable<Bytes> {
    *
    * @param value The value, which must be no larger than an unsigned int.
    * @return A 4 bytes value corresponding to {@code value}.
-   * @throws IllegalArgumentException if {@code value < 0} or {@code value} is too big to fit an unsigned 4-byte int
-   *         (that is, if {@code value >= (1L << 32)}).
+   * @throws IllegalArgumentException if {@code value < 0} or {@code value} is too big to fit an
+   *     unsigned 4-byte int (that is, if {@code value >= (1L << 32)}).
    */
   static Bytes ofUnsignedInt(long value) {
     return ofUnsignedInt(value, BIG_ENDIAN);
@@ -396,8 +389,8 @@ public interface Bytes extends Comparable<Bytes> {
    * @param value The value, which must be no larger than an unsigned int.
    * @param order The byte-order for the integer encoding.
    * @return A 4 bytes value corresponding to the encoded {@code value}.
-   * @throws IllegalArgumentException if {@code value < 0} or {@code value} is too big to fit an unsigned 4-byte int
-   *         (that is, if {@code value >= (1L << 32)}).
+   * @throws IllegalArgumentException if {@code value < 0} or {@code value} is too big to fit an
+   *     unsigned 4-byte int (that is, if {@code value >= (1L << 32)}).
    */
   static Bytes ofUnsignedInt(long value, ByteOrder order) {
     checkArgument(
@@ -424,8 +417,8 @@ public interface Bytes extends Comparable<Bytes> {
    *
    * @param value The value, which will be interpreted as an unsigned long.
    * @return A 8 bytes value corresponding to {@code value}.
-   * @throws IllegalArgumentException if {@code value < 0} or {@code value} is too big to fit an unsigned 8-byte int
-   *         (that is, if {@code value >= (1L << 64)}).
+   * @throws IllegalArgumentException if {@code value < 0} or {@code value} is too big to fit an
+   *     unsigned 8-byte int (that is, if {@code value >= (1L << 64)}).
    */
   static Bytes ofUnsignedLong(long value) {
     return ofUnsignedLong(value, BIG_ENDIAN);
@@ -437,8 +430,8 @@ public interface Bytes extends Comparable<Bytes> {
    * @param value The value, which will be interpreted as an unsigned long.
    * @param order The byte-order for the integer encoding.
    * @return A 8 bytes value corresponding to {@code value}.
-   * @throws IllegalArgumentException if {@code value < 0} or {@code value} is too big to fit an unsigned 8-byte int
-   *         (that is, if {@code value >= (1L << 64)}).
+   * @throws IllegalArgumentException if {@code value < 0} or {@code value} is too big to fit an
+   *     unsigned 8-byte int (that is, if {@code value >= (1L << 64)}).
    */
   static Bytes ofUnsignedLong(long value, ByteOrder order) {
     byte[] res = new byte[8];
@@ -465,8 +458,8 @@ public interface Bytes extends Comparable<Bytes> {
   }
 
   /**
-   * Return the smallest bytes value whose bytes correspond to the provided long. That is, the returned value may be of
-   * size less than 8 if the provided long has leading zero bytes.
+   * Return the smallest bytes value whose bytes correspond to the provided long. That is, the
+   * returned value may be of size less than 8 if the provided long has leading zero bytes.
    *
    * @param value The long from which to create the bytes value.
    * @return The minimal bytes representation corresponding to {@code l}.
@@ -491,13 +484,13 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Parse a hexadecimal string into a {@link Bytes} value.
    *
-   * <p>
-   * This method is lenient in that {@code str} may of an odd length, in which case it will behave exactly as if it had
-   * an additional 0 in front.
+   * <p>This method is lenient in that {@code str} may of an odd length, in which case it will
+   * behave exactly as if it had an additional 0 in front.
    *
    * @param str The hexadecimal string to parse, which may or may not start with "0x".
    * @return The value corresponding to {@code str}.
-   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal representation.
+   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal
+   *     representation.
    */
   static Bytes fromHexStringLenient(CharSequence str) {
     checkNotNull(str);
@@ -507,17 +500,18 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Parse a hexadecimal string into a {@link Bytes} value of the provided size.
    *
-   * <p>
-   * This method allows for {@code str} to have an odd length, in which case it will behave exactly as if it had an
-   * additional 0 in front.
+   * <p>This method allows for {@code str} to have an odd length, in which case it will behave
+   * exactly as if it had an additional 0 in front.
    *
    * @param str The hexadecimal string to parse, which may or may not start with "0x".
-   * @param destinationSize The size of the returned value, which must be big enough to hold the bytes represented by
-   *        {@code str}. If it is strictly bigger those bytes from {@code str}, the returned value will be left padded
-   *        with zeros.
-   * @return A value of size {@code destinationSize} corresponding to {@code str} potentially left-padded.
-   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal representation,
-   *         represents more bytes than {@code destinationSize} or {@code destinationSize < 0}.
+   * @param destinationSize The size of the returned value, which must be big enough to hold the
+   *     bytes represented by {@code str}. If it is strictly bigger those bytes from {@code str},
+   *     the returned value will be left padded with zeros.
+   * @return A value of size {@code destinationSize} corresponding to {@code str} potentially
+   *     left-padded.
+   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal
+   *     representation, represents more bytes than {@code destinationSize} or {@code
+   *     destinationSize < 0}.
    */
   static Bytes fromHexStringLenient(CharSequence str, int destinationSize) {
     checkNotNull(str);
@@ -528,13 +522,12 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Parse a hexadecimal string into a {@link Bytes} value.
    *
-   * <p>
-   * This method requires that {@code str} have an even length.
+   * <p>This method requires that {@code str} have an even length.
    *
    * @param str The hexadecimal string to parse, which may or may not start with "0x".
    * @return The value corresponding to {@code str}.
-   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal representation, or is of
-   *         an odd length.
+   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal
+   *     representation, or is of an odd length.
    */
   static Bytes fromHexString(CharSequence str) {
     checkNotNull(str);
@@ -544,18 +537,19 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Parse a hexadecimal string into a {@link Bytes} value.
    *
-   * <p>
-   * This method requires that {@code str} have an even length.
+   * <p>This method requires that {@code str} have an even length.
    *
    * @param str The hexadecimal string to parse, which may or may not start with "0x".
-   * @param destinationSize The size of the returned value, which must be big enough to hold the bytes represented by
-   *        {@code str}. If it is strictly bigger those bytes from {@code str}, the returned value will be left padded
-   *        with zeros.
-   * @return A value of size {@code destinationSize} corresponding to {@code str} potentially left-padded.
-   * @throws IllegalArgumentException if {@code str} does correspond to a valid hexadecimal representation, or is of an
-   *         odd length.
-   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal representation, or is of
-   *         an odd length, or represents more bytes than {@code destinationSize} or {@code destinationSize < 0}.
+   * @param destinationSize The size of the returned value, which must be big enough to hold the
+   *     bytes represented by {@code str}. If it is strictly bigger those bytes from {@code str},
+   *     the returned value will be left padded with zeros.
+   * @return A value of size {@code destinationSize} corresponding to {@code str} potentially
+   *     left-padded.
+   * @throws IllegalArgumentException if {@code str} does correspond to a valid hexadecimal
+   *     representation, or is of an odd length.
+   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal
+   *     representation, or is of an odd length, or represents more bytes than {@code
+   *     destinationSize} or {@code destinationSize < 0}.
    */
   static Bytes fromHexString(CharSequence str, int destinationSize) {
     checkNotNull(str);
@@ -608,8 +602,8 @@ public interface Bytes extends Comparable<Bytes> {
   }
 
   /**
-   * Splits a Bytes object into Bytes32 objects. If the last element is not exactly 32 bytes, it is right padded with
-   * zeros.
+   * Splits a Bytes object into Bytes32 objects. If the last element is not exactly 32 bytes, it is
+   * right padded with zeros.
    *
    * @param bytes the bytes object to segment
    * @return an array of Bytes32 objects
@@ -624,9 +618,8 @@ public interface Bytes extends Comparable<Bytes> {
   }
 
   /**
-   *
    * Provides the number of bytes this value represents.
-   * 
+   *
    * @return The number of bytes this value represents.
    */
   int size();
@@ -643,7 +636,8 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Retrieve the 4 bytes starting at the provided index in this value as an integer.
    *
-   * @param i The index from which to get the int, which must less than or equal to {@code size() - 4}.
+   * @param i The index from which to get the int, which must less than or equal to {@code size() -
+   *     4}.
    * @return An integer whose value is the 4 bytes from this value starting at index {@code i}.
    * @throws IndexOutOfBoundsException if {@code i < 0} or {@code i > size() - 4}.
    */
@@ -654,7 +648,8 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Retrieve the 4 bytes starting at the provided index in this value as an integer.
    *
-   * @param i The index from which to get the int, which must less than or equal to {@code size() - 4}.
+   * @param i The index from which to get the int, which must less than or equal to {@code size() -
+   *     4}.
    * @param order The byte-order for decoding the integer.
    * @return An integer whose value is the 4 bytes from this value starting at index {@code i}.
    * @throws IndexOutOfBoundsException if {@code i < 0} or {@code i > size() - 4}.
@@ -664,7 +659,9 @@ public interface Bytes extends Comparable<Bytes> {
     checkElementIndex(i, size);
     if (i > (size - 4)) {
       throw new IndexOutOfBoundsException(
-          format("Value of size %s has not enough bytes to read a 4 bytes int from index %s", size, i));
+          format(
+              "Value of size %s has not enough bytes to read a 4 bytes int from index %s",
+              size, i));
     }
 
     int value = 0;
@@ -750,7 +747,8 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Retrieves the 8 bytes starting at the provided index in this value as a long.
    *
-   * @param i The index from which to get the long, which must less than or equal to {@code size() - 8}.
+   * @param i The index from which to get the long, which must less than or equal to {@code size() -
+   *     8}.
    * @return A long whose value is the 8 bytes from this value starting at index {@code i}.
    * @throws IndexOutOfBoundsException if {@code i < 0} or {@code i > size() - 8}.
    */
@@ -761,7 +759,8 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Retrieves the 8 bytes starting at the provided index in this value as a long.
    *
-   * @param i The index from which to get the long, which must less than or equal to {@code size() - 8}.
+   * @param i The index from which to get the long, which must less than or equal to {@code size() -
+   *     8}.
    * @param order The byte-order for decoding the integer.
    * @return A long whose value is the 8 bytes from this value starting at index {@code i}.
    * @throws IndexOutOfBoundsException if {@code i < 0} or {@code i > size() - 8}.
@@ -771,7 +770,9 @@ public interface Bytes extends Comparable<Bytes> {
     checkElementIndex(i, size);
     if (i > (size - 8)) {
       throw new IndexOutOfBoundsException(
-          format("Value of size %s has not enough bytes to read a 8 bytes long from index %s", size, i));
+          format(
+              "Value of size %s has not enough bytes to read a 8 bytes long from index %s",
+              size, i));
     }
 
     long value = 0;
@@ -888,7 +889,8 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * The BigInteger corresponding to interpreting these bytes as a two's-complement signed integer.
    *
-   * @return A {@link BigInteger} corresponding to interpreting these bytes as a two's-complement signed integer.
+   * @return A {@link BigInteger} corresponding to interpreting these bytes as a two's-complement
+   *     signed integer.
    */
   default BigInteger toBigInteger() {
     return toBigInteger(BIG_ENDIAN);
@@ -898,7 +900,8 @@ public interface Bytes extends Comparable<Bytes> {
    * The BigInteger corresponding to interpreting these bytes as a two's-complement signed integer.
    *
    * @param order The byte-order for decoding the integer.
-   * @return A {@link BigInteger} corresponding to interpreting these bytes as a two's-complement signed integer.
+   * @return A {@link BigInteger} corresponding to interpreting these bytes as a two's-complement
+   *     signed integer.
    */
   default BigInteger toBigInteger(ByteOrder order) {
     if (size() == 0) {
@@ -910,7 +913,8 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * The BigInteger corresponding to interpreting these bytes as an unsigned integer.
    *
-   * @return A positive (or zero) {@link BigInteger} corresponding to interpreting these bytes as an unsigned integer.
+   * @return A positive (or zero) {@link BigInteger} corresponding to interpreting these bytes as an
+   *     unsigned integer.
    */
   default BigInteger toUnsignedBigInteger() {
     return toUnsignedBigInteger(BIG_ENDIAN);
@@ -920,7 +924,8 @@ public interface Bytes extends Comparable<Bytes> {
    * The BigInteger corresponding to interpreting these bytes as an unsigned integer.
    *
    * @param order The byte-order for decoding the integer.
-   * @return A positive (or zero) {@link BigInteger} corresponding to interpreting these bytes as an unsigned integer.
+   * @return A positive (or zero) {@link BigInteger} corresponding to interpreting these bytes as an
+   *     unsigned integer.
    */
   default BigInteger toUnsignedBigInteger(ByteOrder order) {
     return new BigInteger(1, (order == BIG_ENDIAN) ? toArrayUnsafe() : reverse().toArrayUnsafe());
@@ -933,8 +938,7 @@ public interface Bytes extends Comparable<Bytes> {
    */
   default boolean isZero() {
     for (int i = size() - 1; i >= 0; --i) {
-      if (get(i) != 0)
-        return false;
+      if (get(i) != 0) return false;
     }
     return true;
   }
@@ -949,11 +953,11 @@ public interface Bytes extends Comparable<Bytes> {
   }
 
   /**
-   * Provides the number of zero bits preceding the highest-order ("leftmost") one-bit, or {@code size() * 8} if all
-   * bits * are zero.
-   * 
-   * @return The number of zero bits preceding the highest-order ("leftmost") one-bit, or {@code size() * 8} if all bits
-   *         are zero.
+   * Provides the number of zero bits preceding the highest-order ("leftmost") one-bit, or {@code
+   * size() * 8} if all bits * are zero.
+   *
+   * @return The number of zero bits preceding the highest-order ("leftmost") one-bit, or {@code
+   *     size() * 8} if all bits are zero.
    */
   default int numberOfLeadingZeros() {
     int size = size();
@@ -979,7 +983,7 @@ public interface Bytes extends Comparable<Bytes> {
 
   /**
    * Provides the number of leading zero bytes of the value
-   * 
+   *
    * @return The number of leading zero bytes of the value.
    */
   default int numberOfLeadingZeroBytes() {
@@ -994,7 +998,7 @@ public interface Bytes extends Comparable<Bytes> {
 
   /**
    * Provides the number of trailing zero bytes of the value.
-   * 
+   *
    * @return The number of trailing zero bytes of the value.
    */
   default int numberOfTrailingZeroBytes() {
@@ -1008,18 +1012,17 @@ public interface Bytes extends Comparable<Bytes> {
   }
 
   /**
-   * Provides the number of bits following and including the highest-order ("leftmost") one-bit, or zero if all bits are
-   * zero.
-   * 
-   * @return The number of bits following and including the highest-order ("leftmost") one-bit, or zero if all bits are
-   *         zero.
+   * Provides the number of bits following and including the highest-order ("leftmost") one-bit, or
+   * zero if all bits are zero.
+   *
+   * @return The number of bits following and including the highest-order ("leftmost") one-bit, or
+   *     zero if all bits are zero.
    */
   default int bitLength() {
     int size = size();
     for (int i = 0; i < size; i++) {
       byte b = get(i);
-      if (b == 0)
-        continue;
+      if (b == 0) continue;
 
       return (size * 8) - (i * 8) - (Integer.numberOfLeadingZeros(b & 0xFF) - 3 * 8);
     }
@@ -1029,7 +1032,8 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Return a bit-wise AND of these bytes and the supplied bytes.
    *
-   * If this value and the supplied value are different lengths, then the shorter will be zero-padded to the left.
+   * <p>If this value and the supplied value are different lengths, then the shorter will be
+   * zero-padded to the left.
    *
    * @param other The bytes to perform the operation with.
    * @return The result of a bit-wise AND.
@@ -1041,10 +1045,9 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Calculate a bit-wise AND of these bytes and the supplied bytes.
    *
-   * <p>
-   * If this value or the supplied value are shorter in length than the output vector, then they will be zero-padded to
-   * the left. Likewise, if either this value or the supplied valid is longer in length than the output vector, then
-   * they will be truncated to the left.
+   * <p>If this value or the supplied value are shorter in length than the output vector, then they
+   * will be zero-padded to the left. Likewise, if either this value or the supplied valid is longer
+   * in length than the output vector, then they will be truncated to the left.
    *
    * @param other The bytes to perform the operation with.
    * @param result The mutable output vector for the result.
@@ -1068,8 +1071,8 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Return a bit-wise OR of these bytes and the supplied bytes.
    *
-   * <p>
-   * If this value and the supplied value are different lengths, then the shorter will be zero-padded to the left.
+   * <p>If this value and the supplied value are different lengths, then the shorter will be
+   * zero-padded to the left.
    *
    * @param other The bytes to perform the operation with.
    * @return The result of a bit-wise OR.
@@ -1081,10 +1084,9 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Calculate a bit-wise OR of these bytes and the supplied bytes.
    *
-   * <p>
-   * If this value or the supplied value are shorter in length than the output vector, then they will be zero-padded to
-   * the left. Likewise, if either this value or the supplied valid is longer in length than the output vector, then
-   * they will be truncated to the left.
+   * <p>If this value or the supplied value are shorter in length than the output vector, then they
+   * will be zero-padded to the left. Likewise, if either this value or the supplied valid is longer
+   * in length than the output vector, then they will be truncated to the left.
    *
    * @param other The bytes to perform the operation with.
    * @param result The mutable output vector for the result.
@@ -1108,8 +1110,8 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Return a bit-wise XOR of these bytes and the supplied bytes.
    *
-   * <p>
-   * If this value and the supplied value are different lengths, then the shorter will be zero-padded to the left.
+   * <p>If this value and the supplied value are different lengths, then the shorter will be
+   * zero-padded to the left.
    *
    * @param other The bytes to perform the operation with.
    * @return The result of a bit-wise XOR.
@@ -1121,10 +1123,9 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Calculate a bit-wise XOR of these bytes and the supplied bytes.
    *
-   * <p>
-   * If this value or the supplied value are shorter in length than the output vector, then they will be zero-padded to
-   * the left. Likewise, if either this value or the supplied valid is longer in length than the output vector, then
-   * they will be truncated to the left.
+   * <p>If this value or the supplied value are shorter in length than the output vector, then they
+   * will be zero-padded to the left. Likewise, if either this value or the supplied valid is longer
+   * in length than the output vector, then they will be truncated to the left.
    *
    * @param other The bytes to perform the operation with.
    * @param result The mutable output vector for the result.
@@ -1157,9 +1158,9 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Calculate a bit-wise NOT of these bytes.
    *
-   * <p>
-   * If this value is shorter in length than the output vector, then it will be zero-padded to the left. Likewise, if
-   * this value is longer in length than the output vector, then it will be truncated to the left.
+   * <p>If this value is shorter in length than the output vector, then it will be zero-padded to
+   * the left. Likewise, if this value is longer in length than the output vector, then it will be
+   * truncated to the left.
    *
    * @param result The mutable output vector for the result.
    * @param <T> The {@link MutableBytes} value type.
@@ -1189,9 +1190,9 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Shift all bits in this value to the right.
    *
-   * <p>
-   * If this value is shorter in length than the output vector, then it will be zero-padded to the left. Likewise, if
-   * this value is longer in length than the output vector, then it will be truncated to the left (after shifting).
+   * <p>If this value is shorter in length than the output vector, then it will be zero-padded to
+   * the left. Likewise, if this value is longer in length than the output vector, then it will be
+   * truncated to the left (after shifting).
    *
    * @param distance The number of bits to shift by.
    * @param result The mutable output vector for the result.
@@ -1237,9 +1238,9 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Shift all bits in this value to the left.
    *
-   * <p>
-   * If this value is shorter in length than the output vector, then it will be zero-padded to the left. Likewise, if
-   * this value is longer in length than the output vector, then it will be truncated to the left.
+   * <p>If this value is shorter in length than the output vector, then it will be zero-padded to
+   * the left. Likewise, if this value is longer in length than the output vector, then it will be
+   * truncated to the left.
    *
    * @param distance The number of bits to shift by.
    * @param result The mutable output vector for the result.
@@ -1276,10 +1277,9 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Create a new value representing (a view of) a slice of the bytes of this value.
    *
-   * <p>
-   * Please note that the resulting slice is only a view and as such maintains a link to the underlying full value. So
-   * holding a reference to the returned slice may hold more memory than the slide represents. Use {@link #copy} on the
-   * returned slice if that is not what you want.
+   * <p>Please note that the resulting slice is only a view and as such maintains a link to the
+   * underlying full value. So holding a reference to the returned slice may hold more memory than
+   * the slide represents. Use {@link #copy} on the returned slice if that is not what you want.
    *
    * @param i The start index for the slice.
    * @return A new value providing a view over the bytes from index {@code i} (included) to the end.
@@ -1299,43 +1299,43 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Create a new value representing (a view of) a slice of the bytes of this value.
    *
-   * <p>
-   * Please note that the resulting slice is only a view and as such maintains a link to the underlying full value. So
-   * holding a reference to the returned slice may hold more memory than the slide represents. Use {@link #copy} on the
-   * returned slice if that is not what you want.
+   * <p>Please note that the resulting slice is only a view and as such maintains a link to the
+   * underlying full value. So holding a reference to the returned slice may hold more memory than
+   * the slide represents. Use {@link #copy} on the returned slice if that is not what you want.
    *
    * @param i The start index for the slice.
    * @param length The length of the resulting value.
-   * @return A new value providing a view over the bytes from index {@code i} (included) to {@code i + length}
-   *         (excluded).
+   * @return A new value providing a view over the bytes from index {@code i} (included) to {@code i
+   *     + length} (excluded).
    * @throws IllegalArgumentException if {@code length < 0}.
    * @throws IndexOutOfBoundsException if {@code i < 0} or {i >= size()} or {i + length > size()} .
    */
   Bytes slice(int i, int length);
 
   /**
-   * Return a value equivalent to this one but guaranteed to 1) be deeply immutable (i.e. the underlying value will be
-   * immutable) and 2) to not retain more bytes than exposed by the value.
+   * Return a value equivalent to this one but guaranteed to 1) be deeply immutable (i.e. the
+   * underlying value will be immutable) and 2) to not retain more bytes than exposed by the value.
    *
-   * @return A value, equals to this one, but deeply immutable and that doesn't retain any "unreachable" bytes. For
-   *         performance reasons, this is allowed to return this value however if it already fit those constraints.
+   * @return A value, equals to this one, but deeply immutable and that doesn't retain any
+   *     "unreachable" bytes. For performance reasons, this is allowed to return this value however
+   *     if it already fit those constraints.
    */
   Bytes copy();
 
   /**
    * Return a new mutable value initialized with the content of this value.
    *
-   * @return A mutable copy of this value. This will copy bytes, modifying the returned value will <b>not</b> modify
-   *         this value.
+   * @return A mutable copy of this value. This will copy bytes, modifying the returned value will
+   *     <b>not</b> modify this value.
    */
   MutableBytes mutableCopy();
 
   /**
    * Copy the bytes of this value to the provided mutable one, which must have the same size.
    *
-   * @param destination The mutable value to which to copy the bytes to, which must have the same size as this value. If
-   *        you want to copy value where size differs, you should use {@link #slice} and/or
-   *        {@link MutableBytes#mutableSlice} and apply the copy to the result.
+   * @param destination The mutable value to which to copy the bytes to, which must have the same
+   *     size as this value. If you want to copy value where size differs, you should use {@link
+   *     #slice} and/or {@link MutableBytes#mutableSlice} and apply the copy to the result.
    * @throws IllegalArgumentException if {@code this.size() != destination.size()}.
    */
   default void copyTo(MutableBytes destination) {
@@ -1351,12 +1351,11 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Copy the bytes of this value to the provided mutable one from a particular offset.
    *
-   * <p>
-   * This is a (potentially slightly more efficient) shortcut for {@code
+   * <p>This is a (potentially slightly more efficient) shortcut for {@code
    * copyTo(destination.mutableSlice(destinationOffset, this.size()))}.
    *
-   * @param destination The mutable value to which to copy the bytes to, which must have enough bytes from
-   *        {@code destinationOffset} for the copied value.
+   * @param destination The mutable value to which to copy the bytes to, which must have enough
+   *     bytes from {@code destinationOffset} for the copied value.
    * @param destinationOffset The offset in {@code destination} at which the copy starts.
    * @throws IllegalArgumentException if the destination doesn't have enough room, that is if {@code
    *     this.size() > (destination.size() - destinationOffset)}.
@@ -1388,7 +1387,8 @@ public interface Bytes extends Comparable<Bytes> {
    * Append the bytes of this value to the {@link ByteBuffer}.
    *
    * @param byteBuffer The {@link ByteBuffer} to which to append this value.
-   * @throws BufferOverflowException If the writer attempts to write more than the provided buffer can hold.
+   * @throws BufferOverflowException If the writer attempts to write more than the provided buffer
+   *     can hold.
    * @throws ReadOnlyBufferException If the provided buffer is read-only.
    */
   default void appendTo(ByteBuffer byteBuffer) {
@@ -1401,8 +1401,7 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Append the bytes of this value to the provided Vert.x {@link Buffer}.
    *
-   * <p>
-   * Note that since a Vert.x {@link Buffer} will grow as necessary, this method never fails.
+   * <p>Note that since a Vert.x {@link Buffer} will grow as necessary, this method never fails.
    *
    * @param buffer The {@link Buffer} to which to append this value.
    */
@@ -1450,7 +1449,6 @@ public interface Bytes extends Comparable<Bytes> {
     }
 
     return new String(result);
-
   }
 
   /**
@@ -1483,7 +1481,8 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Return a slice of representing the same value but without any leading zero bytes.
    *
-   * @return {@code value} if its left-most byte is non zero, or a slice that exclude any leading zero bytes.
+   * @return {@code value} if its left-most byte is non zero, or a slice that exclude any leading
+   *     zero bytes.
    */
   default Bytes trimLeadingZeros() {
     int size = size();
@@ -1498,7 +1497,8 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Return a slice of representing the same value but without any trailing zero bytes.
    *
-   * @return {@code value} if its right-most byte is non zero, or a slice that exclude any trailing zero bytes.
+   * @return {@code value} if its right-most byte is non zero, or a slice that exclude any trailing
+   *     zero bytes.
    */
   default Bytes trimTrailingZeros() {
     int size = size();
@@ -1566,13 +1566,13 @@ public interface Bytes extends Comparable<Bytes> {
   /**
    * Get the bytes represented by this value as byte array.
    *
-   * <p>
-   * Contrarily to {@link #toArray()}, this may avoid allocating a new array and directly return the backing array of
-   * this value if said value is array backed and doing so is possible. As such, modifications to the returned array may
-   * or may not impact this value. As such, this method should be used with care and hence the "unsafe" moniker.
+   * <p>Contrarily to {@link #toArray()}, this may avoid allocating a new array and directly return
+   * the backing array of this value if said value is array backed and doing so is possible. As
+   * such, modifications to the returned array may or may not impact this value. As such, this
+   * method should be used with care and hence the "unsafe" moniker.
    *
-   * @return A byte array with the same content than this value, which may or may not be the direct backing of this
-   *         value.
+   * @return A byte array with the same content than this value, which may or may not be the direct
+   *     backing of this value.
    */
   default byte[] toArrayUnsafe() {
     return toArray();
@@ -1588,7 +1588,7 @@ public interface Bytes extends Comparable<Bytes> {
 
   /**
    * Provides this value represented as hexadecimal, starting with "0x".
-   * 
+   *
    * @return This value represented as hexadecimal, starting with "0x".
    */
   default String toHexString() {
@@ -1597,7 +1597,7 @@ public interface Bytes extends Comparable<Bytes> {
 
   /**
    * Provides this value represented as hexadecimal, with no prefix
-   * 
+   *
    * @return This value represented as hexadecimal, with no prefix.
    */
   default String toUnprefixedHexString() {
@@ -1631,7 +1631,7 @@ public interface Bytes extends Comparable<Bytes> {
 
   /**
    * Provides this value represented as a minimal hexadecimal string (without any leading zero)
-   * 
+   *
    * @return This value represented as a minimal hexadecimal string (without any leading zero).
    */
   default String toShortHexString() {
@@ -1645,11 +1645,11 @@ public interface Bytes extends Comparable<Bytes> {
   }
 
   /**
-   * Provides this value represented as a minimal hexadecimal string (without any leading zero, except if it's valued
-   * zero or empty, in which case it returns 0x0).
-   * 
-   * @return This value represented as a minimal hexadecimal string (without any leading zero, except if it's valued
-   *         zero or empty, in which case it returns 0x0).
+   * Provides this value represented as a minimal hexadecimal string (without any leading zero,
+   * except if it's valued zero or empty, in which case it returns 0x0).
+   *
+   * @return This value represented as a minimal hexadecimal string (without any leading zero,
+   *     except if it's valued zero or empty, in which case it returns 0x0).
    */
   default String toQuantityHexString() {
     if (Bytes.EMPTY.equals(this)) {
@@ -1666,7 +1666,7 @@ public interface Bytes extends Comparable<Bytes> {
 
   /**
    * Provides this value represented as base 64
-   * 
+   *
    * @return This value represented as base 64.
    */
   default String toBase64String() {

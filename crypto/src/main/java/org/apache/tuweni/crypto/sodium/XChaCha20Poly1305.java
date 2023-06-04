@@ -17,20 +17,19 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Authenticated Encryption with Additional Data using XChaCha20-Poly1305.
  *
- * <p>
- * The XChaCha20-Poly1305 construction can safely encrypt a practically unlimited number of messages with the same key,
- * without any practical limit to the size of a message (up to ~ 2^64 bytes).
+ * <p>The XChaCha20-Poly1305 construction can safely encrypt a practically unlimited number of
+ * messages with the same key, without any practical limit to the size of a message (up to ~ 2^64
+ * bytes).
  *
- * <p>
- * As an alternative to counters, its large nonce size (192-bit) allows random nonces to be safely used.
+ * <p>As an alternative to counters, its large nonce size (192-bit) allows random nonces to be
+ * safely used.
  *
- * <p>
- * For this reason, and if interoperability with other libraries is not a concern, this is the recommended AEAD
- * construction.
+ * <p>For this reason, and if interoperability with other libraries is not a concern, this is the
+ * recommended AEAD construction.
  *
- * <p>
- * This class depends upon the JNR-FFI library being available on the classpath, along with its dependencies. See
- * https://github.com/jnr/jnr-ffi. JNR-FFI can be included using the gradle dependency 'com.github.jnr:jnr-ffi'.
+ * <p>This class depends upon the JNR-FFI library being available on the classpath, along with its
+ * dependencies. See https://github.com/jnr/jnr-ffi. JNR-FFI can be included using the gradle
+ * dependency 'com.github.jnr:jnr-ffi'.
  */
 public final class XChaCha20Poly1305 {
   private XChaCha20Poly1305() {}
@@ -40,8 +39,7 @@ public final class XChaCha20Poly1305 {
   /**
    * Check if Sodium and the XChaCha20Poly1305 algorithm is available.
    *
-   * <p>
-   * XChaCha20Poly1305 is supported in sodium native library version &gt;= 10.0.12.
+   * <p>XChaCha20Poly1305 is supported in sodium native library version &gt;= 10.0.12.
    *
    * @return {@code true} if Sodium and the XChaCha20Poly1305 algorithm is available.
    */
@@ -63,8 +61,7 @@ public final class XChaCha20Poly1305 {
   /**
    * Check if Sodium and the XChaCha20Poly1305 secret stream algorithm is available.
    *
-   * <p>
-   * XChaCha20Poly1305 secret stream is supported in sodium native library version &gt;= 10.0.14.
+   * <p>XChaCha20Poly1305 secret stream is supported in sodium native library version &gt;= 10.0.14.
    *
    * @return {@code true} if Sodium and the XChaCha20Poly1305 secret stream algorithm is available.
    */
@@ -83,16 +80,13 @@ public final class XChaCha20Poly1305 {
     }
   }
 
-  /**
-   * A XChaCha20-Poly1305 key.
-   */
+  /** A XChaCha20-Poly1305 key. */
   public static final class Key implements Destroyable {
     final Allocated value;
 
     private Key(Pointer ptr, int length) {
       this.value = new Allocated(ptr, length);
     }
-
 
     @Override
     public void destroy() {
@@ -107,8 +101,7 @@ public final class XChaCha20Poly1305 {
     /**
      * Create a {@link Key} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the key.
      * @return A key, based on the supplied bytes.
@@ -120,8 +113,7 @@ public final class XChaCha20Poly1305 {
     /**
      * Create a {@link Key} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the key.
      * @return A key, based on the supplied bytes.
@@ -131,7 +123,10 @@ public final class XChaCha20Poly1305 {
       assertAvailable();
       if (bytes.length != Sodium.crypto_aead_xchacha20poly1305_ietf_keybytes()) {
         throw new IllegalArgumentException(
-            "key must be " + Sodium.crypto_aead_xchacha20poly1305_ietf_keybytes() + " bytes, got " + bytes.length);
+            "key must be "
+                + Sodium.crypto_aead_xchacha20poly1305_ietf_keybytes()
+                + " bytes, got "
+                + bytes.length);
       }
       return Sodium.dup(bytes, Key::new);
     }
@@ -146,7 +141,8 @@ public final class XChaCha20Poly1305 {
       assertAvailable();
       long keybytes = Sodium.crypto_aead_xchacha20poly1305_ietf_keybytes();
       if (keybytes > Integer.MAX_VALUE) {
-        throw new SodiumException("crypto_aead_xchacha20poly1305_ietf_keybytes: " + keybytes + " is too large");
+        throw new SodiumException(
+            "crypto_aead_xchacha20poly1305_ietf_keybytes: " + keybytes + " is too large");
       }
       return (int) keybytes;
     }
@@ -163,7 +159,7 @@ public final class XChaCha20Poly1305 {
       Pointer ptr = Sodium.malloc(length);
       try {
         // When support for 10.0.11 is dropped, use this instead
-        //Sodium.crypto_aead_xchacha20poly1305_ietf_keygen(ptr);
+        // Sodium.crypto_aead_xchacha20poly1305_ietf_keygen(ptr);
         Sodium.randombytes_buf(ptr, length);
         return new Key(ptr, length);
       } catch (Throwable e) {
@@ -192,7 +188,7 @@ public final class XChaCha20Poly1305 {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory.
+     * <p>WARNING: This will cause the key to be copied into heap memory.
      *
      * @return The bytes of this key.
      */
@@ -203,8 +199,8 @@ public final class XChaCha20Poly1305 {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory. The returned array should be overwritten when no
-     * longer required.
+     * <p>WARNING: This will cause the key to be copied into heap memory. The returned array should
+     * be overwritten when no longer required.
      *
      * @return The bytes of this key.
      */
@@ -213,9 +209,7 @@ public final class XChaCha20Poly1305 {
     }
   }
 
-  /**
-   * A XChaCha20-Poly1305 nonce.
-   */
+  /** A XChaCha20-Poly1305 nonce. */
   public static final class Nonce {
     final Allocated value;
 
@@ -226,8 +220,7 @@ public final class XChaCha20Poly1305 {
     /**
      * Create a {@link Nonce} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the nonce.
      * @return A nonce, based on these bytes.
@@ -239,8 +232,7 @@ public final class XChaCha20Poly1305 {
     /**
      * Create a {@link Nonce} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the nonce.
      * @return A nonce, based on these bytes.
@@ -250,7 +242,10 @@ public final class XChaCha20Poly1305 {
       assertAvailable();
       if (bytes.length != Sodium.crypto_aead_xchacha20poly1305_ietf_npubbytes()) {
         throw new IllegalArgumentException(
-            "nonce must be " + Sodium.crypto_aead_xchacha20poly1305_ietf_npubbytes() + " bytes, got " + bytes.length);
+            "nonce must be "
+                + Sodium.crypto_aead_xchacha20poly1305_ietf_npubbytes()
+                + " bytes, got "
+                + bytes.length);
       }
       return Sodium.dup(bytes, Nonce::new);
     }
@@ -265,7 +260,8 @@ public final class XChaCha20Poly1305 {
       assertAvailable();
       long npubbytes = Sodium.crypto_aead_xchacha20poly1305_ietf_npubbytes();
       if (npubbytes > Integer.MAX_VALUE) {
-        throw new SodiumException("crypto_aead_xchacha20poly1305_ietf_npubbytes: " + npubbytes + " is too large");
+        throw new SodiumException(
+            "crypto_aead_xchacha20poly1305_ietf_npubbytes: " + npubbytes + " is too large");
       }
       return (int) npubbytes;
     }
@@ -301,9 +297,9 @@ public final class XChaCha20Poly1305 {
     /**
      * Increment this nonce.
      *
-     * <p>
-     * Note that this is not synchronized. If multiple threads are creating encrypted messages and incrementing this
-     * nonce, then external synchronization is required to ensure no two encrypt operations use the same nonce.
+     * <p>Note that this is not synchronized. If multiple threads are creating encrypted messages
+     * and incrementing this nonce, then external synchronization is required to ensure no two
+     * encrypt operations use the same nonce.
      *
      * @return A new {@link Nonce}.
      */
@@ -330,7 +326,7 @@ public final class XChaCha20Poly1305 {
 
     /**
      * Provides the bytes of this nonce
-     * 
+     *
      * @return The bytes of this nonce.
      */
     public Bytes bytes() {
@@ -339,7 +335,7 @@ public final class XChaCha20Poly1305 {
 
     /**
      * Provides the bytes of this nonce
-     * 
+     *
      * @return The bytes of this nonce.
      */
     public byte[] bytesArray() {
@@ -402,8 +398,8 @@ public final class XChaCha20Poly1305 {
     byte[] cipherText = new byte[maxCypherTextLength(message)];
 
     LongLongByReference cipherTextLen = new LongLongByReference();
-    int rc = Sodium
-        .crypto_aead_xchacha20poly1305_ietf_encrypt(
+    int rc =
+        Sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
             cipherText,
             cipherTextLen,
             message,
@@ -414,16 +410,19 @@ public final class XChaCha20Poly1305 {
             nonce.value.pointer(),
             key.value.pointer());
     if (rc != 0) {
-      throw new SodiumException("crypto_aead_xchacha20poly1305_ietf_encrypt: failed with result " + rc);
+      throw new SodiumException(
+          "crypto_aead_xchacha20poly1305_ietf_encrypt: failed with result " + rc);
     }
 
-    return maybeSliceResult(cipherText, cipherTextLen, "crypto_aead_xchacha20poly1305_ietf_encrypt");
+    return maybeSliceResult(
+        cipherText, cipherTextLen, "crypto_aead_xchacha20poly1305_ietf_encrypt");
   }
 
   private static int maxCypherTextLength(byte[] message) {
     long abytes = Sodium.crypto_aead_xchacha20poly1305_ietf_abytes();
     if (abytes > Integer.MAX_VALUE) {
-      throw new IllegalStateException("crypto_aead_xchacha20poly1305_ietf_abytes: " + abytes + " is too large");
+      throw new IllegalStateException(
+          "crypto_aead_xchacha20poly1305_ietf_abytes: " + abytes + " is too large");
     }
     return (int) abytes + message.length;
   }
@@ -461,7 +460,8 @@ public final class XChaCha20Poly1305 {
    * @param nonce A unique nonce.
    * @return The encrypted data.
    */
-  public static DetachedEncryptionResult encryptDetached(Bytes message, Bytes data, Key key, Nonce nonce) {
+  public static DetachedEncryptionResult encryptDetached(
+      Bytes message, Bytes data, Key key, Nonce nonce) {
     return encryptDetached(message.toArrayUnsafe(), data.toArrayUnsafe(), key, nonce);
   }
 
@@ -475,7 +475,8 @@ public final class XChaCha20Poly1305 {
    * @return The encrypted data.
    * @throws UnsupportedOperationException If XChaCha20Poly1305 support is not available.
    */
-  public static DetachedEncryptionResult encryptDetached(byte[] message, byte[] data, Key key, Nonce nonce) {
+  public static DetachedEncryptionResult encryptDetached(
+      byte[] message, byte[] data, Key key, Nonce nonce) {
     assertAvailable();
     if (key.isDestroyed()) {
       throw new IllegalArgumentException("Key has been destroyed");
@@ -483,13 +484,14 @@ public final class XChaCha20Poly1305 {
     byte[] cipherText = new byte[message.length];
     long abytes = Sodium.crypto_aead_xchacha20poly1305_ietf_abytes();
     if (abytes > Integer.MAX_VALUE) {
-      throw new IllegalStateException("crypto_aead_xchacha20poly1305_ietf_abytes: " + abytes + " is too large");
+      throw new IllegalStateException(
+          "crypto_aead_xchacha20poly1305_ietf_abytes: " + abytes + " is too large");
     }
     byte[] mac = new byte[(int) abytes];
 
     LongLongByReference macLen = new LongLongByReference();
-    int rc = Sodium
-        .crypto_aead_xchacha20poly1305_ietf_encrypt_detached(
+    int rc =
+        Sodium.crypto_aead_xchacha20poly1305_ietf_encrypt_detached(
             cipherText,
             mac,
             macLen,
@@ -501,7 +503,8 @@ public final class XChaCha20Poly1305 {
             nonce.value.pointer(),
             key.value.pointer());
     if (rc != 0) {
-      throw new SodiumException("crypto_aead_xchacha20poly1305_ietf_encrypt_detached: failed with result " + rc);
+      throw new SodiumException(
+          "crypto_aead_xchacha20poly1305_ietf_encrypt_detached: failed with result " + rc);
     }
 
     return new DefaultDetachedEncryptionResult(
@@ -514,8 +517,7 @@ public final class XChaCha20Poly1305 {
   private static final class SSEncrypt implements SecretEncryptionStream {
     private final int abytes;
     private final byte[] header;
-    @Nullable
-    private Pointer state;
+    @Nullable private Pointer state;
     private boolean complete = false;
 
     private SSEncrypt(Key key) {
@@ -524,7 +526,8 @@ public final class XChaCha20Poly1305 {
       }
       long abytes = Sodium.crypto_secretstream_xchacha20poly1305_abytes();
       if (abytes > Integer.MAX_VALUE) {
-        throw new IllegalStateException("crypto_aead_xchacha20poly1305_ietf_abytes: " + abytes + " is too large");
+        throw new IllegalStateException(
+            "crypto_aead_xchacha20poly1305_ietf_abytes: " + abytes + " is too large");
       }
       this.abytes = (int) abytes;
 
@@ -537,9 +540,12 @@ public final class XChaCha20Poly1305 {
 
       Pointer state = Sodium.malloc(Sodium.crypto_secretstream_xchacha20poly1305_statebytes());
       try {
-        int rc = Sodium.crypto_secretstream_xchacha20poly1305_init_push(state, header, key.value.pointer());
+        int rc =
+            Sodium.crypto_secretstream_xchacha20poly1305_init_push(
+                state, header, key.value.pointer());
         if (rc != 0) {
-          throw new SodiumException("crypto_secretstream_xchacha20poly1305_init_push: failed with result " + rc);
+          throw new SodiumException(
+              "crypto_secretstream_xchacha20poly1305_init_push: failed with result " + rc);
         }
       } catch (Throwable e) {
         Sodium.sodium_free(state);
@@ -577,18 +583,12 @@ public final class XChaCha20Poly1305 {
       }
       byte[] cipherText = new byte[abytes + clearText.length];
       byte tag = isFinal ? TAG_FINAL : 0;
-      int rc = Sodium
-          .crypto_secretstream_xchacha20poly1305_push(
-              state,
-              cipherText,
-              null,
-              clearText,
-              clearText.length,
-              null,
-              0,
-              tag);
+      int rc =
+          Sodium.crypto_secretstream_xchacha20poly1305_push(
+              state, cipherText, null, clearText, clearText.length, null, 0, tag);
       if (rc != 0) {
-        throw new SodiumException("crypto_secretstream_xchacha20poly1305_push: failed with result " + rc);
+        throw new SodiumException(
+            "crypto_secretstream_xchacha20poly1305_push: failed with result " + rc);
       }
       if (isFinal) {
         complete = true;
@@ -604,7 +604,8 @@ public final class XChaCha20Poly1305 {
    *
    * @param key The key to encrypt for.
    * @return The input stream.
-   * @throws UnsupportedOperationException If XChaCha20Poly1305 secret stream support is not available.
+   * @throws UnsupportedOperationException If XChaCha20Poly1305 secret stream support is not
+   *     available.
    */
   public static SecretEncryptionStream openEncryptionStream(Key key) {
     assertSecretStreamAvailable();
@@ -672,8 +673,8 @@ public final class XChaCha20Poly1305 {
     byte[] clearText = new byte[maxClearTextLength(cipherText)];
 
     LongLongByReference clearTextLen = new LongLongByReference();
-    int rc = Sodium
-        .crypto_aead_xchacha20poly1305_ietf_decrypt(
+    int rc =
+        Sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
             clearText,
             clearTextLen,
             null,
@@ -687,7 +688,8 @@ public final class XChaCha20Poly1305 {
       return null;
     }
     if (rc != 0) {
-      throw new SodiumException("crypto_aead_xchacha20poly1305_ietf_decrypt: failed with result " + rc);
+      throw new SodiumException(
+          "crypto_aead_xchacha20poly1305_ietf_decrypt: failed with result " + rc);
     }
 
     return maybeSliceResult(clearText, clearTextLen, "crypto_aead_xchacha20poly1305_ietf_decrypt");
@@ -696,7 +698,8 @@ public final class XChaCha20Poly1305 {
   private static int maxClearTextLength(byte[] cipherText) {
     long abytes = Sodium.crypto_aead_xchacha20poly1305_ietf_abytes();
     if (abytes > Integer.MAX_VALUE) {
-      throw new IllegalStateException("crypto_aead_xchacha20poly1305_ietf_abytes: " + abytes + " is too large");
+      throw new IllegalStateException(
+          "crypto_aead_xchacha20poly1305_ietf_abytes: " + abytes + " is too large");
     }
     if (abytes > cipherText.length) {
       throw new IllegalArgumentException("cipherText is too short");
@@ -743,8 +746,11 @@ public final class XChaCha20Poly1305 {
    * @return The decrypted data, or {@code null} if verification failed.
    */
   @Nullable
-  public static Bytes decryptDetached(Bytes cipherText, Bytes mac, Bytes data, Key key, Nonce nonce) {
-    byte[] bytes = decryptDetached(cipherText.toArrayUnsafe(), mac.toArrayUnsafe(), data.toArrayUnsafe(), key, nonce);
+  public static Bytes decryptDetached(
+      Bytes cipherText, Bytes mac, Bytes data, Key key, Nonce nonce) {
+    byte[] bytes =
+        decryptDetached(
+            cipherText.toArrayUnsafe(), mac.toArrayUnsafe(), data.toArrayUnsafe(), key, nonce);
     return (bytes != null) ? Bytes.wrap(bytes) : null;
   }
 
@@ -760,22 +766,24 @@ public final class XChaCha20Poly1305 {
    * @throws UnsupportedOperationException If XChaCha20Poly1305 support is not available.
    */
   @Nullable
-  public static byte[] decryptDetached(byte[] cipherText, byte[] mac, byte[] data, Key key, Nonce nonce) {
+  public static byte[] decryptDetached(
+      byte[] cipherText, byte[] mac, byte[] data, Key key, Nonce nonce) {
     assertAvailable();
     if (key.isDestroyed()) {
       throw new IllegalArgumentException("Key has been destroyed");
     }
     long abytes = Sodium.crypto_aead_xchacha20poly1305_ietf_abytes();
     if (abytes > Integer.MAX_VALUE) {
-      throw new IllegalStateException("crypto_aead_xchacha20poly1305_ietf_abytes: " + abytes + " is too large");
+      throw new IllegalStateException(
+          "crypto_aead_xchacha20poly1305_ietf_abytes: " + abytes + " is too large");
     }
     if (mac.length != abytes) {
       throw new IllegalArgumentException("mac must be " + abytes + " bytes, got " + mac.length);
     }
 
     byte[] clearText = new byte[cipherText.length];
-    int rc = Sodium
-        .crypto_aead_xchacha20poly1305_ietf_decrypt_detached(
+    int rc =
+        Sodium.crypto_aead_xchacha20poly1305_ietf_decrypt_detached(
             clearText,
             null,
             cipherText,
@@ -789,7 +797,8 @@ public final class XChaCha20Poly1305 {
       return null;
     }
     if (rc != 0) {
-      throw new SodiumException("crypto_aead_xchacha20poly1305_ietf_decrypt_detached: failed with result " + rc);
+      throw new SodiumException(
+          "crypto_aead_xchacha20poly1305_ietf_decrypt_detached: failed with result " + rc);
     }
 
     return clearText;
@@ -797,8 +806,7 @@ public final class XChaCha20Poly1305 {
 
   private static final class SSDecrypt implements SecretDecryptionStream {
     private final int abytes;
-    @Nullable
-    private Pointer state;
+    @Nullable private Pointer state;
     private boolean complete = false;
 
     private SSDecrypt(Key key, byte[] header) {
@@ -815,15 +823,19 @@ public final class XChaCha20Poly1305 {
 
       long abytes = Sodium.crypto_secretstream_xchacha20poly1305_abytes();
       if (abytes > Integer.MAX_VALUE) {
-        throw new IllegalStateException("crypto_aead_xchacha20poly1305_ietf_abytes: " + abytes + " is too large");
+        throw new IllegalStateException(
+            "crypto_aead_xchacha20poly1305_ietf_abytes: " + abytes + " is too large");
       }
       this.abytes = (int) abytes;
 
       Pointer state = Sodium.malloc(Sodium.crypto_secretstream_xchacha20poly1305_statebytes());
       try {
-        int rc = Sodium.crypto_secretstream_xchacha20poly1305_init_pull(state, header, key.value.pointer());
+        int rc =
+            Sodium.crypto_secretstream_xchacha20poly1305_init_pull(
+                state, header, key.value.pointer());
         if (rc != 0) {
-          throw new SodiumException("crypto_secretstream_xchacha20poly1305_init_push: failed with result " + rc);
+          throw new SodiumException(
+              "crypto_secretstream_xchacha20poly1305_init_push: failed with result " + rc);
         }
       } catch (Throwable e) {
         Sodium.sodium_free(state);
@@ -859,18 +871,12 @@ public final class XChaCha20Poly1305 {
       }
       byte[] clearText = new byte[cipherText.length - abytes];
       ByteByReference tag = new ByteByReference();
-      int rc = Sodium
-          .crypto_secretstream_xchacha20poly1305_pull(
-              state,
-              clearText,
-              null,
-              tag,
-              cipherText,
-              cipherText.length,
-              null,
-              0);
+      int rc =
+          Sodium.crypto_secretstream_xchacha20poly1305_pull(
+              state, clearText, null, tag, cipherText, cipherText.length, null, 0);
       if (rc != 0) {
-        throw new SodiumException("crypto_secretstream_xchacha20poly1305_push: failed with result " + rc);
+        throw new SodiumException(
+            "crypto_secretstream_xchacha20poly1305_push: failed with result " + rc);
       }
       if (tag.byteValue() == TAG_FINAL) {
         complete = true;
@@ -892,19 +898,22 @@ public final class XChaCha20Poly1305 {
    * @param key The key to use for decryption.
    * @param header The header for the stream.
    * @return The input stream.
-   * @throws UnsupportedOperationException If XChaCha20Poly1305 secret stream support is not available.
+   * @throws UnsupportedOperationException If XChaCha20Poly1305 secret stream support is not
+   *     available.
    */
   public static SecretDecryptionStream openDecryptionStream(Key key, byte[] header) {
     assertSecretStreamAvailable();
     return new SSDecrypt(key, header);
   }
 
-  private static byte[] maybeSliceResult(byte[] bytes, LongLongByReference actualLength, String methodName) {
+  private static byte[] maybeSliceResult(
+      byte[] bytes, LongLongByReference actualLength, String methodName) {
     if (actualLength.longValue() == bytes.length) {
       return bytes;
     }
     if (actualLength.longValue() > Integer.MAX_VALUE) {
-      throw new SodiumException(methodName + ": result of length " + actualLength.longValue() + " is too large");
+      throw new SodiumException(
+          methodName + ": result of length " + actualLength.longValue() + " is too large");
     }
     byte[] result = new byte[actualLength.intValue()];
     System.arraycopy(bytes, 0, result, 0, result.length);

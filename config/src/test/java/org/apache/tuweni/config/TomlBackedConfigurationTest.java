@@ -27,23 +27,23 @@ class TomlBackedConfigurationTest {
   @Test
   void loadSimpleConfigFile() throws Exception {
     // @formatter:off
-    Configuration config = Configuration.fromToml(
-        "foo = \"12\"\n"
-      + "bar = 13\n"
-      + "foobar = 156.34\n"
-      + "amaps = [{a = 1, b = 2}, {a = 'hello'}]\n"
-      + "\n"
-      + "[boo]\n"
-      + "baz=[1,2,3]\n"
-      + "\n"
-      + "[amap]\n"
-      + "a=1\n"
-      + "b=2\n"
-      + "[deepmap]\n"
-      + "a=4\n"
-      + "[deepmap.deeper]\n"
-      + "b=5\n"
-    );
+    Configuration config =
+        Configuration.fromToml(
+            "foo = \"12\"\n"
+                + "bar = 13\n"
+                + "foobar = 156.34\n"
+                + "amaps = [{a = 1, b = 2}, {a = 'hello'}]\n"
+                + "\n"
+                + "[boo]\n"
+                + "baz=[1,2,3]\n"
+                + "\n"
+                + "[amap]\n"
+                + "a=1\n"
+                + "b=2\n"
+                + "[deepmap]\n"
+                + "a=4\n"
+                + "[deepmap.deeper]\n"
+                + "b=5\n");
     // @formatter:on
     assertFalse(config.hasErrors());
     assertEquals("12", config.getString("foo"));
@@ -66,7 +66,8 @@ class TomlBackedConfigurationTest {
     expectedDeepMap.put("deeper", Collections.singletonMap("b", 5L));
     assertEquals(expectedDeepMap, config.getMap("deepmap"));
 
-    List<Map<String, Object>> expectedList = Arrays.asList(expectedMap, Collections.singletonMap("a", "hello"));
+    List<Map<String, Object>> expectedList =
+        Arrays.asList(expectedMap, Collections.singletonMap("a", "hello"));
     assertEquals(expectedList, config.getListOfMap("amaps"));
   }
 
@@ -100,7 +101,8 @@ class TomlBackedConfigurationTest {
   void throwsForMissingValue() throws Exception {
     Configuration config = Configuration.fromToml("foo=12\nbar=\"13\"\n[baz]\nfoobar = 156.34");
     assertFalse(config.hasErrors());
-    Exception e = assertThrows(NoConfigurationPropertyException.class, () -> config.getString("foo.blah"));
+    Exception e =
+        assertThrows(NoConfigurationPropertyException.class, () -> config.getString("foo.blah"));
     assertEquals("No value for property 'foo.blah'", e.getMessage());
     e = assertThrows(NoConfigurationPropertyException.class, () -> config.getInteger("  foobaz  "));
     assertEquals("No value for property 'foobaz'", e.getMessage());
@@ -108,24 +110,34 @@ class TomlBackedConfigurationTest {
 
   @Test
   void throwsForInvalidType() throws Exception {
-    Configuration config = Configuration
-        .fromToml(
-            "[foo]\n" + "bar=99\n" + "baz='buz'\n" + "biz=false\n" + "buz = [1,2,3]\n" + "sbuz = ['1', '2', '3']\n");
+    Configuration config =
+        Configuration.fromToml(
+            "[foo]\n"
+                + "bar=99\n"
+                + "baz='buz'\n"
+                + "biz=false\n"
+                + "buz = [1,2,3]\n"
+                + "sbuz = ['1', '2', '3']\n");
     assertFalse(config.hasErrors());
 
     assertEquals(99, config.getInteger("foo.bar"));
     InvalidConfigurationPropertyTypeException e =
-        assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getString("foo.bar"));
+        assertThrows(
+            InvalidConfigurationPropertyTypeException.class, () -> config.getString("foo.bar"));
     assertEquals("Value of 'foo.bar' is a integer", e.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(2, 1), e.position());
 
     assertEquals("buz", config.getString("foo.baz"));
-    e = assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getDouble("foo.baz"));
+    e =
+        assertThrows(
+            InvalidConfigurationPropertyTypeException.class, () -> config.getDouble("foo.baz"));
     assertEquals("Value of 'foo.baz' is a string", e.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(3, 1), e.position());
 
     assertFalse(config.getBoolean("foo.biz"));
-    e = assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getLong("foo.biz"));
+    e =
+        assertThrows(
+            InvalidConfigurationPropertyTypeException.class, () -> config.getLong("foo.biz"));
     assertEquals("Value of 'foo.biz' is a boolean", e.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(4, 1), e.position());
 
@@ -133,15 +145,24 @@ class TomlBackedConfigurationTest {
     assertEquals("Value of 'foo' is a table", e.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(1, 1), e.position());
 
-    e = assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getListOfString("foo.buz"));
+    e =
+        assertThrows(
+            InvalidConfigurationPropertyTypeException.class,
+            () -> config.getListOfString("foo.buz"));
     assertEquals("List property 'foo.buz' does not contain strings", e.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(5, 1), e.position());
 
-    e = assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getListOfInteger("foo.sbuz"));
-    assertEquals("List property 'foo.sbuz' does not contain integers", e.getMessageWithoutPosition());
+    e =
+        assertThrows(
+            InvalidConfigurationPropertyTypeException.class,
+            () -> config.getListOfInteger("foo.sbuz"));
+    assertEquals(
+        "List property 'foo.sbuz' does not contain integers", e.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(6, 1), e.position());
 
-    e = assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getListOfMap("foo.sbuz"));
+    e =
+        assertThrows(
+            InvalidConfigurationPropertyTypeException.class, () -> config.getListOfMap("foo.sbuz"));
     assertEquals("List property 'foo.sbuz' does not contain maps", e.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(6, 1), e.position());
   }
@@ -149,30 +170,40 @@ class TomlBackedConfigurationTest {
   @Test
   void throwsForImpossibleIntegerConversion() throws Exception {
     // @formatter:off
-    Configuration config = Configuration.fromToml(
-        "[foo]\n"
-      + "\" bar\" = "
-      + (1L + Integer.MAX_VALUE)
-      + "\n"
-      + "buz = [1, 2, "
-      + (1L + Integer.MAX_VALUE)
-      + ", 4]\n"
-    );
+    Configuration config =
+        Configuration.fromToml(
+            "[foo]\n"
+                + "\" bar\" = "
+                + (1L + Integer.MAX_VALUE)
+                + "\n"
+                + "buz = [1, 2, "
+                + (1L + Integer.MAX_VALUE)
+                + ", 4]\n");
     // @formatter:on
     assertFalse(config.hasErrors());
     InvalidConfigurationPropertyTypeException e =
-        assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getInteger("foo.' bar'"));
-    assertEquals("Value of property 'foo.\" bar\"' is too large for an integer", e.getMessageWithoutPosition());
+        assertThrows(
+            InvalidConfigurationPropertyTypeException.class, () -> config.getInteger("foo.' bar'"));
+    assertEquals(
+        "Value of property 'foo.\" bar\"' is too large for an integer",
+        e.getMessageWithoutPosition());
 
-    e = assertThrows(InvalidConfigurationPropertyTypeException.class, () -> config.getListOfInteger("foo.buz"));
-    assertEquals("Value of property 'foo.buz', index 2, is too large for an integer", e.getMessageWithoutPosition());
+    e =
+        assertThrows(
+            InvalidConfigurationPropertyTypeException.class,
+            () -> config.getListOfInteger("foo.buz"));
+    assertEquals(
+        "Value of property 'foo.buz', index 2, is too large for an integer",
+        e.getMessageWithoutPosition());
   }
 
   @Test
   void loadMissingFile() {
-    assertThrows(NoSuchFileException.class, () -> {
-      Configuration.fromToml(Paths.get("FileThatDoesntExist"));
-    });
+    assertThrows(
+        NoSuchFileException.class,
+        () -> {
+          Configuration.fromToml(Paths.get("FileThatDoesntExist"));
+        });
   }
 
   @Test
@@ -213,12 +244,13 @@ class TomlBackedConfigurationTest {
   @Test
   void validateConfiguration() throws Exception {
     SchemaBuilder builder = SchemaBuilder.create();
-    builder.validateConfiguration(config -> {
-      if (config.getInteger("expenses") > config.getInteger("revenue")) {
-        return singleError("Expenses cannot be larger than revenue");
-      }
-      return noErrors();
-    });
+    builder.validateConfiguration(
+        config -> {
+          if (config.getInteger("expenses") > config.getInteger("revenue")) {
+            return singleError("Expenses cannot be larger than revenue");
+          }
+          return noErrors();
+        });
 
     Schema schema = builder.toSchema();
     Configuration config = Configuration.fromToml("expenses = 2000\nrevenue = 1500\n", schema);
@@ -229,12 +261,16 @@ class TomlBackedConfigurationTest {
   @Test
   void validateConfigurationProperty() throws Exception {
     SchemaBuilder builder = SchemaBuilder.create();
-    builder.addString("foo", "foobar", null, (key, position, value) -> {
-      if ("bar".equals(value)) {
-        return singleError(position, "No bar allowed");
-      }
-      return noErrors();
-    });
+    builder.addString(
+        "foo",
+        "foobar",
+        null,
+        (key, position, value) -> {
+          if ("bar".equals(value)) {
+            return singleError(position, "No bar allowed");
+          }
+          return noErrors();
+        });
 
     Schema schema = builder.toSchema();
     Configuration config = Configuration.fromToml(" foo = \"bar\"", schema);
@@ -247,55 +283,75 @@ class TomlBackedConfigurationTest {
   @Test
   void validateIntegerProperty() throws Exception {
     SchemaBuilder builder = SchemaBuilder.create();
-    builder.addInteger("foo", null, null, (key, position, value) -> {
-      throw new AssertionFailedError("should not be reached");
-    });
+    builder.addInteger(
+        "foo",
+        null,
+        null,
+        (key, position, value) -> {
+          throw new AssertionFailedError("should not be reached");
+        });
 
     Schema schema = builder.toSchema();
-    Configuration config = Configuration.fromToml(" foo = " + (1L + Integer.MAX_VALUE) + "\n", schema);
+    Configuration config =
+        Configuration.fromToml(" foo = " + (1L + Integer.MAX_VALUE) + "\n", schema);
     assertTrue(config.hasErrors());
     ConfigurationError error = config.errors().get(0);
-    assertEquals("Value of property 'foo' is too large for an integer", error.getMessageWithoutPosition());
+    assertEquals(
+        "Value of property 'foo' is too large for an integer", error.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(1, 2), error.position());
   }
 
   @Test
   void shouldValidateStringList() throws Exception {
     SchemaBuilder builder = SchemaBuilder.create();
-    builder.addListOfString("foo", null, null, (key, position, value) -> {
-      throw new AssertionFailedError("should not be reached");
-    });
+    builder.addListOfString(
+        "foo",
+        null,
+        null,
+        (key, position, value) -> {
+          throw new AssertionFailedError("should not be reached");
+        });
 
     Schema schema = builder.toSchema();
     Configuration config = Configuration.fromToml(" foo = [1, 2]\n", schema);
     assertTrue(config.hasErrors());
     ConfigurationError error = config.errors().get(0);
-    assertEquals("Value of property 'foo', index 0, is not a string", error.getMessageWithoutPosition());
+    assertEquals(
+        "Value of property 'foo', index 0, is not a string", error.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(1, 2), error.position());
   }
 
   @Test
   void shouldValidateIntegerList() throws Exception {
     SchemaBuilder builder = SchemaBuilder.create();
-    builder.addListOfInteger("foo", null, null, (key, position, value) -> {
-      throw new AssertionFailedError("should not be reached");
-    });
+    builder.addListOfInteger(
+        "foo",
+        null,
+        null,
+        (key, position, value) -> {
+          throw new AssertionFailedError("should not be reached");
+        });
 
     Schema schema = builder.toSchema();
     Configuration config = Configuration.fromToml(" foo = ['a', 'b']\n", schema);
     assertTrue(config.hasErrors());
     ConfigurationError error = config.errors().get(0);
-    assertEquals("Value of property 'foo', index 0, is not an integer", error.getMessageWithoutPosition());
+    assertEquals(
+        "Value of property 'foo', index 0, is not an integer", error.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(1, 2), error.position());
   }
 
   @Test
   void shouldValidateLongListAsIntegers() throws Exception {
     SchemaBuilder builder = SchemaBuilder.create();
-    builder.addListOfInteger("foo", null, null, (key, position, value) -> {
-      assertEquals(Arrays.asList(1, 2, 3), value);
-      return singleError("should reach here");
-    });
+    builder.addListOfInteger(
+        "foo",
+        null,
+        null,
+        (key, position, value) -> {
+          assertEquals(Arrays.asList(1, 2, 3), value);
+          return singleError("should reach here");
+        });
 
     Schema schema = builder.toSchema();
     Configuration config = Configuration.fromToml(" foo = [1, 2, 3]\n", schema);
@@ -308,30 +364,42 @@ class TomlBackedConfigurationTest {
   @Test
   void shouldValidateWithinIntegerList() throws Exception {
     SchemaBuilder builder = SchemaBuilder.create();
-    builder.addListOfInteger("foo", null, null, (key, position, value) -> {
-      throw new AssertionFailedError("should not be reached");
-    });
+    builder.addListOfInteger(
+        "foo",
+        null,
+        null,
+        (key, position, value) -> {
+          throw new AssertionFailedError("should not be reached");
+        });
 
     Schema schema = builder.toSchema();
-    Configuration config = Configuration.fromToml(" foo = [1, 2, " + (1L + Integer.MAX_VALUE) + ", 3]\n", schema);
+    Configuration config =
+        Configuration.fromToml(" foo = [1, 2, " + (1L + Integer.MAX_VALUE) + ", 3]\n", schema);
     assertTrue(config.hasErrors());
     ConfigurationError error = config.errors().get(0);
-    assertEquals("Value of property 'foo', index 2, is too large for an integer", error.getMessageWithoutPosition());
+    assertEquals(
+        "Value of property 'foo', index 2, is too large for an integer",
+        error.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(1, 2), error.position());
   }
 
   @Test
   void shouldValidateLongList() throws Exception {
     SchemaBuilder builder = SchemaBuilder.create();
-    builder.addListOfLong("foo", null, null, (key, position, value) -> {
-      throw new AssertionFailedError("should not be reached");
-    });
+    builder.addListOfLong(
+        "foo",
+        null,
+        null,
+        (key, position, value) -> {
+          throw new AssertionFailedError("should not be reached");
+        });
 
     Schema schema = builder.toSchema();
     Configuration config = Configuration.fromToml(" foo = ['a', 'b']\n", schema);
     assertTrue(config.hasErrors());
     ConfigurationError error = config.errors().get(0);
-    assertEquals("Value of property 'foo', index 0, is not a long", error.getMessageWithoutPosition());
+    assertEquals(
+        "Value of property 'foo', index 0, is not a long", error.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(1, 2), error.position());
   }
 
@@ -357,7 +425,8 @@ class TomlBackedConfigurationTest {
     Configuration config = Configuration.fromToml(" foo = 15\n", schema);
     assertTrue(config.hasErrors());
     ConfigurationError error = config.errors().get(0);
-    assertEquals("Value of property 'foo' is outside range [0,10)", error.getMessageWithoutPosition());
+    assertEquals(
+        "Value of property 'foo' is outside range [0,10)", error.getMessageWithoutPosition());
     assertEquals(DocumentPosition.positionAt(1, 2), error.position());
 
     Configuration config2 = Configuration.fromToml(" foo = 9\n", schema);
@@ -367,24 +436,48 @@ class TomlBackedConfigurationTest {
   @Test
   void validatorNotCalledWhenDefaultUsed() throws Exception {
     SchemaBuilder builder = SchemaBuilder.create();
-    builder.addString("fooS", "hello", null, (key, position, value) -> {
-      throw new AssertionFailedError("should not be reached");
-    });
-    builder.addInteger("fooI", 2, null, (key, position, value) -> {
-      throw new AssertionFailedError("should not be reached");
-    });
-    builder.addLong("fooL", 2L, null, (key, position, value) -> {
-      throw new AssertionFailedError("should not be reached");
-    });
-    builder.addListOfString("fooLS", Collections.emptyList(), null, (key, position, value) -> {
-      throw new AssertionFailedError("should not be reached");
-    });
-    builder.addListOfInteger("fooLI", Collections.emptyList(), null, (key, position, value) -> {
-      throw new AssertionFailedError("should not be reached");
-    });
-    builder.addListOfLong("fooLL", Collections.emptyList(), null, (key, position, value) -> {
-      throw new AssertionFailedError("should not be reached");
-    });
+    builder.addString(
+        "fooS",
+        "hello",
+        null,
+        (key, position, value) -> {
+          throw new AssertionFailedError("should not be reached");
+        });
+    builder.addInteger(
+        "fooI",
+        2,
+        null,
+        (key, position, value) -> {
+          throw new AssertionFailedError("should not be reached");
+        });
+    builder.addLong(
+        "fooL",
+        2L,
+        null,
+        (key, position, value) -> {
+          throw new AssertionFailedError("should not be reached");
+        });
+    builder.addListOfString(
+        "fooLS",
+        Collections.emptyList(),
+        null,
+        (key, position, value) -> {
+          throw new AssertionFailedError("should not be reached");
+        });
+    builder.addListOfInteger(
+        "fooLI",
+        Collections.emptyList(),
+        null,
+        (key, position, value) -> {
+          throw new AssertionFailedError("should not be reached");
+        });
+    builder.addListOfLong(
+        "fooLL",
+        Collections.emptyList(),
+        null,
+        (key, position, value) -> {
+          throw new AssertionFailedError("should not be reached");
+        });
 
     Schema schema = builder.toSchema();
     Configuration config = Configuration.fromToml("\n", schema);
@@ -394,54 +487,55 @@ class TomlBackedConfigurationTest {
   @Test
   void writeConfigurationToToml() throws Exception {
     // @formatter:off
-    Configuration config = Configuration.fromToml(
-      ("foo = \"12\"\n"
-      + "bar = 13\n"
-      + "foobar = 156.34\n"
-      + "amaps = [{a = 1, b = 2}, {a = 'hello'}]\n"
-      + "\n"
-      + "[boo]\n"
-      + "baz=[1,2,3]\n"
-      + "\n"
-      + "[amap]\n"
-      + "a=1\n"
-      + "b=2\n"
-      + "[deepmap]\n"
-      + "' a' = 4\n"
-      + "[deepmap.' deep']\n"
-      + "'' = 'emptykey'\n"
-      + "[deepmap.deeper]\n"
-      + "farewell='goodbye'\n").replace("\n", System.lineSeparator())
-    );
+    Configuration config =
+        Configuration.fromToml(
+            ("foo = \"12\"\n"
+                    + "bar = 13\n"
+                    + "foobar = 156.34\n"
+                    + "amaps = [{a = 1, b = 2}, {a = 'hello'}]\n"
+                    + "\n"
+                    + "[boo]\n"
+                    + "baz=[1,2,3]\n"
+                    + "\n"
+                    + "[amap]\n"
+                    + "a=1\n"
+                    + "b=2\n"
+                    + "[deepmap]\n"
+                    + "' a' = 4\n"
+                    + "[deepmap.' deep']\n"
+                    + "'' = 'emptykey'\n"
+                    + "[deepmap.deeper]\n"
+                    + "farewell='goodbye'\n")
+                .replace("\n", System.lineSeparator()));
     // @formatter:on
 
     // @formatter:off
     String expected =
-      ("amaps = [{a = 1, b = 2}, {a = \"hello\"}]\n"
-      + "bar = 13\n"
-      + "foo = \"12\"\n"
-      + "foobar = 156.34\n"
-      + "\n"
-      + "[amap]\n"
-      + "a = 1\n"
-      + "b = 2\n"
-      + "\n"
-      + "[boo]\n"
-      + "baz = [1, 2, 3]\n"
-      + "\n"
-      + "[deepmap]\n"
-      + "\" a\" = 4\n"
-      + "\n"
-      + "[deepmap.\" deep\"]\n"
-      + "\"\" = \"emptykey\"\n"
-      + "\n"
-      + "[deepmap.deeper]\n"
-      + "farewell = \"goodbye\"\n").replace("\n", System.lineSeparator());
+        ("amaps = [{a = 1, b = 2}, {a = \"hello\"}]\n"
+                + "bar = 13\n"
+                + "foo = \"12\"\n"
+                + "foobar = 156.34\n"
+                + "\n"
+                + "[amap]\n"
+                + "a = 1\n"
+                + "b = 2\n"
+                + "\n"
+                + "[boo]\n"
+                + "baz = [1, 2, 3]\n"
+                + "\n"
+                + "[deepmap]\n"
+                + "\" a\" = 4\n"
+                + "\n"
+                + "[deepmap.\" deep\"]\n"
+                + "\"\" = \"emptykey\"\n"
+                + "\n"
+                + "[deepmap.deeper]\n"
+                + "farewell = \"goodbye\"\n")
+            .replace("\n", System.lineSeparator());
     // @formatter:on
 
     assertEquals(expected, config.toToml());
   }
-
 
   @Test
   void writeConfigurationWithDocumentationToToml() throws Exception {
@@ -452,51 +546,55 @@ class TomlBackedConfigurationTest {
     Schema schema = builder.toSchema();
 
     // @formatter:off
-    Configuration config = Configuration.fromToml(
-      ("foo = \"12\"\n"
-      + "bar = 13\n"
-      + "foobar = 156.34\n"
-      + "amaps = [{a = 1, b = 2}, {a = 'hello'}]\n"
-      + "\n"
-      + "[boo]\n"
-      + "baz=[1,2,3]\n"
-      + "\n"
-      + "[amap]\n"
-      + "a=1\n"
-      + "b=2\n"
-      + "[deepmap]\n"
-      + "' a' = 4\n"
-      + "[deepmap.' deep']\n"
-      + "'' = 'emptykey'\n"
-      + "[deepmap.deeper]\n"
-      + "farewell='goodbye'\n").replace("\n", System.lineSeparator()), schema);
+    Configuration config =
+        Configuration.fromToml(
+            ("foo = \"12\"\n"
+                    + "bar = 13\n"
+                    + "foobar = 156.34\n"
+                    + "amaps = [{a = 1, b = 2}, {a = 'hello'}]\n"
+                    + "\n"
+                    + "[boo]\n"
+                    + "baz=[1,2,3]\n"
+                    + "\n"
+                    + "[amap]\n"
+                    + "a=1\n"
+                    + "b=2\n"
+                    + "[deepmap]\n"
+                    + "' a' = 4\n"
+                    + "[deepmap.' deep']\n"
+                    + "'' = 'emptykey'\n"
+                    + "[deepmap.deeper]\n"
+                    + "farewell='goodbye'\n")
+                .replace("\n", System.lineSeparator()),
+            schema);
     // @formatter:on
 
     // @formatter:off
     String expected =
-      ("amaps = [{a = 1, b = 2}, {a = \"hello\"}]\n"
-      + "## Lucky number 13\n"
-      + "bar = 13\n"
-      + "foo = \"12\"\n"
-      + "foobar = 156.34\n"
-      + "\n"
-      + "[amap]\n"
-      + "a = 1\n"
-      + "b = 2\n"
-      + "\n"
-      + "[boo]\n"
-      + "## A list of longs\n"
-      + "baz = [1, 2, 3]\n"
-      + "\n"
-      + "## This table will have sub-tables\n"
-      + "[deepmap]\n"
-      + "\" a\" = 4\n"
-      + "\n"
-      + "[deepmap.\" deep\"]\n"
-      + "\"\" = \"emptykey\"\n"
-      + "\n"
-      + "[deepmap.deeper]\n"
-      + "farewell = \"goodbye\"\n").replace("\n", System.lineSeparator());
+        ("amaps = [{a = 1, b = 2}, {a = \"hello\"}]\n"
+                + "## Lucky number 13\n"
+                + "bar = 13\n"
+                + "foo = \"12\"\n"
+                + "foobar = 156.34\n"
+                + "\n"
+                + "[amap]\n"
+                + "a = 1\n"
+                + "b = 2\n"
+                + "\n"
+                + "[boo]\n"
+                + "## A list of longs\n"
+                + "baz = [1, 2, 3]\n"
+                + "\n"
+                + "## This table will have sub-tables\n"
+                + "[deepmap]\n"
+                + "\" a\" = 4\n"
+                + "\n"
+                + "[deepmap.\" deep\"]\n"
+                + "\"\" = \"emptykey\"\n"
+                + "\n"
+                + "[deepmap.deeper]\n"
+                + "farewell = \"goodbye\"\n")
+            .replace("\n", System.lineSeparator());
     // @formatter:on
     assertEquals(expected, config.toToml());
   }
@@ -510,31 +608,33 @@ class TomlBackedConfigurationTest {
     Schema schema = builder.toSchema();
 
     // @formatter:off
-    Configuration config = Configuration.fromToml(
-        "foo = \"12\"\n"
-      + "foobar = 156.34\n"
-      + "xxx = 10\n"
-      + "zzz = 5\n"
-      + "\n"
-      + "[boo]\n"
-      + "baz=[1,2,3]\n"
-      + "\n", schema);
+    Configuration config =
+        Configuration.fromToml(
+            "foo = \"12\"\n"
+                + "foobar = 156.34\n"
+                + "xxx = 10\n"
+                + "zzz = 5\n"
+                + "\n"
+                + "[boo]\n"
+                + "baz=[1,2,3]\n"
+                + "\n",
+            schema);
     // @formatter:on
 
     // @formatter:off
     String expected =
         "## a farewell\n"
-      + "#farewell = \"goodbye\"\n"
-      + "foo = \"12\"\n"
-      + "foobar = 156.34\n"
-      + "## documentation\n"
-      + "##   over multiple lines!\n"
-      + "#xxx = 10\n"
-      + "#zzz = 10\n"
-      + "zzz = 5\n"
-      + "\n"
-      + "[boo]\n"
-      + "baz = [1, 2, 3]\n";
+            + "#farewell = \"goodbye\"\n"
+            + "foo = \"12\"\n"
+            + "foobar = 156.34\n"
+            + "## documentation\n"
+            + "##   over multiple lines!\n"
+            + "#xxx = 10\n"
+            + "#zzz = 10\n"
+            + "zzz = 5\n"
+            + "\n"
+            + "[boo]\n"
+            + "baz = [1, 2, 3]\n";
     // @formatter:on
     assertEquals(expected.replace("\n", System.lineSeparator()), config.toToml());
   }
@@ -551,13 +651,13 @@ class TomlBackedConfigurationTest {
     // @formatter:off
     String expected =
         "## One two three\n"
-      + "#\"Here now\" = 123\n"
-      + "## Value of currency\n"
-      + "#bar = 1.0\n"
-      + "## Toggle switch\n"
-      + "#foo = false\n"
-      + "## Got milk\n"
-      + "#somekey = \"somevalue\"\n";
+            + "#\"Here now\" = 123\n"
+            + "## Value of currency\n"
+            + "#bar = 1.0\n"
+            + "## Toggle switch\n"
+            + "#foo = false\n"
+            + "## Got milk\n"
+            + "#somekey = \"somevalue\"\n";
     // @formatter:on
     assertEquals(expected.replace("\n", System.lineSeparator()), config.toToml());
   }

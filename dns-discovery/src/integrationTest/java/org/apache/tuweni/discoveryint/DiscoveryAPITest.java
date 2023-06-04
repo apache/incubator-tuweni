@@ -28,12 +28,13 @@ class DiscoveryAPITest {
   void resolveNames(@VertxInstance Vertx vertx) throws Exception {
     DNSResolver resolver = new DNSResolver(vertx);
     List<EthereumNodeRecord> nodes = new ArrayList<>();
-    DNSVisitor visitor = enr -> {
-      nodes.add(enr);
-      return false;
-    };
-    AsyncCompletion completion = resolver
-        .visitTreeAsync(
+    DNSVisitor visitor =
+        enr -> {
+          nodes.add(enr);
+          return false;
+        };
+    AsyncCompletion completion =
+        resolver.visitTreeAsync(
             "enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@all.goerli.ethdisco.net",
             visitor);
     completion.join();

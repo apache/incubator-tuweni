@@ -30,9 +30,9 @@ class GenesisTest {
       gasLimit = 0L,
       parentHash = Bytes32.leftPad(Bytes.fromHexString("0x00ff")),
       alloc = mapOf(
-        Pair(Address.fromHexString("0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"), mapOf(Pair("balance", UInt256.ONE)))
+        Pair(Address.fromHexString("0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"), mapOf(Pair("balance", UInt256.ONE))),
       ),
-      config = GenesisConfig(chainId = 1337)
+      config = GenesisConfig(chainId = 1337),
     )
     val mapper = JsonMapper()
     mapper.registerModule(EthJsonModule())

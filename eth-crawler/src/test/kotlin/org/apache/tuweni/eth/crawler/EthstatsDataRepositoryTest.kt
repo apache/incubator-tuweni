@@ -87,7 +87,7 @@ class EthstatsDataRepositoryTest {
         listOf(TxStats(Hash.fromBytes(Bytes32.random())), TxStats(Hash.fromBytes(Bytes32.random()))),
         Hash.fromBytes(Bytes32.random()),
         Hash.fromBytes(Bytes32.random()),
-        listOf()
+        listOf(),
       )
       repository!!.storeBlock("foo", "bar", blockStats).await()
       val block = repository!!.getLatestBlock("bar").await()

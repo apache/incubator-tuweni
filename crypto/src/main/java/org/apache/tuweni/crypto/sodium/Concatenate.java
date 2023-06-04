@@ -7,17 +7,14 @@ import java.util.List;
 
 import jnr.ffi.Pointer;
 
-/**
- * Concatenate elements allocated to Sodium memory.
- *
- */
+/** Concatenate elements allocated to Sodium memory. */
 public final class Concatenate {
 
   private final List<Allocated> values = new ArrayList<>();
 
   /**
    * Adds a hash to the elements to concatenate.
-   * 
+   *
    * @param hash a generic hash
    * @return the Concatenate instance
    */
@@ -28,7 +25,7 @@ public final class Concatenate {
 
   /**
    * Adds a hash to the elements to concatenate.
-   * 
+   *
    * @param hash a generic hash
    * @return the Concatenate instance
    */
@@ -39,7 +36,7 @@ public final class Concatenate {
 
   /**
    * Adds a HMAC key to the elements to concatenate.
-   * 
+   *
    * @param key a HMAC key
    * @return the Concatenate instance
    */
@@ -50,7 +47,7 @@ public final class Concatenate {
 
   /**
    * Adds a memory allocated value to the elements to concatenate.
-   * 
+   *
    * @param allocated a memory allocated value
    * @return the Concatenate instance
    */
@@ -61,7 +58,7 @@ public final class Concatenate {
 
   /**
    * Adds a key to the elements to concatenate.
-   * 
+   *
    * @param key a Diffie-Helman key
    * @return the Concatenate instance
    */
@@ -72,7 +69,7 @@ public final class Concatenate {
 
   /**
    * Adds a public key to the elements to concatenate.
-   * 
+   *
    * @param key a public key
    * @return the Concatenate instance
    */
@@ -83,7 +80,7 @@ public final class Concatenate {
 
   /**
    * Adds a public key to the elements to concatenate.
-   * 
+   *
    * @param key a public key
    * @return the Concatenate instance
    */
@@ -94,7 +91,7 @@ public final class Concatenate {
 
   /**
    * Adds a key to the elements to concatenate.
-   * 
+   *
    * @param key a secret key
    * @return the Concatenate instance
    */
@@ -105,7 +102,7 @@ public final class Concatenate {
 
   /**
    * Adds a key to the elements to concatenate.
-   * 
+   *
    * @param key a secret key
    * @return the Concatenate instance
    */
@@ -116,7 +113,7 @@ public final class Concatenate {
 
   /**
    * Concatenates the values collected into a new safe memory allocation
-   * 
+   *
    * @return the result of the concatenation operation
    */
   @SuppressWarnings("unchecked")

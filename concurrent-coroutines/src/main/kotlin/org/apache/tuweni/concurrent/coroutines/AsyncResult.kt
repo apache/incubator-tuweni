@@ -44,7 +44,7 @@ import kotlin.coroutines.resumeWithException
 fun <T> CoroutineScope.asyncResult(
   context: CoroutineContext = Dispatchers.Default,
   start: CoroutineStart = CoroutineStart.DEFAULT,
-  block: suspend CoroutineScope.() -> T
+  block: suspend CoroutineScope.() -> T,
 ): AsyncResult<T> {
   val asyncResult = AsyncResult.incomplete<T>()
   try {
@@ -141,7 +141,7 @@ suspend fun <T> AsyncResult<T>.await(): T {
 
 private class ContinuationBiConsumer<T>(
   @Volatile @JvmField
-  var cont: Continuation<T>?
+  var cont: Continuation<T>?,
 ) : BiConsumer<T?, Throwable?> {
   @Suppress("UNCHECKED_CAST")
   override fun accept(result: T?, exception: Throwable?) {

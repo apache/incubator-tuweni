@@ -34,7 +34,7 @@ internal object SessionKeyGenerator {
     return SessionKey(
       output.slice(0, DERIVED_KEY_SIZE),
       output.slice(DERIVED_KEY_SIZE, DERIVED_KEY_SIZE),
-      output.slice(DERIVED_KEY_SIZE * 2)
+      output.slice(DERIVED_KEY_SIZE * 2),
     )
   }
 }

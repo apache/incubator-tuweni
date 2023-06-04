@@ -29,10 +29,8 @@ public class ServletPeer implements Peer {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (!(o instanceof ServletPeer))
-      return false;
+    if (this == o) return true;
+    if (!(o instanceof ServletPeer)) return false;
     ServletPeer that = (ServletPeer) o;
     return Objects.equals(serverUrl, that.serverUrl);
   }

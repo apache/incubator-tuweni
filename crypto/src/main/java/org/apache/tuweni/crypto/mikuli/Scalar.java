@@ -6,9 +6,7 @@ import org.apache.milagro.amcl.BLS381.BIG;
 
 import java.util.Objects;
 
-/**
- * This class represents an ordinary scalar value.
- */
+/** This class represents an ordinary scalar value. */
 final class Scalar {
 
   private final BIG value;
@@ -23,10 +21,8 @@ final class Scalar {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     Scalar scalar = (Scalar) o;
     return Objects.equals(value.toString(), scalar.value.toString());
   }

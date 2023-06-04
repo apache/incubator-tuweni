@@ -7,9 +7,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Factory methods for collections of {@link ConfigurationError}.
- */
+/** Factory methods for collections of {@link ConfigurationError}. */
 public final class ConfigurationErrors {
   private ConfigurationErrors() {}
 
@@ -50,7 +48,8 @@ public final class ConfigurationErrors {
    * @param message The error message.
    * @return A list containing a single error.
    */
-  public static List<ConfigurationError> singleError(@Nullable DocumentPosition position, String message) {
+  public static List<ConfigurationError> singleError(
+      @Nullable DocumentPosition position, String message) {
     return Collections.singletonList(new ConfigurationError(position, message));
   }
 
@@ -63,9 +62,7 @@ public final class ConfigurationErrors {
    * @return A list containing a single error.
    */
   public static List<ConfigurationError> singleError(
-      @Nullable DocumentPosition position,
-      String message,
-      @Nullable Throwable cause) {
+      @Nullable DocumentPosition position, String message, @Nullable Throwable cause) {
     return Collections.singletonList(new ConfigurationError(position, message, cause));
   }
 }

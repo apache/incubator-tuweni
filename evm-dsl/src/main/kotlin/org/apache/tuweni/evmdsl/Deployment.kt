@@ -36,7 +36,7 @@ class Deployment(val code: Code) {
         this.add(Push(Bytes.ofUnsignedInt(codeBytes.size().toLong()))) // length
         this.add(Push(Bytes.fromHexString("0x00"))) // location
         this.add(Return) // return the code
-      }
+      },
     )
     return deployment.toBytes()
   }

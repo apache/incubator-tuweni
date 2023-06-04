@@ -56,15 +56,24 @@ class SSZTestSuite {
       int bitLength = Integer.valueOf(type.substring("uint".length()));
       Bytes read;
       if (bitLength < 31) {
-        read = Bytes.ofUnsignedLong((long) SSZ.decode(Bytes.fromHexString(ssz), reader -> reader.readUInt(bitLength)));
+        read =
+            Bytes.ofUnsignedLong(
+                (long) SSZ.decode(Bytes.fromHexString(ssz), reader -> reader.readUInt(bitLength)));
       } else if (bitLength < 62) {
-        read = Bytes.ofUnsignedLong(SSZ.decode(Bytes.fromHexString(ssz), reader -> reader.readULong(bitLength)));
+        read =
+            Bytes.ofUnsignedLong(
+                SSZ.decode(Bytes.fromHexString(ssz), reader -> reader.readULong(bitLength)));
       } else {
-        read = Bytes
-            .wrap(
-                SSZ.decode(Bytes.fromHexString(ssz), reader -> reader.readUnsignedBigInteger(bitLength)).toByteArray());
+        read =
+            Bytes.wrap(
+                SSZ.decode(
+                        Bytes.fromHexString(ssz),
+                        reader -> reader.readUnsignedBigInteger(bitLength))
+                    .toByteArray());
       }
-      assertEquals(Bytes.wrap(new BigInteger(value).toByteArray()).toShortHexString(), read.toShortHexString());
+      assertEquals(
+          Bytes.wrap(new BigInteger(value).toByteArray()).toShortHexString(),
+          read.toShortHexString());
     }
   }
 
@@ -87,15 +96,24 @@ class SSZTestSuite {
       int bitLength = Integer.valueOf(type.substring("uint".length()));
       Bytes read;
       if (bitLength < 31) {
-        read = Bytes.ofUnsignedLong((long) SSZ.decode(Bytes.fromHexString(ssz), reader -> reader.readUInt(bitLength)));
+        read =
+            Bytes.ofUnsignedLong(
+                (long) SSZ.decode(Bytes.fromHexString(ssz), reader -> reader.readUInt(bitLength)));
       } else if (bitLength < 62) {
-        read = Bytes.ofUnsignedLong(SSZ.decode(Bytes.fromHexString(ssz), reader -> reader.readULong(bitLength)));
+        read =
+            Bytes.ofUnsignedLong(
+                SSZ.decode(Bytes.fromHexString(ssz), reader -> reader.readULong(bitLength)));
       } else {
-        read = Bytes
-            .wrap(
-                SSZ.decode(Bytes.fromHexString(ssz), reader -> reader.readUnsignedBigInteger(bitLength)).toByteArray());
+        read =
+            Bytes.wrap(
+                SSZ.decode(
+                        Bytes.fromHexString(ssz),
+                        reader -> reader.readUnsignedBigInteger(bitLength))
+                    .toByteArray());
       }
-      assertEquals(Bytes.wrap(new BigInteger(value).toByteArray()).toShortHexString(), read.toShortHexString());
+      assertEquals(
+          Bytes.wrap(new BigInteger(value).toByteArray()).toShortHexString(),
+          read.toShortHexString());
     }
   }
 
@@ -103,33 +121,46 @@ class SSZTestSuite {
   @MethodSource("readUintWrongLength")
   void testUintWrongLengthFromSSZ(String type, boolean valid, String value, String ssz) {
     int bitLength = Integer.valueOf(type.substring("uint".length()));
-    assertThrows(SSZException.class, () -> {
-      if (bitLength < 31) {
-        Bytes.ofUnsignedLong((long) SSZ.decode(Bytes.fromHexString(ssz), reader -> {
-          int readInt = reader.readUInt(bitLength);
-          if (!reader.isComplete()) {
-            throw new SSZException("Should have read all bytes");
+    assertThrows(
+        SSZException.class,
+        () -> {
+          if (bitLength < 31) {
+            Bytes.ofUnsignedLong(
+                (long)
+                    SSZ.decode(
+                        Bytes.fromHexString(ssz),
+                        reader -> {
+                          int readInt = reader.readUInt(bitLength);
+                          if (!reader.isComplete()) {
+                            throw new SSZException("Should have read all bytes");
+                          }
+                          return readInt;
+                        }));
+          } else if (bitLength < 62) {
+            Bytes.ofUnsignedLong(
+                SSZ.decode(
+                    Bytes.fromHexString(ssz),
+                    reader -> {
+                      long readLong = reader.readULong(bitLength);
+                      if (!reader.isComplete()) {
+                        throw new SSZException("Should have read all bytes");
+                      }
+                      return readLong;
+                    }));
+          } else {
+            Bytes.wrap(
+                SSZ.decode(
+                        Bytes.fromHexString(ssz),
+                        reader -> {
+                          BigInteger readbi = reader.readUnsignedBigInteger(bitLength);
+                          if (!reader.isComplete()) {
+                            throw new SSZException("Should have read all bytes");
+                          }
+                          return readbi;
+                        })
+                    .toByteArray());
           }
-          return readInt;
-        }));
-      } else if (bitLength < 62) {
-        Bytes.ofUnsignedLong(SSZ.decode(Bytes.fromHexString(ssz), reader -> {
-          long readLong = reader.readULong(bitLength);
-          if (!reader.isComplete()) {
-            throw new SSZException("Should have read all bytes");
-          }
-          return readLong;
-        }));
-      } else {
-        Bytes.wrap(SSZ.decode(Bytes.fromHexString(ssz), reader -> {
-          BigInteger readbi = reader.readUnsignedBigInteger(bitLength);
-          if (!reader.isComplete()) {
-            throw new SSZException("Should have read all bytes");
-          }
-          return readbi;
-        }).toByteArray());
-      }
-    });
+        });
   }
 
   @SuppressWarnings("UnusedMethod")
@@ -152,13 +183,15 @@ class SSZTestSuite {
 
   @MustBeClosed
   private static Stream<Arguments> findTests(String glob) throws IOException {
-    return Resources.find(glob).flatMap(url -> {
-      try (InputStream in = url.openConnection().getInputStream()) {
-        return prepareTests(in);
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
-    });
+    return Resources.find(glob)
+        .flatMap(
+            url -> {
+              try (InputStream in = url.openConnection().getInputStream()) {
+                return prepareTests(in);
+              } catch (IOException e) {
+                throw new UncheckedIOException(e);
+              }
+            });
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -168,8 +201,12 @@ class SSZTestSuite {
 
     return ((List<Map>) allTests.get("test_cases"))
         .stream()
-        .map(
-            testCase -> Arguments
-                .of(testCase.get("type"), testCase.get("valid"), testCase.get("value"), testCase.get("ssz")));
+            .map(
+                testCase ->
+                    Arguments.of(
+                        testCase.get("type"),
+                        testCase.get("valid"),
+                        testCase.get("value"),
+                        testCase.get("ssz")));
   }
 }

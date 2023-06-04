@@ -51,14 +51,14 @@ internal class ScuttlebuttLocalDiscoveryServiceTest {
   @Throws(Exception::class)
   fun invalidMulticastAddress(@VertxInstance vertx: Vertx) {
     Assertions.assertThrows(
-      IllegalArgumentException::class.java
+      IllegalArgumentException::class.java,
     ) {
       ScuttlebuttLocalDiscoveryService(
         vertx,
         8008,
         0,
         "127.0.0.1",
-        "10.0.0.0"
+        "10.0.0.0",
       )
     }
   }
@@ -82,7 +82,7 @@ internal class ScuttlebuttLocalDiscoveryServiceTest {
       val ref = AtomicReference<LocalIdentity?>()
       service2.addListener { newValue: LocalIdentity? ->
         ref.set(
-          newValue
+          newValue,
         )
       }
       val localId = LocalIdentity("10.0.0.1", 10000, Identity.random())
@@ -99,7 +99,7 @@ internal class ScuttlebuttLocalDiscoveryServiceTest {
         },
         async {
           service.stop()
-        }
+        },
       ).awaitAll()
     }
   }

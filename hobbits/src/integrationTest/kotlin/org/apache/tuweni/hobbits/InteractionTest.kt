@@ -29,7 +29,7 @@ class TCPPersistentTest {
         networkInterface = "127.0.0.1",
         port = 0,
         handler = ref::set,
-        portUpdateListener = newPort::set
+        portUpdateListener = newPort::set,
       )
       client1.start()
       client2.start()
@@ -37,7 +37,7 @@ class TCPPersistentTest {
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
         "127.0.0.1",
-        newPort.get()
+        newPort.get(),
       )
     }
     Thread.sleep(200)
@@ -60,7 +60,7 @@ class TCPPersistentTest {
         port = 0,
         handler = ref::set,
         tls = true,
-        portUpdateListener = newPort::set
+        portUpdateListener = newPort::set,
       )
       client1.start()
       client2.start()
@@ -68,7 +68,7 @@ class TCPPersistentTest {
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
         "127.0.0.1",
-        newPort.get()
+        newPort.get(),
       )
     }
     Thread.sleep(200)
@@ -91,14 +91,14 @@ class TCPPersistentTest {
         networkInterface = "127.0.0.1",
         port = 0,
         handler = ref::set,
-        portUpdateListener = newPort::set
+        portUpdateListener = newPort::set,
       )
       client1.createTCPEndpoint(
         "bar",
         networkInterface = "127.0.0.1",
         port = 0,
         handler = ref2::set,
-        portUpdateListener = newPort2::set
+        portUpdateListener = newPort2::set,
       )
       client1.start()
       client2.start()
@@ -106,13 +106,13 @@ class TCPPersistentTest {
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
         "127.0.0.1",
-        newPort.get()
+        newPort.get(),
       )
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
         "127.0.0.1",
-        newPort2.get()
+        newPort2.get(),
       )
     }
     Thread.sleep(200)
@@ -138,7 +138,7 @@ class HTTPTest {
         networkInterface = "127.0.0.1",
         port = 0,
         handler = ref::set,
-        portUpdateListener = newPort::set
+        portUpdateListener = newPort::set,
       )
       client1.start()
       client2.start()
@@ -146,11 +146,11 @@ class HTTPTest {
         Message(
           protocol = Protocol.PING,
           body = Bytes.fromHexString("deadbeef"),
-          headers = Bytes.random(16)
+          headers = Bytes.random(16),
         ),
         Transport.HTTP,
         "127.0.0.1",
-        newPort.get()
+        newPort.get(),
       )
     }
     Thread.sleep(200)
@@ -173,14 +173,14 @@ class HTTPTest {
         networkInterface = "127.0.0.1",
         port = 0,
         handler = ref::set,
-        portUpdateListener = newPort::set
+        portUpdateListener = newPort::set,
       )
       client1.createHTTPEndpoint(
         "bar",
         networkInterface = "127.0.0.1",
         port = 0,
         handler = ref2::set,
-        portUpdateListener = newPort2::set
+        portUpdateListener = newPort2::set,
       )
       client1.start()
       client2.start()
@@ -188,13 +188,13 @@ class HTTPTest {
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.HTTP,
         "127.0.0.1",
-        newPort.get()
+        newPort.get(),
       )
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.HTTP,
         "127.0.0.1",
-        newPort2.get()
+        newPort2.get(),
       )
     }
     Thread.sleep(200)
@@ -221,11 +221,11 @@ class UDPTest {
         Message(
           protocol = Protocol.PING,
           body = Bytes.fromHexString("deadbeef"),
-          headers = Bytes.random(16)
+          headers = Bytes.random(16),
         ),
         Transport.UDP,
         "localhost",
-        15000
+        15000,
       )
     }
     Thread.sleep(200)
@@ -249,13 +249,13 @@ class UDPTest {
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.UDP,
         "localhost",
-        16000
+        16000,
       )
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.UDP,
         "localhost",
-        16001
+        16001,
       )
     }
     Thread.sleep(200)
@@ -282,7 +282,7 @@ class WebSocketTest {
         networkInterface = "127.0.0.1",
         port = 0,
         handler = ref::set,
-        portUpdateListener = newPort::set
+        portUpdateListener = newPort::set,
       )
       client1.start()
       client2.start()
@@ -290,11 +290,11 @@ class WebSocketTest {
         Message(
           protocol = Protocol.PING,
           body = Bytes.fromHexString("deadbeef"),
-          headers = Bytes.random(16)
+          headers = Bytes.random(16),
         ),
         Transport.WS,
         "127.0.0.1",
-        newPort.get()
+        newPort.get(),
       )
     }
     Thread.sleep(200)
@@ -319,14 +319,14 @@ class WebSocketTest {
         networkInterface = "127.0.0.1",
         port = 0,
         handler = ref::set,
-        portUpdateListener = newPort::set
+        portUpdateListener = newPort::set,
       )
       client1.createWSEndpoint(
         "bar",
         networkInterface = "127.0.0.1",
         port = 0,
         handler = ref2::set,
-        portUpdateListener = newPort2::set
+        portUpdateListener = newPort2::set,
       )
       client1.start()
       client2.start()
@@ -334,13 +334,13 @@ class WebSocketTest {
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.WS,
         "127.0.0.1",
-        newPort.get()
+        newPort.get(),
       )
       client2.sendMessage(
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.WS,
         "127.0.0.1",
-        newPort2.get()
+        newPort2.get(),
       )
     }
     Thread.sleep(200)

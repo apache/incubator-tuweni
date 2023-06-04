@@ -22,13 +22,17 @@ class Base58Test {
   @Test
   void testQuickBrownFox() {
     String result =
-        Base58.encode(Bytes.wrap("The quick brown fox jumps over the lazy dog.".getBytes(StandardCharsets.US_ASCII)));
+        Base58.encode(
+            Bytes.wrap(
+                "The quick brown fox jumps over the lazy dog."
+                    .getBytes(StandardCharsets.US_ASCII)));
     assertEquals("USm3fpXnKG5EUBx2ndxBDMPVciP5hGey2Jh4NDv6gmeo1LkMeiKrLJUUBk6Z", result);
   }
 
   @Test
   void testHex() {
-    Bytes value = Bytes.fromHexString("1220BA8632EF1A07986B171B3C8FAF0F79B3EE01B6C30BBE15A13261AD6CB0D02E3A");
+    Bytes value =
+        Bytes.fromHexString("1220BA8632EF1A07986B171B3C8FAF0F79B3EE01B6C30BBE15A13261AD6CB0D02E3A");
     assertEquals("QmatmE9msSfkKxoffpHwNLNKgwZG8eT9Bud6YoPab52vpy", Base58.encode(value));
   }
 
@@ -64,8 +68,10 @@ class Base58Test {
 
   @Test
   void testBadCharacter() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      Base58.decode("%^");
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          Base58.decode("%^");
+        });
   }
 }

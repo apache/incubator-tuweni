@@ -30,7 +30,7 @@ internal enum class MessageType(val code: Int) {
   Receipts(0x10),
   NewPooledTransactionHashes(0x08),
   GetPooledTransactions(0x09),
-  PooledTransactions(0x0a)
+  PooledTransactions(0x0a),
 }
 
 internal data class StatusMessage(
@@ -40,7 +40,7 @@ internal data class StatusMessage(
   val bestHash: Hash,
   val genesisHash: Hash,
   val forkHash: Bytes?,
-  val forkBlock: Long?
+  val forkBlock: Long?,
 ) {
 
   companion object {
@@ -66,7 +66,7 @@ internal data class StatusMessage(
           bestHash,
           genesisHash,
           forkInfo?.first,
-          forkInfo?.second?.toLong()
+          forkInfo?.second?.toLong(),
         )
       }
     }
@@ -101,7 +101,7 @@ internal data class NewBlockHashes(val hashes: List<Pair<Hash, Long>>) {
         hashes.add(
           it.readList { pairReader ->
             Pair(Hash.fromBytes(pairReader.readValue()), pairReader.readLong())
-          }
+          },
         )
       }
       NewBlockHashes(hashes)
@@ -147,7 +147,7 @@ internal data class BlockHeaders(val headers: List<BlockHeader>) {
         headers.add(
           it.readList { rlp ->
             BlockHeader.readFrom(rlp)
-          }
+          },
         )
       }
       BlockHeaders(headers)
@@ -189,7 +189,7 @@ internal data class BlockBodies(val bodies: List<BlockBody>) {
         bodies.add(
           it.readList { rlp ->
             BlockBody.readFrom(rlp)
-          }
+          },
         )
       }
       BlockBodies(bodies)

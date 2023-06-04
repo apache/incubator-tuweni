@@ -7,9 +7,7 @@ import org.apache.tuweni.bytes.Bytes;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * This class represents a BLS12-381 public key.
- */
+/** This class represents a BLS12-381 public key. */
 public final class PublicKey {
 
   /**
@@ -28,7 +26,7 @@ public final class PublicKey {
 
   /**
    * Create a PublicKey from byte array
-   * 
+   *
    * @param bytes the bytes to read the public key from
    * @return a valid public key
    */
@@ -38,7 +36,7 @@ public final class PublicKey {
 
   /**
    * Create a PublicKey from bytes
-   * 
+   *
    * @param bytes the bytes to read the public key from
    * @return a valid public key
    */

@@ -11,14 +11,10 @@ import java.nio.charset.StandardCharsets
 
 /**
  * A successful RPC response.
- */
-class RPCResponse
-/**
- * A successful RPC response.
- *
  * @param body the body of the response in bytes
  * @param bodyType the type of the response (e.g. JSON, UTF-8 or binary.)
- */(private val body: Bytes, private val bodyType: BodyType) {
+ */
+class RPCResponse(private val body: Bytes, private val bodyType: BodyType) {
   /**
    * Response body
    *

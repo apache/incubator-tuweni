@@ -36,7 +36,7 @@ class HobbitsTransportTest {
           Message(protocol = Protocol.RPC, headers = Bytes.EMPTY, body = Bytes.EMPTY),
           Transport.TCP,
           "localhost",
-          9000
+          9000,
         )
       }
     }

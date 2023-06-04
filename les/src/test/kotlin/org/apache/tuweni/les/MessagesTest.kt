@@ -43,12 +43,12 @@ internal class BlockBodiesMessageTest {
               Address.fromBytes(Bytes.random(20)),
               Wei.valueOf(2),
               Bytes.random(12),
-              SECP256K1.KeyPair.random()
-            )
+              SECP256K1.KeyPair.random(),
+            ),
           ),
-          emptyList<BlockHeader>()
-        )
-      )
+          emptyList<BlockHeader>(),
+        ),
+      ),
     )
     val rlp = message.toBytes()
     val read = BlockBodiesMessage.read(rlp)
@@ -65,18 +65,18 @@ internal class ReceiptsMessageTest {
       Log(
         Address.fromBytes(Bytes.random(20)),
         Bytes.of(1, 2, 3),
-        listOf(Bytes32.random(), Bytes32.random(), Bytes32.random())
+        listOf(Bytes32.random(), Bytes32.random(), Bytes32.random()),
       ),
       Log(
         Address.fromBytes(Bytes.random(20)),
         Bytes.of(1, 2, 3),
-        listOf(Bytes32.random(), Bytes32.random(), Bytes32.random())
+        listOf(Bytes32.random(), Bytes32.random(), Bytes32.random()),
       ),
       Log(
         Address.fromBytes(Bytes.random(20)),
         Bytes.of(1, 2, 3),
-        listOf(Bytes32.random(), Bytes32.random(), Bytes32.random())
-      )
+        listOf(Bytes32.random(), Bytes32.random(), Bytes32.random()),
+      ),
     )
     val message = ReceiptsMessage(
       3,
@@ -87,12 +87,12 @@ internal class ReceiptsMessageTest {
             Bytes32.random(),
             3,
             LogsBloomFilter.compute(
-              logsList
+              logsList,
             ),
-            logsList
-          )
-        )
-      )
+            logsList,
+          ),
+        ),
+      ),
     )
     val rlp = message.toBytes()
     val read = ReceiptsMessage.read(rlp)
@@ -119,7 +119,7 @@ internal class BlockHeadersMessageTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      UInt64.random()
+      UInt64.random(),
     )
     val message = BlockHeadersMessage(3L, 2L, listOf(header))
     val bytes = message.toBytes()
@@ -137,8 +137,8 @@ internal class GetBlockBodiesMessageTest {
         Hash.fromBytes(Bytes32.random()),
         Hash.fromBytes(Bytes32.random()),
         Hash.fromBytes(Bytes32.random()),
-        Hash.fromBytes(Bytes32.random())
-      )
+        Hash.fromBytes(Bytes32.random()),
+      ),
     )
     val rlp = message.toBytes()
     val read = GetBlockBodiesMessage.read(rlp)
@@ -156,8 +156,8 @@ internal class GetReceiptsMessageTest {
         Hash.fromBytes(Bytes32.random()),
         Hash.fromBytes(Bytes32.random()),
         Hash.fromBytes(Bytes32.random()),
-        Hash.fromBytes(Bytes32.random())
-      )
+        Hash.fromBytes(Bytes32.random()),
+      ),
     )
     val rlp = message.toBytes()
     val read = GetReceiptsMessage.read(rlp)
@@ -176,21 +176,21 @@ internal class GetBlockHeadersMessageTest {
           Bytes32.random(),
           UInt256.valueOf(32),
           UInt256.valueOf(64),
-          GetBlockHeadersMessage.BlockHeaderQuery.Direction.BACKWARDS
+          GetBlockHeadersMessage.BlockHeaderQuery.Direction.BACKWARDS,
         ),
         GetBlockHeadersMessage.BlockHeaderQuery(
           Bytes32.random(),
           UInt256.valueOf(32),
           UInt256.valueOf(64),
-          GetBlockHeadersMessage.BlockHeaderQuery.Direction.FORWARD
+          GetBlockHeadersMessage.BlockHeaderQuery.Direction.FORWARD,
         ),
         GetBlockHeadersMessage.BlockHeaderQuery(
           Bytes32.random(),
           UInt256.valueOf(32),
           UInt256.valueOf(64),
-          GetBlockHeadersMessage.BlockHeaderQuery.Direction.BACKWARDS
-        )
-      )
+          GetBlockHeadersMessage.BlockHeaderQuery.Direction.BACKWARDS,
+        ),
+      ),
     )
 
     val bytes = message.toBytes()
@@ -216,7 +216,7 @@ internal class StatusMessageTest {
       UInt256.valueOf(3),
       UInt256.valueOf(4),
       UInt256.valueOf(5),
-      1
+      1,
     )
     val read = StatusMessage.read(message.toBytes())
     assertEquals(message, read)
@@ -240,7 +240,7 @@ internal class StatusMessageTest {
       UInt256.valueOf(3),
       UInt256.valueOf(4),
       UInt256.valueOf(5),
-      1
+      1,
     )
     assertEquals(Status(2, UInt256.valueOf(1), UInt256.valueOf(23), hash, genesisHash, null, null), message.toStatus())
   }

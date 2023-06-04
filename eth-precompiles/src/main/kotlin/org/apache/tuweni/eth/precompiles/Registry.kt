@@ -34,7 +34,7 @@ object Registry {
       Pair(ecrec, ecrecContract),
       Pair(sha256, sha256PrecompiledContract),
       Pair(ripemd160, ripemD160PrecompiledContract),
-      Pair(id, idPrecompiledContract)
+      Pair(id, idPrecompiledContract),
     )
 
     val modexp = Address.fromBytes(Bytes.wrap(emptyArray, Bytes.of(5)))
@@ -52,7 +52,7 @@ object Registry {
         LibEthPairings.EIP196_PAIR_OPERATION_RAW_VALUE,
         Int.MAX_VALUE / 192 * 192,
         100000,
-        80000
+        80000,
       )
 
     bizantium = buildMap {
@@ -72,7 +72,7 @@ object Registry {
         LibEthPairings.EIP196_PAIR_OPERATION_RAW_VALUE,
         Int.MAX_VALUE / 192 * 192,
         45000,
-        34000
+        34000,
       )
     val blake2bf = Address.fromBytes(Bytes.wrap(emptyArray, Bytes.of(9)))
     val blake2BFPrecompileContract = Blake2BFPrecompileContract()

@@ -68,12 +68,15 @@ class AES256GCMTest {
     byte[] data = "123456".getBytes(UTF_8);
 
     DetachedEncryptionResult result = AES256GCM.encryptDetached(message, data, key, nonce);
-    byte[] clearText = AES256GCM.decryptDetached(result.cipherTextArray(), result.macArray(), data, key, nonce);
+    byte[] clearText =
+        AES256GCM.decryptDetached(result.cipherTextArray(), result.macArray(), data, key, nonce);
 
     assertNotNull(clearText);
     assertArrayEquals(message, clearText);
 
-    clearText = AES256GCM.decryptDetached(result.cipherTextArray(), result.macArray(), data, key, nonce.increment());
+    clearText =
+        AES256GCM.decryptDetached(
+            result.cipherTextArray(), result.macArray(), data, key, nonce.increment());
     assertNull(clearText);
   }
 
@@ -84,12 +87,15 @@ class AES256GCMTest {
       byte[] data = "123456".getBytes(UTF_8);
 
       DetachedEncryptionResult result = precomputed.encryptDetached(message, data, nonce);
-      byte[] clearText = precomputed.decryptDetached(result.cipherTextArray(), result.macArray(), data, nonce);
+      byte[] clearText =
+          precomputed.decryptDetached(result.cipherTextArray(), result.macArray(), data, nonce);
 
       assertNotNull(clearText);
       assertArrayEquals(message, clearText);
 
-      clearText = precomputed.decryptDetached(result.cipherTextArray(), result.macArray(), data, nonce.increment());
+      clearText =
+          precomputed.decryptDetached(
+              result.cipherTextArray(), result.macArray(), data, nonce.increment());
       assertNull(clearText);
     }
   }

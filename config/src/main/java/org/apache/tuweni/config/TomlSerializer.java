@@ -31,22 +31,26 @@ final class TomlSerializer {
     Map<String, List<String>> tableMap = new HashMap<>();
     Map<String, String> keyMap = new HashMap<>();
 
-    configuration.keySet().forEach(configKey -> {
-      List<String> keyPath;
-      try {
-        keyPath = Toml.parseDottedKey(configKey);
-      } catch (IllegalArgumentException e) {
-        throw new IllegalStateException("Configuration key '" + configKey + "' is not valid in TOML");
-      }
-      String tableKey = Toml.joinKeyPath(keyPath.subList(0, keyPath.size() - 1));
-      List<String> keys = tableMap.get(tableKey);
-      if (keys == null) {
-        keys = new ArrayList<>();
-        tableMap.put(tableKey, keys);
-      }
-      keys.add(configKey);
-      keyMap.put(configKey, keyPath.get(keyPath.size() - 1));
-    });
+    configuration
+        .keySet()
+        .forEach(
+            configKey -> {
+              List<String> keyPath;
+              try {
+                keyPath = Toml.parseDottedKey(configKey);
+              } catch (IllegalArgumentException e) {
+                throw new IllegalStateException(
+                    "Configuration key '" + configKey + "' is not valid in TOML");
+              }
+              String tableKey = Toml.joinKeyPath(keyPath.subList(0, keyPath.size() - 1));
+              List<String> keys = tableMap.get(tableKey);
+              if (keys == null) {
+                keys = new ArrayList<>();
+                tableMap.put(tableKey, keys);
+              }
+              keys.add(configKey);
+              keyMap.put(configKey, keyPath.get(keyPath.size() - 1));
+            });
 
     this.configuration = configuration;
     this.schema = schema;
@@ -56,7 +60,7 @@ final class TomlSerializer {
 
   void writeTo(Appendable appendable) throws IOException {
     List<String> tableKeys = tableMap.keySet().stream().sorted().collect(Collectors.toList());
-    for (Iterator<String> iterator = tableKeys.iterator(); iterator.hasNext();) {
+    for (Iterator<String> iterator = tableKeys.iterator(); iterator.hasNext(); ) {
       String tableKey = iterator.next();
       if (!tableKey.isEmpty()) {
         writeDocumentation(tableKey, appendable);
@@ -74,7 +78,8 @@ final class TomlSerializer {
         String leafName = keyMap.get(configKey);
         Object obj = configuration.get(configKey);
         if (obj == null) {
-          throw new IllegalStateException("Configuration key '" + configKey + "' was unexpectedly null");
+          throw new IllegalStateException(
+              "Configuration key '" + configKey + "' was unexpectedly null");
         }
         Object defaultValue = schema.getDefault(configKey);
         if (obj instanceof Integer) {
@@ -128,7 +133,7 @@ final class TomlSerializer {
 
   private void writeList(List<Object> list, Appendable appendable) throws IOException {
     appendable.append('[');
-    for (Iterator<Object> iterator = list.iterator(); iterator.hasNext();) {
+    for (Iterator<Object> iterator = list.iterator(); iterator.hasNext(); ) {
       Object obj = iterator.next();
       if (obj == null) {
         throw new IllegalStateException("Unexpected null in list property");
@@ -143,7 +148,8 @@ final class TomlSerializer {
 
   private void writeMap(Map<String, Object> map, Appendable appendable) throws IOException {
     appendable.append('{');
-    for (Iterator<String> iterator = map.keySet().stream().sorted().iterator(); iterator.hasNext();) {
+    for (Iterator<String> iterator = map.keySet().stream().sorted().iterator();
+        iterator.hasNext(); ) {
       String key = iterator.next();
       Object obj = map.get(key);
       if (obj == null) {

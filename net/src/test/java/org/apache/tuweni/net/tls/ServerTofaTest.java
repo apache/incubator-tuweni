@@ -51,12 +51,14 @@ class ServerTofaTest {
   private HttpServer httpServer;
 
   @BeforeAll
-  static void setupClients(@TempDirectory Path tempDir, @VertxInstance Vertx vertx) throws Exception {
+  static void setupClients(@TempDirectory Path tempDir, @VertxInstance Vertx vertx)
+      throws Exception {
     SelfSignedCertificate caClientCert = SelfSignedCertificate.create("example.com");
-    caFingerprint = certificateHexFingerprint(Paths.get(caClientCert.keyCertOptions().getCertPath()));
+    caFingerprint =
+        certificateHexFingerprint(Paths.get(caClientCert.keyCertOptions().getCertPath()));
     SecurityTestUtils.configureJDKTrustStore(tempDir, caClientCert);
-    caClient = vertx
-        .createHttpClient(
+    caClient =
+        vertx.createHttpClient(
             new HttpClientOptions()
                 .setTrustOptions(InsecureTrustOptions.INSTANCE)
                 .setSsl(true)
@@ -125,7 +127,6 @@ class ServerTofaTest {
         .onSuccess((req) -> req.send().onSuccess(respFuture::complete));
     respFuture.join();
 
-
     List<String> knownClients = Files.readAllLines(knownClientsFile);
     assertEquals(3, knownClients.size());
     assertEquals("#First line", knownClients.get(0));
@@ -155,7 +156,11 @@ class ServerTofaTest {
     foobarClient
         .request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck")
         .onFailure(respFuture::completeExceptionally)
-        .onSuccess((req) -> req.send().onFailure(respFuture::completeExceptionally).onSuccess(respFuture::complete));
+        .onSuccess(
+            (req) ->
+                req.send()
+                    .onFailure(respFuture::completeExceptionally)
+                    .onSuccess(respFuture::complete));
     Throwable e = assertThrows(CompletionException.class, respFuture::join);
     e = e.getCause().getCause();
     assertTrue(e.getMessage().contains("certificate_unknown"));

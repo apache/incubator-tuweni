@@ -16,8 +16,7 @@ public class Store {
     this.value = value;
   }
 
-  @Id
-  private String key;
+  @Id private String key;
 
   private String value;
 
@@ -39,10 +38,8 @@ public class Store {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (!(o instanceof Store))
-      return false;
+    if (this == o) return true;
+    if (!(o instanceof Store)) return false;
     Store store = (Store) o;
     return Objects.equals(key, store.key) && Objects.equals(value, store.value);
   }

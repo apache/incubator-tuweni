@@ -83,7 +83,7 @@ class StoredMerklePatriciaTrie<V> : MerkleTrie<Bytes, V> {
     fun <V> create(
       storage: MerkleStorage,
       valueSerializer: Function<V, Bytes>,
-      valueDeserializer: Function<Bytes, V>
+      valueDeserializer: Function<Bytes, V>,
     ): StoredMerklePatriciaTrie<V> {
       return StoredMerklePatriciaTrie(storage, valueSerializer::apply, valueDeserializer::apply)
     }
@@ -103,7 +103,7 @@ class StoredMerklePatriciaTrie<V> : MerkleTrie<Bytes, V> {
       storage: MerkleStorage,
       rootHash: Bytes32,
       valueSerializer: Function<V, Bytes>,
-      valueDeserializer: Function<Bytes, V>
+      valueDeserializer: Function<Bytes, V>,
     ): StoredMerklePatriciaTrie<V> {
       return StoredMerklePatriciaTrie(storage, rootHash, valueSerializer::apply, valueDeserializer::apply)
     }
@@ -126,7 +126,7 @@ class StoredMerklePatriciaTrie<V> : MerkleTrie<Bytes, V> {
   constructor(
     storage: MerkleStorage,
     valueSerializer: (V) -> Bytes,
-    valueDeserializer: (Bytes) -> V
+    valueDeserializer: (Bytes) -> V,
   ) : this(storage, EMPTY_TRIE_ROOT_HASH, valueSerializer, valueDeserializer)
 
   /**
@@ -141,7 +141,7 @@ class StoredMerklePatriciaTrie<V> : MerkleTrie<Bytes, V> {
     storage: MerkleStorage,
     rootHash: Bytes32,
     valueSerializer: (V) -> Bytes,
-    valueDeserializer: (Bytes) -> V
+    valueDeserializer: (Bytes) -> V,
   ) {
     this.storage = storage
     this.nodeFactory = StoredNodeFactory(storage, valueSerializer, valueDeserializer)

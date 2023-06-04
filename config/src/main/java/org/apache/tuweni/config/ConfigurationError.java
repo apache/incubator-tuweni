@@ -4,13 +4,10 @@ package org.apache.tuweni.config;
 
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Provides details regarding an error in the configuration.
- */
+/** Provides details regarding an error in the configuration. */
 public final class ConfigurationError extends RuntimeException {
 
-  @Nullable
-  private final DocumentPosition position;
+  @Nullable private final DocumentPosition position;
 
   /**
    * Construct an error.
@@ -49,7 +46,8 @@ public final class ConfigurationError extends RuntimeException {
    * @param message The error message.
    * @param cause The cause of the error.
    */
-  public ConfigurationError(@Nullable DocumentPosition position, String message, @Nullable Throwable cause) {
+  public ConfigurationError(
+      @Nullable DocumentPosition position, String message, @Nullable Throwable cause) {
     super(message, cause);
     this.position = position;
   }
@@ -57,8 +55,8 @@ public final class ConfigurationError extends RuntimeException {
   /**
    * Provides the position in the input where the error occurred.
    *
-   * @return The position in the input where the error occurred, or {@code null} if no position information is
-   *         available.
+   * @return The position in the input where the error occurred, or {@code null} if no position
+   *     information is available.
    */
   @Nullable
   public DocumentPosition position() {

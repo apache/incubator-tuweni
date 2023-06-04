@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.apache.tuweni.units.bigints;
 
-
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.bytes.MutableBytes;
@@ -16,12 +15,14 @@ import org.jetbrains.annotations.Nullable;
 /**
  * An unsigned 256-bit precision number.
  *
- * This is a raw {@link UInt256Value} - a 256-bit precision unsigned number of no particular unit.
+ * <p>This is a raw {@link UInt256Value} - a 256-bit precision unsigned number of no particular
+ * unit.
  */
 public final class UInt256 implements UInt256Value<UInt256> {
-  private final static int MAX_CONSTANT = 64;
-  private final static BigInteger BI_MAX_CONSTANT = BigInteger.valueOf(MAX_CONSTANT);
+  private static final int MAX_CONSTANT = 64;
+  private static final BigInteger BI_MAX_CONSTANT = BigInteger.valueOf(MAX_CONSTANT);
   private static UInt256[] CONSTANTS = new UInt256[MAX_CONSTANT + 1];
+
   static {
     CONSTANTS[0] = new UInt256(Bytes32.ZERO);
     for (int i = 1; i <= MAX_CONSTANT; ++i) {
@@ -30,13 +31,16 @@ public final class UInt256 implements UInt256Value<UInt256> {
   }
 
   /** The minimum value of a UInt256 */
-  public final static UInt256 MIN_VALUE = valueOf(0);
+  public static final UInt256 MIN_VALUE = valueOf(0);
+
   /** The maximum value of a UInt256 */
-  public final static UInt256 MAX_VALUE = new UInt256(Bytes32.ZERO.not());
+  public static final UInt256 MAX_VALUE = new UInt256(Bytes32.ZERO.not());
+
   /** The value 0 */
-  public final static UInt256 ZERO = valueOf(0);
+  public static final UInt256 ZERO = valueOf(0);
+
   /** The value 1 */
-  public final static UInt256 ONE = valueOf(1);
+  public static final UInt256 ONE = valueOf(1);
 
   private static final int INTS_SIZE = 32 / 4;
   // The mask is used to obtain the value of an int as if it were unsigned.
@@ -69,7 +73,8 @@ public final class UInt256 implements UInt256Value<UInt256> {
    *
    * @param value the value to create a {@link UInt256} for
    * @return a {@link UInt256} containing the specified value
-   * @throws IllegalArgumentException if the value is negative or too large to be represented as a UInt256
+   * @throws IllegalArgumentException if the value is negative or too large to be represented as a
+   *     UInt256
    */
   public static UInt256 valueOf(BigInteger value) {
     if (value.signum() < 0) {
@@ -104,38 +109,39 @@ public final class UInt256 implements UInt256Value<UInt256> {
       final byte[] array = bytes.toArrayUnsafe();
       return new UInt256(
           new int[] {
-              (Byte.toUnsignedInt(array[0])) << 24
-                  | (Byte.toUnsignedInt(array[1]) << 16)
-                  | (Byte.toUnsignedInt(array[2]) << 8)
-                  | (Byte.toUnsignedInt(array[3])),
-              (Byte.toUnsignedInt(array[4]) << 24)
-                  | (Byte.toUnsignedInt(array[5]) << 16)
-                  | (Byte.toUnsignedInt(array[6]) << 8)
-                  | (Byte.toUnsignedInt(array[7])),
-              (Byte.toUnsignedInt(array[8]) << 24)
-                  | (Byte.toUnsignedInt(array[9]) << 16)
-                  | (Byte.toUnsignedInt(array[10]) << 8)
-                  | (Byte.toUnsignedInt(array[11])),
-              (Byte.toUnsignedInt(array[12]) << 24)
-                  | (Byte.toUnsignedInt(array[13]) << 16)
-                  | (Byte.toUnsignedInt(array[14]) << 8)
-                  | (Byte.toUnsignedInt(array[15])),
-              (Byte.toUnsignedInt(array[16]) << 24)
-                  | (Byte.toUnsignedInt(array[17]) << 16)
-                  | (Byte.toUnsignedInt(array[18]) << 8)
-                  | (Byte.toUnsignedInt(array[19])),
-              (Byte.toUnsignedInt(array[20]) << 24)
-                  | (Byte.toUnsignedInt(array[21]) << 16)
-                  | (Byte.toUnsignedInt(array[22]) << 8)
-                  | (Byte.toUnsignedInt(array[23])),
-              (Byte.toUnsignedInt(array[24]) << 24)
-                  | (Byte.toUnsignedInt(array[25]) << 16)
-                  | (Byte.toUnsignedInt(array[26]) << 8)
-                  | (Byte.toUnsignedInt(array[27])),
-              (Byte.toUnsignedInt(array[28]) << 24)
-                  | (Byte.toUnsignedInt(array[29]) << 16)
-                  | (Byte.toUnsignedInt(array[30]) << 8)
-                  | (Byte.toUnsignedInt(array[31]))});
+            (Byte.toUnsignedInt(array[0])) << 24
+                | (Byte.toUnsignedInt(array[1]) << 16)
+                | (Byte.toUnsignedInt(array[2]) << 8)
+                | (Byte.toUnsignedInt(array[3])),
+            (Byte.toUnsignedInt(array[4]) << 24)
+                | (Byte.toUnsignedInt(array[5]) << 16)
+                | (Byte.toUnsignedInt(array[6]) << 8)
+                | (Byte.toUnsignedInt(array[7])),
+            (Byte.toUnsignedInt(array[8]) << 24)
+                | (Byte.toUnsignedInt(array[9]) << 16)
+                | (Byte.toUnsignedInt(array[10]) << 8)
+                | (Byte.toUnsignedInt(array[11])),
+            (Byte.toUnsignedInt(array[12]) << 24)
+                | (Byte.toUnsignedInt(array[13]) << 16)
+                | (Byte.toUnsignedInt(array[14]) << 8)
+                | (Byte.toUnsignedInt(array[15])),
+            (Byte.toUnsignedInt(array[16]) << 24)
+                | (Byte.toUnsignedInt(array[17]) << 16)
+                | (Byte.toUnsignedInt(array[18]) << 8)
+                | (Byte.toUnsignedInt(array[19])),
+            (Byte.toUnsignedInt(array[20]) << 24)
+                | (Byte.toUnsignedInt(array[21]) << 16)
+                | (Byte.toUnsignedInt(array[22]) << 8)
+                | (Byte.toUnsignedInt(array[23])),
+            (Byte.toUnsignedInt(array[24]) << 24)
+                | (Byte.toUnsignedInt(array[25]) << 16)
+                | (Byte.toUnsignedInt(array[26]) << 8)
+                | (Byte.toUnsignedInt(array[27])),
+            (Byte.toUnsignedInt(array[28]) << 24)
+                | (Byte.toUnsignedInt(array[29]) << 16)
+                | (Byte.toUnsignedInt(array[30]) << 8)
+                | (Byte.toUnsignedInt(array[31]))
+          });
     } else {
       return new UInt256(Bytes32.leftPad(bytes));
     }
@@ -144,11 +150,12 @@ public final class UInt256 implements UInt256Value<UInt256> {
   /**
    * Parse a hexadecimal string into a {@link UInt256}.
    *
-   * @param str The hexadecimal string to parse, which may or may not start with "0x". That representation may contain
-   *        less than 32 bytes, in which case the result is left padded with zeros.
+   * @param str The hexadecimal string to parse, which may or may not start with "0x". That
+   *     representation may contain less than 32 bytes, in which case the result is left padded with
+   *     zeros.
    * @return The value corresponding to {@code str}.
-   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal representation or
-   *         contains more than 32 bytes.
+   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal
+   *     representation or contains more than 32 bytes.
    */
   public static UInt256 fromHexString(String str) {
     return new UInt256(Bytes32.fromHexStringLenient(str));
@@ -246,8 +253,10 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (modulus.isZero()) {
       throw new ArithmeticException("addMod with zero modulus");
     }
-    return UInt256
-        .valueOf(toUnsignedBigInteger().add(value.toUnsignedBigInteger()).mod(modulus.toUnsignedBigInteger()));
+    return UInt256.valueOf(
+        toUnsignedBigInteger()
+            .add(value.toUnsignedBigInteger())
+            .mod(modulus.toUnsignedBigInteger()));
   }
 
   @Override
@@ -255,7 +264,8 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (modulus.isZero()) {
       throw new ArithmeticException("addMod with zero modulus");
     }
-    return UInt256.valueOf(toUnsignedBigInteger().add(BigInteger.valueOf(value)).mod(modulus.toUnsignedBigInteger()));
+    return UInt256.valueOf(
+        toUnsignedBigInteger().add(BigInteger.valueOf(value)).mod(modulus.toUnsignedBigInteger()));
   }
 
   @Override
@@ -266,7 +276,8 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (modulus < 0) {
       throw new ArithmeticException("addMod unsigned with negative modulus");
     }
-    return UInt256.valueOf(toUnsignedBigInteger().add(BigInteger.valueOf(value)).mod(BigInteger.valueOf(modulus)));
+    return UInt256.valueOf(
+        toUnsignedBigInteger().add(BigInteger.valueOf(value)).mod(BigInteger.valueOf(modulus)));
   }
 
   @Override
@@ -277,7 +288,8 @@ public final class UInt256 implements UInt256Value<UInt256> {
 
     int[] result = new int[INTS_SIZE];
     boolean constant = true;
-    long sum = (this.ints[INTS_SIZE - 1] & LONG_MASK) + ((~value.ints[INTS_SIZE - 1]) & LONG_MASK) + 1;
+    long sum =
+        (this.ints[INTS_SIZE - 1] & LONG_MASK) + ((~value.ints[INTS_SIZE - 1]) & LONG_MASK) + 1;
     result[INTS_SIZE - 1] = (int) (sum & LONG_MASK);
     if (result[INTS_SIZE - 1] < 0 || result[INTS_SIZE - 1] > MAX_CONSTANT) {
       constant = false;
@@ -338,7 +350,9 @@ public final class UInt256 implements UInt256Value<UInt256> {
     for (int i = INTS_SIZE; i < (INTS_SIZE + INTS_SIZE) - 1; ++i) {
       constant &= (result[i] == 0);
     }
-    if (constant && result[INTS_SIZE + INTS_SIZE - 1] >= 0 && result[INTS_SIZE + INTS_SIZE - 1] <= MAX_CONSTANT) {
+    if (constant
+        && result[INTS_SIZE + INTS_SIZE - 1] >= 0
+        && result[INTS_SIZE + INTS_SIZE - 1] <= MAX_CONSTANT) {
       return CONSTANTS[result[INTS_SIZE + INTS_SIZE - 1]];
     }
     return new UInt256(Arrays.copyOfRange(result, INTS_SIZE, INTS_SIZE + INTS_SIZE));
@@ -373,8 +387,10 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (value.equals(UInt256.ONE)) {
       return mod(modulus);
     }
-    return UInt256
-        .valueOf(toUnsignedBigInteger().multiply(value.toUnsignedBigInteger()).mod(modulus.toUnsignedBigInteger()));
+    return UInt256.valueOf(
+        toUnsignedBigInteger()
+            .multiply(value.toUnsignedBigInteger())
+            .mod(modulus.toUnsignedBigInteger()));
   }
 
   @Override
@@ -391,8 +407,10 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (value < 0) {
       throw new ArithmeticException("multiplyMod unsigned by negative");
     }
-    return UInt256
-        .valueOf(toUnsignedBigInteger().multiply(BigInteger.valueOf(value)).mod(modulus.toUnsignedBigInteger()));
+    return UInt256.valueOf(
+        toUnsignedBigInteger()
+            .multiply(BigInteger.valueOf(value))
+            .mod(modulus.toUnsignedBigInteger()));
   }
 
   @Override
@@ -412,7 +430,10 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (value < 0) {
       throw new ArithmeticException("multiplyMod unsigned by negative");
     }
-    return UInt256.valueOf(toUnsignedBigInteger().multiply(BigInteger.valueOf(value)).mod(BigInteger.valueOf(modulus)));
+    return UInt256.valueOf(
+        toUnsignedBigInteger()
+            .multiply(BigInteger.valueOf(value))
+            .mod(BigInteger.valueOf(modulus)));
   }
 
   @Override
@@ -452,7 +473,8 @@ public final class UInt256 implements UInt256Value<UInt256> {
       if (resultBytes.size() > 32) {
         resultBytes = resultBytes.slice(resultBytes.size() - 32, 32);
       }
-      return UInt256.fromBytes(Bytes32.leftPad(resultBytes, result.signum() < 0 ? (byte) 0xFF : 0x00));
+      return UInt256.fromBytes(
+          Bytes32.leftPad(resultBytes, result.signum() < 0 ? (byte) 0xFF : 0x00));
     }
   }
 
@@ -540,7 +562,8 @@ public final class UInt256 implements UInt256Value<UInt256> {
       resultBytes = resultBytes.slice(resultBytes.size() - 32, 32);
     }
 
-    return UInt256.fromBytes(Bytes32.leftPad(resultBytes, result.signum() < 0 ? (byte) 0xFF : 0x00));
+    return UInt256.fromBytes(
+        Bytes32.leftPad(resultBytes, result.signum() < 0 ? (byte) 0xFF : 0x00));
   }
 
   @Override
@@ -685,7 +708,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
 
     int resIdx = INTS_SIZE;
     if (s == 0) {
-      for (int i = INTS_SIZE - d; i > 0;) {
+      for (int i = INTS_SIZE - d; i > 0; ) {
         result[--resIdx] = this.ints[--i];
       }
     } else {
@@ -718,7 +741,7 @@ public final class UInt256 implements UInt256Value<UInt256> {
 
     int resIdx = 0;
     if (s == 0) {
-      for (int i = d; i < INTS_SIZE;) {
+      for (int i = d; i < INTS_SIZE; ) {
         result[resIdx++] = this.ints[i++];
       }
     } else {
@@ -825,7 +848,8 @@ public final class UInt256 implements UInt256Value<UInt256> {
     if (!fitsLong()) {
       throw new ArithmeticException("Value does not fit a 8 byte long");
     }
-    return (((long) this.ints[INTS_SIZE - 2]) << 32) | (((long) (this.ints[INTS_SIZE - 1])) & LONG_MASK);
+    return (((long) this.ints[INTS_SIZE - 2]) << 32)
+        | (((long) (this.ints[INTS_SIZE - 1])) & LONG_MASK);
   }
 
   @Override
@@ -840,38 +864,39 @@ public final class UInt256 implements UInt256Value<UInt256> {
 
   private byte[] toByteArray() {
     return new byte[] {
-        (byte) (ints[0] >> 24),
-        (byte) (ints[0] >> 16),
-        (byte) (ints[0] >> 8),
-        (byte) (ints[0]),
-        (byte) (ints[1] >> 24),
-        (byte) (ints[1] >> 16),
-        (byte) (ints[1] >> 8),
-        (byte) (ints[1]),
-        (byte) (ints[2] >> 24),
-        (byte) (ints[2] >> 16),
-        (byte) (ints[2] >> 8),
-        (byte) (ints[2]),
-        (byte) (ints[3] >> 24),
-        (byte) (ints[3] >> 16),
-        (byte) (ints[3] >> 8),
-        (byte) (ints[3]),
-        (byte) (ints[4] >> 24),
-        (byte) (ints[4] >> 16),
-        (byte) (ints[4] >> 8),
-        (byte) (ints[4]),
-        (byte) (ints[5] >> 24),
-        (byte) (ints[5] >> 16),
-        (byte) (ints[5] >> 8),
-        (byte) (ints[5]),
-        (byte) (ints[6] >> 24),
-        (byte) (ints[6] >> 16),
-        (byte) (ints[6] >> 8),
-        (byte) (ints[6]),
-        (byte) (ints[7] >> 24),
-        (byte) (ints[7] >> 16),
-        (byte) (ints[7] >> 8),
-        (byte) (ints[7])};
+      (byte) (ints[0] >> 24),
+      (byte) (ints[0] >> 16),
+      (byte) (ints[0] >> 8),
+      (byte) (ints[0]),
+      (byte) (ints[1] >> 24),
+      (byte) (ints[1] >> 16),
+      (byte) (ints[1] >> 8),
+      (byte) (ints[1]),
+      (byte) (ints[2] >> 24),
+      (byte) (ints[2] >> 16),
+      (byte) (ints[2] >> 8),
+      (byte) (ints[2]),
+      (byte) (ints[3] >> 24),
+      (byte) (ints[3] >> 16),
+      (byte) (ints[3] >> 8),
+      (byte) (ints[3]),
+      (byte) (ints[4] >> 24),
+      (byte) (ints[4] >> 16),
+      (byte) (ints[4] >> 8),
+      (byte) (ints[4]),
+      (byte) (ints[5] >> 24),
+      (byte) (ints[5] >> 16),
+      (byte) (ints[5] >> 8),
+      (byte) (ints[5]),
+      (byte) (ints[6] >> 24),
+      (byte) (ints[6] >> 16),
+      (byte) (ints[6] >> 8),
+      (byte) (ints[6]),
+      (byte) (ints[7] >> 24),
+      (byte) (ints[7] >> 16),
+      (byte) (ints[7] >> 8),
+      (byte) (ints[7])
+    };
   }
 
   @Override

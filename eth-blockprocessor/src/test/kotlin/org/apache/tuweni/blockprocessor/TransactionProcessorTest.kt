@@ -119,7 +119,7 @@ class BlockProcessorReferenceTest {
       testName: String,
       test: JsonReferenceTest,
       hardFork: HardFork,
-      path: URL
+      path: URL,
     ): List<Arguments> {
       var index = 0
       return test.post?.get(hardForkMappping[hardFork])?.map { exec ->
@@ -135,7 +135,7 @@ class BlockProcessorReferenceTest {
               test.transaction!!.to,
               Wei.valueOf(UInt256.fromBytes(value)),
               test.transaction!!.data!!.get(exec.indexes!!.data!!),
-              keyPair
+              keyPair,
             )
           }
         }
@@ -162,7 +162,7 @@ class BlockProcessorReferenceTest {
     testIndex: Int,
     test: JsonReferenceTest,
     tx: () -> Transaction,
-    exec: TransactionExecution
+    exec: TransactionExecution,
   ) {
     runReferenceTests(path, testName, hardFork, testIndex, test, tx, exec)
   }
@@ -174,7 +174,7 @@ class BlockProcessorReferenceTest {
     testIndex: Int,
     test: JsonReferenceTest,
     tx: () -> Transaction?,
-    exec: TransactionExecution
+    exec: TransactionExecution,
   ) = runBlocking {
     assertNotNull(testName)
     assertNotNull(hardFork)
@@ -191,7 +191,7 @@ class BlockProcessorReferenceTest {
           state.nonce!!,
           state.balance!!,
           Hash.fromBytes(MerkleTrie.EMPTY_TRIE_ROOT_HASH),
-          Hash.hash(state.code!!)
+          Hash.hash(state.code!!),
         )
         repository.storeAccount(address, accountState)
         repository.storeCode(state.code!!)
@@ -221,7 +221,7 @@ class BlockProcessorReferenceTest {
       Instant.ofEpochSecond(test.env!!.currentTimestamp!!.toLong()),
       Bytes.EMPTY,
       Hash.hash(RLP.encodeList {}),
-      UInt64.random()
+      UInt64.random(),
     )
     val result =
       processor.execute(
@@ -233,7 +233,7 @@ class BlockProcessorReferenceTest {
         listOf(transaction),
         repository,
         Registry.istanbul,
-        hardFork
+        hardFork,
       )
 
     val rlp = RLP.encodeList { writer ->
@@ -245,7 +245,7 @@ class BlockProcessorReferenceTest {
     val logsHash = Hash.hash(rlp)
     assertEquals(
       exec.logs,
-      logsHash
+      logsHash,
     ) {
       val logs = result.block.transactionReceipts.map { it.logs }.flatten()
       logs.map {
@@ -292,14 +292,14 @@ data class JsonAccountState(
   var balance: Wei? = null,
   var code: Bytes? = null,
   var nonce: UInt256? = null,
-  var storage: Map<UInt256, UInt256>? = null
+  var storage: Map<UInt256, UInt256>? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class TransactionExecutionIndex(
   var data: Int? = null,
   var gas: Int? = null,
-  var value: Int? = null
+  var value: Int? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -308,7 +308,7 @@ data class TransactionExecution(
   var hash: Hash? = null,
   var indexes: TransactionExecutionIndex? = null,
   var logs: Bytes? = null,
-  var txbytes: Bytes? = null
+  var txbytes: Bytes? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -316,7 +316,7 @@ data class JsonReferenceTest(
   var env: Env? = null,
   var post: Map<String, List<TransactionExecution>>? = null,
   var pre: Map<Address, JsonAccountState>? = null,
-  var transaction: TransactionStep? = null
+  var transaction: TransactionStep? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -328,7 +328,7 @@ data class TransactionStep(
   var secretKey: Bytes32? = null,
   var sender: Address? = null,
   var to: Address? = null,
-  val value: List<Bytes>? = null
+  val value: List<Bytes>? = null,
 ) {
   fun combinedData(): Bytes? =
     data?.let {
@@ -344,5 +344,5 @@ data class Env(
   var currentGasLimit: Gas? = null,
   var currentNumber: UInt256? = null,
   var currentTimestamp: UInt256? = null,
-  var previousHash: Hash? = null
+  var previousHash: Hash? = null,
 )

@@ -4,13 +4,10 @@ package org.apache.tuweni.config;
 
 import org.jetbrains.annotations.Nullable;
 
-/**
- * An exception thrown when an invalid type is encountered.
- */
+/** An exception thrown when an invalid type is encountered. */
 public final class InvalidConfigurationPropertyTypeException extends RuntimeException {
 
-  @Nullable
-  private final DocumentPosition position;
+  @Nullable private final DocumentPosition position;
 
   InvalidConfigurationPropertyTypeException(@Nullable DocumentPosition position, String message) {
     super(message);
@@ -18,9 +15,7 @@ public final class InvalidConfigurationPropertyTypeException extends RuntimeExce
   }
 
   InvalidConfigurationPropertyTypeException(
-      @Nullable DocumentPosition position,
-      String message,
-      @Nullable Throwable cause) {
+      @Nullable DocumentPosition position, String message, @Nullable Throwable cause) {
     super(message, cause);
     this.position = position;
   }
@@ -28,8 +23,8 @@ public final class InvalidConfigurationPropertyTypeException extends RuntimeExce
   /**
    * Provides the position of the property in the configuration document.
    *
-   * @return The position of the property in the configuration document, or {@code null} if there is no position
-   *         available.
+   * @return The position of the property in the configuration document, or {@code null} if there is
+   *     no position available.
    */
   @Nullable
   public DocumentPosition position() {

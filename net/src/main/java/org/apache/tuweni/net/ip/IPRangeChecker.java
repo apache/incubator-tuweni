@@ -8,14 +8,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Checks that an IP is allowed according to IP ranges.
- */
+/** Checks that an IP is allowed according to IP ranges. */
 public class IPRangeChecker {
 
   /**
    * Creates a new IP range checker.
-   * 
+   *
    * @param allowedRanges list of allowed ranges.
    * @param rejectedRanges list of rejected ranges
    * @return a new IP range checker
@@ -35,7 +33,7 @@ public class IPRangeChecker {
 
   /**
    * Creates a checker that allows any IP.
-   * 
+   *
    * @return a new range checker that allows any IP.
    */
   public static IPRangeChecker allowAll() {
@@ -52,7 +50,7 @@ public class IPRangeChecker {
 
   /**
    * Checks if an IP address is inside the ranges of this checker
-   * 
+   *
    * @param ip the IP address to check
    * @return true if it is inside the ranges of the checker.
    */
@@ -69,6 +67,4 @@ public class IPRangeChecker {
     }
     return true;
   }
-
-
 }

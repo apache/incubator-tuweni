@@ -19,9 +19,7 @@ import java.util.Objects;
 
 import org.jetbrains.annotations.Nullable;
 
-/**
- * An Ethereum transaction.
- */
+/** An Ethereum transaction. */
 public final class Transaction {
 
   // The base of the signature v-value
@@ -42,19 +40,24 @@ public final class Transaction {
    * Deserialize a transaction from RLP encoded bytes.
    *
    * @param encoded The RLP encoded transaction.
-   * @param lenient If {@code true}, the RLP decoding will be lenient toward any non-minimal encoding.
+   * @param lenient If {@code true}, the RLP decoding will be lenient toward any non-minimal
+   *     encoding.
    * @return The de-serialized transaction.
    * @throws RLPException If there is an error decoding the transaction.
    */
   public static Transaction fromBytes(Bytes encoded, boolean lenient) {
     requireNonNull(encoded);
-    return RLP.decode(encoded, lenient, (reader) -> {
-      Transaction tx = reader.readList(Transaction::readFrom);
-      if (!reader.isComplete()) {
-        throw new RLPException("Additional bytes present at the end of the encoded transaction");
-      }
-      return tx;
-    });
+    return RLP.decode(
+        encoded,
+        lenient,
+        (reader) -> {
+          Transaction tx = reader.readList(Transaction::readFrom);
+          if (!reader.isComplete()) {
+            throw new RLPException(
+                "Additional bytes present at the end of the encoded transaction");
+          }
+          return tx;
+        });
   }
 
   /**
@@ -80,12 +83,14 @@ public final class Transaction {
     int encodedV = reader.readInt();
     Bytes rbytes = reader.readValue();
     if (rbytes.size() > 32) {
-      throw new RLPException("r-value of the signature is " + rbytes.size() + ", it should be at most 32 bytes");
+      throw new RLPException(
+          "r-value of the signature is " + rbytes.size() + ", it should be at most 32 bytes");
     }
     BigInteger r = rbytes.toUnsignedBigInteger();
     Bytes sbytes = reader.readValue();
     if (sbytes.size() > 32) {
-      throw new RLPException("s-value of the signature is " + sbytes.size() + ", it should be at most 32 bytes");
+      throw new RLPException(
+          "s-value of the signature is " + sbytes.size() + ", it should be at most 32 bytes");
     }
     BigInteger s = sbytes.toUnsignedBigInteger();
     if (!reader.isComplete()) {
@@ -102,8 +107,7 @@ public final class Transaction {
   private final UInt256 nonce;
   private final Wei gasPrice;
   private final Gas gasLimit;
-  @Nullable
-  private final Address to;
+  @Nullable private final Address to;
   private final Wei value;
   private final SECP256K1.Signature signature;
   private final Bytes payload;
@@ -238,7 +242,7 @@ public final class Transaction {
 
   /**
    * Provides the transaction nonce
-   * 
+   *
    * @return The transaction nonce.
    */
   public UInt256 getNonce() {
@@ -247,7 +251,7 @@ public final class Transaction {
 
   /**
    * Provides the gas price
-   * 
+   *
    * @return The transaction gas price.
    */
   public Wei getGasPrice() {
@@ -256,7 +260,7 @@ public final class Transaction {
 
   /**
    * Provides the gas limit
-   * 
+   *
    * @return The transaction gas limit.
    */
   public Gas getGasLimit() {
@@ -265,7 +269,7 @@ public final class Transaction {
 
   /**
    * Provides the target contact address.
-   * 
+   *
    * @return The target contract address, or null if not present.
    */
   @Nullable
@@ -275,8 +279,9 @@ public final class Transaction {
 
   /**
    * Returns true if the transaction creates a contract.
-   * 
-   * @return {@code true} if the transaction is a contract creation ({@code to} address is {@code null}).
+   *
+   * @return {@code true} if the transaction is a contract creation ({@code to} address is {@code
+   *     null}).
    */
   public boolean isContractCreation() {
     return to == null;
@@ -284,7 +289,7 @@ public final class Transaction {
 
   /**
    * Provides the amount of eth to transfer
-   * 
+   *
    * @return The amount of Eth to transfer.
    */
   public Wei getValue() {
@@ -293,7 +298,7 @@ public final class Transaction {
 
   /**
    * Provides the transaction signature
-   * 
+   *
    * @return The transaction signature.
    */
   public SECP256K1.Signature getSignature() {
@@ -302,7 +307,7 @@ public final class Transaction {
 
   /**
    * Provides the transaction payload
-   * 
+   *
    * @return The transaction payload.
    */
   public Bytes getPayload() {
@@ -311,7 +316,7 @@ public final class Transaction {
 
   /**
    * Provides the chain id
-   * 
+   *
    * @return the chain id of the transaction, or null if no chain id was encoded on the transaction.
    * @see <a href="https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md">EIP-155</a>
    */
@@ -335,7 +340,7 @@ public final class Transaction {
 
   /**
    * Provides the sender's address
-   * 
+   *
    * @return The sender of the transaction, or {@code null} if the signature is invalid.
    */
   @Nullable
@@ -347,12 +352,11 @@ public final class Transaction {
   }
 
   /**
-   * Extracts the public key of the signature of the transaction. If the transaction is invalid, the public key may be
-   * null.
-   * 
+   * Extracts the public key of the signature of the transaction. If the transaction is invalid, the
+   * public key may be null.
+   *
    * @return the public key of the key pair that signed the transaction.
    */
-
   public SECP256K1.@Nullable PublicKey extractPublicKey() {
     Bytes data = signatureData(nonce, gasPrice, gasLimit, to, value, payload, chainId);
     SECP256K1.PublicKey publicKey = SECP256K1.PublicKey.recoverFromSignature(data, signature);
@@ -397,21 +401,14 @@ public final class Transaction {
 
   @Override
   public String toString() {
-    return String
-        .format(
-            "Transaction{nonce=%s, gasPrice=%s, gasLimit=%s, to=%s, value=%s, signature=%s, payload=%s",
-            nonce,
-            gasPrice,
-            gasLimit,
-            to,
-            value,
-            signature,
-            payload);
+    return String.format(
+        "Transaction{nonce=%s, gasPrice=%s, gasLimit=%s, to=%s, value=%s, signature=%s, payload=%s",
+        nonce, gasPrice, gasLimit, to, value, signature, payload);
   }
 
   /**
    * Provides the transaction bytes
-   * 
+   *
    * @return The RLP serialized form of this transaction.
    */
   public Bytes toBytes() {
@@ -449,7 +446,8 @@ public final class Transaction {
       Bytes payload,
       @Nullable Integer chainId,
       SECP256K1.KeyPair keyPair) {
-    return SECP256K1.sign(signatureData(nonce, gasPrice, gasLimit, to, value, payload, chainId), keyPair);
+    return SECP256K1.sign(
+        signatureData(nonce, gasPrice, gasLimit, to, value, payload, chainId), keyPair);
   }
 
   public static Bytes signatureData(
@@ -460,18 +458,19 @@ public final class Transaction {
       Wei value,
       Bytes payload,
       @Nullable Integer chainId) {
-    return RLP.encodeList(writer -> {
-      writer.writeUInt256(nonce);
-      writer.writeValue(gasPrice.toMinimalBytes());
-      writer.writeValue(gasLimit.toMinimalBytes());
-      writer.writeValue((to != null) ? to : Bytes.EMPTY);
-      writer.writeValue(value.toMinimalBytes());
-      writer.writeValue(payload);
-      if (chainId != null) {
-        writer.writeInt(chainId);
-        writer.writeUInt256(UInt256.ZERO);
-        writer.writeUInt256(UInt256.ZERO);
-      }
-    });
+    return RLP.encodeList(
+        writer -> {
+          writer.writeUInt256(nonce);
+          writer.writeValue(gasPrice.toMinimalBytes());
+          writer.writeValue(gasLimit.toMinimalBytes());
+          writer.writeValue((to != null) ? to : Bytes.EMPTY);
+          writer.writeValue(value.toMinimalBytes());
+          writer.writeValue(payload);
+          if (chainId != null) {
+            writer.writeInt(chainId);
+            writer.writeUInt256(UInt256.ZERO);
+            writer.writeUInt256(UInt256.ZERO);
+          }
+        });
   }
 }

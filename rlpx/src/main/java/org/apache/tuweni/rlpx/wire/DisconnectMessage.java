@@ -11,16 +11,18 @@ import org.slf4j.LoggerFactory;
 
 final class DisconnectMessage implements WireProtocolMessage {
 
-  private final static Logger logger = LoggerFactory.getLogger(DisconnectMessage.class);
+  private static final Logger logger = LoggerFactory.getLogger(DisconnectMessage.class);
 
   static DisconnectMessage read(Bytes data) {
     try {
-      return RLP.decode(data, (reader) -> {
-        if (reader.nextIsList()) {
-          return reader.readList((source) -> new DisconnectMessage(source.readInt()));
-        }
-        return new DisconnectMessage(DisconnectReason.NOT_PROVIDED);
-      });
+      return RLP.decode(
+          data,
+          (reader) -> {
+            if (reader.nextIsList()) {
+              return reader.readList((source) -> new DisconnectMessage(source.readInt()));
+            }
+            return new DisconnectMessage(DisconnectReason.NOT_PROVIDED);
+          });
     } catch (RLPException e) {
       logger.warn("Error reading disconnect message " + data.toHexString(), e);
       return new DisconnectMessage(DisconnectReason.NOT_PROVIDED);

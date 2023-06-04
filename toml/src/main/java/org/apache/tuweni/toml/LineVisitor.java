@@ -91,7 +91,8 @@ final class LineVisitor extends TomlParserBaseVisitor<MutableTomlTable> {
   }
 
   @Override
-  protected MutableTomlTable aggregateResult(MutableTomlTable aggregate, MutableTomlTable nextResult) {
+  protected MutableTomlTable aggregateResult(
+      MutableTomlTable aggregate, MutableTomlTable nextResult) {
     return aggregate == null ? null : nextResult;
   }
 

@@ -73,13 +73,15 @@ class GuardedByteArrayBytes extends AbstractBytes {
         this.length - i,
         i);
     AtomicReference<byte[]> clearBytes = new AtomicReference<>();
-    bytes.access(data -> {
-      byte[] result = new byte[length];
-      System.arraycopy(data, offset + i, result, 0, length);
-      clearBytes.set(result);
-    });
+    bytes.access(
+        data -> {
+          byte[] result = new byte[length];
+          System.arraycopy(data, offset + i, result, 0, length);
+          clearBytes.set(result);
+        });
 
-    return length == Bytes32.SIZE ? new ArrayWrappingBytes32(clearBytes.get())
+    return length == Bytes32.SIZE
+        ? new ArrayWrappingBytes32(clearBytes.get())
         : new ArrayWrappingBytes(clearBytes.get(), 0, length);
   }
 
@@ -166,11 +168,12 @@ class GuardedByteArrayBytes extends AbstractBytes {
   @Override
   public byte[] toArray() {
     AtomicReference<byte[]> clearBytes = new AtomicReference<>();
-    bytes.access(data -> {
-      byte[] result = new byte[length];
-      System.arraycopy(data, offset, result, 0, length);
-      clearBytes.set(result);
-    });
+    bytes.access(
+        data -> {
+          byte[] result = new byte[length];
+          System.arraycopy(data, offset, result, 0, length);
+          clearBytes.set(result);
+        });
     return clearBytes.get();
   }
 

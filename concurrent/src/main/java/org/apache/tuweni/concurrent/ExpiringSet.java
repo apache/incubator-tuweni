@@ -16,9 +16,9 @@ import javax.annotation.Nullable;
 /**
  * A concurrent hash set that stores values along with an expiry.
  *
- * Elements are stored in the set until their expiry is reached, after which they will no longer be available and will
- * appear as if removed. The actual removal is done lazily whenever the set is accessed, or when the
- * {@link #purgeExpired()} method is invoked.
+ * <p>Elements are stored in the set until their expiry is reached, after which they will no longer
+ * be available and will appear as if removed. The actual removal is done lazily whenever the set is
+ * accessed, or when the {@link #purgeExpired()} method is invoked.
  *
  * @param <E> The element type.
  */
@@ -30,8 +30,7 @@ public final class ExpiringSet<E> implements Set<E> {
   private static final class ExpiringEntry<E> implements Comparable<ExpiringEntry<E>> {
     private E element;
     private long expiry;
-    @Nullable
-    private Consumer<E> expiryListener;
+    @Nullable private Consumer<E> expiryListener;
 
     ExpiringEntry(E element, long expiry, @Nullable Consumer<E> expiryListener) {
       this.element = element;
@@ -52,7 +51,7 @@ public final class ExpiringSet<E> implements Set<E> {
 
   /**
    * Construct an empty expiring set.
-   * 
+   *
    * @param evictionTimeout the default eviction timeout for entries in milliseconds.
    */
   public ExpiringSet(long evictionTimeout) {
@@ -69,9 +68,7 @@ public final class ExpiringSet<E> implements Set<E> {
     this(evictionTimeout, System::currentTimeMillis, expiryListener);
   }
 
-  /**
-   * Construct an empty set.
-   */
+  /** Construct an empty set. */
   public ExpiringSet() {
     this(Long.MAX_VALUE, System::currentTimeMillis, null);
   }
@@ -138,13 +135,16 @@ public final class ExpiringSet<E> implements Set<E> {
     requireNonNull(e);
     purgeExpired();
     ExpiringEntry<E> oldEntry =
-        storage.put(e, new ExpiringEntry<>(e, currentTimeSupplier.getAsLong() + evictionTimeout, globalExpiryListener));
+        storage.put(
+            e,
+            new ExpiringEntry<>(
+                e, currentTimeSupplier.getAsLong() + evictionTimeout, globalExpiryListener));
     return oldEntry == null;
   }
 
   /**
-   * Adds the specified element to this set if it is not already present, and expires the entry when the specified
-   * expiry time is reached.
+   * Adds the specified element to this set if it is not already present, and expires the entry when
+   * the specified expiry time is reached.
    *
    * @param element The element to add to the set.
    * @param expiry The expiry time for the element, in milliseconds since the epoch.
@@ -155,8 +155,8 @@ public final class ExpiringSet<E> implements Set<E> {
   }
 
   /**
-   * Adds the specified element to this set if it is not already present, and expires the entry when the specified
-   * expiry time is reached.
+   * Adds the specified element to this set if it is not already present, and expires the entry when
+   * the specified expiry time is reached.
    *
    * @param element The element to add to the set.
    * @param expiry The expiry time for the element, in milliseconds since the epoch.
@@ -178,7 +178,8 @@ public final class ExpiringSet<E> implements Set<E> {
     }
 
     ExpiringEntry<E> newEntry =
-        new ExpiringEntry<>(element, expiry, expiryListener == null ? globalExpiryListener : expiryListener);
+        new ExpiringEntry<>(
+            element, expiry, expiryListener == null ? globalExpiryListener : expiryListener);
     ExpiringEntry<E> oldEntry = storage.put(element, newEntry);
     expiryQueue.offer(newEntry);
     if (oldEntry != null && oldEntry.expiry < Long.MAX_VALUE) {
@@ -247,8 +248,8 @@ public final class ExpiringSet<E> implements Set<E> {
   /**
    * Force immediate expiration of any key/value pairs that have reached their expiry.
    *
-   * @return The earliest expiry time for the current entries in the map (in milliseconds since the epoch), or
-   *         {@code Long.MAX_VALUE} if there are no entries due to expire.
+   * @return The earliest expiry time for the current entries in the map (in milliseconds since the
+   *     epoch), or {@code Long.MAX_VALUE} if there are no entries due to expire.
    */
   public long purgeExpired() {
     return purgeExpired(currentTimeSupplier.getAsLong());

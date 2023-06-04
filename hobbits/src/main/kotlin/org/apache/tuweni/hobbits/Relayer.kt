@@ -23,7 +23,7 @@ class Relayer(
   bind: String,
   to: String,
   interceptor: (Message) -> Unit,
-  override val coroutineContext: CoroutineContext = Dispatchers.Default
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope {
 
   private val transport = HobbitsTransport(vertx, { println("Invalid message: $it") }, coroutineContext)
@@ -40,7 +40,7 @@ class Relayer(
               interceptor(it)
               transport.sendMessage(it, Transport.HTTP, toURI.host, toURI.port, toURI.path)
             }
-          }
+          },
         )
       }
       "tcp" -> {
@@ -52,7 +52,7 @@ class Relayer(
               interceptor(it)
               transport.sendMessage(it, Transport.TCP, toURI.host, toURI.port, toURI.path)
             }
-          }
+          },
         )
       }
       "udp" -> {
@@ -64,7 +64,7 @@ class Relayer(
               interceptor(it)
               transport.sendMessage(it, Transport.UDP, toURI.host, toURI.port, toURI.path)
             }
-          }
+          },
         )
       }
       "ws" -> {
@@ -76,7 +76,7 @@ class Relayer(
               interceptor(it)
               transport.sendMessage(it, Transport.WS, toURI.host, toURI.port, toURI.path)
             }
-          }
+          },
         )
       }
     }

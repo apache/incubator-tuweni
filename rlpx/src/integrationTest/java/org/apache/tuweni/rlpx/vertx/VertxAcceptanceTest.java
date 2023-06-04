@@ -101,42 +101,49 @@ class VertxAcceptanceTest {
   }
 
   @Test
-  void testTwoServicesSendingMessagesOfCustomSubProtocolToEachOther(@VertxInstance Vertx vertx) throws Exception {
+  void testTwoServicesSendingMessagesOfCustomSubProtocolToEachOther(@VertxInstance Vertx vertx)
+      throws Exception {
     SECP256K1.KeyPair kp = SECP256K1.KeyPair.random();
     SECP256K1.KeyPair secondKp = SECP256K1.KeyPair.random();
     MyCustomSubProtocol sp = new MyCustomSubProtocol();
     MyCustomSubProtocol secondSp = new MyCustomSubProtocol();
     MemoryWireConnectionsRepository repository = new MemoryWireConnectionsRepository();
-    VertxRLPxService service = new VertxRLPxService(
-        vertx,
-        0,
-        "localhost",
-        10000,
-        kp,
-        Collections.singletonList(sp),
-        "Client 1",
-        10,
-        meter,
-        repository);
+    VertxRLPxService service =
+        new VertxRLPxService(
+            vertx,
+            0,
+            "localhost",
+            10000,
+            kp,
+            Collections.singletonList(sp),
+            "Client 1",
+            10,
+            meter,
+            repository);
     MemoryWireConnectionsRepository secondRepository = new MemoryWireConnectionsRepository();
 
-    VertxRLPxService secondService = new VertxRLPxService(
-        vertx,
-        0,
-        "localhost",
-        10000,
-        secondKp,
-        Collections.singletonList(secondSp),
-        "Client 2",
-        10,
-        meter,
-        secondRepository);
+    VertxRLPxService secondService =
+        new VertxRLPxService(
+            vertx,
+            0,
+            "localhost",
+            10000,
+            secondKp,
+            Collections.singletonList(secondSp),
+            "Client 2",
+            10,
+            meter,
+            secondRepository);
     service.start().join();
     secondService.start().join();
 
     try {
       WireConnection conn =
-          service.connectTo(secondKp.publicKey(), new InetSocketAddress("localhost", secondService.actualPort())).get();
+          service
+              .connectTo(
+                  secondKp.publicKey(),
+                  new InetSocketAddress("localhost", secondService.actualPort()))
+              .get();
       assertNotNull(conn);
       assertEquals(1, conn.agreedSubprotocols().size());
       assertEquals(1, repository.asMap().size());
@@ -146,7 +153,8 @@ class VertxAcceptanceTest {
       assertEquals(1, sp.handler.messages.size());
       assertEquals(1, secondSp.handler.messages.size());
 
-      AsyncCompletion completion = ((DefaultWireConnection) repository.asMap().values().iterator().next()).sendPing();
+      AsyncCompletion completion =
+          ((DefaultWireConnection) repository.asMap().values().iterator().next()).sendPing();
       completion.join();
       assertTrue(completion.isDone());
     } finally {
@@ -155,8 +163,8 @@ class VertxAcceptanceTest {
   }
 
   @Test
-  void testTwoServicesSendingMessagesOfCustomSubProtocolToEachOtherSimultaneously(@VertxInstance Vertx vertx)
-      throws Exception {
+  void testTwoServicesSendingMessagesOfCustomSubProtocolToEachOtherSimultaneously(
+      @VertxInstance Vertx vertx) throws Exception {
     SECP256K1.KeyPair kp = SECP256K1.KeyPair.random();
     SECP256K1.KeyPair secondKp = SECP256K1.KeyPair.random();
     MyCustomSubProtocol sp = new MyCustomSubProtocol();
@@ -164,34 +172,40 @@ class VertxAcceptanceTest {
     MemoryWireConnectionsRepository repository = new MemoryWireConnectionsRepository();
     MemoryWireConnectionsRepository secondRepository = new MemoryWireConnectionsRepository();
 
-    VertxRLPxService service = new VertxRLPxService(
-        vertx,
-        0,
-        "localhost",
-        10000,
-        kp,
-        Collections.singletonList(sp),
-        "Client 1",
-        10,
-        meter,
-        repository);
-    VertxRLPxService secondService = new VertxRLPxService(
-        vertx,
-        0,
-        "localhost",
-        10000,
-        secondKp,
-        Collections.singletonList(secondSp),
-        "Client 2",
-        10,
-        meter,
-        secondRepository);
+    VertxRLPxService service =
+        new VertxRLPxService(
+            vertx,
+            0,
+            "localhost",
+            10000,
+            kp,
+            Collections.singletonList(sp),
+            "Client 1",
+            10,
+            meter,
+            repository);
+    VertxRLPxService secondService =
+        new VertxRLPxService(
+            vertx,
+            0,
+            "localhost",
+            10000,
+            secondKp,
+            Collections.singletonList(secondSp),
+            "Client 2",
+            10,
+            meter,
+            secondRepository);
     service.start().join();
     secondService.start().join();
 
     try {
       WireConnection conn =
-          service.connectTo(secondKp.publicKey(), new InetSocketAddress("localhost", secondService.actualPort())).get();
+          service
+              .connectTo(
+                  secondKp.publicKey(),
+                  new InetSocketAddress("localhost", secondService.actualPort()))
+              .get();
       assertNotNull(conn);
       assertEquals(1, conn.agreedSubprotocols().size());
       assertEquals(1, repository.asMap().size());
@@ -206,15 +220,16 @@ class VertxAcceptanceTest {
       for (int i = 0; i < 128; i++) {
         CompletableAsyncCompletion task = AsyncCompletion.incomplete();
         completionList.add(task);
-        threadPool.submit(() -> {
-          try {
+        threadPool.submit(
+            () -> {
+              try {
 
-            ((DefaultWireConnection) repository.asMap().values().iterator().next()).sendPing();
-            task.complete();
-          } catch (Throwable t) {
-            task.completeExceptionally(t);
-          }
-        });
+                ((DefaultWireConnection) repository.asMap().values().iterator().next()).sendPing();
+                task.complete();
+              } catch (Throwable t) {
+                task.completeExceptionally(t);
+              }
+            });
       }
       threadPool.shutdown();
 
@@ -231,59 +246,70 @@ class VertxAcceptanceTest {
   @Disabled
   void connectToPeer(@VertxInstance Vertx vertx) throws Exception {
 
-
-    SECP256K1.KeyPair kp = SECP256K1.KeyPair
-        .fromSecretKey(
-            SECP256K1.SecretKey
-                .fromBytes(
-                    Bytes32.fromHexString("0x2CADB9DDEA3E675CC5349A1AF053CF2E144AF657016A6155DF4AD767F561F18E")));
+    SECP256K1.KeyPair kp =
+        SECP256K1.KeyPair.fromSecretKey(
+            SECP256K1.SecretKey.fromBytes(
+                Bytes32.fromHexString(
+                    "0x2CADB9DDEA3E675CC5349A1AF053CF2E144AF657016A6155DF4AD767F561F18E")));
 
     MemoryWireConnectionsRepository repository = new MemoryWireConnectionsRepository();
 
     VertxRLPxService service =
-        new VertxRLPxService(vertx, 36000, "localhost", 36000, kp, Collections.singletonList(new SubProtocol() {
-          @Override
-          public SubProtocolIdentifier id() {
-            return new SubProtocolIdentifier() {
-              @Override
-              public String name() {
-                return "eth";
-              }
+        new VertxRLPxService(
+            vertx,
+            36000,
+            "localhost",
+            36000,
+            kp,
+            Collections.singletonList(
+                new SubProtocol() {
+                  @Override
+                  public SubProtocolIdentifier id() {
+                    return new SubProtocolIdentifier() {
+                      @Override
+                      public String name() {
+                        return "eth";
+                      }
 
-              @Override
-              public int version() {
-                return 63;
-              }
+                      @Override
+                      public int version() {
+                        return 63;
+                      }
 
-              @Override
-              public int versionRange() {
-                return 8;
-              }
-            };
-          }
+                      @Override
+                      public int versionRange() {
+                        return 8;
+                      }
+                    };
+                  }
 
-          @Override
-          public boolean supports(SubProtocolIdentifier subProtocolIdentifier) {
-            return false;
-          }
+                  @Override
+                  public boolean supports(SubProtocolIdentifier subProtocolIdentifier) {
+                    return false;
+                  }
 
-          @Override
-          public SubProtocolHandler createHandler(RLPxService service, SubProtocolClient client) {
-            return null;
-          }
+                  @Override
+                  public SubProtocolHandler createHandler(
+                      RLPxService service, SubProtocolClient client) {
+                    return null;
+                  }
 
-          @Override
-          public SubProtocolClient createClient(RLPxService service, SubProtocolIdentifier identifier) {
-            return null;
-          }
-        }), "Client 1", 10, meter, repository);
+                  @Override
+                  public SubProtocolClient createClient(
+                      RLPxService service, SubProtocolIdentifier identifier) {
+                    return null;
+                  }
+                }),
+            "Client 1",
+            10,
+            meter,
+            repository);
     service.start().join();
 
-    AsyncResult<WireConnection> completion = service
-        .connectTo(
-            SECP256K1.PublicKey
-                .fromHexString(
-                    "7a8fbb31bff7c48179f8504b047313ebb7446a0233175ffda6eb4c27aaa5d2aedcef4dd9501b4f17b4f16588f0fd037f9b9416b8caca655bee3b14b4ef67441a"),
+    AsyncResult<WireConnection> completion =
+        service.connectTo(
+            SECP256K1.PublicKey.fromHexString(
+                "7a8fbb31bff7c48179f8504b047313ebb7446a0233175ffda6eb4c27aaa5d2aedcef4dd9501b4f17b4f16588f0fd037f9b9416b8caca655bee3b14b4ef67441a"),
             new InetSocketAddress("localhost", 30303));
     completion.get();
     Thread.sleep(10000);

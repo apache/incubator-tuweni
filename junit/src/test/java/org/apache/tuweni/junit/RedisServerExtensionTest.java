@@ -21,7 +21,8 @@ class RedisServerExtensionTest {
     assertNotNull(port);
     assertTrue(port >= 32768, "Port must be more than 32768, was:" + port);
     try (JedisPool client =
-        new JedisPool(new JedisPoolConfig(), InetAddress.getLoopbackAddress().getHostAddress(), port)) {
+        new JedisPool(
+            new JedisPoolConfig(), InetAddress.getLoopbackAddress().getHostAddress(), port)) {
       try (Jedis conn = client.getResource()) {
         assertTrue(conn.isConnected());
       }

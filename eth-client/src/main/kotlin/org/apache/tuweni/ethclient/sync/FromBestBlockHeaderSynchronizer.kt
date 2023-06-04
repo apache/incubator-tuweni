@@ -28,7 +28,7 @@ class FromBestBlockHeaderSynchronizer(
   client: EthRequestsManager,
   peerRepository: EthereumPeerRepository,
   from: UInt256?,
-  to: UInt256?
+  to: UInt256?,
 ) : Synchronizer(executor, coroutineContext, repository, client, peerRepository, from, to) {
 
   override fun start() {

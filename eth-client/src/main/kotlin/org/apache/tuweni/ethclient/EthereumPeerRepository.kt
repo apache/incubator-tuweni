@@ -154,7 +154,7 @@ class MemoryEthereumPeerRepository : EthereumPeerRepository {
 internal data class MemoryEthereumPeer(
   private val id: Identity,
   internal var lastContacted: Instant?,
-  internal var lastDiscovered: Instant?
+  internal var lastDiscovered: Instant?,
 ) : Peer {
   val connections: MutableList<Connection> = mutableListOf()
 
@@ -171,7 +171,7 @@ internal data class MemoryEthereumConnection(
   var active: Boolean,
   val peer: Peer,
   val identity: Identity,
-  var status: Status? = null
+  var status: Status? = null,
 ) : EthereumConnection {
   override fun peer(): Peer = peer
 
@@ -185,7 +185,7 @@ internal data class MemoryEthereumConnection(
 internal data class MemoryEthereumIdentity(
   private val networkInterface: String,
   private val port: Int,
-  private val publicKey: SECP256K1.PublicKey
+  private val publicKey: SECP256K1.PublicKey,
 ) : Identity {
 
   internal val connections: MutableList<Connection> = mutableListOf()

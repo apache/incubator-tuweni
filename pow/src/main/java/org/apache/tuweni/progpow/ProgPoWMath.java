@@ -40,8 +40,11 @@ final class ProgPoWMath {
   }
 
   private static UInt32 mul_hi(UInt32 x, UInt32 y) {
-    return UInt32
-        .fromBytes(UInt64.fromBytes(x.toBytes()).multiply(UInt64.fromBytes(y.toBytes())).toBytes().slice(0, 4));
+    return UInt32.fromBytes(
+        UInt64.fromBytes(x.toBytes())
+            .multiply(UInt64.fromBytes(y.toBytes()))
+            .toBytes()
+            .slice(0, 4));
   }
 
   private static UInt32 clz(UInt32 value) {
@@ -53,14 +56,12 @@ final class ProgPoWMath {
   }
 
   static UInt32 rotl32(UInt32 var, UInt32 hops) {
-    return var
-        .shiftLeft(hops.mod(UInt32.valueOf(32)).intValue())
+    return var.shiftLeft(hops.mod(UInt32.valueOf(32)).intValue())
         .or(var.shiftRight(UInt32.valueOf(32).subtract(hops.mod(UInt32.valueOf(32))).intValue()));
   }
 
   static UInt32 rotr32(UInt32 var, UInt32 hops) {
-    return var
-        .shiftRight(hops.mod(UInt32.valueOf(32)).intValue())
+    return var.shiftRight(hops.mod(UInt32.valueOf(32)).intValue())
         .or(var.shiftLeft(UInt32.valueOf(32).subtract(hops.mod(UInt32.valueOf(32))).intValue()));
   }
 }

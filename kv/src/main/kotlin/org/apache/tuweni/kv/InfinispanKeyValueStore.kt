@@ -16,7 +16,7 @@ import kotlin.coroutines.CoroutineContext
  */
 class InfinispanKeyValueStore<K, V> constructor(
   private val cache: Cache<K, V>,
-  override val coroutineContext: CoroutineContext = Dispatchers.IO
+  override val coroutineContext: CoroutineContext = Dispatchers.IO,
 ) : KeyValueStore<K, V> {
 
   companion object {

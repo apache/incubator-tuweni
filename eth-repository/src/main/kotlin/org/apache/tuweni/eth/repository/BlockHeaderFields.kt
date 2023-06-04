@@ -60,5 +60,5 @@ enum class BlockHeaderFields(val fieldName: String) {
   /**
    * Total difficulty
    */
-  TOTAL_DIFFICULTY("totalDifficulty")
+  TOTAL_DIFFICULTY("totalDifficulty"),
 }

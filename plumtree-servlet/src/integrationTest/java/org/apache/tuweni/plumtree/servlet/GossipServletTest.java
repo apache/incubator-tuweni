@@ -49,25 +49,26 @@ public class GossipServletTest {
   void gossipDeadBeefToOtherNode() throws Exception {
     MessageListenerImpl messageReceived1 = new MessageListenerImpl();
     MessageListenerImpl messageReceived2 = new MessageListenerImpl();
-    GossipServlet gossipServlet = new GossipServlet(
-        200,
-        200,
-        bytes -> bytes,
-        "http://127.0.0.1:10000",
-        messageReceived1,
-        (message, peer) -> true,
-        null,
-        new EphemeralPeerRepository());
-    GossipServlet gossipServlet2 = new GossipServlet(
-        200,
-        200,
-        bytes -> bytes,
-        "http://127.0.0.1:10001",
-        messageReceived2,
-        (message, peer) -> true,
-        null,
-        new EphemeralPeerRepository());
-
+    GossipServlet gossipServlet =
+        new GossipServlet(
+            200,
+            200,
+            bytes -> bytes,
+            "http://127.0.0.1:10000",
+            messageReceived1,
+            (message, peer) -> true,
+            null,
+            new EphemeralPeerRepository());
+    GossipServlet gossipServlet2 =
+        new GossipServlet(
+            200,
+            200,
+            bytes -> bytes,
+            "http://127.0.0.1:10001",
+            messageReceived2,
+            (message, peer) -> true,
+            null,
+            new EphemeralPeerRepository());
 
     Server server1 = createHttpServer(gossipServlet, 10000);
     Server server2 = createHttpServer(gossipServlet2, 10001);
@@ -77,7 +78,8 @@ public class GossipServletTest {
 
     gossipServlet.connectTo("http://127.0.0.1:10001").join();
     Map<String, Bytes> attributes =
-        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
+        Collections.singletonMap(
+            "message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     gossipServlet.gossip(attributes, Bytes.fromHexString("deadbeef"));
     for (int i = 0; i < 10; i++) {
       Thread.sleep(500);
@@ -96,34 +98,36 @@ public class GossipServletTest {
     MessageListenerImpl messageReceived1 = new MessageListenerImpl();
     MessageListenerImpl messageReceived2 = new MessageListenerImpl();
     MessageListenerImpl messageReceived3 = new MessageListenerImpl();
-    GossipServlet gossipServlet = new GossipServlet(
-        200,
-        200,
-        bytes -> bytes,
-        "http://127.0.0.1:10000",
-        messageReceived1,
-        (message, peer) -> true,
-        null,
-        new EphemeralPeerRepository());
-    GossipServlet gossipServlet2 = new GossipServlet(
-        200,
-        200,
-        bytes -> bytes,
-        "http://127.0.0.1:10001",
-        messageReceived2,
-        (message, peer) -> true,
-        null,
-        new EphemeralPeerRepository());
-    GossipServlet gossipServlet3 = new GossipServlet(
-        200,
-        200,
-        bytes -> bytes,
-        "http://127.0.0.1:10002",
-        messageReceived3,
-        (message, peer) -> true,
-        null,
-        new EphemeralPeerRepository());
-
+    GossipServlet gossipServlet =
+        new GossipServlet(
+            200,
+            200,
+            bytes -> bytes,
+            "http://127.0.0.1:10000",
+            messageReceived1,
+            (message, peer) -> true,
+            null,
+            new EphemeralPeerRepository());
+    GossipServlet gossipServlet2 =
+        new GossipServlet(
+            200,
+            200,
+            bytes -> bytes,
+            "http://127.0.0.1:10001",
+            messageReceived2,
+            (message, peer) -> true,
+            null,
+            new EphemeralPeerRepository());
+    GossipServlet gossipServlet3 =
+        new GossipServlet(
+            200,
+            200,
+            bytes -> bytes,
+            "http://127.0.0.1:10002",
+            messageReceived3,
+            (message, peer) -> true,
+            null,
+            new EphemeralPeerRepository());
 
     Server server1 = createHttpServer(gossipServlet, 10000);
     Server server2 = createHttpServer(gossipServlet2, 10001);
@@ -136,7 +140,8 @@ public class GossipServletTest {
     gossipServlet.connectTo("http://127.0.0.1:10001").join();
     gossipServlet3.connectTo("http://127.0.0.1:10001").join();
     Map<String, Bytes> attributes =
-        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
+        Collections.singletonMap(
+            "message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     gossipServlet.gossip(attributes, Bytes.fromHexString("deadbeef"));
     for (int i = 0; i < 10; i++) {
       Thread.sleep(500);
@@ -162,33 +167,36 @@ public class GossipServletTest {
     EphemeralPeerRepository peerRepository1 = new EphemeralPeerRepository();
     EphemeralPeerRepository peerRepository3 = new EphemeralPeerRepository();
 
-    GossipServlet gossipServlet = new GossipServlet(
-        200,
-        200,
-        bytes -> bytes,
-        "http://127.0.0.1:10000",
-        messageReceived1,
-        (message, peer) -> true,
-        null,
-        peerRepository1);
-    GossipServlet gossipServlet2 = new GossipServlet(
-        200,
-        200,
-        bytes -> bytes,
-        "http://127.0.0.1:10001",
-        messageReceived2,
-        (message, peer) -> true,
-        null,
-        new EphemeralPeerRepository());
-    GossipServlet gossipServlet3 = new GossipServlet(
-        200,
-        200,
-        bytes -> bytes,
-        "http://127.0.0.1:10002",
-        messageReceived2,
-        (message, peer) -> true,
-        null,
-        peerRepository3);
+    GossipServlet gossipServlet =
+        new GossipServlet(
+            200,
+            200,
+            bytes -> bytes,
+            "http://127.0.0.1:10000",
+            messageReceived1,
+            (message, peer) -> true,
+            null,
+            peerRepository1);
+    GossipServlet gossipServlet2 =
+        new GossipServlet(
+            200,
+            200,
+            bytes -> bytes,
+            "http://127.0.0.1:10001",
+            messageReceived2,
+            (message, peer) -> true,
+            null,
+            new EphemeralPeerRepository());
+    GossipServlet gossipServlet3 =
+        new GossipServlet(
+            200,
+            200,
+            bytes -> bytes,
+            "http://127.0.0.1:10002",
+            messageReceived2,
+            (message, peer) -> true,
+            null,
+            peerRepository3);
 
     Server server1 = createHttpServer(gossipServlet, 10000);
     Server server2 = createHttpServer(gossipServlet2, 10001);
@@ -206,13 +214,15 @@ public class GossipServletTest {
 
       assertEquals(2, peerRepository1.eagerPushPeers().size());
       Map<String, Bytes> attributes =
-          Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
+          Collections.singletonMap(
+              "message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
       gossipServlet.gossip(attributes, Bytes.fromHexString("deadbeef"));
       Thread.sleep(1000);
       assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);
       Thread.sleep(1000);
 
-      assertTrue(peerRepository1.lazyPushPeers().size() > 0 || peerRepository3.lazyPushPeers().size() > 0);
+      assertTrue(
+          peerRepository1.lazyPushPeers().size() > 0 || peerRepository3.lazyPushPeers().size() > 0);
 
     } finally {
       server1.stop();
@@ -228,24 +238,26 @@ public class GossipServletTest {
 
     EphemeralPeerRepository peerRepository1 = new EphemeralPeerRepository();
 
-    GossipServlet gossipServlet = new GossipServlet(
-        200,
-        200,
-        bytes -> bytes,
-        "http://127.0.0.1:10000",
-        messageReceived1,
-        (message, peer) -> true,
-        null,
-        peerRepository1);
-    GossipServlet gossipServlet2 = new GossipServlet(
-        200,
-        200,
-        bytes -> bytes,
-        "http://127.0.0.1:10001",
-        messageReceived2,
-        (message, peer) -> true,
-        null,
-        new EphemeralPeerRepository());
+    GossipServlet gossipServlet =
+        new GossipServlet(
+            200,
+            200,
+            bytes -> bytes,
+            "http://127.0.0.1:10000",
+            messageReceived1,
+            (message, peer) -> true,
+            null,
+            peerRepository1);
+    GossipServlet gossipServlet2 =
+        new GossipServlet(
+            200,
+            200,
+            bytes -> bytes,
+            "http://127.0.0.1:10001",
+            messageReceived2,
+            (message, peer) -> true,
+            null,
+            new EphemeralPeerRepository());
 
     Server server1 = createHttpServer(gossipServlet, 10000);
     Server server2 = createHttpServer(gossipServlet2, 10001);
@@ -256,8 +268,10 @@ public class GossipServletTest {
     gossipServlet.connectTo("http://127.0.0.1:10001").join();
     assertEquals(1, peerRepository1.eagerPushPeers().size());
     Map<String, Bytes> attributes =
-        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
-    gossipServlet.send(peerRepository1.peers().iterator().next(), attributes, Bytes.fromHexString("deadbeef"));
+        Collections.singletonMap(
+            "message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
+    gossipServlet.send(
+        peerRepository1.peers().iterator().next(), attributes, Bytes.fromHexString("deadbeef"));
     Thread.sleep(1000);
     assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);
     Thread.sleep(1000);

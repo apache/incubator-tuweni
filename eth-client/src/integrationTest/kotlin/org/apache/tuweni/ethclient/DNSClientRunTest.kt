@@ -20,7 +20,7 @@ class DNSClientRunTest {
       vertx,
       DNSConfigurationImpl("default", "foo", "example.com", 1000, null),
       MapKeyValueStore.open(),
-      MemoryPeerRepository()
+      MemoryPeerRepository(),
     )
     runBlocking {
       client.start()
@@ -34,7 +34,7 @@ class DNSClientRunTest {
       vertx,
       DNSConfigurationImpl("default", "foo", "example.com", 1000, null),
       MapKeyValueStore.open(),
-      MemoryPeerRepository()
+      MemoryPeerRepository(),
     )
     runBlocking {
       client.seq(42L)

@@ -19,11 +19,11 @@ import redis.embedded.RedisServer;
 /**
  * A junit5 extension, that sets up an ephemeral Redis server for tests.
  *
- * The ephemeral Redis server is created with a random free port for the test suite and injected into any tests with
- * parameters of type {@link Integer} annotated with {@link RedisPort}
+ * <p>The ephemeral Redis server is created with a random free port for the test suite and injected
+ * into any tests with parameters of type {@link Integer} annotated with {@link RedisPort}
  *
- * NOTE: Redis does not support picking a random port on its own. This extension tries its best to test free ports and
- * avoid collisions.
+ * <p>NOTE: Redis does not support picking a random port on its own. This extension tries its best
+ * to test free ports and avoid collisions.
  */
 public final class RedisServerExtension implements ParameterResolver, AfterAllCallback {
 
@@ -51,45 +51,50 @@ public final class RedisServerExtension implements ParameterResolver, AfterAllCa
         port++;
       }
     }
-    throw new IllegalStateException("Could not reserve a port in range " + range + " and " + range + 100);
+    throw new IllegalStateException(
+        "Could not reserve a port in range " + range + " and " + range + 100);
   }
 
   private RedisServer redisServer;
 
-  private Thread shutdownThread = new Thread(() -> {
-    if (redisServer != null) {
-      try {
-        redisServer.stop();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
-  });
+  private Thread shutdownThread =
+      new Thread(
+          () -> {
+            if (redisServer != null) {
+              try {
+                redisServer.stop();
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+            }
+          });
 
   @Override
-  public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+  public boolean supportsParameter(
+      ParameterContext parameterContext, ExtensionContext extensionContext)
       throws ParameterResolutionException {
     return Integer.class.equals(parameterContext.getParameter().getType())
         && parameterContext.isAnnotated(RedisPort.class);
   }
 
   @Override
-  public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+  public Object resolveParameter(
+      ParameterContext parameterContext, ExtensionContext extensionContext)
       throws ParameterResolutionException {
     if (redisServer == null) {
       String localhost = InetAddress.getLoopbackAddress().getHostAddress();
 
       try {
 
-        redisServer = RedisServer
-            .newRedisServer()
-            .setting("bind " + localhost)
-            .setting("maxmemory 128mb")
-            .setting("maxmemory-policy allkeys-lru")
-            .setting("appendonly no")
-            .setting("save \"\"")
-            .port(findFreePort())
-            .build();
+        redisServer =
+            RedisServer.newRedisServer()
+                .setting("bind " + localhost)
+                .setting("maxmemory 128mb")
+                .setting("maxmemory-policy allkeys-lru")
+                .setting("appendonly no")
+                .setting("save \"\"")
+                .port(findFreePort())
+                .build();
         Runtime.getRuntime().addShutdownHook(shutdownThread);
         redisServer.start();
       } catch (IOException e) {

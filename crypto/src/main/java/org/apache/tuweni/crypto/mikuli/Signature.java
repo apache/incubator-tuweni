@@ -7,9 +7,7 @@ import org.apache.tuweni.bytes.Bytes;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * This class represents a Signature on G2
- */
+/** This class represents a Signature on G2 */
 public final class Signature {
 
   /**
@@ -25,7 +23,6 @@ public final class Signature {
     }
     return signatures.stream().reduce(Signature::combine).get();
   }
-
 
   /**
    * Decode a signature from its serialized representation.

@@ -12,16 +12,16 @@ import java.util.function.Function;
 /**
  * Base class for {@link UInt32Value}.
  *
- * <p>
- * This class is abstract as it is not meant to be used directly, but it has no abstract methods. As mentioned in
- * {@link UInt32Value}, this is used to create strongly-typed type aliases of {@link UInt32}. In other words, this allow
- * to "tag" numbers with the unit of what they represent for the type-system, which can help clarity, but also forbid
- * mixing numbers that are mean to be of different units (the strongly-typed part).
+ * <p>This class is abstract as it is not meant to be used directly, but it has no abstract methods.
+ * As mentioned in {@link UInt32Value}, this is used to create strongly-typed type aliases of {@link
+ * UInt32}. In other words, this allow to "tag" numbers with the unit of what they represent for the
+ * type-system, which can help clarity, but also forbid mixing numbers that are mean to be of
+ * different units (the strongly-typed part).
  *
- * <p>
- * This class implements {@link UInt32Value}, but also adds a few operations that take a {@link UInt32} directly, for
- * instance {@link #multiply(UInt32)}. The rational is that multiplying a given quantity of something by a "raw" number
- * is always meaningful, and return a new quantity of the same thing.
+ * <p>This class implements {@link UInt32Value}, but also adds a few operations that take a {@link
+ * UInt32} directly, for instance {@link #multiply(UInt32)}. The rational is that multiplying a
+ * given quantity of something by a "raw" number is always meaningful, and return a new quantity of
+ * the same thing.
  *
  * @param <T> The concrete type of the value.
  */
@@ -65,10 +65,9 @@ public abstract class BaseUInt32Value<T extends UInt32Value<T>> implements UInt3
   /**
    * Return a copy of this value, or itself if immutable.
    *
-   * <p>
-   * The default implementation of this method returns a copy using the constructor for the concrete type and the bytes
-   * returned from {@link #toBytes()}. Most implementations will want to override this method to instead return
-   * {@code this}.
+   * <p>The default implementation of this method returns a copy using the constructor for the
+   * concrete type and the bytes returned from {@link #toBytes()}. Most implementations will want to
+   * override this method to instead return {@code this}.
    *
    * @return A copy of this value, or itself if immutable.
    */
@@ -79,10 +78,9 @@ public abstract class BaseUInt32Value<T extends UInt32Value<T>> implements UInt3
   /**
    * Return the zero value for this type.
    *
-   * <p>
-   * The default implementation of this method returns a value obtained from calling the concrete type constructor with
-   * an argument of {@link UInt32#ZERO}. Most implementations will want to override this method to instead return a
-   * static constant.
+   * <p>The default implementation of this method returns a value obtained from calling the concrete
+   * type constructor with an argument of {@link UInt32#ZERO}. Most implementations will want to
+   * override this method to instead return a static constant.
    *
    * @return The zero value for this type.
    */
@@ -278,8 +276,8 @@ public abstract class BaseUInt32Value<T extends UInt32Value<T>> implements UInt3
    * Compare two {@link UInt32} values.
    *
    * @param other The value to compare to.
-   * @return A negative integer, zero, or a positive integer as this value is less than, equal to, or greater than the
-   *         specified value.
+   * @return A negative integer, zero, or a positive integer as this value is less than, equal to,
+   *     or greater than the specified value.
    */
   public int compareTo(UInt32 other) {
     return this.value.compareTo(other);

@@ -17,11 +17,12 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Various utilities for providing hashes (digests) of arbitrary data.
  *
- * Requires the BouncyCastleProvider to be loaded and available. See
+ * <p>Requires the BouncyCastleProvider to be loaded and available. See
  * https://www.bouncycastle.org/wiki/display/JA1/Provider+Installation for detail.
  */
 public final class Hash {
-  static boolean USE_SODIUM = Boolean.parseBoolean(System.getProperty("org.apache.tuweni.crypto.useSodium", "true"));
+  static boolean USE_SODIUM =
+      Boolean.parseBoolean(System.getProperty("org.apache.tuweni.crypto.useSodium", "true"));
 
   private Hash() {}
 
@@ -33,13 +34,12 @@ public final class Hash {
   private static final String KECCAK_256 = "KECCAK-256";
   private static final String KECCAK_512 = "KECCAK-512";
 
-  static final ThreadLocal<Map<String, MessageDigest>> cachedDigests = ThreadLocal.withInitial(ConcurrentHashMap::new);
+  static final ThreadLocal<Map<String, MessageDigest>> cachedDigests =
+      ThreadLocal.withInitial(ConcurrentHashMap::new);
 
   // SHA-3
   private static final String SHA3_256 = "SHA3-256";
   private static final String SHA3_512 = "SHA3-512";
-
-
 
   /**
    * Helper method to generate a digest using the provided algorithm.
@@ -47,20 +47,26 @@ public final class Hash {
    * @param input The input bytes to produce the digest for.
    * @param alg The name of the digest algorithm to use.
    * @return A digest.
-   * @throws NoSuchAlgorithmException If no Provider supports a MessageDigestSpi implementation for the specified
-   *         algorithm.
+   * @throws NoSuchAlgorithmException If no Provider supports a MessageDigestSpi implementation for
+   *     the specified algorithm.
    */
-  public static byte[] digestUsingAlgorithm(byte[] input, String alg) throws NoSuchAlgorithmException {
+  public static byte[] digestUsingAlgorithm(byte[] input, String alg)
+      throws NoSuchAlgorithmException {
     requireNonNull(input);
     requireNonNull(alg);
     try {
-      MessageDigest digest = cachedDigests.get().computeIfAbsent(alg, (key) -> {
-        try {
-          return MessageDigest.getInstance(key);
-        } catch (NoSuchAlgorithmException e) {
-          throw new RuntimeException(e);
-        }
-      });
+      MessageDigest digest =
+          cachedDigests
+              .get()
+              .computeIfAbsent(
+                  alg,
+                  (key) -> {
+                    try {
+                      return MessageDigest.getInstance(key);
+                    } catch (NoSuchAlgorithmException e) {
+                      throw new RuntimeException(e);
+                    }
+                  });
       digest.update(input);
       return digest.digest();
     } catch (RuntimeException e) {
@@ -78,10 +84,11 @@ public final class Hash {
    * @param input The input bytes to produce the digest for.
    * @param alg The name of the digest algorithm to use.
    * @return A digest.
-   * @throws NoSuchAlgorithmException If no Provider supports a MessageDigestSpi implementation for the specified
-   *         algorithm.
+   * @throws NoSuchAlgorithmException If no Provider supports a MessageDigestSpi implementation for
+   *     the specified algorithm.
    */
-  public static Bytes digestUsingAlgorithm(Bytes input, String alg) throws NoSuchAlgorithmException {
+  public static Bytes digestUsingAlgorithm(Bytes input, String alg)
+      throws NoSuchAlgorithmException {
     requireNonNull(input);
     return Bytes.wrap(digestUsingAlgorithm(input.toArrayUnsafe(), alg));
   }

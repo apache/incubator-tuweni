@@ -24,13 +24,13 @@ internal class InviteTest() {
   @Test
   fun invalidPort() {
     Assertions.assertThrows(
-      IllegalArgumentException::class.java
+      IllegalArgumentException::class.java,
     ) {
       Invite(
         "localhost",
         -1,
         random(),
-        Signature.Seed.random()
+        Signature.Seed.random(),
       )
     }
   }
@@ -48,7 +48,7 @@ internal class InviteTest() {
         identity.curveName() +
         "~" +
         seed.bytes().toBase64String(),
-      invite.toString()
+      invite.toString(),
     )
   }
 
@@ -63,11 +63,11 @@ internal class InviteTest() {
       Assertions.assertEquals(invite.port, 8009)
       Assertions.assertEquals(
         invite.identity.publicKeyAsBase64String(),
-        "MS/HpeAess0EGruiZjfnc+x+FkPq7qoMqSD4SdvTCtM="
+        "MS/HpeAess0EGruiZjfnc+x+FkPq7qoMqSD4SdvTCtM=",
       )
       Assertions.assertEquals(
         invite.seedKey.bytes().toBase64String(),
-        "IJubWEcZM6usWncF/Lu26CyI3ZiovcHjh9+kBI1hiKI="
+        "IJubWEcZM6usWncF/Lu26CyI3ZiovcHjh9+kBI1hiKI=",
       )
       Assertions.assertEquals(invite.toCanonicalForm(), testInvite)
     } catch (malformedInviteCodeException: MalformedInviteCodeException) {

@@ -32,7 +32,7 @@ internal class LESSubProtocolHandler(
   private val flowControlMaximumRequestCostTable: UInt256,
   private val flowControlMinimumRateOfRecharge: UInt256,
   private val controller: EthController,
-  override val coroutineContext: CoroutineContext = Dispatchers.Default
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : SubProtocolHandler, CoroutineScope {
 
   private val peerStateMap = ConcurrentHashMap<String, LESPeerState>()
@@ -86,33 +86,33 @@ internal class LESSubProtocolHandler(
 
   private suspend fun handleGetReceiptsMessage(
     connection: WireConnection,
-    receiptsMessage: GetReceiptsMessage
+    receiptsMessage: GetReceiptsMessage,
   ) {
     val receipts = controller.findTransactionReceipts(receiptsMessage.blockHashes)
     return service.send(
       subProtocolIdentifier,
       5,
       connection,
-      ReceiptsMessage(receiptsMessage.reqID, 0, receipts).toBytes()
+      ReceiptsMessage(receiptsMessage.reqID, 0, receipts).toBytes(),
     )
   }
 
   private suspend fun handleGetBlockBodiesMessage(
     connection: WireConnection,
-    blockBodiesMessage: GetBlockBodiesMessage
+    blockBodiesMessage: GetBlockBodiesMessage,
   ) {
     val bodies = controller.findBlockBodies(blockBodiesMessage.blockHashes)
     return service.send(
       subProtocolIdentifier,
       5,
       connection,
-      BlockBodiesMessage(blockBodiesMessage.reqID, 0, bodies).toBytes()
+      BlockBodiesMessage(blockBodiesMessage.reqID, 0, bodies).toBytes(),
     )
   }
 
   private suspend fun handleBlockBodiesMessage(
     conn: WireConnection,
-    blockBodiesMessage: BlockBodiesMessage
+    blockBodiesMessage: BlockBodiesMessage,
   ) {
     controller.addNewBlockBodies(conn, null, blockBodiesMessage.blockBodies)
   }
@@ -123,7 +123,7 @@ internal class LESSubProtocolHandler(
 
   private suspend fun handleGetBlockHeaders(
     connection: WireConnection,
-    getBlockHeadersMessage: GetBlockHeadersMessage
+    getBlockHeadersMessage: GetBlockHeadersMessage,
   ) {
     val headersFound = TreeSet<BlockHeader>()
     for (query in getBlockHeadersMessage.queries) {
@@ -132,15 +132,15 @@ internal class LESSubProtocolHandler(
           query.blockNumberOrBlockHash,
           query.maxHeaders.toLong(),
           query.skip.toLong(),
-          query.direction == GetBlockHeadersMessage.BlockHeaderQuery.Direction.BACKWARDS
-        )
+          query.direction == GetBlockHeadersMessage.BlockHeaderQuery.Direction.BACKWARDS,
+        ),
       )
     }
     service.send(
       subProtocolIdentifier,
       3,
       connection,
-      BlockHeadersMessage(getBlockHeadersMessage.reqID, 0L, ArrayList(headersFound)).toBytes()
+      BlockHeadersMessage(getBlockHeadersMessage.reqID, 0L, ArrayList(headersFound)).toBytes(),
     )
   }
 
@@ -160,7 +160,7 @@ internal class LESSubProtocolHandler(
       flowControlBufferLimit,
       flowControlMaximumRequestCostTable,
       flowControlMinimumRateOfRecharge,
-      0
+      0,
     )
     service.send(subProtocolIdentifier, 0, connection, state.ourStatusMessage!!.toBytes())
     return state.ready

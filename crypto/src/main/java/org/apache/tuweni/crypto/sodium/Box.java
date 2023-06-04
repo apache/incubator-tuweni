@@ -16,52 +16,43 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Public-key authenticated encryption.
  *
- * <p>
- * Using public-key authenticated encryption, Bob can encrypt a confidential message specifically for Alice, using
- * Alice's public key.
+ * <p>Using public-key authenticated encryption, Bob can encrypt a confidential message specifically
+ * for Alice, using Alice's public key.
  *
- * <p>
- * Using Bob's public key, Alice can compute a shared secret key. Using Alice's public key and his secret key, Bob can
- * compute the exact same shared secret key. That shared secret key can be used to verify that the encrypted message was
- * not tampered with, before eventually decrypting it.
+ * <p>Using Bob's public key, Alice can compute a shared secret key. Using Alice's public key and
+ * his secret key, Bob can compute the exact same shared secret key. That shared secret key can be
+ * used to verify that the encrypted message was not tampered with, before eventually decrypting it.
  *
- * <p>
- * Alice only needs Bob's public key, the nonce and the ciphertext. Bob should never ever share his secret key, even
- * with Alice.
+ * <p>Alice only needs Bob's public key, the nonce and the ciphertext. Bob should never ever share
+ * his secret key, even with Alice.
  *
- * <p>
- * And in order to send messages to Alice, Bob only needs Alice's public key. Alice should never ever share her secret
- * key either, even with Bob.
+ * <p>And in order to send messages to Alice, Bob only needs Alice's public key. Alice should never
+ * ever share her secret key either, even with Bob.
  *
- * <p>
- * Alice can reply to Bob using the same system, without having to generate a distinct key pair.
+ * <p>Alice can reply to Bob using the same system, without having to generate a distinct key pair.
  *
- * <p>
- * The nonce doesn't have to be confidential, but it should be used with just one encryption for a particular pair of
- * public and secret keys.
+ * <p>The nonce doesn't have to be confidential, but it should be used with just one encryption for
+ * a particular pair of public and secret keys.
  *
- * <p>
- * One easy way to generate a nonce is to use {@link Nonce#random()}, considering the size of the nonces the risk of any
- * random collisions is negligible. For some applications, if you wish to use nonces to detect missing messages or to
- * ignore replayed messages, it is also acceptable to use an incrementing counter as a nonce.
+ * <p>One easy way to generate a nonce is to use {@link Nonce#random()}, considering the size of the
+ * nonces the risk of any random collisions is negligible. For some applications, if you wish to use
+ * nonces to detect missing messages or to ignore replayed messages, it is also acceptable to use an
+ * incrementing counter as a nonce.
  *
- * <p>
- * When doing so you must ensure that the same value can never be re-used (for example you may have multiple threads or
- * even hosts generating messages using the same key pairs).
+ * <p>When doing so you must ensure that the same value can never be re-used (for example you may
+ * have multiple threads or even hosts generating messages using the same key pairs).
  *
- * <p>
- * As stated above, senders can decrypt their own messages, and compute a valid authentication tag for any messages
- * encrypted with a given shared secret key. This is generally not an issue for online protocols.
+ * <p>As stated above, senders can decrypt their own messages, and compute a valid authentication
+ * tag for any messages encrypted with a given shared secret key. This is generally not an issue for
+ * online protocols.
  *
- * <p>
- * This class depends upon the JNR-FFI library being available on the classpath, along with its dependencies. See
- * https://github.com/jnr/jnr-ffi. JNR-FFI can be included using the gradle dependency 'com.github.jnr:jnr-ffi'.
+ * <p>This class depends upon the JNR-FFI library being available on the classpath, along with its
+ * dependencies. See https://github.com/jnr/jnr-ffi. JNR-FFI can be included using the gradle
+ * dependency 'com.github.jnr:jnr-ffi'.
  */
 public final class Box implements AutoCloseable {
 
-  /**
-   * A Box public key.
-   */
+  /** A Box public key. */
   public static final class PublicKey implements Destroyable {
     final Allocated value;
 
@@ -72,8 +63,7 @@ public final class Box implements AutoCloseable {
     /**
      * Create a {@link PublicKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the public key.
      * @return A public key.
@@ -85,8 +75,7 @@ public final class Box implements AutoCloseable {
     /**
      * Create a {@link PublicKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the public key.
      * @return A public key.
@@ -111,9 +100,11 @@ public final class Box implements AutoCloseable {
       try {
         int publicKeyLength = PublicKey.length();
         publicKeyPtr = Sodium.malloc(publicKeyLength);
-        int rc = Sodium.crypto_sign_ed25519_pk_to_curve25519(publicKeyPtr, publicKey.value.pointer());
+        int rc =
+            Sodium.crypto_sign_ed25519_pk_to_curve25519(publicKeyPtr, publicKey.value.pointer());
         if (rc != 0) {
-          throw new SodiumException("crypto_sign_ed25519_pk_to_curve25519: failed with results " + rc);
+          throw new SodiumException(
+              "crypto_sign_ed25519_pk_to_curve25519: failed with results " + rc);
         }
         PublicKey pk = new PublicKey(publicKeyPtr, publicKeyLength);
         publicKeyPtr = null;
@@ -158,7 +149,7 @@ public final class Box implements AutoCloseable {
 
     /**
      * Provides the bytes of this key
-     * 
+     *
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -167,7 +158,7 @@ public final class Box implements AutoCloseable {
 
     /**
      * Provides the bytes of this key
-     * 
+     *
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {
@@ -185,9 +176,7 @@ public final class Box implements AutoCloseable {
     }
   }
 
-  /**
-   * A Box secret key.
-   */
+  /** A Box secret key. */
   public static final class SecretKey implements Destroyable {
 
     final Allocated value;
@@ -209,8 +198,7 @@ public final class Box implements AutoCloseable {
     /**
      * Create a {@link SecretKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the secret key.
      * @return A secret key.
@@ -222,8 +210,7 @@ public final class Box implements AutoCloseable {
     /**
      * Create a {@link SecretKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the secret key.
      * @return A secret key.
@@ -251,9 +238,11 @@ public final class Box implements AutoCloseable {
       try {
         int secretKeyLength = SecretKey.length();
         secretKeyPtr = Sodium.malloc(secretKeyLength);
-        int rc = Sodium.crypto_sign_ed25519_sk_to_curve25519(secretKeyPtr, secretKey.value.pointer());
+        int rc =
+            Sodium.crypto_sign_ed25519_sk_to_curve25519(secretKeyPtr, secretKey.value.pointer());
         if (rc != 0) {
-          throw new SodiumException("crypto_sign_ed25519_sk_to_curve25519: failed with results " + rc);
+          throw new SodiumException(
+              "crypto_sign_ed25519_sk_to_curve25519: failed with results " + rc);
         }
         SecretKey sk = new SecretKey(secretKeyPtr, secretKeyLength);
         secretKeyPtr = null;
@@ -299,7 +288,7 @@ public final class Box implements AutoCloseable {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory.
+     * <p>WARNING: This will cause the key to be copied into heap memory.
      *
      * @return The bytes of this key.
      */
@@ -310,8 +299,8 @@ public final class Box implements AutoCloseable {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory. The returned array should be overwritten when no
-     * longer required.
+     * <p>WARNING: This will cause the key to be copied into heap memory. The returned array should
+     * be overwritten when no longer required.
      *
      * @return The bytes of this key.
      */
@@ -320,9 +309,7 @@ public final class Box implements AutoCloseable {
     }
   }
 
-  /**
-   * A Box key pair seed.
-   */
+  /** A Box key pair seed. */
   public static final class Seed {
     final Allocated value;
 
@@ -333,8 +320,7 @@ public final class Box implements AutoCloseable {
     /**
      * Create a {@link Seed} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the seed.
      * @return A seed.
@@ -346,8 +332,7 @@ public final class Box implements AutoCloseable {
     /**
      * Create a {@link Seed} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the seed.
      * @return A seed.
@@ -401,7 +386,7 @@ public final class Box implements AutoCloseable {
 
     /**
      * Provides the bytes of this seed
-     * 
+     *
      * @return The bytes of this seed.
      */
     public Bytes bytes() {
@@ -410,7 +395,7 @@ public final class Box implements AutoCloseable {
 
     /**
      * Provides the bytes of this seed
-     * 
+     *
      * @return The bytes of this seed.
      */
     public byte[] bytesArray() {
@@ -418,9 +403,7 @@ public final class Box implements AutoCloseable {
     }
   }
 
-  /**
-   * A Box key pair.
-   */
+  /** A Box key pair. */
   public static final class KeyPair {
 
     private final PublicKey publicKey;
@@ -447,14 +430,20 @@ public final class Box implements AutoCloseable {
       if (secretKey.isDestroyed()) {
         throw new IllegalArgumentException("SecretKey has been destroyed");
       }
-      return Sodium.scalarMultBase(secretKey.value.pointer(), SecretKey.length(), (ptr, len) -> {
-        int publicKeyLength = PublicKey.length();
-        if (len != publicKeyLength) {
-          throw new IllegalStateException(
-              "Public key length " + publicKeyLength + " is not same as generated key length " + len);
-        }
-        return new KeyPair(new PublicKey(ptr, publicKeyLength), secretKey);
-      });
+      return Sodium.scalarMultBase(
+          secretKey.value.pointer(),
+          SecretKey.length(),
+          (ptr, len) -> {
+            int publicKeyLength = PublicKey.length();
+            if (len != publicKeyLength) {
+              throw new IllegalStateException(
+                  "Public key length "
+                      + publicKeyLength
+                      + " is not same as generated key length "
+                      + len);
+            }
+            return new KeyPair(new PublicKey(ptr, publicKeyLength), secretKey);
+          });
     }
 
     /**
@@ -523,8 +512,9 @@ public final class Box implements AutoCloseable {
     }
 
     /**
-     * Converts signature key pair (Ed25519) to a box key pair (Curve25519) so that the same key pair can be used both
-     * for authenticated encryption and for signatures. See https://libsodium.gitbook.io/doc/advanced/ed25519-curve25519
+     * Converts signature key pair (Ed25519) to a box key pair (Curve25519) so that the same key
+     * pair can be used both for authenticated encryption and for signatures. See
+     * https://libsodium.gitbook.io/doc/advanced/ed25519-curve25519
      *
      * @param keyPair A {@link Signature.KeyPair}.
      * @return A {@link KeyPair}.
@@ -535,7 +525,7 @@ public final class Box implements AutoCloseable {
 
     /**
      * Provides the public key
-     * 
+     *
      * @return The public key of the key pair.
      */
     public PublicKey publicKey() {
@@ -544,7 +534,7 @@ public final class Box implements AutoCloseable {
 
     /**
      * Provides the secret key
-     * 
+     *
      * @return The secret key of the key pair.
      */
     public SecretKey secretKey() {
@@ -569,9 +559,7 @@ public final class Box implements AutoCloseable {
     }
   }
 
-  /**
-   * A Box nonce.
-   */
+  /** A Box nonce. */
   public static final class Nonce {
     final Allocated value;
 
@@ -579,12 +567,10 @@ public final class Box implements AutoCloseable {
       this.value = new Allocated(ptr, length);
     }
 
-
     /**
      * Create a {@link Nonce} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the nonce.
      * @return A nonce, based on these bytes.
@@ -596,8 +582,7 @@ public final class Box implements AutoCloseable {
     /**
      * Create a {@link Nonce} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the nonce.
      * @return A nonce, based on these bytes.
@@ -652,9 +637,9 @@ public final class Box implements AutoCloseable {
     /**
      * Increment this nonce.
      *
-     * <p>
-     * Note that this is not synchronized. If multiple threads are creating encrypted messages and incrementing this
-     * nonce, then external synchronization is required to ensure no two encrypt operations use the same nonce.
+     * <p>Note that this is not synchronized. If multiple threads are creating encrypted messages
+     * and incrementing this nonce, then external synchronization is required to ensure no two
+     * encrypt operations use the same nonce.
      *
      * @return A new {@link Nonce}.
      */
@@ -681,7 +666,7 @@ public final class Box implements AutoCloseable {
 
     /**
      * Provides the bytes of this nonce
-     * 
+     *
      * @return The bytes of this nonce.
      */
     public Bytes bytes() {
@@ -690,7 +675,7 @@ public final class Box implements AutoCloseable {
 
     /**
      * Provides the bytes of this nonce
-     * 
+     *
      * @return The bytes of this nonce.
      */
     public byte[] bytesArray() {
@@ -706,7 +691,8 @@ public final class Box implements AutoCloseable {
     }
     ctx = Sodium.malloc(Sodium.crypto_box_beforenmbytes());
     try {
-      int rc = Sodium.crypto_box_beforenm(ctx, publicKey.value.pointer(), secretKey.value.pointer());
+      int rc =
+          Sodium.crypto_box_beforenm(ctx, publicKey.value.pointer(), secretKey.value.pointer());
       if (rc != 0) {
         throw new SodiumException("crypto_box_beforenm: failed with result " + rc);
       }
@@ -720,9 +706,8 @@ public final class Box implements AutoCloseable {
   /**
    * Precompute the shared key for a given sender and receiver.
    *
-   * <p>
-   * Note that the returned instance of {@link Box} should be closed using {@link #close()} (or try-with-resources) to
-   * ensure timely release of the shared key, which is held in native memory.
+   * <p>Note that the returned instance of {@link Box} should be closed using {@link #close()} (or
+   * try-with-resources) to ensure timely release of the shared key, which is held in native memory.
    *
    * @param receiver The public key of the receiver.
    * @param sender The secret key of the sender.
@@ -760,8 +745,8 @@ public final class Box implements AutoCloseable {
     }
     byte[] cipherText = new byte[combinedCypherTextLength(message)];
 
-    int rc = Sodium
-        .crypto_box_easy(
+    int rc =
+        Sodium.crypto_box_easy(
             cipherText,
             message,
             message.length,
@@ -798,7 +783,9 @@ public final class Box implements AutoCloseable {
 
     byte[] cipherText = new byte[combinedCypherTextLength(message)];
 
-    int rc = Sodium.crypto_box_easy_afternm(cipherText, message, message.length, nonce.value.pointer(), ctx);
+    int rc =
+        Sodium.crypto_box_easy_afternm(
+            cipherText, message, message.length, nonce.value.pointer(), ctx);
     if (rc != 0) {
       throw new SodiumException("crypto_box_easy_afternm: failed with result " + rc);
     }
@@ -809,20 +796,17 @@ public final class Box implements AutoCloseable {
   /**
    * Encrypt a sealed message for a given key.
    *
-   * <p>
-   * Sealed boxes are designed to anonymously send messages to a recipient given its public key.
+   * <p>Sealed boxes are designed to anonymously send messages to a recipient given its public key.
    *
-   * <p>
-   * Only the recipient can decrypt these messages, using its private key. While the recipient can verify the integrity
-   * of the message, it cannot verify the identity of the sender.
+   * <p>Only the recipient can decrypt these messages, using its private key. While the recipient
+   * can verify the integrity of the message, it cannot verify the identity of the sender.
    *
-   * <p>
-   * A message is encrypted using an ephemeral key pair, whose secret part is destroyed right after the encryption
-   * process.
+   * <p>A message is encrypted using an ephemeral key pair, whose secret part is destroyed right
+   * after the encryption process.
    *
-   * <p>
-   * Without knowing the secret key used for a given message, the sender cannot decrypt its own message later. And
-   * without additional data, a message cannot be correlated with the identity of its sender.
+   * <p>Without knowing the secret key used for a given message, the sender cannot decrypt its own
+   * message later. And without additional data, a message cannot be correlated with the identity of
+   * its sender.
    *
    * @param message The message to encrypt.
    * @param receiver The public key of the receiver.
@@ -835,20 +819,17 @@ public final class Box implements AutoCloseable {
   /**
    * Encrypt a sealed message for a given key.
    *
-   * <p>
-   * Sealed boxes are designed to anonymously send messages to a recipient given its public key.
+   * <p>Sealed boxes are designed to anonymously send messages to a recipient given its public key.
    *
-   * <p>
-   * Only the recipient can decrypt these messages, using its private key. While the recipient can verify the integrity
-   * of the message, it cannot verify the identity of the sender.
+   * <p>Only the recipient can decrypt these messages, using its private key. While the recipient
+   * can verify the integrity of the message, it cannot verify the identity of the sender.
    *
-   * <p>
-   * A message is encrypted using an ephemeral key pair, whose secret part is destroyed right after the encryption
-   * process.
+   * <p>A message is encrypted using an ephemeral key pair, whose secret part is destroyed right
+   * after the encryption process.
    *
-   * <p>
-   * Without knowing the secret key used for a given message, the sender cannot decrypt its own message later. And
-   * without additional data, a message cannot be correlated with the identity of its sender.
+   * <p>Without knowing the secret key used for a given message, the sender cannot decrypt its own
+   * message later. And without additional data, a message cannot be correlated with the identity of
+   * its sender.
    *
    * @param message The message to encrypt.
    * @param receiver The public key of the receiver.
@@ -887,10 +868,7 @@ public final class Box implements AutoCloseable {
    * @return The encrypted data and message authentication code.
    */
   public static DetachedEncryptionResult encryptDetached(
-      Bytes message,
-      PublicKey receiver,
-      SecretKey sender,
-      Nonce nonce) {
+      Bytes message, PublicKey receiver, SecretKey sender, Nonce nonce) {
     return encryptDetached(message.toArrayUnsafe(), receiver, sender, nonce);
   }
 
@@ -904,10 +882,7 @@ public final class Box implements AutoCloseable {
    * @return The encrypted data and message authentication code.
    */
   public static DetachedEncryptionResult encryptDetached(
-      byte[] message,
-      PublicKey receiver,
-      SecretKey sender,
-      Nonce nonce) {
+      byte[] message, PublicKey receiver, SecretKey sender, Nonce nonce) {
     if (sender.isDestroyed()) {
       throw new IllegalArgumentException("SecretKey has been destroyed");
     }
@@ -918,8 +893,8 @@ public final class Box implements AutoCloseable {
     }
     byte[] mac = new byte[(int) macbytes];
 
-    int rc = Sodium
-        .crypto_box_detached(
+    int rc =
+        Sodium.crypto_box_detached(
             cipherText,
             mac,
             message,
@@ -962,7 +937,9 @@ public final class Box implements AutoCloseable {
     }
     byte[] mac = new byte[(int) macbytes];
 
-    int rc = Sodium.crypto_box_detached_afternm(cipherText, mac, message, message.length, nonce.value.pointer(), ctx);
+    int rc =
+        Sodium.crypto_box_detached_afternm(
+            cipherText, mac, message, message.length, nonce.value.pointer(), ctx);
     if (rc != 0) {
       throw new SodiumException("crypto_box_detached_afternm: failed with result " + rc);
     }
@@ -995,14 +972,15 @@ public final class Box implements AutoCloseable {
    * @return The decrypted data, or {@code null} if verification failed.
    */
   @Nullable
-  public static byte[] decrypt(byte[] cipherText, PublicKey sender, SecretKey receiver, Nonce nonce) {
+  public static byte[] decrypt(
+      byte[] cipherText, PublicKey sender, SecretKey receiver, Nonce nonce) {
     if (sender.isDestroyed()) {
       throw new IllegalArgumentException("SecretKey has been destroyed");
     }
     byte[] clearText = new byte[clearTextLength(cipherText)];
 
-    int rc = Sodium
-        .crypto_box_open_easy(
+    int rc =
+        Sodium.crypto_box_open_easy(
             clearText,
             cipherText,
             cipherText.length,
@@ -1044,7 +1022,9 @@ public final class Box implements AutoCloseable {
 
     byte[] clearText = new byte[clearTextLength(cipherText)];
 
-    int rc = Sodium.crypto_box_open_easy_afternm(clearText, cipherText, cipherText.length, nonce.value.pointer(), ctx);
+    int rc =
+        Sodium.crypto_box_open_easy_afternm(
+            clearText, cipherText, cipherText.length, nonce.value.pointer(), ctx);
     if (rc == -1) {
       return null;
     }
@@ -1102,8 +1082,8 @@ public final class Box implements AutoCloseable {
     }
     byte[] clearText = new byte[cipherText.length - ((int) sealbytes)];
 
-    int rc = Sodium
-        .crypto_box_seal_open(
+    int rc =
+        Sodium.crypto_box_seal_open(
             clearText,
             cipherText,
             cipherText.length,
@@ -1130,8 +1110,10 @@ public final class Box implements AutoCloseable {
    * @return The decrypted data, or {@code null} if verification failed.
    */
   @Nullable
-  public static Bytes decryptDetached(Bytes cipherText, Bytes mac, PublicKey sender, SecretKey receiver, Nonce nonce) {
-    byte[] bytes = decryptDetached(cipherText.toArrayUnsafe(), mac.toArrayUnsafe(), sender, receiver, nonce);
+  public static Bytes decryptDetached(
+      Bytes cipherText, Bytes mac, PublicKey sender, SecretKey receiver, Nonce nonce) {
+    byte[] bytes =
+        decryptDetached(cipherText.toArrayUnsafe(), mac.toArrayUnsafe(), sender, receiver, nonce);
     return (bytes != null) ? Bytes.wrap(bytes) : null;
   }
 
@@ -1147,11 +1129,7 @@ public final class Box implements AutoCloseable {
    */
   @Nullable
   public static byte[] decryptDetached(
-      byte[] cipherText,
-      byte[] mac,
-      PublicKey sender,
-      SecretKey receiver,
-      Nonce nonce) {
+      byte[] cipherText, byte[] mac, PublicKey sender, SecretKey receiver, Nonce nonce) {
     if (receiver.isDestroyed()) {
       throw new IllegalArgumentException("SecretKey has been destroyed");
     }
@@ -1165,8 +1143,8 @@ public final class Box implements AutoCloseable {
     }
 
     byte[] clearText = new byte[cipherText.length];
-    int rc = Sodium
-        .crypto_box_open_detached(
+    int rc =
+        Sodium.crypto_box_open_detached(
             clearText,
             cipherText,
             mac,
@@ -1217,8 +1195,9 @@ public final class Box implements AutoCloseable {
     }
 
     byte[] clearText = new byte[cipherText.length];
-    int rc = Sodium
-        .crypto_box_open_detached_afternm(clearText, cipherText, mac, cipherText.length, nonce.value.pointer(), ctx);
+    int rc =
+        Sodium.crypto_box_open_detached_afternm(
+            clearText, cipherText, mac, cipherText.length, nonce.value.pointer(), ctx);
     if (rc == -1) {
       return null;
     }

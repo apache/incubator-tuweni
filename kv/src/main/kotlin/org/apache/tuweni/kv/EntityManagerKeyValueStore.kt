@@ -23,7 +23,7 @@ constructor(
   private val entityManagerProvider: () -> EntityManager,
   private val entityClass: Class<V>,
   private val idAccessor: (V) -> K,
-  override val coroutineContext: CoroutineContext = Dispatchers.IO
+  override val coroutineContext: CoroutineContext = Dispatchers.IO,
 ) : KeyValueStore<K, V> {
 
   companion object {
@@ -39,7 +39,7 @@ constructor(
     fun <K, V> open(
       entityManagerProvider: Supplier<EntityManager>,
       entityClass: Class<V>,
-      idAccessor: Function<V, K>
+      idAccessor: Function<V, K>,
     ) = EntityManagerKeyValueStore(entityManagerProvider::get, entityClass, idAccessor::apply)
   }
 

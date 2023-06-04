@@ -10,11 +10,12 @@ import java.math.BigInteger;
 /**
  * An unsigned 64-bit precision number.
  *
- * This is a raw {@link UInt64Value} - a 64-bit precision unsigned number of no particular unit.
+ * <p>This is a raw {@link UInt64Value} - a 64-bit precision unsigned number of no particular unit.
  */
 public final class UInt64 implements UInt64Value<UInt64> {
-  private final static int MAX_CONSTANT = 64;
+  private static final int MAX_CONSTANT = 64;
   private static UInt64[] CONSTANTS = new UInt64[MAX_CONSTANT + 1];
+
   static {
     CONSTANTS[0] = new UInt64(0);
     for (int i = 1; i <= MAX_CONSTANT; ++i) {
@@ -23,13 +24,16 @@ public final class UInt64 implements UInt64Value<UInt64> {
   }
 
   /** The minimum value of a UInt64 */
-  public final static UInt64 MIN_VALUE = valueOf(0);
+  public static final UInt64 MIN_VALUE = valueOf(0);
+
   /** The maximum value of a UInt64 */
-  public final static UInt64 MAX_VALUE = new UInt64(~0L);
+  public static final UInt64 MAX_VALUE = new UInt64(~0L);
+
   /** The value 0 */
-  public final static UInt64 ZERO = valueOf(0);
+  public static final UInt64 ZERO = valueOf(0);
+
   /** The value 1 */
-  public final static UInt64 ONE = valueOf(1);
+  public static final UInt64 ONE = valueOf(1);
 
   private static final BigInteger P_2_64 = BigInteger.valueOf(2).pow(64);
 
@@ -51,7 +55,7 @@ public final class UInt64 implements UInt64Value<UInt64> {
 
   /**
    * Return a {@link UInt64} containing a random value.
-   * 
+   *
    * @return a {@link UInt64} containing a random value
    */
   public static UInt64 random() {
@@ -63,7 +67,8 @@ public final class UInt64 implements UInt64Value<UInt64> {
    *
    * @param value the value to create a {@link UInt64} for
    * @return a {@link UInt64} containing the specified value
-   * @throws IllegalArgumentException if the value is negative or too large to be represented as a UInt64
+   * @throws IllegalArgumentException if the value is negative or too large to be represented as a
+   *     UInt64
    */
   public static UInt64 valueOf(BigInteger value) {
     if (value.signum() < 0) {
@@ -92,11 +97,12 @@ public final class UInt64 implements UInt64Value<UInt64> {
   /**
    * Parse a hexadecimal string into a {@link UInt64}.
    *
-   * @param str The hexadecimal string to parse, which may or may not start with "0x". That representation may contain
-   *        less than 8 bytes, in which case the result is left padded with zeros.
+   * @param str The hexadecimal string to parse, which may or may not start with "0x". That
+   *     representation may contain less than 8 bytes, in which case the result is left padded with
+   *     zeros.
    * @return The value corresponding to {@code str}.
-   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal representation or
-   *         contains more than 8 bytes.
+   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal
+   *     representation or contains more than 8 bytes.
    */
   public static UInt64 fromHexString(String str) {
     return fromBytes(Bytes.fromHexStringLenient(str));
@@ -150,7 +156,8 @@ public final class UInt64 implements UInt64Value<UInt64> {
     if (modulus.isZero()) {
       throw new ArithmeticException("addMod with zero modulus");
     }
-    return create(toBigInteger().add(BigInteger.valueOf(value)).mod(modulus.toBigInteger()).longValue());
+    return create(
+        toBigInteger().add(BigInteger.valueOf(value)).mod(modulus.toBigInteger()).longValue());
   }
 
   @Override
@@ -161,7 +168,8 @@ public final class UInt64 implements UInt64Value<UInt64> {
     if (modulus < 0) {
       throw new ArithmeticException("addMod unsigned with negative modulus");
     }
-    return create(toBigInteger().add(BigInteger.valueOf(value)).mod(BigInteger.valueOf(modulus)).longValue());
+    return create(
+        toBigInteger().add(BigInteger.valueOf(value)).mod(BigInteger.valueOf(modulus)).longValue());
   }
 
   @Override
@@ -213,7 +221,8 @@ public final class UInt64 implements UInt64Value<UInt64> {
     if (value.value == 1) {
       return mod(modulus);
     }
-    return create(toBigInteger().multiply(value.toBigInteger()).mod(modulus.toBigInteger()).longValue());
+    return create(
+        toBigInteger().multiply(value.toBigInteger()).mod(modulus.toBigInteger()).longValue());
   }
 
   @Override
@@ -230,7 +239,8 @@ public final class UInt64 implements UInt64Value<UInt64> {
     if (value < 0) {
       throw new ArithmeticException("multiplyMod unsigned by negative");
     }
-    return create(toBigInteger().multiply(BigInteger.valueOf(value)).mod(modulus.toBigInteger()).longValue());
+    return create(
+        toBigInteger().multiply(BigInteger.valueOf(value)).mod(modulus.toBigInteger()).longValue());
   }
 
   @Override
@@ -250,7 +260,11 @@ public final class UInt64 implements UInt64Value<UInt64> {
     if (value < 0) {
       throw new ArithmeticException("multiplyMod unsigned by negative");
     }
-    return create(toBigInteger().multiply(BigInteger.valueOf(value)).mod(BigInteger.valueOf(modulus)).longValue());
+    return create(
+        toBigInteger()
+            .multiply(BigInteger.valueOf(value))
+            .mod(BigInteger.valueOf(modulus))
+            .longValue());
   }
 
   @Override
@@ -371,7 +385,8 @@ public final class UInt64 implements UInt64Value<UInt64> {
   /**
    * Return a bit-wise XOR of this value and the supplied value.
    *
-   * If this value and the supplied value are different lengths, then the shorter will be zero-padded to the left.
+   * <p>If this value and the supplied value are different lengths, then the shorter will be
+   * zero-padded to the left.
    *
    * @param value the value to perform the operation with
    * @return the result of a bit-wise XOR
@@ -567,5 +582,4 @@ public final class UInt64 implements UInt64Value<UInt64> {
     assert v > 0;
     return 63 - Long.numberOfLeadingZeros(v);
   }
-
 }

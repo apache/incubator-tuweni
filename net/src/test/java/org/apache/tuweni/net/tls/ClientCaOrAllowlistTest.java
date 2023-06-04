@@ -51,36 +51,44 @@ class ClientCaOrAllowlistTest {
   private HttpClient client;
 
   @BeforeAll
-  static void startServers(@TempDirectory Path tempDir, @VertxInstance Vertx vertx) throws Exception {
+  static void startServers(@TempDirectory Path tempDir, @VertxInstance Vertx vertx)
+      throws Exception {
     SelfSignedCertificate caSignedCert = SelfSignedCertificate.create("localhost");
     SecurityTestUtils.configureJDKTrustStore(tempDir, caSignedCert);
-    caValidServer = vertx
-        .createHttpServer(new HttpServerOptions().setSsl(true).setPemKeyCertOptions(caSignedCert.keyCertOptions()))
-        .requestHandler(context -> context.response().end("OK"));
+    caValidServer =
+        vertx
+            .createHttpServer(
+                new HttpServerOptions()
+                    .setSsl(true)
+                    .setPemKeyCertOptions(caSignedCert.keyCertOptions()))
+            .requestHandler(context -> context.response().end("OK"));
     startServer(caValidServer);
 
     SelfSignedCertificate fooCert = SelfSignedCertificate.create("foo.com");
     fooFingerprint = certificateHexFingerprint(Paths.get(fooCert.keyCertOptions().getCertPath()));
-    fooServer = vertx
-        .createHttpServer(new HttpServerOptions().setSsl(true).setPemKeyCertOptions(fooCert.keyCertOptions()))
-        .requestHandler(context -> context.response().end("OK"));
+    fooServer =
+        vertx
+            .createHttpServer(
+                new HttpServerOptions().setSsl(true).setPemKeyCertOptions(fooCert.keyCertOptions()))
+            .requestHandler(context -> context.response().end("OK"));
     startServer(fooServer);
 
     SelfSignedCertificate barCert = SelfSignedCertificate.create("bar.com");
     barFingerprint = certificateHexFingerprint(Paths.get(barCert.keyCertOptions().getCertPath()));
-    barServer = vertx
-        .createHttpServer(new HttpServerOptions().setSsl(true).setPemKeyCertOptions(barCert.keyCertOptions()))
-        .requestHandler(context -> context.response().end("OK"));
+    barServer =
+        vertx
+            .createHttpServer(
+                new HttpServerOptions().setSsl(true).setPemKeyCertOptions(barCert.keyCertOptions()))
+            .requestHandler(context -> context.response().end("OK"));
     startServer(barServer);
   }
 
   @BeforeEach
   void setupClient(@TempDirectory Path tempDir, @VertxInstance Vertx vertx) throws Exception {
     knownServersFile = tempDir.resolve("knownclients.txt");
-    Files
-        .write(
-            knownServersFile,
-            Arrays.asList("#First line", "localhost:" + fooServer.actualPort() + " " + fooFingerprint));
+    Files.write(
+        knownServersFile,
+        Arrays.asList("#First line", "localhost:" + fooServer.actualPort() + " " + fooFingerprint));
 
     HttpClientOptions options = new HttpClientOptions();
     options
@@ -116,7 +124,8 @@ class ClientCaOrAllowlistTest {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
     client
         .request(HttpMethod.POST, caValidServer.actualPort(), "localhost", "/sample")
-        .onSuccess((req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
+        .onSuccess(
+            (req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
         .onFailure(statusCode::completeExceptionally);
     assertEquals((Integer) 200, statusCode.join());
   }
@@ -126,7 +135,8 @@ class ClientCaOrAllowlistTest {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
     client
         .request(HttpMethod.POST, fooServer.actualPort(), "localhost", "/sample")
-        .onSuccess((req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
+        .onSuccess(
+            (req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
         .onFailure(statusCode::completeExceptionally);
     assertEquals((Integer) 200, statusCode.join());
   }
@@ -136,7 +146,8 @@ class ClientCaOrAllowlistTest {
     CompletableFuture<Integer> statusCode = new CompletableFuture<>();
     client
         .request(HttpMethod.POST, barServer.actualPort(), "localhost", "/sample")
-        .onSuccess((req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
+        .onSuccess(
+            (req) -> req.send().onSuccess((response) -> statusCode.complete(response.statusCode())))
         .onFailure(statusCode::completeExceptionally);
     Throwable e = assertThrows(CompletionException.class, statusCode::join);
     e = e.getCause();

@@ -58,12 +58,11 @@ class GuardedBytesTest extends CommonBytesTests {
 
   @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> wrapProvider() {
-    return Stream
-        .of(
-            Arguments.of(new Object[] {new byte[10]}),
-            Arguments.of(new Object[] {new byte[] {1}}),
-            Arguments.of(new Object[] {new byte[] {1, 2, 3, 4}}),
-            Arguments.of(new Object[] {new byte[] {-1, 127, -128}}));
+    return Stream.of(
+        Arguments.of(new Object[] {new byte[10]}),
+        Arguments.of(new Object[] {new byte[] {1}}),
+        Arguments.of(new Object[] {new byte[] {1, 2, 3, 4}}),
+        Arguments.of(new Object[] {new byte[] {-1, 127, -128}}));
   }
 
   @Test
@@ -71,9 +70,7 @@ class GuardedBytesTest extends CommonBytesTests {
     assertThrows(NullPointerException.class, () -> Bytes.wrap((byte[]) null));
   }
 
-  /**
-   * Checks that modifying a wrapped array modifies the value itself.
-   */
+  /** Checks that modifying a wrapped array modifies the value itself. */
   @Test
   void wrapReflectsUpdates() {
     byte[] bytes = new byte[] {1, 2, 3, 4, 5};
@@ -104,12 +101,11 @@ class GuardedBytesTest extends CommonBytesTests {
 
   @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> wrapSliceProvider() {
-    return Stream
-        .of(
-            Arguments.of(new byte[] {1, 2, 3, 4}, 0, 4),
-            Arguments.of(new byte[] {1, 2, 3, 4}, 0, 2),
-            Arguments.of(new byte[] {1, 2, 3, 4}, 2, 1),
-            Arguments.of(new byte[] {1, 2, 3, 4}, 2, 2));
+    return Stream.of(
+        Arguments.of(new byte[] {1, 2, 3, 4}, 0, 4),
+        Arguments.of(new byte[] {1, 2, 3, 4}, 0, 2),
+        Arguments.of(new byte[] {1, 2, 3, 4}, 2, 1),
+        Arguments.of(new byte[] {1, 2, 3, 4}, 2, 2));
   }
 
   private void assertWrapSlice(byte[] bytes, int offset, int length) {
@@ -125,30 +121,37 @@ class GuardedBytesTest extends CommonBytesTests {
 
   @Test
   void wrapSliceNegativeOffset() {
-    assertThrows(IndexOutOfBoundsException.class, () -> assertWrapSlice(new byte[] {1, 2, 3, 4}, -1, 4));
+    assertThrows(
+        IndexOutOfBoundsException.class, () -> assertWrapSlice(new byte[] {1, 2, 3, 4}, -1, 4));
   }
 
   @Test
   void wrapSliceOutOfBoundOffset() {
-    assertThrows(IndexOutOfBoundsException.class, () -> assertWrapSlice(new byte[] {1, 2, 3, 4}, 5, 1));
+    assertThrows(
+        IndexOutOfBoundsException.class, () -> assertWrapSlice(new byte[] {1, 2, 3, 4}, 5, 1));
   }
 
   @Test
   void wrapSliceNegativeLength() {
     Throwable exception =
-        assertThrows(IllegalArgumentException.class, () -> assertWrapSlice(new byte[] {1, 2, 3, 4}, 0, -2));
+        assertThrows(
+            IllegalArgumentException.class, () -> assertWrapSlice(new byte[] {1, 2, 3, 4}, 0, -2));
     assertEquals("Invalid negative length", exception.getMessage());
   }
 
   @Test
   void wrapSliceTooBig() {
     Throwable exception =
-        assertThrows(IllegalArgumentException.class, () -> assertWrapSlice(new byte[] {1, 2, 3, 4}, 2, 3));
-    assertEquals("Provided length 3 is too big: the value has only 2 bytes from offset 2", exception.getMessage());
+        assertThrows(
+            IllegalArgumentException.class, () -> assertWrapSlice(new byte[] {1, 2, 3, 4}, 2, 3));
+    assertEquals(
+        "Provided length 3 is too big: the value has only 2 bytes from offset 2",
+        exception.getMessage());
   }
 
   /**
-   * Checks that modifying a wrapped array modifies the value itself, but only if within the wrapped slice.
+   * Checks that modifying a wrapped array modifies the value itself, but only if within the wrapped
+   * slice.
    */
   @Test
   void wrapSliceReflectsUpdates() {
@@ -176,7 +179,9 @@ class GuardedBytesTest extends CommonBytesTests {
   void ofBytes() {
     assertArrayEquals(Bytes.of().toArray(), new byte[] {});
     assertArrayEquals(Bytes.of((byte) 1, (byte) 2).toArray(), new byte[] {1, 2});
-    assertArrayEquals(Bytes.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).toArray(), new byte[] {1, 2, 3, 4, 5});
+    assertArrayEquals(
+        Bytes.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).toArray(),
+        new byte[] {1, 2, 3, 4, 5});
     assertArrayEquals(Bytes.of((byte) -1, (byte) 2, (byte) -3).toArray(), new byte[] {-1, 2, -3});
   }
 
@@ -235,7 +240,8 @@ class GuardedBytesTest extends CommonBytesTests {
 
   @Test
   void ofUnsignedShortNegative() {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes.ofUnsignedShort(-1));
+    Throwable exception =
+        assertThrows(IllegalArgumentException.class, () -> Bytes.ofUnsignedShort(-1));
     assertEquals(
         "Value -1 cannot be represented as an unsigned short (it is negative or too big)",
         exception.getMessage());
@@ -243,7 +249,8 @@ class GuardedBytesTest extends CommonBytesTests {
 
   @Test
   void ofUnsignedShortTooBig() {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes.ofUnsignedShort(65536));
+    Throwable exception =
+        assertThrows(IllegalArgumentException.class, () -> Bytes.ofUnsignedShort(65536));
     assertEquals(
         "Value 65536 cannot be represented as an unsigned short (it is negative or too big)",
         exception.getMessage());
@@ -303,8 +310,11 @@ class GuardedBytesTest extends CommonBytesTests {
 
   @Test
   void fromHexStringLenientInvalidInput() {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes.fromHexStringLenient("foo"));
-    assertEquals("Illegal character 'o' found at index 1 in hex binary representation", exception.getMessage());
+    Throwable exception =
+        assertThrows(IllegalArgumentException.class, () -> Bytes.fromHexStringLenient("foo"));
+    assertEquals(
+        "Illegal character 'o' found at index 1 in hex binary representation",
+        exception.getMessage());
   }
 
   @Test
@@ -330,14 +340,20 @@ class GuardedBytesTest extends CommonBytesTests {
 
   @Test
   void fromHexStringLenientLeftPaddingInvalidInput() {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes.fromHexStringLenient("foo", 10));
-    assertEquals("Illegal character 'o' found at index 1 in hex binary representation", exception.getMessage());
+    Throwable exception =
+        assertThrows(IllegalArgumentException.class, () -> Bytes.fromHexStringLenient("foo", 10));
+    assertEquals(
+        "Illegal character 'o' found at index 1 in hex binary representation",
+        exception.getMessage());
   }
 
   @Test
   void fromHexStringLenientLeftPaddingInvalidSize() {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes.fromHexStringLenient("0x001F34", 2));
-    assertEquals("Hex value is too large: expected at most 2 bytes but got 3", exception.getMessage());
+    Throwable exception =
+        assertThrows(
+            IllegalArgumentException.class, () -> Bytes.fromHexStringLenient("0x001F34", 2));
+    assertEquals(
+        "Hex value is too large: expected at most 2 bytes but got 3", exception.getMessage());
   }
 
   @Test
@@ -354,13 +370,17 @@ class GuardedBytesTest extends CommonBytesTests {
 
   @Test
   void fromHexStringInvalidInput() {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes.fromHexString("fooo"));
-    assertEquals("Illegal character 'o' found at index 1 in hex binary representation", exception.getMessage());
+    Throwable exception =
+        assertThrows(IllegalArgumentException.class, () -> Bytes.fromHexString("fooo"));
+    assertEquals(
+        "Illegal character 'o' found at index 1 in hex binary representation",
+        exception.getMessage());
   }
 
   @Test
   void fromHexStringNotLenient() {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes.fromHexString("0x100"));
+    Throwable exception =
+        assertThrows(IllegalArgumentException.class, () -> Bytes.fromHexString("0x100"));
     assertEquals("Invalid odd-length hex binary representation", exception.getMessage());
   }
 
@@ -380,20 +400,27 @@ class GuardedBytesTest extends CommonBytesTests {
 
   @Test
   void fromHexStringLeftPaddingInvalidInput() {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes.fromHexString("fooo", 4));
-    assertEquals("Illegal character 'o' found at index 1 in hex binary representation", exception.getMessage());
+    Throwable exception =
+        assertThrows(IllegalArgumentException.class, () -> Bytes.fromHexString("fooo", 4));
+    assertEquals(
+        "Illegal character 'o' found at index 1 in hex binary representation",
+        exception.getMessage());
   }
 
   @Test
   void fromHexStringLeftPaddingNotLenient() {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes.fromHexString("0x100", 4));
+    Throwable exception =
+        assertThrows(IllegalArgumentException.class, () -> Bytes.fromHexString("0x100", 4));
     assertEquals("Invalid odd-length hex binary representation", exception.getMessage());
   }
 
   @Test
   void fromHexStringLeftPaddingInvalidSize() {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes.fromHexStringLenient("0x001F34", 2));
-    assertEquals("Hex value is too large: expected at most 2 bytes but got 3", exception.getMessage());
+    Throwable exception =
+        assertThrows(
+            IllegalArgumentException.class, () -> Bytes.fromHexStringLenient("0x001F34", 2));
+    assertEquals(
+        "Hex value is too large: expected at most 2 bytes but got 3", exception.getMessage());
   }
 
   @Test

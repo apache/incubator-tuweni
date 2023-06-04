@@ -54,7 +54,8 @@ class FilesTest {
   void canCopyResources(@TempDirectory Path tempDir) throws Exception {
     Files.createDirectories(tempDir.resolve("org/something"));
     Files.write(tempDir.resolve("org/something/test.txt"), "foo".getBytes(StandardCharsets.UTF_8));
-    URLClassLoader classLoader = new URLClassLoader(new URL[] {new URL("file:" + tempDir.toString() + "/")});
+    URLClassLoader classLoader =
+        new URLClassLoader(new URL[] {new URL("file:" + tempDir.toString() + "/")});
 
     Path file = copyResource(classLoader, "org/something/test.txt", tempDir.resolve("test.txt"));
     assertTrue(Files.exists(file));
@@ -66,7 +67,8 @@ class FilesTest {
     Files.createDirectories(tempDir.resolve("org/something"));
     Files.write(tempDir.resolve("org/something/test.txt"), "foo".getBytes(StandardCharsets.UTF_8));
 
-    atomicReplace(Paths.get("org/something/test.txt"), "hello world".getBytes(StandardCharsets.UTF_8));
+    atomicReplace(
+        Paths.get("org/something/test.txt"), "hello world".getBytes(StandardCharsets.UTF_8));
     assertEquals(11, Files.size(Paths.get("org/something/test.txt")));
   }
 
@@ -75,9 +77,11 @@ class FilesTest {
     Files.createDirectories(tempDir.resolve("org/something"));
     Files.write(tempDir.resolve("org/something/test.txt"), "foo".getBytes(StandardCharsets.UTF_8));
 
-    atomicReplace(Paths.get("org/something/test.txt"), (writer) -> {
-      writer.write("hello world");
-    });
+    atomicReplace(
+        Paths.get("org/something/test.txt"),
+        (writer) -> {
+          writer.write("hello world");
+        });
     assertEquals(11, Files.size(Paths.get("org/something/test.txt")));
   }
 

@@ -73,7 +73,7 @@ internal class LESSubProtocolHandlerTest {
     Instant.now().truncatedTo(ChronoUnit.SECONDS),
     Bytes.of(2, 3, 4),
     Hash.fromBytes(Bytes32.random()),
-    UInt64.random()
+    UInt64.random(),
   )
   private val body = BlockBody(
     listOf(
@@ -84,10 +84,10 @@ internal class LESSubProtocolHandlerTest {
         Address.fromBytes(Bytes.random(20)),
         Wei.valueOf(2),
         Bytes.random(12),
-        SECP256K1.KeyPair.random()
-      )
+        SECP256K1.KeyPair.random(),
+      ),
     ),
-    emptyList()
+    emptyList(),
   )
   private val block = Block(header, body)
 
@@ -97,7 +97,7 @@ internal class LESSubProtocolHandlerTest {
     block.header.hash,
     UInt256.valueOf(42L),
     block.header.hash,
-    emptyList()
+    emptyList(),
   )
 
   private class MyRLPxService : RLPxService {
@@ -126,7 +126,7 @@ internal class LESSubProtocolHandlerTest {
 
     override fun connectTo(
       peerPublicKey: SECP256K1.PublicKey,
-      peerAddress: InetSocketAddress
+      peerAddress: InetSocketAddress,
     ): AsyncResult<WireConnection>? {
       return null
     }
@@ -143,14 +143,14 @@ internal class LESSubProtocolHandlerTest {
       subProtocolIdentifier: SubProtocolIdentifier,
       messageType: Int,
       connection: WireConnection,
-      message: Bytes
+      message: Bytes,
     ) {
       this.message = message
     }
 
     override fun disconnect(
       connection: WireConnection,
-      reason: DisconnectReason
+      reason: DisconnectReason,
     ) {
       this.disconnectReason = reason
     }
@@ -185,13 +185,13 @@ internal class LESSubProtocolHandlerTest {
           MapKeyValueStore(),
           MapKeyValueStore(),
           BlockchainIndex(writer),
-          block
+          block,
         )
       val pool = MemoryTransactionPool()
       val controller = EthController(
         repo,
         pool,
-        EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository()))
+        EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository())),
       )
 
       val handler = LESSubProtocolHandler(
@@ -204,7 +204,7 @@ internal class LESSubProtocolHandlerTest {
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
-        controller
+        controller,
       )
       val conn = makeConnection()
       handler.handleNewPeerConnection(conn)
@@ -232,7 +232,7 @@ internal class LESSubProtocolHandlerTest {
         UInt256.valueOf(3),
         UInt256.valueOf(4),
         UInt256.valueOf(5),
-        0
+        0,
       ).toBytes()
       val service = MyRLPxService()
 
@@ -245,13 +245,13 @@ internal class LESSubProtocolHandlerTest {
           MapKeyValueStore(),
           MapKeyValueStore(),
           BlockchainIndex(writer),
-          block
+          block,
         )
       val pool = MemoryTransactionPool()
       val controller = EthController(
         repo,
         pool,
-        EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository()))
+        EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository())),
       )
 
       val handler = LESSubProtocolHandler(
@@ -264,7 +264,7 @@ internal class LESSubProtocolHandlerTest {
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
-        controller
+        controller,
       )
       val conn = makeConnection()
       handler.handleNewPeerConnection(conn)
@@ -287,7 +287,7 @@ internal class LESSubProtocolHandlerTest {
     val controller = EthController(
       repo,
       pool,
-      EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository()))
+      EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository())),
     )
 
     val handler = LESSubProtocolHandler(
@@ -300,7 +300,7 @@ internal class LESSubProtocolHandlerTest {
       UInt256.ZERO,
       UInt256.ZERO,
       UInt256.ZERO,
-      controller
+      controller,
     )
     assertThrows(IllegalStateException::class.java) {
       runBlocking {
@@ -326,13 +326,13 @@ internal class LESSubProtocolHandlerTest {
           MapKeyValueStore(),
           MapKeyValueStore(),
           BlockchainIndex(writer),
-          block
+          block,
         )
       val pool = MemoryTransactionPool()
       val controller = EthController(
         repo,
         pool,
-        EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository()))
+        EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository())),
       )
       val handler = LESSubProtocolHandler(
         service,
@@ -344,7 +344,7 @@ internal class LESSubProtocolHandlerTest {
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
-        controller
+        controller,
       )
       val status = StatusMessage(
         2,
@@ -359,7 +359,7 @@ internal class LESSubProtocolHandlerTest {
         UInt256.valueOf(3),
         UInt256.valueOf(4),
         UInt256.valueOf(5),
-        0
+        0,
       ).toBytes()
       val conn = makeConnection()
       val ready = handler.handleNewPeerConnection(conn)
@@ -376,10 +376,10 @@ internal class LESSubProtocolHandlerTest {
               Bytes32.random(),
               UInt256.valueOf(3),
               UInt256.valueOf(0),
-              GetBlockHeadersMessage.BlockHeaderQuery.Direction.BACKWARDS
-            )
-          )
-        ).toBytes()
+              GetBlockHeadersMessage.BlockHeaderQuery.Direction.BACKWARDS,
+            ),
+          ),
+        ).toBytes(),
       ).await()
       val blockHeaders = BlockHeadersMessage.read(service.message!!)
       assertTrue(blockHeaders.blockHeaders.isEmpty())
@@ -399,13 +399,13 @@ internal class LESSubProtocolHandlerTest {
           MapKeyValueStore(),
           MapKeyValueStore(),
           BlockchainIndex(writer),
-          block
+          block,
         )
       val pool = MemoryTransactionPool()
       val controller = EthController(
         repo,
         pool,
-        EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository()))
+        EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository())),
       )
       val handler = LESSubProtocolHandler(
         service,
@@ -417,7 +417,7 @@ internal class LESSubProtocolHandlerTest {
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
-        controller
+        controller,
       )
       val status = StatusMessage(
         2,
@@ -432,7 +432,7 @@ internal class LESSubProtocolHandlerTest {
         UInt256.valueOf(3),
         UInt256.valueOf(4),
         UInt256.valueOf(5),
-        0
+        0,
       ).toBytes()
       val conn = makeConnection()
       val ready = handler.handleNewPeerConnection(conn)
@@ -460,13 +460,13 @@ internal class LESSubProtocolHandlerTest {
           MapKeyValueStore(),
           MapKeyValueStore(),
           BlockchainIndex(writer),
-          block
+          block,
         )
       val pool = MemoryTransactionPool()
       val controller = EthController(
         repo,
         pool,
-        EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository()))
+        EthClient(service, pool, RandomConnectionSelectionStrategy(MemoryWireConnectionsRepository())),
       )
 
       val handler = LESSubProtocolHandler(
@@ -479,7 +479,7 @@ internal class LESSubProtocolHandlerTest {
         UInt256.ZERO,
         UInt256.ZERO,
         UInt256.ZERO,
-        controller
+        controller,
       )
       val status = StatusMessage(
         2,
@@ -494,7 +494,7 @@ internal class LESSubProtocolHandlerTest {
         UInt256.valueOf(3),
         UInt256.valueOf(4),
         UInt256.valueOf(5),
-        0
+        0,
       ).toBytes()
       val conn = makeConnection()
       val ready = handler.handleNewPeerConnection(conn)

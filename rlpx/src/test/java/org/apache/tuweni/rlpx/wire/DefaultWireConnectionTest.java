@@ -33,11 +33,20 @@ class DefaultWireConnectionTest {
   void disconnectIfNoHelloExchanged() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
     DefaultWireConnection conn =
-        new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
-        }, () -> {
-        }, new LinkedHashMap<>(), 3, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
-    conn.registerListener(event -> {
-    });
+        new DefaultWireConnection(
+            nodeId,
+            peerNodeId,
+            capturedDisconnect::set,
+            helloMessage -> {},
+            () -> {},
+            new LinkedHashMap<>(),
+            3,
+            "abc",
+            10000,
+            AsyncResult.incomplete(),
+            "127.0.0.1",
+            1234);
+    conn.registerListener(event -> {});
     conn.messageReceived(new RLPxMessage(45, Bytes.EMPTY));
     assertEquals(1, capturedDisconnect.get().messageId());
     DisconnectMessage msg = DisconnectMessage.read(capturedDisconnect.get().content());
@@ -49,11 +58,20 @@ class DefaultWireConnectionTest {
   void disconnectIfNoHelloReceived() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
     DefaultWireConnection conn =
-        new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
-        }, () -> {
-        }, new LinkedHashMap<>(), 4, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
-    conn.registerListener(event -> {
-    });
+        new DefaultWireConnection(
+            nodeId,
+            peerNodeId,
+            capturedDisconnect::set,
+            helloMessage -> {},
+            () -> {},
+            new LinkedHashMap<>(),
+            4,
+            "abc",
+            10000,
+            AsyncResult.incomplete(),
+            "127.0.0.1",
+            1234);
+    conn.registerListener(event -> {});
     conn.sendHello();
     conn.messageReceived(new RLPxMessage(45, Bytes.EMPTY));
     assertEquals(1, capturedDisconnect.get().messageId());
@@ -70,19 +88,31 @@ class DefaultWireConnectionTest {
     when(handler.handleNewPeerConnection(any())).thenReturn(AsyncCompletion.COMPLETED);
     subProtocols.put(SubProtocolIdentifier.of("foo", 1, 1), handler);
     DefaultWireConnection conn =
-        new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
-        }, () -> {
-        }, subProtocols, 28, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
-    conn.registerListener(event -> {
-    });
+        new DefaultWireConnection(
+            nodeId,
+            peerNodeId,
+            capturedDisconnect::set,
+            helloMessage -> {},
+            () -> {},
+            subProtocols,
+            28,
+            "abc",
+            10000,
+            AsyncResult.incomplete(),
+            "127.0.0.1",
+            1234);
+    conn.registerListener(event -> {});
     conn.sendHello();
-    conn
-        .messageReceived(
-            new RLPxMessage(
-                0,
-                HelloMessage
-                    .create(peerNodeId, 30303, 3, "blah", Collections.singletonList(new Capability("foo", 1)))
-                    .toBytes()));
+    conn.messageReceived(
+        new RLPxMessage(
+            0,
+            HelloMessage.create(
+                    peerNodeId,
+                    30303,
+                    3,
+                    "blah",
+                    Collections.singletonList(new Capability("foo", 1)))
+                .toBytes()));
     conn.messageReceived(new RLPxMessage(45, Bytes.EMPTY));
     assertEquals(1, capturedDisconnect.get().messageId());
     DisconnectMessage msg = DisconnectMessage.read(capturedDisconnect.get().content());
@@ -94,15 +124,25 @@ class DefaultWireConnectionTest {
   void disconnectIfNoNodeID() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
     DefaultWireConnection conn =
-        new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
-        }, () -> {
-        }, new LinkedHashMap<>(), 32, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
-    conn.registerListener(event -> {
-    });
+        new DefaultWireConnection(
+            nodeId,
+            peerNodeId,
+            capturedDisconnect::set,
+            helloMessage -> {},
+            () -> {},
+            new LinkedHashMap<>(),
+            32,
+            "abc",
+            10000,
+            AsyncResult.incomplete(),
+            "127.0.0.1",
+            1234);
+    conn.registerListener(event -> {});
     conn.sendHello();
-    conn
-        .messageReceived(
-            new RLPxMessage(0, HelloMessage.create(Bytes.EMPTY, 30303, 4, "blah", Collections.emptyList()).toBytes()));
+    conn.messageReceived(
+        new RLPxMessage(
+            0,
+            HelloMessage.create(Bytes.EMPTY, 30303, 4, "blah", Collections.emptyList()).toBytes()));
 
     assertEquals(1, capturedDisconnect.get().messageId());
     DisconnectMessage msg = DisconnectMessage.read(capturedDisconnect.get().content());
@@ -114,17 +154,26 @@ class DefaultWireConnectionTest {
   void disconnectIfNodeIDMismatches() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
     DefaultWireConnection conn =
-        new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
-        }, () -> {
-        }, new LinkedHashMap<>(), 32, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
-    conn.registerListener(event -> {
-    });
+        new DefaultWireConnection(
+            nodeId,
+            peerNodeId,
+            capturedDisconnect::set,
+            helloMessage -> {},
+            () -> {},
+            new LinkedHashMap<>(),
+            32,
+            "abc",
+            10000,
+            AsyncResult.incomplete(),
+            "127.0.0.1",
+            1234);
+    conn.registerListener(event -> {});
     conn.sendHello();
-    conn
-        .messageReceived(
-            new RLPxMessage(
-                0,
-                HelloMessage.create(Bytes.of(1, 2, 3, 4), 30303, 3, "blah", Collections.emptyList()).toBytes()));
+    conn.messageReceived(
+        new RLPxMessage(
+            0,
+            HelloMessage.create(Bytes.of(1, 2, 3, 4), 30303, 3, "blah", Collections.emptyList())
+                .toBytes()));
 
     assertEquals(1, capturedDisconnect.get().messageId());
     DisconnectMessage msg = DisconnectMessage.read(capturedDisconnect.get().content());
@@ -135,15 +184,25 @@ class DefaultWireConnectionTest {
   @Test
   void disconnectIfConnectedToSelf() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
-    DefaultWireConnection conn = new DefaultWireConnection(nodeId, nodeId, capturedDisconnect::set, helloMessage -> {
-    }, () -> {
-    }, new LinkedHashMap<>(), 33, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
-    conn.registerListener(event -> {
-    });
+    DefaultWireConnection conn =
+        new DefaultWireConnection(
+            nodeId,
+            nodeId,
+            capturedDisconnect::set,
+            helloMessage -> {},
+            () -> {},
+            new LinkedHashMap<>(),
+            33,
+            "abc",
+            10000,
+            AsyncResult.incomplete(),
+            "127.0.0.1",
+            1234);
+    conn.registerListener(event -> {});
     conn.sendHello();
-    conn
-        .messageReceived(
-            new RLPxMessage(0, HelloMessage.create(nodeId, 30303, 1, "blah", Collections.emptyList()).toBytes()));
+    conn.messageReceived(
+        new RLPxMessage(
+            0, HelloMessage.create(nodeId, 30303, 1, "blah", Collections.emptyList()).toBytes()));
 
     assertEquals(1, capturedDisconnect.get().messageId());
     DisconnectMessage msg = DisconnectMessage.read(capturedDisconnect.get().content());
@@ -155,15 +214,25 @@ class DefaultWireConnectionTest {
   void disconnectIfInvalidP2PConnection() {
     AtomicReference<RLPxMessage> capturedDisconnect = new AtomicReference<>();
     DefaultWireConnection conn =
-        new DefaultWireConnection(nodeId, peerNodeId, capturedDisconnect::set, helloMessage -> {
-        }, () -> {
-        }, new LinkedHashMap<>(), 5, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
-    conn.registerListener(event -> {
-    });
+        new DefaultWireConnection(
+            nodeId,
+            peerNodeId,
+            capturedDisconnect::set,
+            helloMessage -> {},
+            () -> {},
+            new LinkedHashMap<>(),
+            5,
+            "abc",
+            10000,
+            AsyncResult.incomplete(),
+            "127.0.0.1",
+            1234);
+    conn.registerListener(event -> {});
     conn.sendHello();
-    conn
-        .messageReceived(
-            new RLPxMessage(0, HelloMessage.create(peerNodeId, 30303, 6, "blah", Collections.emptyList()).toBytes()));
+    conn.messageReceived(
+        new RLPxMessage(
+            0,
+            HelloMessage.create(peerNodeId, 30303, 6, "blah", Collections.emptyList()).toBytes()));
 
     assertEquals(1, capturedDisconnect.get().messageId());
     DisconnectMessage msg = DisconnectMessage.read(capturedDisconnect.get().content());
@@ -176,10 +245,20 @@ class DefaultWireConnectionTest {
     SubProtocolIdentifier cus = SubProtocolIdentifier.of("cus", 1, 1);
     LinkedHashMap<SubProtocolIdentifier, SubProtocolHandler> subprotocols = new LinkedHashMap<>();
     subprotocols.put(cus, mock(SubProtocolHandler.class));
-    DefaultWireConnection conn = new DefaultWireConnection(nodeId, peerNodeId, disconnect -> {
-    }, helloMessage -> {
-    }, () -> {
-    }, subprotocols, 5, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
+    DefaultWireConnection conn =
+        new DefaultWireConnection(
+            nodeId,
+            peerNodeId,
+            disconnect -> {},
+            helloMessage -> {},
+            () -> {},
+            subprotocols,
+            5,
+            "abc",
+            10000,
+            AsyncResult.incomplete(),
+            "127.0.0.1",
+            1234);
     List<Capability> capabilityList = Arrays.asList(new Capability("cus", 1));
     conn.initSupportedRange(capabilityList);
     assertEquals(1, conn.agreedSubprotocols().size());
@@ -190,10 +269,20 @@ class DefaultWireConnectionTest {
     SubProtocolIdentifier cus = SubProtocolIdentifier.of("auc", 1, 1);
     LinkedHashMap<SubProtocolIdentifier, SubProtocolHandler> subprotocols = new LinkedHashMap<>();
     subprotocols.put(cus, mock(SubProtocolHandler.class));
-    DefaultWireConnection conn = new DefaultWireConnection(nodeId, peerNodeId, disconnect -> {
-    }, helloMessage -> {
-    }, () -> {
-    }, subprotocols, 5, "abc", 10000, AsyncResult.incomplete(), "127.0.0.1", 1234);
+    DefaultWireConnection conn =
+        new DefaultWireConnection(
+            nodeId,
+            peerNodeId,
+            disconnect -> {},
+            helloMessage -> {},
+            () -> {},
+            subprotocols,
+            5,
+            "abc",
+            10000,
+            AsyncResult.incomplete(),
+            "127.0.0.1",
+            1234);
     List<Capability> capabilityList = Arrays.asList(new Capability("cus", 1));
     conn.initSupportedRange(capabilityList);
     assertEquals(0, conn.agreedSubprotocols().size());

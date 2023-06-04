@@ -81,7 +81,7 @@ class KademliaRoutingTable<T>(
   k: Int,
   maxReplacements: Int = k,
   private val nodeId: (T) -> ByteArray,
-  private val distanceToSelf: (T) -> Int = { nodeId(it) xorDist selfId }
+  private val distanceToSelf: (T) -> Int = { nodeId(it) xorDist selfId },
 ) : Set<T> {
 
   companion object {
@@ -99,7 +99,7 @@ class KademliaRoutingTable<T>(
       selfId: ByteArray,
       k: Int,
       nodeId: Function<T, ByteArray>,
-      distanceToSelf: Function<T, Int>
+      distanceToSelf: Function<T, Int>,
     ): KademliaRoutingTable<T> =
       KademliaRoutingTable(selfId, k, nodeId = nodeId::apply, distanceToSelf = distanceToSelf::apply)
 
@@ -119,7 +119,7 @@ class KademliaRoutingTable<T>(
       k: Int,
       maxReplacements: Int,
       nodeId: Function<T, ByteArray>,
-      distanceToSelf: Function<T, Int>
+      distanceToSelf: Function<T, Int>,
     ): KademliaRoutingTable<T> = KademliaRoutingTable(selfId, k, maxReplacements, nodeId::apply, distanceToSelf::apply)
   }
 
@@ -261,7 +261,7 @@ class KademliaRoutingTable<T>(
     // ordered with most recent first
     private val entries: MutableList<E>,
     private val k: Int,
-    private val maxReplacements: Int
+    private val maxReplacements: Int,
   ) : List<E> by entries {
 
     constructor(k: Int, maxReplacements: Int) : this(Collections.synchronizedList(mutableListOf()), k, maxReplacements)

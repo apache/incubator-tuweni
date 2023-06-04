@@ -32,7 +32,7 @@ class PeerStatusEthSynchronizer(
   peerRepository: EthereumPeerRepository,
   private val adapter: WireConnectionPeerRepositoryAdapter,
   from: UInt256? = UInt256.ZERO,
-  to: UInt256?
+  to: UInt256?,
 ) : Synchronizer(executor, coroutineContext, repository, client, peerRepository, from, to) {
 
   var listenerId: String? = null
@@ -59,7 +59,7 @@ class PeerStatusEthSynchronizer(
           HEADER_REQUEST_SIZE,
           0L,
           true,
-          adapter.get(ethereumConnection)
+          adapter.get(ethereumConnection),
         ).thenAccept {
           addHeaders(it)
           launch {
@@ -85,7 +85,7 @@ class PeerStatusEthSynchronizer(
       HEADER_REQUEST_SIZE,
       0L,
       true,
-      adapter.get(ethereumConnection)
+      adapter.get(ethereumConnection),
     ).thenAccept {
       addHeaders(it)
       launch {

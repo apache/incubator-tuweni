@@ -16,13 +16,13 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A transaction receipt, containing information pertaining a transaction execution.
  *
- * <p>
- * Transaction receipts have two different formats: state root-encoded and status-encoded. The difference between these
- * two formats is that the state root-encoded transaction receipt contains the state root for world state after the
- * transaction has been processed (e.g. not invalid) and the status-encoded transaction receipt instead has contains the
- * status of the transaction (e.g. 1 for success and 0 for failure). The other transaction receipt fields are the same
- * for both formats: logs, logs bloom, and cumulative gas used in the block. The TransactionReceiptType attribute is the
- * best way to check which format has been used.
+ * <p>Transaction receipts have two different formats: state root-encoded and status-encoded. The
+ * difference between these two formats is that the state root-encoded transaction receipt contains
+ * the state root for world state after the transaction has been processed (e.g. not invalid) and
+ * the status-encoded transaction receipt instead has contains the status of the transaction (e.g. 1
+ * for success and 0 for failure). The other transaction receipt fields are the same for both
+ * formats: logs, logs bloom, and cumulative gas used in the block. The TransactionReceiptType
+ * attribute is the best way to check which format has been used.
  */
 public final class TransactionReceipt {
 
@@ -43,20 +43,21 @@ public final class TransactionReceipt {
    * @return the transaction receipt
    */
   public static TransactionReceipt readFrom(final RLPReader reader) {
-    return reader.readList(input -> {
+    return reader.readList(
+        input -> {
+          Bytes statusOrRootState = input.readValue();
+          long cumulativeGas = input.readLong();
+          LogsBloomFilter bloomFilter = new LogsBloomFilter(input.readValue());
+          List<Log> logs = input.readListContents(Log::readFrom);
 
-      Bytes statusOrRootState = input.readValue();
-      long cumulativeGas = input.readLong();
-      LogsBloomFilter bloomFilter = new LogsBloomFilter(input.readValue());
-      List<Log> logs = input.readListContents(Log::readFrom);
-
-      if (statusOrRootState.size() == 32) {
-        return new TransactionReceipt(Bytes32.wrap(statusOrRootState), cumulativeGas, bloomFilter, logs);
-      } else {
-        int status = statusOrRootState.toInt();
-        return new TransactionReceipt(status, cumulativeGas, bloomFilter, logs);
-      }
-    });
+          if (statusOrRootState.size() == 32) {
+            return new TransactionReceipt(
+                Bytes32.wrap(statusOrRootState), cumulativeGas, bloomFilter, logs);
+          } else {
+            int status = statusOrRootState.toInt();
+            return new TransactionReceipt(status, cumulativeGas, bloomFilter, logs);
+          }
+        });
   }
 
   private final Bytes32 stateRoot;
@@ -73,7 +74,8 @@ public final class TransactionReceipt {
    * @param bloomFilter the bloom filter of the logs
    * @param logs the logs generated within the transaction
    */
-  public TransactionReceipt(Bytes32 stateRoot, long cumulativeGasUsed, LogsBloomFilter bloomFilter, List<Log> logs) {
+  public TransactionReceipt(
+      Bytes32 stateRoot, long cumulativeGasUsed, LogsBloomFilter bloomFilter, List<Log> logs) {
     this(stateRoot, null, cumulativeGasUsed, bloomFilter, logs);
   }
 
@@ -85,7 +87,8 @@ public final class TransactionReceipt {
    * @param bloomFilter the bloom filter of the logs
    * @param logs the logs generated within the transaction
    */
-  public TransactionReceipt(int status, long cumulativeGasUsed, LogsBloomFilter bloomFilter, List<Log> logs) {
+  public TransactionReceipt(
+      int status, long cumulativeGasUsed, LogsBloomFilter bloomFilter, List<Log> logs) {
     this(null, status, cumulativeGasUsed, bloomFilter, logs);
   }
 
@@ -104,7 +107,7 @@ public final class TransactionReceipt {
 
   /**
    * Writes the transaction receipt into a serialized RLP form.
-   * 
+   *
    * @return the transaction receipt encoded as a set of bytes using the RLP serialization
    */
   public Bytes toBytes() {
@@ -117,19 +120,20 @@ public final class TransactionReceipt {
    * @param writer The RLP output to write to
    */
   public void writeTo(final RLPWriter writer) {
-    writer.writeList(out -> {
+    writer.writeList(
+        out -> {
 
-      // Determine whether it's a state root-encoded transaction receipt
-      // or is a status code-encoded transaction receipt.
-      if (stateRoot != null) {
-        out.writeValue(stateRoot);
-      } else {
-        out.writeLong(status);
-      }
-      out.writeLong(cumulativeGasUsed);
-      out.writeValue(bloomFilter.toBytes());
-      out.writeList(logs, (logWriter, log) -> log.writeTo(logWriter));
-    });
+          // Determine whether it's a state root-encoded transaction receipt
+          // or is a status code-encoded transaction receipt.
+          if (stateRoot != null) {
+            out.writeValue(stateRoot);
+          } else {
+            out.writeLong(status);
+          }
+          out.writeLong(cumulativeGasUsed);
+          out.writeValue(bloomFilter.toBytes());
+          out.writeList(logs, (logWriter, log) -> log.writeTo(logWriter));
+        });
   }
 
   /**
@@ -169,7 +173,8 @@ public final class TransactionReceipt {
   }
 
   /**
-   * Computes the logs bloom filters of the current receipt and compares it to the bloom filter stored.
+   * Computes the logs bloom filters of the current receipt and compares it to the bloom filter
+   * stored.
    *
    * @return true if the computed bloom filter matches the bloom filter stored
    */

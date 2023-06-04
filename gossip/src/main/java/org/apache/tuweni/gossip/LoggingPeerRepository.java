@@ -16,7 +16,8 @@ import org.slf4j.LoggerFactory;
 
 final class LoggingPeerRepository implements PeerRepository {
 
-  private static final Logger logger = LoggerFactory.getLogger(LoggingPeerRepository.class.getName());
+  private static final Logger logger =
+      LoggerFactory.getLogger(LoggingPeerRepository.class.getName());
 
   private final Set<Peer> eagerPushPeers = ConcurrentHashMap.newKeySet();
   private final Set<Peer> lazyPushPeers = ConcurrentHashMap.newKeySet();
@@ -72,7 +73,5 @@ final class LoggingPeerRepository implements PeerRepository {
         logger.info("Added new peer {}", peer);
       }
     }
-
   }
-
 }

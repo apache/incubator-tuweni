@@ -34,7 +34,7 @@ object ScuttlebuttClientFactory {
     host: String,
     port: Int,
     keyPair: Signature.KeyPair,
-    serverPublicKey: Signature.PublicKey
+    serverPublicKey: Signature.PublicKey,
   ): ScuttlebuttClient {
     return fromNetWithNetworkKey(vertx, host, port, keyPair, serverPublicKey, DEFAULT_NETWORK)
   }
@@ -57,24 +57,24 @@ object ScuttlebuttClientFactory {
     port: Int,
     keyPair: Signature.KeyPair?,
     serverPublicKey: Signature.PublicKey?,
-    networkIdentifier: Bytes32?
+    networkIdentifier: Bytes32?,
   ): ScuttlebuttClient {
     val secureScuttlebuttVertxClient = SecureScuttlebuttVertxClient(
       vertx,
       keyPair!!,
-      networkIdentifier!!
+      networkIdentifier!!,
     )
     return runBlocking {
       val client = secureScuttlebuttVertxClient.connectTo(
         port,
         host,
         serverPublicKey,
-        null
+        null,
       ) { sender, terminationFn ->
         RPCHandler(
           vertx,
           sender,
-          terminationFn
+          terminationFn,
         )
       } as RPCHandler
       return@runBlocking ScuttlebuttClient(client)
@@ -95,12 +95,12 @@ object ScuttlebuttClientFactory {
     vertx: Vertx,
     keyPair: Signature.KeyPair,
     invite: Invite,
-    networkIdentifier: Bytes32
+    networkIdentifier: Bytes32,
   ): ScuttlebuttClient {
     val secureScuttlebuttVertxClient = SecureScuttlebuttVertxClient(
       vertx,
       keyPair,
-      networkIdentifier
+      networkIdentifier,
     )
     return runBlocking {
       val multiplexer: RPCHandler = secureScuttlebuttVertxClient
@@ -108,12 +108,12 @@ object ScuttlebuttClientFactory {
           invite.port,
           invite.host,
           null,
-          invite
+          invite,
         ) { sender, terminationFn ->
           RPCHandler(
             vertx,
             sender,
-            terminationFn
+            terminationFn,
           )
         } as RPCHandler
       return@runBlocking ScuttlebuttClient(multiplexer)

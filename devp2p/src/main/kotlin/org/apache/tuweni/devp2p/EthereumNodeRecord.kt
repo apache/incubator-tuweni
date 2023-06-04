@@ -29,7 +29,7 @@ class EthereumNodeRecord(
   val seq: Long,
   val data: Map<String, Bytes>,
   val listData: Map<String, List<Bytes>> = emptyMap(),
-  val rlp: Bytes
+  val rlp: Bytes,
 ) {
 
   companion object {
@@ -121,7 +121,7 @@ class EthereumNodeRecord(
       udp: Int? = null,
       data: Map<String, Bytes>? = null,
       listData: Map<String, List<Bytes>>? = null,
-      writer: RLPWriter
+      writer: RLPWriter,
     ) {
       writer.writeLong(seq)
       val mutableData = data?.toMutableMap() ?: mutableMapOf()
@@ -173,7 +173,7 @@ class EthereumNodeRecord(
       listData: Map<String, List<Bytes>>? = null,
       ip: InetAddress,
       tcp: Int? = null,
-      udp: Int? = null
+      udp: Int? = null,
     ): EthereumNodeRecord {
       return fromRLP(toRLP(signatureKeyPair, seq, data, listData, ip, tcp, udp))
     }
@@ -198,7 +198,7 @@ class EthereumNodeRecord(
       listData: Map<String, List<Bytes>>? = null,
       ip: InetAddress,
       tcp: Int? = null,
-      udp: Int? = null
+      udp: Int? = null,
     ): Bytes {
       val encoded = RLP.encodeList { writer ->
         encode(signatureKeyPair, seq, ip, tcp, udp, data, listData, writer)
@@ -233,7 +233,7 @@ class EthereumNodeRecord(
     val sig = SECP256K1.Signature.create(
       1,
       signature.slice(0, 32).toUnsignedBigInteger(),
-      signature.slice(32).toUnsignedBigInteger()
+      signature.slice(32).toUnsignedBigInteger(),
     )
 
     val pubKey = publicKey()
@@ -243,7 +243,7 @@ class EthereumNodeRecord(
       val sig0 = SECP256K1.Signature.create(
         0,
         signature.slice(0, 32).toUnsignedBigInteger(),
-        signature.slice(32).toUnsignedBigInteger()
+        signature.slice(32).toUnsignedBigInteger(),
       )
       val recovered0 = SECP256K1.PublicKey.recoverFromSignature(encoded, sig0)
       if (pubKey != recovered0) {

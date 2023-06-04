@@ -5,7 +5,7 @@ package org.apache.tuweni.plumtree;
 /**
  * Interface to decide whether to prune peers when they send messages late.
  *
- * Pruned peers become "lazy peers". They send message attestations (IHAVE).
+ * <p>Pruned peers become "lazy peers". They send message attestations (IHAVE).
  */
 public interface PeerPruning {
 

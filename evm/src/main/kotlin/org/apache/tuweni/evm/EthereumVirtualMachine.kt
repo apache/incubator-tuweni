@@ -32,7 +32,7 @@ enum class CallKind(val number: Int) {
   CALLCODE(2),
   CREATE(3),
   CREATE2(4),
-  STATICCALL(5)
+  STATICCALL(5),
 }
 
 /**
@@ -59,7 +59,7 @@ enum class EVMExecutionStatusCode(val number: Int) {
   INTERNAL_ERROR(-1),
   REJECTED(-2),
   OUT_OF_MEMORY(-3),
-  HALTED(-4);
+  HALTED(-4),
 }
 
 /**
@@ -83,7 +83,7 @@ enum class HardFork(val number: Int) {
   CONSTANTINOPLE(5),
   PETERSBURG(6),
   ISTANBUL(7),
-  BERLIN(8)
+  BERLIN(8),
 }
 
 val latestHardFork = HardFork.BERLIN
@@ -102,7 +102,7 @@ data class EVMState(
   val logs: List<Log>,
   val stack: Stack,
   val memory: Memory,
-  val output: Bytes? = null
+  val output: Bytes? = null,
 ) {
 
   /**
@@ -137,7 +137,7 @@ data class EVMResult(
   val statusCode: EVMExecutionStatusCode,
   val hostContext: HostContext,
   val changes: ExecutionChanges,
-  val state: EVMState
+  val state: EVMState,
 )
 
 /**
@@ -154,7 +154,7 @@ data class EVMMessage(
   val origin: Address,
   val inputData: Bytes,
   val value: Bytes,
-  val createSalt: Bytes32 = Bytes32.ZERO
+  val createSalt: Bytes32 = Bytes32.ZERO,
 )
 
 /**
@@ -171,7 +171,7 @@ class EthereumVirtualMachine(
   private val repository: BlockchainRepository,
   val precompiles: Map<Address, PrecompileContract>,
   private val evmVmFactory: () -> EvmVm,
-  private val options: Map<String, String> = mapOf()
+  private val options: Map<String, String> = mapOf(),
 ) {
 
   companion object {
@@ -256,7 +256,7 @@ class EthereumVirtualMachine(
     currentDifficulty: UInt256,
     chainId: UInt256,
     callKind: CallKind,
-    revision: HardFork = latestHardFork
+    revision: HardFork = latestHardFork,
   ): AsyncResult<EVMResult> = runBlocking {
     asyncResult {
       execute(
@@ -274,7 +274,7 @@ class EthereumVirtualMachine(
         currentDifficulty,
         chainId,
         callKind,
-        revision
+        revision,
       )
     }
   }
@@ -313,7 +313,7 @@ class EthereumVirtualMachine(
     chainId: UInt256,
     callKind: CallKind,
     revision: HardFork = latestHardFork,
-    depth: Int = 0
+    depth: Int = 0,
   ): EVMResult {
     val hostContext = TransactionalEVMHostContext(
       repository,
@@ -330,7 +330,7 @@ class EthereumVirtualMachine(
       currentTimestamp,
       currentGasLimit,
       currentDifficulty,
-      chainId
+      chainId,
     )
     val result =
       executeInternal(
@@ -345,7 +345,7 @@ class EthereumVirtualMachine(
         callKind,
         revision,
         depth,
-        hostContext
+        hostContext,
       )
 
     return result
@@ -363,7 +363,7 @@ class EthereumVirtualMachine(
     callKind: CallKind,
     revision: HardFork = latestHardFork,
     depth: Int = 0,
-    hostContext: HostContext
+    hostContext: HostContext,
   ): EVMResult {
     var gasAvailable = gas
     if (depth > 1024) {
@@ -372,7 +372,7 @@ class EthereumVirtualMachine(
         EVMExecutionStatusCode.CALL_DEPTH_EXCEEDED,
         hostContext,
         NoOpExecutionChanges,
-        EVMState(gasManager, listOf(), Stack(), Memory(), null)
+        EVMState(gasManager, listOf(), Stack(), Memory(), null),
       )
     }
     val senderNonce = hostContext.getNonce(sender)
@@ -382,7 +382,7 @@ class EthereumVirtualMachine(
         EVMExecutionStatusCode.REJECTED,
         hostContext,
         NoOpExecutionChanges,
-        EVMState(GasManager(gas), listOf(), Stack(), Memory(), null)
+        EVMState(GasManager(gas), listOf(), Stack(), Memory(), null),
       )
     }
 
@@ -393,7 +393,7 @@ class EthereumVirtualMachine(
           EVMExecutionStatusCode.REJECTED,
           hostContext,
           NoOpExecutionChanges,
-          EVMState(GasManager(gas), listOf(), Stack(), Memory(), null)
+          EVMState(GasManager(gas), listOf(), Stack(), Memory(), null),
         )
       }
       gasAvailable = gasAvailable.subtract(codeDepositGasFee)
@@ -410,7 +410,7 @@ class EthereumVirtualMachine(
           EVMExecutionStatusCode.REJECTED,
           hostContext,
           NoOpExecutionChanges,
-          EVMState(GasManager(gas), listOf(), Stack(), Memory(), null)
+          EVMState(GasManager(gas), listOf(), Stack(), Memory(), null),
         )
       }
       hostContext.setBalance(sender, senderBalance.subtract(amount))
@@ -423,7 +423,7 @@ class EthereumVirtualMachine(
           EVMExecutionStatusCode.REJECTED,
           hostContext,
           NoOpExecutionChanges,
-          EVMState(GasManager(gas), listOf(), Stack(), Memory(), null)
+          EVMState(GasManager(gas), listOf(), Stack(), Memory(), null),
         )
       }
       logger.trace("Executing precompile $contractAddress")
@@ -434,20 +434,20 @@ class EthereumVirtualMachine(
         if (result.output == null) EVMExecutionStatusCode.PRECOMPILE_FAILURE else EVMExecutionStatusCode.SUCCESS,
         hostContext,
         NoOpExecutionChanges,
-        EVMState(gasManager, listOf(), Stack(), Memory(), result.output)
+        EVMState(gasManager, listOf(), Stack(), Memory(), result.output),
       )
     } else {
       val msg =
         EVMMessage(
           callKind, 0, depth, gas, contractAddress, destination, sender, origin, inputData,
-          value
+          value,
         )
 
       return vm().execute(
         hostContext,
         revision,
         msg,
-        code
+        code,
       )
     }
   }
@@ -831,7 +831,7 @@ val opcodes = mapOf<Byte, String>(
   Pair(0xfb.toByte(), "unused"),
   Pair(0xfd.toByte(), "revert"),
   Pair(0xfe.toByte(), "invalid"),
-  Pair(0xff.toByte(), "selfdestruct")
+  Pair(0xff.toByte(), "selfdestruct"),
 )
 
 /**

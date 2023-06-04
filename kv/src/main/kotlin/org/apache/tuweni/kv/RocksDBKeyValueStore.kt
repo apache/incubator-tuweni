@@ -34,7 +34,7 @@ constructor(
   private val keyDeserializer: (Bytes) -> K,
   private val valueDeserializer: (Bytes) -> V,
   private val options: Options = Options().setCreateIfMissing(true).setWriteBufferSize(268435456).setMaxOpenFiles(-1),
-  override val coroutineContext: CoroutineContext = Dispatchers.IO
+  override val coroutineContext: CoroutineContext = Dispatchers.IO,
 ) : KeyValueStore<K, V> {
 
   companion object {
@@ -56,13 +56,13 @@ constructor(
       keySerializer: Function<K, Bytes>,
       valueSerializer: Function<V, Bytes>,
       keyDeserializer: Function<Bytes, K>,
-      valueDeserializer: Function<Bytes, V>
+      valueDeserializer: Function<Bytes, V>,
     ) = RocksDBKeyValueStore(
       dbPath,
       keySerializer::apply,
       valueSerializer::apply,
       keyDeserializer::apply,
-      valueDeserializer::apply
+      valueDeserializer::apply,
     )
 
     /**
@@ -85,7 +85,7 @@ constructor(
       valueSerializer: Function<V, Bytes>,
       keyDeserializer: Function<Bytes, K>,
       valueDeserializer: Function<Bytes, V>,
-      options: Options
+      options: Options,
     ) =
       RocksDBKeyValueStore(
         dbPath,
@@ -93,7 +93,7 @@ constructor(
         valueSerializer::apply,
         keyDeserializer::apply,
         valueDeserializer::apply,
-        options
+        options,
       )
   }
 

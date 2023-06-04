@@ -37,11 +37,11 @@ class SendDataToAnotherNodeTest {
       0,
       SECP256K1.KeyPair.random(),
       listOf(
-        ProxySubprotocol()
+        ProxySubprotocol(),
       ),
       "Tuweni Experiment 0.1",
       10,
-      meter
+      meter,
     )
 
     val service2kp = SECP256K1.KeyPair.random()
@@ -54,7 +54,7 @@ class SendDataToAnotherNodeTest {
       listOf(ProxySubprotocol()),
       "Tuweni Experiment 0.1",
       10,
-      meter
+      meter,
     )
     val recorder = RecordingClientHandler()
     service.start().await()

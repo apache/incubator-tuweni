@@ -12,14 +12,18 @@ class DelegateMutableBytes32Test {
   @Test
   void failsWhenWrappingArraySmallerThan32() {
     Throwable exception =
-        assertThrows(IllegalArgumentException.class, () -> MutableBytes32.wrap(MutableBytes.wrap(new byte[31])));
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> MutableBytes32.wrap(MutableBytes.wrap(new byte[31])));
     assertEquals("Expected 32 bytes but got 31", exception.getMessage());
   }
 
   @Test
   void failsWhenWrappingArrayLargerThan32() {
     Throwable exception =
-        assertThrows(IllegalArgumentException.class, () -> MutableBytes32.wrap(MutableBytes.wrap(new byte[33])));
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> MutableBytes32.wrap(MutableBytes.wrap(new byte[33])));
     assertEquals("Expected 32 bytes but got 33", exception.getMessage());
   }
 
@@ -38,6 +42,7 @@ class DelegateMutableBytes32Test {
   @Test
   void testSlice() {
     Bytes bytes = DelegatingMutableBytes32.delegateTo(MutableBytes32.create()).copy();
-    assertEquals(Bytes.wrap(new byte[] {bytes.get(2), bytes.get(3), bytes.get(4)}), bytes.slice(2, 3));
+    assertEquals(
+        Bytes.wrap(new byte[] {bytes.get(2), bytes.get(3), bytes.get(4)}), bytes.slice(2, 3));
   }
 }

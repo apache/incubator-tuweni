@@ -12,12 +12,13 @@ import org.apache.tuweni.rlp.RLPReader;
 import java.util.Collection;
 
 /**
- * Bloom filter implementation for storing persistent logs, describes a 2048-bit representation of all log entries of a
- * transaction, except data. Sets the bits of the 2048 byte array, where indices are given by: The lower order 11-bits,
- * of the first three double-bytes, of the SHA3, of each value. For instance the address
- * "0x0F572E5295C57F15886F9B263E2F6D2D6C7B5EC6" results in the KECCAK256 hash
- * "bd2b01afcd27800b54d2179edc49e2bffde5078bb6d0b204694169b1643fb108", of which the corresponding double-bytes are:
- * bd2b, 01af, cd27, corresponding to the following bits in the bloom filter: 1323, 431, 1319
+ * Bloom filter implementation for storing persistent logs, describes a 2048-bit representation of
+ * all log entries of a transaction, except data. Sets the bits of the 2048 byte array, where
+ * indices are given by: The lower order 11-bits, of the first three double-bytes, of the SHA3, of
+ * each value. For instance the address "0x0F572E5295C57F15886F9B263E2F6D2D6C7B5EC6" results in the
+ * KECCAK256 hash "bd2b01afcd27800b54d2179edc49e2bffde5078bb6d0b204694169b1643fb108", of which the
+ * corresponding double-bytes are: bd2b, 01af, cd27, corresponding to the following bits in the
+ * bloom filter: 1323, 431, 1319
  */
 public final class LogsBloomFilter {
 
@@ -54,7 +55,8 @@ public final class LogsBloomFilter {
   public LogsBloomFilter(Bytes data) {
     if (data.size() != 256) {
       throw new IllegalArgumentException(
-          String.format("Invalid size for bloom filter backing array: expected 256 but got %s", data.size()));
+          String.format(
+              "Invalid size for bloom filter backing array: expected 256 but got %s", data.size()));
     }
     this.data = data.mutableCopy();
   }
@@ -78,15 +80,16 @@ public final class LogsBloomFilter {
   }
 
   /**
-   * Discover the low order 11-bits, of the first three double-bytes, of the SHA3 hash, of each value and update the
-   * bloom filter accordingly.
+   * Discover the low order 11-bits, of the first three double-bytes, of the SHA3 hash, of each
+   * value and update the bloom filter accordingly.
    *
    * @param hashValue The hash of the log item.
    */
   private void setBits(final Bytes hashValue) {
     for (int counter = 0; counter < 6; counter += 2) {
       final int setBloomBit =
-          ((hashValue.get(counter) & LEAST_SIGNIFICANT_THREE_BITS) << 8) + (hashValue.get(counter + 1) & 0xFF);
+          ((hashValue.get(counter) & LEAST_SIGNIFICANT_THREE_BITS) << 8)
+              + (hashValue.get(counter + 1) & 0xFF);
       setBit(setBloomBit);
     }
   }

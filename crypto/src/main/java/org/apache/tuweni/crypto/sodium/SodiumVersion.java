@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.apache.tuweni.crypto.sodium;
 
-/**
- * Details of a sodium native library version.
- */
+/** Details of a sodium native library version. */
 public final class SodiumVersion implements Comparable<SodiumVersion> {
   private final int major;
   private final int minor;

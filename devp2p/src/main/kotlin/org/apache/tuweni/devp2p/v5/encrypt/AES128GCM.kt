@@ -29,7 +29,7 @@ object AES128GCM {
     cipher.init(
       Cipher.ENCRYPT_MODE,
       SecretKeySpec(privateKey.toArrayUnsafe(), "AES"),
-      GCMParameterSpec(128, nonce.toArrayUnsafe())
+      GCMParameterSpec(128, nonce.toArrayUnsafe()),
     )
     cipher.updateAAD(additionalAuthenticatedData.toArrayUnsafe())
     val result = Bytes.wrap(cipher.doFinal(message.toArrayUnsafe()))
@@ -50,7 +50,7 @@ object AES128GCM {
     cipher.init(
       Cipher.DECRYPT_MODE,
       SecretKeySpec(privateKey.toArrayUnsafe(), "AES"),
-      GCMParameterSpec(128, nonce.toArrayUnsafe())
+      GCMParameterSpec(128, nonce.toArrayUnsafe()),
     )
     cipher.updateAAD(additionalAuthenticatedData.toArrayUnsafe())
     return Bytes.wrap(cipher.doFinal(encoded.toArrayUnsafe()))

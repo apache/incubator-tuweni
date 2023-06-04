@@ -59,7 +59,7 @@ internal class BlockchainIndexTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      UInt64.random()
+      UInt64.random(),
     )
     blockchainIndex.index { it.indexBlockHeader(header) }
 
@@ -94,7 +94,7 @@ internal class BlockchainIndexTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      UInt64.random()
+      UInt64.random(),
     )
     blockchainIndex.index { w -> w.indexBlockHeader(header) }
 
@@ -129,7 +129,7 @@ internal class BlockchainIndexTest {
       Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
       Hash.fromBytes(Bytes32.random()),
-      UInt64.random()
+      UInt64.random(),
     )
     blockchainIndex.index { it.indexBlockHeader(header) }
 
@@ -187,7 +187,7 @@ internal class BlockchainIndexTest {
       val entries = reader.findInRange(
         BlockHeaderFields.NUMBER,
         header.number.subtract(5),
-        header.number.add(5)
+        header.number.add(5),
       )
       assertEquals(1, entries.size)
       assertEquals(header.hash, entries[0])
@@ -231,7 +231,7 @@ internal class BlockchainIndexTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      UInt64.random()
+      UInt64.random(),
     )
     blockchainIndex.index { w -> w.indexBlockHeader(header) }
     assertEquals(UInt256.valueOf(1), blockchainIndex.totalDifficulty(header.hash))
@@ -251,7 +251,7 @@ internal class BlockchainIndexTest {
       Instant.now().truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4),
       Hash.fromBytes(Bytes32.random()),
-      UInt64.random()
+      UInt64.random(),
     )
 
     blockchainIndex.index { w -> w.indexBlockHeader(childHeader) }
@@ -272,9 +272,9 @@ internal class BlockchainIndexTest {
         Log(
           Address.fromBytes(Bytes.random(20)),
           Bytes.fromHexString("deadbeef"),
-          listOf(Bytes32.random(), Bytes32.random())
-        )
-      )
+          listOf(Bytes32.random(), Bytes32.random()),
+        ),
+      ),
     )
 
     val txHash = Hash.fromBytes(Bytes32.random())
@@ -290,9 +290,9 @@ internal class BlockchainIndexTest {
         Log(
           Address.fromBytes(Bytes.random(20)),
           Bytes.fromHexString("deadbeef"),
-          listOf(Bytes32.random(), Bytes32.random())
-        )
-      )
+          listOf(Bytes32.random(), Bytes32.random()),
+        ),
+      ),
     )
 
     val txHash2 = Hash.fromBytes(Bytes32.random())

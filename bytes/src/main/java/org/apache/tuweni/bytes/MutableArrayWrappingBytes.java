@@ -59,10 +59,8 @@ class MutableArrayWrappingBytes extends ArrayWrappingBytes implements MutableByt
 
   @Override
   public MutableBytes mutableSlice(int i, int length) {
-    if (i == 0 && length == this.length)
-      return this;
-    if (length == 0)
-      return MutableBytes.EMPTY;
+    if (i == 0 && length == this.length) return this;
+    if (length == 0) return MutableBytes.EMPTY;
 
     checkElementIndex(i, this.length);
     checkArgument(
@@ -72,7 +70,8 @@ class MutableArrayWrappingBytes extends ArrayWrappingBytes implements MutableByt
         this.length,
         this.length - i,
         i);
-    return length == Bytes32.SIZE ? new MutableArrayWrappingBytes32(bytes, offset + i)
+    return length == Bytes32.SIZE
+        ? new MutableArrayWrappingBytes32(bytes, offset + i)
         : new MutableArrayWrappingBytes(bytes, offset + i, length);
   }
 

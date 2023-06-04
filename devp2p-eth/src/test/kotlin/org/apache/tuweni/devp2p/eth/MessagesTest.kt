@@ -37,7 +37,7 @@ class MessagesTest {
         Hash.fromBytes(Bytes32.random()),
         Hash.fromBytes(Bytes32.random()),
         Bytes.fromHexString("0xe029e991"),
-        12L
+        12L,
       )
     val read = StatusMessage.read(msg.toBytes())
 
@@ -70,7 +70,7 @@ class MessagesTest {
       Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
       Hash.fromBytes(Bytes32.random()),
-      UInt64.ZERO
+      UInt64.ZERO,
     )
     val msg = BlockHeaders(listOf(header))
     val read = BlockHeaders.read(msg.toBytes())
@@ -103,7 +103,7 @@ class MessagesTest {
       Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
       Hash.fromBytes(Bytes32.random()),
-      UInt64.ZERO
+      UInt64.ZERO,
     )
     val blockBodies = BlockBodies(
       listOf(
@@ -116,12 +116,12 @@ class MessagesTest {
               Address.fromBytes(Bytes.random(20)),
               Wei.valueOf(2),
               Bytes.random(12),
-              SECP256K1.KeyPair.random()
-            )
+              SECP256K1.KeyPair.random(),
+            ),
           ),
-          listOf(header)
-        )
-      )
+          listOf(header),
+        ),
+      ),
     )
     val read = BlockBodies.read(blockBodies.toBytes())
 
@@ -145,7 +145,7 @@ class MessagesTest {
       Instant.now().plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
       Bytes.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
       Hash.fromBytes(Bytes32.random()),
-      UInt64.ZERO
+      UInt64.ZERO,
     )
     val body = BlockBody(
       listOf(
@@ -156,10 +156,10 @@ class MessagesTest {
           Address.fromBytes(Bytes.random(20)),
           Wei.valueOf(2),
           Bytes.random(12),
-          SECP256K1.KeyPair.random()
-        )
+          SECP256K1.KeyPair.random(),
+        ),
       ),
-      listOf(header)
+      listOf(header),
     )
     val block = Block(header, body)
     val message = NewBlock(block, UInt256.ONE)
@@ -196,9 +196,9 @@ class MessagesTest {
           Wei.valueOf(20),
           Bytes.fromHexString("deadbeef"),
           SECP256K1.KeyPair.random(),
-          1
-        )
-      )
+          1,
+        ),
+      ),
     )
     val read = Transactions.read(tx.toBytes())
     assertEquals(tx, read)
@@ -244,9 +244,9 @@ class MessagesTest {
           Wei.valueOf(20),
           Bytes.fromHexString("deadbeef"),
           SECP256K1.KeyPair.random(),
-          1
-        )
-      )
+          1,
+        ),
+      ),
     )
     val read = PooledTransactions.read(pooledTransactions.toBytes())
     assertEquals(pooledTransactions, read)

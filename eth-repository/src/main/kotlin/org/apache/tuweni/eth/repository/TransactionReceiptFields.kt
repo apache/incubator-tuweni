@@ -50,5 +50,5 @@ enum class TransactionReceiptFields(val fieldName: String) {
   /**
    * Status of the transaction
    */
-  STATUS("status")
+  STATUS("status"),
 }

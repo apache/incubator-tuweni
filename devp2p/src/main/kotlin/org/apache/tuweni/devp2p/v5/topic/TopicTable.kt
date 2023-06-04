@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 
 internal class TopicTable(
   private val tableCapacity: Int = MAX_TABLE_CAPACITY,
-  private val queueCapacity: Int = MAX_ENTRIES_PER_TOPIC
+  private val queueCapacity: Int = MAX_ENTRIES_PER_TOPIC,
 ) {
 
   private val timeSupplier: () -> Long = DiscoveryService.CURRENT_TIME_SUPPLIER

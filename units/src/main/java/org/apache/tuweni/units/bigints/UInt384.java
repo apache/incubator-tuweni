@@ -13,12 +13,14 @@ import java.util.Arrays;
 /**
  * An unsigned 384-bit precision number.
  *
- * This is a raw {@link UInt384Value} - a 384-bit precision unsigned number of no particular unit.
+ * <p>This is a raw {@link UInt384Value} - a 384-bit precision unsigned number of no particular
+ * unit.
  */
 public final class UInt384 implements UInt384Value<UInt384> {
-  private final static int MAX_CONSTANT = 64;
-  private final static BigInteger BI_MAX_CONSTANT = BigInteger.valueOf(MAX_CONSTANT);
+  private static final int MAX_CONSTANT = 64;
+  private static final BigInteger BI_MAX_CONSTANT = BigInteger.valueOf(MAX_CONSTANT);
   private static UInt384[] CONSTANTS = new UInt384[MAX_CONSTANT + 1];
+
   static {
     CONSTANTS[0] = new UInt384(Bytes48.ZERO);
     for (int i = 1; i <= MAX_CONSTANT; ++i) {
@@ -27,13 +29,16 @@ public final class UInt384 implements UInt384Value<UInt384> {
   }
 
   /** The minimum value of a UInt384 */
-  public final static UInt384 MIN_VALUE = valueOf(0);
+  public static final UInt384 MIN_VALUE = valueOf(0);
+
   /** The maximum value of a UInt384 */
-  public final static UInt384 MAX_VALUE = new UInt384(Bytes48.ZERO.not());
+  public static final UInt384 MAX_VALUE = new UInt384(Bytes48.ZERO.not());
+
   /** The value 0 */
-  public final static UInt384 ZERO = valueOf(0);
+  public static final UInt384 ZERO = valueOf(0);
+
   /** The value 1 */
-  public final static UInt384 ONE = valueOf(1);
+  public static final UInt384 ONE = valueOf(1);
 
   private static final int INTS_SIZE = 48 / 4;
   // The mask is used to obtain the value of an int as if it were unsigned.
@@ -65,7 +70,8 @@ public final class UInt384 implements UInt384Value<UInt384> {
    *
    * @param value the value to create a {@link UInt384} for
    * @return a {@link UInt384} containing the specified value
-   * @throws IllegalArgumentException if the value is negative or too large to be represented as a UInt384
+   * @throws IllegalArgumentException if the value is negative or too large to be represented as a
+   *     UInt384
    */
   public static UInt384 valueOf(BigInteger value) {
     if (value.signum() < 0) {
@@ -99,11 +105,12 @@ public final class UInt384 implements UInt384Value<UInt384> {
   /**
    * Parse a hexadecimal string into a {@link UInt384}.
    *
-   * @param str The hexadecimal string to parse, which may or may not start with "0x". That representation may contain
-   *        less than 48 bytes, in which case the result is left padded with zeros.
+   * @param str The hexadecimal string to parse, which may or may not start with "0x". That
+   *     representation may contain less than 48 bytes, in which case the result is left padded with
+   *     zeros.
    * @return The value corresponding to {@code str}.
-   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal representation or
-   *         contains more than 48 bytes.
+   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal
+   *     representation or contains more than 48 bytes.
    */
   public static UInt384 fromHexString(String str) {
     return new UInt384(Bytes48.fromHexStringLenient(str));
@@ -209,7 +216,8 @@ public final class UInt384 implements UInt384Value<UInt384> {
     if (modulus.isZero()) {
       throw new ArithmeticException("addMod with zero modulus");
     }
-    return UInt384.valueOf(toBigInteger().add(BigInteger.valueOf(value)).mod(modulus.toBigInteger()));
+    return UInt384.valueOf(
+        toBigInteger().add(BigInteger.valueOf(value)).mod(modulus.toBigInteger()));
   }
 
   @Override
@@ -220,7 +228,8 @@ public final class UInt384 implements UInt384Value<UInt384> {
     if (modulus < 0) {
       throw new ArithmeticException("addMod unsigned with negative modulus");
     }
-    return UInt384.valueOf(toBigInteger().add(BigInteger.valueOf(value)).mod(BigInteger.valueOf(modulus)));
+    return UInt384.valueOf(
+        toBigInteger().add(BigInteger.valueOf(value)).mod(BigInteger.valueOf(modulus)));
   }
 
   @Override
@@ -231,7 +240,8 @@ public final class UInt384 implements UInt384Value<UInt384> {
 
     int[] result = new int[INTS_SIZE];
     boolean constant = true;
-    long sum = (this.ints[INTS_SIZE - 1] & LONG_MASK) + ((~value.ints[INTS_SIZE - 1]) & LONG_MASK) + 1;
+    long sum =
+        (this.ints[INTS_SIZE - 1] & LONG_MASK) + ((~value.ints[INTS_SIZE - 1]) & LONG_MASK) + 1;
     result[INTS_SIZE - 1] = (int) (sum & LONG_MASK);
     if (result[INTS_SIZE - 1] < 0 || result[INTS_SIZE - 1] > MAX_CONSTANT) {
       constant = false;
@@ -289,7 +299,9 @@ public final class UInt384 implements UInt384Value<UInt384> {
     for (int i = INTS_SIZE; i < (INTS_SIZE + INTS_SIZE) - 2; ++i) {
       constant &= (result[i] == 0);
     }
-    if (constant && result[INTS_SIZE + INTS_SIZE - 1] >= 0 && result[INTS_SIZE + INTS_SIZE - 1] <= MAX_CONSTANT) {
+    if (constant
+        && result[INTS_SIZE + INTS_SIZE - 1] >= 0
+        && result[INTS_SIZE + INTS_SIZE - 1] <= MAX_CONSTANT) {
       return CONSTANTS[result[INTS_SIZE + INTS_SIZE - 1]];
     }
     return new UInt384(Arrays.copyOfRange(result, INTS_SIZE, INTS_SIZE + INTS_SIZE));
@@ -321,7 +333,8 @@ public final class UInt384 implements UInt384Value<UInt384> {
     if (value.equals(UInt384.ONE)) {
       return mod(modulus);
     }
-    return UInt384.valueOf(toBigInteger().multiply(value.toBigInteger()).mod(modulus.toBigInteger()));
+    return UInt384.valueOf(
+        toBigInteger().multiply(value.toBigInteger()).mod(modulus.toBigInteger()));
   }
 
   @Override
@@ -338,7 +351,8 @@ public final class UInt384 implements UInt384Value<UInt384> {
     if (value < 0) {
       throw new ArithmeticException("multiplyMod unsigned by negative");
     }
-    return UInt384.valueOf(toBigInteger().multiply(BigInteger.valueOf(value)).mod(modulus.toBigInteger()));
+    return UInt384.valueOf(
+        toBigInteger().multiply(BigInteger.valueOf(value)).mod(modulus.toBigInteger()));
   }
 
   @Override
@@ -358,7 +372,8 @@ public final class UInt384 implements UInt384Value<UInt384> {
     if (value < 0) {
       throw new ArithmeticException("multiplyMod unsigned by negative");
     }
-    return UInt384.valueOf(toBigInteger().multiply(BigInteger.valueOf(value)).mod(BigInteger.valueOf(modulus)));
+    return UInt384.valueOf(
+        toBigInteger().multiply(BigInteger.valueOf(value)).mod(BigInteger.valueOf(modulus)));
   }
 
   @Override
@@ -558,7 +573,7 @@ public final class UInt384 implements UInt384Value<UInt384> {
 
     int resIdx = INTS_SIZE;
     if (s == 0) {
-      for (int i = INTS_SIZE - d; i > 0;) {
+      for (int i = INTS_SIZE - d; i > 0; ) {
         result[--resIdx] = this.ints[--i];
       }
     } else {
@@ -590,7 +605,7 @@ public final class UInt384 implements UInt384Value<UInt384> {
 
     int resIdx = 0;
     if (s == 0) {
-      for (int i = d; i < INTS_SIZE;) {
+      for (int i = d; i < INTS_SIZE; ) {
         result[resIdx++] = this.ints[i++];
       }
     } else {
@@ -675,7 +690,8 @@ public final class UInt384 implements UInt384Value<UInt384> {
     if (!fitsLong()) {
       throw new ArithmeticException("Value does not fit a 8 byte long");
     }
-    return (((long) this.ints[INTS_SIZE - 2]) << 32) | (((long) (this.ints[INTS_SIZE - 1])) & LONG_MASK);
+    return (((long) this.ints[INTS_SIZE - 2]) << 32)
+        | (((long) (this.ints[INTS_SIZE - 1])) & LONG_MASK);
   }
 
   @Override
