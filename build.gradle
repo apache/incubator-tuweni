@@ -409,10 +409,10 @@ allprojects {
 
           if (!credentialsFound) {
             project.logger.info('Reading credentials from environment')
-            project.logger.info('Username ' + asfNexusUsername)
+            project.logger.info('Username ' + nexusUsername)
             credentials {
-              username asfNexusUsername
-              password asfNexusPassword
+              username nexusUsername
+              password nexusPassword
             }
           }
         }

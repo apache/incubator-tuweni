@@ -26,10 +26,10 @@ class VerifyStageTask extends DefaultTask {
   @TaskAction
   def run() {
     // check if credentials are set
-    if (project.findProperty("asfNexusUsername") == null) {
+    if (project.findProperty("nexusUsername") == null) {
       throw new GradleException("Missing nexus username")
     }
-    if (project.findProperty("asfNexusPassword") == null) {
+    if (project.findProperty("nexusPassword") == null) {
       throw new GradleException("Missing nexus password")
     }
     if (project.findProperty('signing.keyId') == null) {

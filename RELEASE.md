@@ -9,8 +9,8 @@ Add your gpg keys to KEYS before you do anything else.
 Open the file `~/.gradle/gradle.properties` and add the following information:
 
 ```
-asfNexusUsername=${asf LDAP id}
-asfNexusPassword=${asf LDAP password}
+nexusUsername=${Nexus username}
+nexusPassword=${Nexus password}
 signing.keyId=${GPG key ID}
 signing.gnupg.keyName=${GPG key ID}
 ```
