@@ -14,20 +14,17 @@ import jnr.ffi.Pointer;
 /**
  * Key derivation.
  *
- * <p>
- * Multiple secret subkeys can be derived from a single master key.
+ * <p>Multiple secret subkeys can be derived from a single master key.
  *
- * <p>
- * Given the master key and a key identifier, a subkey can be deterministically computed. However, given a subkey, an
- * attacker cannot compute the master key nor any other subkeys.
+ * <p>Given the master key and a key identifier, a subkey can be deterministically computed.
+ * However, given a subkey, an attacker cannot compute the master key nor any other subkeys.
  */
 public final class KeyDerivation {
 
   /**
    * Check if Sodium and key derivation support is available.
    *
-   * <p>
-   * Key derivation is supported in sodium native library version &gt;= 10.0.12.
+   * <p>Key derivation is supported in sodium native library version &gt;= 10.0.12.
    *
    * @return {@code true} if Sodium and key derivation support is available.
    */
@@ -46,9 +43,7 @@ public final class KeyDerivation {
     }
   }
 
-  /**
-   * A KeyDerivation master key.
-   */
+  /** A KeyDerivation master key. */
   public static final class MasterKey implements Destroyable {
     final Allocated value;
 
@@ -69,8 +64,7 @@ public final class KeyDerivation {
     /**
      * Create a {@link MasterKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the key.
      * @return A key, based on the supplied bytes.
@@ -82,8 +76,7 @@ public final class KeyDerivation {
     /**
      * Create a {@link MasterKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the key.
      * @return A key, based on the supplied bytes.
@@ -125,7 +118,7 @@ public final class KeyDerivation {
       Pointer ptr = Sodium.malloc(length);
       try {
         // When support for 10.0.11 is dropped, use this instead
-        //Sodium.crypto_kdf_keygen(ptr);
+        // Sodium.crypto_kdf_keygen(ptr);
         Sodium.randombytes_buf(ptr, length);
         return new MasterKey(ptr, length);
       } catch (Throwable e) {
@@ -138,7 +131,7 @@ public final class KeyDerivation {
      * Derive a sub key.
      *
      * @param length The length of the sub key, which must be between {@link #minSubKeyLength()} and
-     *        {@link #maxSubKeyLength()}.
+     *     {@link #maxSubKeyLength()}.
      * @param subkeyId The id for the sub key.
      * @param context The context for the sub key, which must be of length {@link #contextLength()}.
      * @return The derived sub key.
@@ -151,7 +144,7 @@ public final class KeyDerivation {
      * Derive a sub key.
      *
      * @param length The length of the sub key, which must be between {@link #minSubKeyLength()} and
-     *        {@link #maxSubKeyLength()}.
+     *     {@link #maxSubKeyLength()}.
      * @param subkeyId The id for the sub key.
      * @param context The context for the sub key, which must be of length {@link #contextLength()}.
      * @return The derived sub key.
@@ -164,7 +157,9 @@ public final class KeyDerivation {
       assertContextLength(context);
 
       byte[] subKey = new byte[length];
-      int rc = Sodium.crypto_kdf_derive_from_key(subKey, subKey.length, subkeyId, context, value.pointer());
+      int rc =
+          Sodium.crypto_kdf_derive_from_key(
+              subKey, subKey.length, subkeyId, context, value.pointer());
       if (rc != 0) {
         throw new SodiumException("crypto_kdf_derive_from_key: failed with result " + rc);
       }
@@ -176,7 +171,8 @@ public final class KeyDerivation {
      *
      * @param length The length of the subkey.
      * @param subkeyId The id for the subkey.
-     * @param context The context for the sub key, which must be of length &le; {@link #contextLength()}.
+     * @param context The context for the sub key, which must be of length &le; {@link
+     *     #contextLength()}.
      * @return The derived sub key.
      */
     public Bytes deriveKey(int length, long subkeyId, String context) {
@@ -188,14 +184,16 @@ public final class KeyDerivation {
      *
      * @param length The length of the subkey.
      * @param subkeyId The id for the subkey.
-     * @param context The context for the sub key, which must be of length &le; {@link #contextLength()}.
+     * @param context The context for the sub key, which must be of length &le; {@link
+     *     #contextLength()}.
      * @return The derived sub key.
      */
     public byte[] deriveKeyArray(int length, long subkeyId, String context) {
       int contextLen = contextLength();
       byte[] contextBytes = context.getBytes(UTF_8);
       if (context.length() > contextLen) {
-        throw new IllegalArgumentException("context must be " + contextLen + " bytes, got " + context.length());
+        throw new IllegalArgumentException(
+            "context must be " + contextLen + " bytes, got " + context.length());
       }
       byte[] ctx;
       if (contextBytes.length == contextLen) {
@@ -227,7 +225,7 @@ public final class KeyDerivation {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory.
+     * <p>WARNING: This will cause the key to be copied into heap memory.
      *
      * @return The bytes of this key.
      */
@@ -238,8 +236,8 @@ public final class KeyDerivation {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory. The returned array should be overwritten when no
-     * longer required.
+     * <p>WARNING: This will cause the key to be copied into heap memory. The returned array should
+     * be overwritten when no longer required.
      *
      * @return The bytes of this key.
      */
@@ -250,7 +248,7 @@ public final class KeyDerivation {
 
   /**
    * Provides the required length for the context
-   * 
+   *
    * @return The required length for the context (8).
    */
   public static int contextLength() {
@@ -263,7 +261,7 @@ public final class KeyDerivation {
 
   /**
    * Provides the minimum length for a new sub key
-   * 
+   *
    * @return The minimum length for a new sub key (16).
    */
   public static int minSubKeyLength() {
@@ -276,7 +274,7 @@ public final class KeyDerivation {
 
   /**
    * Provides the maximum length for a new sub key
-   * 
+   *
    * @return The maximum length for a new sub key (64).
    */
   public static int maxSubKeyLength() {
@@ -290,7 +288,8 @@ public final class KeyDerivation {
   private static void assertContextLength(byte[] context) {
     long contextBytes = Sodium.crypto_kdf_contextbytes();
     if (context.length != contextBytes) {
-      throw new IllegalArgumentException("context must be " + contextBytes + " bytes, got " + context.length);
+      throw new IllegalArgumentException(
+          "context must be " + contextBytes + " bytes, got " + context.length);
     }
   }
 
@@ -298,7 +297,8 @@ public final class KeyDerivation {
     long minLength = Sodium.crypto_kdf_bytes_min();
     long maxLength = Sodium.crypto_kdf_bytes_max();
     if (length < minLength || length > maxLength) {
-      throw new IllegalArgumentException("length is out of range [" + minLength + ", " + maxLength + "]");
+      throw new IllegalArgumentException(
+          "length is out of range [" + minLength + ", " + maxLength + "]");
     }
   }
 }

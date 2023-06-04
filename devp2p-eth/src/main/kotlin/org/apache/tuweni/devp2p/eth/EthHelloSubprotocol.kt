@@ -14,7 +14,7 @@ import kotlin.coroutines.CoroutineContext
 class EthHelloSubprotocol(
   private val coroutineContext: CoroutineContext = Dispatchers.Default,
   private val blockchainInfo: BlockchainInformation,
-  private val listener: (WireConnection, Status) -> Unit = { _, _ -> }
+  private val listener: (WireConnection, Status) -> Unit = { _, _ -> },
 ) : SubProtocol {
 
   companion object {

@@ -12,17 +12,18 @@ class SecretDecryptionStreamTest {
 
   @Test
   void testBytesPull() {
-    SecretDecryptionStream stream = new SecretDecryptionStream() {
-      @Override
-      public byte[] pull(byte[] cipherText) {
-        return Bytes.fromHexString("deadbeef").toArrayUnsafe();
-      }
+    SecretDecryptionStream stream =
+        new SecretDecryptionStream() {
+          @Override
+          public byte[] pull(byte[] cipherText) {
+            return Bytes.fromHexString("deadbeef").toArrayUnsafe();
+          }
 
-      @Override
-      public boolean isComplete() {
-        return false;
-      }
-    };
+          @Override
+          public boolean isComplete() {
+            return false;
+          }
+        };
     assertEquals(Bytes.fromHexString("deadbeef"), stream.pull(Bytes.EMPTY));
   }
 }

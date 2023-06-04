@@ -5,7 +5,6 @@ package org.apache.tuweni.ssz;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
 
-
 public class TransactionNetworkPayload implements SSZReadable, SSZWritable {
   public static final int KZG_COMMITMENT_SIZE = 48;
   public static final int FIELD_ELEMENTS_PER_BLOB = 4096;
@@ -13,7 +12,8 @@ public class TransactionNetworkPayload implements SSZReadable, SSZWritable {
   SingedBlobTransaction signedBlobTransaction = new SingedBlobTransaction();
   SSZFixedSizeTypeList<KZGCommitment> kzgCommitments =
       new SSZFixedSizeTypeList<>(KZG_COMMITMENT_SIZE, KZGCommitment::new);
-  SSZFixedSizeTypeList<Blob> blobs = new SSZFixedSizeTypeList<>(FIELD_ELEMENTS_PER_BLOB * ELEMENT_SIZE, Blob::new);
+  SSZFixedSizeTypeList<Blob> blobs =
+      new SSZFixedSizeTypeList<>(FIELD_ELEMENTS_PER_BLOB * ELEMENT_SIZE, Blob::new);
 
   KZGProof kzgProof = new KZGProof();
 
@@ -57,7 +57,6 @@ public class TransactionNetworkPayload implements SSZReadable, SSZWritable {
       return false;
     }
 
-
     @Override
     public void populateFromReader(SSZReader reader) {
       reader.readAsContainer(message, signature);
@@ -81,11 +80,12 @@ public class TransactionNetworkPayload implements SSZReadable, SSZWritable {
       long gas;
       AddressUnion address = new AddressUnion();
       UInt256 value;
-      SSZVariableSizeTypeList<AccessTuple> accessList = new SSZVariableSizeTypeList<>(AccessTuple::new);
+      SSZVariableSizeTypeList<AccessTuple> accessList =
+          new SSZVariableSizeTypeList<>(AccessTuple::new);
       UInt256 maxFeePerData;
 
-      SSZFixedSizeTypeList<VersionedHash> blobVersionedHashes = new SSZFixedSizeTypeList<>(32, VersionedHash::new);
-
+      SSZFixedSizeTypeList<VersionedHash> blobVersionedHashes =
+          new SSZFixedSizeTypeList<>(32, VersionedHash::new);
 
       @Override
       public boolean isFixed() {
@@ -94,36 +94,34 @@ public class TransactionNetworkPayload implements SSZReadable, SSZWritable {
 
       @Override
       public void populateFromReader(SSZReader reader) {
-        reader
-            .readAsContainer(
-                r -> chainId = r.readUInt256(),
-                r -> nonce = r.readUInt64(),
-                r -> maxPriorityFeePerGas = r.readUInt256(),
-                r -> maxFeePerGas = r.readUInt256(),
-                r -> gas = r.readUInt64(),
-                address,
-                r -> value = r.readUInt256(),
-                data,
-                accessList,
-                r -> maxFeePerData = r.readUInt256(),
-                blobVersionedHashes);
+        reader.readAsContainer(
+            r -> chainId = r.readUInt256(),
+            r -> nonce = r.readUInt64(),
+            r -> maxPriorityFeePerGas = r.readUInt256(),
+            r -> maxFeePerGas = r.readUInt256(),
+            r -> gas = r.readUInt64(),
+            address,
+            r -> value = r.readUInt256(),
+            data,
+            accessList,
+            r -> maxFeePerData = r.readUInt256(),
+            blobVersionedHashes);
       }
 
       @Override
       public void writeTo(SSZWriter writer) {
-        writer
-            .writeAsContainer(
-                w -> w.writeUInt256(chainId),
-                w -> w.writeUInt64(nonce),
-                w -> w.writeUInt256(maxPriorityFeePerGas),
-                w -> w.writeUInt256(maxFeePerGas),
-                w -> w.writeUInt64(gas),
-                address,
-                w -> w.writeUInt256(value),
-                data,
-                accessList,
-                w -> w.writeUInt256(maxFeePerData),
-                blobVersionedHashes);
+        writer.writeAsContainer(
+            w -> w.writeUInt256(chainId),
+            w -> w.writeUInt64(nonce),
+            w -> w.writeUInt256(maxPriorityFeePerGas),
+            w -> w.writeUInt256(maxFeePerGas),
+            w -> w.writeUInt64(gas),
+            address,
+            w -> w.writeUInt256(value),
+            data,
+            accessList,
+            w -> w.writeUInt256(maxFeePerData),
+            blobVersionedHashes);
       }
     }
 
@@ -220,7 +218,6 @@ public class TransactionNetworkPayload implements SSZReadable, SSZWritable {
       }
     }
 
-
     public static class ECDSASignature implements SSZReadable, SSZWritable {
       boolean parity;
       UInt256 r;
@@ -269,7 +266,6 @@ public class TransactionNetworkPayload implements SSZReadable, SSZWritable {
     public void writeTo(SSZWriter writer) {
       vector.writeTo(writer);
     }
-
   }
 
   public static class SSZUInt256Wrapper implements SSZReadable, SSZWritable {
@@ -303,5 +299,4 @@ public class TransactionNetworkPayload implements SSZReadable, SSZWritable {
       return bytes;
     }
   }
-
 }

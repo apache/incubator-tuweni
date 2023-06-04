@@ -32,7 +32,7 @@ internal object Utils {
       port,
       serverKeypair,
       serverKeypair.publicKey(),
-      DEFAULT_NETWORK
+      DEFAULT_NETWORK,
     )
   }
 
@@ -48,7 +48,7 @@ internal object Utils {
       port,
       Signature.KeyPair.random(),
       serverKeypair.publicKey(),
-      DEFAULT_NETWORK
+      DEFAULT_NETWORK,
     )
   }
 
@@ -62,7 +62,7 @@ internal object Utils {
       vertx,
       Signature.KeyPair.random(),
       recalibratedInvite,
-      DEFAULT_NETWORK
+      DEFAULT_NETWORK,
     )
   }
 }

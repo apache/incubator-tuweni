@@ -18,14 +18,16 @@ public class EVMTest {
 
   @Test
   void testStartAndStop() {
-    BlockchainRepository repository = BlockchainRepository.Companion.inMemoryBlocking(Genesis.dev());
+    BlockchainRepository repository =
+        BlockchainRepository.Companion.inMemoryBlocking(Genesis.dev());
 
-    EthereumVirtualMachine vm = new EthereumVirtualMachine(
-        repository,
-        repository,
-        Registry.getIstanbul(),
-        EvmVmImpl::create,
-        Collections.singletonMap("DISABLE_TRANSFER_VALUE", "true"));
+    EthereumVirtualMachine vm =
+        new EthereumVirtualMachine(
+            repository,
+            repository,
+            Registry.getIstanbul(),
+            EvmVmImpl::create,
+            Collections.singletonMap("DISABLE_TRANSFER_VALUE", "true"));
     vm.startAsync();
     vm.stopAsync();
   }

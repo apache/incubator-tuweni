@@ -9,7 +9,7 @@ import org.apache.tuweni.rlp.RLP
 internal data class BlockBodiesMessage(
   val reqID: Long,
   val bufferValue: Long,
-  val blockBodies: List<BlockBody>
+  val blockBodies: List<BlockBody>,
 ) {
 
   fun toBytes(): Bytes {
@@ -24,12 +24,12 @@ internal data class BlockBodiesMessage(
 
     fun read(bytes: Bytes): BlockBodiesMessage {
       return RLP.decodeList(
-        bytes
+        bytes,
       ) { reader ->
         BlockBodiesMessage(
           reader.readLong(),
           reader.readLong(),
-          reader.readListContents { BlockBody.readFrom(it) }
+          reader.readListContents { BlockBody.readFrom(it) },
         )
       }
     }

@@ -27,7 +27,7 @@ internal class NeighborsPacketTest {
     val keyPair = SECP256K1.KeyPair.random()
     val neighbors = listOf(
       Node(Endpoint("10.0.0.54", 6543, 6543), SECP256K1.KeyPair.random().publicKey()),
-      Node(Endpoint("192.168.34.65", 9832, 1453), SECP256K1.KeyPair.random().publicKey())
+      Node(Endpoint("192.168.34.65", 9832, 1453), SECP256K1.KeyPair.random().publicKey()),
     )
     val now = System.currentTimeMillis()
     val pong = NeighborsPacket.create(keyPair, now, neighbors)
@@ -57,7 +57,7 @@ internal class NeighborsPacketTest {
         "d96126051913f44582e8c199ad7c6d6819e9a56483f637feaac9448aacf8599020010db885a308d3" +
         "13198a2e037073488203e78203e8b8408dcab8618c3253b558d459da53bd8fa68935a719aff8b811" +
         "197101a4b2b47dd2d47295286fc00cc081bb542d760717d1bdd6bec2c37cd72eca367d6dd3b9df73" +
-        "8443b9a355010203b525a138aa34383fec3d2719a0"
+        "8443b9a355010203b525a138aa34383fec3d2719a0",
     )
     val packet = Packet.decodeFrom(datagram)
 

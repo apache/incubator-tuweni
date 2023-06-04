@@ -23,7 +23,7 @@ class DNSDaemon @JvmOverloads constructor(
   private val seq: Long = 0,
   private val period: Long = 60000L,
   private val dnsServer: String? = null,
-  private val vertx: Vertx
+  private val vertx: Vertx,
 ) {
   companion object {
     val logger = LoggerFactory.getLogger(DNSDaemon::class.java)
@@ -63,7 +63,7 @@ internal class DNSTimerTask(
   private val enrLink: String,
   private val records: (List<EthereumNodeRecord>) -> Unit,
   private val dnsServer: String? = null,
-  private val dnsResolver: DNSResolver = DNSResolver(dnsServer, seq, vertx)
+  private val dnsResolver: DNSResolver = DNSResolver(dnsServer, seq, vertx),
 ) {
 
   companion object {

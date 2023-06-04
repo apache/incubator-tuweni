@@ -17,7 +17,7 @@ class NodeStatsTest {
     assertEquals(
       "{\"active\":true,\"gasPrice\":5000,\"hashrate\":42," +
         "\"mining\":true,\"peers\":23,\"syncing\":true,\"uptime\":1234567}",
-      mapper.writeValueAsString(stats)
+      mapper.writeValueAsString(stats),
     )
   }
 }

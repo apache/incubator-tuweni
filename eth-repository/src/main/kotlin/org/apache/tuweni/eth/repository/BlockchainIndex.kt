@@ -410,7 +410,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
       document += StringField(
         PARENT_HASH.fieldName,
         hashRef,
-        Field.Store.NO
+        Field.Store.NO,
       )
       queryDiffDocs(TermQuery(Term("_id", hashRef)), listOf(TOTAL_DIFFICULTY)).firstOrNull()?.let {
         it.getField(TOTAL_DIFFICULTY.fieldName)?.let {
@@ -456,7 +456,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     document += StringField(
       TransactionReceiptFields.BLOCK_HASH.fieldName,
       toBytesRef(blockHash),
-      Field.Store.NO
+      Field.Store.NO,
     )
     for (log in txReceipt.getLogs()) {
       document += StringField(TransactionReceiptFields.LOGGER.fieldName, toBytesRef(log.getLogger()), Field.Store.NO)
@@ -470,11 +470,11 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
     document += StringField(
       TransactionReceiptFields.BLOOM_FILTER.fieldName,
       toBytesRef(txReceipt.getBloomFilter().toBytes()),
-      Field.Store.NO
+      Field.Store.NO,
     )
     document += NumericDocValuesField(
       TransactionReceiptFields.CUMULATIVE_GAS_USED.fieldName,
-      txReceipt.getCumulativeGasUsed()
+      txReceipt.getCumulativeGasUsed(),
     )
     txReceipt.getStatus()?.let {
       document += NumericDocValuesField(TransactionReceiptFields.STATUS.fieldName, it.toLong())
@@ -494,7 +494,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
   private fun queryTxReceiptDocs(query: Query, fields: List<BlockHeaderFields>): List<Document> {
     val txQuery = BooleanQuery.Builder().add(
       query,
-      BooleanClause.Occur.MUST
+      BooleanClause.Occur.MUST,
     )
       .add(TermQuery(Term("_type", "txReceipt")), BooleanClause.Occur.MUST).build()
 
@@ -510,7 +510,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
       if (topDocs.scoreDocs.isNotEmpty()) {
         val doc = searcher.indexReader.storedFields().document(
           topDocs.scoreDocs.elementAt(0).doc,
-          setOf("_id") + fields
+          setOf("_id") + fields,
         )
         docs += doc
       }
@@ -528,7 +528,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
   private fun queryBlockDocs(query: Query, fields: List<BlockHeaderFields>): List<Document> {
     val blockQuery = BooleanQuery.Builder().add(
       query,
-      BooleanClause.Occur.MUST
+      BooleanClause.Occur.MUST,
     )
       .add(TermQuery(Term("_type", "block")), BooleanClause.Occur.MUST).build()
 
@@ -538,7 +538,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
   private fun queryDiffDocs(query: Query, fields: List<BlockHeaderFields>): List<Document> {
     val blockQuery = BooleanQuery.Builder().add(
       query,
-      BooleanClause.Occur.MUST
+      BooleanClause.Occur.MUST,
     )
       .add(TermQuery(Term("_type", "difficulty")), BooleanClause.Occur.MUST).build()
 
@@ -583,7 +583,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
       val topDocs = searcher!!.search(
         TermQuery(Term("_type", "difficulty")),
         HITS,
-        Sort(SortField(TOTAL_DIFFICULTY.fieldName, SortField.Type.STRING, true))
+        Sort(SortField(TOTAL_DIFFICULTY.fieldName, SortField.Type.STRING, true)),
       )
       if (topDocs.scoreDocs.isEmpty()) {
         throw IndexReadException("No headers indexed")
@@ -612,7 +612,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
       val topDocs = searcher!!.search(
         TermQuery(Term("_type", "block")),
         HITS,
-        Sort(SortField.FIELD_SCORE, SortField(field.fieldName, SortField.Type.DOC, true))
+        Sort(SortField.FIELD_SCORE, SortField(field.fieldName, SortField.Type.DOC, true)),
       )
       if (topDocs.scoreDocs.isEmpty()) {
         return null
@@ -640,7 +640,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
       val topDocs = searcher!!.search(
         TermQuery(Term("_type", "block")),
         1,
-        Sort(SortField.FIELD_SCORE, SortField(TOTAL_DIFFICULTY.fieldName, SortField.Type.DOC, true))
+        Sort(SortField.FIELD_SCORE, SortField(TOTAL_DIFFICULTY.fieldName, SortField.Type.DOC, true)),
       )
 
       if (topDocs.scoreDocs.isEmpty()) {
@@ -649,7 +649,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
 
       val doc = searcher.indexReader.storedFields().document(
         topDocs.scoreDocs[0].doc,
-        setOf(TOTAL_DIFFICULTY.fieldName)
+        setOf(TOTAL_DIFFICULTY.fieldName),
       )
       val fieldValue = doc.getBinaryValue(TOTAL_DIFFICULTY.fieldName)
 
@@ -703,7 +703,7 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
       val topDocs = searcher!!.search(
         TermQuery(Term("_type", "txReceipt")),
         HITS,
-        Sort(SortField.FIELD_SCORE, SortField(field.fieldName, SortField.Type.DOC, false))
+        Sort(SortField.FIELD_SCORE, SortField(field.fieldName, SortField.Type.DOC, false)),
       )
       if (topDocs.scoreDocs.isEmpty()) {
         return null
@@ -745,12 +745,12 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
       BooleanQuery.Builder()
         .add(
           TermQuery(Term(TransactionReceiptFields.BLOCK_HASH.fieldName, toBytesRef(blockHash))),
-          BooleanClause.Occur.MUST
+          BooleanClause.Occur.MUST,
         )
         .add(
           NumericDocValuesField.newSlowExactQuery(TransactionReceiptFields.INDEX.fieldName, index.toLong()),
-          BooleanClause.Occur.MUST
-        ).build()
+          BooleanClause.Occur.MUST,
+        ).build(),
     ).firstOrNull()
   }
 
@@ -761,8 +761,8 @@ class BlockchainIndex(private val indexWriter: IndexWriter) : BlockchainIndexWri
       .add(
         BooleanClause(
           TermQuery(Term(NUMBER.fieldName, toBytesRef(hashOrNumber))),
-          BooleanClause.Occur.SHOULD
-        )
+          BooleanClause.Occur.SHOULD,
+        ),
       )
       .build()
     return queryBlocks(query)

@@ -56,13 +56,16 @@ class BlockRLPTestSuite {
   @SuppressWarnings("UnusedMethod")
   @MustBeClosed
   private static Stream<Arguments> readBlockChainTests() throws IOException {
-    return Resources.find("**/BlockchainTests/**/*.json").flatMap(url -> {
-      try (InputStream is = url.openConnection().getInputStream()) {
-        return readTestCase(is);
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
-    }).filter(Objects::nonNull);
+    return Resources.find("**/BlockchainTests/**/*.json")
+        .flatMap(
+            url -> {
+              try (InputStream is = url.openConnection().getInputStream()) {
+                return readTestCase(is);
+              } catch (IOException e) {
+                throw new UncheckedIOException(e);
+              }
+            })
+        .filter(Objects::nonNull);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -74,10 +77,19 @@ class BlockRLPTestSuite {
     String name = test.keySet().iterator().next();
     Map testData = test.get(name);
     List<Map> blocks = (List<Map>) testData.get("blocks");
-    return IntStream.range(0, blocks.size()).boxed().filter(i -> blocks.get(i).containsKey("blockHeader")).map(i -> {
-      Map block = blocks.get(i);
-      return Arguments.of(name, i, createBlock(block), block.get("rlp"), ((Map) block.get("blockHeader")).get("hash"));
-    });
+    return IntStream.range(0, blocks.size())
+        .boxed()
+        .filter(i -> blocks.get(i).containsKey("blockHeader"))
+        .map(
+            i -> {
+              Map block = blocks.get(i);
+              return Arguments.of(
+                  name,
+                  i,
+                  createBlock(block),
+                  block.get("rlp"),
+                  ((Map) block.get("blockHeader")).get("hash"));
+            });
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -116,21 +128,19 @@ class BlockRLPTestSuite {
         toAddress = toAddressBytes.isEmpty() ? null : Address.fromBytes(toAddressBytes);
       }
 
-      transactions
-          .add(
-              new Transaction(
-                  UInt256.fromHexString((String) txData.get("nonce")),
-                  Wei.valueOf(UInt256.fromHexString((String) txData.get("gasPrice"))),
-                  Gas.valueOf(UInt256.fromHexString((String) txData.get("gasLimit"))),
-                  toAddress,
-                  Wei.valueOf(UInt256.fromHexString((String) txData.get("value"))),
-                  Bytes.fromHexString((String) txData.get("data")),
-                  null,
-                  Signature
-                      .create(
-                          (byte) ((int) Bytes.fromHexString((String) txData.get("v")).get(0) - 27),
-                          Bytes.fromHexString((String) txData.get("r")).toUnsignedBigInteger(),
-                          Bytes.fromHexString((String) txData.get("s")).toUnsignedBigInteger())));
+      transactions.add(
+          new Transaction(
+              UInt256.fromHexString((String) txData.get("nonce")),
+              Wei.valueOf(UInt256.fromHexString((String) txData.get("gasPrice"))),
+              Gas.valueOf(UInt256.fromHexString((String) txData.get("gasLimit"))),
+              toAddress,
+              Wei.valueOf(UInt256.fromHexString((String) txData.get("value"))),
+              Bytes.fromHexString((String) txData.get("data")),
+              null,
+              Signature.create(
+                  (byte) ((int) Bytes.fromHexString((String) txData.get("v")).get(0) - 27),
+                  Bytes.fromHexString((String) txData.get("r")).toUnsignedBigInteger(),
+                  Bytes.fromHexString((String) txData.get("s")).toUnsignedBigInteger())));
     }
     List<BlockHeader> ommers = new ArrayList<>();
     for (Object ommerDataObj : (List) blockData.get("uncleHeaders")) {

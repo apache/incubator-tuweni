@@ -18,8 +18,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Access to the sodium native library.
  *
- * <p>
- * This class provides static methods for checking or loading the sodium native library.
+ * <p>This class provides static methods for checking or loading the sodium native library.
  */
 public final class Sodium {
   private Sodium() {}
@@ -73,11 +72,13 @@ public final class Sodium {
   }
 
   private static final String LIBRARY_NAME;
+
   static {
     try {
       Class.forName("jnr.ffi.Platform");
     } catch (ClassNotFoundException e) {
-      throw new IllegalStateException("JNR-FFI is not available on the classpath, see https://github.com/jnr/jnr-ffi");
+      throw new IllegalStateException(
+          "JNR-FFI is not available on the classpath, see https://github.com/jnr/jnr-ffi");
     }
     switch (Platform.getNativePlatform().getOS()) {
       case WINDOWS:
@@ -94,12 +95,12 @@ public final class Sodium {
   /**
    * Load and initialize the native libsodium shared library.
    *
-   * <p>
-   * If this method returns successfully (without throwing a {@link LinkageError}), then all future calls to methods
-   * provided by this class will use the loaded library.
+   * <p>If this method returns successfully (without throwing a {@link LinkageError}), then all
+   * future calls to methods provided by this class will use the loaded library.
    *
    * @param path The path to the shared library.
-   * @throws LinkageError If the library cannot be found, dependent libraries are missing, or cannot be initialized.
+   * @throws LinkageError If the library cannot be found, dependent libraries are missing, or cannot
+   *     be initialized.
    */
   public static void loadLibrary(Path path) {
     requireNonNull(path);
@@ -111,7 +112,9 @@ public final class Sodium {
     Path library = path.getFileName();
 
     LibSodium lib =
-        LibraryLoader.create(LibSodium.class).search(dir.toFile().getAbsolutePath()).load(library.toString());
+        LibraryLoader.create(LibSodium.class)
+            .search(dir.toFile().getAbsolutePath())
+            .load(library.toString());
     initializeLibrary(lib);
 
     synchronized (LibSodium.class) {
@@ -122,13 +125,14 @@ public final class Sodium {
   /**
    * Search for, then load and initialize the native libsodium shared library.
    *
-   * <p>
-   * The library will be searched for in all the provided locations, using the library name {@code "sodium"}. If this
-   * method returns successfully (without throwing a {@link LinkageError}), then all future calls to methods provided by
-   * this class will use the loaded library.
+   * <p>The library will be searched for in all the provided locations, using the library name
+   * {@code "sodium"}. If this method returns successfully (without throwing a {@link
+   * LinkageError}), then all future calls to methods provided by this class will use the loaded
+   * library.
    *
    * @param paths A set of directories to search for the library in.
-   * @throws LinkageError If the library cannot be found, dependent libraries are missing, or cannot be initialized.
+   * @throws LinkageError If the library cannot be found, dependent libraries are missing, or cannot
+   *     be initialized.
    */
   public static void searchLibrary(Path... paths) {
     searchLibrary(LIBRARY_NAME, paths);
@@ -137,14 +141,14 @@ public final class Sodium {
   /**
    * Search for, then load and initialize the native libsodium shared library.
    *
-   * <p>
-   * The library will be searched for in all the provided locations, using the provided library name. If this method
-   * returns successfully (without throwing a {@link LinkageError}), then all future calls to methods provided by this
-   * class will use the loaded library.
+   * <p>The library will be searched for in all the provided locations, using the provided library
+   * name. If this method returns successfully (without throwing a {@link LinkageError}), then all
+   * future calls to methods provided by this class will use the loaded library.
    *
    * @param libraryName The name of the library (e.g. {@code "sodium"}).
    * @param paths A set of directories to search for the library in.
-   * @throws LinkageError If the library cannot be found, dependent libraries are missing, or cannot be initialized.
+   * @throws LinkageError If the library cannot be found, dependent libraries are missing, or cannot
+   *     be initialized.
    */
   public static void searchLibrary(String libraryName, Path... paths) {
     LibraryLoader<LibSodium> loader = LibraryLoader.create(LibSodium.class);
@@ -163,13 +167,13 @@ public final class Sodium {
     if (libSodium == null) {
       synchronized (LibSodium.class) {
         if (libSodium == null) {
-          LibSodium lib = LibraryLoader
-              .create(LibSodium.class)
-              .search("/usr/local/lib")
-              .search("/opt/local/lib")
-              .search("/usr/lib")
-              .search("/lib")
-              .load(LIBRARY_NAME);
+          LibSodium lib =
+              LibraryLoader.create(LibSodium.class)
+                  .search("/usr/local/lib")
+                  .search("/opt/local/lib")
+                  .search("/usr/lib")
+                  .search("/lib")
+                  .load(LIBRARY_NAME);
           libSodium = initializeLibrary(lib);
         }
       }
@@ -180,12 +184,11 @@ public final class Sodium {
   private static LibSodium initializeLibrary(LibSodium lib) {
     if (!supportsVersion(minSupportedVersion(), lib)) {
       throw new LinkageError(
-          String
-              .format(
-                  "Unsupported libsodium version %s (%s:%s)",
-                  lib.sodium_version_string(),
-                  lib.sodium_library_version_major(),
-                  lib.sodium_library_version_minor()));
+          String.format(
+              "Unsupported libsodium version %s (%s:%s)",
+              lib.sodium_version_string(),
+              lib.sodium_library_version_major(),
+              lib.sodium_library_version_minor()));
     }
     int result = lib.sodium_init();
     if (result == -1) {
@@ -197,8 +200,8 @@ public final class Sodium {
   /**
    * Check if the sodium library is available.
    *
-   * <p>
-   * If the sodium library has not already been loaded, this will attempt to load and initialize it before returning.
+   * <p>If the sodium library has not already been loaded, this will attempt to load and initialize
+   * it before returning.
    *
    * @return {@code true} if the library is loaded and available.
    */
@@ -310,7 +313,10 @@ public final class Sodium {
   static <T> T scalarMultBase(Pointer n, long nlen, BiFunction<Pointer, Long, T> ctr) {
     if (nlen != Sodium.crypto_scalarmult_scalarbytes()) {
       throw new IllegalArgumentException(
-          "secret key length is " + nlen + " but required " + Sodium.crypto_scalarmult_scalarbytes());
+          "secret key length is "
+              + nlen
+              + " but required "
+              + Sodium.crypto_scalarmult_scalarbytes());
     }
     long qbytes = Sodium.crypto_scalarmult_bytes();
     Pointer dst = malloc(qbytes);
@@ -326,10 +332,14 @@ public final class Sodium {
     }
   }
 
-  static <T> T scalarMult(Pointer n, long nlen, Pointer p, long plen, BiFunction<Pointer, Long, T> ctr) {
+  static <T> T scalarMult(
+      Pointer n, long nlen, Pointer p, long plen, BiFunction<Pointer, Long, T> ctr) {
     if (nlen != Sodium.crypto_scalarmult_scalarbytes()) {
       throw new IllegalArgumentException(
-          "secret key length is " + nlen + " but required " + Sodium.crypto_scalarmult_scalarbytes());
+          "secret key length is "
+              + nlen
+              + " but required "
+              + Sodium.crypto_scalarmult_scalarbytes());
     }
     if (plen != Sodium.crypto_scalarmult_bytes()) {
       throw new IllegalArgumentException(
@@ -441,7 +451,9 @@ public final class Sodium {
       @Nullable Pointer nsec,
       Pointer npub,
       Pointer k) {
-    return libSodium().crypto_aead_aes256gcm_encrypt_detached(c, mac, maclen_p, m, mlen, ad, adlen, nsec, npub, k);
+    return libSodium()
+        .crypto_aead_aes256gcm_encrypt_detached(
+            c, mac, maclen_p, m, mlen, ad, adlen, nsec, npub, k);
   }
 
   static int crypto_aead_aes256gcm_decrypt_detached(
@@ -454,7 +466,8 @@ public final class Sodium {
       long adlen,
       Pointer npub,
       Pointer k) {
-    return libSodium().crypto_aead_aes256gcm_decrypt_detached(m, nsec, c, clen, mac, ad, adlen, npub, k);
+    return libSodium()
+        .crypto_aead_aes256gcm_decrypt_detached(m, nsec, c, clen, mac, ad, adlen, npub, k);
   }
 
   static int crypto_aead_aes256gcm_beforenm(Pointer ctx_, Pointer k) {
@@ -471,7 +484,8 @@ public final class Sodium {
       @Nullable Pointer nsec,
       Pointer npub,
       Pointer ctx_) {
-    return libSodium().crypto_aead_aes256gcm_encrypt_afternm(c, clen_p, m, mlen, ad, adlen, nsec, npub, ctx_);
+    return libSodium()
+        .crypto_aead_aes256gcm_encrypt_afternm(c, clen_p, m, mlen, ad, adlen, nsec, npub, ctx_);
   }
 
   static int crypto_aead_aes256gcm_decrypt_afternm(
@@ -484,7 +498,8 @@ public final class Sodium {
       long adlen,
       Pointer npub,
       Pointer ctx_) {
-    return libSodium().crypto_aead_aes256gcm_decrypt_afternm(m, mlen_p, nsec, c, clen, ad, adlen, npub, ctx_);
+    return libSodium()
+        .crypto_aead_aes256gcm_decrypt_afternm(m, mlen_p, nsec, c, clen, ad, adlen, npub, ctx_);
   }
 
   static int crypto_aead_aes256gcm_encrypt_detached_afternm(
@@ -499,7 +514,8 @@ public final class Sodium {
       Pointer npub,
       Pointer ctx_) {
     return libSodium()
-        .crypto_aead_aes256gcm_encrypt_detached_afternm(c, mac, maclen_p, m, mlen, ad, adlen, nsec, npub, ctx_);
+        .crypto_aead_aes256gcm_encrypt_detached_afternm(
+            c, mac, maclen_p, m, mlen, ad, adlen, nsec, npub, ctx_);
   }
 
   static int crypto_aead_aes256gcm_decrypt_detached_afternm(
@@ -512,7 +528,9 @@ public final class Sodium {
       long adlen,
       Pointer npub,
       Pointer ctx_) {
-    return libSodium().crypto_aead_aes256gcm_decrypt_detached_afternm(m, nsec, c, clen, mac, ad, adlen, npub, ctx_);
+    return libSodium()
+        .crypto_aead_aes256gcm_decrypt_detached_afternm(
+            m, nsec, c, clen, mac, ad, adlen, npub, ctx_);
   }
 
   static void crypto_aead_aes256gcm_keygen(Pointer k) {
@@ -549,7 +567,8 @@ public final class Sodium {
       byte[] nsec,
       byte[] npub,
       byte[] k) {
-    return libSodium().crypto_aead_chacha20poly1305_ietf_encrypt(c, clen_p, m, mlen, ad, adlen, nsec, npub, k);
+    return libSodium()
+        .crypto_aead_chacha20poly1305_ietf_encrypt(c, clen_p, m, mlen, ad, adlen, nsec, npub, k);
   }
 
   static int crypto_aead_chacha20poly1305_ietf_decrypt(
@@ -562,7 +581,8 @@ public final class Sodium {
       long adlen,
       byte[] npub,
       byte[] k) {
-    return libSodium().crypto_aead_chacha20poly1305_ietf_decrypt(m, mlen_p, nsec, c, clen, ad, adlen, npub, k);
+    return libSodium()
+        .crypto_aead_chacha20poly1305_ietf_decrypt(m, mlen_p, nsec, c, clen, ad, adlen, npub, k);
   }
 
   static int crypto_aead_chacha20poly1305_ietf_encrypt_detached(
@@ -577,7 +597,8 @@ public final class Sodium {
       byte[] npub,
       byte[] k) {
     return libSodium()
-        .crypto_aead_chacha20poly1305_ietf_encrypt_detached(c, mac, maclen_p, m, mlen, ad, adlen, nsec, npub, k);
+        .crypto_aead_chacha20poly1305_ietf_encrypt_detached(
+            c, mac, maclen_p, m, mlen, ad, adlen, nsec, npub, k);
   }
 
   static int crypto_aead_chacha20poly1305_ietf_decrypt_detached(
@@ -590,7 +611,9 @@ public final class Sodium {
       long adlen,
       byte[] npub,
       byte[] k) {
-    return libSodium().crypto_aead_chacha20poly1305_ietf_decrypt_detached(m, nsec, c, clen, mac, ad, adlen, npub, k);
+    return libSodium()
+        .crypto_aead_chacha20poly1305_ietf_decrypt_detached(
+            m, nsec, c, clen, mac, ad, adlen, npub, k);
   }
 
   static void crypto_aead_chacha20poly1305_ietf_keygen(byte[] k) {
@@ -627,7 +650,8 @@ public final class Sodium {
       byte[] nsec,
       byte[] npub,
       byte[] k) {
-    return libSodium().crypto_aead_chacha20poly1305_encrypt(c, clen_p, m, mlen, ad, adlen, nsec, npub, k);
+    return libSodium()
+        .crypto_aead_chacha20poly1305_encrypt(c, clen_p, m, mlen, ad, adlen, nsec, npub, k);
   }
 
   static int crypto_aead_chacha20poly1305_decrypt(
@@ -640,7 +664,8 @@ public final class Sodium {
       long adlen,
       byte[] npub,
       byte[] k) {
-    return libSodium().crypto_aead_chacha20poly1305_decrypt(m, mlen_p, nsec, c, clen, ad, adlen, npub, k);
+    return libSodium()
+        .crypto_aead_chacha20poly1305_decrypt(m, mlen_p, nsec, c, clen, ad, adlen, npub, k);
   }
 
   static int crypto_aead_chacha20poly1305_encrypt_detached(
@@ -655,7 +680,8 @@ public final class Sodium {
       byte[] npub,
       byte[] k) {
     return libSodium()
-        .crypto_aead_chacha20poly1305_encrypt_detached(c, mac, maclen_p, m, mlen, ad, adlen, nsec, npub, k);
+        .crypto_aead_chacha20poly1305_encrypt_detached(
+            c, mac, maclen_p, m, mlen, ad, adlen, nsec, npub, k);
   }
 
   static int crypto_aead_chacha20poly1305_decrypt_detached(
@@ -668,7 +694,8 @@ public final class Sodium {
       long adlen,
       byte[] npub,
       byte[] k) {
-    return libSodium().crypto_aead_chacha20poly1305_decrypt_detached(m, nsec, c, clen, mac, ad, adlen, npub, k);
+    return libSodium()
+        .crypto_aead_chacha20poly1305_decrypt_detached(m, nsec, c, clen, mac, ad, adlen, npub, k);
   }
 
   static void crypto_aead_chacha20poly1305_keygen(byte[] k) {
@@ -705,7 +732,8 @@ public final class Sodium {
       @Nullable byte[] nsec,
       Pointer npub,
       Pointer k) {
-    return libSodium().crypto_aead_xchacha20poly1305_ietf_encrypt(c, clen_p, m, mlen, ad, adlen, nsec, npub, k);
+    return libSodium()
+        .crypto_aead_xchacha20poly1305_ietf_encrypt(c, clen_p, m, mlen, ad, adlen, nsec, npub, k);
   }
 
   static int crypto_aead_xchacha20poly1305_ietf_decrypt(
@@ -718,7 +746,8 @@ public final class Sodium {
       long adlen,
       Pointer npub,
       Pointer k) {
-    return libSodium().crypto_aead_xchacha20poly1305_ietf_decrypt(m, mlen_p, nsec, c, clen, ad, adlen, npub, k);
+    return libSodium()
+        .crypto_aead_xchacha20poly1305_ietf_decrypt(m, mlen_p, nsec, c, clen, ad, adlen, npub, k);
   }
 
   static int crypto_aead_xchacha20poly1305_ietf_encrypt_detached(
@@ -733,7 +762,8 @@ public final class Sodium {
       Pointer npub,
       Pointer k) {
     return libSodium()
-        .crypto_aead_xchacha20poly1305_ietf_encrypt_detached(c, mac, maclen_p, m, mlen, ad, adlen, nsec, npub, k);
+        .crypto_aead_xchacha20poly1305_ietf_encrypt_detached(
+            c, mac, maclen_p, m, mlen, ad, adlen, nsec, npub, k);
   }
 
   static int crypto_aead_xchacha20poly1305_ietf_decrypt_detached(
@@ -746,7 +776,9 @@ public final class Sodium {
       long adlen,
       Pointer npub,
       Pointer k) {
-    return libSodium().crypto_aead_xchacha20poly1305_ietf_decrypt_detached(m, nsec, c, clen, mac, ad, adlen, npub, k);
+    return libSodium()
+        .crypto_aead_xchacha20poly1305_ietf_decrypt_detached(
+            m, nsec, c, clen, mac, ad, adlen, npub, k);
   }
 
   static void crypto_aead_xchacha20poly1305_ietf_keygen(Pointer k) {
@@ -957,7 +989,8 @@ public final class Sodium {
     return libSodium().crypto_stream_xsalsa20_xor(c, m, mlen, n, k);
   }
 
-  static int crypto_stream_xsalsa20_xor_ic(byte[] c, byte[] m, long mlen, byte[] n, long ic, byte[] k) {
+  static int crypto_stream_xsalsa20_xor_ic(
+      byte[] c, byte[] m, long mlen, byte[] n, long ic, byte[] k) {
     return libSodium().crypto_stream_xsalsa20_xor_ic(c, m, mlen, n, ic, k);
   }
 
@@ -1013,19 +1046,23 @@ public final class Sodium {
     return libSodium().crypto_box_curve25519xsalsa20poly1305_zerobytes();
   }
 
-  static int crypto_box_curve25519xsalsa20poly1305(byte[] c, byte[] m, long mlen, byte[] n, byte[] pk, byte[] sk) {
+  static int crypto_box_curve25519xsalsa20poly1305(
+      byte[] c, byte[] m, long mlen, byte[] n, byte[] pk, byte[] sk) {
     return libSodium().crypto_box_curve25519xsalsa20poly1305(c, m, mlen, n, pk, sk);
   }
 
-  static int crypto_box_curve25519xsalsa20poly1305_open(byte[] m, byte[] c, long clen, byte[] n, byte[] pk, byte[] sk) {
+  static int crypto_box_curve25519xsalsa20poly1305_open(
+      byte[] m, byte[] c, long clen, byte[] n, byte[] pk, byte[] sk) {
     return libSodium().crypto_box_curve25519xsalsa20poly1305_open(m, c, clen, n, pk, sk);
   }
 
-  static int crypto_box_curve25519xsalsa20poly1305_afternm(byte[] c, byte[] m, long mlen, byte[] n, Pointer k) {
+  static int crypto_box_curve25519xsalsa20poly1305_afternm(
+      byte[] c, byte[] m, long mlen, byte[] n, Pointer k) {
     return libSodium().crypto_box_curve25519xsalsa20poly1305_afternm(c, m, mlen, n, k);
   }
 
-  static int crypto_box_curve25519xsalsa20poly1305_open_afternm(byte[] m, byte[] c, long clen, byte[] n, Pointer k) {
+  static int crypto_box_curve25519xsalsa20poly1305_open_afternm(
+      byte[] m, byte[] c, long clen, byte[] n, Pointer k) {
     return libSodium().crypto_box_curve25519xsalsa20poly1305_open_afternm(m, c, clen, n, k);
   }
 
@@ -1069,15 +1106,18 @@ public final class Sodium {
     return libSodium().crypto_box_easy(c, m, mlen, n, pk, sk);
   }
 
-  static int crypto_box_open_easy(byte[] m, byte[] c, long clen, Pointer n, Pointer pk, Pointer sk) {
+  static int crypto_box_open_easy(
+      byte[] m, byte[] c, long clen, Pointer n, Pointer pk, Pointer sk) {
     return libSodium().crypto_box_open_easy(m, c, clen, n, pk, sk);
   }
 
-  static int crypto_box_detached(byte[] c, byte[] mac, byte[] m, long mlen, Pointer n, Pointer pk, Pointer sk) {
+  static int crypto_box_detached(
+      byte[] c, byte[] mac, byte[] m, long mlen, Pointer n, Pointer pk, Pointer sk) {
     return libSodium().crypto_box_detached(c, mac, m, mlen, n, pk, sk);
   }
 
-  static int crypto_box_open_detached(byte[] m, byte[] c, byte[] mac, long clen, Pointer n, Pointer pk, Pointer sk) {
+  static int crypto_box_open_detached(
+      byte[] m, byte[] c, byte[] mac, long clen, Pointer n, Pointer pk, Pointer sk) {
     return libSodium().crypto_box_open_detached(m, c, mac, clen, n, pk, sk);
   }
 
@@ -1097,11 +1137,13 @@ public final class Sodium {
     return libSodium().crypto_box_open_easy_afternm(m, c, clen, n, k);
   }
 
-  static int crypto_box_detached_afternm(byte[] c, byte[] mac, byte[] m, long mlen, Pointer n, Pointer k) {
+  static int crypto_box_detached_afternm(
+      byte[] c, byte[] mac, byte[] m, long mlen, Pointer n, Pointer k) {
     return libSodium().crypto_box_detached_afternm(c, mac, m, mlen, n, k);
   }
 
-  static int crypto_box_open_detached_afternm(byte[] m, byte[] c, byte[] mac, long clen, Pointer n, Pointer k) {
+  static int crypto_box_open_detached_afternm(
+      byte[] m, byte[] c, byte[] mac, long clen, Pointer n, Pointer k) {
     return libSodium().crypto_box_open_detached_afternm(m, c, mac, clen, n, k);
   }
 
@@ -1277,7 +1319,8 @@ public final class Sodium {
     return libSodium().crypto_generichash_blake2b_statebytes();
   }
 
-  static int crypto_generichash_blake2b(byte[] out, long outlen, byte[] in, long inlen, byte[] key, long keylen) {
+  static int crypto_generichash_blake2b(
+      byte[] out, long outlen, byte[] in, long inlen, byte[] key, long keylen) {
     return libSodium().crypto_generichash_blake2b(out, outlen, in, inlen, key, keylen);
   }
 
@@ -1290,7 +1333,9 @@ public final class Sodium {
       long keylen,
       byte[] salt,
       byte[] personal) {
-    return libSodium().crypto_generichash_blake2b_salt_personal(out, outlen, in, inlen, key, keylen, salt, personal);
+    return libSodium()
+        .crypto_generichash_blake2b_salt_personal(
+            out, outlen, in, inlen, key, keylen, salt, personal);
   }
 
   static int crypto_generichash_blake2b_init(Pointer state, byte[] key, long keylen, long outlen) {
@@ -1298,13 +1343,9 @@ public final class Sodium {
   }
 
   static int crypto_generichash_blake2b_init_salt_personal(
-      Pointer state,
-      byte[] key,
-      long keylen,
-      long outlen,
-      byte[] salt,
-      byte[] personal) {
-    return libSodium().crypto_generichash_blake2b_init_salt_personal(state, key, keylen, outlen, salt, personal);
+      Pointer state, byte[] key, long keylen, long outlen, byte[] salt, byte[] personal) {
+    return libSodium()
+        .crypto_generichash_blake2b_init_salt_personal(state, key, keylen, outlen, salt, personal);
   }
 
   static int crypto_generichash_blake2b_update(Pointer state, byte[] in, long inlen) {
@@ -1351,7 +1392,8 @@ public final class Sodium {
     return libSodium().crypto_generichash_statebytes();
   }
 
-  static int crypto_generichash(Pointer out, long outlen, Pointer in, long inlen, Pointer key, long keylen) {
+  static int crypto_generichash(
+      Pointer out, long outlen, Pointer in, long inlen, Pointer key, long keylen) {
     return libSodium().crypto_generichash(out, outlen, in, inlen, key, keylen);
   }
 
@@ -1400,11 +1442,7 @@ public final class Sodium {
   }
 
   static int crypto_kdf_blake2b_derive_from_key(
-      byte[] subkey,
-      long subkey_len,
-      long subkey_id,
-      byte[] ctx,
-      Pointer key) {
+      byte[] subkey, long subkey_len, long subkey_id, byte[] ctx, Pointer key) {
     return libSodium().crypto_kdf_blake2b_derive_from_key(subkey, subkey_len, subkey_id, ctx, key);
   }
 
@@ -1428,7 +1466,8 @@ public final class Sodium {
     return libSodium().crypto_kdf_primitive();
   }
 
-  static int crypto_kdf_derive_from_key(byte[] subkey, long subkey_len, long subkey_id, byte[] ctx, Pointer key) {
+  static int crypto_kdf_derive_from_key(
+      byte[] subkey, long subkey_len, long subkey_id, byte[] ctx, Pointer key) {
     return libSodium().crypto_kdf_derive_from_key(subkey, subkey_len, subkey_id, ctx, key);
   }
 
@@ -1465,20 +1504,12 @@ public final class Sodium {
   }
 
   static int crypto_kx_client_session_keys(
-      Pointer rx,
-      Pointer tx,
-      Pointer client_pk,
-      Pointer client_sk,
-      Pointer server_pk) {
+      Pointer rx, Pointer tx, Pointer client_pk, Pointer client_sk, Pointer server_pk) {
     return libSodium().crypto_kx_client_session_keys(rx, tx, client_pk, client_sk, server_pk);
   }
 
   static int crypto_kx_server_session_keys(
-      Pointer rx,
-      Pointer tx,
-      Pointer server_pk,
-      Pointer server_sk,
-      Pointer client_pk) {
+      Pointer rx, Pointer tx, Pointer server_pk, Pointer server_sk, Pointer client_pk) {
     return libSodium().crypto_kx_server_session_keys(rx, tx, server_pk, server_sk, client_pk);
   }
 
@@ -1639,10 +1670,12 @@ public final class Sodium {
       long opslimit,
       long memlimit,
       int alg) {
-    return libSodium().crypto_pwhash_argon2i(out, outlen, passwd, passwdlen, salt, opslimit, memlimit, alg);
+    return libSodium()
+        .crypto_pwhash_argon2i(out, outlen, passwd, passwdlen, salt, opslimit, memlimit, alg);
   }
 
-  static int crypto_pwhash_argon2i_str(byte[] out, byte[] passwd, long passwdlen, long opslimit, long memlimit) {
+  static int crypto_pwhash_argon2i_str(
+      byte[] out, byte[] passwd, long passwdlen, long opslimit, long memlimit) {
     return libSodium().crypto_pwhash_argon2i_str(out, passwd, passwdlen, opslimit, memlimit);
   }
 
@@ -1735,10 +1768,12 @@ public final class Sodium {
       long opslimit,
       long memlimit,
       int alg) {
-    return libSodium().crypto_pwhash_argon2id(out, outlen, passwd, passwdlen, salt, opslimit, memlimit, alg);
+    return libSodium()
+        .crypto_pwhash_argon2id(out, outlen, passwd, passwdlen, salt, opslimit, memlimit, alg);
   }
 
-  static int crypto_pwhash_argon2id_str(byte[] out, byte[] passwd, long passwdlen, long opslimit, long memlimit) {
+  static int crypto_pwhash_argon2id_str(
+      byte[] out, byte[] passwd, long passwdlen, long opslimit, long memlimit) {
     return libSodium().crypto_pwhash_argon2id_str(out, passwd, passwdlen, opslimit, memlimit);
   }
 
@@ -1842,11 +1877,13 @@ public final class Sodium {
     return libSodium().crypto_pwhash(out, outlen, passwd, passwdlen, salt, opslimit, memlimit, alg);
   }
 
-  static int crypto_pwhash_str(byte[] out, byte[] passwd, long passwdlen, long opslimit, long memlimit) {
+  static int crypto_pwhash_str(
+      byte[] out, byte[] passwd, long passwdlen, long opslimit, long memlimit) {
     return libSodium().crypto_pwhash_str(out, passwd, passwdlen, opslimit, memlimit);
   }
 
-  static int crypto_pwhash_str_alg(byte[] out, byte[] passwd, long passwdlen, long opslimit, long memlimit, int alg) {
+  static int crypto_pwhash_str_alg(
+      byte[] out, byte[] passwd, long passwdlen, long opslimit, long memlimit, int alg) {
     return libSodium().crypto_pwhash_str_alg(out, passwd, passwdlen, opslimit, memlimit, alg);
   }
 
@@ -1918,7 +1955,8 @@ public final class Sodium {
     return libSodium().crypto_secretbox_xsalsa20poly1305(c, m, mlen, n, k);
   }
 
-  static int crypto_secretbox_xsalsa20poly1305_open(byte[] m, byte[] c, long clen, byte[] n, byte[] k) {
+  static int crypto_secretbox_xsalsa20poly1305_open(
+      byte[] m, byte[] c, long clen, byte[] n, byte[] k) {
     return libSodium().crypto_secretbox_xsalsa20poly1305_open(m, c, clen, n, k);
   }
 
@@ -1970,11 +2008,13 @@ public final class Sodium {
     return libSodium().crypto_secretbox_open_easy(m, c, clen, n, k);
   }
 
-  static int crypto_secretbox_detached(byte[] c, byte[] mac, byte[] m, long mlen, Pointer n, Pointer k) {
+  static int crypto_secretbox_detached(
+      byte[] c, byte[] mac, byte[] m, long mlen, Pointer n, Pointer k) {
     return libSodium().crypto_secretbox_detached(c, mac, m, mlen, n, k);
   }
 
-  static int crypto_secretbox_open_detached(byte[] m, byte[] c, byte[] mac, long clen, Pointer n, Pointer k) {
+  static int crypto_secretbox_open_detached(
+      byte[] m, byte[] c, byte[] mac, long clen, Pointer n, Pointer k) {
     return libSodium().crypto_secretbox_open_detached(m, c, mac, clen, n, k);
   }
 
@@ -2018,7 +2058,8 @@ public final class Sodium {
     return libSodium().crypto_stream_chacha20_xor(c, m, mlen, n, k);
   }
 
-  static int crypto_stream_chacha20_xor_ic(byte[] c, byte[] m, long mlen, byte[] n, long ic, byte[] k) {
+  static int crypto_stream_chacha20_xor_ic(
+      byte[] c, byte[] m, long mlen, byte[] n, long ic, byte[] k) {
     return libSodium().crypto_stream_chacha20_xor_ic(c, m, mlen, n, ic, k);
   }
 
@@ -2046,7 +2087,8 @@ public final class Sodium {
     return libSodium().crypto_stream_chacha20_ietf_xor(c, m, mlen, n, k);
   }
 
-  static int crypto_stream_chacha20_ietf_xor_ic(byte[] c, byte[] m, long mlen, byte[] n, int ic, byte[] k) {
+  static int crypto_stream_chacha20_ietf_xor_ic(
+      byte[] c, byte[] m, long mlen, byte[] n, int ic, byte[] k) {
     return libSodium().crypto_stream_chacha20_ietf_xor_ic(c, m, mlen, n, ic, k);
   }
 
@@ -2094,7 +2136,8 @@ public final class Sodium {
     libSodium().crypto_secretstream_xchacha20poly1305_keygen(k);
   }
 
-  static int crypto_secretstream_xchacha20poly1305_init_push(Pointer state, byte[] header, Pointer k) {
+  static int crypto_secretstream_xchacha20poly1305_init_push(
+      Pointer state, byte[] header, Pointer k) {
     return libSodium().crypto_secretstream_xchacha20poly1305_init_push(state, header, k);
   }
 
@@ -2107,10 +2150,12 @@ public final class Sodium {
       @Nullable byte[] ad,
       long adlen,
       byte tag) {
-    return libSodium().crypto_secretstream_xchacha20poly1305_push(state, c, clen_p, m, mlen, ad, adlen, tag);
+    return libSodium()
+        .crypto_secretstream_xchacha20poly1305_push(state, c, clen_p, m, mlen, ad, adlen, tag);
   }
 
-  static int crypto_secretstream_xchacha20poly1305_init_pull(Pointer state, byte[] header, Pointer k) {
+  static int crypto_secretstream_xchacha20poly1305_init_pull(
+      Pointer state, byte[] header, Pointer k) {
     return libSodium().crypto_secretstream_xchacha20poly1305_init_pull(state, header, k);
   }
 
@@ -2123,7 +2168,8 @@ public final class Sodium {
       long clen,
       @Nullable byte[] ad,
       long adlen) {
-    return libSodium().crypto_secretstream_xchacha20poly1305_pull(state, m, mlen_p, tag_p, c, clen, ad, adlen);
+    return libSodium()
+        .crypto_secretstream_xchacha20poly1305_pull(state, m, mlen_p, tag_p, c, clen, ad, adlen);
   }
 
   static void crypto_secretstream_xchacha20poly1305_rekey(Pointer state) {
@@ -2198,15 +2244,18 @@ public final class Sodium {
     return libSodium().crypto_sign_ed25519_messagebytes_max();
   }
 
-  static int crypto_sign_ed25519(byte[] sm, LongLongByReference smlen_p, byte[] m, long mlen, byte[] sk) {
+  static int crypto_sign_ed25519(
+      byte[] sm, LongLongByReference smlen_p, byte[] m, long mlen, byte[] sk) {
     return libSodium().crypto_sign_ed25519(sm, smlen_p, m, mlen, sk);
   }
 
-  static int crypto_sign_ed25519_open(byte[] m, LongLongByReference mlen_p, byte[] sm, long smlen, byte[] pk) {
+  static int crypto_sign_ed25519_open(
+      byte[] m, LongLongByReference mlen_p, byte[] sm, long smlen, byte[] pk) {
     return libSodium().crypto_sign_ed25519_open(m, mlen_p, sm, smlen, pk);
   }
 
-  static int crypto_sign_ed25519_detached(byte[] sig, LongLongByReference siglen_p, byte[] m, long mlen, byte[] sk) {
+  static int crypto_sign_ed25519_detached(
+      byte[] sig, LongLongByReference siglen_p, byte[] m, long mlen, byte[] sk) {
     return libSodium().crypto_sign_ed25519_detached(sig, siglen_p, m, mlen, sk);
   }
 
@@ -2246,7 +2295,8 @@ public final class Sodium {
     return libSodium().crypto_sign_ed25519ph_update(state, m, mlen);
   }
 
-  static int crypto_sign_ed25519ph_final_create(Pointer state, byte[] sig, LongLongByReference siglen_p, byte[] sk) {
+  static int crypto_sign_ed25519ph_final_create(
+      Pointer state, byte[] sig, LongLongByReference siglen_p, byte[] sk) {
     return libSodium().crypto_sign_ed25519ph_final_create(state, sig, siglen_p, sk);
   }
 
@@ -2290,24 +2340,23 @@ public final class Sodium {
     return libSodium().crypto_sign_keypair(pk, sk);
   }
 
-  static int crypto_sign(byte[] sm, @Nullable LongLongByReference smlen_p, byte[] m, long mlen, Pointer sk) {
+  static int crypto_sign(
+      byte[] sm, @Nullable LongLongByReference smlen_p, byte[] m, long mlen, Pointer sk) {
     return libSodium().crypto_sign(sm, smlen_p, m, mlen, sk);
   }
 
-  static int crypto_sign_open(byte[] m, LongLongByReference mlen_p, byte[] sm, long smlen, Pointer pk) {
+  static int crypto_sign_open(
+      byte[] m, LongLongByReference mlen_p, byte[] sm, long smlen, Pointer pk) {
     return libSodium().crypto_sign_open(m, mlen_p, sm, smlen, pk);
   }
 
-  static int crypto_sign_detached(byte[] sig, @Nullable LongLongByReference siglen_p, byte[] m, long mlen, Pointer sk) {
+  static int crypto_sign_detached(
+      byte[] sig, @Nullable LongLongByReference siglen_p, byte[] m, long mlen, Pointer sk) {
     return libSodium().crypto_sign_detached(sig, siglen_p, m, mlen, sk);
   }
 
   static int crypto_sign_detached(
-      Pointer sig,
-      @Nullable LongLongByReference siglen_p,
-      Pointer m,
-      long mlen,
-      Pointer sk) {
+      Pointer sig, @Nullable LongLongByReference siglen_p, Pointer m, long mlen, Pointer sk) {
     return libSodium().crypto_sign_detached(sig, siglen_p, m, mlen, sk);
   }
 
@@ -2327,7 +2376,8 @@ public final class Sodium {
     return libSodium().crypto_sign_update(state, m, mlen);
   }
 
-  static int crypto_sign_final_create(Pointer state, byte[] sig, LongLongByReference siglen_p, byte[] sk) {
+  static int crypto_sign_final_create(
+      Pointer state, byte[] sig, LongLongByReference siglen_p, byte[] sk) {
     return libSodium().crypto_sign_final_create(state, sig, siglen_p, sk);
   }
 
@@ -2383,7 +2433,8 @@ public final class Sodium {
     return libSodium().crypto_stream_salsa20_xor(c, m, mlen, n, k);
   }
 
-  static int crypto_stream_salsa20_xor_ic(byte[] c, byte[] m, long mlen, byte[] n, long ic, byte[] k) {
+  static int crypto_stream_salsa20_xor_ic(
+      byte[] c, byte[] m, long mlen, byte[] n, long ic, byte[] k) {
     return libSodium().crypto_stream_salsa20_xor_ic(c, m, mlen, n, ic, k);
   }
 
@@ -2576,7 +2627,8 @@ public final class Sodium {
   }
 
   // FIXME: not available due to issue with LibSodium#sodium_bin2base64
-  //  static byte[] sodium_bin2base64(byte[] b64, long b64_maxlen, byte[] bin, long bin_len, int variant) {
+  //  static byte[] sodium_bin2base64(byte[] b64, long b64_maxlen, byte[] bin, long bin_len, int
+  // variant) {
   //    return libSodium().sodium_bin2base64(b64, b64_maxlen, bin, bin_len, variant);
   //  }
 
@@ -2589,7 +2641,8 @@ public final class Sodium {
       LongLongByReference bin_len,
       Pointer b64_end,
       int variant) {
-    return libSodium().sodium_base642bin(bin, bin_maxlen, b64, b64_len, ignore, bin_len, b64_end, variant);
+    return libSodium()
+        .sodium_base642bin(bin, bin_maxlen, b64, b64_len, ignore, bin_len, b64_end, variant);
   }
 
   static int sodium_mlock(Pointer addr, long len) {
@@ -2633,7 +2686,8 @@ public final class Sodium {
     return libSodium().sodium_pad(padded_buflen_p, buf, unpadded_buflen, blocksize, max_buflen);
   }
 
-  static int sodium_unpad(LongLongByReference unpadded_buflen_p, byte[] buf, long padded_buflen, long blocksize) {
+  static int sodium_unpad(
+      LongLongByReference unpadded_buflen_p, byte[] buf, long padded_buflen, long blocksize) {
     return libSodium().sodium_unpad(unpadded_buflen_p, buf, padded_buflen, blocksize);
   }
 
@@ -2657,7 +2711,8 @@ public final class Sodium {
     return libSodium().crypto_stream_xchacha20_xor(c, m, mlen, n, k);
   }
 
-  static int crypto_stream_xchacha20_xor_ic(byte[] c, byte[] m, long mlen, byte[] n, long ic, byte[] k) {
+  static int crypto_stream_xchacha20_xor_ic(
+      byte[] c, byte[] m, long mlen, byte[] n, long ic, byte[] k) {
     return libSodium().crypto_stream_xchacha20_xor_ic(c, m, mlen, n, ic, k);
   }
 
@@ -2693,7 +2748,8 @@ public final class Sodium {
     return libSodium().crypto_box_curve25519xchacha20poly1305_messagebytes_max();
   }
 
-  static int crypto_box_curve25519xchacha20poly1305_seed_keypair(byte[] pk, byte[] sk, byte[] seed) {
+  static int crypto_box_curve25519xchacha20poly1305_seed_keypair(
+      byte[] pk, byte[] sk, byte[] seed) {
     return libSodium().crypto_box_curve25519xchacha20poly1305_seed_keypair(pk, sk, seed);
   }
 
@@ -2702,82 +2758,50 @@ public final class Sodium {
   }
 
   static int crypto_box_curve25519xchacha20poly1305_easy(
-      byte[] c,
-      byte[] m,
-      long mlen,
-      byte[] n,
-      byte[] pk,
-      byte[] sk) {
+      byte[] c, byte[] m, long mlen, byte[] n, byte[] pk, byte[] sk) {
     return libSodium().crypto_box_curve25519xchacha20poly1305_easy(c, m, mlen, n, pk, sk);
   }
 
   static int crypto_box_curve25519xchacha20poly1305_open_easy(
-      byte[] m,
-      byte[] c,
-      long clen,
-      byte[] n,
-      byte[] pk,
-      byte[] sk) {
+      byte[] m, byte[] c, long clen, byte[] n, byte[] pk, byte[] sk) {
     return libSodium().crypto_box_curve25519xchacha20poly1305_open_easy(m, c, clen, n, pk, sk);
   }
 
   static int crypto_box_curve25519xchacha20poly1305_detached(
-      byte[] c,
-      byte[] mac,
-      byte[] m,
-      long mlen,
-      byte[] n,
-      byte[] pk,
-      byte[] sk) {
+      byte[] c, byte[] mac, byte[] m, long mlen, byte[] n, byte[] pk, byte[] sk) {
     return libSodium().crypto_box_curve25519xchacha20poly1305_detached(c, mac, m, mlen, n, pk, sk);
   }
 
   static int crypto_box_curve25519xchacha20poly1305_open_detached(
-      byte[] m,
-      byte[] c,
-      byte[] mac,
-      long clen,
-      byte[] n,
-      byte[] pk,
-      byte[] sk) {
-    return libSodium().crypto_box_curve25519xchacha20poly1305_open_detached(m, c, mac, clen, n, pk, sk);
+      byte[] m, byte[] c, byte[] mac, long clen, byte[] n, byte[] pk, byte[] sk) {
+    return libSodium()
+        .crypto_box_curve25519xchacha20poly1305_open_detached(m, c, mac, clen, n, pk, sk);
   }
 
   static int crypto_box_curve25519xchacha20poly1305_beforenm(Pointer k, byte[] pk, byte[] sk) {
     return libSodium().crypto_box_curve25519xchacha20poly1305_beforenm(k, pk, sk);
   }
 
-  static int crypto_box_curve25519xchacha20poly1305_easy_afternm(byte[] c, byte[] m, long mlen, byte[] n, Pointer k) {
+  static int crypto_box_curve25519xchacha20poly1305_easy_afternm(
+      byte[] c, byte[] m, long mlen, byte[] n, Pointer k) {
     return libSodium().crypto_box_curve25519xchacha20poly1305_easy_afternm(c, m, mlen, n, k);
   }
 
   static int crypto_box_curve25519xchacha20poly1305_open_easy_afternm(
-      byte[] m,
-      byte[] c,
-      long clen,
-      byte[] n,
-      Pointer k) {
+      byte[] m, byte[] c, long clen, byte[] n, Pointer k) {
     return libSodium().crypto_box_curve25519xchacha20poly1305_open_easy_afternm(m, c, clen, n, k);
   }
 
   static int crypto_box_curve25519xchacha20poly1305_detached_afternm(
-      byte[] c,
-      byte[] mac,
-      byte[] m,
-      long mlen,
-      byte[] n,
-      Pointer k) {
-    return libSodium().crypto_box_curve25519xchacha20poly1305_detached_afternm(c, mac, m, mlen, n, k);
+      byte[] c, byte[] mac, byte[] m, long mlen, byte[] n, Pointer k) {
+    return libSodium()
+        .crypto_box_curve25519xchacha20poly1305_detached_afternm(c, mac, m, mlen, n, k);
   }
 
   static int crypto_box_curve25519xchacha20poly1305_open_detached_afternm(
-      byte[] m,
-      byte[] c,
-      byte[] mac,
-      long clen,
-      byte[] n,
-      Pointer k) {
-    return libSodium().crypto_box_curve25519xchacha20poly1305_open_detached_afternm(m, c, mac, clen, n, k);
+      byte[] m, byte[] c, byte[] mac, long clen, byte[] n, Pointer k) {
+    return libSodium()
+        .crypto_box_curve25519xchacha20poly1305_open_detached_afternm(m, c, mac, clen, n, k);
   }
 
   static long crypto_box_curve25519xchacha20poly1305_sealbytes() {
@@ -2788,7 +2812,8 @@ public final class Sodium {
     return libSodium().crypto_box_curve25519xchacha20poly1305_seal(c, m, mlen, pk);
   }
 
-  static int crypto_box_curve25519xchacha20poly1305_seal_open(byte[] m, byte[] c, long clen, byte[] pk, byte[] sk) {
+  static int crypto_box_curve25519xchacha20poly1305_seal_open(
+      byte[] m, byte[] c, long clen, byte[] pk, byte[] sk) {
     return libSodium().crypto_box_curve25519xchacha20poly1305_seal_open(m, c, clen, pk, sk);
   }
 
@@ -2992,31 +3017,23 @@ public final class Sodium {
     return libSodium().crypto_secretbox_xchacha20poly1305_messagebytes_max();
   }
 
-  static int crypto_secretbox_xchacha20poly1305_easy(byte[] c, byte[] m, long mlen, byte[] n, byte[] k) {
+  static int crypto_secretbox_xchacha20poly1305_easy(
+      byte[] c, byte[] m, long mlen, byte[] n, byte[] k) {
     return libSodium().crypto_secretbox_xchacha20poly1305_easy(c, m, mlen, n, k);
   }
 
-  static int crypto_secretbox_xchacha20poly1305_open_easy(byte[] m, byte[] c, long clen, byte[] n, byte[] k) {
+  static int crypto_secretbox_xchacha20poly1305_open_easy(
+      byte[] m, byte[] c, long clen, byte[] n, byte[] k) {
     return libSodium().crypto_secretbox_xchacha20poly1305_open_easy(m, c, clen, n, k);
   }
 
   static int crypto_secretbox_xchacha20poly1305_detached(
-      byte[] c,
-      byte[] mac,
-      byte[] m,
-      long mlen,
-      byte[] n,
-      byte[] k) {
+      byte[] c, byte[] mac, byte[] m, long mlen, byte[] n, byte[] k) {
     return libSodium().crypto_secretbox_xchacha20poly1305_detached(c, mac, m, mlen, n, k);
   }
 
   static int crypto_secretbox_xchacha20poly1305_open_detached(
-      byte[] m,
-      byte[] c,
-      byte[] mac,
-      long clen,
-      byte[] n,
-      byte[] k) {
+      byte[] m, byte[] c, byte[] mac, long clen, byte[] n, byte[] k) {
     return libSodium().crypto_secretbox_xchacha20poly1305_open_detached(m, c, mac, clen, n, k);
   }
 
@@ -3088,19 +3105,19 @@ public final class Sodium {
       byte[] salt,
       long opslimit,
       long memlimit) {
-    return libSodium().crypto_pwhash_scryptsalsa208sha256(out, outlen, passwd, passwdlen, salt, opslimit, memlimit);
+    return libSodium()
+        .crypto_pwhash_scryptsalsa208sha256(
+            out, outlen, passwd, passwdlen, salt, opslimit, memlimit);
   }
 
   static int crypto_pwhash_scryptsalsa208sha256_str(
-      byte[] out,
-      byte[] passwd,
-      long passwdlen,
-      long opslimit,
-      long memlimit) {
-    return libSodium().crypto_pwhash_scryptsalsa208sha256_str(out, passwd, passwdlen, opslimit, memlimit);
+      byte[] out, byte[] passwd, long passwdlen, long opslimit, long memlimit) {
+    return libSodium()
+        .crypto_pwhash_scryptsalsa208sha256_str(out, passwd, passwdlen, opslimit, memlimit);
   }
 
-  static int crypto_pwhash_scryptsalsa208sha256_str_verify(byte[] str, byte[] passwd, long passwdlen) {
+  static int crypto_pwhash_scryptsalsa208sha256_str_verify(
+      byte[] str, byte[] passwd, long passwdlen) {
     return libSodium().crypto_pwhash_scryptsalsa208sha256_str_verify(str, passwd, passwdlen);
   }
 
@@ -3114,10 +3131,13 @@ public final class Sodium {
       int p,
       byte[] buf,
       long buflen) {
-    return libSodium().crypto_pwhash_scryptsalsa208sha256_ll(passwd, passwdlen, salt, saltlen, N, r, p, buf, buflen);
+    return libSodium()
+        .crypto_pwhash_scryptsalsa208sha256_ll(
+            passwd, passwdlen, salt, saltlen, N, r, p, buf, buflen);
   }
 
-  static int crypto_pwhash_scryptsalsa208sha256_str_needs_rehash(byte[] str, long opslimit, long memlimit) {
+  static int crypto_pwhash_scryptsalsa208sha256_str_needs_rehash(
+      byte[] str, long opslimit, long memlimit) {
     return libSodium().crypto_pwhash_scryptsalsa208sha256_str_needs_rehash(str, opslimit, memlimit);
   }
 

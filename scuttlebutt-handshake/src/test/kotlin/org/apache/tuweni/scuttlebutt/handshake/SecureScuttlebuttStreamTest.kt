@@ -124,7 +124,7 @@ internal class SecureScuttlebuttStreamTest {
     val message = clientToServer.sendGoodbyeToServer()
     assertTrue(SecureScuttlebuttStreamServer.isGoodbye(serverToClient.readFromClient(message)))
     assertTrue(
-      SecureScuttlebuttStreamServer.isGoodbye(clientToServer.readFromServer(serverToClient.sendGoodbyeToClient()))
+      SecureScuttlebuttStreamServer.isGoodbye(clientToServer.readFromServer(serverToClient.sendGoodbyeToClient())),
     )
   }
 

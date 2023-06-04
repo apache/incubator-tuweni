@@ -9,7 +9,7 @@ import org.apache.tuweni.rlp.RLP
 internal data class ReceiptsMessage(
   val reqID: Long,
   val bufferValue: Long,
-  val receipts: List<List<TransactionReceipt>>
+  val receipts: List<List<TransactionReceipt>>,
 ) {
 
   fun toBytes(): Bytes {
@@ -30,12 +30,12 @@ internal data class ReceiptsMessage(
 
     fun read(bytes: Bytes): ReceiptsMessage {
       return RLP.decodeList(
-        bytes
+        bytes,
       ) { reader ->
         ReceiptsMessage(
           reader.readLong(),
           reader.readLong(),
-          reader.readListContents { listTx -> listTx.readListContents { TransactionReceipt.readFrom(it) } }
+          reader.readListContents { listTx -> listTx.readListContents { TransactionReceipt.readFrom(it) } },
         )
       }
     }

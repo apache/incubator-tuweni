@@ -12,91 +12,89 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-/**
- * An array of TOML values.
- */
+/** An array of TOML values. */
 public interface TomlArray {
 
   /**
    * Provides the size of the array.
-   * 
+   *
    * @return The size of the array.
    */
   int size();
 
   /**
    * Returns true if the array is empty.
-   * 
+   *
    * @return {@code true} if the array is empty.
    */
   boolean isEmpty();
 
   /**
    * Returns true if the array contains strings.
-   * 
+   *
    * @return {@code true} if the array contains strings.
    */
   boolean containsStrings();
 
   /**
    * Returns true if the array contains longs.
-   * 
+   *
    * @return {@code true} if the array contains longs.
    */
   boolean containsLongs();
 
   /**
    * Returns true if the array contains doubles.
-   * 
+   *
    * @return {@code true} if the array contains doubles.
    */
   boolean containsDoubles();
 
   /**
    * Returns true if the array contains booleans.
-   * 
+   *
    * @return {@code true} if the array contains booleans.
    */
   boolean containsBooleans();
 
   /**
    * Returns true if the array contains offset date times.
-   * 
+   *
    * @return {@code true} if the array contains {@link OffsetDateTime}s.
    */
   boolean containsOffsetDateTimes();
 
   /**
    * Returns true if the array contains local date times.
-   * 
+   *
    * @return {@code true} if the array contains {@link LocalDateTime}s.
    */
   boolean containsLocalDateTimes();
 
   /**
    * Returns true if the array contains local dates.
-   * 
+   *
    * @return {@code true} if the array contains {@link LocalDate}s.
    */
   boolean containsLocalDates();
 
   /**
    * Returns true if the array contains local time objects.
-   * 
+   *
    * @return {@code true} if the array contains {@link LocalTime}s.
    */
   boolean containsLocalTimes();
 
   /**
    * Returns true if the array contains arrays.
-   * 
+   *
    * @return {@code true} if the array contains arrays.
    */
   boolean containsArrays();
 
   /**
    * Returns true if the array contains tables.
-   * 
+   *
    * @return {@code true} if the array contains tables.
    */
   boolean containsTables();
@@ -282,9 +280,8 @@ public interface TomlArray {
   /**
    * Get the elements of this array as a {@link List}.
    *
-   * <p>
-   * Note that this does not do a deep conversion. If this array contains tables or arrays, they will be of type
-   * {@link TomlTable} or {@link TomlArray} respectively.
+   * <p>Note that this does not do a deep conversion. If this array contains tables or arrays, they
+   * will be of type {@link TomlTable} or {@link TomlArray} respectively.
    *
    * @return The elements of this array as a {@link List}.
    */

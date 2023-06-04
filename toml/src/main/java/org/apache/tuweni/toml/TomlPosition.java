@@ -5,9 +5,7 @@ package org.apache.tuweni.toml;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
-/**
- * A position in an input document.
- */
+/** A position in an input document. */
 public final class TomlPosition {
   private final int line;
   private final int column;
@@ -47,8 +45,7 @@ public final class TomlPosition {
   /**
    * The line number.
    *
-   * <p>
-   * The first line of the document is line 1.
+   * <p>The first line of the document is line 1.
    *
    * @return The line number (1..).
    */
@@ -59,9 +56,8 @@ public final class TomlPosition {
   /**
    * The column number.
    *
-   * <p>
-   * The first column of the document is column 1.
-   * 
+   * <p>The first column of the document is column 1.
+   *
    * @return The column number (1..).
    */
   public int column() {

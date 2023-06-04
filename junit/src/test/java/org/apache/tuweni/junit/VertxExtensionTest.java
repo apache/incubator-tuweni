@@ -15,5 +15,4 @@ class VertxExtensionTest {
   void test(@VertxInstance Vertx vertx) {
     assertNotNull(vertx);
   }
-
 }

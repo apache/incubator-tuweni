@@ -18,7 +18,7 @@ class StatsJob(
   private val upgradeConfigs: List<UpgradeConfig> = listOf(),
   private val meter: Meter,
   private val clientsStatsDelay: Long = 30 * 1000L,
-  override val coroutineContext: CoroutineContext = Dispatchers.Default
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope {
 
   companion object {

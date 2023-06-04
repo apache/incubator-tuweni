@@ -27,7 +27,7 @@ internal class RPCEncodingTest {
     val message = encodeRequest(
       Bytes.wrap("\"some JSON string\"".toByteArray(StandardCharsets.UTF_8)),
       RPCFlag.BodyType.JSON,
-      RPCFlag.Stream.STREAM
+      RPCFlag.Stream.STREAM,
     )
     val decoded = RPCMessage(message)
     Assertions.assertTrue(decoded.stream())
@@ -35,8 +35,8 @@ internal class RPCEncodingTest {
       "some JSON string",
       decoded.asJSON(
         ObjectMapper(),
-        String::class.java
-      )
+        String::class.java,
+      ),
     )
     Assertions.assertEquals(RPCFlag.BodyType.JSON, decoded.bodyType())
     Assertions.assertEquals(RPCCodec.counter.get() - 1, decoded.requestNumber())
@@ -55,14 +55,14 @@ internal class RPCEncodingTest {
   @Test
   fun rpcInvalidRequestNumber() {
     Assertions.assertThrows(
-      IllegalArgumentException::class.java
+      IllegalArgumentException::class.java,
     ) {
       encodeRequest(
         Bytes.fromHexString(
-          "deadbeef"
+          "deadbeef",
         ),
         -1,
-        RPCFlag.BodyType.BINARY
+        RPCFlag.BodyType.BINARY,
       )
     }
   }
@@ -70,14 +70,14 @@ internal class RPCEncodingTest {
   @Test
   fun rpcInvalidRequestNumberZero() {
     Assertions.assertThrows(
-      IllegalArgumentException::class.java
+      IllegalArgumentException::class.java,
     ) {
       encodeRequest(
         Bytes.fromHexString(
-          "deadbeef"
+          "deadbeef",
         ),
         0,
-        RPCFlag.BodyType.BINARY
+        RPCFlag.BodyType.BINARY,
       )
     }
   }

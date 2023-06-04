@@ -8,7 +8,7 @@ import org.apache.tuweni.rlp.RLPWriter
 
 internal data class Node(
   val endpoint: Endpoint,
-  val nodeId: SECP256K1.PublicKey
+  val nodeId: SECP256K1.PublicKey,
 ) {
 
   companion object {

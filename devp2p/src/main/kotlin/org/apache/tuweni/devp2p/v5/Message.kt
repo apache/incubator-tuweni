@@ -58,7 +58,8 @@ internal enum class MessageType(val code: Int) {
   REGTOPIC(5),
   REGCONFIRM(7),
   TICKET(6),
-  TOPICQUERY(8);
+  TOPICQUERY(8),
+  ;
 
   fun byte(): Byte = code.toByte()
 

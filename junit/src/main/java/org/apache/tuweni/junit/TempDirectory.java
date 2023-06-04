@@ -7,10 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * A parameter annotation for injecting a temporary directory into junit5 tests.
- */
+/** A parameter annotation for injecting a temporary directory into junit5 tests. */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TempDirectory {
-}
+public @interface TempDirectory {}

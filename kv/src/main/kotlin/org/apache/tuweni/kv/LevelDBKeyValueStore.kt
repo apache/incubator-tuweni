@@ -38,7 +38,7 @@ constructor(
   private val keyDeserializer: (Bytes) -> K,
   private val valueDeserializer: (Bytes) -> V,
   private val options: Options = Options().createIfMissing(true).cacheSize((100 * 1048576).toLong()),
-  override val coroutineContext: CoroutineContext = Dispatchers.IO
+  override val coroutineContext: CoroutineContext = Dispatchers.IO,
 ) : KeyValueStore<K, V> {
 
   companion object {
@@ -61,14 +61,14 @@ constructor(
       keySerializer: Function<K, Bytes>,
       valueSerializer: Function<V, Bytes>,
       keyDeserializer: Function<Bytes, K>,
-      valueDeserializer: Function<Bytes, V>
+      valueDeserializer: Function<Bytes, V>,
     ): LevelDBKeyValueStore<K, V> =
       LevelDBKeyValueStore(
         dbPath,
         keySerializer::apply,
         valueSerializer::apply,
         keyDeserializer::apply,
-        valueDeserializer::apply
+        valueDeserializer::apply,
       )
 
     /**
@@ -91,7 +91,7 @@ constructor(
       valueSerializer: Function<V, Bytes>,
       keyDeserializer: Function<Bytes, K>,
       valueDeserializer: Function<Bytes, V>,
-      options: Options
+      options: Options,
     ) =
       LevelDBKeyValueStore(
         dbPath,
@@ -99,7 +99,7 @@ constructor(
         valueSerializer::apply,
         keyDeserializer::apply,
         valueDeserializer::apply,
-        options
+        options,
       )
 
     /**
@@ -112,14 +112,14 @@ constructor(
     @JvmStatic
     @Throws(IOException::class)
     fun open(
-      dbPath: Path
+      dbPath: Path,
     ) =
       LevelDBKeyValueStore<Bytes, Bytes>(
         dbPath,
         Function.identity<Bytes>()::apply,
         Function.identity<Bytes>()::apply,
         Function.identity<Bytes>()::apply,
-        Function.identity<Bytes>()::apply
+        Function.identity<Bytes>()::apply,
       )
   }
 
@@ -151,7 +151,7 @@ constructor(
 
   override suspend fun put(key: K, value: V) = db.put(
     keySerializer(key).toArrayUnsafe(),
-    valueSerializer(value).toArrayUnsafe()
+    valueSerializer(value).toArrayUnsafe(),
   )
 
   private class KIterator<K>(val iter: DBIterator, val keyDeserializer: (Bytes) -> K) : Iterator<K> {

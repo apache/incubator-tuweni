@@ -10,56 +10,54 @@ import io.vertx.core.net.TrustOptions;
 /**
  * Vert.x {@link TrustOptions} for fingerprinting clients and servers.
  *
- * <p>
- * This class depends upon the Vert.X library being available on the classpath, along with its dependencies. See
- * https://vertx.io/download/. Vert.X can be included using the gradle dependency 'io.vertx:vertx-core'.
+ * <p>This class depends upon the Vert.X library being available on the classpath, along with its
+ * dependencies. See https://vertx.io/download/. Vert.X can be included using the gradle dependency
+ * 'io.vertx:vertx-core'.
  */
 public final class VertxTrustOptions {
   private VertxTrustOptions() {}
 
   /**
-   * Accept all server certificates, recording certificate fingerprints for those that are not CA-signed.
+   * Accept all server certificates, recording certificate fingerprints for those that are not
+   * CA-signed.
    *
-   * <p>
-   * Excepting when a server presents a CA-signed certificate, the server host+port and the certificate fingerprint will
-   * be written to {@code knownServersFile}.
+   * <p>Excepting when a server presents a CA-signed certificate, the server host+port and the
+   * certificate fingerprint will be written to {@code knownServersFile}.
    *
-   * <p>
-   * Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
+   * <p>Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
    *
    * @param knownServersFile The path to a file in which to record fingerprints by host.
    * @return A Vert.x {@link TrustOptions}.
    */
   public static TrustOptions recordServerFingerprints(Path knownServersFile) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.recordServerFingerprints(knownServersFile));
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.recordServerFingerprints(knownServersFile));
   }
 
   /**
-   * Accept all server certificates, recording certificate fingerprints for those that are not CA-signed.
+   * Accept all server certificates, recording certificate fingerprints for those that are not
+   * CA-signed.
    *
-   * <p>
-   * Excepting when a server presents a CA-signed certificate, the server host+port and the certificate fingerprint will
-   * be written to {@code knownServersFile}.
+   * <p>Excepting when a server presents a CA-signed certificate, the server host+port and the
+   * certificate fingerprint will be written to {@code knownServersFile}.
    *
-   * <p>
-   * Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
+   * <p>Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
    *
    * @param repository The repository in which to record fingerprints by host.
    * @return A Vert.x {@link TrustOptions}.
    */
   public static TrustOptions recordServerFingerprints(FingerprintRepository repository) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.recordServerFingerprints(repository));
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.recordServerFingerprints(repository));
   }
 
   /**
    * Accept all server certificates, recording certificate fingerprints.
    *
-   * <p>
-   * For all connections, the server host+port and the fingerprint of the presented certificate will be written to
-   * {@code knownServersFile}.
+   * <p>For all connections, the server host+port and the fingerprint of the presented certificate
+   * will be written to {@code knownServersFile}.
    *
-   * <p>
-   * Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
+   * <p>Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
    *
    * @param knownServersFile The path to a file in which to record fingerprints by host.
    * @param skipCASigned If {@code true}, CA-signed certificates are not recorded.
@@ -73,79 +71,82 @@ public final class VertxTrustOptions {
   /**
    * Accept all server certificates, recording certificate fingerprints.
    *
-   * <p>
-   * For all connections, the server host+port and the fingerprint of the presented certificate will be written to
-   * {@code knownServersFile}.
+   * <p>For all connections, the server host+port and the fingerprint of the presented certificate
+   * will be written to {@code knownServersFile}.
    *
-   * <p>
-   * Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
+   * <p>Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
    *
    * @param repository The repository in which to record fingerprints by host.
    * @param skipCASigned If {@code true}, CA-signed certificates are not recorded.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions recordServerFingerprints(FingerprintRepository repository, boolean skipCASigned) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.recordServerFingerprints(repository, skipCASigned));
+  public static TrustOptions recordServerFingerprints(
+      FingerprintRepository repository, boolean skipCASigned) {
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.recordServerFingerprints(repository, skipCASigned));
   }
 
   /**
-   * Accept all server certificates, recording certificate fingerprints for those that are not CA-signed.
+   * Accept all server certificates, recording certificate fingerprints for those that are not
+   * CA-signed.
    *
-   * <p>
-   * Excepting when a server presents a CA-signed certificate, the server host+port and the certificate fingerprint will
-   * be written to {@code knownServersFile}.
+   * <p>Excepting when a server presents a CA-signed certificate, the server host+port and the
+   * certificate fingerprint will be written to {@code knownServersFile}.
    *
-   * <p>
-   * Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
+   * <p>Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
    *
    * @param knownServersFile The path to a file in which to record fingerprints by host.
    * @param tmf A {@link TrustManagerFactory} for checking server certificates against a CA.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions recordServerFingerprints(Path knownServersFile, TrustManagerFactory tmf) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.recordServerFingerprints(knownServersFile, tmf));
+  public static TrustOptions recordServerFingerprints(
+      Path knownServersFile, TrustManagerFactory tmf) {
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.recordServerFingerprints(knownServersFile, tmf));
   }
 
   /**
-   * Accept all server certificates, recording certificate fingerprints for those that are not CA-signed.
+   * Accept all server certificates, recording certificate fingerprints for those that are not
+   * CA-signed.
    *
-   * <p>
-   * Excepting when a server presents a CA-signed certificate, the server host+port and the certificate fingerprint will
-   * be written to {@code knownServersFile}.
+   * <p>Excepting when a server presents a CA-signed certificate, the server host+port and the
+   * certificate fingerprint will be written to {@code knownServersFile}.
    *
-   * <p>
-   * Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
+   * <p>Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
    *
    * @param repository The repository in which to record fingerprints by host.
    * @param tmf A {@link TrustManagerFactory} for checking server certificates against a CA.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions recordServerFingerprints(FingerprintRepository repository, TrustManagerFactory tmf) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.recordServerFingerprints(repository, tmf));
+  public static TrustOptions recordServerFingerprints(
+      FingerprintRepository repository, TrustManagerFactory tmf) {
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.recordServerFingerprints(repository, tmf));
   }
 
   /**
    * Accept CA-signed certificates, and otherwise trust server certificates on first use.
    *
-   * <p>
-   * Except when a server presents a CA-signed certificate, on first connection to a server (identified by host+port)
-   * the fingerprint of the presented certificate will be recorded. On subsequent connections, the presented certificate
-   * will be matched to the stored fingerprint to ensure it has not changed.
+   * <p>Except when a server presents a CA-signed certificate, on first connection to a server
+   * (identified by host+port) the fingerprint of the presented certificate will be recorded. On
+   * subsequent connections, the presented certificate will be matched to the stored fingerprint to
+   * ensure it has not changed.
    *
    * @param knownServersFile The path to the file containing fingerprints by host.
    * @return A Vert.x {@link TrustOptions}.
    */
   public static TrustOptions trustServerOnFirstUse(Path knownServersFile) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.trustServerOnFirstUse(knownServersFile));
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.trustServerOnFirstUse(knownServersFile));
   }
 
   /**
    * Accept CA-signed certificates, and otherwise trust server certificates on first use.
    *
-   * <p>
-   * Except when a server presents a CA-signed certificate, on first connection to a server (identified by host+port)
-   * the fingerprint of the presented certificate will be recorded. On subsequent connections, the presented certificate
-   * will be matched to the stored fingerprint to ensure it has not changed.
+   * <p>Except when a server presents a CA-signed certificate, on first connection to a server
+   * (identified by host+port) the fingerprint of the presented certificate will be recorded. On
+   * subsequent connections, the presented certificate will be matched to the stored fingerprint to
+   * ensure it has not changed.
    *
    * @param repository The repository containing fingerprints by host.
    * @return A Vert.x {@link TrustOptions}.
@@ -157,14 +158,13 @@ public final class VertxTrustOptions {
   /**
    * Trust server certificates on first use.
    *
-   * <p>
-   * On first connection to a server (identified by host+port) the fingerprint of the presented certificate will be
-   * recorded. On subsequent connections, the presented certificate will be matched to the stored fingerprint to ensure
-   * it has not changed.
+   * <p>On first connection to a server (identified by host+port) the fingerprint of the presented
+   * certificate will be recorded. On subsequent connections, the presented certificate will be
+   * matched to the stored fingerprint to ensure it has not changed.
    *
    * @param knownServersFile The path to the file containing fingerprints by host.
-   * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted (and the fingerprint will not
-   *        be recorded).
+   * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted (and the
+   *     fingerprint will not be recorded).
    * @return A Vert.x {@link TrustOptions}.
    */
   public static TrustOptions trustServerOnFirstUse(Path knownServersFile, boolean acceptCASigned) {
@@ -175,58 +175,61 @@ public final class VertxTrustOptions {
   /**
    * Trust server certificates on first use.
    *
-   * <p>
-   * On first connection to a server (identified by host+port) the fingerprint of the presented certificate will be
-   * recorded. On subsequent connections, the presented certificate will be matched to the stored fingerprint to ensure
-   * it has not changed.
+   * <p>On first connection to a server (identified by host+port) the fingerprint of the presented
+   * certificate will be recorded. On subsequent connections, the presented certificate will be
+   * matched to the stored fingerprint to ensure it has not changed.
    *
    * @param repository The repository containing fingerprints by host.
-   * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted (and the fingerprint will not
-   *        be recorded).
+   * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted (and the
+   *     fingerprint will not be recorded).
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions trustServerOnFirstUse(FingerprintRepository repository, boolean acceptCASigned) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.trustServerOnFirstUse(repository, acceptCASigned));
+  public static TrustOptions trustServerOnFirstUse(
+      FingerprintRepository repository, boolean acceptCASigned) {
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.trustServerOnFirstUse(repository, acceptCASigned));
   }
 
   /**
    * Accept CA-signed certificates, and otherwise trust server certificates on first use.
    *
-   * <p>
-   * Except when a server presents a CA-signed certificate, on first connection to a server (identified by host+port)
-   * the fingerprint of the presented certificate will be recorded. On subsequent connections, the presented certificate
-   * will be matched to the stored fingerprint to ensure it has not changed.
+   * <p>Except when a server presents a CA-signed certificate, on first connection to a server
+   * (identified by host+port) the fingerprint of the presented certificate will be recorded. On
+   * subsequent connections, the presented certificate will be matched to the stored fingerprint to
+   * ensure it has not changed.
    *
    * @param knownServersFile The path to the file containing fingerprints by host.
    * @param tmf A {@link TrustManagerFactory} for checking server certificates against a CA.
    * @return A Vert.x {@link TrustOptions}.
    */
   public static TrustOptions trustServerOnFirstUse(Path knownServersFile, TrustManagerFactory tmf) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.trustServerOnFirstUse(knownServersFile, tmf));
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.trustServerOnFirstUse(knownServersFile, tmf));
   }
 
   /**
    * Accept CA-signed certificates, and otherwise trust server certificates on first use.
    *
-   * <p>
-   * Except when a server presents a CA-signed certificate, on first connection to a server (identified by host+port)
-   * the fingerprint of the presented certificate will be recorded. On subsequent connections, the presented certificate
-   * will be matched to the stored fingerprint to ensure it has not changed.
+   * <p>Except when a server presents a CA-signed certificate, on first connection to a server
+   * (identified by host+port) the fingerprint of the presented certificate will be recorded. On
+   * subsequent connections, the presented certificate will be matched to the stored fingerprint to
+   * ensure it has not changed.
    *
    * @param repository The repository containing fingerprints by host.
    * @param tmf A {@link TrustManagerFactory} for checking server certificates against a CA.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions trustServerOnFirstUse(FingerprintRepository repository, TrustManagerFactory tmf) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.trustServerOnFirstUse(repository, tmf));
+  public static TrustOptions trustServerOnFirstUse(
+      FingerprintRepository repository, TrustManagerFactory tmf) {
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.trustServerOnFirstUse(repository, tmf));
   }
 
   /**
    * Require servers to present known certificates, or CA-signed certificates.
    *
-   * <p>
-   * If a certificate is not CA-signed, then its fingerprint must be present in the known servers file, associated with
-   * the server (identified by host+port).
+   * <p>If a certificate is not CA-signed, then its fingerprint must be present in the known servers
+   * file, associated with the server (identified by host+port).
    *
    * @param knownServersFile The path to the file containing fingerprints by host.
    * @return A Vert.x {@link TrustOptions}.
@@ -238,9 +241,8 @@ public final class VertxTrustOptions {
   /**
    * Require servers to present known certificates, or CA-signed certificates.
    *
-   * <p>
-   * If a certificate is not CA-signed, then its fingerprint must be present in the known servers file, associated with
-   * the server (identified by host+port).
+   * <p>If a certificate is not CA-signed, then its fingerprint must be present in the known servers
+   * file, associated with the server (identified by host+port).
    *
    * @param repository The repository containing fingerprints by host.
    * @return A Vert.x {@link TrustOptions}.
@@ -252,106 +254,105 @@ public final class VertxTrustOptions {
   /**
    * Require servers to present known certificates.
    *
-   * <p>
-   * The fingerprint for a server certificate must be present in the known servers file, associated with the server
-   * (identified by host+port).
+   * <p>The fingerprint for a server certificate must be present in the known servers file,
+   * associated with the server (identified by host+port).
    *
    * @param knownServersFile The path to the file containing fingerprints by host.
    * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted.
    * @return A Vert.x {@link TrustOptions}.
    */
   public static TrustOptions allowlistServers(Path knownServersFile, boolean acceptCASigned) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistServers(knownServersFile, acceptCASigned));
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.allowlistServers(knownServersFile, acceptCASigned));
   }
 
   /**
    * Require servers to present known certificates.
    *
-   * <p>
-   * The fingerprint for a server certificate must be present in the known servers file, associated with the server
-   * (identified by host+port).
+   * <p>The fingerprint for a server certificate must be present in the known servers file,
+   * associated with the server (identified by host+port).
    *
    * @param repository The repository containing fingerprints by host.
    * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions allowlistServers(FingerprintRepository repository, boolean acceptCASigned) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistServers(repository, acceptCASigned));
+  public static TrustOptions allowlistServers(
+      FingerprintRepository repository, boolean acceptCASigned) {
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.allowlistServers(repository, acceptCASigned));
   }
 
   /**
    * Require servers to present known certificates, or CA-signed certificates.
    *
-   * <p>
-   * If a certificate is not CA-signed, then its fingerprint must be present in the known servers file, associated with
-   * the server (identified by host+port).
+   * <p>If a certificate is not CA-signed, then its fingerprint must be present in the known servers
+   * file, associated with the server (identified by host+port).
    *
    * @param knownServersFile The path to the file containing fingerprints by host.
    * @param tmf A {@link TrustManagerFactory} for checking server certificates against a CA.
    * @return A Vert.x {@link TrustOptions}.
    */
   public static TrustOptions allowlistServers(Path knownServersFile, TrustManagerFactory tmf) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistServers(knownServersFile, tmf));
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.allowlistServers(knownServersFile, tmf));
   }
 
   /**
    * Require servers to present known certificates, or CA-signed certificates.
    *
-   * <p>
-   * If a certificate is not CA-signed, then its fingerprint must be present in the known servers file, associated with
-   * the server (identified by host+port).
+   * <p>If a certificate is not CA-signed, then its fingerprint must be present in the known servers
+   * file, associated with the server (identified by host+port).
    *
    * @param repository The repository containing fingerprints by host.
    * @param tmf A {@link TrustManagerFactory} for checking server certificates against a CA.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions allowlistServers(FingerprintRepository repository, TrustManagerFactory tmf) {
+  public static TrustOptions allowlistServers(
+      FingerprintRepository repository, TrustManagerFactory tmf) {
     return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistServers(repository, tmf));
   }
 
   /**
-   * Accept all client certificates, recording certificate fingerprints for those that are not CA-signed.
+   * Accept all client certificates, recording certificate fingerprints for those that are not
+   * CA-signed.
    *
-   * <p>
-   * Excepting when a client presents a CA-signed certificate, the certificate common name and fingerprint will be
-   * written to {@code knownClientsFile}.
+   * <p>Excepting when a client presents a CA-signed certificate, the certificate common name and
+   * fingerprint will be written to {@code knownClientsFile}.
    *
-   * <p>
-   * Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
+   * <p>Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
    *
    * @param knownClientsFile The path to a file in which to record fingerprints by common name.
    * @return A Vert.x {@link TrustOptions}.
    */
   public static TrustOptions recordClientFingerprints(Path knownClientsFile) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.recordClientFingerprints(knownClientsFile));
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.recordClientFingerprints(knownClientsFile));
   }
 
   /**
-   * Accept all client certificates, recording certificate fingerprints for those that are not CA-signed.
+   * Accept all client certificates, recording certificate fingerprints for those that are not
+   * CA-signed.
    *
-   * <p>
-   * Excepting when a client presents a CA-signed certificate, the certificate common name and fingerprint will be
-   * written to {@code knownClientsFile}.
+   * <p>Excepting when a client presents a CA-signed certificate, the certificate common name and
+   * fingerprint will be written to {@code knownClientsFile}.
    *
-   * <p>
-   * Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
+   * <p>Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
    *
    * @param repository The repository in which to record fingerprints by common name.
    * @return A Vert.x {@link TrustOptions}.
    */
   public static TrustOptions recordClientFingerprints(FingerprintRepository repository) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.recordClientFingerprints(repository));
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.recordClientFingerprints(repository));
   }
 
   /**
    * Accept all client certificates, recording certificate fingerprints.
    *
-   * <p>
-   * For all connections, the common name and fingerprint of the presented certificate will be written to
-   * {@code knownClientsFile}.
+   * <p>For all connections, the common name and fingerprint of the presented certificate will be
+   * written to {@code knownClientsFile}.
    *
-   * <p>
-   * Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
+   * <p>Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
    *
    * @param knownClientsFile The path to a file in which to record fingerprints by common name.
    * @param skipCASigned If {@code true}, CA-signed certificates are not recorded.
@@ -365,120 +366,126 @@ public final class VertxTrustOptions {
   /**
    * Accept all client certificates, recording certificate fingerprints.
    *
-   * <p>
-   * For all connections, the common name and fingerprint of the presented certificate will be written to
-   * {@code knownClientsFile}.
+   * <p>For all connections, the common name and fingerprint of the presented certificate will be
+   * written to {@code knownClientsFile}.
    *
-   * <p>
-   * Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
+   * <p>Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
    *
    * @param repository The repository in which to record fingerprints by common name.
    * @param skipCASigned If {@code true}, CA-signed certificates are not recorded.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions recordClientFingerprints(FingerprintRepository repository, boolean skipCASigned) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.recordClientFingerprints(repository, skipCASigned));
+  public static TrustOptions recordClientFingerprints(
+      FingerprintRepository repository, boolean skipCASigned) {
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.recordClientFingerprints(repository, skipCASigned));
   }
 
   /**
-   * Accept all client certificates, recording certificate fingerprints for those that are not CA-signed.
+   * Accept all client certificates, recording certificate fingerprints for those that are not
+   * CA-signed.
    *
-   * <p>
-   * Excepting when a client presents a CA-signed certificate, the certificate common name and fingerprint will be
-   * written to {@code knownClientsFile}.
+   * <p>Excepting when a client presents a CA-signed certificate, the certificate common name and
+   * fingerprint will be written to {@code knownClientsFile}.
    *
-   * <p>
-   * Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
+   * <p>Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
    *
    * @param knownClientsFile The path to a file in which to record fingerprints by common name.
    * @param tmf A {@link TrustManagerFactory} for checking client certificates against a CA.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions recordClientFingerprints(Path knownClientsFile, TrustManagerFactory tmf) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.recordClientFingerprints(knownClientsFile, tmf));
+  public static TrustOptions recordClientFingerprints(
+      Path knownClientsFile, TrustManagerFactory tmf) {
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.recordClientFingerprints(knownClientsFile, tmf));
   }
 
   /**
-   * Accept all client certificates, recording certificate fingerprints for those that are not CA-signed.
+   * Accept all client certificates, recording certificate fingerprints for those that are not
+   * CA-signed.
    *
-   * <p>
-   * Excepting when a client presents a CA-signed certificate, the certificate common name and fingerprint will be
-   * written to {@code knownClientsFile}.
+   * <p>Excepting when a client presents a CA-signed certificate, the certificate common name and
+   * fingerprint will be written to {@code knownClientsFile}.
    *
-   * <p>
-   * Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
+   * <p>Important: this provides no security as it is vulnerable to man-in-the-middle attacks.
    *
    * @param repository The repository in which to record fingerprints by common name.
    * @param tmf A {@link TrustManagerFactory} for checking client certificates against a CA.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions recordClientFingerprints(FingerprintRepository repository, TrustManagerFactory tmf) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.recordClientFingerprints(repository, tmf));
+  public static TrustOptions recordClientFingerprints(
+      FingerprintRepository repository, TrustManagerFactory tmf) {
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.recordClientFingerprints(repository, tmf));
   }
 
   /**
    * Accept CA-signed client certificates, and otherwise trust client certificates on first access.
    *
-   * <p>
-   * Except when a client presents a CA-signed certificate, on first connection to this server the common name and
-   * fingerprint of the presented certificate will be recorded. On subsequent connections, the client will be rejected
-   * if the fingerprint has changed.
+   * <p>Except when a client presents a CA-signed certificate, on first connection to this server
+   * the common name and fingerprint of the presented certificate will be recorded. On subsequent
+   * connections, the client will be rejected if the fingerprint has changed.
    *
-   * <p>
-   * <i>Note: unlike the seemingly equivalent {@link #trustServerOnFirstUse(Path)} method for authenticating servers,
-   * this method for authenticating clients is <b>insecure</b> and <b>provides zero confidence in client identity</b>.
-   * Unlike the server version, which bases the identity on the hostname and port the connection is being established
-   * to, the client version only uses the common name of the certificate that the connecting client presents. Therefore,
-   * clients can circumvent access control by using a different common name from any previously recorded client.</i>
+   * <p><i>Note: unlike the seemingly equivalent {@link #trustServerOnFirstUse(Path)} method for
+   * authenticating servers, this method for authenticating clients is <b>insecure</b> and
+   * <b>provides zero confidence in client identity</b>. Unlike the server version, which bases the
+   * identity on the hostname and port the connection is being established to, the client version
+   * only uses the common name of the certificate that the connecting client presents. Therefore,
+   * clients can circumvent access control by using a different common name from any previously
+   * recorded client.</i>
    *
    * @param knownClientsFile The path to the file containing fingerprints by common name.
    * @return A Vert.x {@link TrustOptions}.
    */
   public static TrustOptions trustClientOnFirstAccess(Path knownClientsFile) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.trustClientOnFirstAccess(knownClientsFile));
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.trustClientOnFirstAccess(knownClientsFile));
   }
 
   /**
    * Accept CA-signed client certificates, and otherwise trust client certificates on first access.
    *
-   * <p>
-   * Except when a client presents a CA-signed certificate, on first connection to this server the common name and
-   * fingerprint of the presented certificate will be recorded. On subsequent connections, the client will be rejected
-   * if the fingerprint has changed.
+   * <p>Except when a client presents a CA-signed certificate, on first connection to this server
+   * the common name and fingerprint of the presented certificate will be recorded. On subsequent
+   * connections, the client will be rejected if the fingerprint has changed.
    *
-   * <p>
-   * <i>Note: unlike the seemingly equivalent {@link #trustServerOnFirstUse(Path)} method for authenticating servers,
-   * this method for authenticating clients is <b>insecure</b> and <b>provides zero confidence in client identity</b>.
-   * Unlike the server version, which bases the identity on the hostname and port the connection is being established
-   * to, the client version only uses the common name of the certificate that the connecting client presents. Therefore,
-   * clients can circumvent access control by using a different common name from any previously recorded client.</i>
+   * <p><i>Note: unlike the seemingly equivalent {@link #trustServerOnFirstUse(Path)} method for
+   * authenticating servers, this method for authenticating clients is <b>insecure</b> and
+   * <b>provides zero confidence in client identity</b>. Unlike the server version, which bases the
+   * identity on the hostname and port the connection is being established to, the client version
+   * only uses the common name of the certificate that the connecting client presents. Therefore,
+   * clients can circumvent access control by using a different common name from any previously
+   * recorded client.</i>
    *
    * @param repository The repository containing fingerprints by common name.
    * @return A Vert.x {@link TrustOptions}.
    */
   public static TrustOptions trustClientOnFirstAccess(FingerprintRepository repository) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.trustClientOnFirstAccess(repository));
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.trustClientOnFirstAccess(repository));
   }
 
   /**
    * Trust client certificates on first access.
    *
-   * <p>
-   * On first connection to this server the common name and fingerprint of the presented certificate will be recorded.
-   * On subsequent connections, the client will be rejected if the fingerprint has changed.
+   * <p>On first connection to this server the common name and fingerprint of the presented
+   * certificate will be recorded. On subsequent connections, the client will be rejected if the
+   * fingerprint has changed.
    *
-   * <p>
-   * <i>Note: unlike the seemingly equivalent {@link #trustServerOnFirstUse(Path)} method for authenticating servers,
-   * this method for authenticating clients is <b>insecure</b> and <b>provides zero confidence in client identity</b>.
-   * Unlike the server version, which bases the identity on the hostname and port the connection is being established
-   * to, the client version only uses the common name of the certificate that the connecting client presents. Therefore,
-   * clients can circumvent access control by using a different common name from any previously recorded client.</i>
+   * <p><i>Note: unlike the seemingly equivalent {@link #trustServerOnFirstUse(Path)} method for
+   * authenticating servers, this method for authenticating clients is <b>insecure</b> and
+   * <b>provides zero confidence in client identity</b>. Unlike the server version, which bases the
+   * identity on the hostname and port the connection is being established to, the client version
+   * only uses the common name of the certificate that the connecting client presents. Therefore,
+   * clients can circumvent access control by using a different common name from any previously
+   * recorded client.</i>
    *
    * @param knownClientsFile The path to the file containing fingerprints by common name.
    * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions trustClientOnFirstAccess(Path knownClientsFile, boolean acceptCASigned) {
+  public static TrustOptions trustClientOnFirstAccess(
+      Path knownClientsFile, boolean acceptCASigned) {
     return new TrustManagerFactoryWrapper(
         TrustManagerFactories.trustClientOnFirstAccess(knownClientsFile, acceptCASigned));
   }
@@ -486,77 +493,83 @@ public final class VertxTrustOptions {
   /**
    * Trust client certificates on first access.
    *
-   * <p>
-   * On first connection to this server the common name and fingerprint of the presented certificate will be recorded.
-   * On subsequent connections, the client will be rejected if the fingerprint has changed.
+   * <p>On first connection to this server the common name and fingerprint of the presented
+   * certificate will be recorded. On subsequent connections, the client will be rejected if the
+   * fingerprint has changed.
    *
-   * <p>
-   * <i>Note: unlike the seemingly equivalent {@link #trustServerOnFirstUse(Path)} method for authenticating servers,
-   * this method for authenticating clients is <b>insecure</b> and <b>provides zero confidence in client identity</b>.
-   * Unlike the server version, which bases the identity on the hostname and port the connection is being established
-   * to, the client version only uses the common name of the certificate that the connecting client presents. Therefore,
-   * clients can circumvent access control by using a different common name from any previously recorded client.</i>
+   * <p><i>Note: unlike the seemingly equivalent {@link #trustServerOnFirstUse(Path)} method for
+   * authenticating servers, this method for authenticating clients is <b>insecure</b> and
+   * <b>provides zero confidence in client identity</b>. Unlike the server version, which bases the
+   * identity on the hostname and port the connection is being established to, the client version
+   * only uses the common name of the certificate that the connecting client presents. Therefore,
+   * clients can circumvent access control by using a different common name from any previously
+   * recorded client.</i>
    *
    * @param repository The repository containing fingerprints by common name.
    * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions trustClientOnFirstAccess(FingerprintRepository repository, boolean acceptCASigned) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.trustClientOnFirstAccess(repository, acceptCASigned));
+  public static TrustOptions trustClientOnFirstAccess(
+      FingerprintRepository repository, boolean acceptCASigned) {
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.trustClientOnFirstAccess(repository, acceptCASigned));
   }
 
   /**
    * Accept CA-signed certificates, and otherwise trust client certificates on first access.
    *
-   * <p>
-   * Except when a client presents a CA-signed certificate, on first connection to this server the common name and
-   * fingerprint of the presented certificate will be recorded. On subsequent connections, the client will be rejected
-   * if the fingerprint has changed.
+   * <p>Except when a client presents a CA-signed certificate, on first connection to this server
+   * the common name and fingerprint of the presented certificate will be recorded. On subsequent
+   * connections, the client will be rejected if the fingerprint has changed.
    *
-   * <p>
-   * <i>Note: unlike the seemingly equivalent {@link #trustServerOnFirstUse(Path)} method for authenticating servers,
-   * this method for authenticating clients is <b>insecure</b> and <b>provides zero confidence in client identity</b>.
-   * Unlike the server version, which bases the identity on the hostname and port the connection is being established
-   * to, the client version only uses the common name of the certificate that the connecting client presents. Therefore,
-   * clients can circumvent access control by using a different common name from any previously recorded client.</i>
+   * <p><i>Note: unlike the seemingly equivalent {@link #trustServerOnFirstUse(Path)} method for
+   * authenticating servers, this method for authenticating clients is <b>insecure</b> and
+   * <b>provides zero confidence in client identity</b>. Unlike the server version, which bases the
+   * identity on the hostname and port the connection is being established to, the client version
+   * only uses the common name of the certificate that the connecting client presents. Therefore,
+   * clients can circumvent access control by using a different common name from any previously
+   * recorded client.</i>
    *
    * @param knownClientsFile The path to the file containing fingerprints by common name.
    * @param tmf A {@link TrustManagerFactory} for checking server certificates against a CA.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions trustClientOnFirstAccess(Path knownClientsFile, TrustManagerFactory tmf) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.trustClientOnFirstAccess(knownClientsFile, tmf));
+  public static TrustOptions trustClientOnFirstAccess(
+      Path knownClientsFile, TrustManagerFactory tmf) {
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.trustClientOnFirstAccess(knownClientsFile, tmf));
   }
 
   /**
    * Accept CA-signed certificates, and otherwise trust client certificates on first access.
    *
-   * <p>
-   * Except when a client presents a CA-signed certificate, on first connection to this server the common name and
-   * fingerprint of the presented certificate will be recorded. On subsequent connections, the client will be rejected
-   * if the fingerprint has changed.
+   * <p>Except when a client presents a CA-signed certificate, on first connection to this server
+   * the common name and fingerprint of the presented certificate will be recorded. On subsequent
+   * connections, the client will be rejected if the fingerprint has changed.
    *
-   * <p>
-   * <i>Note: unlike the seemingly equivalent {@link #trustServerOnFirstUse(Path)} method for authenticating servers,
-   * this method for authenticating clients is <b>insecure</b> and <b>provides zero confidence in client identity</b>.
-   * Unlike the server version, which bases the identity on the hostname and port the connection is being established
-   * to, the client version only uses the common name of the certificate that the connecting client presents. Therefore,
-   * clients can circumvent access control by using a different common name from any previously recorded client.</i>
+   * <p><i>Note: unlike the seemingly equivalent {@link #trustServerOnFirstUse(Path)} method for
+   * authenticating servers, this method for authenticating clients is <b>insecure</b> and
+   * <b>provides zero confidence in client identity</b>. Unlike the server version, which bases the
+   * identity on the hostname and port the connection is being established to, the client version
+   * only uses the common name of the certificate that the connecting client presents. Therefore,
+   * clients can circumvent access control by using a different common name from any previously
+   * recorded client.</i>
    *
    * @param repository The repository containing fingerprints by common name.
    * @param tmf A {@link TrustManagerFactory} for checking server certificates against a CA.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions trustClientOnFirstAccess(FingerprintRepository repository, TrustManagerFactory tmf) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.trustClientOnFirstAccess(repository, tmf));
+  public static TrustOptions trustClientOnFirstAccess(
+      FingerprintRepository repository, TrustManagerFactory tmf) {
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.trustClientOnFirstAccess(repository, tmf));
   }
 
   /**
    * Require clients to present known certificates, or CA-signed certificates.
    *
-   * <p>
-   * If a certificate is not CA-signed, then its common name and fingerprint must be present in the
-   * {@code knownClientsFile}.
+   * <p>If a certificate is not CA-signed, then its common name and fingerprint must be present in
+   * the {@code knownClientsFile}.
    *
    * @param knownClientsFile The path to the file containing fingerprints by common name.
    * @return A Vert.x {@link TrustOptions}.
@@ -568,9 +581,8 @@ public final class VertxTrustOptions {
   /**
    * Require clients to present known certificates, or CA-signed certificates.
    *
-   * <p>
-   * If a certificate is not CA-signed, then its common name and fingerprint must be present in the
-   * {@code knownClientsFile}.
+   * <p>If a certificate is not CA-signed, then its common name and fingerprint must be present in
+   * the {@code knownClientsFile}.
    *
    * @param repository The repository containing fingerprints by common name.
    * @return A Vert.x {@link TrustOptions}.
@@ -582,58 +594,61 @@ public final class VertxTrustOptions {
   /**
    * Require clients to present known certificates.
    *
-   * <p>
-   * The common name and fingerprint for a client certificate must be present in {@code knownClientsFile}.
+   * <p>The common name and fingerprint for a client certificate must be present in {@code
+   * knownClientsFile}.
    *
    * @param knownClientsFile The path to the file containing fingerprints by common name.
    * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted.
    * @return A Vert.x {@link TrustOptions}.
    */
   public static TrustOptions allowlistClients(Path knownClientsFile, boolean acceptCASigned) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistClients(knownClientsFile, acceptCASigned));
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.allowlistClients(knownClientsFile, acceptCASigned));
   }
 
   /**
    * Require clients to present known certificates.
    *
-   * <p>
-   * The common name and fingerprint for a client certificate must be present in {@code knownClientsFile}.
+   * <p>The common name and fingerprint for a client certificate must be present in {@code
+   * knownClientsFile}.
    *
    * @param repository The repository containing fingerprints by common name.
    * @param acceptCASigned If {@code true}, CA-signed certificates will always be accepted.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions allowlistClients(FingerprintRepository repository, boolean acceptCASigned) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistClients(repository, acceptCASigned));
+  public static TrustOptions allowlistClients(
+      FingerprintRepository repository, boolean acceptCASigned) {
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.allowlistClients(repository, acceptCASigned));
   }
 
   /**
    * Require clients to present known certificates, or CA-signed certificates.
    *
-   * <p>
-   * If a certificate is not CA-signed, then its common name and fingerprint must be present in the
-   * {@code knownClientsFile}.
+   * <p>If a certificate is not CA-signed, then its common name and fingerprint must be present in
+   * the {@code knownClientsFile}.
    *
    * @param knownClientsFile The path to the file containing fingerprints by common name.
    * @param tmf A {@link TrustManagerFactory} for checking client certificates against a CA.
    * @return A Vert.x {@link TrustOptions}.
    */
   public static TrustOptions allowlistClients(Path knownClientsFile, TrustManagerFactory tmf) {
-    return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistClients(knownClientsFile, tmf));
+    return new TrustManagerFactoryWrapper(
+        TrustManagerFactories.allowlistClients(knownClientsFile, tmf));
   }
 
   /**
    * Require clients to present known certificates, or CA-signed certificates.
    *
-   * <p>
-   * If a certificate is not CA-signed, then its common name and fingerprint must be present in the
-   * {@code knownClientsFile}.
+   * <p>If a certificate is not CA-signed, then its common name and fingerprint must be present in
+   * the {@code knownClientsFile}.
    *
    * @param repository The repository containing fingerprints by common name.
    * @param tmf A {@link TrustManagerFactory} for checking client certificates against a CA.
    * @return A Vert.x {@link TrustOptions}.
    */
-  public static TrustOptions allowlistClients(FingerprintRepository repository, TrustManagerFactory tmf) {
+  public static TrustOptions allowlistClients(
+      FingerprintRepository repository, TrustManagerFactory tmf) {
     return new TrustManagerFactoryWrapper(TrustManagerFactories.allowlistClients(repository, tmf));
   }
 }

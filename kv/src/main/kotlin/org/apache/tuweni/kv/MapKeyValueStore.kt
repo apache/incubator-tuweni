@@ -16,7 +16,7 @@ import kotlin.coroutines.CoroutineContext
 class MapKeyValueStore<K, V>
 constructor(
   private val map: MutableMap<K, V> = HashMap(),
-  override val coroutineContext: CoroutineContext = Dispatchers.IO
+  override val coroutineContext: CoroutineContext = Dispatchers.IO,
 ) : KeyValueStore<K, V> {
 
   companion object {

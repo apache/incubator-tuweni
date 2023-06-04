@@ -34,7 +34,7 @@ class TransientStateRepository(val repository: BlockchainRepository) : StateRepo
           transientState.put(hash, content)
         }
       },
-      stateRoot
+      stateRoot,
     )
   }
 
@@ -57,7 +57,7 @@ class TransientStateRepository(val repository: BlockchainRepository) : StateRepo
           transientState.put(hash, content)
         }
       },
-      accountState.storageRoot
+      accountState.storageRoot,
     )
     return tree.get(key)
   }
@@ -75,14 +75,14 @@ class TransientStateRepository(val repository: BlockchainRepository) : StateRepo
           transientState.put(hash, content)
         }
       },
-      accountState.storageRoot
+      accountState.storageRoot,
     )
     tree.put(key, value)
     val newAccountState = AccountState(
       accountState.nonce,
       accountState.balance,
       Hash.fromBytes(tree.rootHash()),
-      accountState.codeHash
+      accountState.codeHash,
     )
     transientWorldState.put(addrHash, newAccountState.toBytes())
   }
@@ -100,14 +100,14 @@ class TransientStateRepository(val repository: BlockchainRepository) : StateRepo
           transientState.put(hash, content)
         }
       },
-      accountState.storageRoot
+      accountState.storageRoot,
     )
     tree.remove(key)
     val newAccountState = AccountState(
       accountState.nonce,
       accountState.balance,
       Hash.fromBytes(tree.rootHash()),
-      accountState.codeHash
+      accountState.codeHash,
     )
     transientWorldState.put(addrHash, newAccountState.toBytes())
   }

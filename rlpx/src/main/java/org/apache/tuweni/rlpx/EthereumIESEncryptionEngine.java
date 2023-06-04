@@ -12,8 +12,8 @@ import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.Pack;
 
 /**
- * Support class for constructing integrated encryption ciphers for doing basic message exchanges on top of key
- * agreement ciphers. Follows the description given in IEEE Std 1363a.
+ * Support class for constructing integrated encryption ciphers for doing basic message exchanges on
+ * top of key agreement ciphers. Follows the description given in IEEE Std 1363a.
  */
 public class EthereumIESEncryptionEngine {
   BasicAgreement agree;
@@ -31,10 +31,9 @@ public class EthereumIESEncryptionEngine {
   byte[] V;
   private byte[] IV;
 
-
   /**
-   * Set up for use in conjunction with a block cipher to handle the message. It is <b>strongly</b> recommended that the
-   * cipher is not in ECB mode.
+   * Set up for use in conjunction with a block cipher to handle the message. It is <b>strongly</b>
+   * recommended that the cipher is not in ECB mode.
    *
    * @param agree the key agreement used as the basis for the encryption
    * @param kdf the key derivation function used for byte generation
@@ -62,7 +61,8 @@ public class EthereumIESEncryptionEngine {
    * @param forEncryption whether or not this is encryption/decryption.
    * @param privParam our private key parameters
    * @param pubParam the recipient's/sender's public key parameters
-   * @param params encoding and derivation parameters, may be wrapped to include an IV for an underlying block cipher.
+   * @param params encoding and derivation parameters, may be wrapped to include an IV for an
+   *     underlying block cipher.
    */
   public void init(
       boolean forEncryption,
@@ -91,7 +91,6 @@ public class EthereumIESEncryptionEngine {
     byte[] C, K, K1, K2;
     int len;
 
-
     // Block cipher mode.
     K1 = new byte[((IESWithCipherParameters) param).getCipherKeySize() / 8];
     K2 = new byte[param.getMacKeySize() / 8];
@@ -112,15 +111,12 @@ public class EthereumIESEncryptionEngine {
     len = cipher.processBytes(in, inOff, inLen, C, 0);
     len += cipher.doFinal(C, len);
 
-
-
     // Convert the length of the encoding vector into a byte array.
     byte[] P2 = param.getEncodingV();
     byte[] L2 = null;
     if (V.length != 0) {
       L2 = getLengthTag(P2);
     }
-
 
     // Apply the MAC.
     byte[] T = new byte[mac.getMacSize()];
@@ -147,7 +143,6 @@ public class EthereumIESEncryptionEngine {
     mac.update(commonMac, 0, commonMac.length);
     mac.doFinal(T, 0);
 
-
     // Output the triple (V,C,T).
     byte[] Output = new byte[V.length + len + T.length];
     System.arraycopy(V, 0, Output, 0, V.length);
@@ -156,13 +151,15 @@ public class EthereumIESEncryptionEngine {
     return Output;
   }
 
-  private byte[] decryptBlock(byte[] in_enc, int inOff, int inLen) throws InvalidCipherTextException {
+  private byte[] decryptBlock(byte[] in_enc, int inOff, int inLen)
+      throws InvalidCipherTextException {
     byte[] M, K, K1, K2;
     int len;
 
     // Ensure that the length of the input is greater than the MAC in bytes
     if (inLen < V.length + mac.getMacSize()) {
-      throw new InvalidCipherTextException("Length of input must be greater than the MAC and V combined");
+      throw new InvalidCipherTextException(
+          "Length of input must be greater than the MAC and V combined");
     }
 
     // note order is important: set up keys, do simple encryptions, check mac, do final encryption.
@@ -189,7 +186,6 @@ public class EthereumIESEncryptionEngine {
 
     // do initial processing
     len = cipher.processBytes(in_enc, inOff + V.length, inLen - V.length - mac.getMacSize(), M, 0);
-
 
     // Convert the length of the encoding vector into a byte array.
     byte[] P2 = param.getEncodingV();
@@ -240,7 +236,6 @@ public class EthereumIESEncryptionEngine {
     }
   }
 
-
   public byte[] processBlock(byte[] in, int inOff, int inLen) throws InvalidCipherTextException {
 
     // Compute the common value and convert to byte array.
@@ -278,9 +273,9 @@ public class EthereumIESEncryptionEngine {
   /**
    * Basic KDF generator for derived keys and ivs as defined by IEEE P1363a/ISO 18033 <br>
    * This implementation is based on ISO 18033/P1363a.
-   * <p>
-   * This class has been adapted from the <tt>BaseKDFBytesGenerator</tt> implementation of Bouncy Castle. Only one
-   * change is present specifically for Ethereum.
+   *
+   * <p>This class has been adapted from the <tt>BaseKDFBytesGenerator</tt> implementation of Bouncy
+   * Castle. Only one change is present specifically for Ethereum.
    */
   static class ECIESHandshakeKDFFunction implements DigestDerivationFunction {
     private int counterStart;
@@ -290,6 +285,7 @@ public class EthereumIESEncryptionEngine {
 
     /**
      * Construct a KDF Parameters generator.
+     *
      * <p>
      *
      * @param counterStart value of counter.
@@ -317,9 +313,7 @@ public class EthereumIESEncryptionEngine {
       }
     }
 
-    /**
-     * return the underlying digest.
-     */
+    /** return the underlying digest. */
     @Override
     public Digest getDigest() {
       return digest;
@@ -332,7 +326,8 @@ public class EthereumIESEncryptionEngine {
      * @throws DataLengthException if the out buffer is too small.
      */
     @Override
-    public int generateBytes(byte[] out, int outOff, int len) throws DataLengthException, IllegalArgumentException {
+    public int generateBytes(byte[] out, int outOff, int len)
+        throws DataLengthException, IllegalArgumentException {
       if ((out.length - len) < outOff) {
         throw new OutputLengthException("output buffer too small");
       }

@@ -28,8 +28,15 @@ enum TokenName {
   TRIPLE_APOSTROPHE("'''", TomlLexer.TripleApostrophe),
   TRIPLE_QUOTATION_MARK("\"\"\"", TomlLexer.TripleQuotationMark),
   CHARACTER("a character", TomlLexer.EscapeSequence, TomlLexer.StringChar),
-  NUMBER("a number", TomlLexer.DecimalInteger, TomlLexer.BinaryInteger, TomlLexer.OctalInteger, TomlLexer.HexInteger,
-      TomlLexer.FloatingPoint, TomlLexer.FloatingPointInf, TomlLexer.FloatingPointNaN),
+  NUMBER(
+      "a number",
+      TomlLexer.DecimalInteger,
+      TomlLexer.BinaryInteger,
+      TomlLexer.OctalInteger,
+      TomlLexer.HexInteger,
+      TomlLexer.FloatingPoint,
+      TomlLexer.FloatingPointInf,
+      TomlLexer.FloatingPointNaN),
   BOOLEAN("a boolean", TomlLexer.TrueBoolean, TomlLexer.FalseBoolean),
   DATETIME("a date/time", TomlLexer.DateDigits),
   TIME("a time", TomlLexer.TimeDelimiter),
@@ -41,6 +48,7 @@ enum TokenName {
   NULL("NULL", 0, TomlLexer.WS, TomlLexer.Comment, TomlLexer.Error);
 
   private final String displayName;
+
   @SuppressWarnings("ImmutableEnumChecker")
   private final BitSet tokenTypes;
 

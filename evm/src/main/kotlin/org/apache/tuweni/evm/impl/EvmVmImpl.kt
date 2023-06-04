@@ -18,7 +18,7 @@ data class Result(
   val status: EVMExecutionStatusCode? = null,
   val newCodePosition: Int? = null,
   val output: Bytes? = null,
-  val validationStatus: EVMExecutionStatusCode? = null
+  val validationStatus: EVMExecutionStatusCode? = null,
 )
 
 /**
@@ -82,7 +82,7 @@ class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
           EVMExecutionStatusCode.INVALID_INSTRUCTION,
           hostContext,
           hostContext as TransactionalEVMHostContext,
-          EVMState(gasManager, hostContext.getLogs(), stack, memory)
+          EVMState(gasManager, hostContext.getLogs(), stack, memory),
         )
       }
       val currentOpcodeByte = code.get(current)
@@ -93,7 +93,7 @@ class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
 
         logger.trace(
           ">> OPCODE: ${opcodes[currentOpcodeByte] ?: opCodeAsString } " +
-            "gas: ${gasManager.gasLeft()} cost: ${gasManager.lastGasCost()}"
+            "gas: ${gasManager.gasLeft()} cost: ${gasManager.lastGasCost()}",
         )
       }
       val state = EVMState(
@@ -101,7 +101,7 @@ class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
         (hostContext as TransactionalEVMHostContext).getLogs(),
         stack,
         memory,
-        result?.output
+        result?.output,
       )
 
       if (result?.status != null) {
@@ -130,7 +130,7 @@ class EvmVmImpl(val stepListener: StepListener? = null) : EvmVm {
             EVMExecutionStatusCode.HALTED,
             hostContext,
             hostContext,
-            EVMState(gasManager, hostContext.getLogs(), stack, memory, result?.output)
+            EVMState(gasManager, hostContext.getLogs(), stack, memory, result?.output),
           )
         }
       }

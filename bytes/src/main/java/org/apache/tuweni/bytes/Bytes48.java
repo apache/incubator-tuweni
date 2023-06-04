@@ -8,9 +8,7 @@ import static org.apache.tuweni.bytes.Checks.checkNotNull;
 import java.security.SecureRandom;
 import java.util.Random;
 
-/**
- * A {@link Bytes} value that is guaranteed to contain exactly 48 bytes.
- */
+/** A {@link Bytes} value that is guaranteed to contain exactly 48 bytes. */
 public interface Bytes48 extends Bytes {
   /** The number of bytes in this value - i.e. 48 */
   int SIZE = 48;
@@ -21,9 +19,8 @@ public interface Bytes48 extends Bytes {
   /**
    * Wrap the provided byte array, which must be of length 48, as a {@link Bytes48}.
    *
-   * <p>
-   * Note that value is not copied, only wrapped, and thus any future update to {@code value} will be reflected in the
-   * returned value.
+   * <p>Note that value is not copied, only wrapped, and thus any future update to {@code value}
+   * will be reflected in the returned value.
    *
    * @param bytes The bytes to wrap.
    * @return A {@link Bytes48} wrapping {@code value}.
@@ -38,15 +35,14 @@ public interface Bytes48 extends Bytes {
   /**
    * Wrap a slice/sub-part of the provided array as a {@link Bytes48}.
    *
-   * <p>
-   * Note that value is not copied, only wrapped, and thus any future update to {@code value} within the wrapped parts
-   * will be reflected in the returned value.
+   * <p>Note that value is not copied, only wrapped, and thus any future update to {@code value}
+   * within the wrapped parts will be reflected in the returned value.
    *
    * @param bytes The bytes to wrap.
-   * @param offset The index (inclusive) in {@code value} of the first byte exposed by the returned value. In other
-   *        words, you will have {@code wrap(value, i).get(0) == value[i]}.
-   * @return A {@link Bytes48} that exposes the bytes of {@code value} from {@code offset} (inclusive) to
-   *         {@code offset + 48} (exclusive).
+   * @param offset The index (inclusive) in {@code value} of the first byte exposed by the returned
+   *     value. In other words, you will have {@code wrap(value, i).get(0) == value[i]}.
+   * @return A {@link Bytes48} that exposes the bytes of {@code value} from {@code offset}
+   *     (inclusive) to {@code offset + 48} (exclusive).
    * @throws IndexOutOfBoundsException if {@code offset < 0 || (value.length > 0 && offset >=
    *     value.length)}.
    * @throws IllegalArgumentException if {@code length < 0 || offset + 48 > value.length}.
@@ -59,9 +55,8 @@ public interface Bytes48 extends Bytes {
   /**
    * Wrap a the provided value, which must be of size 48, as a {@link Bytes48}.
    *
-   * <p>
-   * Note that value is not copied, only wrapped, and thus any future update to {@code value} will be reflected in the
-   * returned value.
+   * <p>Note that value is not copied, only wrapped, and thus any future update to {@code value}
+   * will be reflected in the returned value.
    *
    * @param value The bytes to wrap.
    * @return A {@link Bytes48} that exposes the bytes of {@code value}.
@@ -79,15 +74,14 @@ public interface Bytes48 extends Bytes {
   /**
    * Wrap a slice/sub-part of the provided value as a {@link Bytes48}.
    *
-   * <p>
-   * Note that value is not copied, only wrapped, and thus any future update to {@code value} within the wrapped parts
-   * will be reflected in the returned value.
+   * <p>Note that value is not copied, only wrapped, and thus any future update to {@code value}
+   * within the wrapped parts will be reflected in the returned value.
    *
    * @param value The bytes to wrap.
-   * @param offset The index (inclusive) in {@code value} of the first byte exposed by the returned value. In other
-   *        words, you will have {@code wrap(value, i).get(0) == value.get(i)}.
-   * @return A {@link Bytes48} that exposes the bytes of {@code value} from {@code offset} (inclusive) to
-   *         {@code offset + 48} (exclusive).
+   * @param offset The index (inclusive) in {@code value} of the first byte exposed by the returned
+   *     value. In other words, you will have {@code wrap(value, i).get(0) == value.get(i)}.
+   * @return A {@link Bytes48} that exposes the bytes of {@code value} from {@code offset}
+   *     (inclusive) to {@code offset + 48} (exclusive).
    * @throws IndexOutOfBoundsException if {@code offset < 0 || (value.size() > 0 && offset >=
    *     value.size())}.
    * @throws IllegalArgumentException if {@code length < 0 || offset + 48 > value.size()}.
@@ -122,7 +116,6 @@ public interface Bytes48 extends Bytes {
     return result;
   }
 
-
   /**
    * Right pad a {@link Bytes} value with zero bytes to create a {@link Bytes48}.
    *
@@ -144,16 +137,15 @@ public interface Bytes48 extends Bytes {
   /**
    * Parse a hexadecimal string into a {@link Bytes48}.
    *
-   * <p>
-   * This method is lenient in that {@code str} may of an odd length, in which case it will behave exactly as if it had
-   * an additional 0 in front.
+   * <p>This method is lenient in that {@code str} may of an odd length, in which case it will
+   * behave exactly as if it had an additional 0 in front.
    *
-   * @param str The hexadecimal string to parse, which may or may not start with "0x". That representation may contain
-   *        less than 48 bytes, in which case the result is left padded with zeros (see {@link #fromHexStringStrict} if
-   *        this is not what you want).
+   * @param str The hexadecimal string to parse, which may or may not start with "0x". That
+   *     representation may contain less than 48 bytes, in which case the result is left padded with
+   *     zeros (see {@link #fromHexStringStrict} if this is not what you want).
    * @return The value corresponding to {@code str}.
-   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal representation or
-   *         contains more than 48 bytes.
+   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal
+   *     representation or contains more than 48 bytes.
    */
   static Bytes48 fromHexStringLenient(CharSequence str) {
     checkNotNull(str);
@@ -163,15 +155,14 @@ public interface Bytes48 extends Bytes {
   /**
    * Parse a hexadecimal string into a {@link Bytes48}.
    *
-   * <p>
-   * This method is strict in that {@code str} must of an even length.
+   * <p>This method is strict in that {@code str} must of an even length.
    *
-   * @param str The hexadecimal string to parse, which may or may not start with "0x". That representation may contain
-   *        less than 48 bytes, in which case the result is left padded with zeros (see {@link #fromHexStringStrict} if
-   *        this is not what you want).
+   * @param str The hexadecimal string to parse, which may or may not start with "0x". That
+   *     representation may contain less than 48 bytes, in which case the result is left padded with
+   *     zeros (see {@link #fromHexStringStrict} if this is not what you want).
    * @return The value corresponding to {@code str}.
-   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal representation, is of an
-   *         odd length, or contains more than 48 bytes.
+   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal
+   *     representation, is of an odd length, or contains more than 48 bytes.
    */
   static Bytes48 fromHexString(CharSequence str) {
     checkNotNull(str);
@@ -202,14 +193,13 @@ public interface Bytes48 extends Bytes {
   /**
    * Parse a hexadecimal string into a {@link Bytes48}.
    *
-   * <p>
-   * This method is extra strict in that {@code str} must of an even length and the provided representation must have
-   * exactly 48 bytes.
+   * <p>This method is extra strict in that {@code str} must of an even length and the provided
+   * representation must have exactly 48 bytes.
    *
    * @param str The hexadecimal string to parse, which may or may not start with "0x".
    * @return The value corresponding to {@code str}.
-   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal representation, is of an
-   *         odd length or does not contain exactly 48 bytes.
+   * @throws IllegalArgumentException if {@code str} does not correspond to a valid hexadecimal
+   *     representation, is of an odd length or does not contain exactly 48 bytes.
    */
   static Bytes48 fromHexStringStrict(CharSequence str) {
     checkNotNull(str);

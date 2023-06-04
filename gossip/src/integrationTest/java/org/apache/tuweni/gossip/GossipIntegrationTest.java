@@ -33,65 +33,93 @@ import org.junit.jupiter.api.extension.ExtendWith;
 class GossipIntegrationTest {
 
   @Test
-  void threeGossipServersStarting(@VertxInstance Vertx vertx, @TempDirectory Path tempDir) throws Exception {
-    GossipCommandLineOptions opts1 = new GossipCommandLineOptions(
-        new String[] {"tcp://127.0.0.1:9001", "tcp://127.0.0.1:9002"},
-        9000,
-        "127.0.0.1",
-        tempDir.resolve("log1.log").toString(),
-        10000,
-        0,
-        0,
-        false,
-        50,
-        null);
-    GossipCommandLineOptions opts2 = new GossipCommandLineOptions(
-        new String[] {"tcp://127.0.0.1:9000", "tcp://127.0.0.1:9002"},
-        9001,
-        "127.0.0.1",
-        tempDir.resolve("log2.log").toString(),
-        10001,
-        0,
-        0,
-        false,
-        50,
-        null);
-    GossipCommandLineOptions opts3 = new GossipCommandLineOptions(
-        new String[] {"tcp://127.0.0.1:9000", "tcp://127.0.0.1:9001"},
-        9002,
-        "127.0.0.1",
-        tempDir.resolve("log3.log").toString(),
-        10002,
-        0,
-        0,
-        false,
-        50,
-        null);
+  void threeGossipServersStarting(@VertxInstance Vertx vertx, @TempDirectory Path tempDir)
+      throws Exception {
+    GossipCommandLineOptions opts1 =
+        new GossipCommandLineOptions(
+            new String[] {"tcp://127.0.0.1:9001", "tcp://127.0.0.1:9002"},
+            9000,
+            "127.0.0.1",
+            tempDir.resolve("log1.log").toString(),
+            10000,
+            0,
+            0,
+            false,
+            50,
+            null);
+    GossipCommandLineOptions opts2 =
+        new GossipCommandLineOptions(
+            new String[] {"tcp://127.0.0.1:9000", "tcp://127.0.0.1:9002"},
+            9001,
+            "127.0.0.1",
+            tempDir.resolve("log2.log").toString(),
+            10001,
+            0,
+            0,
+            false,
+            50,
+            null);
+    GossipCommandLineOptions opts3 =
+        new GossipCommandLineOptions(
+            new String[] {"tcp://127.0.0.1:9000", "tcp://127.0.0.1:9001"},
+            9002,
+            "127.0.0.1",
+            tempDir.resolve("log3.log").toString(),
+            10002,
+            0,
+            0,
+            false,
+            50,
+            null);
     AtomicBoolean terminationRan = new AtomicBoolean(false);
 
     ExecutorService service = Executors.newFixedThreadPool(3);
 
-    Future<GossipApp> app1Future = service.submit(() -> {
-      GossipApp app = new GossipApp(vertx, opts1, System.err, System.out, () -> {
-        terminationRan.set(true);
-      });
-      app.start();
-      return app;
-    });
-    Future<GossipApp> app2Future = service.submit(() -> {
-      GossipApp app = new GossipApp(vertx, opts2, System.err, System.out, () -> {
-        terminationRan.set(true);
-      });
-      app.start();
-      return app;
-    });
-    Future<GossipApp> app3Future = service.submit(() -> {
-      GossipApp app = new GossipApp(vertx, opts3, System.err, System.out, () -> {
-        terminationRan.set(true);
-      });
-      app.start();
-      return app;
-    });
+    Future<GossipApp> app1Future =
+        service.submit(
+            () -> {
+              GossipApp app =
+                  new GossipApp(
+                      vertx,
+                      opts1,
+                      System.err,
+                      System.out,
+                      () -> {
+                        terminationRan.set(true);
+                      });
+              app.start();
+              return app;
+            });
+    Future<GossipApp> app2Future =
+        service.submit(
+            () -> {
+              GossipApp app =
+                  new GossipApp(
+                      vertx,
+                      opts2,
+                      System.err,
+                      System.out,
+                      () -> {
+                        terminationRan.set(true);
+                      });
+              app.start();
+              return app;
+            });
+    Future<GossipApp> app3Future =
+        service.submit(
+            () -> {
+              GossipApp app =
+                  new GossipApp(
+                      vertx,
+                      opts3,
+                      System.err,
+                      System.out,
+                      () -> {
+                        terminationRan.set(true);
+                      });
+              app.start();
+              return app;
+            });
     GossipApp app1 = app1Future.get(10, TimeUnit.SECONDS);
     GossipApp app2 = app2Future.get(10, TimeUnit.SECONDS);
     GossipApp app3 = app3Future.get(10, TimeUnit.SECONDS);
@@ -107,11 +135,17 @@ class GossipIntegrationTest {
       sent.add(message.toHexString());
 
       Thread.sleep(100);
-      client.request(HttpMethod.POST, 10000, "127.0.0.1", "/publish").onSuccess((request) -> {
-        request.exceptionHandler(thr -> {
-          throw new RuntimeException(thr);
-        }).end(Buffer.buffer(message.toArrayUnsafe()));
-      });
+      client
+          .request(HttpMethod.POST, 10000, "127.0.0.1", "/publish")
+          .onSuccess(
+              (request) -> {
+                request
+                    .exceptionHandler(
+                        thr -> {
+                          throw new RuntimeException(thr);
+                        })
+                    .end(Buffer.buffer(message.toArrayUnsafe()));
+              });
     }
 
     List<String> receiver1 = Collections.emptyList();

@@ -39,7 +39,7 @@ class ConnectTwoServersTest {
       SECP256K1.KeyPair.random(),
       localPort = 40000,
       bootstrapENRList = emptyList(),
-      enrStorage = storage
+      enrStorage = storage,
     )
     service.start().await()
 
@@ -49,7 +49,7 @@ class ConnectTwoServersTest {
       SECP256K1.KeyPair.random(),
       localPort = 40001,
       bootstrapENRList = emptyList(),
-      enrStorage = otherStorage
+      enrStorage = otherStorage,
     )
     otherService.start().await()
     otherService.addPeer(service.enr()).await()

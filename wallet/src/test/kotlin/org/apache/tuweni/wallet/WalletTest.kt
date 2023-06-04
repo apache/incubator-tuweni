@@ -28,7 +28,7 @@ class WalletTest {
       null,
       Wei.valueOf(2),
       Bytes.EMPTY,
-      1
+      1,
     )
     assertTrue(wallet.verify(tx))
   }
@@ -43,7 +43,7 @@ class WalletTest {
       null,
       Wei.valueOf(2),
       Bytes.EMPTY,
-      1
+      1,
     )
     val wallet2 = Wallet.open(tempDir.resolve(Paths.get("subfolder", "mywallet")), "password")
     assertTrue(wallet2.verify(tx))

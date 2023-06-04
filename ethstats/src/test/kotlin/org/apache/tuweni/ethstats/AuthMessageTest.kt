@@ -17,7 +17,7 @@ class AuthMessageTest {
       "{\"id\":\"foo\",\"info\":{\"api\":\"No\",\"canUpdateHistory\":true," +
         "\"client\":\"Apache Tuweni Ethstats\",\"name\":\"foo\",\"net\":\"eth\",\"node\":\"node\"," +
         "\"os\":\"os\",\"os_v\":\"123\",\"port\":123,\"protocol\":\"protocol\"},\"secret\":\"secret\"}",
-      mapper.writeValueAsString(message)
+      mapper.writeValueAsString(message),
     )
   }
 }

@@ -30,7 +30,8 @@ class SignatureTest {
   void checkDetachedSignVerify() {
     Signature.KeyPair kp = Signature.KeyPair.random();
     Bytes signature = Signature.signDetached(Bytes.fromHexString("deadbeef"), kp.secretKey());
-    boolean result = Signature.verifyDetached(Bytes.fromHexString("deadbeef"), signature, kp.publicKey());
+    boolean result =
+        Signature.verifyDetached(Bytes.fromHexString("deadbeef"), signature, kp.publicKey());
     assertTrue(result);
   }
 
@@ -50,5 +51,4 @@ class SignatureTest {
     assertTrue(sigPubKey.isDestroyed());
     assertFalse(keyPair.publicKey().isDestroyed());
   }
-
 }

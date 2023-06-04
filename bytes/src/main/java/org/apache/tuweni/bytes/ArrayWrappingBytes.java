@@ -69,7 +69,8 @@ class ArrayWrappingBytes extends AbstractBytes {
         this.length - i,
         i);
 
-    return length == Bytes32.SIZE ? new ArrayWrappingBytes32(bytes, offset + i)
+    return length == Bytes32.SIZE
+        ? new ArrayWrappingBytes32(bytes, offset + i)
         : new ArrayWrappingBytes(bytes, offset + i, length);
   }
 
@@ -138,7 +139,6 @@ class ArrayWrappingBytes extends AbstractBytes {
   public void appendTo(Buffer buffer) {
     buffer.appendBytes(bytes, offset, length);
   }
-
 
   @Override
   public byte[] toArray() {

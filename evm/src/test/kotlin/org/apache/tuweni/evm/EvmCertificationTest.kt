@@ -173,7 +173,7 @@ class EvmCertificationTest {
           info.nonce,
           info.balance,
           Hash.fromBytes(MerkleTrie.EMPTY_TRIE_ROOT_HASH),
-          Hash.hash(info.code)
+          Hash.hash(info.code),
         )
         repository.storeAccount(info.address, accountState)
         repository.storeCode(info.code)
@@ -203,7 +203,7 @@ class EvmCertificationTest {
         UInt256.fromBytes(Bytes32.leftPad(test.difficultyBytes)),
         test.chainId,
         CallKind.CALL,
-        hardFork
+        hardFork,
       )
 
       if (test.name == "REVERT") {
@@ -230,18 +230,18 @@ class EvmCertificationTest {
             balance,
             "balance doesn't match: " + address.toHexString() + ":" + if (balance > info.balance) {
               balance.subtract(
-                info.balance
+                info.balance,
               ).toString()
             } else {
               info.balance.subtract(balance).toString()
-            }
+            },
           )
           assertEquals(info.nonce, accountState!!.nonce)
 
           for (stored in info.storage) {
             val changed = changesRepository.getAccountStoreValue(address, Hash.hash(stored.key))?.let {
               RLP.decodeValue(
-                it
+                it,
               )
             } ?: UInt256.ZERO
             assertEquals(stored.value, Bytes32.leftPad(changed)) {
@@ -257,7 +257,7 @@ class EvmCertificationTest {
                       return changesRepository.transientState.put(hash, content)
                     }
                   },
-                  account.storageRoot
+                  account.storageRoot,
                 )
                 "mismatched account storage for address $address at slot ${stored.key}\n" + tree.printAsString()
               }
@@ -286,7 +286,7 @@ class EvmCertificationTest {
         } else {
           result.state.gasManager.gasLeft()
             .subtract(test.allGasUsed)
-        }
+        },
       )
     } finally {
       vm.stop()

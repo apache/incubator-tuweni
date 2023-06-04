@@ -69,12 +69,12 @@ class CrawlerApplication(
   val config: CrawlerConfig,
   override val coroutineContext: CoroutineDispatcher =
     Executors.newFixedThreadPool(
-      config.numberOfThreads()
+      config.numberOfThreads(),
     ) {
       val thread = Thread("crawler")
       thread.isDaemon = true
       thread
-    }.asCoroutineDispatcher()
+    }.asCoroutineDispatcher(),
 ) : CoroutineScope {
 
   private val metricsService = MetricsService(
@@ -82,11 +82,11 @@ class CrawlerApplication(
     port = config.metricsPort(),
     networkInterface = config.metricsNetworkInterface(),
     enableGrpcPush = config.metricsGrpcPushEnabled(),
-    enablePrometheus = config.metricsPrometheusEnabled()
+    enablePrometheus = config.metricsPrometheusEnabled(),
   )
 
   private fun createCoroutineContext() = Executors.newFixedThreadPool(
-    config.numberOfThreads()
+    config.numberOfThreads(),
   ) {
     val thread = Thread("crawler")
     thread.isDaemon = true
@@ -113,7 +113,7 @@ class CrawlerApplication(
       initialURIs = config.bootNodes(),
       bindAddress = SocketAddress.inetSocketAddress(config.discoveryPort(), config.discoveryNetworkInterface()),
       repository = repo,
-      coroutineContext = createCoroutineContext()
+      coroutineContext = createCoroutineContext(),
     )
 
     val dnsDaemon = DNSDaemon(
@@ -129,7 +129,7 @@ class CrawlerApplication(
             }
           }
         }
-      }
+      },
     )
 
     val contents = if (config.network() == null) {
@@ -146,7 +146,7 @@ class CrawlerApplication(
       genesisBlock.header.hash,
       UInt256.ZERO,
       genesisBlock.header.hash,
-      genesisFile.forks
+      genesisFile.forks,
     )
     val expiringConnectionIds = ExpiringSet<String>()
 
@@ -155,7 +155,7 @@ class CrawlerApplication(
       listener = { conn, status ->
         expiringConnectionIds.add(conn.uri())
         repo.recordInfo(conn, status)
-      }
+      },
     )
     val meter = metricsService.meterSdkProvider.get("rlpx-crawler")
     val wireConnectionsRepository = MemoryWireConnectionsRepository()
@@ -181,7 +181,7 @@ class CrawlerApplication(
       "Apache Tuweni network crawler",
       50,
       meter,
-      wireConnectionsRepository
+      wireConnectionsRepository,
     )
     repo.addListener {
       launch {
@@ -195,7 +195,7 @@ class CrawlerApplication(
       stats = statsJob,
       maxRequestsPerSec = config.maxRequestsPerSec(),
       meter = meter,
-      allowedOrigins = config.corsAllowedOrigins()
+      allowedOrigins = config.corsAllowedOrigins(),
     )
     val refreshLoop = AtomicBoolean(true)
     val ethstatsDataRepository = EthstatsDataRepository(ds)
@@ -205,7 +205,7 @@ class CrawlerApplication(
       config.ethstatsPort(),
       config.ethstatsSecret(),
       controller = CrawlerEthstatsController(ethstatsDataRepository),
-      coroutineContext = createCoroutineContext()
+      coroutineContext = createCoroutineContext(),
     )
 
     Runtime.getRuntime().addShutdownHook(
@@ -222,7 +222,7 @@ class CrawlerApplication(
           }.await()
           metricsService.close()
         }
-      }
+      },
     )
     runBlocking {
       statsJob.start()
@@ -234,7 +234,7 @@ class CrawlerApplication(
               connect(
                 rlpxService,
                 connectionInfo.nodeId,
-                InetSocketAddress(connectionInfo.host, if (connectionInfo.port == 0) 30303 else connectionInfo.port)
+                InetSocketAddress(connectionInfo.host, if (connectionInfo.port == 0) 30303 else connectionInfo.port),
               )
             }
           } catch (e: Exception) {
@@ -263,8 +263,8 @@ class CrawlerApplication(
                       connectionInfo.nodeId,
                       InetSocketAddress(
                         connectionInfo.host,
-                        if (connectionInfo.port == 0) 30303 else connectionInfo.port
-                      )
+                        if (connectionInfo.port == 0) 30303 else connectionInfo.port,
+                      ),
                     ).await()
                   }
                 }

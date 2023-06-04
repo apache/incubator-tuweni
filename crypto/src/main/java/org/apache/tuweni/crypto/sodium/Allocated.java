@@ -18,7 +18,7 @@ public final class Allocated implements Destroyable {
 
   /**
    * Assign bytes using Sodium memory allocation
-   * 
+   *
    * @param bytes the bytes to assign
    * @return a new allocated value filled with the bytes
    */
@@ -30,7 +30,7 @@ public final class Allocated implements Destroyable {
 
   /**
    * Allocate bytes using Sodium memory allocation
-   * 
+   *
    * @param length the length of the memory allocation, in bytes
    * @return a new allocated value
    */
@@ -39,8 +39,7 @@ public final class Allocated implements Destroyable {
     return new Allocated(ptr, (int) length);
   }
 
-  @Nullable
-  private Pointer ptr;
+  @Nullable private Pointer ptr;
   private final int length;
 
   Allocated(Pointer ptr, int length) {
@@ -59,9 +58,7 @@ public final class Allocated implements Destroyable {
     return length;
   }
 
-  /**
-   * Destroys the value from memory.
-   */
+  /** Destroys the value from memory. */
   @Override
   public void destroy() {
     if (!isDestroyed()) {
@@ -83,7 +80,7 @@ public final class Allocated implements Destroyable {
 
   /**
    * Provides the bytes of this key.
-   * 
+   *
    * @return The bytes of this key.
    */
   public Bytes bytes() {
@@ -92,7 +89,7 @@ public final class Allocated implements Destroyable {
 
   /**
    * Provides the bytes of this key.
-   * 
+   *
    * @return The bytes of this key.
    */
   public byte[] bytesArray() {

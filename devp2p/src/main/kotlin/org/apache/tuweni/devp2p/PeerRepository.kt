@@ -93,7 +93,7 @@ interface PeerRepository {
  */
 class EphemeralPeerRepository(
   private val peers: MutableMap<SECP256K1.PublicKey, Peer> = ConcurrentHashMap(),
-  override val coroutineContext: CoroutineContext = Dispatchers.Default
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) :
   PeerRepository, CoroutineScope {
 
@@ -139,7 +139,7 @@ class EphemeralPeerRepository(
 
   private inner class EphemeralPeer(
     override val nodeId: SECP256K1.PublicKey,
-    knownEndpoint: Endpoint
+    knownEndpoint: Endpoint,
   ) : Peer {
     @Volatile
     override var endpoint: Endpoint = knownEndpoint

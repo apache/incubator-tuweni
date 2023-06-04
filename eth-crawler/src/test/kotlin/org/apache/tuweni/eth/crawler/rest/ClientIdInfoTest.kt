@@ -21,7 +21,7 @@ class ClientIdInfoTest {
   @Test
   fun testWithLabel() {
     val clientInfo = ClientIdInfo(
-      "OpenEthereum/Bob Ross/v3.0.1-stable-8ca8089-20200601/x86_64-unknown-linux-gnu/rustc1.43.1"
+      "OpenEthereum/Bob Ross/v3.0.1-stable-8ca8089-20200601/x86_64-unknown-linux-gnu/rustc1.43.1",
     )
     assertEquals("OpenEthereum", clientInfo.name)
     assertEquals("Bob Ross", clientInfo.label)

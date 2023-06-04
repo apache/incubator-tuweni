@@ -3,8 +3,8 @@
 package org.apache.tuweni.bytes;
 
 /**
- * An abstract {@link Bytes} value that provides implementations of {@link #equals(Object)}, {@link #hashCode()} and
- * {@link #toString()}.
+ * An abstract {@link Bytes} value that provides implementations of {@link #equals(Object)}, {@link
+ * #hashCode()} and {@link #toString()}.
  */
 public abstract class AbstractBytes implements Bytes {
 
@@ -16,8 +16,7 @@ public abstract class AbstractBytes implements Bytes {
   /**
    * Compare this value and the provided one for equality.
    *
-   * <p>
-   * Two {@link Bytes} values are equal is they have contain the exact same bytes.
+   * <p>Two {@link Bytes} values are equal is they have contain the exact same bytes.
    *
    * @param obj The object to test for equality with.
    * @return {@code true} if this value and {@code obj} are equal.

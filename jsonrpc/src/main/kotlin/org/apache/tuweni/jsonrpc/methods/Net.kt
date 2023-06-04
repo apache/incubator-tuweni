@@ -9,7 +9,7 @@ import org.apache.tuweni.eth.JSONRPCResponse
 fun registerNet(
   networkId: String,
   listeningToConnections: Boolean = true,
-  peerCount: () -> Int
+  peerCount: () -> Int,
 ): Map<String, suspend (JSONRPCRequest) -> JSONRPCResponse> {
   val version = ConstantStringResult(networkId)
   val listening = ConstantBooleanResult(listeningToConnections)
@@ -20,7 +20,7 @@ fun registerNet(
       "net_peerCount",
       FunctionCallResult {
         Bytes.ofUnsignedInt(peerCount().toLong()).toQuantityHexString()
-      }::handle
-    )
+      }::handle,
+    ),
   )
 }

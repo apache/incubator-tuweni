@@ -8,16 +8,12 @@ import javax.security.auth.Destroyable;
 
 import jnr.ffi.Pointer;
 
-/**
- * Message authentication code support for HMAC-SHA-512.
- */
+/** Message authentication code support for HMAC-SHA-512. */
 public final class HMACSHA512 {
 
   private HMACSHA512() {}
 
-  /**
-   * A HMACSHA512 secret key.
-   */
+  /** A HMACSHA512 secret key. */
   public static final class Key implements Destroyable {
     final Allocated value;
 
@@ -38,8 +34,7 @@ public final class HMACSHA512 {
     /**
      * Create a {@link Key} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the secret key.
      * @return A secret key.
@@ -51,8 +46,7 @@ public final class HMACSHA512 {
     /**
      * Create a {@link Key} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the secret key.
      * @return A secret key.
@@ -60,7 +54,10 @@ public final class HMACSHA512 {
     public static Key fromBytes(byte[] bytes) {
       if (bytes.length != Sodium.crypto_auth_hmacsha512_keybytes()) {
         throw new IllegalArgumentException(
-            "key must be " + Sodium.crypto_auth_hmacsha512_keybytes() + " bytes, got " + bytes.length);
+            "key must be "
+                + Sodium.crypto_auth_hmacsha512_keybytes()
+                + " bytes, got "
+                + bytes.length);
       }
       return Sodium.dup(bytes, Key::new);
     }
@@ -106,7 +103,7 @@ public final class HMACSHA512 {
 
     /**
      * Provides the bytes of this key.
-     * 
+     *
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -115,7 +112,7 @@ public final class HMACSHA512 {
 
     /**
      * Provides the bytes of this key.
-     * 
+     *
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {
@@ -189,7 +186,8 @@ public final class HMACSHA512 {
               + authenticator.length
               + " instead");
     }
-    int rc = Sodium.crypto_auth_hmacsha512_verify(authenticator, in, in.length, key.value.pointer());
+    int rc =
+        Sodium.crypto_auth_hmacsha512_verify(authenticator, in, in.length, key.value.pointer());
     return rc == 0;
   }
 }

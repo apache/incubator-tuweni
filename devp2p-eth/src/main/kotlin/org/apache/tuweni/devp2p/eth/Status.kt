@@ -23,5 +23,5 @@ data class Status(
   val bestHash: Bytes32,
   val genesisHash: Bytes32,
   val forkHash: Bytes?,
-  val forkBlock: Long?
+  val forkBlock: Long?,
 )

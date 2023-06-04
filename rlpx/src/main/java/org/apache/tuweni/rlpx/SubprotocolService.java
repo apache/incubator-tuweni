@@ -16,7 +16,11 @@ public interface SubprotocolService {
    * @param connection the connection.
    * @param message the message, addressed to a connection.
    */
-  void send(SubProtocolIdentifier subProtocolIdentifier, int messageType, WireConnection connection, Bytes message);
+  void send(
+      SubProtocolIdentifier subProtocolIdentifier,
+      int messageType,
+      WireConnection connection,
+      Bytes message);
 
   /**
    * Sends a message to the peer explaining that we are about to disconnect.

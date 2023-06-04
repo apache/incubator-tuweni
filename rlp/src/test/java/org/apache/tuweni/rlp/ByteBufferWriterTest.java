@@ -46,12 +46,12 @@ class ByteBufferWriterTest {
     assertEquals(fromHexString("830186a0"), Bytes.wrapByteBuffer(buffer));
 
     buffer.clear();
-    RLP
-        .encodeTo(
-            buffer,
-            writer -> writer
-                .writeUInt256(
-                    UInt256.fromHexString("0x0400000000000000000000000000000000000000000000000000f100000000ab")));
+    RLP.encodeTo(
+        buffer,
+        writer ->
+            writer.writeUInt256(
+                UInt256.fromHexString(
+                    "0x0400000000000000000000000000000000000000000000000000f100000000ab")));
     buffer.flip();
     assertEquals(
         fromHexString("a00400000000000000000000000000000000000000000000000000f100000000ab"),
@@ -98,7 +98,8 @@ class ByteBufferWriterTest {
   @Test
   void shouldWriteShortLists() {
     List<String> strings =
-        Arrays.asList("asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer");
+        Arrays.asList(
+            "asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer");
 
     ByteBuffer buffer = ByteBuffer.allocate(64);
     RLP.encodeListTo(buffer, listWriter -> strings.forEach(listWriter::writeString));
@@ -114,34 +115,42 @@ class ByteBufferWriterTest {
   @Test
   void shouldWriteNestedLists() {
     ByteBuffer buffer = ByteBuffer.allocate(1024);
-    RLP.encodeListTo(buffer, listWriter -> {
-      listWriter.writeString("asdf");
-      listWriter.writeString("qwer");
-      for (int i = 30; i >= 0; --i) {
-        listWriter.writeList(subListWriter -> {
-          subListWriter.writeString("zxcv");
-          subListWriter.writeString("asdf");
-          subListWriter.writeString("qwer");
+    RLP.encodeListTo(
+        buffer,
+        listWriter -> {
+          listWriter.writeString("asdf");
+          listWriter.writeString("qwer");
+          for (int i = 30; i >= 0; --i) {
+            listWriter.writeList(
+                subListWriter -> {
+                  subListWriter.writeString("zxcv");
+                  subListWriter.writeString("asdf");
+                  subListWriter.writeString("qwer");
+                });
+          }
         });
-      }
-    });
 
     buffer.flip();
-    assertTrue(RLP.<Boolean>decodeList(Bytes.wrapByteBuffer(buffer), listReader -> {
-      assertEquals("asdf", listReader.readString());
-      assertEquals("qwer", listReader.readString());
+    assertTrue(
+        RLP.<Boolean>decodeList(
+            Bytes.wrapByteBuffer(buffer),
+            listReader -> {
+              assertEquals("asdf", listReader.readString());
+              assertEquals("qwer", listReader.readString());
 
-      for (int i = 30; i >= 0; --i) {
-        assertTrue(listReader.<Boolean>readList(subListReader -> {
-          assertEquals("zxcv", subListReader.readString());
-          assertEquals("asdf", subListReader.readString());
-          assertEquals("qwer", subListReader.readString());
-          return true;
-        }));
-      }
+              for (int i = 30; i >= 0; --i) {
+                assertTrue(
+                    listReader.<Boolean>readList(
+                        subListReader -> {
+                          assertEquals("zxcv", subListReader.readString());
+                          assertEquals("asdf", subListReader.readString());
+                          assertEquals("qwer", subListReader.readString());
+                          return true;
+                        }));
+              }
 
-      return true;
-    }));
+              return true;
+            }));
   }
 
   @Test

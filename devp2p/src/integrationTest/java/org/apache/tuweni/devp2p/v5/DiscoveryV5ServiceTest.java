@@ -21,7 +21,8 @@ class DiscoveryV5ServiceTest {
   @Test
   void testStartAndStop(@VertxInstance Vertx vertx) throws InterruptedException {
     DiscoveryV5Service service =
-        DiscoveryService.open(vertx, SECP256K1.KeyPair.random(), 0, new InetSocketAddress("localhost", 34555));
+        DiscoveryService.open(
+            vertx, SECP256K1.KeyPair.random(), 0, new InetSocketAddress("localhost", 34555));
     service.startAsync().join();
     service.terminateAsync().join();
   }

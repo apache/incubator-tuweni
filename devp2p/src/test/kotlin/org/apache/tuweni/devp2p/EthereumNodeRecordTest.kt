@@ -33,7 +33,7 @@ class EthereumNodeRecordTest {
       emptyMap(),
       InetAddress.getLoopbackAddress(),
       null,
-      10000
+      10000,
     )
     enr.validate()
     assertEquals(1L, enr.seq())
@@ -49,7 +49,7 @@ class EthereumNodeRecordTest {
       seq = 1L,
       data = mutableMapOf(Pair("key", Bytes.fromHexString("deadbeef"))),
       listData = mutableMapOf(Pair("foo", listOf(Bytes.fromHexString("deadbeef")))),
-      ip = InetAddress.getByName("127.0.0.1")
+      ip = InetAddress.getByName("127.0.0.1"),
     )
     val record = EthereumNodeRecord.fromRLP(rlp)
     assertEquals(1L, record.seq())

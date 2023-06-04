@@ -36,7 +36,7 @@ constructor(
   private val valueSerializer: (V) -> Bytes,
   private val keyDeserializer: (Bytes) -> K,
   private val valueDeserializer: (Bytes) -> V,
-  override val coroutineContext: CoroutineContext = Dispatchers.IO
+  override val coroutineContext: CoroutineContext = Dispatchers.IO,
 ) : KeyValueStore<K, V> {
 
   companion object {
@@ -57,14 +57,14 @@ constructor(
       keySerializer: Function<K, Bytes>,
       valueSerializer: Function<V, Bytes>,
       keyDeserializer: Function<Bytes, K>,
-      valueDeserializer: Function<Bytes, V>
+      valueDeserializer: Function<Bytes, V>,
     ) =
       MapDBKeyValueStore<K, V>(
         dbPath,
         keySerializer::apply,
         valueSerializer::apply,
         keyDeserializer::apply,
-        valueDeserializer::apply
+        valueDeserializer::apply,
       )
 
     /**
@@ -76,14 +76,14 @@ constructor(
      */
     @JvmStatic
     fun open(
-      dbPath: Path
+      dbPath: Path,
     ) =
       MapDBKeyValueStore<Bytes, Bytes>(
         dbPath,
         Function.identity<Bytes>()::apply,
         Function.identity<Bytes>()::apply,
         Function.identity<Bytes>()::apply,
-        Function.identity<Bytes>()::apply
+        Function.identity<Bytes>()::apply,
       )
   }
 
@@ -96,7 +96,7 @@ constructor(
     storageData = db.hashMap(
       "storageData",
       BytesSerializer(),
-      BytesSerializer()
+      BytesSerializer(),
     ).createOrOpen()
   }
 

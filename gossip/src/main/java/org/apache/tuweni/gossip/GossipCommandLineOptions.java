@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.apache.tuweni.gossip;
 
-
 import org.apache.tuweni.config.Configuration;
 import org.apache.tuweni.config.ConfigurationError;
 import org.apache.tuweni.config.PropertyValidator;
@@ -24,58 +23,89 @@ import picocli.CommandLine;
 final class GossipCommandLineOptions {
 
   static final Schema createConfigFileSchema() {
-    return SchemaBuilder
-        .create()
+    return SchemaBuilder.create()
         .addInteger("listenPort", 0, "Port to listen on", PropertyValidator.inRange(0, 65536))
         .addInteger("rpcPort", 0, "RPC port to listen on", PropertyValidator.inRange(0, 65536))
         .addString("networkInterface", "0.0.0.0", "Network interface to bind to", null)
         .addListOfString("peers", Collections.emptyList(), "Static peers list", null)
         .addString("messagelog", "messages.log", "Log file where messages are stored", null)
-        .addBoolean("sending", false, "Whether this peer sends random messages to all other peers (load testing)", null)
+        .addBoolean(
+            "sending",
+            false,
+            "Whether this peer sends random messages to all other peers (load testing)",
+            null)
         .addInteger(
             "sendInterval",
             1000,
             "Interval to wait in between sending messages in milliseconds (load testing)",
             null)
-        .addInteger("numberOfMessages", 100, "Number of messages to publish to other peers (load testing)", null)
-        .addInteger("payloadSize", 200, "Size of the random payload to send to other peers (load testing)", null)
+        .addInteger(
+            "numberOfMessages",
+            100,
+            "Number of messages to publish to other peers (load testing)",
+            null)
+        .addInteger(
+            "payloadSize",
+            200,
+            "Size of the random payload to send to other peers (load testing)",
+            null)
         .toSchema();
   }
 
-  @CommandLine.Option(names = {"-c", "--config"} , description = "Configuration file.")
+  @CommandLine.Option(
+      names = {"-c", "--config"},
+      description = "Configuration file.")
   private Path configPath = null;
 
-  @CommandLine.Option(arity = "0..*" , names = {"-p", "--peer"} , description = "Static peers list")
+  @CommandLine.Option(
+      arity = "0..*",
+      names = {"-p", "--peer"},
+      description = "Static peers list")
   private String[] peers;
 
-  @CommandLine.Option(names = {"-l", "--listen"} , description = "Port to listen on")
+  @CommandLine.Option(
+      names = {"-l", "--listen"},
+      description = "Port to listen on")
   private Integer port;
 
-  @CommandLine.Option(names = {"-r", "--rpc"} , description = "RPC port to listen on")
+  @CommandLine.Option(
+      names = {"-r", "--rpc"},
+      description = "RPC port to listen on")
   private Integer rpcPort;
 
-  @CommandLine.Option(names = {"-n", "--networkInterface"} , description = "Network interface to bind to")
+  @CommandLine.Option(
+      names = {"-n", "--networkInterface"},
+      description = "Network interface to bind to")
   private String networkInterface = "0.0.0.0";
 
-  @CommandLine.Option(names = {"-m", "--messageLog"} , description = "Log file where messages are stored")
+  @CommandLine.Option(
+      names = {"-m", "--messageLog"},
+      description = "Log file where messages are stored")
   private String messageLog;
 
-  @CommandLine.Option(names = {"--sendInterval"} ,
+  @CommandLine.Option(
+      names = {"--sendInterval"},
       description = "Interval to wait in between sending messages in milliseconds (load testing)")
   private Integer sendInterval;
 
-  @CommandLine.Option(names = {"--payloadSize"} ,
+  @CommandLine.Option(
+      names = {"--payloadSize"},
       description = "Size of the random payload to send to other peers (load testing)")
   private Integer payloadSize;
 
-  @CommandLine.Option(names = {"--numberOfMessages"} , description = "Number of messages to publish (load testing)")
+  @CommandLine.Option(
+      names = {"--numberOfMessages"},
+      description = "Number of messages to publish (load testing)")
   private Integer numberOfMessages;
 
-  @CommandLine.Option(names = {"--sending"} ,
+  @CommandLine.Option(
+      names = {"--sending"},
       description = "Whether this peer sends random messages to all other peers (load testing)")
   private Boolean sending;
 
-  @CommandLine.Option(names = {"-h", "--help"} , description = "Prints usage prompt")
+  @CommandLine.Option(
+      names = {"-h", "--help"},
+      description = "Prints usage prompt")
   private boolean help;
 
   private List<URI> peerAddresses;
@@ -83,9 +113,7 @@ final class GossipCommandLineOptions {
 
   GossipCommandLineOptions() {}
 
-  /**
-   * Constructor used for testing.
-   */
+  /** Constructor used for testing. */
   GossipCommandLineOptions(
       String[] peers,
       Integer port,
@@ -164,10 +192,10 @@ final class GossipCommandLineOptions {
     if (config() != null) {
       List<ConfigurationError> errors = config().errors();
       if (errors.size() > 0) {
-        String message = errors
-            .stream()
-            .map(err -> "[" + err.position() + "] " + err.getMessage())
-            .collect(Collectors.joining("\n"));
+        String message =
+            errors.stream()
+                .map(err -> "[" + err.position() + "] " + err.getMessage())
+                .collect(Collectors.joining("\n"));
         throw new IllegalArgumentException(message);
       }
     }

@@ -24,7 +24,7 @@ class ProxyKeyValueStore<K, V, E, R>(
   private val proxyKey: (K) -> E,
   private val unproxyValue: (R) -> V,
   private val proxyValue: (K, V) -> R,
-  override val coroutineContext: CoroutineContext = store.coroutineContext
+  override val coroutineContext: CoroutineContext = store.coroutineContext,
 ) : KeyValueStore<K, V> {
 
   companion object {
@@ -44,7 +44,7 @@ class ProxyKeyValueStore<K, V, E, R>(
       unproxyKey: Function<E, K>,
       proxyKey: Function<K, E>,
       unproxyValue: Function<R, V>,
-      proxyValue: BiFunction<K, V, R>
+      proxyValue: BiFunction<K, V, R>,
     ) =
       ProxyKeyValueStore(store, unproxyKey::apply, proxyKey::apply, unproxyValue::apply, proxyValue::apply)
   }

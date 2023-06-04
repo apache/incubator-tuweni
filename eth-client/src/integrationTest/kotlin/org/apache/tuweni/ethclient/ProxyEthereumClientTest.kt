@@ -51,7 +51,7 @@ class ProxyEthereumClientTest {
       [rlpx.default]
       port=30303
       key="${identity.secretKey().bytes().toHexString()}"
-      """.trimMargin()
+      """.trimMargin(),
     )
     val config2 = EthereumClientConfig.fromString(
       """
@@ -74,7 +74,7 @@ class ProxyEthereumClientTest {
       [rlpx.default]
       port=30304
       key="${identity2.secretKey().bytes().toHexString()}"
-      """.trimMargin()
+      """.trimMargin(),
     )
     assertEquals(1, config1.proxies().size)
     assertEquals(2, config2.proxies().size)

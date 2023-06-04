@@ -62,7 +62,7 @@ class MemoryPeerRepository : PeerRepository {
 internal data class MemoryPeer(
   private val id: Identity,
   internal var lastContacted: Instant?,
-  internal var lastDiscovered: Instant?
+  internal var lastDiscovered: Instant?,
 ) : Peer {
   val connections: MutableList<Connection> = mutableListOf()
 
@@ -86,7 +86,7 @@ internal data class MemoryConnection(var active: Boolean, val peer: Peer, val id
 internal data class MemoryIdentity(
   private val networkInterface: String,
   private val port: Int,
-  private val publicKey: SECP256K1.PublicKey
+  private val publicKey: SECP256K1.PublicKey,
 ) : Identity {
 
   internal val connections: MutableList<Connection> = mutableListOf()

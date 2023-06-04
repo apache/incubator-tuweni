@@ -5,8 +5,8 @@ package org.apache.tuweni.bytes;
 import java.util.Arrays;
 
 /**
- * A Bytes value with just one constant value throughout. Ideal to avoid allocating large byte arrays filled with the
- * same byte.
+ * A Bytes value with just one constant value throughout. Ideal to avoid allocating large byte
+ * arrays filled with the same byte.
  */
 class ConstantBytesValue extends AbstractBytes {
 

@@ -37,11 +37,12 @@ class RLPReferenceTestSuite {
     } else if (in instanceof Integer) {
       writer.writeValue(Bytes.minimalBytes((Integer) in));
     } else if (in instanceof List) {
-      writer.writeList((listWriter) -> {
-        for (Object elt : (List) in) {
-          writePayload(listWriter, elt);
-        }
-      });
+      writer.writeList(
+          (listWriter) -> {
+            for (Object elt : (List) in) {
+              writePayload(listWriter, elt);
+            }
+          });
     } else {
       throw new UnsupportedOperationException();
     }
@@ -49,11 +50,12 @@ class RLPReferenceTestSuite {
 
   private static Object readPayload(RLPReader reader, Object in) {
     if (in instanceof List) {
-      return reader.readList((listReader, list) -> {
-        for (Object elt : ((List) in)) {
-          list.add(readPayload(listReader, elt));
-        }
-      });
+      return reader.readList(
+          (listReader, list) -> {
+            for (Object elt : ((List) in)) {
+              list.add(readPayload(listReader, elt));
+            }
+          });
     } else if (in instanceof BigInteger) {
       return reader.readBigInteger();
     } else if (in instanceof String) {
@@ -86,14 +88,15 @@ class RLPReferenceTestSuite {
   @ParameterizedTest(name = "{index}. invalid {0}")
   @MethodSource("readInvalidRLPTests")
   void testReadInvalidRLP(String name, Object in, String out) {
-    assertThrows(RLPException.class, () -> {
-      if ("incorrectLengthInArray".equals(name)) {
-        RLP.decodeToList(Bytes.fromHexString(out), (reader, list) -> {
+    assertThrows(
+        RLPException.class,
+        () -> {
+          if ("incorrectLengthInArray".equals(name)) {
+            RLP.decodeToList(Bytes.fromHexString(out), (reader, list) -> {});
+          } else {
+            RLP.decodeValue(Bytes.fromHexString(out));
+          }
         });
-      } else {
-        RLP.decodeValue(Bytes.fromHexString(out));
-      }
-    });
   }
 
   @SuppressWarnings("UnusedMethod")
@@ -110,22 +113,25 @@ class RLPReferenceTestSuite {
 
   @MustBeClosed
   private static Stream<Arguments> findTests(String glob) throws IOException {
-    return Resources.find(glob).flatMap(url -> {
-      try (InputStream in = url.openConnection().getInputStream()) {
-        return prepareTests(in);
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
-    });
+    return Resources.find(glob)
+        .flatMap(
+            url -> {
+              try (InputStream in = url.openConnection().getInputStream()) {
+                return prepareTests(in);
+              } catch (IOException e) {
+                throw new UncheckedIOException(e);
+              }
+            });
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   private static Stream<Arguments> prepareTests(InputStream in) throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     Map<String, Map> allTests = mapper.readerFor(Map.class).readValue(in);
-    return allTests
-        .entrySet()
-        .stream()
-        .map(entry -> Arguments.of(entry.getKey(), entry.getValue().get("in"), entry.getValue().get("out")));
+    return allTests.entrySet().stream()
+        .map(
+            entry ->
+                Arguments.of(
+                    entry.getKey(), entry.getValue().get("in"), entry.getValue().get("out")));
   }
 }

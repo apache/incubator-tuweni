@@ -19,7 +19,7 @@ fun main(args: Array<String>) {
     config = QuorumGenesisConfig(chainId = args[0].toInt()),
     numberValidators = 4,
     numberAllocations = 100,
-    amount = UInt256.fromBytes(Bytes32.rightPad(Bytes.fromHexString("0x10")))
+    amount = UInt256.fromBytes(Bytes32.rightPad(Bytes.fromHexString("0x10"))),
   )
 
   val mapper = JsonMapper()

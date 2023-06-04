@@ -40,35 +40,38 @@ class VertxGossipServerTest {
     MessageListenerImpl messageReceived1 = new MessageListenerImpl();
     MessageListenerImpl messageReceived2 = new MessageListenerImpl();
 
-    VertxGossipServer server1 = new VertxGossipServer(
-        vertx,
-        "127.0.0.1",
-        10000,
-        bytes -> bytes,
-        new EphemeralPeerRepository(),
-        messageReceived1,
-        (message, peer) -> true,
-        null,
-        200,
-        200);
-    VertxGossipServer server2 = new VertxGossipServer(
-        vertx,
-        "127.0.0.1",
-        10001,
-        bytes -> bytes,
-        new EphemeralPeerRepository(),
-        messageReceived2,
-        (message, peer) -> true,
-        null,
-        200,
-        200);
+    VertxGossipServer server1 =
+        new VertxGossipServer(
+            vertx,
+            "127.0.0.1",
+            10000,
+            bytes -> bytes,
+            new EphemeralPeerRepository(),
+            messageReceived1,
+            (message, peer) -> true,
+            null,
+            200,
+            200);
+    VertxGossipServer server2 =
+        new VertxGossipServer(
+            vertx,
+            "127.0.0.1",
+            10001,
+            bytes -> bytes,
+            new EphemeralPeerRepository(),
+            messageReceived2,
+            (message, peer) -> true,
+            null,
+            200,
+            200);
 
     server1.start().join();
     server2.start().join();
 
     server1.connectTo("127.0.0.1", 10001).join();
     Map<String, Bytes> attributes =
-        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
+        Collections.singletonMap(
+            "message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     server1.gossip(attributes, Bytes.fromHexString("deadbeef"));
     for (int i = 0; i < 10; i++) {
       Thread.sleep(500);
@@ -89,39 +92,42 @@ class VertxGossipServerTest {
     MessageListenerImpl messageReceived2 = new MessageListenerImpl();
     MessageListenerImpl messageReceived3 = new MessageListenerImpl();
 
-    VertxGossipServer server1 = new VertxGossipServer(
-        vertx,
-        "127.0.0.1",
-        10000,
-        bytes -> bytes,
-        new EphemeralPeerRepository(),
-        messageReceived1,
-        (message, peer) -> true,
-        null,
-        200,
-        200);
-    VertxGossipServer server2 = new VertxGossipServer(
-        vertx,
-        "127.0.0.1",
-        10001,
-        bytes -> bytes,
-        new EphemeralPeerRepository(),
-        messageReceived2,
-        (message, peer) -> true,
-        null,
-        200,
-        200);
-    VertxGossipServer server3 = new VertxGossipServer(
-        vertx,
-        "127.0.0.1",
-        10002,
-        bytes -> bytes,
-        new EphemeralPeerRepository(),
-        messageReceived3,
-        (message, peer) -> true,
-        null,
-        200,
-        200);
+    VertxGossipServer server1 =
+        new VertxGossipServer(
+            vertx,
+            "127.0.0.1",
+            10000,
+            bytes -> bytes,
+            new EphemeralPeerRepository(),
+            messageReceived1,
+            (message, peer) -> true,
+            null,
+            200,
+            200);
+    VertxGossipServer server2 =
+        new VertxGossipServer(
+            vertx,
+            "127.0.0.1",
+            10001,
+            bytes -> bytes,
+            new EphemeralPeerRepository(),
+            messageReceived2,
+            (message, peer) -> true,
+            null,
+            200,
+            200);
+    VertxGossipServer server3 =
+        new VertxGossipServer(
+            vertx,
+            "127.0.0.1",
+            10002,
+            bytes -> bytes,
+            new EphemeralPeerRepository(),
+            messageReceived3,
+            (message, peer) -> true,
+            null,
+            200,
+            200);
 
     server1.start().join();
     server2.start().join();
@@ -130,7 +136,8 @@ class VertxGossipServerTest {
     server1.connectTo("127.0.0.1", 10001).join();
     server3.connectTo("127.0.0.1", 10001).join();
     Map<String, Bytes> attributes =
-        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
+        Collections.singletonMap(
+            "message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     server1.gossip(attributes, Bytes.fromHexString("deadbeef"));
     for (int i = 0; i < 10; i++) {
       Thread.sleep(500);
@@ -156,39 +163,42 @@ class VertxGossipServerTest {
     EphemeralPeerRepository peerRepository1 = new EphemeralPeerRepository();
     EphemeralPeerRepository peerRepository3 = new EphemeralPeerRepository();
 
-    VertxGossipServer server1 = new VertxGossipServer(
-        vertx,
-        "127.0.0.1",
-        10000,
-        bytes -> bytes,
-        peerRepository1,
-        messageReceived1,
-        (message, peer) -> true,
-        null,
-        200,
-        200);
-    VertxGossipServer server2 = new VertxGossipServer(
-        vertx,
-        "127.0.0.1",
-        10001,
-        bytes -> bytes,
-        new EphemeralPeerRepository(),
-        messageReceived2,
-        (message, peer) -> true,
-        null,
-        200,
-        200);
-    VertxGossipServer server3 = new VertxGossipServer(
-        vertx,
-        "127.0.0.1",
-        10002,
-        bytes -> bytes,
-        peerRepository3,
-        messageReceived2,
-        (message, peer) -> true,
-        null,
-        200,
-        200);
+    VertxGossipServer server1 =
+        new VertxGossipServer(
+            vertx,
+            "127.0.0.1",
+            10000,
+            bytes -> bytes,
+            peerRepository1,
+            messageReceived1,
+            (message, peer) -> true,
+            null,
+            200,
+            200);
+    VertxGossipServer server2 =
+        new VertxGossipServer(
+            vertx,
+            "127.0.0.1",
+            10001,
+            bytes -> bytes,
+            new EphemeralPeerRepository(),
+            messageReceived2,
+            (message, peer) -> true,
+            null,
+            200,
+            200);
+    VertxGossipServer server3 =
+        new VertxGossipServer(
+            vertx,
+            "127.0.0.1",
+            10002,
+            bytes -> bytes,
+            peerRepository3,
+            messageReceived2,
+            (message, peer) -> true,
+            null,
+            200,
+            200);
 
     server1.start().join();
     server2.start().join();
@@ -199,13 +209,15 @@ class VertxGossipServerTest {
     server1.connectTo("127.0.0.1", 10002).join();
     assertEquals(2, peerRepository1.eagerPushPeers().size());
     Map<String, Bytes> attributes =
-        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
+        Collections.singletonMap(
+            "message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
     server1.gossip(attributes, Bytes.fromHexString("deadbeef"));
     Thread.sleep(1000);
     assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);
     Thread.sleep(1000);
 
-    assertTrue(peerRepository1.lazyPushPeers().size() > 0 || peerRepository3.lazyPushPeers().size() > 0);
+    assertTrue(
+        peerRepository1.lazyPushPeers().size() > 0 || peerRepository3.lazyPushPeers().size() > 0);
 
     server1.stop().join();
     server2.stop().join();
@@ -219,28 +231,30 @@ class VertxGossipServerTest {
 
     EphemeralPeerRepository peerRepository1 = new EphemeralPeerRepository();
 
-    VertxGossipServer server1 = new VertxGossipServer(
-        vertx,
-        "127.0.0.1",
-        10000,
-        bytes -> bytes,
-        peerRepository1,
-        messageReceived1,
-        (message, peer) -> true,
-        null,
-        200,
-        200);
-    VertxGossipServer server2 = new VertxGossipServer(
-        vertx,
-        "127.0.0.1",
-        10001,
-        bytes -> bytes,
-        new EphemeralPeerRepository(),
-        messageReceived2,
-        (message, peer) -> true,
-        null,
-        200,
-        200);
+    VertxGossipServer server1 =
+        new VertxGossipServer(
+            vertx,
+            "127.0.0.1",
+            10000,
+            bytes -> bytes,
+            peerRepository1,
+            messageReceived1,
+            (message, peer) -> true,
+            null,
+            200,
+            200);
+    VertxGossipServer server2 =
+        new VertxGossipServer(
+            vertx,
+            "127.0.0.1",
+            10001,
+            bytes -> bytes,
+            new EphemeralPeerRepository(),
+            messageReceived2,
+            (message, peer) -> true,
+            null,
+            200,
+            200);
 
     server1.start().join();
     server2.start().join();
@@ -248,8 +262,10 @@ class VertxGossipServerTest {
     server1.connectTo("127.0.0.1", 10001).join();
     assertEquals(1, peerRepository1.eagerPushPeers().size());
     Map<String, Bytes> attributes =
-        Collections.singletonMap("message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
-    server1.send(peerRepository1.peers().iterator().next(), attributes, Bytes.fromHexString("deadbeef"));
+        Collections.singletonMap(
+            "message_type", Bytes.wrap("BLOCK".getBytes(StandardCharsets.UTF_8)));
+    server1.send(
+        peerRepository1.peers().iterator().next(), attributes, Bytes.fromHexString("deadbeef"));
     Thread.sleep(1000);
     assertEquals(Bytes.fromHexString("deadbeef"), messageReceived2.message);
     Thread.sleep(1000);

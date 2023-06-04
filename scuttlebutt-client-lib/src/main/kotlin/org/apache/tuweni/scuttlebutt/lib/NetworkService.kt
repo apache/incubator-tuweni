@@ -92,7 +92,7 @@ class NetworkService(private val multiplexer: Multiplexer) {
       rpcResponse.asJSON(
         mapper,
         object :
-          TypeReference<List<Peer>>() {}
+          TypeReference<List<Peer>>() {},
       )
     return peers
   }
@@ -110,7 +110,7 @@ class NetworkService(private val multiplexer: Multiplexer) {
     val function = RPCFunction(listOf("gossip"), "changes")
     val request = RPCStreamRequest(function, listOf())
     multiplexer.openStream(
-      request
+      request,
     ) { closer: Runnable ->
       object : ScuttlebuttStreamHandler {
         var changeStream: StreamHandler<PeerStateChange?> =

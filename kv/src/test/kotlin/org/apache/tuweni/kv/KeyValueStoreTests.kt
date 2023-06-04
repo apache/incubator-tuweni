@@ -155,7 +155,7 @@ class MapDBKeyValueStoreTest {
       keySerializer = { it },
       valueSerializer = { it },
       keyDeserializer = { it },
-      valueDeserializer = { it }
+      valueDeserializer = { it },
     )
 
     @JvmStatic
@@ -214,7 +214,7 @@ class MapDBKeyValueStoreTest {
       keySerializer = { it },
       valueSerializer = { it },
       keyDeserializer = { it },
-      valueDeserializer = { it }
+      valueDeserializer = { it },
     )
     kv2.close()
     runBlocking {
@@ -246,7 +246,7 @@ class LevelDBKeyValueStoreSpec {
         keySerializer = { it },
         valueSerializer = { it },
         keyDeserializer = { it },
-        valueDeserializer = { it }
+        valueDeserializer = { it },
       )
     }
 
@@ -304,7 +304,7 @@ class LevelDBKeyValueStoreSpec {
       keySerializer = { it },
       valueSerializer = { it },
       keyDeserializer = { it },
-      valueDeserializer = { it }
+      valueDeserializer = { it },
     )
     kv2.close()
     runBlocking {
@@ -327,7 +327,7 @@ class RocksDBKeyValueStoreTest {
       keySerializer = { it },
       valueSerializer = { it },
       keyDeserializer = { it },
-      valueDeserializer = { it }
+      valueDeserializer = { it },
     )
 
     @JvmStatic
@@ -386,7 +386,7 @@ class RocksDBKeyValueStoreTest {
       keySerializer = { it },
       valueSerializer = { it },
       keyDeserializer = { it },
-      valueDeserializer = { it }
+      valueDeserializer = { it },
     )
     kv2.close()
     runBlocking {
@@ -426,7 +426,7 @@ class SQLKeyValueStoreTest {
         keySerializer = { it },
         valueSerializer = { it },
         keyDeserializer = { it },
-        valueDeserializer = { it }
+        valueDeserializer = { it },
       )
       otherkv = SQLKeyValueStore.open(
         jdbcUrl,
@@ -436,7 +436,7 @@ class SQLKeyValueStoreTest {
         keySerializer = { it },
         valueSerializer = { it },
         keyDeserializer = { it },
-        valueDeserializer = { it }
+        valueDeserializer = { it },
       )
     }
 
@@ -511,7 +511,7 @@ class SQLKeyValueStoreTest {
       keySerializer = { it },
       valueSerializer = { it },
       keyDeserializer = { it },
-      valueDeserializer = { it }
+      valueDeserializer = { it },
     )
     kv2.close()
     runBlocking {
@@ -610,7 +610,7 @@ class ProxyKeyValueStoreSpec {
       Base64::decode,
       Base64::encode,
       Base64::decode,
-      { _: Bytes, value: Bytes -> Base64.encode(value) }
+      { _: Bytes, value: Bytes -> Base64.encode(value) },
     )
 
     @JvmStatic
@@ -688,7 +688,7 @@ class CascadingKeyValueStoreTest {
     val backingKv = MapKeyValueStore<Bytes, Bytes>()
     val cascade = CascadingKeyValueStore(
       kv,
-      backingKv
+      backingKv,
     )
 
     @JvmStatic

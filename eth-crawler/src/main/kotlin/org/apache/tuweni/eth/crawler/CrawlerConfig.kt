@@ -30,7 +30,7 @@ class CrawlerConfig(val filePath: Path) {
       "enode://1118980bf48b0a3640bdba04e0fe78b1add18e1cd99bf22d53daac1fd9972ad650df52176e7c7d89d1114cfef2bc23a2959aa54998a46afcf7d91809f0855082@52.74.57.123:30303", // SG
 
       // Ethereum Foundation Aleth Bootnodes
-      "enode://979b7fa28feeb35a4741660a16076f1943202cb72b6af70d327f053e248bab9ba81760f39d0701ef1d8f89cc1fbd2cacba0710a12cd5314d5e0c9021aa3637f9@5.1.83.226:30303" // DE
+      "enode://979b7fa28feeb35a4741660a16076f1943202cb72b6af70d327f053e248bab9ba81760f39d0701ef1d8f89cc1fbd2cacba0710a12cd5314d5e0c9021aa3637f9@5.1.83.226:30303", // DE
     )
     val mainnetDiscoveryDNS = "enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@all.mainnet.ethdisco.net"
 
@@ -47,7 +47,7 @@ class CrawlerConfig(val filePath: Path) {
           "jdbcUrl",
           System.getProperty("DATABASE_URL", System.getenv("DATABASE_URL")),
           "JDBC URL of the form jdbc:posgresql://localhost:5432",
-          PropertyValidator.isPresent()
+          PropertyValidator.isPresent(),
         )
         .addInteger("jdbcConnections", 25, "Number of JDBC connections for the connections pool", null)
         .addString("network", "mainnet", "Network to use instead of providing a genesis file.", null)
@@ -62,7 +62,7 @@ class CrawlerConfig(val filePath: Path) {
           "clientIdsInterval",
           24 * 60 * 60 * 1000 * 2L,
           "Client IDs Interval - number of milliseconds to go back in time",
-          null
+          null,
         )
         .addLong("clientsStatsDelay", 30 * 1000L, "Delay between client stats calculations", null)
         .addLong("rlpxDisconnectionDelay", 10 * 1000L, "RLPx connections disconnection delay", null)
@@ -75,7 +75,7 @@ class CrawlerConfig(val filePath: Path) {
           "metricsPrometheusEnabled",
           false,
           "Enable exposing metrics on the Prometheus endpoint",
-          null
+          null,
         )
         .addString("corsAllowedOrigins", "*", "CORS allowed domains filter for REST service", null)
 

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.apache.tuweni.units.bigints;
 
-
 import org.apache.tuweni.bytes.Bytes;
 
 import java.math.BigInteger;
@@ -10,20 +9,17 @@ import java.math.BigInteger;
 /**
  * Represents a 32-bit (8 bytes) unsigned integer value.
  *
- * <p>
- * A {@link UInt32Value} is an unsigned integer value whose value can range between 0 and 2^32-1.
+ * <p>A {@link UInt32Value} is an unsigned integer value whose value can range between 0 and 2^32-1.
  *
- * <p>
- * This interface defines operations for value types with a 32-bit precision range. The methods provided by this
- * interface take parameters of the same type (and also {@code long}. This provides type safety by ensuring calculations
- * cannot mix different {@code UInt32Value} types.
+ * <p>This interface defines operations for value types with a 32-bit precision range. The methods
+ * provided by this interface take parameters of the same type (and also {@code long}. This provides
+ * type safety by ensuring calculations cannot mix different {@code UInt32Value} types.
  *
- * <p>
- * Where only a pure numerical 32-bit value is required, {@link UInt32} should be used.
+ * <p>Where only a pure numerical 32-bit value is required, {@link UInt32} should be used.
  *
- * <p>
- * It is strongly advised to extend {@link BaseUInt32Value} rather than implementing this interface directly. Doing so
- * provides type safety in that quantities of different units cannot be mixed accidentally.
+ * <p>It is strongly advised to extend {@link BaseUInt32Value} rather than implementing this
+ * interface directly. Doing so provides type safety in that quantities of different units cannot be
+ * mixed accidentally.
  *
  * @param <T> The concrete type of the value.
  */
@@ -228,11 +224,9 @@ public interface UInt32Value<T extends UInt32Value<T>> extends Comparable<T> {
   /**
    * Returns a value that is {@code (this<sup>exponent</sup> mod 2<sup>32</sup>)}
    *
-   * <p>
-   * This calculates an exponentiation over the modulus of {@code 2^32}.
+   * <p>This calculates an exponentiation over the modulus of {@code 2^32}.
    *
-   * <p>
-   * Note that {@code exponent} is an {@link UInt32} rather than of the type {@code T}.
+   * <p>Note that {@code exponent} is an {@link UInt32} rather than of the type {@code T}.
    *
    * @param exponent The exponent to which this value is to be raised.
    * @return {@code this<sup>exponent</sup> mod 2<sup>32</sup>}
@@ -242,8 +236,7 @@ public interface UInt32Value<T extends UInt32Value<T>> extends Comparable<T> {
   /**
    * Returns a value that is {@code (this<sup>exponent</sup> mod 2<sup>32</sup>)}
    *
-   * <p>
-   * This calculates an exponentiation over the modulus of {@code 2^32}.
+   * <p>This calculates an exponentiation over the modulus of {@code 2^32}.
    *
    * @param exponent The exponent to which this value is to be raised.
    * @return {@code this<sup>exponent</sup> mod 2<sup>32</sup>}
@@ -271,7 +264,8 @@ public interface UInt32Value<T extends UInt32Value<T>> extends Comparable<T> {
   /**
    * Returns true if this value fits an int.
    *
-   * @return True if this value fits a java {@code int} (i.e. is less or equal to {@code Integer.MAX_VALUE}).
+   * @return True if this value fits a java {@code int} (i.e. is less or equal to {@code
+   *     Integer.MAX_VALUE}).
    */
   default boolean fitsInt() {
     return !UInt32.MAX_VALUE.equals(this);
@@ -279,7 +273,7 @@ public interface UInt32Value<T extends UInt32Value<T>> extends Comparable<T> {
 
   /**
    * Returns this value as an int.
-   * 
+   *
    * @return This value as a java {@code int} assuming it is small enough to fit an {@code int}.
    * @throws ArithmeticException If the value does not fit an {@code int}, that is if {@code
    *     !fitsInt()}.
@@ -290,8 +284,9 @@ public interface UInt32Value<T extends UInt32Value<T>> extends Comparable<T> {
 
   /**
    * Returns true if this value fits a long.
-   * 
-   * @return True if this value fits a java {@code long} (i.e. is less or equal to {@code Long.MAX_VALUE}).
+   *
+   * @return True if this value fits a java {@code long} (i.e. is less or equal to {@code
+   *     Long.MAX_VALUE}).
    */
   default boolean fitsLong() {
     return true;
@@ -299,7 +294,7 @@ public interface UInt32Value<T extends UInt32Value<T>> extends Comparable<T> {
 
   /**
    * Returns this value as a long.
-   * 
+   *
    * @return This value as a java {@code long} assuming it is small enough to fit a {@code long}.
    * @throws ArithmeticException If the value does not fit a {@code long}, that is if {@code
    *     !fitsLong()}.
@@ -310,7 +305,7 @@ public interface UInt32Value<T extends UInt32Value<T>> extends Comparable<T> {
 
   /**
    * Provides this value as a BigInteger.
-   * 
+   *
    * @return This value as a {@link BigInteger}.
    */
   default BigInteger toBigInteger() {
@@ -320,10 +315,9 @@ public interface UInt32Value<T extends UInt32Value<T>> extends Comparable<T> {
   /**
    * This value represented as an hexadecimal string.
    *
-   * <p>
-   * Note that this representation includes all the 8 underlying bytes, no matter what the integer actually represents
-   * (in other words, it can have many leading zeros). For a shorter representation that don't include leading zeros,
-   * use {@link #toShortHexString}.
+   * <p>Note that this representation includes all the 8 underlying bytes, no matter what the
+   * integer actually represents (in other words, it can have many leading zeros). For a shorter
+   * representation that don't include leading zeros, use {@link #toShortHexString}.
    *
    * @return This value represented as an hexadecimal string.
    */
@@ -333,7 +327,7 @@ public interface UInt32Value<T extends UInt32Value<T>> extends Comparable<T> {
 
   /**
    * Returns this value represented as a minimal hexadecimal string (without any leading zero).
-   * 
+   *
    * @return This value represented as a minimal hexadecimal string (without any leading zero).
    */
   default String toShortHexString() {
@@ -349,23 +343,23 @@ public interface UInt32Value<T extends UInt32Value<T>> extends Comparable<T> {
 
   /**
    * Provides the value as bytes.
-   * 
+   *
    * @return The value as bytes.
    */
   Bytes toBytes();
 
   /**
    * Provides the value as bytes without any leading zero bytes
-   * 
+   *
    * @return The value as bytes without any leading zero bytes.
    */
   Bytes toMinimalBytes();
 
   /**
    * Provides the number of zero bits preceding the highest-order ("leftmost") one-bit
-   * 
-   * @return the number of zero bits preceding the highest-order ("leftmost") one-bit in the binary representation of
-   *         this value, or 32 if the value is equal to zero.
+   *
+   * @return the number of zero bits preceding the highest-order ("leftmost") one-bit in the binary
+   *     representation of this value, or 32 if the value is equal to zero.
    */
   default int numberOfLeadingZeros() {
     return toBytes().numberOfLeadingZeros();
@@ -373,9 +367,9 @@ public interface UInt32Value<T extends UInt32Value<T>> extends Comparable<T> {
 
   /**
    * Provides the number of bits following and including the highest-order ("leftmost") one-bit
-   * 
-   * @return The number of bits following and including the highest-order ("leftmost") one-bit in the binary
-   *         representation of this value, or zero if all bits are zero.
+   *
+   * @return The number of bits following and including the highest-order ("leftmost") one-bit in
+   *     the binary representation of this value, or zero if all bits are zero.
    */
   default int bitLength() {
     return toBytes().bitLength();

@@ -38,7 +38,7 @@ constructor(
   private val valueSerializer: (V) -> Bytes,
   private val keyDeserializer: (Bytes) -> K,
   private val valueDeserializer: (Bytes?) -> V?,
-  override val coroutineContext: CoroutineContext = Dispatchers.IO
+  override val coroutineContext: CoroutineContext = Dispatchers.IO,
 ) : KeyValueStore<K, V> {
 
   companion object {
@@ -60,13 +60,13 @@ constructor(
       keySerializer: (K) -> Bytes,
       valueSerializer: (V) -> Bytes,
       keyDeserializer: (Bytes) -> K,
-      valueDeserializer: (Bytes?) -> V?
+      valueDeserializer: (Bytes?) -> V?,
     ) = SQLKeyValueStore<K, V>(
       jdbcurl = jdbcUrl,
       keySerializer = keySerializer,
       valueSerializer = valueSerializer,
       keyDeserializer = keyDeserializer,
-      valueDeserializer = valueDeserializer
+      valueDeserializer = valueDeserializer,
     )
 
     /**
@@ -93,7 +93,7 @@ constructor(
       keySerializer: (K) -> Bytes,
       valueSerializer: (V) -> Bytes,
       keyDeserializer: (Bytes) -> K,
-      valueDeserializer: (Bytes?) -> V?
+      valueDeserializer: (Bytes?) -> V?,
     ) =
       SQLKeyValueStore<K, V>(
         jdbcUrl,
@@ -103,7 +103,7 @@ constructor(
         keySerializer,
         valueSerializer,
         keyDeserializer,
-        valueDeserializer
+        valueDeserializer,
       )
   }
 

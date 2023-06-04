@@ -16,21 +16,24 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-
 class SignatureTest {
 
   @Test
   void testNoSigs() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      Signature.aggregate(Collections.emptyList());
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          Signature.aggregate(Collections.emptyList());
+        });
   }
 
   @Test
   void testNoSigsAndPubKeys() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      SignatureAndPublicKey.aggregate(Collections.emptyList());
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          SignatureAndPublicKey.aggregate(Collections.emptyList());
+        });
   }
 
   @Test
@@ -39,7 +42,8 @@ class SignatureTest {
     byte[] message = "Hello".getBytes(UTF_8);
     SignatureAndPublicKey sigAndPubKey = BLS12381.sign(keyPair, message, 48);
 
-    Boolean isValid = BLS12381.verify(sigAndPubKey.publicKey(), sigAndPubKey.signature(), message, 48);
+    Boolean isValid =
+        BLS12381.verify(sigAndPubKey.publicKey(), sigAndPubKey.signature(), message, 48);
     assertTrue(isValid);
   }
 

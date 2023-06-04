@@ -7,9 +7,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.apache.tuweni.bytes.Bytes;
 
-/**
- * Utility methods for encoding and decoding base64 strings.
- */
+/** Utility methods for encoding and decoding base64 strings. */
 public final class Base64 {
   private Base64() {}
 

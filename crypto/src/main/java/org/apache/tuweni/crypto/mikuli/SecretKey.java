@@ -9,9 +9,7 @@ import org.apache.tuweni.bytes.Bytes;
 
 import java.util.Objects;
 
-/**
- * This class represents a BLS12-381 private key.
- */
+/** This class represents a BLS12-381 private key. */
 public final class SecretKey {
 
   /**
@@ -52,10 +50,8 @@ public final class SecretKey {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     SecretKey secretKey = (SecretKey) o;
     return Objects.equals(scalarValue, secretKey.scalarValue);
   }

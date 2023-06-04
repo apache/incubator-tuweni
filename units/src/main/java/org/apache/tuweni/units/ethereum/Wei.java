@@ -7,15 +7,14 @@ import org.apache.tuweni.units.bigints.UInt256;
 
 import java.math.BigInteger;
 
-/**
- * A unit measure of Wei as used by the Ethereum VM.
- */
+/** A unit measure of Wei as used by the Ethereum VM. */
 public final class Wei extends BaseUInt256Value<Wei> {
 
-  private final static int MAX_CONSTANT = 64;
-  private final static BigInteger BI_MAX_CONSTANT = BigInteger.valueOf(MAX_CONSTANT);
-  private final static UInt256 UINT256_MAX_CONSTANT = UInt256.valueOf(MAX_CONSTANT);
+  private static final int MAX_CONSTANT = 64;
+  private static final BigInteger BI_MAX_CONSTANT = BigInteger.valueOf(MAX_CONSTANT);
+  private static final UInt256 UINT256_MAX_CONSTANT = UInt256.valueOf(MAX_CONSTANT);
   private static Wei CONSTANTS[] = new Wei[MAX_CONSTANT + 1];
+
   static {
     CONSTANTS[0] = new Wei(UInt256.ZERO);
     for (int i = 1; i <= MAX_CONSTANT; ++i) {
@@ -31,7 +30,7 @@ public final class Wei extends BaseUInt256Value<Wei> {
 
   /**
    * Return a {@link Wei} containing the specified value from an ETH
-   * 
+   *
    * @param ethValue the value in eth
    * @return A {@link Wei} containing the specified value.
    * @throws IllegalArgumentException If the value is negative.

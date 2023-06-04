@@ -30,12 +30,14 @@ class BoxTest {
     assumeTrue(Sodium.isAvailable(), "Sodium native library is not available");
     nonce = Box.Nonce.random();
     // @formatter:off
-    seed = Box.Seed.fromBytes(new byte[] {
-        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-        0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
-        0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
-        0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f
-    });
+    seed =
+        Box.Seed.fromBytes(
+            new byte[] {
+              0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+              0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+              0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+              0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f
+            });
     // @formatter:on
   }
 
@@ -91,9 +93,15 @@ class BoxTest {
     Box.KeyPair receiver = Box.KeyPair.random();
     Box.Nonce nonce = Box.Nonce.zero();
     DetachedEncryptionResult encrypted =
-        Box.encryptDetached(Bytes.fromHexString("deadbeef"), receiver.publicKey(), sender.secretKey(), nonce);
+        Box.encryptDetached(
+            Bytes.fromHexString("deadbeef"), receiver.publicKey(), sender.secretKey(), nonce);
     Bytes decrypted =
-        Box.decryptDetached(encrypted.cipherText(), encrypted.mac(), sender.publicKey(), receiver.secretKey(), nonce);
+        Box.decryptDetached(
+            encrypted.cipherText(),
+            encrypted.mac(),
+            sender.publicKey(),
+            receiver.secretKey(),
+            nonce);
     assertEquals(Bytes.fromHexString("deadbeef"), decrypted);
   }
 
@@ -104,13 +112,17 @@ class BoxTest {
 
     byte[] message = "This is a test message".getBytes(UTF_8);
 
-    byte[] cipherText = Box.encrypt(message, aliceKeyPair.publicKey(), bobKeyPair.secretKey(), nonce);
-    byte[] clearText = Box.decrypt(cipherText, bobKeyPair.publicKey(), aliceKeyPair.secretKey(), nonce);
+    byte[] cipherText =
+        Box.encrypt(message, aliceKeyPair.publicKey(), bobKeyPair.secretKey(), nonce);
+    byte[] clearText =
+        Box.decrypt(cipherText, bobKeyPair.publicKey(), aliceKeyPair.secretKey(), nonce);
 
     assertNotNull(clearText);
     assertArrayEquals(message, clearText);
 
-    clearText = Box.decrypt(cipherText, bobKeyPair.publicKey(), aliceKeyPair.secretKey(), nonce.increment());
+    clearText =
+        Box.decrypt(
+            cipherText, bobKeyPair.publicKey(), aliceKeyPair.secretKey(), nonce.increment());
     assertNull(clearText);
 
     Box.KeyPair otherKeyPair = Box.KeyPair.random();
@@ -130,7 +142,8 @@ class BoxTest {
       cipherText = precomputed.encrypt(message, nonce);
     }
 
-    byte[] clearText = Box.decrypt(cipherText, bobKeyPair.publicKey(), aliceKeyPair.secretKey(), nonce);
+    byte[] clearText =
+        Box.decrypt(cipherText, bobKeyPair.publicKey(), aliceKeyPair.secretKey(), nonce);
 
     assertNotNull(clearText);
     assertArrayEquals(message, clearText);
@@ -159,8 +172,8 @@ class BoxTest {
 
     DetachedEncryptionResult result =
         Box.encryptDetached(message, aliceKeyPair.publicKey(), bobKeyPair.secretKey(), nonce);
-    byte[] clearText = Box
-        .decryptDetached(
+    byte[] clearText =
+        Box.decryptDetached(
             result.cipherTextArray(),
             result.macArray(),
             bobKeyPair.publicKey(),
@@ -170,8 +183,8 @@ class BoxTest {
     assertNotNull(clearText);
     assertArrayEquals(message, clearText);
 
-    clearText = Box
-        .decryptDetached(
+    clearText =
+        Box.decryptDetached(
             result.cipherTextArray(),
             result.macArray(),
             bobKeyPair.publicKey(),
@@ -180,8 +193,8 @@ class BoxTest {
     assertNull(clearText);
 
     Box.KeyPair otherKeyPair = Box.KeyPair.random();
-    clearText = Box
-        .decryptDetached(
+    clearText =
+        Box.decryptDetached(
             result.cipherTextArray(),
             result.macArray(),
             otherKeyPair.publicKey(),
@@ -202,8 +215,8 @@ class BoxTest {
       result = precomputed.encryptDetached(message, nonce);
     }
 
-    byte[] clearText = Box
-        .decryptDetached(
+    byte[] clearText =
+        Box.decryptDetached(
             result.cipherTextArray(),
             result.macArray(),
             bobKeyPair.publicKey(),
@@ -219,7 +232,9 @@ class BoxTest {
       assertNotNull(clearText);
       assertArrayEquals(message, clearText);
 
-      assertNull(precomputed.decryptDetached(result.cipherTextArray(), result.macArray(), nonce.increment()));
+      assertNull(
+          precomputed.decryptDetached(
+              result.cipherTextArray(), result.macArray(), nonce.increment()));
     }
 
     Box.KeyPair otherKeyPair = Box.KeyPair.random();

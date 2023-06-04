@@ -11,7 +11,7 @@ import org.apache.tuweni.crypto.SECP256K1
  * @param typeId the byte representing the type
  */
 internal enum class PacketType(
-  val typeId: Byte
+  val typeId: Byte,
 ) {
   /**
    * Ping packet
@@ -21,7 +21,7 @@ internal enum class PacketType(
       payload: Bytes,
       hash: Bytes32,
       publicKey: SECP256K1.PublicKey,
-      signature: SECP256K1.Signature
+      signature: SECP256K1.Signature,
     ) = PingPacket.decode(payload, hash, publicKey, signature) as Packet
   },
 
@@ -33,7 +33,7 @@ internal enum class PacketType(
       payload: Bytes,
       hash: Bytes32,
       publicKey: SECP256K1.PublicKey,
-      signature: SECP256K1.Signature
+      signature: SECP256K1.Signature,
     ) = PongPacket.decode(payload, hash, publicKey, signature) as Packet
   },
 
@@ -45,7 +45,7 @@ internal enum class PacketType(
       payload: Bytes,
       hash: Bytes32,
       publicKey: SECP256K1.PublicKey,
-      signature: SECP256K1.Signature
+      signature: SECP256K1.Signature,
     ) = FindNodePacket.decode(payload, hash, publicKey, signature) as Packet
   },
 
@@ -57,7 +57,7 @@ internal enum class PacketType(
       payload: Bytes,
       hash: Bytes32,
       publicKey: SECP256K1.PublicKey,
-      signature: SECP256K1.Signature
+      signature: SECP256K1.Signature,
     ) = NeighborsPacket.decode(payload, hash, publicKey, signature) as Packet
   },
 
@@ -69,7 +69,7 @@ internal enum class PacketType(
       payload: Bytes,
       hash: Bytes32,
       publicKey: SECP256K1.PublicKey,
-      signature: SECP256K1.Signature
+      signature: SECP256K1.Signature,
     ) = ENRRequestPacket.decode(payload, hash, publicKey, signature) as Packet
   },
 
@@ -81,9 +81,9 @@ internal enum class PacketType(
       payload: Bytes,
       hash: Bytes32,
       publicKey: SECP256K1.PublicKey,
-      signature: SECP256K1.Signature
+      signature: SECP256K1.Signature,
     ) = ENRResponsePacket.decode(payload, hash, publicKey, signature) as Packet
-  };
+  }, ;
 
   companion object {
     private const val MAX_VALUE: Byte = 0x7f
@@ -107,6 +107,6 @@ internal enum class PacketType(
     payload: Bytes,
     hash: Bytes32,
     publicKey: SECP256K1.PublicKey,
-    signature: SECP256K1.Signature
+    signature: SECP256K1.Signature,
   ): Packet
 }

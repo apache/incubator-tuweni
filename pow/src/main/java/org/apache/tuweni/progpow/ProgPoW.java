@@ -16,10 +16,11 @@ import java.util.stream.Stream;
 /**
  * Ethereum ProgPoW mining algorithm, based on revision 0.9.2.
  *
- * This implements the ProgPoW algorithm (https://github.com/ifdefelse/ProgPOW). This algorithm is licensed under CC0
- * 1.0 Universal (CC0 1.0) Public Domain Dedication (https://creativecommons.org/publicdomain/zero/1.0/)
+ * <p>This implements the ProgPoW algorithm (https://github.com/ifdefelse/ProgPOW). This algorithm
+ * is licensed under CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+ * (https://creativecommons.org/publicdomain/zero/1.0/)
  *
- * See the specification at https://github.com/ifdefelse/ProgPOW
+ * <p>See the specification at https://github.com/ifdefelse/ProgPOW
  */
 public final class ProgPoW {
 
@@ -59,10 +60,15 @@ public final class ProgPoW {
     Bytes32 seed_256 = Keccakf800.keccakF800Progpow(header, nonce, Bytes32.ZERO);
 
     // endian swap so byte 0 of the hash is the MSB of the value
-    long seed = (Integer.toUnsignedLong(seed_256.getInt(0)) << 32) | Integer.toUnsignedLong(seed_256.getInt(4));
+    long seed =
+        (Integer.toUnsignedLong(seed_256.getInt(0)) << 32)
+            | Integer.toUnsignedLong(seed_256.getInt(4));
     // initialize mix for all lanes
     for (int l = 0; l < PROGPOW_LANES; l++)
-      mix[l] = fillMix(UInt64.fromBytes(Bytes.wrap(ByteBuffer.allocate(8).putLong(seed).array())), UInt32.valueOf(l));
+      mix[l] =
+          fillMix(
+              UInt64.fromBytes(Bytes.wrap(ByteBuffer.allocate(8).putLong(seed).array())),
+              UInt32.valueOf(l));
     // execute the randomly generated inner loop
     for (int i = 0; i < PROGPOW_CNT_DAG; i++)
       progPowLoop(blockNumber, UInt32.valueOf(i), mix, dag, dagLookupFunction);
@@ -71,8 +77,7 @@ public final class ProgPoW {
     UInt32[] digest_lane = new UInt32[PROGPOW_LANES];
     for (int l = 0; l < PROGPOW_LANES; l++) {
       digest_lane[l] = UInt32.fromBytes(FNV_OFFSET_BASIS);
-      for (int i = 0; i < PROGPOW_REGS; i++)
-        digest_lane[l] = fnv1a(digest_lane[l], mix[l][i]);
+      for (int i = 0; i < PROGPOW_REGS; i++) digest_lane[l] = fnv1a(digest_lane[l], mix[l][i]);
     }
     // Reduce all lanes to a single 256-bit digest
     UInt32[] digest = new UInt32[8];
@@ -82,7 +87,9 @@ public final class ProgPoW {
       digest[l % 8] = fnv1a(digest[l % 8], digest_lane[l]);
     }
 
-    Bytes32 bytesDigest = Bytes32.wrap(Bytes.concatenate(Stream.of(digest).map(UInt32::toBytes).toArray(Bytes[]::new)));
+    Bytes32 bytesDigest =
+        Bytes32.wrap(
+            Bytes.concatenate(Stream.of(digest).map(UInt32::toBytes).toArray(Bytes[]::new)));
 
     // keccak(header .. keccak(header..nonce) .. digest);
     return Keccakf800.keccakF800Progpow(header, seed, bytesDigest);
@@ -90,13 +97,14 @@ public final class ProgPoW {
 
   /**
    * Creates a cache for the DAG at a given block number
-   * 
+   *
    * @param blockNumber the block number
    * @param datasetLookup the function generating elements of the DAG
    * @return a cache of the DAG up to the block number
    */
   public static UInt32[] createDagCache(long blockNumber, Function<UInt32, Bytes> datasetLookup) {
-    // TODO size of cache should be function of blockNumber - and DAG should be stored in its own memory structure.
+    // TODO size of cache should be function of blockNumber - and DAG should be stored in its own
+    // memory structure.
     // cache the first 16KB of the dag
     UInt32[] cdag = new UInt32[HASH_BYTES * DATASET_PARENTS];
     for (int i = 0; i < cdag.length; i++) {
@@ -139,20 +147,26 @@ public final class ProgPoW {
         return (a.multiply(UInt32.valueOf(33))).add(b);
       case 1:
         return a.xor(b).multiply(UInt32.valueOf(33));
-      // prevent rotate by 0 which is a NOP
+        // prevent rotate by 0 which is a NOP
       case 2:
-        return ProgPoWMath.rotl32(a, (r.shiftRight(16).mod(UInt32.valueOf(31))).add(UInt32.ONE)).xor(b);
+        return ProgPoWMath.rotl32(a, (r.shiftRight(16).mod(UInt32.valueOf(31))).add(UInt32.ONE))
+            .xor(b);
       case 3:
-        return ProgPoWMath.rotr32(a, (r.shiftRight(16).mod(UInt32.valueOf(31))).add(UInt32.ONE)).xor(b);
+        return ProgPoWMath.rotr32(a, (r.shiftRight(16).mod(UInt32.valueOf(31))).add(UInt32.ONE))
+            .xor(b);
       default:
         throw new IllegalArgumentException(
-            "r mod 4 is larger than 4" + r.toHexString() + " " + r.mod(UInt32.valueOf(4)).intValue());
+            "r mod 4 is larger than 4"
+                + r.toHexString()
+                + " "
+                + r.mod(UInt32.valueOf(4)).intValue());
     }
   }
 
   static UInt32[] fillMix(UInt64 seed, UInt32 laneId) {
 
-    UInt32 z = fnv1a(UInt32.fromBytes(FNV_OFFSET_BASIS), UInt32.fromBytes(seed.toBytes().slice(4, 4)));
+    UInt32 z =
+        fnv1a(UInt32.fromBytes(FNV_OFFSET_BASIS), UInt32.fromBytes(seed.toBytes().slice(4, 4)));
     UInt32 w = fnv1a(z, UInt32.fromBytes(seed.toBytes().slice(0, 4)));
     UInt32 jsr = fnv1a(w, laneId);
     UInt32 jcong = fnv1a(jsr, laneId);
@@ -183,32 +197,37 @@ public final class ProgPoW {
     // dag_entry holds the 256 bytes of data loaded from the DAG
     UInt32[][] dag_entry = new UInt32[PROGPOW_LANES][PROGPOW_DAG_LOADS];
     // On each loop iteration rotate which lane is the source of the DAG address.
-    // The source lane's mix[0] value is used to ensure the last loop's DAG data feeds into this loop's address.
+    // The source lane's mix[0] value is used to ensure the last loop's DAG data feeds into this
+    // loop's address.
     // dag_addr_base is which 256-byte entry within the DAG will be accessed
-    int dag_addr_base = mix[loop.intValue() % PROGPOW_LANES][0]
-        .mod(
-            UInt32
-                .valueOf(
-                    java.lang.Math
-                        .toIntExact(
-                            dagBytes / ((long) PROGPOW_LANES * (long) PROGPOW_DAG_LOADS * ((long) Integer.BYTES)))))
-        .intValue();
-    //mix[loop.intValue()%PROGPOW_LANES][0].mod(UInt32.valueOf((int) dagBytes / (PROGPOW_LANES*PROGPOW_DAG_LOADS*4))).intValue();
+    int dag_addr_base =
+        mix[loop.intValue() % PROGPOW_LANES][0]
+            .mod(
+                UInt32.valueOf(
+                    java.lang.Math.toIntExact(
+                        dagBytes
+                            / ((long) PROGPOW_LANES
+                                * (long) PROGPOW_DAG_LOADS
+                                * ((long) Integer.BYTES)))))
+            .intValue();
+    // mix[loop.intValue()%PROGPOW_LANES][0].mod(UInt32.valueOf((int) dagBytes /
+    // (PROGPOW_LANES*PROGPOW_DAG_LOADS*4))).intValue();
     for (int l = 0; l < PROGPOW_LANES; l++) {
       // Lanes access DAG_LOADS sequential words from the dag entry
-      // Shuffle which portion of the entry each lane accesses each iteration by XORing lane and loop.
+      // Shuffle which portion of the entry each lane accesses each iteration by XORing lane and
+      // loop.
       // This prevents multi-chip ASICs from each storing just a portion of the DAG
       //
-      int dag_addr_lane = dag_addr_base * PROGPOW_LANES + Integer.remainderUnsigned(l ^ loop.intValue(), PROGPOW_LANES);
+      int dag_addr_lane =
+          dag_addr_base * PROGPOW_LANES
+              + Integer.remainderUnsigned(l ^ loop.intValue(), PROGPOW_LANES);
       int offset = Integer.remainderUnsigned(l ^ loop.intValue(), PROGPOW_LANES);
       for (int i = 0; i < PROGPOW_DAG_LOADS; i++) {
         UInt32 lookup = (UInt32.valueOf(dag_addr_lane).divide(UInt32.valueOf(4))).add(offset >> 4);
         Bytes lookupHolder = dagLookupFunction.apply(lookup);
         int lookupOffset = (i * 4 + ((offset & 0xf) << 4)) % 64;
         dag_entry[l][i] = UInt32.fromBytes(lookupHolder.slice(lookupOffset, 4).reverse());
-
       }
-
     }
 
     // Initialize the program seed and sequences
@@ -217,7 +236,8 @@ public final class ProgPoW {
     int[] mix_seq_src = new int[PROGPOW_REGS];
     int mix_seq_dst_cnt = 0;
     int mix_seq_src_cnt = 0;
-    KISS99Random prog_rnd = progPowInit(UInt64.valueOf(blockNumber / PROGPOW_PERIOD), mix_seq_src, mix_seq_dst);
+    KISS99Random prog_rnd =
+        progPowInit(UInt64.valueOf(blockNumber / PROGPOW_PERIOD), mix_seq_src, mix_seq_dst);
 
     int max_i = Integer.max(PROGPOW_CNT_CACHE, PROGPOW_CNT_MATH);
     for (int i = 0; i < max_i; i++) {
@@ -238,9 +258,9 @@ public final class ProgPoW {
         // Generate 2 unique sources
         UInt32 src_rnd = prog_rnd.generate().mod(UInt32.valueOf(PROGPOW_REGS * (PROGPOW_REGS - 1)));
         int src1 = src_rnd.mod(UInt32.valueOf(PROGPOW_REGS)).intValue(); // 0 <= src1 < PROGPOW_REGS
-        int src2 = src_rnd.divide(UInt32.valueOf(PROGPOW_REGS)).intValue(); // 0 <= src2 < PROGPOW_REGS - 1
-        if (src2 >= src1)
-          ++src2; // src2 is now any reg other than src1
+        int src2 =
+            src_rnd.divide(UInt32.valueOf(PROGPOW_REGS)).intValue(); // 0 <= src2 < PROGPOW_REGS - 1
+        if (src2 >= src1) ++src2; // src2 is now any reg other than src1
         UInt32 sel1 = prog_rnd.generate();
         int dst = mix_seq_dst[(mix_seq_dst_cnt++) % PROGPOW_REGS];
         UInt32 sel2 = prog_rnd.generate();

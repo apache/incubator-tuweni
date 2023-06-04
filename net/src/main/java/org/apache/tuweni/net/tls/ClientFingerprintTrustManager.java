@@ -41,16 +41,15 @@ final class ClientFingerprintTrustManager extends X509ExtendedTrustManager {
   private final boolean updateFingerprints;
 
   private ClientFingerprintTrustManager(
-      FingerprintRepository repository,
-      boolean acceptNewFingerprints,
-      boolean updateFingerprints) {
+      FingerprintRepository repository, boolean acceptNewFingerprints, boolean updateFingerprints) {
     this.repository = repository;
     this.acceptNewFingerprints = acceptNewFingerprints;
     this.updateFingerprints = updateFingerprints;
   }
 
   @Override
-  public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
+  public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket)
+      throws CertificateException {
     X509Certificate cert = chain[0];
     X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
     RDN cn = x500name.getRDNs(BCStyle.CN)[0];
@@ -99,7 +98,8 @@ final class ClientFingerprintTrustManager extends X509ExtendedTrustManager {
       if (!updateFingerprints) {
         throw new CertificateException(
             format(
-                "Client identification has changed!!" + " Certificate for %s (%s) has fingerprint %s",
+                "Client identification has changed!!"
+                    + " Certificate for %s (%s) has fingerprint %s",
                 host,
                 cert.getSubjectDN(),
                 fingerprint.toHexString().substring(2).toLowerCase(Locale.ENGLISH)));

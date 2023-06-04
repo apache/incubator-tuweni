@@ -21,8 +21,8 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 /**
  * A junit5 extension, that provides a memory-backed Lucene index writer for tests.
  *
- * The index writer is created for the test suite and injected into any tests with parameters annotated by
- * {@link LuceneIndexWriter}.
+ * <p>The index writer is created for the test suite and injected into any tests with parameters
+ * annotated by {@link LuceneIndexWriter}.
  */
 public class LuceneIndexWriterExtension implements ParameterResolver, AfterAllCallback {
 
@@ -30,14 +30,16 @@ public class LuceneIndexWriterExtension implements ParameterResolver, AfterAllCa
   private IndexWriter writer;
 
   @Override
-  public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+  public boolean supportsParameter(
+      ParameterContext parameterContext, ExtensionContext extensionContext)
       throws ParameterResolutionException {
     return parameterContext.getParameter().isAnnotationPresent(LuceneIndexWriter.class)
         || parameterContext.getParameter().isAnnotationPresent(LuceneIndex.class);
   }
 
   @Override
-  public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+  public Object resolveParameter(
+      ParameterContext parameterContext, ExtensionContext extensionContext)
       throws ParameterResolutionException {
     if (writer == null) {
       try {
@@ -66,6 +68,4 @@ public class LuceneIndexWriterExtension implements ParameterResolver, AfterAllCa
       index.close();
     }
   }
-
-
 }

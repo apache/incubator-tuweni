@@ -38,7 +38,7 @@ class DNSResolverTest {
 
     resolver.visitTree(
       "enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@all.goerli.ethdisco.net",
-      visitor
+      visitor,
     )
     assertTrue(nodes.size > 0)
   }
@@ -57,7 +57,7 @@ class DNSResolverTest {
 
     resolver.visitTree(
       "enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@all.mainnet.ethdisco.net",
-      visitor
+      visitor,
     )
     assertTrue(nodes.size > 0)
     println(nodes.size)

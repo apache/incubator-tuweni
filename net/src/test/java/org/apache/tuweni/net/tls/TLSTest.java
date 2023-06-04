@@ -41,7 +41,8 @@ class TLSTest {
   }
 
   @Test
-  void doesNotGenerateSelfSignedCertificateIfCertFileExists(@TempDirectory Path tempDir) throws Exception {
+  void doesNotGenerateSelfSignedCertificateIfCertFileExists(@TempDirectory Path tempDir)
+      throws Exception {
     Path certificate = tempDir.resolve("server1.crt");
     Path key = tempDir.resolve("server1.key");
 
@@ -54,7 +55,8 @@ class TLSTest {
   }
 
   @Test
-  void doesNotGenerateSelfSignedCertificateIfKeyFileExists(@TempDirectory Path tempDir) throws Exception {
+  void doesNotGenerateSelfSignedCertificateIfKeyFileExists(@TempDirectory Path tempDir)
+      throws Exception {
     Path certificate = tempDir.resolve("server2.crt");
     Path key = tempDir.resolve("server2.key");
 
@@ -80,7 +82,8 @@ class TLSTest {
   private void checkKeyPair(Path key, Path cert) throws Exception {
     PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(readPemFile(key));
     CertificateFactory cf = CertificateFactory.getInstance("X.509");
-    Certificate certificate = cf.generateCertificate(new ByteArrayInputStream(Files.readAllBytes(cert)));
+    Certificate certificate =
+        cf.generateCertificate(new ByteArrayInputStream(Files.readAllBytes(cert)));
     KeyFactory kf = KeyFactory.getInstance("RSA");
     KeyPair keyPair = new KeyPair(certificate.getPublicKey(), kf.generatePrivate(pkcs8KeySpec));
 

@@ -45,18 +45,18 @@ object ScraperApp {
           if (seen.add(node)) {
             println(
               node.ip().hostAddress + "," + node.udp() + "," + node.data["attnets"] + "," +
-                Base64URLSafe.encode(node.toRLP())
+                Base64URLSafe.encode(node.toRLP()),
             )
           }
         }
-      }
+      },
     )
     Runtime.getRuntime().addShutdownHook(
       Thread {
         runBlocking {
           scraper.stop().await()
         }
-      }
+      },
     )
     runBlocking {
       scraper.start().await()
@@ -76,7 +76,7 @@ class Scraper(
   val bindAddress: InetSocketAddress,
   val listeners: List<(EthereumNodeRecord, List<EthereumNodeRecord>) -> Unit>,
   val maxWaitForNewPeers: Long = 20L,
-  val waitBetweenScrapes: Long = (5 * 60).toLong()
+  val waitBetweenScrapes: Long = (5 * 60).toLong(),
 ) : CoroutineScope {
 
   private var service: DiscoveryV5Service? = null
@@ -89,7 +89,7 @@ class Scraper(
       keyPair = SECP256K1.KeyPair.random(),
       localPort = 0,
       bindAddress = bindAddress,
-      bootstrapENRList = emptyList()
+      bootstrapENRList = emptyList(),
     )
     newService.start().await()
     for (enr in initialENRs) {

@@ -16,8 +16,10 @@ class PublicKeyToAddressTest {
 
   @Test
   public void testTransformFromSecretKeyToAddress() {
-    SECP256K1.SecretKey key = SECP256K1.SecretKey
-        .fromBytes(Bytes32.fromHexString("4ee50b74f1f903a80df52c4f6b43a17bc1319636e203f3fe9c09294f74907849"));
+    SECP256K1.SecretKey key =
+        SECP256K1.SecretKey.fromBytes(
+            Bytes32.fromHexString(
+                "4ee50b74f1f903a80df52c4f6b43a17bc1319636e203f3fe9c09294f74907849"));
     SECP256K1.PublicKey pk = SECP256K1.KeyPair.fromSecretKey(key).publicKey();
     Address addr = Address.fromPublicKeyBytes(pk.bytes());
     assertEquals(Address.fromHexString("0x25851ab5f8151a68d0014fd508609bbf6b4d6d1d"), addr);

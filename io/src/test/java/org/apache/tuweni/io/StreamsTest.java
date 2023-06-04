@@ -17,8 +17,10 @@ class StreamsTest {
 
   @Test
   void shouldStreamAnEnumeration() {
-    Enumeration<String> enumeration = Collections.enumeration(Arrays.asList("RED", "BLUE", "GREEN"));
-    List<String> result = enumerationStream(enumeration).map(String::toLowerCase).collect(Collectors.toList());
+    Enumeration<String> enumeration =
+        Collections.enumeration(Arrays.asList("RED", "BLUE", "GREEN"));
+    List<String> result =
+        enumerationStream(enumeration).map(String::toLowerCase).collect(Collectors.toList());
     assertEquals(Arrays.asList("red", "blue", "green"), result);
   }
 }

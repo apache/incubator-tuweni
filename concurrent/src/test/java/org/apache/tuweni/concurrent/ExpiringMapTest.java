@@ -71,10 +71,13 @@ class ExpiringMapTest {
     AtomicReference<String> key = new AtomicReference<>();
     AtomicReference<String> value = new AtomicReference<>();
     ExpiringMap<String, String> listeningMap =
-        new ExpiringMap<>(() -> currentTime.toEpochMilli(), 1L, (String k, String v) -> {
-          key.set(k);
-          value.set(v);
-        });
+        new ExpiringMap<>(
+            () -> currentTime.toEpochMilli(),
+            1L,
+            (String k, String v) -> {
+              key.set(k);
+              value.set(v);
+            });
     listeningMap.put("foo", "bar", -1);
     assertEquals("foo", key.get());
     assertEquals("bar", value.get());

@@ -17,7 +17,8 @@ class KeyDerivationTest {
   @BeforeAll
   static void checkAvailable() {
     assumeTrue(Sodium.isAvailable(), "Sodium native library is not available");
-    assumeTrue(KeyDerivation.isAvailable(), "KeyDerivation support is not available (requires >= 10.0.12");
+    assumeTrue(
+        KeyDerivation.isAvailable(), "KeyDerivation support is not available (requires >= 10.0.12");
   }
 
   @Test

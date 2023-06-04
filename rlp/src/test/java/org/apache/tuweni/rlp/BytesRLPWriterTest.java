@@ -33,18 +33,23 @@ class BytesRLPWriterTest {
   @Test
   void shouldWriteFullObjects() {
     SomeObject bob = new SomeObject("Bob", 4, BigInteger.valueOf(1234563434344L));
-    Bytes bytes = RLP.encode(writer -> {
-      writer.writeString(bob.name);
-      writer.writeInt(bob.number);
-      writer.writeBigInteger(bob.longNumber);
-    });
+    Bytes bytes =
+        RLP.encode(
+            writer -> {
+              writer.writeString(bob.name);
+              writer.writeInt(bob.number);
+              writer.writeBigInteger(bob.longNumber);
+            });
 
-    assertTrue(RLP.<Boolean>decode(bytes, reader -> {
-      assertEquals("Bob", reader.readString());
-      assertEquals(4, reader.readInt());
-      assertEquals(BigInteger.valueOf(1234563434344L), reader.readBigInteger());
-      return true;
-    }));
+    assertTrue(
+        RLP.<Boolean>decode(
+            bytes,
+            reader -> {
+              assertEquals("Bob", reader.readString());
+              assertEquals(4, reader.readInt());
+              assertEquals(BigInteger.valueOf(1234563434344L), reader.readBigInteger());
+              return true;
+            }));
   }
 
   @Test
@@ -69,20 +74,25 @@ class BytesRLPWriterTest {
 
   @Test
   void shouldWriteUInt256Integers() {
-    assertEquals(fromHexString("80"), RLP.encode(writer -> writer.writeUInt256(UInt256.valueOf(0L))));
-    assertEquals(fromHexString("830186a0"), RLP.encode(writer -> writer.writeUInt256(UInt256.valueOf(100000L))));
+    assertEquals(
+        fromHexString("80"), RLP.encode(writer -> writer.writeUInt256(UInt256.valueOf(0L))));
+    assertEquals(
+        fromHexString("830186a0"),
+        RLP.encode(writer -> writer.writeUInt256(UInt256.valueOf(100000L))));
     assertEquals(
         fromHexString("a00400000000000000000000000000000000000000000000000000f100000000ab"),
-        RLP
-            .encode(
-                writer -> writer
-                    .writeUInt256(
-                        UInt256.fromHexString("0x0400000000000000000000000000000000000000000000000000f100000000ab"))));
+        RLP.encode(
+            writer ->
+                writer.writeUInt256(
+                    UInt256.fromHexString(
+                        "0x0400000000000000000000000000000000000000000000000000f100000000ab"))));
   }
 
   @Test
   void shouldWriteBigIntegers() {
-    assertEquals(fromHexString("830186a0"), RLP.encode(writer -> writer.writeBigInteger(BigInteger.valueOf(100000))));
+    assertEquals(
+        fromHexString("830186a0"),
+        RLP.encode(writer -> writer.writeBigInteger(BigInteger.valueOf(100000))));
     assertEquals(
         fromHexString("8ee1ceefa5bbd9ed1c97f17a1df801"),
         RLP.encode(writer -> writer.writeBigInteger(BigInteger.valueOf(127).pow(16))));
@@ -106,7 +116,8 @@ class BytesRLPWriterTest {
   @Test
   void shouldWriteShortLists() {
     List<String> strings =
-        Arrays.asList("asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer");
+        Arrays.asList(
+            "asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer");
 
     assertEquals(
         fromHexString(
@@ -118,7 +129,8 @@ class BytesRLPWriterTest {
   @Test
   void shouldWriteShortListWithAFunction() {
     List<String> strings =
-        Arrays.asList("asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer");
+        Arrays.asList(
+            "asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer", "zxcv", "asdf", "qwer");
 
     assertEquals(
         fromHexString(
@@ -129,38 +141,47 @@ class BytesRLPWriterTest {
 
   @Test
   void shouldWriteNestedLists() {
-    Bytes bytes = RLP.encodeList(listWriter -> {
-      listWriter.writeString("asdf");
-      listWriter.writeString("qwer");
-      for (int i = 30; i >= 0; --i) {
-        listWriter.writeList(subListWriter -> {
-          subListWriter.writeString("zxcv");
-          subListWriter.writeString("asdf");
-          subListWriter.writeString("qwer");
-        });
-      }
-    });
+    Bytes bytes =
+        RLP.encodeList(
+            listWriter -> {
+              listWriter.writeString("asdf");
+              listWriter.writeString("qwer");
+              for (int i = 30; i >= 0; --i) {
+                listWriter.writeList(
+                    subListWriter -> {
+                      subListWriter.writeString("zxcv");
+                      subListWriter.writeString("asdf");
+                      subListWriter.writeString("qwer");
+                    });
+              }
+            });
 
-    assertTrue(RLP.<Boolean>decodeList(bytes, listReader -> {
-      assertEquals("asdf", listReader.readString());
-      assertEquals("qwer", listReader.readString());
+    assertTrue(
+        RLP.<Boolean>decodeList(
+            bytes,
+            listReader -> {
+              assertEquals("asdf", listReader.readString());
+              assertEquals("qwer", listReader.readString());
 
-      for (int i = 30; i >= 0; --i) {
-        assertTrue(listReader.<Boolean>readList(subListReader -> {
-          assertEquals("zxcv", subListReader.readString());
-          assertEquals("asdf", subListReader.readString());
-          assertEquals("qwer", subListReader.readString());
-          return true;
-        }));
-      }
+              for (int i = 30; i >= 0; --i) {
+                assertTrue(
+                    listReader.<Boolean>readList(
+                        subListReader -> {
+                          assertEquals("zxcv", subListReader.readString());
+                          assertEquals("asdf", subListReader.readString());
+                          assertEquals("qwer", subListReader.readString());
+                          return true;
+                        }));
+              }
 
-      return true;
-    }));
+              return true;
+            }));
   }
 
   @Test
   void shouldWritePreviouslyEncodedValues() {
-    Bytes output = RLP.encode(writer -> writer.writeRLP(RLP.encodeByteArray("abc".getBytes(UTF_8))));
+    Bytes output =
+        RLP.encode(writer -> writer.writeRLP(RLP.encodeByteArray("abc".getBytes(UTF_8))));
     assertEquals("abc", RLP.decodeString(output));
   }
 }

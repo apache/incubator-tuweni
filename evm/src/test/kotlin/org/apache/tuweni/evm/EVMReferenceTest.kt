@@ -125,7 +125,7 @@ class EVMReferenceTest {
           state.nonce!!,
           state.balance!!,
           Hash.fromBytes(MerkleTrie.EMPTY_TRIE_ROOT_HASH),
-          Hash.hash(state.code!!)
+          Hash.hash(state.code!!),
         )
         repository.storeAccount(address, accountState)
         repository.storeCode(state.code!!)
@@ -143,7 +143,7 @@ class EVMReferenceTest {
       repository,
       Registry.istanbul,
       EvmVmImpl::create,
-      mapOf(Pair("DISABLE_TRANSFER_VALUE", "true"))
+      mapOf(Pair("DISABLE_TRANSFER_VALUE", "true")),
     )
     vm.start()
     try {
@@ -162,7 +162,7 @@ class EVMReferenceTest {
         test.env?.currentDifficulty!!,
         UInt256.valueOf(1),
         CallKind.CALL,
-        hardFork
+        hardFork,
       )
       if (test.post == null) {
         assertNotEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
@@ -233,7 +233,7 @@ class EVMReferenceTest {
         test.post!!.forEach { address, state ->
           runBlocking {
             assertTrue(
-              repository.accountsExists(address)
+              repository.accountsExists(address),
             )
             val accountState = repository.getAccount(address)
             val balance = accountState?.balance ?: Wei.valueOf(0)
@@ -260,12 +260,12 @@ class EVMReferenceTest {
         } else {
           assertEquals(
             test.out?.let { if (it.size() < 32) Bytes32.rightPad(it) else it },
-            result.state.output?.let { if (it.size() < 32) Bytes32.rightPad(it) else it }
+            result.state.output?.let { if (it.size() < 32) Bytes32.rightPad(it) else it },
           )
         }
         assertEquals(
           test.gas!!,
-          result.state.gasManager.gasLeft()
+          result.state.gasManager.gasLeft(),
         )
       }
     } finally {
@@ -280,7 +280,7 @@ data class Env(
   var currentDifficulty: UInt256? = null,
   var currentGasLimit: UInt256? = null,
   var currentNumber: UInt256? = null,
-  var currentTimestamp: UInt256? = null
+  var currentTimestamp: UInt256? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -292,7 +292,7 @@ data class Exec(
   var gas: Gas? = null,
   var gasPrice: Wei? = null,
   var origin: Address? = null,
-  var value: Bytes? = null
+  var value: Bytes? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -300,7 +300,7 @@ data class JsonAccountState(
   var balance: Wei? = null,
   var code: Bytes? = null,
   var nonce: UInt256? = null,
-  var storage: Map<UInt256, UInt256>? = null
+  var storage: Map<UInt256, UInt256>? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -311,5 +311,5 @@ data class JsonReferenceTest(
   var logs: Bytes? = null,
   var out: Bytes? = null,
   var post: Map<Address, JsonAccountState>? = null,
-  var pre: Map<Address, JsonAccountState>? = null
+  var pre: Map<Address, JsonAccountState>? = null,
 )

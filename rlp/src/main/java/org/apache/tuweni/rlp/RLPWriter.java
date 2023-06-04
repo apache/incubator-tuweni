@@ -12,18 +12,15 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-
-/**
- * A writer for encoding values to RLP.
- */
+/** A writer for encoding values to RLP. */
 public interface RLPWriter {
 
   /**
    * Append an already RLP encoded value.
    *
-   * <p>
-   * Note that this method <b>may not</b> validate that {@code value} is a valid RLP sequence. Appending an invalid RLP
-   * sequence will cause the entire RLP encoding produced by this writer to also be invalid.
+   * <p>Note that this method <b>may not</b> validate that {@code value} is a valid RLP sequence.
+   * Appending an invalid RLP sequence will cause the entire RLP encoding produced by this writer to
+   * also be invalid.
    *
    * @param value The RLP encoded bytes to append.
    */
@@ -121,10 +118,11 @@ public interface RLPWriter {
    * @param <T> The type of the list elements.
    */
   default <T> void writeList(List<T> elements, BiConsumer<RLPWriter, T> elementWriter) {
-    writeList(writer -> {
-      for (T element : elements) {
-        elementWriter.accept(writer, element);
-      }
-    });
+    writeList(
+        writer -> {
+          for (T element : elements) {
+            elementWriter.accept(writer, element);
+          }
+        });
   }
 }

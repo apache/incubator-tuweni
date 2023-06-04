@@ -15,56 +15,44 @@ import org.jetbrains.annotations.Nullable;
 /**
  * The Argon2 memory-hard hashing function.
  *
- * <p>
- * Argon2 summarizes the state of the art in the design of memory-hard functions.
+ * <p>Argon2 summarizes the state of the art in the design of memory-hard functions.
  *
- * <p>
- * It aims at the highest memory filling rate and effective use of multiple computing units, while still providing
- * defense against tradeoff attacks.
+ * <p>It aims at the highest memory filling rate and effective use of multiple computing units,
+ * while still providing defense against tradeoff attacks.
  *
- * <p>
- * It prevents ASICs from having a significant advantage over software implementations.
+ * <p>It prevents ASICs from having a significant advantage over software implementations.
  *
  * <h3>Guidelines for choosing the parameters</h3>
  *
- * <p>
- * Start by determining how much memory the function can use. What will be the highest number of threads/processes
- * evaluating the function simultaneously (ideally, no more than 1 per CPU core)? How much physical memory is guaranteed
- * to be available?
+ * <p>Start by determining how much memory the function can use. What will be the highest number of
+ * threads/processes evaluating the function simultaneously (ideally, no more than 1 per CPU core)?
+ * How much physical memory is guaranteed to be available?
  *
- * <p>
- * Set memlimit to the amount of memory you want to reserve for password hashing.
+ * <p>Set memlimit to the amount of memory you want to reserve for password hashing.
  *
- * <p>
- * Then, set opslimit to 3 and measure the time it takes to hash a password.
+ * <p>Then, set opslimit to 3 and measure the time it takes to hash a password.
  *
- * <p>
- * If this it is way too long for your application, reduce memlimit, but keep opslimit set to 3.
+ * <p>If this it is way too long for your application, reduce memlimit, but keep opslimit set to 3.
  *
- * <p>
- * If the function is so fast that you can afford it to be more computationally intensive without any usability issues,
- * increase opslimit.
+ * <p>If the function is so fast that you can afford it to be more computationally intensive without
+ * any usability issues, increase opslimit.
  *
- * <p>
- * For online use (e.g. login in on a website), a 1 second computation is likely to be the acceptable maximum.
+ * <p>For online use (e.g. login in on a website), a 1 second computation is likely to be the
+ * acceptable maximum.
  *
- * <p>
- * For interactive use (e.g. a desktop application), a 5 second pause after having entered a password is acceptable if
- * the password doesn't need to be entered more than once per session.
+ * <p>For interactive use (e.g. a desktop application), a 5 second pause after having entered a
+ * password is acceptable if the password doesn't need to be entered more than once per session.
  *
- * <p>
- * For non-interactive use and infrequent use (e.g. restoring an encrypted backup), an even slower computation can be an
- * option.
+ * <p>For non-interactive use and infrequent use (e.g. restoring an encrypted backup), an even
+ * slower computation can be an option.
  *
- * <p>
- * This class depends upon the JNR-FFI library being available on the classpath, along with its dependencies. See
- * https://github.com/jnr/jnr-ffi. JNR-FFI can be included using the gradle dependency 'com.github.jnr:jnr-ffi'.
+ * <p>This class depends upon the JNR-FFI library being available on the classpath, along with its
+ * dependencies. See https://github.com/jnr/jnr-ffi. JNR-FFI can be included using the gradle
+ * dependency 'com.github.jnr:jnr-ffi'.
  */
 public final class PasswordHash {
 
-  /**
-   * A PasswordHash salt.
-   */
+  /** A PasswordHash salt. */
   public static final class Salt {
     final Allocated value;
 
@@ -75,8 +63,7 @@ public final class PasswordHash {
     /**
      * Create a {@link Salt} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the seed.
      * @return A seed.
@@ -88,8 +75,7 @@ public final class PasswordHash {
     /**
      * Create a {@link Salt} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the seed.
      * @return A seed.
@@ -143,7 +129,7 @@ public final class PasswordHash {
 
     /**
      * Provides the bytes of this salt.
-     * 
+     *
      * @return The bytes of this salt.
      */
     public Bytes bytes() {
@@ -152,7 +138,7 @@ public final class PasswordHash {
 
     /**
      * Provides the bytes of this salt.
-     * 
+     *
      * @return The bytes of this salt.
      */
     public byte[] bytesArray() {
@@ -160,9 +146,7 @@ public final class PasswordHash {
     }
   }
 
-  /**
-   * A PasswordHash algorithm.
-   */
+  /** A PasswordHash algorithm. */
   public static final class Algorithm {
 
     private static Algorithm ARGON2I13 = new Algorithm("argon2i13", 1, 3, true);
@@ -183,7 +167,7 @@ public final class PasswordHash {
 
     /**
      * Returns the currently recommended algorithm
-     * 
+     *
      * @return The currently recommended algorithm.
      */
     public static Algorithm recommended() {
@@ -192,7 +176,7 @@ public final class PasswordHash {
 
     /**
      * Returns the version 1.3 of the Argon2i algorithm.
-     * 
+     *
      * @return Version 1.3 of the Argon2i algorithm.
      */
     public static Algorithm argon2i13() {
@@ -201,7 +185,7 @@ public final class PasswordHash {
 
     /**
      * Returns the version 1.3 of the Argon2id algorithm.
-     * 
+     *
      * @return Version 1.3 of the Argon2id algorithm.
      */
     public static Algorithm argon2id13() {
@@ -254,8 +238,8 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a key from a password, using the currently recommended algorithm and limits on operations and memory that
-   * are suitable for most use-cases.
+   * Compute a key from a password, using the currently recommended algorithm and limits on
+   * operations and memory that are suitable for most use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -267,8 +251,8 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a key from a password, using the currently recommended algorithm and limits on operations and memory that
-   * are suitable for most use-cases.
+   * Compute a key from a password, using the currently recommended algorithm and limits on
+   * operations and memory that are suitable for most use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -280,8 +264,8 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a key from a password, using the currently recommended algorithm and limits on operations and memory that
-   * are suitable for most use-cases.
+   * Compute a key from a password, using the currently recommended algorithm and limits on
+   * operations and memory that are suitable for most use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -289,11 +273,13 @@ public final class PasswordHash {
    * @return The derived key.
    */
   public static byte[] hash(byte[] password, int length, Salt salt) {
-    return hash(password, length, salt, moderateOpsLimit(), moderateMemLimit(), Algorithm.recommended());
+    return hash(
+        password, length, salt, moderateOpsLimit(), moderateMemLimit(), Algorithm.recommended());
   }
 
   /**
-   * Compute a key from a password, using limits on operations and memory that are suitable for most use-cases.
+   * Compute a key from a password, using limits on operations and memory that are suitable for most
+   * use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -306,7 +292,8 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a key from a password, using limits on operations and memory that are suitable for most use-cases.
+   * Compute a key from a password, using limits on operations and memory that are suitable for most
+   * use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -319,7 +306,8 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a key from a password, using limits on operations and memory that are suitable for most use-cases.
+   * Compute a key from a password, using limits on operations and memory that are suitable for most
+   * use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -332,8 +320,8 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a key from a password, using the currently recommended algorithm and limits on operations and memory that
-   * are suitable for interactive use-cases.
+   * Compute a key from a password, using the currently recommended algorithm and limits on
+   * operations and memory that are suitable for interactive use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -345,8 +333,8 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a key from a password, using the currently recommended algorithm and limits on operations and memory that
-   * are suitable for interactive use-cases.
+   * Compute a key from a password, using the currently recommended algorithm and limits on
+   * operations and memory that are suitable for interactive use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -358,8 +346,8 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a key from a password, using the currently recommended algorithm and limits on operations and memory that
-   * are suitable for interactive use-cases.
+   * Compute a key from a password, using the currently recommended algorithm and limits on
+   * operations and memory that are suitable for interactive use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -367,11 +355,18 @@ public final class PasswordHash {
    * @return The derived key.
    */
   public static byte[] hashInteractive(byte[] password, int length, Salt salt) {
-    return hash(password, length, salt, interactiveOpsLimit(), interactiveMemLimit(), Algorithm.recommended());
+    return hash(
+        password,
+        length,
+        salt,
+        interactiveOpsLimit(),
+        interactiveMemLimit(),
+        Algorithm.recommended());
   }
 
   /**
-   * Compute a key from a password, using limits on operations and memory that are suitable for interactive use-cases.
+   * Compute a key from a password, using limits on operations and memory that are suitable for
+   * interactive use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -384,7 +379,8 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a key from a password, using limits on operations and memory that are suitable for interactive use-cases.
+   * Compute a key from a password, using limits on operations and memory that are suitable for
+   * interactive use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -397,7 +393,8 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a key from a password, using limits on operations and memory that are suitable for interactive use-cases.
+   * Compute a key from a password, using limits on operations and memory that are suitable for
+   * interactive use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -405,13 +402,14 @@ public final class PasswordHash {
    * @param algorithm The algorithm to use.
    * @return The derived key.
    */
-  public static byte[] hashInteractive(byte[] password, int length, Salt salt, Algorithm algorithm) {
+  public static byte[] hashInteractive(
+      byte[] password, int length, Salt salt, Algorithm algorithm) {
     return hash(password, length, salt, interactiveOpsLimit(), interactiveMemLimit(), algorithm);
   }
 
   /**
-   * Compute a key from a password, using the currently recommended algorithm and limits on operations and memory that
-   * are suitable for sensitive use-cases.
+   * Compute a key from a password, using the currently recommended algorithm and limits on
+   * operations and memory that are suitable for sensitive use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -423,8 +421,8 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a key from a password, using the currently recommended algorithm and limits on operations and memory that
-   * are suitable for sensitive use-cases.
+   * Compute a key from a password, using the currently recommended algorithm and limits on
+   * operations and memory that are suitable for sensitive use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -436,8 +434,8 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a key from a password, using the currently recommended algorithm and limits on operations and memory that
-   * are suitable for sensitive use-cases.
+   * Compute a key from a password, using the currently recommended algorithm and limits on
+   * operations and memory that are suitable for sensitive use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -445,11 +443,13 @@ public final class PasswordHash {
    * @return The derived key.
    */
   public static byte[] hashSensitive(byte[] password, int length, Salt salt) {
-    return hash(password, length, salt, sensitiveOpsLimit(), sensitiveMemLimit(), Algorithm.recommended());
+    return hash(
+        password, length, salt, sensitiveOpsLimit(), sensitiveMemLimit(), Algorithm.recommended());
   }
 
   /**
-   * Compute a key from a password, using limits on operations and memory that are suitable for sensitive use-cases.
+   * Compute a key from a password, using limits on operations and memory that are suitable for
+   * sensitive use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -462,7 +462,8 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a key from a password, using limits on operations and memory that are suitable for sensitive use-cases.
+   * Compute a key from a password, using limits on operations and memory that are suitable for
+   * sensitive use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -475,7 +476,8 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a key from a password, using limits on operations and memory that are suitable for sensitive use-cases.
+   * Compute a key from a password, using limits on operations and memory that are suitable for
+   * sensitive use-cases.
    *
    * @param password The password to hash.
    * @param length The key length to generate.
@@ -493,12 +495,15 @@ public final class PasswordHash {
    * @param password The password to hash.
    * @param length The key length to generate.
    * @param salt A salt.
-   * @param opsLimit The operations limit, which must be in the range {@link #minOpsLimit()} to {@link #maxOpsLimit()}.
-   * @param memLimit The memory limit, which must be in the range {@link #minMemLimit()} to {@link #maxMemLimit()}.
+   * @param opsLimit The operations limit, which must be in the range {@link #minOpsLimit()} to
+   *     {@link #maxOpsLimit()}.
+   * @param memLimit The memory limit, which must be in the range {@link #minMemLimit()} to {@link
+   *     #maxMemLimit()}.
    * @param algorithm The algorithm to use.
    * @return The derived key.
    */
-  public static Bytes hash(String password, int length, Salt salt, long opsLimit, long memLimit, Algorithm algorithm) {
+  public static Bytes hash(
+      String password, int length, Salt salt, long opsLimit, long memLimit, Algorithm algorithm) {
     return Bytes.wrap(hash(password.getBytes(UTF_8), length, salt, opsLimit, memLimit, algorithm));
   }
 
@@ -508,12 +513,15 @@ public final class PasswordHash {
    * @param password The password to hash.
    * @param length The key length to generate.
    * @param salt A salt.
-   * @param opsLimit The operations limit, which must be in the range {@link #minOpsLimit()} to {@link #maxOpsLimit()}.
-   * @param memLimit The memory limit, which must be in the range {@link #minMemLimit()} to {@link #maxMemLimit()}.
+   * @param opsLimit The operations limit, which must be in the range {@link #minOpsLimit()} to
+   *     {@link #maxOpsLimit()}.
+   * @param memLimit The memory limit, which must be in the range {@link #minMemLimit()} to {@link
+   *     #maxMemLimit()}.
    * @param algorithm The algorithm to use.
    * @return The derived key.
    */
-  public static Bytes hash(Bytes password, int length, Salt salt, long opsLimit, long memLimit, Algorithm algorithm) {
+  public static Bytes hash(
+      Bytes password, int length, Salt salt, long opsLimit, long memLimit, Algorithm algorithm) {
     return Bytes.wrap(hash(password.toArrayUnsafe(), length, salt, opsLimit, memLimit, algorithm));
   }
 
@@ -523,20 +531,24 @@ public final class PasswordHash {
    * @param password The password to hash.
    * @param length The key length to generate.
    * @param salt A salt.
-   * @param opsLimit The operations limit, which must be in the range {@link #minOpsLimit()} to {@link #maxOpsLimit()}.
-   * @param memLimit The memory limit, which must be in the range {@link #minMemLimit()} to {@link #maxMemLimit()}.
+   * @param opsLimit The operations limit, which must be in the range {@link #minOpsLimit()} to
+   *     {@link #maxOpsLimit()}.
+   * @param memLimit The memory limit, which must be in the range {@link #minMemLimit()} to {@link
+   *     #maxMemLimit()}.
    * @param algorithm The algorithm to use.
    * @return The derived key.
    * @throws IllegalArgumentException If the opsLimit is too low for the specified algorithm.
-   * @throws UnsupportedOperationException If the specified algorithm is not supported by the currently loaded sodium
-   *         native library.
+   * @throws UnsupportedOperationException If the specified algorithm is not supported by the
+   *     currently loaded sodium native library.
    */
-  public static byte[] hash(byte[] password, int length, Salt salt, long opsLimit, long memLimit, Algorithm algorithm) {
+  public static byte[] hash(
+      byte[] password, int length, Salt salt, long opsLimit, long memLimit, Algorithm algorithm) {
     assertHashLength(length);
     assertOpsLimit(opsLimit);
     assertMemLimit(memLimit);
     if (opsLimit < algorithm.minOps) {
-      throw new IllegalArgumentException("opsLimit " + opsLimit + " too low for specified algorithm");
+      throw new IllegalArgumentException(
+          "opsLimit " + opsLimit + " too low for specified algorithm");
     }
     if (!algorithm.isSupported()) {
       throw new UnsupportedOperationException(
@@ -544,8 +556,16 @@ public final class PasswordHash {
     }
     byte[] out = new byte[length];
 
-    int rc = Sodium
-        .crypto_pwhash(out, length, password, password.length, salt.value.pointer(), opsLimit, memLimit, algorithm.id);
+    int rc =
+        Sodium.crypto_pwhash(
+            out,
+            length,
+            password,
+            password.length,
+            salt.value.pointer(),
+            opsLimit,
+            memLimit,
+            algorithm.id);
     if (rc != 0) {
       throw new SodiumException("crypto_pwhash: failed with result " + rc);
     }
@@ -554,7 +574,7 @@ public final class PasswordHash {
 
   /**
    * Returns the minimum hash length
-   * 
+   *
    * @return The minimum hash length (16).
    */
   public static int minHashLength() {
@@ -571,7 +591,7 @@ public final class PasswordHash {
 
   /**
    * Returns the maximum hash length
-   * 
+   *
    * @return The maximum hash length.
    */
   public static int maxHashLength() {
@@ -600,10 +620,10 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a hash from a password, using limits on operations and memory that are suitable for most use-cases.
+   * Compute a hash from a password, using limits on operations and memory that are suitable for
+   * most use-cases.
    *
-   * <p>
-   * Equivalent to {@code hash(password, moderateOpsLimit(), moderateMemLimit())}.
+   * <p>Equivalent to {@code hash(password, moderateOpsLimit(), moderateMemLimit())}.
    *
    * @param password The password to hash.
    * @return The hash string.
@@ -613,10 +633,10 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a hash from a password, using limits on operations and memory that are suitable for interactive use-cases.
+   * Compute a hash from a password, using limits on operations and memory that are suitable for
+   * interactive use-cases.
    *
-   * <p>
-   * Equivalent to {@code hash(password, sensitiveOpsLimit(), sensitiveMemLimit())}.
+   * <p>Equivalent to {@code hash(password, sensitiveOpsLimit(), sensitiveMemLimit())}.
    *
    * @param password The password to hash.
    * @return The hash string.
@@ -626,10 +646,10 @@ public final class PasswordHash {
   }
 
   /**
-   * Compute a hash from a password, using limits on operations and memory that are suitable for sensitive use-cases.
+   * Compute a hash from a password, using limits on operations and memory that are suitable for
+   * sensitive use-cases.
    *
-   * <p>
-   * Equivalent to {@code hash(password, sensitiveOpsLimit(), sensitiveMemLimit())}.
+   * <p>Equivalent to {@code hash(password, sensitiveOpsLimit(), sensitiveMemLimit())}.
    *
    * @param password The password to hash.
    * @return The hash string.
@@ -642,8 +662,10 @@ public final class PasswordHash {
    * Compute a hash from a password.
    *
    * @param password The password to hash.
-   * @param opsLimit The operations limit, which must be in the range {@link #minOpsLimit()} to {@link #maxOpsLimit()}.
-   * @param memLimit The memory limit, which must be in the range {@link #minMemLimit()} to {@link #maxMemLimit()}.
+   * @param opsLimit The operations limit, which must be in the range {@link #minOpsLimit()} to
+   *     {@link #maxOpsLimit()}.
+   * @param memLimit The memory limit, which must be in the range {@link #minMemLimit()} to {@link
+   *     #maxMemLimit()}.
    * @return The hash string.
    */
   public static String hash(String password, long opsLimit, long memLimit) {
@@ -702,23 +724,20 @@ public final class PasswordHash {
   /**
    * A hash verification result.
    *
-   * <p>
-   * Note: methods returning this result are only supported when the sodium native library version &gt;= 10.0.14 is
-   * available.
+   * <p>Note: methods returning this result are only supported when the sodium native library
+   * version &gt;= 10.0.14 is available.
    */
   public enum VerificationResult {
     /** The hash verification failed. */
     FAILED,
     /** The hash verification passed. */
     PASSED,
-    /**
-     * The hash verification passed, but the hash is out-of-date and should be regenerated.
-     */
+    /** The hash verification passed, but the hash is out-of-date and should be regenerated. */
     NEEDS_REHASH;
 
     /**
      * Returns true if the verification passed.
-     * 
+     *
      * @return {@code true} if the verification passed.
      */
     public boolean passed() {
@@ -727,7 +746,7 @@ public final class PasswordHash {
 
     /**
      * Returns true if the hash should be regenerated.
-     * 
+     *
      * @return {@code true} if the hash should be regenerated.
      */
     public boolean needsRehash() {
@@ -738,11 +757,9 @@ public final class PasswordHash {
   /**
    * Verify a password against a hash and check the hash is suitable for normal use-cases.
    *
-   * <p>
-   * Equivalent to {@code verify(hash, password, moderateOpsLimit(), moderateMemLimit())}.
+   * <p>Equivalent to {@code verify(hash, password, moderateOpsLimit(), moderateMemLimit())}.
    *
-   * <p>
-   * Note: only supported when the sodium native library version &gt;= 10.0.14 is available.
+   * <p>Note: only supported when the sodium native library version &gt;= 10.0.14 is available.
    *
    * @param hash The hash.
    * @param password The password to verify.
@@ -755,11 +772,9 @@ public final class PasswordHash {
   /**
    * Verify a password against a hash and check the hash is suitable for interactive use-cases.
    *
-   * <p>
-   * Equivalent to {@code verify(hash, password, interactiveOpsLimit(), interactiveMemLimit())}.
+   * <p>Equivalent to {@code verify(hash, password, interactiveOpsLimit(), interactiveMemLimit())}.
    *
-   * <p>
-   * Note: only supported when the sodium native library version &gt;= 10.0.14 is available.
+   * <p>Note: only supported when the sodium native library version &gt;= 10.0.14 is available.
    *
    * @param hash The hash.
    * @param password The password to verify.
@@ -772,11 +787,9 @@ public final class PasswordHash {
   /**
    * Verify a password against a hash and check the hash is suitable for sensitive use-cases.
    *
-   * <p>
-   * Equivalent to {@code verify(hash, password, sensitiveOpsLimit(), sensitiveMemLimit())}.
+   * <p>Equivalent to {@code verify(hash, password, sensitiveOpsLimit(), sensitiveMemLimit())}.
    *
-   * <p>
-   * Note: only supported when the sodium native library version &gt;= 10.0.14 is available.
+   * <p>Note: only supported when the sodium native library version &gt;= 10.0.14 is available.
    *
    * @param hash The hash.
    * @param password The password to verify.
@@ -789,16 +802,18 @@ public final class PasswordHash {
   /**
    * Verify a password against a hash.
    *
-   * <p>
-   * Note: only supported when the sodium native library version &gt;= 10.0.14 is available.
+   * <p>Note: only supported when the sodium native library version &gt;= 10.0.14 is available.
    *
    * @param hash The hash.
    * @param password The password to verify.
-   * @param opsLimit The operations limit, which must be in the range {@link #minOpsLimit()} to {@link #maxOpsLimit()}.
-   * @param memLimit The memory limit, which must be in the range {@link #minMemLimit()} to {@link #maxMemLimit()}.
+   * @param opsLimit The operations limit, which must be in the range {@link #minOpsLimit()} to
+   *     {@link #maxOpsLimit()}.
+   * @param memLimit The memory limit, which must be in the range {@link #minMemLimit()} to {@link
+   *     #maxMemLimit()}.
    * @return The result of verification.
    */
-  public static VerificationResult checkHash(String hash, String password, long opsLimit, long memLimit) {
+  public static VerificationResult checkHash(
+      String hash, String password, long opsLimit, long memLimit) {
     assertCheckRehashAvailable();
     assertOpsLimit(opsLimit);
     assertMemLimit(memLimit);
@@ -831,13 +846,12 @@ public final class PasswordHash {
   }
 
   /**
-   * Check if a hash needs to be regenerated using limits on operations and memory that are suitable for most use-cases.
+   * Check if a hash needs to be regenerated using limits on operations and memory that are suitable
+   * for most use-cases.
    *
-   * <p>
-   * Equivalent to {@code needsRehash(hash, moderateOpsLimit(), moderateMemLimit())}.
+   * <p>Equivalent to {@code needsRehash(hash, moderateOpsLimit(), moderateMemLimit())}.
    *
-   * <p>
-   * Note: only supported when the sodium native library version &gt;= 10.0.14 is available.
+   * <p>Note: only supported when the sodium native library version &gt;= 10.0.14 is available.
    *
    * @param hash The hash.
    * @return {@code true} if the hash should be regenerated.
@@ -847,14 +861,12 @@ public final class PasswordHash {
   }
 
   /**
-   * Check if a hash needs to be regenerated using limits on operations and memory that are suitable for interactive
-   * use-cases.
+   * Check if a hash needs to be regenerated using limits on operations and memory that are suitable
+   * for interactive use-cases.
    *
-   * <p>
-   * Equivalent to {@code needsRehash(hash, interactiveOpsLimit(), interactiveMemLimit())}.
+   * <p>Equivalent to {@code needsRehash(hash, interactiveOpsLimit(), interactiveMemLimit())}.
    *
-   * <p>
-   * Note: only supported when the sodium native library version &gt;= 10.0.14 is available.
+   * <p>Note: only supported when the sodium native library version &gt;= 10.0.14 is available.
    *
    * @param hash The hash.
    * @return {@code true} if the hash should be regenerated.
@@ -864,14 +876,12 @@ public final class PasswordHash {
   }
 
   /**
-   * Check if a hash needs to be regenerated using limits on operations and memory that are suitable for sensitive
-   * use-cases.
+   * Check if a hash needs to be regenerated using limits on operations and memory that are suitable
+   * for sensitive use-cases.
    *
-   * <p>
-   * Equivalent to {@code needsRehash(hash, sensitiveOpsLimit(), sensitiveMemLimit())}.
+   * <p>Equivalent to {@code needsRehash(hash, sensitiveOpsLimit(), sensitiveMemLimit())}.
    *
-   * <p>
-   * Note: only supported when the sodium native library version &gt;= 10.0.14 is available.
+   * <p>Note: only supported when the sodium native library version &gt;= 10.0.14 is available.
    *
    * @param hash The hash.
    * @return {@code true} if the hash should be regenerated.
@@ -883,15 +893,16 @@ public final class PasswordHash {
   /**
    * Check if a hash needs to be regenerated.
    *
-   * <p>
-   * Check if a hash matches the parameters opslimit and memlimit, and the current default algorithm.
+   * <p>Check if a hash matches the parameters opslimit and memlimit, and the current default
+   * algorithm.
    *
-   * <p>
-   * Note: only supported when the sodium native library version &gt;= 10.0.14 is available.
+   * <p>Note: only supported when the sodium native library version &gt;= 10.0.14 is available.
    *
    * @param hash The hash.
-   * @param opsLimit The operations limit, which must be in the range {@link #minOpsLimit()} to {@link #maxOpsLimit()}.
-   * @param memLimit The memory limit, which must be in the range {@link #minMemLimit()} to {@link #maxMemLimit()}.
+   * @param opsLimit The operations limit, which must be in the range {@link #minOpsLimit()} to
+   *     {@link #maxOpsLimit()}.
+   * @param memLimit The memory limit, which must be in the range {@link #minMemLimit()} to {@link
+   *     #maxMemLimit()}.
    * @return {@code true} if the hash should be regenerated.
    */
   public static boolean needsRehash(String hash, long opsLimit, long memLimit) {
@@ -931,7 +942,7 @@ public final class PasswordHash {
 
   /**
    * Returns the minimum operations limit
-   * 
+   *
    * @return The minimum operations limit (1).
    */
   public static long minOpsLimit() {
@@ -944,7 +955,7 @@ public final class PasswordHash {
 
   /**
    * Returns an operations limit for interactive use-cases
-   * 
+   *
    * @return An operations limit suitable for interactive use-cases (2).
    */
   public static long interactiveOpsLimit() {
@@ -953,7 +964,7 @@ public final class PasswordHash {
 
   /**
    * Returns an operations limit for most use-cases
-   * 
+   *
    * @return An operations limit suitable for most use-cases (3).
    */
   public static long moderateOpsLimit() {
@@ -962,7 +973,7 @@ public final class PasswordHash {
 
   /**
    * Returns an operations limit for sensitive use-cases (4).
-   * 
+   *
    * @return An operations limit for sensitive use-cases (4).
    */
   public static long sensitiveOpsLimit() {
@@ -971,7 +982,7 @@ public final class PasswordHash {
 
   /**
    * Returns the maximum operations limit.
-   * 
+   *
    * @return The maximum operations limit (4294967295).
    */
   public static long maxOpsLimit() {
@@ -990,7 +1001,7 @@ public final class PasswordHash {
 
   /**
    * Returns the minimum memory limit.
-   * 
+   *
    * @return The minimum memory limit (8192).
    */
   public static long minMemLimit() {
@@ -1003,7 +1014,7 @@ public final class PasswordHash {
 
   /**
    * Returns a memory limit for interactive use-cases.
-   * 
+   *
    * @return A memory limit suitable for interactive use-cases (67108864).
    */
   public static long interactiveMemLimit() {
@@ -1012,7 +1023,7 @@ public final class PasswordHash {
 
   /**
    * Returns a memory limit for most use-cases
-   * 
+   *
    * @return A memory limit suitable for most use-cases (268435456).
    */
   public static long moderateMemLimit() {
@@ -1021,7 +1032,7 @@ public final class PasswordHash {
 
   /**
    * Returns a memory limit for sensitive use-cases
-   * 
+   *
    * @return A memory limit suitable for sensitive use-cases (1073741824).
    */
   public static long sensitiveMemLimit() {
@@ -1030,7 +1041,7 @@ public final class PasswordHash {
 
   /**
    * Returns the max memory limit.
-   * 
+   *
    * @return The maximum memory limit (4398046510080).
    */
   public static long maxMemLimit() {

@@ -77,7 +77,8 @@ final class LocalTimeVisitor extends TomlParserBaseVisitor<LocalTime> {
   public LocalTime visitSecondFraction(SecondFractionContext ctx) {
     String text = ctx.getText();
     if (text.isEmpty() || text.length() > 9) {
-      throw new TomlParseError("Invalid nanoseconds (valid range 0..999999999)", new TomlPosition(ctx));
+      throw new TomlParseError(
+          "Invalid nanoseconds (valid range 0..999999999)", new TomlPosition(ctx));
     }
     if (text.length() < 9) {
       text = text + "000000000".substring(text.length());

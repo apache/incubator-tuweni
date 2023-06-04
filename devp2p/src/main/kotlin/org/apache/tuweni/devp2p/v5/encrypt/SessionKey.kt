@@ -7,5 +7,5 @@ import org.apache.tuweni.bytes.Bytes
 internal data class SessionKey(
   val initiatorKey: Bytes,
   val recipientKey: Bytes,
-  val authRespKey: Bytes
+  val authRespKey: Bytes,
 )

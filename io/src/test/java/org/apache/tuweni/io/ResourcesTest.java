@@ -35,10 +35,15 @@ class ResourcesTest {
   void shouldSplitGlob() {
     assertEquals(Arrays.asList("foo", "*.bar"), Arrays.asList(Resources.globRoot("foo/*.bar")));
     assertEquals(Arrays.asList("foo", "bar.?"), Arrays.asList(Resources.globRoot("foo/bar.?")));
-    assertEquals(Arrays.asList("foo/baz", "*.bar"), Arrays.asList(Resources.globRoot("foo/baz/*.bar")));
-    assertEquals(Arrays.asList("foo/baz", "bar.?"), Arrays.asList(Resources.globRoot("foo/baz/bar.?")));
-    assertEquals(Collections.singletonList("foo/*.bar"), Arrays.asList(Resources.globRoot("foo/\\*.bar")));
-    assertEquals(Arrays.asList("foo/*.bar", "*.baz"), Arrays.asList(Resources.globRoot("foo/\\*.bar/*.baz")));
+    assertEquals(
+        Arrays.asList("foo/baz", "*.bar"), Arrays.asList(Resources.globRoot("foo/baz/*.bar")));
+    assertEquals(
+        Arrays.asList("foo/baz", "bar.?"), Arrays.asList(Resources.globRoot("foo/baz/bar.?")));
+    assertEquals(
+        Collections.singletonList("foo/*.bar"), Arrays.asList(Resources.globRoot("foo/\\*.bar")));
+    assertEquals(
+        Arrays.asList("foo/*.bar", "*.baz"),
+        Arrays.asList(Resources.globRoot("foo/\\*.bar/*.baz")));
     assertEquals(Arrays.asList("", "*.bar"), Arrays.asList(Resources.globRoot("*.bar")));
     assertEquals(Arrays.asList("", "**/*.bar"), Arrays.asList(Resources.globRoot("**/*.bar")));
   }
@@ -61,43 +66,56 @@ class ResourcesTest {
     Files.createFile(folder.resolve("org/apache/tuweni/io/file/resourceresolver/test.txt"));
     Files.createFile(folder.resolve("org/apache/tuweni/io/file/resourceresolver/test1.txt"));
     Files.createFile(folder.resolve("org/apache/tuweni/io/file/resourceresolver/test2.txt"));
-    Files.createFile(folder.resolve("org/apache/tuweni/io/file/resourceresolver/subdir/test3.yaml"));
+    Files.createFile(
+        folder.resolve("org/apache/tuweni/io/file/resourceresolver/subdir/test3.yaml"));
 
     Files.createDirectory(folder.resolve("org/apache/tuweni/io/file/resourceresolver/anotherdir"));
-    Files.createFile(folder.resolve("org/apache/tuweni/io/file/resourceresolver/anotherdir/test6.yaml"));
-    Files.createFile(folder.resolve("org/apache/tuweni/io/file/resourceresolver/anotherdir/test5.txt"));
+    Files.createFile(
+        folder.resolve("org/apache/tuweni/io/file/resourceresolver/anotherdir/test6.yaml"));
+    Files.createFile(
+        folder.resolve("org/apache/tuweni/io/file/resourceresolver/anotherdir/test5.txt"));
 
     URI jarFile = URI.create("jar:" + folder.resolve("resourceresolvertest.jar").toUri());
 
-    try (FileSystem zipfs = FileSystems.newFileSystem(jarFile, Collections.singletonMap("create", "true"));) {
-      Files.walk(folder).forEach(source -> copy(source, zipfs.getPath(folder.relativize(source).toString())));
+    try (FileSystem zipfs =
+        FileSystems.newFileSystem(jarFile, Collections.singletonMap("create", "true")); ) {
+      Files.walk(folder)
+          .forEach(source -> copy(source, zipfs.getPath(folder.relativize(source).toString())));
     }
-    Files
-        .walk(folder.resolve("org/apache/tuweni/io/file/resourceresolver/anotherdir"))
+    Files.walk(folder.resolve("org/apache/tuweni/io/file/resourceresolver/anotherdir"))
         .sorted(Comparator.reverseOrder())
         .map(Path::toFile)
         .forEach(File::delete);
 
-    URLClassLoader classLoader = new URLClassLoader(
-        new URL[] {folder.toUri().toURL(), folder.resolve("resourceresolvertest.jar").toUri().toURL()});
+    URLClassLoader classLoader =
+        new URLClassLoader(
+            new URL[] {
+              folder.toUri().toURL(), folder.resolve("resourceresolvertest.jar").toUri().toURL()
+            });
     List<URL> all =
-        Resources.find(classLoader, "/org/apache/tuweni/io/file/resourceresolver/**").collect(Collectors.toList());
+        Resources.find(classLoader, "/org/apache/tuweni/io/file/resourceresolver/**")
+            .collect(Collectors.toList());
 
     assertEquals(14, all.size(), () -> describeExpectation(14, all));
 
-    List<URL> txtFiles = Resources.find(classLoader, "org/**/test*.txt").collect(Collectors.toList());
+    List<URL> txtFiles =
+        Resources.find(classLoader, "org/**/test*.txt").collect(Collectors.toList());
     assertEquals(7, txtFiles.size(), () -> describeExpectation(7, txtFiles));
 
-    List<URL> txtFilesFromRoot = Resources.find(classLoader, "/**/test?.txt").collect(Collectors.toList());
+    List<URL> txtFilesFromRoot =
+        Resources.find(classLoader, "/**/test?.txt").collect(Collectors.toList());
     assertEquals(5, txtFilesFromRoot.size(), () -> describeExpectation(5, txtFilesFromRoot));
 
-    List<URL> txtFilesFromRoot2 = Resources.find(classLoader, "//**/test*.txt").collect(Collectors.toList());
+    List<URL> txtFilesFromRoot2 =
+        Resources.find(classLoader, "//**/test*.txt").collect(Collectors.toList());
     assertEquals(7, txtFilesFromRoot2.size(), () -> describeExpectation(7, txtFilesFromRoot2));
 
-    List<URL> txtFilesFromRoot3 = Resources.find(classLoader, "///**/test*.txt").collect(Collectors.toList());
+    List<URL> txtFilesFromRoot3 =
+        Resources.find(classLoader, "///**/test*.txt").collect(Collectors.toList());
     assertEquals(7, txtFilesFromRoot3.size(), () -> describeExpectation(7, txtFilesFromRoot3));
 
-    List<URL> txtFilesInDir = Resources.find(classLoader, "**/anotherdir/*.txt").collect(Collectors.toList());
+    List<URL> txtFilesInDir =
+        Resources.find(classLoader, "**/anotherdir/*.txt").collect(Collectors.toList());
     assertEquals(1, txtFilesInDir.size(), () -> describeExpectation(1, txtFilesInDir));
   }
 

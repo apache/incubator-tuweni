@@ -30,7 +30,7 @@ class BlockStatsTest {
       listOf(TxStats(Hash.fromBytes(Bytes32.random()))),
       Hash.fromBytes(Bytes32.random()),
       Hash.fromBytes(Bytes32.random()),
-      Collections.emptyList()
+      Collections.emptyList(),
     )
     val mapper = ObjectMapper()
     mapper.registerModule(EthJsonModule())
@@ -47,7 +47,7 @@ class BlockStatsTest {
         "\"totalDifficulty\":\"0x0000000000000000000000000000000000000000000000000000000000000001\"," +
         "\"transactions\":[{\"hash\":\"" + stats.transactions.get(0).hash.toHexString() + "\"}]," +
         "\"transactionsRoot\":\"" + stats.transactionsRoot + "\",\"uncles\":[]}",
-      mapper.writeValueAsString(stats)
+      mapper.writeValueAsString(stats),
     )
   }
 }

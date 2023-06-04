@@ -19,26 +19,23 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Authenticated Encryption with Additional Data using AES-GCM.
  *
- * <p>
- * WARNING: Despite being the most popular AEAD construction due to its use in TLS, safely using AES-GCM in a different
- * context is tricky.
+ * <p>WARNING: Despite being the most popular AEAD construction due to its use in TLS, safely using
+ * AES-GCM in a different context is tricky.
  *
- * <p>
- * No more than ~350 GB of input data should be encrypted with a given key. This is for ~16 KB messages -- Actual
- * figures vary according to message sizes.
+ * <p>No more than ~350 GB of input data should be encrypted with a given key. This is for ~16 KB
+ * messages -- Actual figures vary according to message sizes.
  *
- * <p>
- * In addition, nonces are short and repeated nonces would totally destroy the security of this scheme. Nonces should
- * thus come from atomic counters, which can be difficult to set up in a distributed environment.
+ * <p>In addition, nonces are short and repeated nonces would totally destroy the security of this
+ * scheme. Nonces should thus come from atomic counters, which can be difficult to set up in a
+ * distributed environment.
  *
- * <p>
- * Unless you absolutely need AES-GCM, use {@link XChaCha20Poly1305} instead. It doesn't have any of these limitations.
- * Or, if you don't need to authenticate additional data, just stick to
- * {@link Sodium#crypto_box(byte[], byte[], long, byte[], byte[], byte[])}.
+ * <p>Unless you absolutely need AES-GCM, use {@link XChaCha20Poly1305} instead. It doesn't have any
+ * of these limitations. Or, if you don't need to authenticate additional data, just stick to {@link
+ * Sodium#crypto_box(byte[], byte[], long, byte[], byte[], byte[])}.
  *
- * <p>
- * This class depends upon the JNR-FFI library being available on the classpath, along with its dependencies. See
- * https://github.com/jnr/jnr-ffi. JNR-FFI can be included using the gradle dependency 'com.github.jnr:jnr-ffi'.
+ * <p>This class depends upon the JNR-FFI library being available on the classpath, along with its
+ * dependencies. See https://github.com/jnr/jnr-ffi. JNR-FFI can be included using the gradle
+ * dependency 'com.github.jnr:jnr-ffi'.
  */
 public final class AES256GCM implements AutoCloseable {
 
@@ -63,9 +60,7 @@ public final class AES256GCM implements AutoCloseable {
     }
   }
 
-  /**
-   * An AES256-GSM key.
-   */
+  /** An AES256-GSM key. */
   public static final class Key implements Destroyable {
     final Allocated value;
 
@@ -86,8 +81,7 @@ public final class AES256GCM implements AutoCloseable {
     /**
      * Create a {@link Key} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the key.
      * @return A key, based on the supplied bytes.
@@ -99,8 +93,7 @@ public final class AES256GCM implements AutoCloseable {
     /**
      * Create a {@link Key} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the key.
      * @return A key, based on the supplied bytes.
@@ -110,7 +103,10 @@ public final class AES256GCM implements AutoCloseable {
       assertAvailable();
       if (bytes.length != Sodium.crypto_aead_aes256gcm_keybytes()) {
         throw new IllegalArgumentException(
-            "key must be " + Sodium.crypto_aead_aes256gcm_keybytes() + " bytes, got " + bytes.length);
+            "key must be "
+                + Sodium.crypto_aead_aes256gcm_keybytes()
+                + " bytes, got "
+                + bytes.length);
       }
       return Sodium.dup(bytes, Key::new);
     }
@@ -142,7 +138,7 @@ public final class AES256GCM implements AutoCloseable {
       Pointer ptr = Sodium.malloc(length);
       try {
         // When support for 10.0.11 is dropped, use this instead
-        //Sodium.crypto_aead_aes256gcm_keygen(ptr);
+        // Sodium.crypto_aead_aes256gcm_keygen(ptr);
         Sodium.randombytes_buf(ptr, length);
         return new Key(ptr, length);
       } catch (Throwable e) {
@@ -171,7 +167,7 @@ public final class AES256GCM implements AutoCloseable {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory.
+     * <p>WARNING: This will cause the key to be copied into heap memory.
      *
      * @return The bytes of this key.
      */
@@ -182,8 +178,8 @@ public final class AES256GCM implements AutoCloseable {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory. The returned array should be overwritten when no
-     * longer required.
+     * <p>WARNING: This will cause the key to be copied into heap memory. The returned array should
+     * be overwritten when no longer required.
      *
      * @return The bytes of this key.
      */
@@ -192,9 +188,7 @@ public final class AES256GCM implements AutoCloseable {
     }
   }
 
-  /**
-   * An AES256-GSM nonce.
-   */
+  /** An AES256-GSM nonce. */
   public static final class Nonce {
     final Allocated value;
 
@@ -205,8 +199,7 @@ public final class AES256GCM implements AutoCloseable {
     /**
      * Create a {@link Nonce} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the nonce.
      * @return A nonce, based on these bytes.
@@ -218,8 +211,7 @@ public final class AES256GCM implements AutoCloseable {
     /**
      * Create a {@link Nonce} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the nonce.
      * @return A nonce, based on these bytes.
@@ -229,7 +221,10 @@ public final class AES256GCM implements AutoCloseable {
       assertAvailable();
       if (bytes.length != Sodium.crypto_aead_aes256gcm_npubbytes()) {
         throw new IllegalArgumentException(
-            "nonce must be " + Sodium.crypto_aead_aes256gcm_npubbytes() + " bytes, got " + bytes.length);
+            "nonce must be "
+                + Sodium.crypto_aead_aes256gcm_npubbytes()
+                + " bytes, got "
+                + bytes.length);
       }
       return Sodium.dup(bytes, Nonce::new);
     }
@@ -244,7 +239,8 @@ public final class AES256GCM implements AutoCloseable {
       assertAvailable();
       long npubbytes = Sodium.crypto_aead_aes256gcm_npubbytes();
       if (npubbytes > Integer.MAX_VALUE) {
-        throw new SodiumException("crypto_aead_aes256gcm_npubbytes: " + npubbytes + " is too large");
+        throw new SodiumException(
+            "crypto_aead_aes256gcm_npubbytes: " + npubbytes + " is too large");
       }
       return (int) npubbytes;
     }
@@ -278,9 +274,9 @@ public final class AES256GCM implements AutoCloseable {
     /**
      * Increment this nonce.
      *
-     * <p>
-     * Note that this is not synchronized. If multiple threads are creating encrypted messages and incrementing this
-     * nonce, then external synchronization is required to ensure no two encrypt operations use the same nonce.
+     * <p>Note that this is not synchronized. If multiple threads are creating encrypted messages
+     * and incrementing this nonce, then external synchronization is required to ensure no two
+     * encrypt operations use the same nonce.
      *
      * @return A new {@link Nonce}.
      */
@@ -307,7 +303,7 @@ public final class AES256GCM implements AutoCloseable {
 
     /**
      * Provides the bytes of this nonce.
-     * 
+     *
      * @return The bytes of this nonce.
      */
     public Bytes bytes() {
@@ -316,7 +312,7 @@ public final class AES256GCM implements AutoCloseable {
 
     /**
      * Provides the bytes of this nonce.
-     * 
+     *
      * @return The bytes of this nonce.
      */
     public byte[] bytesArray() {
@@ -346,9 +342,9 @@ public final class AES256GCM implements AutoCloseable {
   /**
    * Pre-compute the expansion for the key.
    *
-   * <p>
-   * Note that the returned instance of {@link AES256GCM} should be closed using {@link #close()} (or
-   * try-with-resources) to ensure timely release of the expanded key, which is held in native memory.
+   * <p>Note that the returned instance of {@link AES256GCM} should be closed using {@link #close()}
+   * (or try-with-resources) to ensure timely release of the expanded key, which is held in native
+   * memory.
    *
    * @param key The key to precompute an expansion for.
    * @return A {@link AES256GCM} instance.
@@ -416,8 +412,8 @@ public final class AES256GCM implements AutoCloseable {
     byte[] cipherText = new byte[maxCombinedCypherTextLength(message)];
 
     LongLongByReference cipherTextLen = new LongLongByReference();
-    int rc = Sodium
-        .crypto_aead_aes256gcm_encrypt(
+    int rc =
+        Sodium.crypto_aead_aes256gcm_encrypt(
             cipherText,
             cipherTextLen,
             message,
@@ -482,8 +478,8 @@ public final class AES256GCM implements AutoCloseable {
     byte[] cipherText = new byte[maxCombinedCypherTextLength(message)];
 
     LongLongByReference cipherTextLen = new LongLongByReference();
-    int rc = Sodium
-        .crypto_aead_aes256gcm_encrypt_afternm(
+    int rc =
+        Sodium.crypto_aead_aes256gcm_encrypt_afternm(
             cipherText,
             cipherTextLen,
             message,
@@ -541,7 +537,8 @@ public final class AES256GCM implements AutoCloseable {
    * @param nonce A unique nonce.
    * @return The encrypted data and message authentication code.
    */
-  public static DetachedEncryptionResult encryptDetached(Bytes message, Bytes data, Key key, Nonce nonce) {
+  public static DetachedEncryptionResult encryptDetached(
+      Bytes message, Bytes data, Key key, Nonce nonce) {
     return encryptDetached(message.toArrayUnsafe(), data.toArrayUnsafe(), key, nonce);
   }
 
@@ -555,7 +552,8 @@ public final class AES256GCM implements AutoCloseable {
    * @return The encrypted data and message authentication code.
    * @throws UnsupportedOperationException If AES256-GSM support is not available.
    */
-  public static DetachedEncryptionResult encryptDetached(byte[] message, byte[] data, Key key, Nonce nonce) {
+  public static DetachedEncryptionResult encryptDetached(
+      byte[] message, byte[] data, Key key, Nonce nonce) {
     assertAvailable();
     if (key.isDestroyed()) {
       throw new IllegalArgumentException("Key has been destroyed");
@@ -569,8 +567,8 @@ public final class AES256GCM implements AutoCloseable {
     byte[] mac = new byte[(int) abytes];
 
     LongLongByReference macLen = new LongLongByReference();
-    int rc = Sodium
-        .crypto_aead_aes256gcm_encrypt_detached(
+    int rc =
+        Sodium.crypto_aead_aes256gcm_encrypt_detached(
             cipherText,
             mac,
             macLen,
@@ -586,8 +584,7 @@ public final class AES256GCM implements AutoCloseable {
     }
 
     return new DefaultDetachedEncryptionResult(
-        cipherText,
-        maybeSliceResult(mac, macLen, "crypto_aead_aes256gcm_encrypt_detached"));
+        cipherText, maybeSliceResult(mac, macLen, "crypto_aead_aes256gcm_encrypt_detached"));
   }
 
   /**
@@ -643,8 +640,8 @@ public final class AES256GCM implements AutoCloseable {
     byte[] mac = new byte[(int) abytes];
 
     LongLongByReference macLen = new LongLongByReference();
-    int rc = Sodium
-        .crypto_aead_aes256gcm_encrypt_detached_afternm(
+    int rc =
+        Sodium.crypto_aead_aes256gcm_encrypt_detached_afternm(
             cipherText,
             mac,
             macLen,
@@ -656,7 +653,8 @@ public final class AES256GCM implements AutoCloseable {
             nonce.value.pointer(),
             ctx);
     if (rc != 0) {
-      throw new SodiumException("crypto_aead_aes256gcm_encrypt_detached_afternm: failed with result " + rc);
+      throw new SodiumException(
+          "crypto_aead_aes256gcm_encrypt_detached_afternm: failed with result " + rc);
     }
 
     return new DefaultDetachedEncryptionResult(
@@ -726,8 +724,8 @@ public final class AES256GCM implements AutoCloseable {
     byte[] clearText = new byte[maxClearTextLength(cipherText)];
 
     LongLongByReference clearTextLen = new LongLongByReference();
-    int rc = Sodium
-        .crypto_aead_aes256gcm_decrypt(
+    int rc =
+        Sodium.crypto_aead_aes256gcm_decrypt(
             clearText,
             clearTextLen,
             null,
@@ -801,8 +799,8 @@ public final class AES256GCM implements AutoCloseable {
     byte[] clearText = new byte[maxClearTextLength(cipherText)];
 
     LongLongByReference clearTextLen = new LongLongByReference();
-    int rc = Sodium
-        .crypto_aead_aes256gcm_decrypt_afternm(
+    int rc =
+        Sodium.crypto_aead_aes256gcm_decrypt_afternm(
             clearText,
             clearTextLen,
             null,
@@ -873,8 +871,11 @@ public final class AES256GCM implements AutoCloseable {
    * @return The decrypted data, or {@code null} if verification failed.
    */
   @Nullable
-  public static Bytes decryptDetached(Bytes cipherText, Bytes mac, Bytes data, Key key, Nonce nonce) {
-    byte[] bytes = decryptDetached(cipherText.toArrayUnsafe(), mac.toArrayUnsafe(), data.toArrayUnsafe(), key, nonce);
+  public static Bytes decryptDetached(
+      Bytes cipherText, Bytes mac, Bytes data, Key key, Nonce nonce) {
+    byte[] bytes =
+        decryptDetached(
+            cipherText.toArrayUnsafe(), mac.toArrayUnsafe(), data.toArrayUnsafe(), key, nonce);
     return (bytes != null) ? Bytes.wrap(bytes) : null;
   }
 
@@ -890,7 +891,8 @@ public final class AES256GCM implements AutoCloseable {
    * @throws UnsupportedOperationException If AES256-GSM support is not available.
    */
   @Nullable
-  public static byte[] decryptDetached(byte[] cipherText, byte[] mac, byte[] data, Key key, Nonce nonce) {
+  public static byte[] decryptDetached(
+      byte[] cipherText, byte[] mac, byte[] data, Key key, Nonce nonce) {
     assertAvailable();
     if (key.isDestroyed()) {
       throw new IllegalArgumentException("Key has been destroyed");
@@ -905,8 +907,8 @@ public final class AES256GCM implements AutoCloseable {
     }
 
     byte[] clearText = new byte[cipherText.length];
-    int rc = Sodium
-        .crypto_aead_aes256gcm_decrypt_detached(
+    int rc =
+        Sodium.crypto_aead_aes256gcm_decrypt_detached(
             clearText,
             null,
             cipherText,
@@ -964,7 +966,9 @@ public final class AES256GCM implements AutoCloseable {
    */
   @Nullable
   public Bytes decryptDetached(Bytes cipherText, Bytes mac, Bytes data, Nonce nonce) {
-    byte[] bytes = decryptDetached(cipherText.toArrayUnsafe(), mac.toArrayUnsafe(), data.toArrayUnsafe(), nonce);
+    byte[] bytes =
+        decryptDetached(
+            cipherText.toArrayUnsafe(), mac.toArrayUnsafe(), data.toArrayUnsafe(), nonce);
     return (bytes != null) ? Bytes.wrap(bytes) : null;
   }
 
@@ -991,8 +995,8 @@ public final class AES256GCM implements AutoCloseable {
     }
 
     byte[] clearText = new byte[cipherText.length];
-    int rc = Sodium
-        .crypto_aead_aes256gcm_decrypt_detached_afternm(
+    int rc =
+        Sodium.crypto_aead_aes256gcm_decrypt_detached_afternm(
             clearText,
             null,
             cipherText,
@@ -1006,7 +1010,8 @@ public final class AES256GCM implements AutoCloseable {
       return null;
     }
     if (rc != 0) {
-      throw new SodiumException("crypto_aead_aes256gcm_decrypt_detached_afternm: failed with result " + rc);
+      throw new SodiumException(
+          "crypto_aead_aes256gcm_decrypt_detached_afternm: failed with result " + rc);
     }
 
     return clearText;
@@ -1018,12 +1023,14 @@ public final class AES256GCM implements AutoCloseable {
     }
   }
 
-  private static byte[] maybeSliceResult(byte[] bytes, LongLongByReference actualLength, String methodName) {
+  private static byte[] maybeSliceResult(
+      byte[] bytes, LongLongByReference actualLength, String methodName) {
     if (actualLength.longValue() == bytes.length) {
       return bytes;
     }
     if (actualLength.longValue() > Integer.MAX_VALUE) {
-      throw new SodiumException(methodName + ": result of length " + actualLength.longValue() + " is too large");
+      throw new SodiumException(
+          methodName + ": result of length " + actualLength.longValue() + " is too large");
     }
     return Arrays.copyOfRange(bytes, 0, actualLength.intValue());
   }

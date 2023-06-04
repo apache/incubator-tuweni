@@ -12,13 +12,15 @@ class Bytes48Test {
 
   @Test
   void failsWhenWrappingArraySmallerThan48() {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes48.wrap(new byte[47]));
+    Throwable exception =
+        assertThrows(IllegalArgumentException.class, () -> Bytes48.wrap(new byte[47]));
     assertEquals("Expected 48 bytes but got 47", exception.getMessage());
   }
 
   @Test
   void failsWhenWrappingArrayLargerThan48() {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes48.wrap(new byte[49]));
+    Throwable exception =
+        assertThrows(IllegalArgumentException.class, () -> Bytes48.wrap(new byte[49]));
     assertEquals("Expected 48 bytes but got 49", exception.getMessage());
   }
 
@@ -48,13 +50,17 @@ class Bytes48Test {
 
   @Test
   void failsWhenLeftPaddingValueLargerThan48() {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes48.leftPad(MutableBytes.create(49)));
+    Throwable exception =
+        assertThrows(
+            IllegalArgumentException.class, () -> Bytes48.leftPad(MutableBytes.create(49)));
     assertEquals("Expected at most 48 bytes but got 49", exception.getMessage());
   }
 
   @Test
   void failsWhenRightPaddingValueLargerThan48() {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> Bytes48.rightPad(MutableBytes.create(49)));
+    Throwable exception =
+        assertThrows(
+            IllegalArgumentException.class, () -> Bytes48.rightPad(MutableBytes.create(49)));
     assertEquals("Expected at most 48 bytes but got 49", exception.getMessage());
   }
 
@@ -74,9 +80,8 @@ class Bytes48Test {
   @Test
   void not() {
     assertEquals(
-        Bytes48
-            .fromHexString(
-                "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+        Bytes48.fromHexString(
+            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
         Bytes48.leftPad(Bytes.EMPTY).not());
   }
 
@@ -96,31 +101,29 @@ class Bytes48Test {
 
   @Test
   void or() {
-    Bytes48 one = Bytes48
-        .fromHexString(
+    Bytes48 one =
+        Bytes48.fromHexString(
             "0x0000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffff");
-    Bytes48 two = Bytes48
-        .fromHexString(
+    Bytes48 two =
+        Bytes48.fromHexString(
             "0xffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000");
     assertEquals(
-        Bytes48
-            .fromHexString(
-                "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+        Bytes48.fromHexString(
+            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
         one.or(two));
   }
 
   @Test
   void and() {
-    Bytes48 one = Bytes48
-        .fromHexString(
+    Bytes48 one =
+        Bytes48.fromHexString(
             "0x0000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffff");
-    Bytes48 two = Bytes48
-        .fromHexString(
+    Bytes48 two =
+        Bytes48.fromHexString(
             "0xffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000");
     assertEquals(
-        Bytes48
-            .fromHexString(
-                "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
+        Bytes48.fromHexString(
+            "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
         one.and(two));
   }
 }

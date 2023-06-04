@@ -31,8 +31,11 @@ class HMACSHA256Test {
     Bytes authenticator = HMACSHA256.authenticate(Bytes.fromHexString("deadbeef"), key);
     assertThrows(
         IllegalArgumentException.class,
-        () -> HMACSHA256
-            .verify(Bytes.concatenate(authenticator, Bytes.of(1, 2, 3)), Bytes.fromHexString("deadbeef"), key));
+        () ->
+            HMACSHA256.verify(
+                Bytes.concatenate(authenticator, Bytes.of(1, 2, 3)),
+                Bytes.fromHexString("deadbeef"),
+                key));
   }
 
   @Test

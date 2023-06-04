@@ -4,9 +4,7 @@ package org.apache.tuweni.io;
 
 import java.io.IOException;
 
-/**
- * Represents an operation that accepts a single input argument and returns no result.
- */
+/** Represents an operation that accepts a single input argument and returns no result. */
 @FunctionalInterface
 public interface IOConsumer<T> {
 

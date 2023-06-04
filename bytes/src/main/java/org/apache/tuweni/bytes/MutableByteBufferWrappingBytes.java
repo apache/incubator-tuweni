@@ -7,7 +7,8 @@ import static org.apache.tuweni.bytes.Checks.checkElementIndex;
 
 import java.nio.ByteBuffer;
 
-public class MutableByteBufferWrappingBytes extends ByteBufferWrappingBytes implements MutableBytes {
+public class MutableByteBufferWrappingBytes extends ByteBufferWrappingBytes
+    implements MutableBytes {
 
   MutableByteBufferWrappingBytes(ByteBuffer byteBuffer) {
     super(byteBuffer);

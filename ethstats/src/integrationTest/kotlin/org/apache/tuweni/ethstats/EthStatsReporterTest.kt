@@ -43,7 +43,7 @@ public class EthStatsReporterTest {
       "Windoz",
       "64",
       { },
-      { now }
+      { now },
     )
 
     for (i in 1..3) {
@@ -70,8 +70,8 @@ public class EthStatsReporterTest {
           Collections.emptyList(),
           Hash.fromBytes(Bytes32.random()),
           Hash.fromBytes(Bytes32.random()),
-          Collections.emptyList()
-        )
+          Collections.emptyList(),
+        ),
       )
 
     reporter.sendNewNodeStats(NodeStats(true, false, true, 42, 9, 4000, 100))
@@ -82,15 +82,15 @@ public class EthStatsReporterTest {
         .messagesContain(
           "{\"emit\":[\"hello\",{\"id\":\"foo\",\"info\":{\"api\":\"No\",\"canUpdateHistory\":true,\"client\":" +
             "\"Apache Tuweni Ethstats\",\"name\":\"name\",\"net\":\"10\",\"node\":\"node\",\"os\":\"Windoz\"," +
-            "\"os_v\":\"64\",\"port\":33030,\"protocol\":\"eth/63\"},\"secret\":\"wat\"}]}"
-        )
+            "\"os_v\":\"64\",\"port\":33030,\"protocol\":\"eth/63\"},\"secret\":\"wat\"}]}",
+        ),
     )
     assertTrue(server.messagesContain("{\"emit\":[\"node-ping\",{\"id\":\"foo\""))
     assertTrue(server.messagesContain("{\"emit\":[\"block\","), server.getResults().joinToString("\n"))
     assertTrue(server.messagesContain("\"stats\":{\"pending\":42}"), server.getResults().joinToString("\n"))
     assertTrue(
       server.messagesContain("{\"emit\":[\"stats\",{\"id\":\"foo\",\"stats\":"),
-      server.getResults().joinToString("\n")
+      server.getResults().joinToString("\n"),
     )
 
     reporter.stop()
@@ -111,7 +111,7 @@ public class EthStatsReporterTest {
       33030,
       "wat",
       { now },
-      controller
+      controller,
     )
     server.start()
     val reporter = EthStatsReporter(
@@ -127,7 +127,7 @@ public class EthStatsReporterTest {
       "Windoz",
       "64",
       { },
-      { now }
+      { now },
     )
 
     reporter.start()
@@ -147,8 +147,8 @@ public class EthStatsReporterTest {
           Collections.emptyList(),
           Hash.fromBytes(Bytes32.random()),
           Hash.fromBytes(Bytes32.random()),
-          Collections.emptyList()
-        )
+          Collections.emptyList(),
+        ),
       )
 
     reporter.sendNewNodeStats(NodeStats(true, false, true, 42, 9, 4000, 100))

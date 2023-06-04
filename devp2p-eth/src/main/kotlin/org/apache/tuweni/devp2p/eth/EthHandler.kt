@@ -25,7 +25,7 @@ internal class EthHandler(
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
   private val blockchainInfo: BlockchainInformation,
   private val service: RLPxService,
-  private val controller: EthController
+  private val controller: EthController,
 ) : SubProtocolHandler, CoroutineScope {
 
   private val pendingStatus = ExpiringMap<String, PeerInfo>(60000)
@@ -53,11 +53,11 @@ internal class EthHandler(
       MessageType.Receipts.code -> handleReceipts(connection, Receipts.read(message))
       MessageType.NewPooledTransactionHashes.code -> handleNewPooledTransactionHashes(
         connection,
-        NewPooledTransactionHashes.read(message)
+        NewPooledTransactionHashes.read(message),
       )
       MessageType.GetPooledTransactions.code -> handleGetPooledTransactions(
         connection,
-        GetPooledTransactions.read(message)
+        GetPooledTransactions.read(message),
       )
       MessageType.PooledTransactions.code -> handlePooledTransactions(PooledTransactions.read(message))
       else -> {
@@ -78,7 +78,7 @@ internal class EthHandler(
       EthSubprotocol.ETH65,
       MessageType.PooledTransactions.code,
       connection,
-      PooledTransactions(tx).toBytes()
+      PooledTransactions(tx).toBytes(),
     )
   }
 
@@ -119,7 +119,7 @@ internal class EthHandler(
 
   private suspend fun handleNewPooledTransactionHashes(
     connection: WireConnection,
-    newPooledTransactionHashes: NewPooledTransactionHashes
+    newPooledTransactionHashes: NewPooledTransactionHashes,
   ) {
     if (newPooledTransactionHashes.hashes.size > MAX_NEW_POOLED_TX_HASHES) {
       service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
@@ -136,7 +136,7 @@ internal class EthHandler(
           connection.agreedSubprotocolVersion(ETH65.name()),
           MessageType.GetPooledTransactions.code,
           connection,
-          message.toBytes()
+          message.toBytes(),
         )
         missingTx = ArrayList()
         message = GetPooledTransactions(missingTx)
@@ -147,7 +147,7 @@ internal class EthHandler(
         connection.agreedSubprotocolVersion(ETH65.name()),
         MessageType.GetPooledTransactions.code,
         connection,
-        message.toBytes()
+        message.toBytes(),
       )
     }
   }
@@ -161,7 +161,7 @@ internal class EthHandler(
       connection.agreedSubprotocolVersion(ETH62.name()),
       MessageType.Receipts.code,
       connection,
-      Receipts(controller.findTransactionReceipts(getReceipts.hashes)).toBytes()
+      Receipts(controller.findTransactionReceipts(getReceipts.hashes)).toBytes(),
     )
   }
 
@@ -170,7 +170,7 @@ internal class EthHandler(
       connection.agreedSubprotocolVersion(ETH65.name()),
       MessageType.NodeData.code,
       connection,
-      NodeData(controller.findNodeData(nodeData.hashes)).toBytes()
+      NodeData(controller.findNodeData(nodeData.hashes)).toBytes(),
     )
   }
 
@@ -191,7 +191,7 @@ internal class EthHandler(
       connection.agreedSubprotocolVersion(ETH62.name()),
       MessageType.BlockBodies.code,
       connection,
-      BlockBodies(controller.findBlockBodies(message.hashes)).toBytes()
+      BlockBodies(controller.findBlockBodies(message.hashes)).toBytes(),
     )
   }
 
@@ -204,13 +204,13 @@ internal class EthHandler(
       blockHeaderRequest.block,
       blockHeaderRequest.maxHeaders,
       blockHeaderRequest.skip,
-      blockHeaderRequest.reverse
+      blockHeaderRequest.reverse,
     )
     service.send(
       connection.agreedSubprotocolVersion(ETH62.name()),
       MessageType.BlockHeaders.code,
       connection,
-      BlockHeaders(headers).toBytes()
+      BlockHeaders(headers).toBytes(),
     )
   }
 
@@ -240,8 +240,8 @@ internal class EthHandler(
           blockchainInfo.bestHash(),
           blockchainInfo.genesisHash(),
           forkId.hash,
-          forkId.next
-        ).toBytes()
+          forkId.next,
+        ).toBytes(),
       )
 
       return@runBlocking newPeer.ready

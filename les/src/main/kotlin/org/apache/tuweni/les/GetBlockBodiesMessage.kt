@@ -19,11 +19,11 @@ internal data class GetBlockBodiesMessage(val reqID: Long, val blockHashes: List
 
     fun read(bytes: Bytes): GetBlockBodiesMessage {
       return RLP.decodeList(
-        bytes
+        bytes,
       ) { reader ->
         GetBlockBodiesMessage(
           reader.readLong(),
-          reader.readListContents { elementReader -> Hash.fromBytes(elementReader.readValue()) }
+          reader.readListContents { elementReader -> Hash.fromBytes(elementReader.readValue()) },
         )
       }
     }

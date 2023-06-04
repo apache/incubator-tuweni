@@ -16,7 +16,7 @@ fun interface Opcode {
     code: Bytes,
     currentIndex: Int,
     memory: Memory,
-    callResult: Result?
+    callResult: Result?,
   ): Result?
 }
 
@@ -36,7 +36,7 @@ class OpcodeRegistry(val opcodes: Map<HardFork, Map<Byte, Opcode>>) {
         Pair(HardFork.CONSTANTINOPLE, org.apache.tuweni.evm.impl.constantinople.constantinopleOpcodes),
         Pair(HardFork.PETERSBURG, org.apache.tuweni.evm.impl.petersburg.petersburgOpcodes),
         Pair(HardFork.ISTANBUL, org.apache.tuweni.evm.impl.istanbul.istanbulOpcodes),
-        Pair(HardFork.BERLIN, org.apache.tuweni.evm.impl.berlin.berlinOpcodes)
+        Pair(HardFork.BERLIN, org.apache.tuweni.evm.impl.berlin.berlinOpcodes),
       )
       return OpcodeRegistry(forks)
     }

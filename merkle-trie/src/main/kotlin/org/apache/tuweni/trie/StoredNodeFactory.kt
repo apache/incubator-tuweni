@@ -12,7 +12,7 @@ import java.util.Collections
 internal class StoredNodeFactory<V>(
   private val storage: MerkleStorage,
   private val valueSerializer: (V) -> Bytes,
-  private val valueDeserializer: (Bytes) -> V
+  private val valueDeserializer: (Bytes) -> V,
 ) : NodeFactory<V> {
 
   private val nullNode: NullNode<V> = NullNode.instance()

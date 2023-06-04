@@ -25,7 +25,7 @@ internal class EthHandler66(
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
   private val blockchainInfo: BlockchainInformation,
   private val service: RLPxService,
-  private val controller: EthController
+  private val controller: EthController,
 ) : SubProtocolHandler, CoroutineScope {
 
   private val ethHandler = EthHandler(coroutineContext, blockchainInfo, service, controller)
@@ -56,14 +56,14 @@ internal class EthHandler66(
         MessageType.GetBlockHeaders.code -> handleGetBlockHeaders(
           connection,
           requestIdentifier,
-          GetBlockHeaders.read(payload)
+          GetBlockHeaders.read(payload),
         )
 
         MessageType.BlockHeaders.code -> handleHeaders(connection, requestIdentifier, BlockHeaders.read(payload))
         MessageType.GetBlockBodies.code -> handleGetBlockBodies(
           connection,
           requestIdentifier,
-          GetBlockBodies.read(payload)
+          GetBlockBodies.read(payload),
         )
 
         MessageType.BlockBodies.code -> handleBlockBodies(connection, requestIdentifier, BlockBodies.read(payload))
@@ -74,13 +74,13 @@ internal class EthHandler66(
         MessageType.Receipts.code -> handleReceipts(connection, requestIdentifier, Receipts.read(payload))
         MessageType.NewPooledTransactionHashes.code -> handleNewPooledTransactionHashes(
           connection,
-          NewPooledTransactionHashes.read(message)
+          NewPooledTransactionHashes.read(message),
         )
 
         MessageType.GetPooledTransactions.code -> handleGetPooledTransactions(
           connection,
           requestIdentifier,
-          GetPooledTransactions.read(payload)
+          GetPooledTransactions.read(payload),
         )
 
         MessageType.PooledTransactions.code -> handlePooledTransactions(PooledTransactions.read(payload))
@@ -99,7 +99,7 @@ internal class EthHandler66(
   private suspend fun handleGetPooledTransactions(
     connection: WireConnection,
     requestIdentifier: Bytes,
-    read: GetPooledTransactions
+    read: GetPooledTransactions,
   ) {
     val tx = controller.findPooledTransactions(read.hashes)
     logger.debug("Responding to GetPooledTransactions with {} transactions", tx.size)
@@ -110,7 +110,7 @@ internal class EthHandler66(
       RLP.encodeList {
         it.writeValue(requestIdentifier)
         it.writeRLP(PooledTransactions(tx).toBytes())
-      }
+      },
     )
   }
 
@@ -140,7 +140,7 @@ internal class EthHandler66(
     if (!status.genesisHash.equals(blockchainInfo.genesisHash())) {
       EthHandler.logger.info(
         "Peer with different genesisHash ${status.genesisHash} " +
-          "(expected ${blockchainInfo.genesisHash()})"
+          "(expected ${blockchainInfo.genesisHash()})",
       )
       disconnect = true
     }
@@ -154,7 +154,7 @@ internal class EthHandler66(
 
   private suspend fun handleNewPooledTransactionHashes(
     connection: WireConnection,
-    newPooledTransactionHashes: NewPooledTransactionHashes
+    newPooledTransactionHashes: NewPooledTransactionHashes,
   ) {
     if (newPooledTransactionHashes.hashes.size > MAX_NEW_POOLED_TX_HASHES) {
       service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
@@ -174,7 +174,7 @@ internal class EthHandler66(
           RLP.encodeList {
             it.writeValue(UInt64.random().toBytes())
             it.writeRLP(message.toBytes())
-          }
+          },
         )
         missingTx = ArrayList()
         message = GetPooledTransactions(missingTx)
@@ -188,7 +188,7 @@ internal class EthHandler66(
         RLP.encodeList {
           it.writeValue(UInt64.random().toBytes())
           it.writeRLP(message.toBytes())
-        }
+        },
       )
     }
   }
@@ -200,7 +200,7 @@ internal class EthHandler66(
   private suspend fun handleGetReceipts(
     connection: WireConnection,
     requestIdentifier: Bytes,
-    getReceipts: GetReceipts
+    getReceipts: GetReceipts,
   ) {
     val receipts = controller.findTransactionReceipts(getReceipts.hashes)
     service.send(
@@ -210,7 +210,7 @@ internal class EthHandler66(
       RLP.encodeList {
         it.writeValue(requestIdentifier)
         it.writeRLP(Receipts(receipts).toBytes())
-      }
+      },
     )
   }
 
@@ -223,7 +223,7 @@ internal class EthHandler66(
       RLP.encodeList {
         it.writeValue(requestIdentifier)
         it.writeRLP(NodeData(data).toBytes())
-      }
+      },
     )
   }
 
@@ -238,7 +238,7 @@ internal class EthHandler66(
   private suspend fun handleGetBlockBodies(
     connection: WireConnection,
     requestIdentifier: Bytes,
-    message: GetBlockBodies
+    message: GetBlockBodies,
   ) {
     if (message.hashes.isEmpty()) {
       service.disconnect(connection, DisconnectReason.SUBPROTOCOL_REASON)
@@ -252,7 +252,7 @@ internal class EthHandler66(
       RLP.encodeList {
         it.writeValue(requestIdentifier)
         it.writeRLP(bodies.toBytes())
-      }
+      },
     )
   }
 
@@ -263,13 +263,13 @@ internal class EthHandler66(
   private suspend fun handleGetBlockHeaders(
     connection: WireConnection,
     requestIdentifier: Bytes,
-    blockHeaderRequest: GetBlockHeaders
+    blockHeaderRequest: GetBlockHeaders,
   ) {
     val headers = controller.findHeaders(
       blockHeaderRequest.block,
       blockHeaderRequest.maxHeaders,
       blockHeaderRequest.skip,
-      blockHeaderRequest.reverse
+      blockHeaderRequest.reverse,
     )
     service.send(
       EthSubprotocol.ETH66,
@@ -278,7 +278,7 @@ internal class EthHandler66(
       RLP.encodeList {
         it.writeValue(requestIdentifier)
         it.writeRLP(BlockHeaders(headers).toBytes())
-      }
+      },
     )
   }
 
@@ -313,8 +313,8 @@ internal class EthHandler66(
         blockchainInfo.bestHash(),
         blockchainInfo.genesisHash(),
         forkId.hash,
-        forkId.next
-      ).toBytes()
+        forkId.next,
+      ).toBytes(),
     )
 
     return@runBlocking newPeer.ready

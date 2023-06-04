@@ -23,7 +23,7 @@ class EthControllerTest {
     val controller = EthController(
       BlockchainRepository.inMemory(Genesis.dev()),
       MemoryTransactionPool(),
-      requestsManager
+      requestsManager,
     ) { _, _ -> }
     val conn = mock<WireConnection> {}
 

@@ -70,7 +70,7 @@ class JSONRPCConfigTest {
 ## Whether the JSON-RPC server should serve data over SSL
 #ssl = false
 """.split("\n").joinToString(System.lineSeparator()),
-      configAsString
+      configAsString,
     )
   }
 }

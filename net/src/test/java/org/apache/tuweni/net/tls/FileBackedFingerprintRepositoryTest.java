@@ -51,7 +51,8 @@ class FileBackedFingerprintRepositoryTest {
     Bytes fingerprint1 = generateFingerprint();
     Bytes fingerprint2 = generateFingerprint();
 
-    String content = String.format("%s %s%n%s %s", identifier1, fingerprint1, identifier2, fingerprint2);
+    String content =
+        String.format("%s %s%n%s %s", identifier1, fingerprint1, identifier2, fingerprint2);
     Files.writeString(repoFile, content);
 
     FileBackedFingerprintRepository repo = new FileBackedFingerprintRepository(repoFile);
@@ -60,8 +61,10 @@ class FileBackedFingerprintRepositoryTest {
   }
 
   @Test
-  FileBackedFingerprintRepository testAddingNewFingerprint(@TempDirectory Path tempFolder) throws IOException {
-    FileBackedFingerprintRepository repo = new FileBackedFingerprintRepository(tempFolder.resolve("repo"));
+  FileBackedFingerprintRepository testAddingNewFingerprint(@TempDirectory Path tempFolder)
+      throws IOException {
+    FileBackedFingerprintRepository repo =
+        new FileBackedFingerprintRepository(tempFolder.resolve("repo"));
     Bytes fingerprint = generateFingerprint();
     repo.addFingerprint("foo", fingerprint);
     assertTrue(repo.contains("foo", fingerprint));
@@ -84,12 +87,12 @@ class FileBackedFingerprintRepositoryTest {
 
   @Test
   void testInvalidFingerprintAddedToFile(@TempDirectory Path tempFolder) throws IOException {
-    FileBackedFingerprintRepository repo = new FileBackedFingerprintRepository(tempFolder.resolve("repo-bad2"));
+    FileBackedFingerprintRepository repo =
+        new FileBackedFingerprintRepository(tempFolder.resolve("repo-bad2"));
     Bytes fingerprint = generateFingerprint();
-    Files
-        .write(
-            tempFolder.resolve("repo-bad2"),
-            ("bar " + fingerprint.slice(8).toHexString().substring(2) + "GGG").getBytes(UTF_8));
+    Files.write(
+        tempFolder.resolve("repo-bad2"),
+        ("bar " + fingerprint.slice(8).toHexString().substring(2) + "GGG").getBytes(UTF_8));
     assertThrows(TLSEnvironmentException.class, () -> repo.addFingerprint("foo", fingerprint));
   }
 }

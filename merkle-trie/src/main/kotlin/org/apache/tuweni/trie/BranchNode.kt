@@ -15,7 +15,7 @@ internal class BranchNode<V>(
   private val children: List<Node<V>>,
   private val value: V?,
   private val nodeFactory: NodeFactory<V>,
-  private val valueSerializer: (V) -> Bytes
+  private val valueSerializer: (V) -> Bytes,
 ) : Node<V> {
 
   companion object {

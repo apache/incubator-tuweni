@@ -32,7 +32,7 @@ class SecureScuttlebuttVertxServer(
   private val addr: InetSocketAddress,
   private val keyPair: Signature.KeyPair,
   private val networkIdentifier: Bytes32,
-  private val handlerFactory: (writer: (Bytes) -> Unit, terminationFn: () -> Unit) -> ServerHandler
+  private val handlerFactory: (writer: (Bytes) -> Unit, terminationFn: () -> Unit) -> ServerHandler,
 ) {
 
   val port: Int
@@ -53,7 +53,7 @@ class SecureScuttlebuttVertxServer(
     var streamServer: SecureScuttlebuttStreamServer? = null
     var handshakeServer = create(
       keyPair,
-      networkIdentifier
+      networkIdentifier,
     )
     private var messageBuffer = Bytes.EMPTY
 
@@ -67,12 +67,12 @@ class SecureScuttlebuttVertxServer(
       netSocket.exceptionHandler { e: Throwable ->
         logger.error(
           e.message,
-          e
+          e,
         )
       }
       netSocket.handler { buffer: Buffer ->
         handleMessage(
-          buffer
+          buffer,
         )
       }
     }
@@ -93,17 +93,17 @@ class SecureScuttlebuttVertxServer(
               synchronized(this@NetSocketHandler) {
                 netSocket!!.write(
                   Buffer.buffer(
-                    streamServer!!.sendToClient(bytes!!).toArrayUnsafe()
-                  )
+                    streamServer!!.sendToClient(bytes!!).toArrayUnsafe(),
+                  ),
                 )
               }
-            }
+            },
           ) {
             synchronized(this@NetSocketHandler) {
               netSocket!!.write(
                 Buffer.buffer(
-                  streamServer!!.sendGoodbyeToClient().toArrayUnsafe()
-                )
+                  streamServer!!.sendGoodbyeToClient().toArrayUnsafe(),
+                ),
               )
               netSocket!!.close()
             }
@@ -163,7 +163,7 @@ class SecureScuttlebuttVertxServer(
   suspend fun start() {
     server = vertx
       .createNetServer(
-        NetServerOptions().setTcpKeepAlive(true).setHost(addr.hostString).setPort(addr.port)
+        NetServerOptions().setTcpKeepAlive(true).setHost(addr.hostString).setPort(addr.port),
       )
     server!!.connectHandler { netSocket: NetSocket ->
       NetSocketHandler().handle(netSocket)

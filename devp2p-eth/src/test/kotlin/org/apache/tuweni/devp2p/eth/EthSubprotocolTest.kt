@@ -32,7 +32,7 @@ class EthSubprotocolTest {
     Hash.fromBytes(Bytes32.random()),
     UInt256.valueOf(42L),
     Hash.fromBytes(Bytes32.random()),
-    emptyList()
+    emptyList(),
   )
 
   @Test
@@ -41,7 +41,7 @@ class EthSubprotocolTest {
     val eth = EthSubprotocol(
       blockchainInfo = blockchainInfo,
       repository = repository,
-      pendingTransactionsPool = MemoryTransactionPool()
+      pendingTransactionsPool = MemoryTransactionPool(),
     )
     assertEquals(SubProtocolIdentifier.of("eth", 66), eth.id())
   }
@@ -52,7 +52,7 @@ class EthSubprotocolTest {
     val eth = EthSubprotocol(
       blockchainInfo = blockchainInfo,
       repository = repository,
-      pendingTransactionsPool = MemoryTransactionPool()
+      pendingTransactionsPool = MemoryTransactionPool(),
     )
     assertTrue(eth.supports(SubProtocolIdentifier.of("eth", 66)))
     assertTrue(eth.supports(SubProtocolIdentifier.of("eth", 65)))

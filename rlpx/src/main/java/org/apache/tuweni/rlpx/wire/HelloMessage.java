@@ -17,7 +17,12 @@ public final class HelloMessage implements WireProtocolMessage {
   private final int p2pVersion;
   private final List<Capability> capabilities;
 
-  private HelloMessage(Bytes nodeId, int listenPort, String clientId, int p2pVersion, List<Capability> capabilities) {
+  private HelloMessage(
+      Bytes nodeId,
+      int listenPort,
+      String clientId,
+      int p2pVersion,
+      List<Capability> capabilities) {
     this.nodeId = nodeId;
     this.listenPort = listenPort;
     this.clientId = clientId;
@@ -35,44 +40,49 @@ public final class HelloMessage implements WireProtocolMessage {
   }
 
   static HelloMessage read(Bytes data) {
-    return RLP.decodeList(data, reader -> {
-      int p2pVersion = reader.readInt();
-      String clientId = reader.readString();
-      List<Capability> capabilities = reader.readList(capabilitiesReader -> {
-        List<Capability> caps = new ArrayList<>();
-        while (!capabilitiesReader.isComplete()) {
-          caps
-              .add(
-                  capabilitiesReader
-                      .readList(
-                          capabilityReader -> new Capability(
-                              capabilityReader.readString(),
-                              capabilityReader.readInt())));
-        }
-        return caps;
-      });
-      int listenPort = reader.readInt();
-      Bytes nodeId = reader.readValue();
-      return new HelloMessage(nodeId, listenPort, clientId, p2pVersion, capabilities);
-    });
+    return RLP.decodeList(
+        data,
+        reader -> {
+          int p2pVersion = reader.readInt();
+          String clientId = reader.readString();
+          List<Capability> capabilities =
+              reader.readList(
+                  capabilitiesReader -> {
+                    List<Capability> caps = new ArrayList<>();
+                    while (!capabilitiesReader.isComplete()) {
+                      caps.add(
+                          capabilitiesReader.readList(
+                              capabilityReader ->
+                                  new Capability(
+                                      capabilityReader.readString(), capabilityReader.readInt())));
+                    }
+                    return caps;
+                  });
+          int listenPort = reader.readInt();
+          Bytes nodeId = reader.readValue();
+          return new HelloMessage(nodeId, listenPort, clientId, p2pVersion, capabilities);
+        });
   }
 
   @Override
   public Bytes toBytes() {
-    return RLP.encodeList(writer -> {
-      writer.writeInt(p2pVersion);
-      writer.writeString(clientId);
-      writer.writeList(capabilitiesWriter -> {
-        for (Capability cap : capabilities) {
-          capabilitiesWriter.writeList(capabilityWriter -> {
-            capabilityWriter.writeString(cap.name());
-            capabilityWriter.writeInt(cap.version());
-          });
-        }
-      });
-      writer.writeInt(listenPort);
-      writer.writeValue(nodeId);
-    });
+    return RLP.encodeList(
+        writer -> {
+          writer.writeInt(p2pVersion);
+          writer.writeString(clientId);
+          writer.writeList(
+              capabilitiesWriter -> {
+                for (Capability cap : capabilities) {
+                  capabilitiesWriter.writeList(
+                      capabilityWriter -> {
+                        capabilityWriter.writeString(cap.name());
+                        capabilityWriter.writeInt(cap.version());
+                      });
+                }
+              });
+          writer.writeInt(listenPort);
+          writer.writeValue(nodeId);
+        });
   }
 
   @Override
@@ -98,10 +108,8 @@ public final class HelloMessage implements WireProtocolMessage {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     HelloMessage that = (HelloMessage) o;
     if (capabilities.size() != that.capabilities.size()) {
       return false;

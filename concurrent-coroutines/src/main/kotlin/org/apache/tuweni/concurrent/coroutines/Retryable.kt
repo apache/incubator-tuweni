@@ -20,7 +20,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 @ExperimentalCoroutinesApi
 suspend fun <R> CoroutineScope.retry(
   retryDelay: Long,
-  block: suspend (Int) -> R?
+  block: suspend (Int) -> R?,
 ): R = retry({ retryDelay }, block)!!
 
 /**
@@ -35,7 +35,7 @@ suspend fun <R> CoroutineScope.retry(
 suspend fun <R> CoroutineScope.retry(
   retryDelay: Long,
   maxRetries: Int,
-  block: suspend (Int) -> R?
+  block: suspend (Int) -> R?,
 ): R? = retry({ i -> if (i > maxRetries) null else retryDelay }, block)
 
 /**
@@ -49,7 +49,7 @@ suspend fun <R> CoroutineScope.retry(
 @ExperimentalCoroutinesApi
 suspend fun <R> CoroutineScope.retry(
   retryDelay: (Int) -> Long?,
-  block: suspend (Int) -> R?
+  block: suspend (Int) -> R?,
 ): R? {
   val jobs = mutableSetOf<Job>()
   val result = CompletableDeferred<R?>()
@@ -104,7 +104,7 @@ suspend fun <R> CoroutineScope.retry(
  */
 suspend fun <R> timeoutAndRetry(
   timeout: Long,
-  block: suspend (Int) -> R?
+  block: suspend (Int) -> R?,
 ): R = timeoutAndRetry({ timeout }, block)!!
 
 /**
@@ -118,7 +118,7 @@ suspend fun <R> timeoutAndRetry(
 suspend fun <R> timeoutAndRetry(
   timeout: Long,
   maxRetries: Int,
-  block: suspend (Int) -> R?
+  block: suspend (Int) -> R?,
 ): R? = timeoutAndRetry({ i -> if (i >= maxRetries) null else timeout }, block)
 
 /**
@@ -131,7 +131,7 @@ suspend fun <R> timeoutAndRetry(
  */
 suspend fun <R> timeoutAndRetry(
   timeout: (Int) -> Long?,
-  block: suspend (Int) -> R?
+  block: suspend (Int) -> R?,
 ): R? {
   var i = 1
   while (true) {

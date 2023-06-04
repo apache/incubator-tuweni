@@ -58,11 +58,11 @@ class DefaultCompletableAsyncCompletionTest {
     assertThat(asyncResult.get()).isEqualTo("Completed");
   }
 
-
   @Test
   void suppliesAsyncResultWhenCompletedSchedule(@VertxInstance Vertx vertx) throws Exception {
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-    AsyncResult<String> completion2 = completion.thenSchedule(vertx, () -> AsyncResult.completed("Completed2"));
+    AsyncResult<String> completion2 =
+        completion.thenSchedule(vertx, () -> AsyncResult.completed("Completed2"));
     assertThat(completion2.isDone()).isFalse();
     completion.complete();
     assertThat(completion2.get()).isEqualTo("Completed2");
@@ -71,9 +71,11 @@ class DefaultCompletableAsyncCompletionTest {
   @Test
   void suppliesAsyncCompletionWhenCompletedCompose() throws Exception {
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-    AsyncCompletion composed = completion.thenCompose(() -> {
-      return AsyncCompletion.completed();
-    });
+    AsyncCompletion composed =
+        completion.thenCompose(
+            () -> {
+              return AsyncCompletion.completed();
+            });
     completion.complete();
     assertThat(composed.isDone()).isTrue();
   }
@@ -92,9 +94,10 @@ class DefaultCompletableAsyncCompletionTest {
   void accept() throws Exception {
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
     AtomicReference<Boolean> ref = new AtomicReference<>();
-    completion.accept((e) -> {
-      ref.set(true);
-    });
+    completion.accept(
+        (e) -> {
+          ref.set(true);
+        });
     completion.complete();
     assertThat(completion.isDone()).isTrue();
     assertThat(ref.get()).isTrue();
@@ -156,9 +159,11 @@ class DefaultCompletableAsyncCompletionTest {
   void completesExceptionallyWhenContinuationFunctionThrows() throws Exception {
     RuntimeException exception = new RuntimeException();
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-    AsyncResult<String> asyncResult = completion.then(() -> {
-      throw exception;
-    });
+    AsyncResult<String> asyncResult =
+        completion.then(
+            () -> {
+              throw exception;
+            });
     assertThat(asyncResult.isDone()).isFalse();
     completion.complete();
     assertThat(asyncResult.isDone()).isTrue();
@@ -169,10 +174,12 @@ class DefaultCompletableAsyncCompletionTest {
   void doesntInvokeContinuationFunctionIfCompletingExceptionally() throws Exception {
     RuntimeException exception = new RuntimeException();
     CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-    AsyncResult<String> asyncResult = completion.then(() -> {
-      fail("should not be invoked");
-      throw new RuntimeException();
-    });
+    AsyncResult<String> asyncResult =
+        completion.then(
+            () -> {
+              fail("should not be invoked");
+              throw new RuntimeException();
+            });
     assertThat(asyncResult.isDone()).isFalse();
     completion.completeExceptionally(exception);
     assertThat(asyncResult.isDone()).isTrue();
@@ -185,10 +192,12 @@ class DefaultCompletableAsyncCompletionTest {
     CompletableAsyncCompletion completion2 = AsyncCompletion.incomplete();
 
     AtomicBoolean composed = new AtomicBoolean(false);
-    AsyncCompletion result = completion1.thenCompose(() -> {
-      composed.set(true);
-      return completion2;
-    });
+    AsyncCompletion result =
+        completion1.thenCompose(
+            () -> {
+              composed.set(true);
+              return completion2;
+            });
     assertThat(result.isDone()).isFalse();
     assertThat(composed.get()).isFalse();
 
@@ -205,9 +214,11 @@ class DefaultCompletableAsyncCompletionTest {
     CompletableAsyncCompletion completion1 = AsyncCompletion.incomplete();
     RuntimeException exception = new RuntimeException();
 
-    AsyncCompletion result = completion1.thenCompose(() -> {
-      throw exception;
-    });
+    AsyncCompletion result =
+        completion1.thenCompose(
+            () -> {
+              throw exception;
+            });
     assertThat(result.isDone()).isFalse();
 
     completion1.complete();
@@ -220,10 +231,12 @@ class DefaultCompletableAsyncCompletionTest {
     CompletableAsyncCompletion completion2 = AsyncCompletion.incomplete();
 
     AtomicBoolean composed = new AtomicBoolean(false);
-    AsyncCompletion result = completion1.thenCompose(() -> {
-      composed.set(true);
-      return completion2;
-    });
+    AsyncCompletion result =
+        completion1.thenCompose(
+            () -> {
+              composed.set(true);
+              return completion2;
+            });
     assertThat(result.isDone()).isFalse();
     assertThat(composed.get()).isFalse();
 
@@ -243,10 +256,12 @@ class DefaultCompletableAsyncCompletionTest {
     CompletableAsyncCompletion completion2 = AsyncCompletion.incomplete();
 
     AtomicBoolean composed = new AtomicBoolean(false);
-    AsyncCompletion result = completion1.thenCompose(() -> {
-      composed.set(true);
-      return completion2;
-    });
+    AsyncCompletion result =
+        completion1.thenCompose(
+            () -> {
+              composed.set(true);
+              return completion2;
+            });
     assertThat(result.isDone()).isFalse();
     assertThat(composed.get()).isFalse();
 
@@ -403,7 +418,8 @@ class DefaultCompletableAsyncCompletionTest {
   void testRunOnWorker(@VertxInstance Vertx vertx) throws InterruptedException {
     AtomicReference<Boolean> executed = new AtomicReference<>();
     WorkerExecutor executor = vertx.createSharedWorkerExecutor("foo");
-    AsyncCompletion completion = AsyncCompletion.executeBlocking(executor, () -> executed.set(true));
+    AsyncCompletion completion =
+        AsyncCompletion.executeBlocking(executor, () -> executed.set(true));
     completion.join();
     assertTrue(executed.get());
   }
@@ -411,10 +427,13 @@ class DefaultCompletableAsyncCompletionTest {
   @Test
   void testRunOnContextWithCompletion(@VertxInstance Vertx vertx) throws InterruptedException {
     AtomicReference<Boolean> executed = new AtomicReference<>();
-    AsyncCompletion completion = AsyncCompletion.runOnContext(vertx, () -> {
-      executed.set(true);
-      return AsyncCompletion.completed();
-    });
+    AsyncCompletion completion =
+        AsyncCompletion.runOnContext(
+            vertx,
+            () -> {
+              executed.set(true);
+              return AsyncCompletion.completed();
+            });
     completion.join();
     assertTrue(executed.get());
   }
@@ -429,7 +448,8 @@ class DefaultCompletableAsyncCompletionTest {
     service.shutdown();
   }
 
-  private void assertCompletedWithException(AsyncCompletion completion, Exception exception) throws Exception {
+  private void assertCompletedWithException(AsyncCompletion completion, Exception exception)
+      throws Exception {
     try {
       completion.join();
       fail("Expected exception not thrown");
@@ -438,7 +458,8 @@ class DefaultCompletableAsyncCompletionTest {
     }
   }
 
-  private void assertCompletedWithException(AsyncResult<?> asyncResult, Exception exception) throws Exception {
+  private void assertCompletedWithException(AsyncResult<?> asyncResult, Exception exception)
+      throws Exception {
     try {
       asyncResult.get();
       fail("Expected exception not thrown");

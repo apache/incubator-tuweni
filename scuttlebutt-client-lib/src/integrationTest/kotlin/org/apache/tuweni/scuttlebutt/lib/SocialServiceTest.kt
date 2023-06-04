@@ -34,7 +34,7 @@ class SocialServiceTest {
     Assertions.assertTrue(!profiles.isEmpty())
     profiles.stream().forEach { (_, displayName): Profile ->
       println(
-        displayName
+        displayName,
       )
     }
     println("Following: " + profiles.size)
@@ -48,7 +48,7 @@ class SocialServiceTest {
     Assertions.assertTrue(!profiles.isEmpty())
     profiles.stream().forEach { (_, displayName): Profile ->
       println(
-        displayName
+        displayName,
       )
     }
     println("Followed by: " + profiles.size)
@@ -62,7 +62,7 @@ class SocialServiceTest {
     Assertions.assertTrue(!profiles.isEmpty())
     profiles.stream().forEach { (_, displayName): Profile ->
       println(
-        displayName
+        displayName,
       )
     }
     println("Friends: " + profiles.size)

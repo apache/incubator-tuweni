@@ -23,7 +23,7 @@ class BlockchainInformationTest {
       genesisBlock.header.hash,
       UInt256.valueOf(42L),
       genesisBlock.header.hash,
-      genesisFile.forks
+      genesisFile.forks,
     )
     assertEquals(Bytes.fromHexString("0xfc64ec04"), info.getForkHashes()[0])
     assertEquals(Bytes.fromHexString("0x97c2c34c"), info.getForkHashes()[1])
@@ -46,7 +46,7 @@ class BlockchainInformationTest {
       genesisBlock.header.hash,
       UInt256.valueOf(42L),
       genesisBlock.header.hash,
-      genesisFile.forks
+      genesisFile.forks,
     )
     assertEquals(1150000L, info.getLastestApplicableFork(0L).next)
   }
@@ -62,7 +62,7 @@ class BlockchainInformationTest {
       genesisBlock.header.hash,
       UInt256.valueOf(42L),
       genesisBlock.header.hash,
-      genesisFile.forks
+      genesisFile.forks,
     )
     assertEquals(Bytes.fromHexString("0x30c7ddbc"), info.getLastestApplicableFork(0L).hash)
     assertEquals(10L, info.getLastestApplicableFork(0L).next)

@@ -28,7 +28,8 @@ class DiscoveryServiceJavaTest {
 
   @Test
   void setUpAndShutDownAsync(@VertxInstance Vertx vertx) throws Exception {
-    DiscoveryService service = DiscoveryService.Companion.open(vertx, SECP256K1.KeyPair.random(), 0, "127.0.0.1");
+    DiscoveryService service =
+        DiscoveryService.Companion.open(vertx, SECP256K1.KeyPair.random(), 0, "127.0.0.1");
     service.awaitBootstrapAsync().join();
     AsyncCompletion completion = service.shutdownAsync();
     completion.join();
@@ -37,7 +38,8 @@ class DiscoveryServiceJavaTest {
 
   @Test
   void lookupAsync(@VertxInstance Vertx vertx) throws Exception {
-    DiscoveryService service = DiscoveryService.Companion.open(vertx, SECP256K1.KeyPair.random(), 0, "127.0.0.1");
+    DiscoveryService service =
+        DiscoveryService.Companion.open(vertx, SECP256K1.KeyPair.random(), 0, "127.0.0.1");
     service.awaitBootstrapAsync().join();
     AsyncResult<List<Peer>> result = service.lookupAsync(SECP256K1.KeyPair.random().publicKey());
     List<Peer> peers = result.get();
@@ -49,22 +51,25 @@ class DiscoveryServiceJavaTest {
   void managePeerRepository(@VertxInstance Vertx vertx) throws Exception {
     SECP256K1.KeyPair peerKeyPair = SECP256K1.KeyPair.random();
     EphemeralPeerRepository repository = new EphemeralPeerRepository();
-    DiscoveryService service = DiscoveryService.Companion
-        .open(
+    DiscoveryService service =
+        DiscoveryService.Companion.open(
             vertx,
             SECP256K1.KeyPair.random(),
             32456,
             "127.0.0.1",
             1,
             emptyMap(),
-            Collections
-                .singletonList(URI.create("enode://" + peerKeyPair.publicKey().toHexString() + "@127.0.0.1:10000")),
+            Collections.singletonList(
+                URI.create(
+                    "enode://" + peerKeyPair.publicKey().toHexString() + "@127.0.0.1:10000")),
             repository);
     AsyncResult<Peer> result =
-        repository.getAsync(URI.create("enode://" + peerKeyPair.publicKey().toHexString() + "@127.0.0.1:10000"));
+        repository.getAsync(
+            URI.create("enode://" + peerKeyPair.publicKey().toHexString() + "@127.0.0.1:10000"));
     assertEquals(peerKeyPair.publicKey(), result.get().getNodeId());
     AsyncResult<Peer> byURIString =
-        repository.getAsync("enode://" + peerKeyPair.publicKey().toHexString() + "@127.0.0.1:10000");
+        repository.getAsync(
+            "enode://" + peerKeyPair.publicKey().toHexString() + "@127.0.0.1:10000");
     assertEquals(peerKeyPair.publicKey(), byURIString.get().getNodeId());
     service.shutdownAsync().join();
   }

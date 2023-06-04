@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.apache.tuweni.units.bigints;
 
-
 import static java.nio.ByteOrder.BIG_ENDIAN;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -11,25 +10,21 @@ import org.apache.tuweni.bytes.Bytes32;
 import java.math.BigInteger;
 import java.nio.ByteOrder;
 
-
 /**
  * Represents a 256-bit (32 bytes) unsigned integer value.
  *
- * <p>
- * A {@link UInt256Value} is an unsigned integer value stored with 32 bytes, so whose value can range between 0 and
- * 2^256-1.
+ * <p>A {@link UInt256Value} is an unsigned integer value stored with 32 bytes, so whose value can
+ * range between 0 and 2^256-1.
  *
- * <p>
- * This interface defines operations for value types with a 256-bit precision range. The methods provided by this
- * interface take parameters of the same type (and also {@code long}. This provides type safety by ensuring calculations
- * cannot mix different {@code UInt256Value} types.
+ * <p>This interface defines operations for value types with a 256-bit precision range. The methods
+ * provided by this interface take parameters of the same type (and also {@code long}. This provides
+ * type safety by ensuring calculations cannot mix different {@code UInt256Value} types.
  *
- * <p>
- * Where only a pure numerical 256-bit value is required, {@link UInt256} should be used.
+ * <p>Where only a pure numerical 256-bit value is required, {@link UInt256} should be used.
  *
- * <p>
- * It is strongly advised to extend {@link BaseUInt256Value} rather than implementing this interface directly. Doing so
- * provides type safety in that quantities of different units cannot be mixed accidentally.
+ * <p>It is strongly advised to extend {@link BaseUInt256Value} rather than implementing this
+ * interface directly. Doing so provides type safety in that quantities of different units cannot be
+ * mixed accidentally.
  *
  * @param <T> The concrete type of the value.
  */
@@ -46,8 +41,7 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
   /**
    * Returns a value that is {@code (this + value)}.
    *
-   * <p>
-   * This notation can be used in Kotlin with the {@code +} operator.
+   * <p>This notation can be used in Kotlin with the {@code +} operator.
    *
    * @param value The amount to be added to this value.
    * @return {@code this + value}
@@ -59,8 +53,7 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
   /**
    * Returns a value that is {@code (this + value)}.
    *
-   * <p>
-   * This notation can be used in Kotlin with the {@code +} operator.
+   * <p>This notation can be used in Kotlin with the {@code +} operator.
    *
    * @param value The amount to be added to this value.
    * @return {@code this + value}
@@ -86,7 +79,7 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
 
   /**
    * Returns a value that is {@code (this + value)}, or MAX_VALUE if it overflows.
-   * 
+   *
    * @param value the amount to be added to this value
    * @return {@code this + value} or UInt256.MAX
    */
@@ -214,10 +207,9 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
   /**
    * Return the max value for this type.
    *
-   * <p>
-   * The default implementation of this method returns a value obtained from calling the concrete type constructor with
-   * an argument of {@link UInt256#MAX_VALUE}. Most implementations will want to override this method to instead return
-   * a static constant.
+   * <p>The default implementation of this method returns a value obtained from calling the concrete
+   * type constructor with an argument of {@link UInt256#MAX_VALUE}. Most implementations will want
+   * to override this method to instead return a static constant.
    *
    * @return The max value for this type.
    */
@@ -309,11 +301,9 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
   /**
    * Returns a value that is {@code (this<sup>exponent</sup> mod 2<sup>256</sup>)}
    *
-   * <p>
-   * This calculates an exponentiation over the modulus of {@code 2^256}.
+   * <p>This calculates an exponentiation over the modulus of {@code 2^256}.
    *
-   * <p>
-   * Note that {@code exponent} is an {@link UInt256} rather than of the type {@code T}.
+   * <p>Note that {@code exponent} is an {@link UInt256} rather than of the type {@code T}.
    *
    * @param exponent The exponent to which this value is to be raised.
    * @return {@code this<sup>exponent</sup> mod 2<sup>256</sup>}
@@ -323,8 +313,7 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
   /**
    * Returns a value that is {@code (this<sup>exponent</sup> mod 2<sup>256</sup>)}
    *
-   * <p>
-   * This calculates an exponentiation over the modulus of {@code 2^256}.
+   * <p>This calculates an exponentiation over the modulus of {@code 2^256}.
    *
    * @param exponent The exponent to which this value is to be raised.
    * @return {@code this<sup>exponent</sup> mod 2<sup>256</sup>}
@@ -368,7 +357,8 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
   /**
    * Returns true if the value can fit in an int.
    *
-   * @return True if this value fits a java {@code int} (i.e. is less or equal to {@code Integer.MAX_VALUE}).
+   * @return True if this value fits a java {@code int} (i.e. is less or equal to {@code
+   *     Integer.MAX_VALUE}).
    */
   default boolean fitsInt() {
     return fitsInt(ByteOrder.BIG_ENDIAN);
@@ -378,22 +368,21 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
    * Returns true if the value can fit in an int according to the byte order.
    *
    * @param order the byte order, little or big endian
-   * @return True if this value fits a java {@code int} (i.e. is less or equal to {@code Integer.MAX_VALUE}).
+   * @return True if this value fits a java {@code int} (i.e. is less or equal to {@code
+   *     Integer.MAX_VALUE}).
    */
   default boolean fitsInt(ByteOrder order) {
     if (order == ByteOrder.BIG_ENDIAN) {
       // Ints are 4 bytes, so anything but the 4 last bytes must be zeroes
       for (int i = 0; i < Bytes32.SIZE - 4; i++) {
-        if (get(i) != 0)
-          return false;
+        if (get(i) != 0) return false;
       }
       // Lastly, the left-most byte of the int must not start with a 1.
       return get(Bytes32.SIZE - 4) >= 0;
     } else {
       // Ints are 4 bytes, so only the 4 first bytes must not be zeroes
       for (int i = 4; i < Bytes32.SIZE - 4; i++) {
-        if (get(i) != 0)
-          return false;
+        if (get(i) != 0) return false;
       }
       // Lastly, the right-most byte of the int must not start with a 1.
       return get(3) >= 0;
@@ -404,7 +393,8 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
    * Provides this value as an int.
    *
    * @return This value as a java {@code int} assuming it is small enough to fit an {@code int}.
-   * @throws ArithmeticException If the value does not fit an {@code int}, that is if {@code !fitsInt()}.
+   * @throws ArithmeticException If the value does not fit an {@code int}, that is if {@code
+   *     !fitsInt()}.
    */
   default int intValue() {
     if (!fitsInt()) {
@@ -440,7 +430,8 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
   /**
    * Returns true if the value can fit in a long.
    *
-   * @return True if this value fits a java {@code long} (i.e. is less or equal to {@code Long.MAX_VALUE}).
+   * @return True if this value fits a java {@code long} (i.e. is less or equal to {@code
+   *     Long.MAX_VALUE}).
    */
   default boolean fitsLong() {
     return fitsLong(ByteOrder.BIG_ENDIAN);
@@ -450,22 +441,21 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
    * Returns true if the value can fit in a long.
    *
    * @param order byte order, little or big endian
-   * @return True if this value fits a java {@code long} (i.e. is less or equal to {@code Long.MAX_VALUE}).
+   * @return True if this value fits a java {@code long} (i.e. is less or equal to {@code
+   *     Long.MAX_VALUE}).
    */
   default boolean fitsLong(ByteOrder order) {
     if (order == ByteOrder.BIG_ENDIAN) {
       // Longs are 8 bytes, so anything but the 8 last bytes must be zeroes
       for (int i = 0; i < Bytes32.SIZE - 8; i++) {
-        if (get(i) != 0)
-          return false;
+        if (get(i) != 0) return false;
       }
       // Lastly, the left-most byte of the long must not start with a 1.
       return get(Bytes32.SIZE - 8) >= 0;
     } else {
       // Longs are 8 bytes, so only the 8 first bytes may not be zeroes
       for (int i = 8; i < Bytes32.SIZE; i++) {
-        if (get(i) != 0)
-          return false;
+        if (get(i) != 0) return false;
       }
       // Lastly, the left-most byte of the long must not start with a 1.
       return get(7) >= 0;
@@ -481,21 +471,21 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
 
   /**
    * Provides the value as bytes.
-   * 
+   *
    * @return The value as bytes.
    */
   Bytes32 toBytes();
 
   /**
    * Provides the value as bytes without any leading zero bytes.
-   * 
+   *
    * @return The value as bytes without any leading zero bytes.
    */
   Bytes toMinimalBytes();
 
   /**
    * Returns true if this value is greater than the other one
-   * 
+   *
    * @param other the other value being compared
    * @return true if this value is greater than the other one, false otherwise
    */
@@ -505,7 +495,7 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
 
   /**
    * Returns true if this value is greater or equal than the other one
-   * 
+   *
    * @param other the other value being compared
    * @return true if this value is greater or equal than the other one, false otherwise
    */
@@ -515,7 +505,7 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
 
   /**
    * Returns true if this value is less than the other one
-   * 
+   *
    * @param other the other value being compared
    * @return true if this value is less than the other one, false otherwise
    */
@@ -525,7 +515,7 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
 
   /**
    * Returns true if this value is less or equal than the other one
-   * 
+   *
    * @param other the other value being compared
    * @return true if this value is less or equal than the other one, false otherwise
    */
@@ -545,7 +535,8 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
   /**
    * The BigInteger corresponding to interpreting these bytes as a two's-complement signed integer.
    *
-   * @return A {@link BigInteger} corresponding to interpreting these bytes as a two's-complement signed integer.
+   * @return A {@link BigInteger} corresponding to interpreting these bytes as a two's-complement
+   *     signed integer.
    */
   default BigInteger toSignedBigInteger() {
     return toSignedBigInteger(BIG_ENDIAN);
@@ -555,7 +546,8 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
    * The BigInteger corresponding to interpreting these bytes as a two's-complement signed integer.
    *
    * @param order The byte-order for decoding the integer.
-   * @return A {@link BigInteger} corresponding to interpreting these bytes as a two's-complement signed integer.
+   * @return A {@link BigInteger} corresponding to interpreting these bytes as a two's-complement
+   *     signed integer.
    */
   default BigInteger toSignedBigInteger(ByteOrder order) {
     if (size() == 0) {
@@ -567,7 +559,8 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
   /**
    * The BigInteger corresponding to interpreting these bytes as an unsigned integer.
    *
-   * @return A positive (or zero) {@link BigInteger} corresponding to interpreting these bytes as an unsigned integer.
+   * @return A positive (or zero) {@link BigInteger} corresponding to interpreting these bytes as an
+   *     unsigned integer.
    */
   @Override
   default BigInteger toBigInteger() {
@@ -578,7 +571,8 @@ public interface UInt256Value<T extends UInt256Value<T>> extends Bytes32 {
    * The BigInteger corresponding to interpreting these bytes as an unsigned integer.
    *
    * @param order The byte-order for decoding the integer.
-   * @return A positive (or zero) {@link BigInteger} corresponding to interpreting these bytes as an unsigned integer.
+   * @return A positive (or zero) {@link BigInteger} corresponding to interpreting these bytes as an
+   *     unsigned integer.
    */
   @Override
   default BigInteger toBigInteger(ByteOrder order) {

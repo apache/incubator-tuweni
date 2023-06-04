@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class SSZVariableSizeTypeList<T extends SSZReadable & SSZWritable> implements SSZReadable, SSZWritable {
+public class SSZVariableSizeTypeList<T extends SSZReadable & SSZWritable>
+    implements SSZReadable, SSZWritable {
   private final Supplier<T> supplier;
 
   private final List<T> elements = new ArrayList<>();

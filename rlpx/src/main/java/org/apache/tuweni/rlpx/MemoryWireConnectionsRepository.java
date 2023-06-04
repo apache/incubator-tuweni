@@ -14,10 +14,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-/**
- * In-memory implementation of the wire connections repository.
- *
- */
+/** In-memory implementation of the wire connections repository. */
 public class MemoryWireConnectionsRepository implements WireConnectionRepository {
 
   private final Map<String, WireConnection> connections = new ConcurrentHashMap<>();
@@ -30,18 +27,19 @@ public class MemoryWireConnectionsRepository implements WireConnectionRepository
   public String add(WireConnection wireConnection) {
     String id = UUID.randomUUID().toString();
     connections.put(id, wireConnection);
-    wireConnection.registerListener((event) -> {
-      if (event == CONNECTED) {
-        for (Listener listener : connectionListeners) {
-          listener.connectionEvent(wireConnection);
-        }
-      } else if (event == DISCONNECTED) {
-        connections.remove(id);
-        for (Listener listener : disconnectionListeners) {
-          listener.connectionEvent(wireConnection);
-        }
-      }
-    });
+    wireConnection.registerListener(
+        (event) -> {
+          if (event == CONNECTED) {
+            for (Listener listener : connectionListeners) {
+              listener.connectionEvent(wireConnection);
+            }
+          } else if (event == DISCONNECTED) {
+            connections.remove(id);
+            for (Listener listener : disconnectionListeners) {
+              listener.connectionEvent(wireConnection);
+            }
+          }
+        });
     return id;
   }
 
@@ -57,7 +55,9 @@ public class MemoryWireConnectionsRepository implements WireConnectionRepository
 
   @Override
   public Iterable<WireConnection> asIterable(SubProtocolIdentifier identifier) {
-    return connections.values().stream().filter(conn -> conn.supports(identifier)).collect(Collectors.toList());
+    return connections.values().stream()
+        .filter(conn -> conn.supports(identifier))
+        .collect(Collectors.toList());
   }
 
   @Override

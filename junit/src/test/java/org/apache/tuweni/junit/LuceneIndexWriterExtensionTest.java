@@ -16,7 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 class LuceneIndexWriterExtensionTest {
 
   @Test
-  void shouldHaveAccessToLuceneIndexWriter(@LuceneIndexWriter IndexWriter indexWriter) throws Exception {
+  void shouldHaveAccessToLuceneIndexWriter(@LuceneIndexWriter IndexWriter indexWriter)
+      throws Exception {
     assertTrue(indexWriter.isOpen());
     indexWriter.addDocument(new Document());
     indexWriter.commit();

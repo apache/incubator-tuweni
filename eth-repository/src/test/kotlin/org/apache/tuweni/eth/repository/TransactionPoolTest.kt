@@ -29,7 +29,7 @@ class TransactionPoolTest {
       Address.fromBytes(Bytes.random(20)),
       Wei.valueOf(2),
       Bytes.random(12),
-      SECP256K1.KeyPair.random()
+      SECP256K1.KeyPair.random(),
     )
     val transactionPool = MemoryTransactionPool()
     assertFalse(transactionPool.contains(tx.hash))

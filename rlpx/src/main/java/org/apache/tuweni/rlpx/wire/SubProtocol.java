@@ -2,27 +2,24 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.apache.tuweni.rlpx.wire;
 
-
 import org.apache.tuweni.rlpx.RLPxService;
 
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Defines a subprotocol to be used for wire connections
- */
+/** Defines a subprotocol to be used for wire connections */
 public interface SubProtocol {
 
   /**
    * Provides the identifier of the subprotocol
-   * 
+   *
    * @return the identifier of the subprotocol
    */
   SubProtocolIdentifier id();
 
   /**
    * Returns true if the subprotocol supports a sub protocol ID.
-   * 
+   *
    * @param subProtocolIdentifier the identifier of the subprotocol
    * @return true if the subprotocol ID and version are supported, false otherwise
    */
@@ -48,7 +45,7 @@ public interface SubProtocol {
 
   /**
    * Provides the capabilities supported by the subprotocol.
-   * 
+   *
    * @return the capabilities for this protocol, ordered.
    */
   default List<SubProtocolIdentifier> getCapabilities() {

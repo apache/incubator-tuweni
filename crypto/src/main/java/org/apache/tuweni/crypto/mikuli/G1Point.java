@@ -9,8 +9,8 @@ import org.apache.tuweni.bytes.Bytes;
 import java.util.Objects;
 
 /**
- * G1 is a subgroup of an elliptic curve whose points are elements of the finite field Fp - simple numbers mod some
- * prime p. The curve is defined by: y^2 = x^3 + 4
+ * G1 is a subgroup of an elliptic curve whose points are elements of the finite field Fp - simple
+ * numbers mod some prime p. The curve is defined by: y^2 = x^3 + 4
  */
 final class G1Point implements Group<G1Point> {
 

@@ -44,7 +44,7 @@ class DefaultDiscoveryV5ServiceTest {
     emptyMap(),
     bindAddress.address,
     null,
-    bindAddress.port
+    bindAddress.port,
   )
 
   @Test
@@ -58,7 +58,7 @@ class DefaultDiscoveryV5ServiceTest {
         vertx,
         keyPair,
         localPort,
-        bootstrapENRList = bootstrapENRList
+        bootstrapENRList = bootstrapENRList,
       )
     discoveryV5Service.start()
 
@@ -71,7 +71,7 @@ class DefaultDiscoveryV5ServiceTest {
 
     val message = RandomMessage.create(
       Message.authTag(),
-      content
+      content,
     )
     assertEquals(message.data.size(), Message.RANDOM_DATA_LENGTH)
     discoveryV5Service.terminate()

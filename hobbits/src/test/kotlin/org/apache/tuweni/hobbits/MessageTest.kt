@@ -16,7 +16,7 @@ class MessageTest {
     val msg = Message(
       protocol = Protocol.PING,
       headers = Bytes.fromHexString("deadbeef01"),
-      body = Bytes.fromHexString("deadbeef02")
+      body = Bytes.fromHexString("deadbeef02"),
     )
     val serialized = msg.toBytes()
     val read = Message.readMessage(serialized)!!
@@ -39,13 +39,13 @@ class MessageTest {
     val msg = Message(
       protocol = Protocol.PING,
       headers = Bytes.fromHexString("deadbeef01"),
-      body = Bytes.fromHexString("deadbeef02")
+      body = Bytes.fromHexString("deadbeef02"),
     )
     assertEquals(
       "EWP 3 PING 5 5\n" +
         "0xdeadbeef01\n" +
         "0xdeadbeef02",
-      msg.toString()
+      msg.toString(),
     )
   }
 
@@ -54,11 +54,11 @@ class MessageTest {
     val msg = Message(
       protocol = Protocol.PING,
       headers = Bytes.fromHexString("deadbeef01"),
-      body = Bytes.fromHexString("deadbeef02")
+      body = Bytes.fromHexString("deadbeef02"),
     )
     assertEquals(
       26,
-      msg.size()
+      msg.size(),
     )
   }
 
@@ -67,7 +67,7 @@ class MessageTest {
     val msg = Message(
       protocol = Protocol.PING,
       headers = Bytes.fromHexString("deadbeef01"),
-      body = Bytes.fromHexString("deadbeef02")
+      body = Bytes.fromHexString("deadbeef02"),
     )
     val serialized = msg.toBytes()
     assertNull(Message.readMessage(serialized.slice(0, 3)))

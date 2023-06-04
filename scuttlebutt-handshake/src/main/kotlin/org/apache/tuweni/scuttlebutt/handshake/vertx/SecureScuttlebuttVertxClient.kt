@@ -34,13 +34,13 @@ import org.slf4j.LoggerFactory
 class SecureScuttlebuttVertxClient(
   private val vertx: Vertx,
   private val keyPair: Signature.KeyPair,
-  private val networkIdentifier: Bytes32
+  private val networkIdentifier: Bytes32,
 ) {
   private inner class NetSocketClientHandler(
     private val socket: NetSocket,
     remotePublicKey: Signature.PublicKey?,
     invite: Invite?,
-    private val handlerFactory: (sender: (Bytes) -> Unit, terminationFunction: () -> Unit) -> ClientHandler
+    private val handlerFactory: (sender: (Bytes) -> Unit, terminationFunction: () -> Unit) -> ClientHandler,
   ) {
     private val handshakeClient: SecureScuttlebuttHandshakeClient
     private var handshakeCounter = 0
@@ -57,7 +57,7 @@ class SecureScuttlebuttVertxClient(
         create(
           keyPair,
           networkIdentifier,
-          remotePublicKey
+          remotePublicKey,
         )
       }
       socket.closeHandler {
@@ -71,12 +71,12 @@ class SecureScuttlebuttVertxClient(
       socket.exceptionHandler { e: Throwable ->
         logger.error(
           e.message,
-          e
+          e,
         )
       }
       socket.handler { buffer: Buffer? ->
         handle(
-          buffer
+          buffer,
         )
       }
       socket.write(Buffer.buffer(handshakeClient.createHello().toArrayUnsafe()))
@@ -96,17 +96,17 @@ class SecureScuttlebuttVertxClient(
               synchronized(this@NetSocketClientHandler) {
                 socket.write(
                   Buffer.buffer(
-                    client!!.sendToServer(bytes!!).toArrayUnsafe()
-                  )
+                    client!!.sendToServer(bytes!!).toArrayUnsafe(),
+                  ),
                 )
               }
-            }
+            },
           ) {
             synchronized(this@NetSocketClientHandler) {
               socket.write(
                 Buffer.buffer(
-                  client!!.sendGoodbyeToServer().toArrayUnsafe()
-                )
+                  client!!.sendGoodbyeToServer().toArrayUnsafe(),
+                ),
               )
               socket.close()
             }
@@ -116,8 +116,8 @@ class SecureScuttlebuttVertxClient(
         } else {
           val message = client!!.readFromServer(
             Bytes.wrapBuffer(
-              buffer!!
-            )
+              buffer!!,
+            ),
           )
           messageBuffer = Bytes.concatenate(messageBuffer, message)
           val headerSize = 9
@@ -187,7 +187,7 @@ class SecureScuttlebuttVertxClient(
     host: String,
     remotePublicKey: Signature.PublicKey?,
     invite: Invite?,
-    handlerFactory: (sender: (Bytes) -> Unit, terminationFunction: () -> Unit) -> ClientHandler
+    handlerFactory: (sender: (Bytes) -> Unit, terminationFunction: () -> Unit) -> ClientHandler,
   ): ClientHandler {
     client = vertx.createNetClient(NetClientOptions().setTcpKeepAlive(true))
     val socket = client!!.connect(port, host).await()
@@ -195,7 +195,7 @@ class SecureScuttlebuttVertxClient(
       socket,
       remotePublicKey,
       invite,
-      handlerFactory
+      handlerFactory,
     )
     return h.result.await()
   }

@@ -15,9 +15,7 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 
-/**
- * A validator associated with a specific configuration property.
- */
+/** A validator associated with a specific configuration property. */
 public interface PropertyValidator<T> {
 
   /**
@@ -28,7 +26,8 @@ public interface PropertyValidator<T> {
    * @param <T> The validator type.
    * @return A single validator that combines the results of evaluating the provided validators.
    */
-  static <T> PropertyValidator<T> combine(PropertyValidator<? super T> first, PropertyValidator<? super T> second) {
+  static <T> PropertyValidator<T> combine(
+      PropertyValidator<? super T> first, PropertyValidator<? super T> second) {
     return combine(Arrays.<PropertyValidator<? super T>>asList(first, second));
   }
 
@@ -40,12 +39,11 @@ public interface PropertyValidator<T> {
    * @return A single validator that combines the results of evaluating the provided validators.
    */
   static <T> PropertyValidator<T> combine(List<PropertyValidator<? super T>> validators) {
-    return (key, position, value) -> validators
-        .stream()
-        .flatMap(validator -> validator.validate(key, position, value).stream())
-        .collect(Collectors.toList());
+    return (key, position, value) ->
+        validators.stream()
+            .flatMap(validator -> validator.validate(key, position, value).stream())
+            .collect(Collectors.toList());
   }
-
 
   /**
    * A validator that applies a validator to all elements of list, if the list is present.
@@ -57,8 +55,7 @@ public interface PropertyValidator<T> {
   static <T> PropertyValidator<List<T>> allInList(PropertyValidator<? super T> validator) {
     return (key, position, value) -> {
       if (value != null) {
-        return value
-            .stream()
+        return value.stream()
             .flatMap(elem -> validator.validate(key, position, elem).stream())
             .collect(Collectors.toList());
       }
@@ -85,7 +82,8 @@ public interface PropertyValidator<T> {
   static PropertyValidator<Number> inRange(long from, long to) {
     return (key, position, value) -> {
       if (value != null && (value.longValue() < from || value.longValue() >= to)) {
-        return singleError(position, "Value of property '" + key + "' is outside range [" + from + "," + to + ")");
+        return singleError(
+            position, "Value of property '" + key + "' is outside range [" + from + "," + to + ")");
       }
       return noErrors();
     };
@@ -100,7 +98,8 @@ public interface PropertyValidator<T> {
   static PropertyValidator<Number> isGreaterOrEqual(long value) {
     return (key, position, currentValue) -> {
       if (currentValue != null && (currentValue.longValue() < value)) {
-        return singleError(position, "Value of property '" + key + "' is less than '" + value + "'");
+        return singleError(
+            position, "Value of property '" + key + "' is less than '" + value + "'");
       }
       return noErrors();
     };
@@ -151,7 +150,8 @@ public interface PropertyValidator<T> {
    *
    * @param values The acceptable values.
    * @param comparator A comparator between values.
-   * @return A validator that ensures a property, if present, has a comparable value within a given set.
+   * @return A validator that ensures a property, if present, has a comparable value within a given
+   *     set.
    */
   static PropertyValidator<String> anyOf(Collection<String> values, Comparator<String> comparator) {
     StringBuilder builder = new StringBuilder();
@@ -199,8 +199,8 @@ public interface PropertyValidator<T> {
   }
 
   /**
-   * A validator that ensures a property, if present, is a well-formed port number, or zero - meaning it will be
-   * allocated at runtime.
+   * A validator that ensures a property, if present, is a well-formed port number, or zero -
+   * meaning it will be allocated at runtime.
    *
    * @return A validator that ensures a property, if present, is a well-formed number or zero.
    */
@@ -241,15 +241,15 @@ public interface PropertyValidator<T> {
     };
   }
 
-
   /**
    * Validate a configuration property.
    *
    * @param key The configuration property key.
-   * @param position The position of the property in the input document, if supported. This should be used when
-   *        constructing errors.
+   * @param position The position of the property in the input document, if supported. This should
+   *     be used when constructing errors.
    * @param value The value associated with the configuration entry.
    * @return A list of errors. If no errors are found, an empty list should be returned.
    */
-  List<ConfigurationError> validate(String key, @Nullable DocumentPosition position, @Nullable T value);
+  List<ConfigurationError> validate(
+      String key, @Nullable DocumentPosition position, @Nullable T value);
 }

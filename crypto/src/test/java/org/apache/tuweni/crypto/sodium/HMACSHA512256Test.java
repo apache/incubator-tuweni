@@ -31,14 +31,18 @@ class HMACSHA512256Test {
     Bytes authenticator = HMACSHA512256.authenticate(Bytes.fromHexString("deadbeef"), key);
     assertThrows(
         IllegalArgumentException.class,
-        () -> HMACSHA512256
-            .verify(Bytes.concatenate(authenticator, Bytes.of(1, 2, 3)), Bytes.fromHexString("deadbeef"), key));
+        () ->
+            HMACSHA512256.verify(
+                Bytes.concatenate(authenticator, Bytes.of(1, 2, 3)),
+                Bytes.fromHexString("deadbeef"),
+                key));
   }
 
   @Test
   void testHmacsha512256NoMatch() {
     HMACSHA512256.Key key = HMACSHA512256.Key.random();
     Bytes authenticator = HMACSHA512256.authenticate(Bytes.fromHexString("deadbeef"), key);
-    assertFalse(HMACSHA512256.verify(authenticator.reverse(), Bytes.fromHexString("deadbeef"), key));
+    assertFalse(
+        HMACSHA512256.verify(authenticator.reverse(), Bytes.fromHexString("deadbeef"), key));
   }
 }

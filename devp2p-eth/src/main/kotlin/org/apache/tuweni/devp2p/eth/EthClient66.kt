@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory
 open class EthClient66(
   private val service: RLPxService,
   private val pendingTransactionsPool: TransactionPool,
-  private val connectionSelectionStrategy: ConnectionSelectionStrategy
+  private val connectionSelectionStrategy: ConnectionSelectionStrategy,
 ) : EthClient(service, pendingTransactionsPool, connectionSelectionStrategy) {
 
   companion object {
@@ -41,7 +41,7 @@ open class EthClient66(
 
   override fun requestTransactionReceipts(
     blockHashes: List<Hash>,
-    connection: WireConnection
+    connection: WireConnection,
   ): AsyncResult<List<List<TransactionReceipt>>> {
     val handle = AsyncResult.incomplete<List<List<TransactionReceipt>>>()
     transactionReceiptRequests.computeIfAbsent(UInt64.random().toBytes()) { key ->
@@ -52,7 +52,7 @@ open class EthClient66(
         RLP.encodeList {
           it.writeValue(key)
           it.writeRLP(GetReceipts(blockHashes).toBytes())
-        }
+        },
       )
       Request(connection.uri(), handle, blockHashes)
     }
@@ -64,7 +64,7 @@ open class EthClient66(
     maxHeaders: Long,
     skip: Long,
     reverse: Boolean,
-    connection: WireConnection
+    connection: WireConnection,
   ): AsyncResult<List<BlockHeader>> {
     logger.info("Requesting headers hash: $blockHash maxHeaders: $maxHeaders skip: $skip reverse: $reverse")
     if (connection.agreedSubprotocolVersion(EthSubprotocol.ETH66.name()) != EthSubprotocol.ETH66) {
@@ -79,7 +79,7 @@ open class EthClient66(
         RLP.encodeList {
           it.writeValue(key)
           it.writeRLP(GetBlockHeaders(blockHash, maxHeaders, skip, reverse).toBytes())
-        }
+        },
       )
       Request(connectionId = connection.uri(), handle = completion, data = blockHash)
     }
@@ -91,7 +91,7 @@ open class EthClient66(
     maxHeaders: Long,
     skip: Long,
     reverse: Boolean,
-    connection: WireConnection
+    connection: WireConnection,
   ): AsyncResult<List<BlockHeader>> {
     if (connection.agreedSubprotocolVersion(EthSubprotocol.ETH66.name()) != EthSubprotocol.ETH66) {
       return super.requestBlockHeaders(blockNumber, maxHeaders, skip, reverse, connection)
@@ -106,7 +106,7 @@ open class EthClient66(
         RLP.encodeList {
           it.writeValue(key)
           it.writeRLP(GetBlockHeaders(blockNumberBytes, maxHeaders, skip, reverse).toBytes())
-        }
+        },
 
       )
       Request(connectionId = connection.uri(), handle = completion, data = blockNumber)
@@ -116,7 +116,7 @@ open class EthClient66(
 
   override fun requestBlockHeaders(
     blockHashes: List<Hash>,
-    connection: WireConnection
+    connection: WireConnection,
   ): AsyncResult<List<BlockHeader>> {
     if (connection.agreedSubprotocolVersion(EthSubprotocol.ETH66.name()) != EthSubprotocol.ETH66) {
       return super.requestBlockHeaders(blockHashes, connection)
@@ -136,7 +136,7 @@ open class EthClient66(
         RLP.encodeList {
           it.writeValue(key)
           it.writeRLP(GetBlockHeaders(blockHash, 1, 0, false).toBytes())
-        }
+        },
       )
       val completion = AsyncResult.incomplete<List<BlockHeader>>()
       Request(connectionId = connection.uri(), handle = completion, data = blockHash)
@@ -157,7 +157,7 @@ open class EthClient66(
         RLP.encodeList {
           it.writeValue(key)
           it.writeRLP(GetBlockBodies(blockHashes).toBytes())
-        }
+        },
       )
       Request(connection.uri(), handle, blockHashes)
     }
@@ -184,7 +184,7 @@ open class EthClient66(
   }
 
   fun headersRequested(
-    requestIdentifier: Bytes
+    requestIdentifier: Bytes,
   ): Request<List<BlockHeader>>? {
     val request = headerRequests.remove(requestIdentifier) ?: return null
     return request
@@ -197,7 +197,7 @@ open class EthClient66(
     nodeDataRequests[requestIdentifier]
 
   fun transactionReceiptsRequested(
-    requestIdentifier: Bytes
+    requestIdentifier: Bytes,
   ): Request<List<List<TransactionReceipt>>>? = transactionReceiptRequests[requestIdentifier]
 
   override suspend fun submitPooledTransaction(vararg tx: Transaction) {
@@ -214,7 +214,7 @@ open class EthClient66(
         RLP.encodeList {
           it.writeValue(UInt64.random().toBytes())
           it.writeRLP(GetBlockBodies(hashes).toBytes())
-        }
+        },
       )
     }
 
@@ -224,7 +224,7 @@ open class EthClient66(
         conn.agreedSubprotocolVersion(EthSubprotocol.ETH65.name()),
         MessageType.NewPooledTransactionHashes.code,
         conn,
-        GetBlockBodies(hashes).toBytes()
+        GetBlockBodies(hashes).toBytes(),
       )
     }
   }

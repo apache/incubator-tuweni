@@ -34,9 +34,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 
-/**
- * Utility to read genesis config files and translate them to a block.
- */
+/** Utility to read genesis config files and translate them to a block. */
 public class GenesisFile {
 
   private final Bytes nonce;
@@ -49,7 +47,6 @@ public class GenesisFile {
   private final Map<Address, Wei> allocs;
   private final int chainId;
   private final List<Long> forks;
-
 
   public GenesisFile(
       String nonce,
@@ -88,8 +85,10 @@ public class GenesisFile {
     this.difficulty = UInt256.fromHexString(difficulty);
     this.mixhash = Hash.fromHexString(mixhash);
     this.coinbase = Address.fromHexString(coinbase);
-    this.timestamp = "0x0".equals(timestamp) ? Instant.ofEpochSecond(0)
-        : Instant.ofEpochSecond(Bytes.fromHexStringLenient(timestamp).toLong());
+    this.timestamp =
+        "0x0".equals(timestamp)
+            ? Instant.ofEpochSecond(0)
+            : Instant.ofEpochSecond(Bytes.fromHexStringLenient(timestamp).toLong());
     this.extraData = Bytes.fromHexString(extraData);
     this.gasLimit = Gas.valueOf(Bytes.fromHexStringLenient(gasLimit).toLong());
     this.allocs = new HashMap<>();
@@ -214,19 +213,21 @@ public class GenesisFile {
     return allocs;
   }
 
-
   public Block toBlock() {
-    Hash emptyListHash = Hash.hash(RLP.encodeList(writer -> {
-    }));
-    Hash emptyHash = Hash.hash(RLP.encode(writer -> {
-      writer.writeValue(Bytes.EMPTY);
-    }));
+    Hash emptyListHash = Hash.hash(RLP.encodeList(writer -> {}));
+    Hash emptyHash =
+        Hash.hash(
+            RLP.encode(
+                writer -> {
+                  writer.writeValue(Bytes.EMPTY);
+                }));
     Hash empty = Hash.hash(Bytes.EMPTY);
     MerklePatriciaTrie<AccountState> stateTree = new MerklePatriciaTrie<>(AccountState::toBytes);
 
     List<AsyncCompletion> futures = new ArrayList<>();
     for (Map.Entry<Address, Wei> entry : allocs.entrySet()) {
-      AccountState accountState = new AccountState(UInt256.ZERO, entry.getValue(), emptyHash, empty);
+      AccountState accountState =
+          new AccountState(UInt256.ZERO, entry.getValue(), emptyHash, empty);
       futures.add(stateTree.putAsync(Hash.hash(entry.getKey()), accountState));
     }
     try {

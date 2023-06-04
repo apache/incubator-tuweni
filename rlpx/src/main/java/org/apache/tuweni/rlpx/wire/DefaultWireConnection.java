@@ -26,12 +26,10 @@ import com.google.common.collect.TreeRangeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * A stateful connection between two peers under the Devp2p wire protocol.
- */
+/** A stateful connection between two peers under the Devp2p wire protocol. */
 public final class DefaultWireConnection implements WireConnection {
 
-  private final static Logger logger = LoggerFactory.getLogger(DefaultWireConnection.class);
+  private static final Logger logger = LoggerFactory.getLogger(DefaultWireConnection.class);
 
   private final Bytes nodeId;
   private final Bytes peerNodeId;
@@ -61,7 +59,8 @@ public final class DefaultWireConnection implements WireConnection {
    * @param nodeId the node id of this node
    * @param peerNodeId the node id of the peer
    * @param writer the message writer
-   * @param afterHandshakeListener a listener called after the handshake is complete with the peer hello message.
+   * @param afterHandshakeListener a listener called after the handshake is complete with the peer
+   *     hello message.
    * @param disconnectHandler the handler to run upon receiving a disconnect message
    * @param subprotocols the subprotocols supported by this connection
    * @param p2pVersion the version of the devp2p protocol supported by this client
@@ -129,11 +128,10 @@ public final class DefaultWireConnection implements WireConnection {
       }
 
       if (subprotocolRangeMap.asMapOfRanges().isEmpty()) {
-        logger
-            .debug(
-                "Useless peer detected, caps {}, our caps {}",
-                peerHelloMessage.capabilities(),
-                subprotocols.keySet());
+        logger.debug(
+            "Useless peer detected, caps {}, our caps {}",
+            peerHelloMessage.capabilities(),
+            subprotocols.keySet());
         disconnect(DisconnectReason.USELESS_PEER);
         ready.complete(this);
         return;
@@ -145,18 +143,16 @@ public final class DefaultWireConnection implements WireConnection {
 
       afterHandshakeListener.accept(peerHelloMessage);
 
-      AsyncCompletion allSubProtocols = AsyncCompletion
-          .allOf(
-              subprotocolRangeMap
-                  .asMapOfRanges()
-                  .values()
-                  .stream()
+      AsyncCompletion allSubProtocols =
+          AsyncCompletion.allOf(
+              subprotocolRangeMap.asMapOfRanges().values().stream()
                   .map(subprotocols::get)
                   .map(handler -> handler.handleNewPeerConnection(this)));
-      allSubProtocols.thenRun(() -> {
-        ready.complete(this);
-        eventListener.onEvent(Event.CONNECTED);
-      });
+      allSubProtocols.thenRun(
+          () -> {
+            ready.complete(this);
+            eventListener.onEvent(Event.CONNECTED);
+          });
       return;
     } else if (message.messageId() == 1) {
       DisconnectMessage disconnect = DisconnectMessage.read(message.content());
@@ -197,7 +193,8 @@ public final class DefaultWireConnection implements WireConnection {
         SubProtocolHandler handler = subprotocols.get(subProtocolEntry.getValue());
         handler
             .handle(this, message.messageId() - offset, message.content())
-            .exceptionally(t -> logger.error("Handler " + handler.toString() + " threw an exception", t));
+            .exceptionally(
+                t -> logger.error("Handler " + handler.toString() + " threw an exception", t));
       }
     }
   }
@@ -225,7 +222,8 @@ public final class DefaultWireConnection implements WireConnection {
       for (SubProtocolIdentifier sp : subprotocols.keySet()) {
         if (sp.equals(capSp)) {
           int numberOfMessageTypes = sp.versionRange();
-          subprotocolRangeMap.put(Range.closedOpen(startRange, startRange + numberOfMessageTypes), sp);
+          subprotocolRangeMap.put(
+              Range.closedOpen(startRange, startRange + numberOfMessageTypes), sp);
           startRange += numberOfMessageTypes;
           break;
         }
@@ -267,19 +265,17 @@ public final class DefaultWireConnection implements WireConnection {
   }
 
   void sendHello() {
-    myHelloMessage = HelloMessage
-        .create(
+    myHelloMessage =
+        HelloMessage.create(
             nodeId,
             advertisedPort,
             p2pVersion,
             clientId,
-            subprotocols
-                .keySet()
-                .stream()
+            subprotocols.keySet().stream()
                 .map(
-                    subProtocolIdentifier -> new Capability(
-                        subProtocolIdentifier.name(),
-                        subProtocolIdentifier.version()))
+                    subProtocolIdentifier ->
+                        new Capability(
+                            subProtocolIdentifier.name(), subProtocolIdentifier.version()))
                 .collect(Collectors.toList()));
     logger.debug("Sending hello message {}", myHelloMessage);
     writer.accept(new RLPxMessage(0, myHelloMessage.toBytes()));
@@ -304,10 +300,12 @@ public final class DefaultWireConnection implements WireConnection {
     return identifiers;
   }
 
-  public void sendMessage(SubProtocolIdentifier subProtocolIdentifier, int messageType, Bytes message) {
+  public void sendMessage(
+      SubProtocolIdentifier subProtocolIdentifier, int messageType, Bytes message) {
     logger.trace("Sending sub-protocol message {} {} {}", messageType, message, uri());
     Integer offset = null;
-    for (Map.Entry<Range<Integer>, SubProtocolIdentifier> entry : subprotocolRangeMap.asMapOfRanges().entrySet()) {
+    for (Map.Entry<Range<Integer>, SubProtocolIdentifier> entry :
+        subprotocolRangeMap.asMapOfRanges().entrySet()) {
       if (entry.getValue().equals(subProtocolIdentifier)) {
         offset = entry.getKey().lowerEndpoint();
         break;

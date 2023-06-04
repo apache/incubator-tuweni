@@ -73,42 +73,43 @@ class TomlTest {
 
   @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> stringSupplier() {
-    return Stream
-        .of(
-            Arguments.of("foo = \"\"", ""),
-            Arguments.of("foo = \"\\\"\"", "\""),
-            Arguments
-                .of("foo = \"bar \\b \\f \\n \\\\ \\u0053 \\U0010FfFf baz\"", "bar \b \f \n \\ S \uDBFF\uDFFF baz"),
-            Arguments.of("foo = \"\"\"\"\"\"", ""),
-            Arguments.of("foo = \"\"\"  foo\nbar\"\"\"", "  foo" + System.lineSeparator() + "bar"),
-            Arguments.of("foo = \"\"\"\n  foobar\"\"\"", "  foobar"),
-            Arguments.of("foo = \"\"\"\n  foo\nbar\"\"\"", "  foo" + System.lineSeparator() + "bar"),
-            Arguments.of("foo = \"\"\"\\n  foo\nbar\"\"\"", "\n  foo" + System.lineSeparator() + "bar"),
-            Arguments
-                .of(
-                    "foo = \"\"\"\n\n  foo\nbar\"\"\"",
-                    System.lineSeparator() + "  foo" + System.lineSeparator() + "bar"),
-            Arguments.of("foo = \"\"\"  foo \\  \nbar\"\"\"", "  foo " + System.lineSeparator() + "bar"),
-            Arguments.of("foo = \"\"\"  foo \\\nbar\"\"\"", "  foo " + System.lineSeparator() + "bar"),
-            Arguments.of("foo = \"\"\"  foo \\       \nbar\"\"\"", "  foo " + System.lineSeparator() + "bar"),
-            Arguments.of("foo = \"foobar#\" # comment", "foobar#"),
-            Arguments.of("foo = \"foobar#\"", "foobar#"),
-            Arguments.of("foo = \"foo \\\" bar #\" # \"baz\"", "foo \" bar #"),
-            Arguments.of("foo = ''", ""),
-            Arguments.of("foo = '\"'", "\""),
-            Arguments.of("foo = 'foobar \\'", "foobar \\"),
-            Arguments.of("foo = '''foobar \n'''", "foobar " + System.lineSeparator()),
-            Arguments.of("foo = '''\nfoobar \n'''", "foobar " + System.lineSeparator()),
-            Arguments.of("foo = '''\nfoobar \\    \n'''", "foobar \\    " + System.lineSeparator()),
-            Arguments.of("# I am a comment. Hear me roar. Roar.\nfoo = \"value\" # Yeah, you can do this.", "value"),
-            Arguments
-                .of(
-                    "foo = \"I'm a string. \\\"You can quote me\\\". Name\\tJos\\u00E9\\nLocation\\tSF.\"",
-                    "I'm a string. \"You can quote me\". Name\tJosé\nLocation\tSF."),
-            Arguments
-                .of(
-                    "foo=\"\"\"\nRoses are red\nViolets are blue\"\"\"",
-                    "Roses are red" + System.lineSeparator() + "Violets are blue"));
+    return Stream.of(
+        Arguments.of("foo = \"\"", ""),
+        Arguments.of("foo = \"\\\"\"", "\""),
+        Arguments.of(
+            "foo = \"bar \\b \\f \\n \\\\ \\u0053 \\U0010FfFf baz\"",
+            "bar \b \f \n \\ S \uDBFF\uDFFF baz"),
+        Arguments.of("foo = \"\"\"\"\"\"", ""),
+        Arguments.of("foo = \"\"\"  foo\nbar\"\"\"", "  foo" + System.lineSeparator() + "bar"),
+        Arguments.of("foo = \"\"\"\n  foobar\"\"\"", "  foobar"),
+        Arguments.of("foo = \"\"\"\n  foo\nbar\"\"\"", "  foo" + System.lineSeparator() + "bar"),
+        Arguments.of("foo = \"\"\"\\n  foo\nbar\"\"\"", "\n  foo" + System.lineSeparator() + "bar"),
+        Arguments.of(
+            "foo = \"\"\"\n\n  foo\nbar\"\"\"",
+            System.lineSeparator() + "  foo" + System.lineSeparator() + "bar"),
+        Arguments.of(
+            "foo = \"\"\"  foo \\  \nbar\"\"\"", "  foo " + System.lineSeparator() + "bar"),
+        Arguments.of("foo = \"\"\"  foo \\\nbar\"\"\"", "  foo " + System.lineSeparator() + "bar"),
+        Arguments.of(
+            "foo = \"\"\"  foo \\       \nbar\"\"\"", "  foo " + System.lineSeparator() + "bar"),
+        Arguments.of("foo = \"foobar#\" # comment", "foobar#"),
+        Arguments.of("foo = \"foobar#\"", "foobar#"),
+        Arguments.of("foo = \"foo \\\" bar #\" # \"baz\"", "foo \" bar #"),
+        Arguments.of("foo = ''", ""),
+        Arguments.of("foo = '\"'", "\""),
+        Arguments.of("foo = 'foobar \\'", "foobar \\"),
+        Arguments.of("foo = '''foobar \n'''", "foobar " + System.lineSeparator()),
+        Arguments.of("foo = '''\nfoobar \n'''", "foobar " + System.lineSeparator()),
+        Arguments.of("foo = '''\nfoobar \\    \n'''", "foobar \\    " + System.lineSeparator()),
+        Arguments.of(
+            "# I am a comment. Hear me roar. Roar.\nfoo = \"value\" # Yeah, you can do this.",
+            "value"),
+        Arguments.of(
+            "foo = \"I'm a string. \\\"You can quote me\\\". Name\\tJos\\u00E9\\nLocation\\tSF.\"",
+            "I'm a string. \"You can quote me\". Name\tJosé\nLocation\tSF."),
+        Arguments.of(
+            "foo=\"\"\"\nRoses are red\nViolets are blue\"\"\"",
+            "Roses are red" + System.lineSeparator() + "Violets are blue"));
   }
 
   @Test
@@ -131,20 +132,19 @@ class TomlTest {
 
   @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> integerSupplier() {
-    return Stream
-        .of(
-            Arguments.of("foo = 1", 1L),
-            Arguments.of("foo = 0", 0L),
-            Arguments.of("foo = 100", 100L),
-            Arguments.of("foo = -9876", -9876L),
-            Arguments.of("foo = +5_433", 5433L),
-            Arguments.of("foo = 0xff", 255L),
-            Arguments.of("foo = 0xffbccd34", 4290563380L),
-            Arguments.of("foo = 0o7656", 4014L),
-            Arguments.of("foo = 0o0007_6543_21", 2054353L),
-            Arguments.of("foo = 0b11111100010101_0100000000111111111", 8466858495L),
-            Arguments.of("foo = 0b0000000_00000000000000000000000000", 0L),
-            Arguments.of("foo = 0b111111111111111111111111111111111", 8589934591L));
+    return Stream.of(
+        Arguments.of("foo = 1", 1L),
+        Arguments.of("foo = 0", 0L),
+        Arguments.of("foo = 100", 100L),
+        Arguments.of("foo = -9876", -9876L),
+        Arguments.of("foo = +5_433", 5433L),
+        Arguments.of("foo = 0xff", 255L),
+        Arguments.of("foo = 0xffbccd34", 4290563380L),
+        Arguments.of("foo = 0o7656", 4014L),
+        Arguments.of("foo = 0o0007_6543_21", 2054353L),
+        Arguments.of("foo = 0b11111100010101_0100000000111111111", 8466858495L),
+        Arguments.of("foo = 0b0000000_00000000000000000000000000", 0L),
+        Arguments.of("foo = 0b111111111111111111111111111111111", 8589934591L));
   }
 
   @ParameterizedTest
@@ -165,12 +165,14 @@ class TomlTest {
         Arguments.of("foo = 0.00e-100", 0D),
         Arguments.of("foo = +0.0", 0D),
         Arguments.of("foo = -0.0", -0D),
-        Arguments.of("foo = 0.000000000000000000000000000000000000000000"
-            + "000000000000000000000000000000000000000000000000000000000"
-            + "000000000000000000000000000000000000000000000000000000000"
-            + "000000000000000000000000000000000000000000000000000000000"
-            + "000000000000000000000000000000000000000000000000000000000"
-            + "000000000000000000000000000000000000000000000000000000000", 0D),
+        Arguments.of(
+            "foo = 0.000000000000000000000000000000000000000000"
+                + "000000000000000000000000000000000000000000000000000000000"
+                + "000000000000000000000000000000000000000000000000000000000"
+                + "000000000000000000000000000000000000000000000000000000000"
+                + "000000000000000000000000000000000000000000000000000000000"
+                + "000000000000000000000000000000000000000000000000000000000",
+            0D),
         Arguments.of("foo = -0.0E999999999999999999999999999999999999999", -0D),
         Arguments.of("foo = 1.0", 1D),
         Arguments.of("foo = 43.55E34", 43.55E34D),
@@ -180,8 +182,7 @@ class TomlTest {
         Arguments.of("foo = -inf", Double.NEGATIVE_INFINITY),
         Arguments.of("foo = nan", Double.NaN),
         Arguments.of("foo = +nan", Double.NaN),
-        Arguments.of("foo = -nan", Double.NaN)
-    );
+        Arguments.of("foo = -nan", Double.NaN));
     // @formatter:on
   }
 
@@ -207,17 +208,24 @@ class TomlTest {
   private static Stream<Arguments> offsetDateSupplier() {
     // @formatter:off
     return Stream.of(
-        Arguments.of("foo = 1937-07-18T03:25:43-04:00", OffsetDateTime.parse("1937-07-18T03:25:43-04:00")),
-        Arguments.of("foo = 1937-07-18 11:44:02+18:00", OffsetDateTime.parse("1937-07-18T11:44:02+18:00")),
-        Arguments.of("foo = 0000-07-18 11:44:02.00+18:00", OffsetDateTime.parse("0000-07-18T11:44:02+18:00")),
-        Arguments.of("foo = 1979-05-27T07:32:00Z\nbar = 1979-05-27T00:32:00-07:00\n",
+        Arguments.of(
+            "foo = 1937-07-18T03:25:43-04:00", OffsetDateTime.parse("1937-07-18T03:25:43-04:00")),
+        Arguments.of(
+            "foo = 1937-07-18 11:44:02+18:00", OffsetDateTime.parse("1937-07-18T11:44:02+18:00")),
+        Arguments.of(
+            "foo = 0000-07-18 11:44:02.00+18:00",
+            OffsetDateTime.parse("0000-07-18T11:44:02+18:00")),
+        Arguments.of(
+            "foo = 1979-05-27T07:32:00Z\nbar = 1979-05-27T00:32:00-07:00\n",
             OffsetDateTime.parse("1979-05-27T07:32:00Z")),
-        Arguments.of("bar = 1979-05-27T07:32:00Z\nfoo = 1979-05-27T00:32:00-07:00\n",
+        Arguments.of(
+            "bar = 1979-05-27T07:32:00Z\nfoo = 1979-05-27T00:32:00-07:00\n",
             OffsetDateTime.parse("1979-05-27T00:32:00-07:00")),
-        Arguments.of("foo = 1937-07-18 11:44:02.334543+18:00",
+        Arguments.of(
+            "foo = 1937-07-18 11:44:02.334543+18:00",
             OffsetDateTime.parse("1937-07-18T11:44:02.334543+18:00")),
-        Arguments.of("foo = 1937-07-18 11:44:02Z", OffsetDateTime.parse("1937-07-18T11:44:02+00:00"))
-    );
+        Arguments.of(
+            "foo = 1937-07-18 11:44:02Z", OffsetDateTime.parse("1937-07-18T11:44:02+00:00")));
     // @formatter:on
   }
 
@@ -231,13 +239,13 @@ class TomlTest {
 
   @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> localDateTimeSupplier() {
-    return Stream
-        .of(
-            Arguments.of("foo = 1937-07-18T03:25:43", LocalDateTime.parse("1937-07-18T03:25:43")),
-            Arguments.of("foo = 1937-07-18 11:44:02", LocalDateTime.parse("1937-07-18T11:44:02")),
-            Arguments.of("foo = 0000-07-18 11:44:02.00", LocalDateTime.parse("0000-07-18T11:44:02")),
-            Arguments.of("foo = 1937-07-18 11:44:02.334543", LocalDateTime.parse("1937-07-18T11:44:02.334543")),
-            Arguments.of("foo = 1937-07-18 11:44:02", LocalDateTime.parse("1937-07-18T11:44:02")));
+    return Stream.of(
+        Arguments.of("foo = 1937-07-18T03:25:43", LocalDateTime.parse("1937-07-18T03:25:43")),
+        Arguments.of("foo = 1937-07-18 11:44:02", LocalDateTime.parse("1937-07-18T11:44:02")),
+        Arguments.of("foo = 0000-07-18 11:44:02.00", LocalDateTime.parse("0000-07-18T11:44:02")),
+        Arguments.of(
+            "foo = 1937-07-18 11:44:02.334543", LocalDateTime.parse("1937-07-18T11:44:02.334543")),
+        Arguments.of("foo = 1937-07-18 11:44:02", LocalDateTime.parse("1937-07-18T11:44:02")));
   }
 
   @ParameterizedTest
@@ -250,13 +258,12 @@ class TomlTest {
 
   @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> localDateSupplier() {
-    return Stream
-        .of(
-            Arguments.of("foo = 1937-07-18", LocalDate.parse("1937-07-18")),
-            Arguments.of("foo = 1937-07-18", LocalDate.parse("1937-07-18")),
-            Arguments.of("foo = 0000-07-18", LocalDate.parse("0000-07-18")),
-            Arguments.of("foo = 1937-07-18", LocalDate.parse("1937-07-18")),
-            Arguments.of("foo = 1937-07-18", LocalDate.parse("1937-07-18")));
+    return Stream.of(
+        Arguments.of("foo = 1937-07-18", LocalDate.parse("1937-07-18")),
+        Arguments.of("foo = 1937-07-18", LocalDate.parse("1937-07-18")),
+        Arguments.of("foo = 0000-07-18", LocalDate.parse("0000-07-18")),
+        Arguments.of("foo = 1937-07-18", LocalDate.parse("1937-07-18")),
+        Arguments.of("foo = 1937-07-18", LocalDate.parse("1937-07-18")));
   }
 
   @ParameterizedTest
@@ -269,13 +276,12 @@ class TomlTest {
 
   @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> localTimeSupplier() {
-    return Stream
-        .of(
-            Arguments.of("foo = 03:25:43", LocalTime.parse("03:25:43")),
-            Arguments.of("foo = 11:44:02", LocalTime.parse("11:44:02")),
-            Arguments.of("foo = 11:44:02.00", LocalTime.parse("11:44:02")),
-            Arguments.of("foo = 11:44:02.334543", LocalTime.parse("11:44:02.334543")),
-            Arguments.of("foo = 11:44:02", LocalTime.parse("11:44:02")));
+    return Stream.of(
+        Arguments.of("foo = 03:25:43", LocalTime.parse("03:25:43")),
+        Arguments.of("foo = 11:44:02", LocalTime.parse("11:44:02")),
+        Arguments.of("foo = 11:44:02.00", LocalTime.parse("11:44:02")),
+        Arguments.of("foo = 11:44:02.334543", LocalTime.parse("11:44:02.334543")),
+        Arguments.of("foo = 11:44:02", LocalTime.parse("11:44:02")));
   }
 
   @ParameterizedTest
@@ -291,18 +297,18 @@ class TomlTest {
 
   @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> arraySupplier() {
-    return Stream
-        .of(
-            Arguments.of("foo = []", new Object[0]),
-            Arguments.of("foo = [\n]", new Object[0]),
-            Arguments.of("foo = [1]", new Object[] {1L}),
-            Arguments.of("foo = [ \"bar\"\n]", new Object[] {"bar"}),
-            Arguments.of("foo = [11:44:02,]", new Object[] {LocalTime.parse("11:44:02")}),
-            Arguments.of("foo = [\n'bar', #baz\n]", new Object[] {"bar"}),
-            Arguments.of("foo = ['bar', 'baz']", new Object[] {"bar", "baz"}),
-            Arguments
-                .of("foo = [\n'''bar\nbaz''',\n'baz'\n]", new Object[] {"bar" + System.lineSeparator() + "baz", "baz"}),
-            Arguments.of("foo = [['bar']]", new Object[] {new Object[] {"bar"}}));
+    return Stream.of(
+        Arguments.of("foo = []", new Object[0]),
+        Arguments.of("foo = [\n]", new Object[0]),
+        Arguments.of("foo = [1]", new Object[] {1L}),
+        Arguments.of("foo = [ \"bar\"\n]", new Object[] {"bar"}),
+        Arguments.of("foo = [11:44:02,]", new Object[] {LocalTime.parse("11:44:02")}),
+        Arguments.of("foo = [\n'bar', #baz\n]", new Object[] {"bar"}),
+        Arguments.of("foo = ['bar', 'baz']", new Object[] {"bar", "baz"}),
+        Arguments.of(
+            "foo = [\n'''bar\nbaz''',\n'baz'\n]",
+            new Object[] {"bar" + System.lineSeparator() + "baz", "baz"}),
+        Arguments.of("foo = [['bar']]", new Object[] {new Object[] {"bar"}}));
   }
 
   @ParameterizedTest
@@ -315,12 +321,11 @@ class TomlTest {
 
   @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> tableSupplier() {
-    return Stream
-        .of(
-            Arguments.of("[foo]\nbar = 'baz'", "foo.bar", "baz"),
-            Arguments.of("[foo] #foo.bar\nbar = 'baz'", "foo.bar", "baz"),
-            Arguments.of("[foo]\n[foo.bar]\nbaz = 'buz'", "foo.bar.baz", "buz"),
-            Arguments.of("[foo.bar]\nbaz=1\n[foo]\nbaz=2", "foo.baz", 2L));
+    return Stream.of(
+        Arguments.of("[foo]\nbar = 'baz'", "foo.bar", "baz"),
+        Arguments.of("[foo] #foo.bar\nbar = 'baz'", "foo.bar", "baz"),
+        Arguments.of("[foo]\n[foo.bar]\nbaz = 'buz'", "foo.bar.baz", "buz"),
+        Arguments.of("[foo.bar]\nbaz=1\n[foo]\nbaz=2", "foo.baz", 2L));
   }
 
   @ParameterizedTest
@@ -333,14 +338,13 @@ class TomlTest {
 
   @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> inlineTableSupplier() {
-    return Stream
-        .of(
-            Arguments.of("foo = {}", "foo.bar", null),
-            Arguments.of("foo = { bar = 'baz' }", "foo.bar", "baz"),
-            Arguments.of("foo = { bar = 'baz', baz.buz = 2 }", "foo.baz.buz", 2L),
-            Arguments.of("foo = { bar = ['baz', 'buz']   , baz  .   buz = 2 }", "foo.baz.buz", 2L),
-            Arguments.of("foo = { bar = ['baz',\n'buz'\n], baz.buz = 2 }", "foo.baz.buz", 2L),
-            Arguments.of("bar = { bar = ['baz',\n'buz'\n], baz.buz = 2 }\nfoo=2\n", "foo", 2L));
+    return Stream.of(
+        Arguments.of("foo = {}", "foo.bar", null),
+        Arguments.of("foo = { bar = 'baz' }", "foo.bar", "baz"),
+        Arguments.of("foo = { bar = 'baz', baz.buz = 2 }", "foo.baz.buz", 2L),
+        Arguments.of("foo = { bar = ['baz', 'buz']   , baz  .   buz = 2 }", "foo.baz.buz", 2L),
+        Arguments.of("foo = { bar = ['baz',\n'buz'\n], baz.buz = 2 }", "foo.baz.buz", 2L),
+        Arguments.of("bar = { bar = ['baz',\n'buz'\n], baz.buz = 2 }\nfoo=2\n", "foo", 2L));
   }
 
   @ParameterizedTest
@@ -366,26 +370,26 @@ class TomlTest {
 
   @SuppressWarnings("UnusedMethod")
   private static Stream<Arguments> arrayTableSupplier() {
-    return Stream
-        .of(
-            Arguments.of("[[foo]]\nbar = 'baz'", new Object[] {"foo", 0, "bar"}, "baz"),
-            Arguments.of("[[foo]] #foo.bar\nbar = 'baz'", new Object[] {"foo", 0, "bar"}, "baz"),
-            Arguments.of("[[foo]] \n   bar = 'buz'\nbuz=1\n", new Object[] {"foo", 0, "buz"}, 1L),
-            Arguments.of("[[foo]] \n   bar = 'buz'\n[[foo]]\nbar=1\n", new Object[] {"foo", 0, "bar"}, "buz"),
-            Arguments.of("[[foo]] \n   bar = 'buz'\n[[foo]]\nbar=1\n", new Object[] {"foo", 1, "bar"}, 1L),
-            Arguments.of("[[foo]]\nbar=1\n[[foo]]\nbar=2\n", new Object[] {"foo", 0, "bar"}, 1L),
-            Arguments.of("[[foo]]\nbar=1\n[[foo]]\nbar=2\n", new Object[] {"foo", 1, "bar"}, 2L),
-            Arguments.of("[[foo]]\n\n[foo.bar]\n\nbaz=2\n\n", new Object[] {"foo", 0, "bar", "baz"}, 2L),
-            Arguments
-                .of(
-                    "[[foo]]\n[[foo.bar]]\n[[foo.baz]]\n[foo.bar.baz]\nbuz=2\n[foo.baz.buz]\nbiz=3\n",
-                    new Object[] {"foo", 0, "bar", 0, "baz", "buz"},
-                    2L),
-            Arguments
-                .of(
-                    "[[foo]]\n[[foo.bar]]\n[[foo.baz]]\n[foo.bar.baz]\nbuz=2\n[foo.baz.buz]\nbiz=3\n",
-                    new Object[] {"foo", 0, "baz", 0, "buz", "biz"},
-                    3L));
+    return Stream.of(
+        Arguments.of("[[foo]]\nbar = 'baz'", new Object[] {"foo", 0, "bar"}, "baz"),
+        Arguments.of("[[foo]] #foo.bar\nbar = 'baz'", new Object[] {"foo", 0, "bar"}, "baz"),
+        Arguments.of("[[foo]] \n   bar = 'buz'\nbuz=1\n", new Object[] {"foo", 0, "buz"}, 1L),
+        Arguments.of(
+            "[[foo]] \n   bar = 'buz'\n[[foo]]\nbar=1\n", new Object[] {"foo", 0, "bar"}, "buz"),
+        Arguments.of(
+            "[[foo]] \n   bar = 'buz'\n[[foo]]\nbar=1\n", new Object[] {"foo", 1, "bar"}, 1L),
+        Arguments.of("[[foo]]\nbar=1\n[[foo]]\nbar=2\n", new Object[] {"foo", 0, "bar"}, 1L),
+        Arguments.of("[[foo]]\nbar=1\n[[foo]]\nbar=2\n", new Object[] {"foo", 1, "bar"}, 2L),
+        Arguments.of(
+            "[[foo]]\n\n[foo.bar]\n\nbaz=2\n\n", new Object[] {"foo", 0, "bar", "baz"}, 2L),
+        Arguments.of(
+            "[[foo]]\n[[foo.bar]]\n[[foo.baz]]\n[foo.bar.baz]\nbuz=2\n[foo.baz.buz]\nbiz=3\n",
+            new Object[] {"foo", 0, "bar", 0, "baz", "buz"},
+            2L),
+        Arguments.of(
+            "[[foo]]\n[[foo.bar]]\n[[foo.baz]]\n[foo.bar.baz]\nbuz=2\n[foo.baz.buz]\nbiz=3\n",
+            new Object[] {"foo", 0, "baz", 0, "buz", "biz"},
+            3L));
   }
 
   @ParameterizedTest
@@ -406,99 +410,213 @@ class TomlTest {
         Arguments.of("\"foo\"", 1, 6, "Unexpected end of input, expected . or ="),
         Arguments.of("foo", 1, 4, "Unexpected end of input, expected . or ="),
         Arguments.of("foo  \n", 1, 6, "Unexpected end of line, expected . or ="),
-        Arguments.of("foo =", 1, 6, "Unexpected end of input, expected ', \", ''', \"\"\", a number, a boolean, a date/time, an array, or a table"),
+        Arguments.of(
+            "foo =",
+            1,
+            6,
+            "Unexpected end of input, expected ', \", ''', \"\"\", a number, a boolean, a date/time, an array, or a table"),
         Arguments.of("foo = 0b", 1, 8, "Unexpected 'b', expected a newline or end-of-input"),
-        Arguments.of("foo = +", 1, 7, "Unexpected '+', expected ', \", ''', \"\"\", a number, a boolean, a date/time, an array, or a table"),
-        Arguments.of("=", 1, 1, "Unexpected '=', expected a-z, A-Z, 0-9, ', \", a table key, a newline, or end-of-input"),
+        Arguments.of(
+            "foo = +",
+            1,
+            7,
+            "Unexpected '+', expected ', \", ''', \"\"\", a number, a boolean, a date/time, an array, or a table"),
+        Arguments.of(
+            "=",
+            1,
+            1,
+            "Unexpected '=', expected a-z, A-Z, 0-9, ', \", a table key, a newline, or end-of-input"),
         Arguments.of("\"foo\tbar\" = 1", 1, 5, "Unexpected '\\t', expected \" or a character"),
-        Arguments.of("\"foo \nbar\" = 1", 1, 6, "Unexpected end of line, expected \" or a character"),
+        Arguments.of(
+            "\"foo \nbar\" = 1", 1, 6, "Unexpected end of line, expected \" or a character"),
         Arguments.of("foo = \"bar \\y baz\"", 1, 12, "Invalid escape sequence '\\y'"),
-        Arguments.of("\u0011abc = 'foo'", 1, 1, "Unexpected '\\u0011', expected a-z, A-Z, 0-9, ', \", a table key, a newline, or end-of-input"),
-        Arguments.of(" \uDBFF\uDFFFAAabc='foo'", 1, 2, "Unexpected '\\U0010ffff', expected a-z, A-Z, 0-9, ', \", a table key, a newline, or end-of-input"),
-
+        Arguments.of(
+            "\u0011abc = 'foo'",
+            1,
+            1,
+            "Unexpected '\\u0011', expected a-z, A-Z, 0-9, ', \", a table key, a newline, or end-of-input"),
+        Arguments.of(
+            " \uDBFF\uDFFFAAabc='foo'",
+            1,
+            2,
+            "Unexpected '\\U0010ffff', expected a-z, A-Z, 0-9, ', \", a table key, a newline, or end-of-input"),
         Arguments.of("foo = 1234567891234567891233456789", 1, 7, "Integer is too large"),
-
         Arguments.of("\n\nfoo    =    \t    +1E1000", 3, 18, "Float is too large"),
         Arguments.of("foo = +1E-1000", 1, 7, "Float is too small"),
-        Arguments.of("foo = 0.000000000000000000000000000000000000000000"
-            + "000000000000000000000000000000000000000000000000000000000"
-            + "000000000000000000000000000000000000000000000000000000000"
-            + "000000000000000000000000000000000000000000000000000000000"
-            + "000000000000000000000000000000000000000000000000000000000"
-            + "000000000000000000000000000000000000000000000000000001", 1, 7, "Float is too small"),
-
-        Arguments.of("\nfoo = 1937-47-18-00:00:00-04:00", 2, 17, "Unexpected '-', expected a newline or end-of-input"),
-        Arguments.of("\nfoo = 1937-47-18  00:00:00-04:00", 2, 19, "Unexpected '00', expected a newline or end-of-input"),
-        Arguments.of("\nfoo = 2334567891233457889-07-18T00:00:00-04:00", 2, 7, "Invalid year (valid range 0000..9999)"),
-        Arguments.of("\nfoo = 2-07-18T00:00:00-04:00", 2, 7, "Invalid year (valid range 0000..9999)"),
-        Arguments.of("\nfoo = -07-18T00:00:00-04:00", 2, 9, "Unexpected '7-18T00', expected a newline or end-of-input"),
-        Arguments.of("\nfoo = 1937-47-18T00:00:00-04:00", 2, 12, "Invalid month (valid range 01..12)"),
-        Arguments.of("\nfoo = 1937-7-18T00:00:00-04:00", 2, 12, "Invalid month (valid range 01..12)"),
-        Arguments.of("\nfoo = 1937-00-18T00:00:00-04:00", 2, 12, "Invalid month (valid range 01..12)"),
-        Arguments.of("\nfoo = 1937--18T00:00:00-04:00", 2, 12, "Unexpected '-', expected a date/time"),
-        Arguments.of("\nfoo = 1937-07-48T00:00:00-04:00", 2, 15, "Invalid day (valid range 01..28/31)"),
-        Arguments.of("\nfoo = 1937-07-8T00:00:00-04:00", 2, 15, "Invalid day (valid range 01..28/31)"),
-        Arguments.of("\nfoo = 1937-07-00T00:00:00-04:00", 2, 15, "Invalid day (valid range 01..28/31)"),
+        Arguments.of(
+            "foo = 0.000000000000000000000000000000000000000000"
+                + "000000000000000000000000000000000000000000000000000000000"
+                + "000000000000000000000000000000000000000000000000000000000"
+                + "000000000000000000000000000000000000000000000000000000000"
+                + "000000000000000000000000000000000000000000000000000000000"
+                + "000000000000000000000000000000000000000000000000000001",
+            1,
+            7,
+            "Float is too small"),
+        Arguments.of(
+            "\nfoo = 1937-47-18-00:00:00-04:00",
+            2,
+            17,
+            "Unexpected '-', expected a newline or end-of-input"),
+        Arguments.of(
+            "\nfoo = 1937-47-18  00:00:00-04:00",
+            2,
+            19,
+            "Unexpected '00', expected a newline or end-of-input"),
+        Arguments.of(
+            "\nfoo = 2334567891233457889-07-18T00:00:00-04:00",
+            2,
+            7,
+            "Invalid year (valid range 0000..9999)"),
+        Arguments.of(
+            "\nfoo = 2-07-18T00:00:00-04:00", 2, 7, "Invalid year (valid range 0000..9999)"),
+        Arguments.of(
+            "\nfoo = -07-18T00:00:00-04:00",
+            2,
+            9,
+            "Unexpected '7-18T00', expected a newline or end-of-input"),
+        Arguments.of(
+            "\nfoo = 1937-47-18T00:00:00-04:00", 2, 12, "Invalid month (valid range 01..12)"),
+        Arguments.of(
+            "\nfoo = 1937-7-18T00:00:00-04:00", 2, 12, "Invalid month (valid range 01..12)"),
+        Arguments.of(
+            "\nfoo = 1937-00-18T00:00:00-04:00", 2, 12, "Invalid month (valid range 01..12)"),
+        Arguments.of(
+            "\nfoo = 1937--18T00:00:00-04:00", 2, 12, "Unexpected '-', expected a date/time"),
+        Arguments.of(
+            "\nfoo = 1937-07-48T00:00:00-04:00", 2, 15, "Invalid day (valid range 01..28/31)"),
+        Arguments.of(
+            "\nfoo = 1937-07-8T00:00:00-04:00", 2, 15, "Invalid day (valid range 01..28/31)"),
+        Arguments.of(
+            "\nfoo = 1937-07-00T00:00:00-04:00", 2, 15, "Invalid day (valid range 01..28/31)"),
         Arguments.of("\nfoo = 1937-02-30T00:00:00-04:00", 2, 15, "Invalid date 'FEBRUARY 30'"),
-        Arguments.of("\nfoo = 1937-07-18T30:00:00-04:00", 2, 18, "Invalid hour (valid range 00..23)"),
-        Arguments.of("\nfoo = 1937-07-18T3:00:00-04:00", 2, 18, "Invalid hour (valid range 00..23)"),
-        Arguments.of("\nfoo = 1937-07-18T13:70:00-04:00", 2, 21, "Invalid minutes (valid range 00..59)"),
-        Arguments.of("\nfoo = 1937-07-18T13:7:00-04:00", 2, 21, "Invalid minutes (valid range 00..59)"),
-        Arguments.of("\nfoo = 1937-07-18T13:55:92-04:00", 2, 24, "Invalid seconds (valid range 00..59)"),
-        Arguments.of("\nfoo = 1937-07-18T13:55:2-04:00", 2, 24, "Invalid seconds (valid range 00..59)"),
-        Arguments.of("\nfoo = 1937-07-18T13:55:02.0000000009-04:00", 2, 27, "Invalid nanoseconds (valid range 0..999999999)"),
-        Arguments.of("\nfoo = 1937-07-18T13:55:02.-04:00", 2, 27, "Unexpected '-', expected a date/time"),
-        Arguments.of("\nfoo = 1937-07-18T13:55:26-25:00", 2, 26, "Invalid zone offset hours (valid range -18..+18)"),
-        Arguments.of("\nfoo = 1937-07-18T13:55:26-:00", 2, 27, "Unexpected ':', expected a date/time"),
-        Arguments.of("\nfoo = 1937-07-18T13:55:26-04:60", 2, 30, "Invalid zone offset minutes (valid range 0..59)"),
-        Arguments.of("\nfoo = 1937-07-18T13:55:26-18:30", 2, 26, "Invalid zone offset (valid range -18:00..+18:00)"),
-        Arguments.of("\nfoo = 1937-07-18T13:55:26-18:", 2, 30, "Unexpected end of input, expected a date/time"),
-
-        Arguments.of("\nfoo = 2334567891233457889-07-18T00:00:00", 2, 7, "Invalid year (valid range 0000..9999)"),
+        Arguments.of(
+            "\nfoo = 1937-07-18T30:00:00-04:00", 2, 18, "Invalid hour (valid range 00..23)"),
+        Arguments.of(
+            "\nfoo = 1937-07-18T3:00:00-04:00", 2, 18, "Invalid hour (valid range 00..23)"),
+        Arguments.of(
+            "\nfoo = 1937-07-18T13:70:00-04:00", 2, 21, "Invalid minutes (valid range 00..59)"),
+        Arguments.of(
+            "\nfoo = 1937-07-18T13:7:00-04:00", 2, 21, "Invalid minutes (valid range 00..59)"),
+        Arguments.of(
+            "\nfoo = 1937-07-18T13:55:92-04:00", 2, 24, "Invalid seconds (valid range 00..59)"),
+        Arguments.of(
+            "\nfoo = 1937-07-18T13:55:2-04:00", 2, 24, "Invalid seconds (valid range 00..59)"),
+        Arguments.of(
+            "\nfoo = 1937-07-18T13:55:02.0000000009-04:00",
+            2,
+            27,
+            "Invalid nanoseconds (valid range 0..999999999)"),
+        Arguments.of(
+            "\nfoo = 1937-07-18T13:55:02.-04:00", 2, 27, "Unexpected '-', expected a date/time"),
+        Arguments.of(
+            "\nfoo = 1937-07-18T13:55:26-25:00",
+            2,
+            26,
+            "Invalid zone offset hours (valid range -18..+18)"),
+        Arguments.of(
+            "\nfoo = 1937-07-18T13:55:26-:00", 2, 27, "Unexpected ':', expected a date/time"),
+        Arguments.of(
+            "\nfoo = 1937-07-18T13:55:26-04:60",
+            2,
+            30,
+            "Invalid zone offset minutes (valid range 0..59)"),
+        Arguments.of(
+            "\nfoo = 1937-07-18T13:55:26-18:30",
+            2,
+            26,
+            "Invalid zone offset (valid range -18:00..+18:00)"),
+        Arguments.of(
+            "\nfoo = 1937-07-18T13:55:26-18:",
+            2,
+            30,
+            "Unexpected end of input, expected a date/time"),
+        Arguments.of(
+            "\nfoo = 2334567891233457889-07-18T00:00:00",
+            2,
+            7,
+            "Invalid year (valid range 0000..9999)"),
         Arguments.of("\nfoo = 1937-47-18T00:00:00", 2, 12, "Invalid month (valid range 01..12)"),
         Arguments.of("\nfoo = 1937-07-48T00:00:00", 2, 15, "Invalid day (valid range 01..28/31)"),
         Arguments.of("\nfoo = 1937-07-18T30:00:00", 2, 18, "Invalid hour (valid range 00..23)"),
         Arguments.of("\nfoo = 1937-07-18T13:70:00", 2, 21, "Invalid minutes (valid range 00..59)"),
         Arguments.of("\nfoo = 1937-07-18T13:55:92", 2, 24, "Invalid seconds (valid range 00..59)"),
-        Arguments.of("\nfoo = 1937-07-18T13:55:02.0000000009", 2, 27, "Invalid nanoseconds (valid range 0..999999999)"),
-
-        Arguments.of("\nfoo = 2334567891233457889-07-18", 2, 7, "Invalid year (valid range 0000..9999)"),
+        Arguments.of(
+            "\nfoo = 1937-07-18T13:55:02.0000000009",
+            2,
+            27,
+            "Invalid nanoseconds (valid range 0..999999999)"),
+        Arguments.of(
+            "\nfoo = 2334567891233457889-07-18", 2, 7, "Invalid year (valid range 0000..9999)"),
         Arguments.of("\nfoo = 1937-47-18", 2, 12, "Invalid month (valid range 01..12)"),
         Arguments.of("\nfoo = 1937-07-48", 2, 15, "Invalid day (valid range 01..28/31)"),
-
         Arguments.of("\nfoo = 30:00:00", 2, 7, "Invalid hour (valid range 00..23)"),
         Arguments.of("\nfoo = 13:70:00", 2, 10, "Invalid minutes (valid range 00..59)"),
         Arguments.of("\nfoo = 13:55:92", 2, 13, "Invalid seconds (valid range 00..59)"),
-        Arguments.of("\nfoo = 13:55:02.0000000009", 2, 16, "Invalid nanoseconds (valid range 0..999999999)"),
-
-        Arguments.of("foo = [", 1, 8, "Unexpected end of input, expected ], ', \", ''', \"\"\", a number, a boolean, a date/time, an array, a table, or a newline"),
+        Arguments.of(
+            "\nfoo = 13:55:02.0000000009", 2, 16, "Invalid nanoseconds (valid range 0..999999999)"),
+        Arguments.of(
+            "foo = [",
+            1,
+            8,
+            "Unexpected end of input, expected ], ', \", ''', \"\"\", a number, a boolean, a date/time, an array, a table, or a newline"),
         Arguments.of("foo = [ 1\n", 2, 1, "Unexpected end of input, expected ] or a newline"),
-        Arguments.of("foo = [ 1, 'bar' ]", 1, 12, "Cannot add a string to an array containing integers"),
+        Arguments.of(
+            "foo = [ 1, 'bar' ]", 1, 12, "Cannot add a string to an array containing integers"),
         Arguments.of("foo = [ 1, 'bar ]\n", 1, 18, "Unexpected end of line, expected '"),
-
         Arguments.of("[]", 1, 1, "Empty table key"),
-        Arguments.of("[foo] bar='baz'", 1, 7, "Unexpected 'bar', expected a newline or end-of-input"),
-        Arguments.of("foo='bar'\n[foo]\nbar='baz'", 2, 1, "foo previously defined at line 1, column 1"),
-        Arguments.of("[foo]\nbar='baz'\n[foo]\nbaz=1", 3, 1, "foo previously defined at line 1, column 1"),
-        Arguments.of("[foo]\nbar='baz'\n[foo.bar]\nbaz=1", 3, 1, "foo.bar previously defined at line 2, column 1"),
-
-        Arguments.of("foo = {", 1, 8, "Unexpected end of input, expected a-z, A-Z, 0-9, }, ', or \""),
-        Arguments.of("foo = { bar = 1,\nbaz = 2 }", 1, 17, "Unexpected end of line, expected a-z, A-Z, 0-9, ', or \""),
+        Arguments.of(
+            "[foo] bar='baz'", 1, 7, "Unexpected 'bar', expected a newline or end-of-input"),
+        Arguments.of(
+            "foo='bar'\n[foo]\nbar='baz'", 2, 1, "foo previously defined at line 1, column 1"),
+        Arguments.of(
+            "[foo]\nbar='baz'\n[foo]\nbaz=1", 3, 1, "foo previously defined at line 1, column 1"),
+        Arguments.of(
+            "[foo]\nbar='baz'\n[foo.bar]\nbaz=1",
+            3,
+            1,
+            "foo.bar previously defined at line 2, column 1"),
+        Arguments.of(
+            "foo = {", 1, 8, "Unexpected end of input, expected a-z, A-Z, 0-9, }, ', or \""),
+        Arguments.of(
+            "foo = { bar = 1,\nbaz = 2 }",
+            1,
+            17,
+            "Unexpected end of line, expected a-z, A-Z, 0-9, ', or \""),
         Arguments.of("foo = { bar = 1\nbaz = 2 }", 1, 16, "Unexpected end of line, expected }"),
         Arguments.of("foo = { bar = 1 baz = 2 }", 1, 17, "Unexpected 'baz', expected } or a comma"),
-
-        Arguments.of("[foo]\nbar=1\n[[foo]]\nbar=2\n", 3, 1, "foo is not an array (previously defined at line 1, column 1)"),
-        Arguments.of("foo = [1]\n[[foo]]\nbar=2\n", 2, 1, "foo previously defined as a literal array at line 1, column 1"),
-        Arguments.of("foo = []\n[[foo]]\nbar=2\n", 2, 1, "foo previously defined as a literal array at line 1, column 1"),
-        Arguments.of("[[foo.bar]]\n[foo]\nbaz=2\nbar=3\n", 4, 1, "bar previously defined at line 1, column 1"),
-        Arguments.of("[[foo]]\nbaz=1\n[[foo.bar]]\nbaz=2\n[foo.bar]\nbaz=3\n", 5, 1, "foo.bar previously defined at line 3, column 1")
-    );
+        Arguments.of(
+            "[foo]\nbar=1\n[[foo]]\nbar=2\n",
+            3,
+            1,
+            "foo is not an array (previously defined at line 1, column 1)"),
+        Arguments.of(
+            "foo = [1]\n[[foo]]\nbar=2\n",
+            2,
+            1,
+            "foo previously defined as a literal array at line 1, column 1"),
+        Arguments.of(
+            "foo = []\n[[foo]]\nbar=2\n",
+            2,
+            1,
+            "foo previously defined as a literal array at line 1, column 1"),
+        Arguments.of(
+            "[[foo.bar]]\n[foo]\nbaz=2\nbar=3\n",
+            4,
+            1,
+            "bar previously defined at line 1, column 1"),
+        Arguments.of(
+            "[[foo]]\nbaz=1\n[[foo.bar]]\nbaz=2\n[foo.bar]\nbaz=3\n",
+            5,
+            1,
+            "foo.bar previously defined at line 3, column 1"));
     // @formatter:on
   }
 
   @Test
   void testTomlV0_4_0Example() throws Exception {
-    InputStream is = this.getClass().getResourceAsStream("/org/apache/tuweni/toml/example-v0.4.0.toml");
+    InputStream is =
+        this.getClass().getResourceAsStream("/org/apache/tuweni/toml/example-v0.4.0.toml");
     assertNotNull(is);
     TomlParseResult result = Toml.parse(is, TomlVersion.V0_4_0);
     assertFalse(result.hasErrors(), () -> joinErrors(result));
@@ -514,37 +632,46 @@ class TomlTest {
 
   @Test
   void testHardExample() throws Exception {
-    InputStream is = this.getClass().getResourceAsStream("/org/apache/tuweni/toml/hard_example.toml");
+    InputStream is =
+        this.getClass().getResourceAsStream("/org/apache/tuweni/toml/hard_example.toml");
     assertNotNull(is);
     TomlParseResult result = Toml.parse(is, TomlVersion.V0_4_0);
     assertFalse(result.hasErrors(), () -> joinErrors(result));
 
     assertEquals("You'll hate me after this - #", result.getString("the.test_string"));
-    assertEquals(" And when \"'s are in the string, along with # \"", result.getString("the.hard.harder_test_string"));
+    assertEquals(
+        " And when \"'s are in the string, along with # \"",
+        result.getString("the.hard.harder_test_string"));
     assertEquals("]", result.getArray("the.hard.'bit#'.multi_line_array").getString(0));
   }
 
   @Test
   void testHardExampleUnicode() throws Exception {
-    InputStream is = this.getClass().getResourceAsStream("/org/apache/tuweni/toml/hard_example_unicode.toml");
+    InputStream is =
+        this.getClass().getResourceAsStream("/org/apache/tuweni/toml/hard_example_unicode.toml");
     assertNotNull(is);
     TomlParseResult result = Toml.parse(is, TomlVersion.V0_4_0);
     assertFalse(result.hasErrors(), () -> joinErrors(result));
 
     assertEquals("Ýôú'ℓℓ λáƭè ₥è áƒƭèř ƭλïƨ - #", result.getString("the.test_string"));
-    assertEquals(" Âñδ ωλèñ \"'ƨ ářè ïñ ƭλè ƨƭřïñϱ, áℓôñϱ ωïƭλ # \"", result.getString("the.hard.harder_test_string"));
+    assertEquals(
+        " Âñδ ωλèñ \"'ƨ ářè ïñ ƭλè ƨƭřïñϱ, áℓôñϱ ωïƭλ # \"",
+        result.getString("the.hard.harder_test_string"));
     assertEquals("]", result.getArray("the.hard.'βïƭ#'.multi_line_array").getString(0));
   }
 
   @Test
   void testSpecExample() throws Exception {
-    InputStream is = this.getClass().getResourceAsStream("/org/apache/tuweni/toml/toml-v0.5.0-spec-example.toml");
+    InputStream is =
+        this.getClass()
+            .getResourceAsStream("/org/apache/tuweni/toml/toml-v0.5.0-spec-example.toml");
     assertNotNull(is);
     TomlParseResult result = Toml.parse(is, TomlVersion.V0_4_0);
     assertFalse(result.hasErrors(), () -> joinErrors(result));
 
     assertEquals("Tom Preston-Werner", result.getString("owner.name"));
-    assertEquals(OffsetDateTime.parse("1979-05-27T07:32:00-08:00"), result.getOffsetDateTime("owner.dob"));
+    assertEquals(
+        OffsetDateTime.parse("1979-05-27T07:32:00-08:00"), result.getOffsetDateTime("owner.dob"));
 
     assertEquals("10.0.0.2", result.getString("servers.beta.ip"));
     TomlArray clientHosts = result.getArray("clients.hosts");

@@ -16,9 +16,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-/**
- * Recursive Length Prefix (RLP) encoding and decoding.
- */
+/** Recursive Length Prefix (RLP) encoding and decoding. */
 public final class RLP {
   private static final byte[] EMPTY_VALUE = new byte[] {(byte) 0x80};
 
@@ -26,9 +24,9 @@ public final class RLP {
 
   /**
    * Encode values to a {@link Bytes} value.
-   * <p>
-   * Important: this method does not write any list prefix to the result. If you are writing a RLP encoded list of
-   * values, you usually want to use {@link #encodeList(Consumer)}.
+   *
+   * <p>Important: this method does not write any list prefix to the result. If you are writing a
+   * RLP encoded list of values, you usually want to use {@link #encodeList(Consumer)}.
    *
    * @param fn A consumer that will be provided with a {@link RLPWriter} that can consume values.
    * @return The RLP encoding in a {@link Bytes} value.
@@ -42,15 +40,16 @@ public final class RLP {
 
   /**
    * Encode values to a {@link ByteBuffer}.
-   * <p>
-   * Important: this method does not write any list prefix to the result. If you are writing a RLP encoded list of
-   * values, you usually want to use {@link #encodeList(Consumer)}.
+   *
+   * <p>Important: this method does not write any list prefix to the result. If you are writing a
+   * RLP encoded list of values, you usually want to use {@link #encodeList(Consumer)}.
    *
    * @param buffer The buffer to write into, starting from its current position.
    * @param fn A consumer that will be provided with a {@link RLPWriter} that can consume values.
    * @param <T> The type of the buffer.
    * @return The buffer.
-   * @throws BufferOverflowException If the writer attempts to write more than the provided buffer can hold.
+   * @throws BufferOverflowException If the writer attempts to write more than the provided buffer
+   *     can hold.
    * @throws ReadOnlyBufferException If the provided buffer is read-only.
    */
   public static <T extends ByteBuffer> T encodeTo(T buffer, Consumer<RLPWriter> fn) {
@@ -95,7 +94,8 @@ public final class RLP {
    * @param fn A consumer that will be provided with a {@link RLPWriter} that can consume values.
    * @param <T> The type of the buffer.
    * @return The buffer.
-   * @throws BufferOverflowException If the writer attempts to write more than the provided buffer can hold.
+   * @throws BufferOverflowException If the writer attempts to write more than the provided buffer
+   *     can hold.
    * @throws ReadOnlyBufferException If the provided buffer is read-only.
    */
   public static <T extends ByteBuffer> T encodeListTo(T buffer, Consumer<RLPWriter> fn) {
@@ -228,9 +228,10 @@ public final class RLP {
 
   /**
    * Read and decode RLP from a {@link Bytes} value.
-   * <p>
-   * Important: this method does not consume any list prefix from the source data. If you are reading a RLP encoded list
-   * of values, you usually want to use {@link #decodeList(Bytes, Function)}.
+   *
+   * <p>Important: this method does not consume any list prefix from the source data. If you are
+   * reading a RLP encoded list of values, you usually want to use {@link #decodeList(Bytes,
+   * Function)}.
    *
    * @param source The RLP encoded bytes.
    * @param fn A function that will be provided a {@link RLPReader}.
@@ -243,12 +244,14 @@ public final class RLP {
 
   /**
    * Read and decode RLP from a {@link Bytes} value.
-   * <p>
-   * Important: this method does not consume any list prefix from the source data. If you are reading a RLP encoded list
-   * of values, you usually want to use {@link #decodeList(Bytes, Function)}.
+   *
+   * <p>Important: this method does not consume any list prefix from the source data. If you are
+   * reading a RLP encoded list of values, you usually want to use {@link #decodeList(Bytes,
+   * Function)}.
    *
    * @param source The RLP encoded bytes.
-   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally encoded.
+   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally
+   *     encoded.
    * @param fn A function that will be provided a {@link RLPReader}.
    * @param <T> The result type of the reading function.
    * @return The result from the reading function.
@@ -277,7 +280,8 @@ public final class RLP {
    * Read an RLP encoded list of values from a {@link Bytes} value.
    *
    * @param source The RLP encoded bytes.
-   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally encoded.
+   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally
+   *     encoded.
    * @param fn A function that will be provided a {@link RLPReader}.
    * @param <T> The result type of the reading function.
    * @return The result from the reading function.
@@ -294,7 +298,8 @@ public final class RLP {
   }
 
   /**
-   * Read an RLP encoded list of values from a {@link Bytes} value, populating a mutable output list.
+   * Read an RLP encoded list of values from a {@link Bytes} value, populating a mutable output
+   * list.
    *
    * @param source The RLP encoded bytes.
    * @param fn A function that will be provided a {@link RLPReader}.
@@ -307,16 +312,19 @@ public final class RLP {
   }
 
   /**
-   * Read an RLP encoded list of values from a {@link Bytes} value, populating a mutable output list.
+   * Read an RLP encoded list of values from a {@link Bytes} value, populating a mutable output
+   * list.
    *
    * @param source The RLP encoded bytes.
-   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally encoded.
+   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally
+   *     encoded.
    * @param fn A function that will be provided a {@link RLPReader}.
    * @return The list supplied to {@code fn}.
    * @throws InvalidRLPEncodingException If there is an error decoding the RLP source.
    * @throws InvalidRLPTypeException If the first RLP value is not a list.
    */
-  public static List<Object> decodeToList(Bytes source, boolean lenient, BiConsumer<RLPReader, List<Object>> fn) {
+  public static List<Object> decodeToList(
+      Bytes source, boolean lenient, BiConsumer<RLPReader, List<Object>> fn) {
     requireNonNull(source);
     requireNonNull(fn);
     if (source.isEmpty()) {
@@ -326,7 +334,8 @@ public final class RLP {
   }
 
   /**
-   * Read a list of values from the RLP source, populating a list using a function interpreting each value.
+   * Read a list of values from the RLP source, populating a list using a function interpreting each
+   * value.
    *
    * @param source The RLP encoded bytes.
    * @param fn A function creating a new element of the list for each value in the RLP list.
@@ -340,10 +349,12 @@ public final class RLP {
   }
 
   /**
-   * Read an RLP encoded list of values from a {@link Bytes} value, populating a mutable output list.
+   * Read an RLP encoded list of values from a {@link Bytes} value, populating a mutable output
+   * list.
    *
    * @param source The RLP encoded bytes.
-   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally encoded.
+   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally
+   *     encoded.
    * @param fn A function creating a new element of the list for each value in the RLP list.
    * @param <T> The type of the list elements.
    * @return The list supplied to {@code fn}.
@@ -375,7 +386,8 @@ public final class RLP {
    * Read an RLP encoded value from a {@link Bytes} value.
    *
    * @param source The RLP encoded bytes.
-   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally encoded.
+   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally
+   *     encoded.
    * @return The bytes for the value.
    * @throws InvalidRLPEncodingException If there is an error decoding the RLP source.
    * @throws EndOfRLPException If there are no RLP values to read.
@@ -400,7 +412,8 @@ public final class RLP {
    * Read an RLP encoded integer from a {@link Bytes} value.
    *
    * @param source The RLP encoded bytes.
-   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally encoded.
+   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally
+   *     encoded.
    * @return An integer.
    * @throws InvalidRLPEncodingException If there is an error decoding the RLP source.
    */
@@ -427,7 +440,8 @@ public final class RLP {
    * Read an RLP encoded long from a {@link Bytes} value.
    *
    * @param source The RLP encoded bytes.
-   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally encoded.
+   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally
+   *     encoded.
    * @return A long.
    * @throws InvalidRLPEncodingException If there is an error decoding the RLP source.
    */
@@ -454,7 +468,8 @@ public final class RLP {
    * Read an RLP encoded big integer from a {@link Bytes} value.
    *
    * @param source The RLP encoded bytes.
-   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally encoded.
+   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally
+   *     encoded.
    * @return A {@link BigInteger}.
    * @throws InvalidRLPEncodingException If there is an error decoding the RLP source.
    */
@@ -481,7 +496,8 @@ public final class RLP {
    * Read an RLP encoded string from a {@link Bytes} value.
    *
    * @param source The RLP encoded bytes.
-   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally encoded.
+   * @param lenient If {@code false}, an exception will be thrown if the value is not minimally
+   *     encoded.
    * @return A string.
    * @throws InvalidRLPEncodingException If there is an error decoding the RLP source.
    */

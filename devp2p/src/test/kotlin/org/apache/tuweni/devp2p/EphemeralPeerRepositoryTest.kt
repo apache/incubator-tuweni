@@ -28,7 +28,7 @@ internal class EphemeralPeerRepositoryTest {
   fun shouldReturnPeerBasedOnURIWithEndpoint() = runBlocking {
     val peer = peerRepository.get(
       "enode://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
-        "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:7654"
+        "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:7654",
     )
     assertNotNull(peer.endpoint)
     assertNull(peer.lastSeen)
@@ -36,7 +36,7 @@ internal class EphemeralPeerRepositoryTest {
 
     val expectedId = SECP256K1.PublicKey.fromHexString(
       "c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54c705" +
-        "b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b"
+        "b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b",
     )
     assertEquals(expectedId, peer.nodeId)
     assertEquals("172.20.0.4", peer.endpoint.address)
@@ -48,7 +48,7 @@ internal class EphemeralPeerRepositoryTest {
   fun shouldReturnPeerWithDefaultPortsWhenMissingFromURI() = runBlocking {
     val peer = peerRepository.get(
       "enode://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
-        "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4"
+        "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4",
     )
     assertNotNull(peer.endpoint)
     assertNull(peer.lastSeen)
@@ -56,7 +56,7 @@ internal class EphemeralPeerRepositoryTest {
 
     val expectedId = SECP256K1.PublicKey.fromHexString(
       "c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54c705" +
-        "b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b"
+        "b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b",
     )
     assertEquals(expectedId, peer.nodeId)
     assertEquals("172.20.0.4", peer.endpoint.address)
@@ -68,7 +68,7 @@ internal class EphemeralPeerRepositoryTest {
   fun shouldReturnPeerWithDifferentPortsWhenQueryParamInURI() = runBlocking {
     val peer = peerRepository.get(
       "enode://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
-        "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789?discport=23456"
+        "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789?discport=23456",
     )
     assertNotNull(peer.endpoint)
     assertNull(peer.lastSeen)
@@ -76,7 +76,7 @@ internal class EphemeralPeerRepositoryTest {
 
     val expectedId = SECP256K1.PublicKey.fromHexString(
       "c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54c705" +
-        "b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b"
+        "b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b",
     )
     assertEquals(expectedId, peer.nodeId)
     assertEquals("172.20.0.4", peer.endpoint.address)
@@ -90,7 +90,7 @@ internal class EphemeralPeerRepositoryTest {
       runBlocking {
         peerRepository.get(
           "http://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
-            "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:30303"
+            "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:30303",
         )
       }
     }
@@ -111,7 +111,7 @@ internal class EphemeralPeerRepositoryTest {
       runBlocking {
         peerRepository.get(
           "enode://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
-            "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:98766"
+            "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:98766",
         )
       }
     }
@@ -123,7 +123,7 @@ internal class EphemeralPeerRepositoryTest {
       runBlocking {
         peerRepository.get(
           "enode://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
-            "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789?discport=98765"
+            "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789?discport=98765",
         )
       }
     }
@@ -135,7 +135,7 @@ internal class EphemeralPeerRepositoryTest {
       runBlocking {
         peerRepository.get(
           "enode://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
-            "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789?discport=abcd"
+            "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789?discport=abcd",
         )
       }
     }
@@ -146,7 +146,7 @@ internal class EphemeralPeerRepositoryTest {
     val peer = peerRepository.get(
       "enode://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
         "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b" +
-        "@172.20.0.4:54789?foo=bar&discport=23456&bar=foo"
+        "@172.20.0.4:54789?foo=bar&discport=23456&bar=foo",
     )
     assertNotNull(peer.endpoint)
     assertNull(peer.lastSeen)
@@ -154,7 +154,7 @@ internal class EphemeralPeerRepositoryTest {
 
     val expectedId = SECP256K1.PublicKey.fromHexString(
       "c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
-        "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b"
+        "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b",
     )
     assertEquals(expectedId, peer.nodeId)
     assertEquals("172.20.0.4", peer.endpoint.address)
@@ -166,7 +166,7 @@ internal class EphemeralPeerRepositoryTest {
   fun shouldUpdateEndpointIfNoTimeCriteriaSpecified() = runBlocking {
     val peer = peerRepository.get(
       "enode://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
-        "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789"
+        "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789",
     )
     peer.verifyEndpoint(peer.endpoint, currentTime)
     assertEquals(currentTime, peer.lastSeen)
@@ -183,7 +183,7 @@ internal class EphemeralPeerRepositoryTest {
   fun shouldNotUpdateEndpointIfTimeCriteriaIsNotMet() = runBlocking {
     val peer = peerRepository.get(
       "enode://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
-        "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789"
+        "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789",
     )
     peer.verifyEndpoint(peer.endpoint, currentTime)
     assertEquals(currentTime, peer.lastSeen)
@@ -201,7 +201,7 @@ internal class EphemeralPeerRepositoryTest {
   fun shouldUpdateEndpointIfTimeCriteriaIsMet() = runBlocking {
     val peer = peerRepository.get(
       "enode://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
-        "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789"
+        "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789",
     )
     peer.verifyEndpoint(peer.endpoint, currentTime)
     assertEquals(currentTime, peer.lastSeen)
@@ -218,7 +218,7 @@ internal class EphemeralPeerRepositoryTest {
   fun shouldUpdateLastSeenIfEndpointIsUnchanged() = runBlocking {
     val peer = peerRepository.get(
       "enode://c7849b663d12a2b5bf05b1ebf5810364f4870d5f1053fbd7500d38bc54" +
-        "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789"
+        "c705b453d7511ca8a4a86003d34d4c8ee0bbfcd387aa724f5b240b3ab4bbb994a1e09b@172.20.0.4:54789",
     )
     peer.verifyEndpoint(peer.endpoint, currentTime)
     assertEquals(currentTime, peer.lastSeen)

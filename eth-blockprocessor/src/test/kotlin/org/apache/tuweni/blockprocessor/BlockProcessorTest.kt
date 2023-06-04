@@ -37,7 +37,7 @@ class BlockProcessorTest {
       listOf(),
       repository,
       Registry.istanbul,
-      HardFork.HOMESTEAD
+      HardFork.HOMESTEAD,
     )
     val block = result.block.toBlock(
       listOf(),
@@ -46,7 +46,7 @@ class BlockProcessorTest {
       Instant.now(),
       Bytes.EMPTY,
       Genesis.emptyHash,
-      UInt64.random()
+      UInt64.random(),
     )
     assertEquals(0, block.body.transactions.size)
   }

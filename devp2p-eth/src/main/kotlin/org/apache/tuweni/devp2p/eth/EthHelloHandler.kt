@@ -20,7 +20,7 @@ internal class EthHelloHandler(
   override val coroutineContext: CoroutineContext = Dispatchers.Default,
   private val blockchainInfo: BlockchainInformation,
   private val service: RLPxService,
-  private val controller: EthHelloController
+  private val controller: EthHelloController,
 ) : SubProtocolHandler, CoroutineScope {
 
   private val pendingStatus = WeakHashMap<String, PeerInfo>()
@@ -72,8 +72,8 @@ internal class EthHelloHandler(
         blockchainInfo.bestHash(),
         blockchainInfo.genesisHash(),
         forkId.hash,
-        forkId.next
-      ).toBytes()
+        forkId.next,
+      ).toBytes(),
     )
 
     return newPeer.ready

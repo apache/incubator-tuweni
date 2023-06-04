@@ -39,7 +39,7 @@ data class BlockStats(
   val transactions: List<TxStats>,
   val transactionsRoot: Hash,
   val stateRoot: Hash,
-  val uncles: List<Hash>
+  val uncles: List<Hash>,
 ) {
 
   @JsonGetter("number")

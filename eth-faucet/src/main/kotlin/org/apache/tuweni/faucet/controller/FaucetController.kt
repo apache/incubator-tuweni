@@ -90,7 +90,7 @@ class FaucetController(@Autowired val vertx: Vertx, @Autowired val wallet: Walle
           addr,
           missing,
           Bytes.EMPTY,
-          chainId!!
+          chainId!!,
         )
 
         logger.info("Transaction ready to send")

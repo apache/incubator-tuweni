@@ -65,7 +65,7 @@ class EVMBrokenMetreAttack {
       MapKeyValueStore(),
       stateStore,
       BlockchainIndex(writer),
-      Genesis.dev()
+      Genesis.dev(),
     )
     val tree = MerklePatriciaTrie.storingBytes()
     val accountState =
@@ -90,7 +90,7 @@ class EVMBrokenMetreAttack {
       UInt256.valueOf(1234),
       UInt256.valueOf(1),
       CallKind.CALL,
-      HardFork.ISTANBUL
+      HardFork.ISTANBUL,
     )
     assertEquals(expectedStatusCode, result.statusCode)
   }
@@ -104,13 +104,13 @@ class EVMBrokenMetreAttack {
       Bytes.concatenate(
         start,
         Bytes.fromHexString("60008080805a5a${opcode}50".repeat(code_repetitions)),
-        end
+        end,
       ) //  (PUSH 0 DUP1 DUP1 DUP1 GAS GAS STATICCALL POP) * 8'000 PUSH1 0x0 JUMP
     } else {
       Bytes.concatenate(
         start,
         Bytes.fromHexString("5a${opcode}50".repeat(code_repetitions)),
-        end
+        end,
       ) // JUMPDEST (GAS BALANCE/EXTCODESIZE/EXTCODEHASH POP) * 8'000 PUSH1 0x0 JUMP
     }
   }

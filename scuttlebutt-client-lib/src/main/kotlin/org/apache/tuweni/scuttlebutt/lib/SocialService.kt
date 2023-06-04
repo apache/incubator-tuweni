@@ -41,7 +41,7 @@ class SocialService(private val multiplexer: Multiplexer, private val feedServic
     val response = multiplexer.makeAsyncRequest(request)
     return response.asJSON(
       mapper,
-      WhoAmIResponse::class.java
+      WhoAmIResponse::class.java,
     ).id
   }
 
@@ -66,7 +66,7 @@ class SocialService(private val multiplexer: Multiplexer, private val feedServic
     val rpcResponse = multiplexer.makeAsyncRequest(rpcAsyncRequest)
     val followHops: Map<String, Int> = rpcResponse.asJSON(
       mapper,
-      object : TypeReference<Map<String, Int>>() {}
+      object : TypeReference<Map<String, Int>>() {},
     )
     return followHops
   }
@@ -86,7 +86,7 @@ class SocialService(private val multiplexer: Multiplexer, private val feedServic
     return IsFollowingResponse(
       source,
       destination,
-      answer
+      answer,
     )
   }
 
@@ -115,11 +115,11 @@ class SocialService(private val multiplexer: Multiplexer, private val feedServic
     for (ident in identities) {
       val f = isFollowing(
         ident,
-        id
+        id,
       )
       if (f.following) {
         results.add(
-          f.source
+          f.source,
         )
       }
     }
@@ -137,11 +137,11 @@ class SocialService(private val multiplexer: Multiplexer, private val feedServic
     for (profile in getFollowing()) {
       val f = isFollowing(
         profile.key,
-        id
+        id,
       )
       if (f.following) {
         results.add(
-          profile
+          profile,
         )
       }
     }
@@ -161,7 +161,7 @@ class SocialService(private val multiplexer: Multiplexer, private val feedServic
     val rpcResponse = multiplexer.makeAsyncRequest(rpcAsyncRequest)
     val aboutQueryResponse: AboutQueryResponse = rpcResponse.asJSON(
       mapper,
-      AboutQueryResponse::class.java
+      AboutQueryResponse::class.java,
     )
     return Profile(publicKey, aboutQueryResponse.name)
   }

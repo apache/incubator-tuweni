@@ -27,18 +27,19 @@ class StoredMerklePatriciaTrieJavaTest {
   @BeforeEach
   void setup() {
     Map<Bytes32, Bytes> storage = new HashMap<>();
-    merkleStorage = new AsyncMerkleStorage() {
-      @Override
-      public @NotNull AsyncResult<Bytes> getAsync(@NotNull Bytes32 hash) {
-        return AsyncResult.completed(storage.get(hash));
-      }
+    merkleStorage =
+        new AsyncMerkleStorage() {
+          @Override
+          public @NotNull AsyncResult<Bytes> getAsync(@NotNull Bytes32 hash) {
+            return AsyncResult.completed(storage.get(hash));
+          }
 
-      @Override
-      public @NotNull AsyncCompletion putAsync(@NotNull Bytes32 hash, @NotNull Bytes content) {
-        storage.put(hash, content);
-        return AsyncCompletion.completed();
-      }
-    };
+          @Override
+          public @NotNull AsyncCompletion putAsync(@NotNull Bytes32 hash, @NotNull Bytes content) {
+            storage.put(hash, content);
+            return AsyncCompletion.completed();
+          }
+        };
 
     trie = StoredMerklePatriciaTrie.storingStrings(merkleStorage);
   }
@@ -50,7 +51,9 @@ class StoredMerklePatriciaTrieJavaTest {
 
   @Test
   void testEmptyTreeHasKnownRootHash() {
-    assertEquals("0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421", trie.rootHash().toString());
+    assertEquals(
+        "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+        trie.rootHash().toString());
   }
 
   @Test

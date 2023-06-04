@@ -5,5 +5,6 @@ package org.apache.tuweni.ssz;
 public interface SSZType {
   default boolean isFixed() {
     return true;
-  };
+  }
+  ;
 }

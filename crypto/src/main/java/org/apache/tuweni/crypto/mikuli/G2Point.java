@@ -9,8 +9,8 @@ import org.apache.tuweni.bytes.Bytes;
 import java.util.Objects;
 
 /**
- * G2 is the subgroup of elliptic curve similar to G1 and the points are identical except for where they are elements of
- * the extension field Fq12.
+ * G2 is the subgroup of elliptic curve similar to G1 and the points are identical except for where
+ * they are elements of the extension field Fq12.
  */
 final class G2Point implements Group<G2Point> {
   private final ECP2 point;

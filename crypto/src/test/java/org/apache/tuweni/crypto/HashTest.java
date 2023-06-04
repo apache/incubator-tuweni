@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-
 @ExtendWith(BouncyCastleExtension.class)
 class HashTest {
 
@@ -142,15 +141,21 @@ class HashTest {
     Hash.cachedDigests.get().clear();
     try {
       assertThrows(IllegalStateException.class, () -> Hash.sha2_256("horse".getBytes(UTF_8)));
-      assertThrows(IllegalStateException.class, () -> Hash.sha2_256(Bytes.wrap("horse".getBytes(UTF_8))));
+      assertThrows(
+          IllegalStateException.class, () -> Hash.sha2_256(Bytes.wrap("horse".getBytes(UTF_8))));
       assertThrows(IllegalStateException.class, () -> Hash.sha3_256("horse".getBytes(UTF_8)));
-      assertThrows(IllegalStateException.class, () -> Hash.sha3_256(Bytes.wrap("horse".getBytes(UTF_8))));
+      assertThrows(
+          IllegalStateException.class, () -> Hash.sha3_256(Bytes.wrap("horse".getBytes(UTF_8))));
       assertThrows(IllegalStateException.class, () -> Hash.sha3_512("horse".getBytes(UTF_8)));
-      assertThrows(IllegalStateException.class, () -> Hash.sha3_512(Bytes.wrap("horse".getBytes(UTF_8))));
+      assertThrows(
+          IllegalStateException.class, () -> Hash.sha3_512(Bytes.wrap("horse".getBytes(UTF_8))));
       assertThrows(IllegalStateException.class, () -> Hash.keccak256("horse".getBytes(UTF_8)));
-      assertThrows(IllegalStateException.class, () -> Hash.keccak256(Bytes.wrap("horse".getBytes(UTF_8))));
+      assertThrows(
+          IllegalStateException.class, () -> Hash.keccak256(Bytes.wrap("horse".getBytes(UTF_8))));
       assertThrows(IllegalStateException.class, () -> Hash.sha2_512_256("horse".getBytes(UTF_8)));
-      assertThrows(IllegalStateException.class, () -> Hash.sha2_512_256(Bytes.wrap("horse".getBytes(UTF_8))));
+      assertThrows(
+          IllegalStateException.class,
+          () -> Hash.sha2_512_256(Bytes.wrap("horse".getBytes(UTF_8))));
     } finally {
       for (Provider p : providers) {
         Security.addProvider(p);

@@ -34,7 +34,7 @@ class RelayerAppTest {
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
         "localhost",
-        21000
+        21000,
       )
     }
     Thread.sleep(1000)

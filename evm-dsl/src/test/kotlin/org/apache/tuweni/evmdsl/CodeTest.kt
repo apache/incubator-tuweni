@@ -18,7 +18,7 @@ class CodeTest {
         this.add(Push(Bytes.fromHexString("0xdeadbeef")))
         this.add(Push(Bytes.fromHexString("0xf00ba3")))
         this.add(Push(Bytes.fromHexString("0xf000")))
-      }
+      },
     )
     assertEquals(Bytes.fromHexString("0x63deadbeef62f00ba361f000"), code.toBytes())
     val codeRead = Code.read(code.toBytes())
@@ -49,7 +49,7 @@ class CodeTest {
         this.add(Push(Bytes.fromHexString("0x4567")))
         this.add(Push(Bytes.fromHexString("0x456778")))
         this.add(Call)
-      }
+      },
     )
     val err = code.validate()!!
     assertEquals(2, err.index)
@@ -65,7 +65,7 @@ class CodeTest {
         this.add(Push(Bytes.fromHexString("0x456778")))
         this.add(Invalid(0xfe.toByte()))
         this.add(Push(Bytes.fromHexString("0x456778")))
-      }
+      },
     )
     val err = code.validate()!!
     assertEquals(2, err.index)
@@ -80,7 +80,7 @@ class CodeTest {
         for (i in 0..1024) {
           this.add(Push(Bytes.fromHexString("0x4567")))
         }
-      }
+      },
     )
     val err = code.validate()!!
     assertEquals(1024, err.index)
@@ -97,7 +97,7 @@ class CodeTest {
         this.add(Push(Bytes.of("hello world".toByteArray().size)))
         this.add(Push(Bytes.of(32 - "hello world".toByteArray().size)))
         this.add(Return)
-      }
+      },
     )
     assertNull(code.validate()?.error)
   }
@@ -124,7 +124,7 @@ class CodeTest {
         this.add(Push(Bytes.fromHexString("0x01"))) // length
         this.add(Push(Bytes.fromHexString("0x1f"))) // location
         this.add(Return)
-      }
+      },
     )
     assertNull(code.validate()?.error)
     println(code.toString())
@@ -139,7 +139,7 @@ class CodeTest {
         this.add(Push(Bytes.ofUnsignedInt(code.toBytes().size().toLong()))) // length
         this.add(Push(Bytes.fromHexString("0x00"))) // location
         this.add(Return) // return the code
-      }
+      },
     )
 
     println(deployment.toBytes().toHexString())

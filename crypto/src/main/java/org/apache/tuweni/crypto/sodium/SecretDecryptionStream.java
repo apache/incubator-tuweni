@@ -6,9 +6,7 @@ import org.apache.tuweni.bytes.Bytes;
 
 import javax.security.auth.Destroyable;
 
-/**
- * Used to decrypt a sequence of messages, or a single message split into arbitrary chunks.
- */
+/** Used to decrypt a sequence of messages, or a single message split into arbitrary chunks. */
 public interface SecretDecryptionStream extends Destroyable {
 
   /**
@@ -31,7 +29,7 @@ public interface SecretDecryptionStream extends Destroyable {
 
   /**
    * Returns true if the stream is complete
-   * 
+   *
    * @return {@code true} if no more messages should be decrypted by this stream
    */
   boolean isComplete();

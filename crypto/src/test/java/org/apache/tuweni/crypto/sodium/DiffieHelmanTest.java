@@ -26,8 +26,10 @@ class DiffieHelmanTest {
     DiffieHelman.KeyPair keyPair = DiffieHelman.KeyPair.random();
     DiffieHelman.KeyPair secondKeyPair = DiffieHelman.KeyPair.random();
 
-    DiffieHelman.Secret scalar1 = DiffieHelman.Secret.forKeys(keyPair.secretKey(), secondKeyPair.publicKey());
-    DiffieHelman.Secret scalar2 = DiffieHelman.Secret.forKeys(secondKeyPair.secretKey(), keyPair.publicKey());
+    DiffieHelman.Secret scalar1 =
+        DiffieHelman.Secret.forKeys(keyPair.secretKey(), secondKeyPair.publicKey());
+    DiffieHelman.Secret scalar2 =
+        DiffieHelman.Secret.forKeys(secondKeyPair.secretKey(), keyPair.publicKey());
 
     assertEquals(scalar1, scalar2);
   }
@@ -92,5 +94,4 @@ class DiffieHelmanTest {
     Bytes bytes = Bytes.random(20);
     assertThrows(IllegalArgumentException.class, () -> DiffieHelman.SecretKey.fromBytes(bytes));
   }
-
 }

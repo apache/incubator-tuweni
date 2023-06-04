@@ -60,7 +60,7 @@ class SendPendingTransactionsTest {
       MapKeyValueStore(),
       MapKeyValueStore(),
       BlockchainIndex(writer),
-      genesisBlock
+      genesisBlock,
     )
     val service = VertxRLPxService(
       vertx,
@@ -77,19 +77,19 @@ class SendPendingTransactionsTest {
             genesisBlock.header.hash,
             UInt256.valueOf(42L),
             genesisBlock.header.hash,
-            genesisFile.forks
+            genesisFile.forks,
           ),
-          pendingTransactionsPool = MemoryTransactionPool()
-        )
+          pendingTransactionsPool = MemoryTransactionPool(),
+        ),
       ),
       "Tuweni Experiment 0.1",
       10,
-      meter
+      meter,
     )
     service.start().await()
     service.connectTo(
       SECP256K1.PublicKey.fromHexString(peerId),
-      InetSocketAddress("127.0.0.1", 30303)
+      InetSocketAddress("127.0.0.1", 30303),
     ).await()
 
     var loop = true
@@ -106,7 +106,7 @@ class SendPendingTransactionsTest {
         Address.fromBytes(Bytes.random(20)),
         Wei.valueOf(2),
         Bytes.random(12),
-        SECP256K1.KeyPair.random()
+        SECP256K1.KeyPair.random(),
       )
       client.submitPooledTransaction(tx)
       delay(100)

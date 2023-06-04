@@ -28,7 +28,8 @@ final class ArrayVisitor extends TomlParserBaseVisitor<MutableTomlArray> {
   }
 
   @Override
-  protected MutableTomlArray aggregateResult(MutableTomlArray aggregate, MutableTomlArray nextResult) {
+  protected MutableTomlArray aggregateResult(
+      MutableTomlArray aggregate, MutableTomlArray nextResult) {
     return aggregate == null ? null : nextResult;
   }
 

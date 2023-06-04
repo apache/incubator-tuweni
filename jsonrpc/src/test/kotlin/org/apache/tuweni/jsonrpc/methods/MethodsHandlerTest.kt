@@ -30,7 +30,7 @@ class MethodsHandlerTest {
     val methodsRouter = MethodsRouter(emptyMap())
     assertEquals(
       methodNotFound,
-      methodsRouter.handleRequest(JSONRPCRequest(StringOrLong(1), "web3_sha3", arrayOf("0xdeadbeef")))
+      methodsRouter.handleRequest(JSONRPCRequest(StringOrLong(1), "web3_sha3", arrayOf("0xdeadbeef"))),
     )
   }
 
@@ -40,9 +40,9 @@ class MethodsHandlerTest {
     assertEquals(
       JSONRPCResponse(
         StringOrLong(1),
-        result = "0xd4fd4e189132273036449fc9e11198c739161b4c0116a9a2dccdfa1c492006f1"
+        result = "0xd4fd4e189132273036449fc9e11198c739161b4c0116a9a2dccdfa1c492006f1",
       ),
-      methodsRouter.handleRequest(JSONRPCRequest(StringOrLong(1), "web3_sha3", arrayOf("0xdeadbeef")))
+      methodsRouter.handleRequest(JSONRPCRequest(StringOrLong(1), "web3_sha3", arrayOf("0xdeadbeef"))),
     )
   }
 
@@ -168,7 +168,7 @@ class CachingHandlerTest {
       listOf("foo"),
       kv,
       meter.counterBuilder("foo").build(),
-      meter.counterBuilder("bar").build()
+      meter.counterBuilder("bar").build(),
     ) {
       if (it.params.isNotEmpty()) {
         JSONRPCResponse(id = StringOrLong(1), error = JSONRPCError(1234, ""))
@@ -201,7 +201,7 @@ class CachingPollingHandlerTest {
       1000,
       kv,
       meter.counterBuilder("foo").build(),
-      meter.counterBuilder("bar").build()
+      meter.counterBuilder("bar").build(),
     ) {
       if (it.params.isNotEmpty()) {
         JSONRPCResponse(id = StringOrLong(1), error = JSONRPCError(1234, ""))

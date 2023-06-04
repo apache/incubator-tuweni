@@ -56,7 +56,8 @@ class ExpiringSetTest {
   @Test
   void addGlobalExpiryListener() {
     AtomicReference<String> key = new AtomicReference<>();
-    ExpiringSet<String> listeningSet = new ExpiringSet<>(1L, () -> currentTime.toEpochMilli(), key::set);
+    ExpiringSet<String> listeningSet =
+        new ExpiringSet<>(1L, () -> currentTime.toEpochMilli(), key::set);
     listeningSet.add("foo", -1);
     assertEquals("foo", key.get());
     assertEquals(0, listeningSet.size());

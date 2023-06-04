@@ -25,10 +25,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 
-
-/**
- * Utility methods for working with files.
- */
+/** Utility methods for working with files. */
 public final class Files {
   private Files() {}
 
@@ -40,7 +37,8 @@ public final class Files {
    * @return {@code true} if the file was created.
    * @throws IOException If an I/O error occurs or the parent directory does not exist.
    */
-  public static boolean createFileIfMissing(Path path, FileAttribute<?>... attrs) throws IOException {
+  public static boolean createFileIfMissing(Path path, FileAttribute<?>... attrs)
+      throws IOException {
     requireNonNull(path);
     try {
       java.nio.file.Files.createFile(path, attrs);
@@ -59,27 +57,30 @@ public final class Files {
   public static void deleteRecursively(Path directory) throws IOException {
     checkNotNull(directory);
 
-    walkFileTree(directory, new SimpleFileVisitor<>() {
-      @Override
-      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        try {
-          delete(file);
-        } catch (IOException ioe) {
-          file.toFile().deleteOnExit();
-        }
-        return FileVisitResult.CONTINUE;
-      }
+    walkFileTree(
+        directory,
+        new SimpleFileVisitor<>() {
+          @Override
+          public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+              throws IOException {
+            try {
+              delete(file);
+            } catch (IOException ioe) {
+              file.toFile().deleteOnExit();
+            }
+            return FileVisitResult.CONTINUE;
+          }
 
-      @Override
-      public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-        try {
-          delete(dir);
-        } catch (IOException ioe) {
-          dir.toFile().deleteOnExit();
-        }
-        return FileVisitResult.CONTINUE;
-      }
-    });
+          @Override
+          public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+            try {
+              delete(dir);
+            } catch (IOException ioe) {
+              dir.toFile().deleteOnExit();
+            }
+            return FileVisitResult.CONTINUE;
+          }
+        });
   }
 
   /**
@@ -91,7 +92,8 @@ public final class Files {
    * @return The destination file.
    * @throws IOException If an I/O error occurs.
    */
-  public static Path copyResource(String resourceName, Path destination, OpenOption... options) throws IOException {
+  public static Path copyResource(String resourceName, Path destination, OpenOption... options)
+      throws IOException {
     return copyResource(Files.class.getClassLoader(), resourceName, destination, options);
   }
 
@@ -105,7 +107,8 @@ public final class Files {
    * @return The destination file.
    * @throws IOException If an I/O error occurs.
    */
-  public static Path copyResource(ClassLoader classloader, String resourceName, Path destination, OpenOption... options)
+  public static Path copyResource(
+      ClassLoader classloader, String resourceName, Path destination, OpenOption... options)
       throws IOException {
     requireNonNull(resourceName);
     requireNonNull(destination);
@@ -137,7 +140,8 @@ public final class Files {
    * @return The total bytes written.
    * @throws IOException If an I/O error occurs.
    */
-  public static long copyResource(ClassLoader classloader, String resourceName, OutputStream out) throws IOException {
+  public static long copyResource(ClassLoader classloader, String resourceName, OutputStream out)
+      throws IOException {
     try (InputStream in = classloader.getResourceAsStream(resourceName)) {
       if (in == null) {
         throw new IllegalArgumentException(resourceName + " could not be accessed");
@@ -182,7 +186,8 @@ public final class Files {
    * Write a temporary file and then replace target.
    *
    * @param path The target file to be replaced (if it exists).
-   * @param fn A consumer that will be provided a buffered {@link Writer} instance that will write to the file.
+   * @param fn A consumer that will be provided a buffered {@link Writer} instance that will write
+   *     to the file.
    * @throws IOException If an I/O error occurs.
    */
   public static void atomicReplace(Path path, IOConsumer<Writer> fn) throws IOException {
@@ -194,10 +199,12 @@ public final class Files {
    *
    * @param path The target file to be replaced (if it exists).
    * @param charset The charset of the file.
-   * @param fn A consumer that will be provided a buffered {@link Writer} instance that will write to the file.
+   * @param fn A consumer that will be provided a buffered {@link Writer} instance that will write
+   *     to the file.
    * @throws IOException If an I/O error occurs.
    */
-  public static void atomicReplace(Path path, Charset charset, IOConsumer<Writer> fn) throws IOException {
+  public static void atomicReplace(Path path, Charset charset, IOConsumer<Writer> fn)
+      throws IOException {
     requireNonNull(charset);
     requireNonNull(fn);
     Path directory = path.getParent();

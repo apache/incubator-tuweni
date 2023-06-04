@@ -47,7 +47,7 @@ internal class Session(
   private val routingTable: RoutingTable,
   private val topicTable: TopicTable,
   private val failedPingsListener: (missedPings: Int) -> Boolean,
-  override val coroutineContext: CoroutineContext
+  override val coroutineContext: CoroutineContext,
 ) : CoroutineScope {
 
   companion object {
@@ -121,10 +121,10 @@ internal class Session(
       MessageType.PING -> handlePing(message as PingMessage)
       MessageType.PONG -> handlePong(message as PongMessage)
       MessageType.REGTOPIC -> handleRegTopic(
-        message as RegTopicMessage
+        message as RegTopicMessage,
       )
       MessageType.REGCONFIRM -> handleRegConfirmation(
-        message as RegConfirmationMessage
+        message as RegConfirmationMessage,
       )
       MessageType.TICKET -> handleTicket(message as TicketMessage)
       MessageType.TOPICQUERY -> handleTopicQuery(message as TopicQueryMessage)
@@ -143,7 +143,7 @@ internal class Session(
   }
 
   private suspend fun handlePong(
-    message: PongMessage
+    message: PongMessage,
   ) {
     if (activePing?.isDone == true) {
       logger.trace("Received pong when no ping was active")
@@ -157,7 +157,7 @@ internal class Session(
   }
 
   private suspend fun handlePing(
-    message: PingMessage
+    message: PingMessage,
   ) {
     activePing = AsyncCompletion.incomplete()
     val response =
@@ -197,7 +197,7 @@ internal class Session(
   }
 
   private suspend fun handleRegTopic(
-    message: RegTopicMessage
+    message: RegTopicMessage,
   ) {
     val topic = Topic(message.topic.toHexString())
 
@@ -308,7 +308,7 @@ internal class Session(
   private suspend fun sendRegTopic(
     topic: Bytes,
     ticket: Bytes,
-    requestId: Bytes = Message.requestId()
+    requestId: Bytes = Message.requestId(),
   ) {
     TODO("" + topic + ticket + requestId)
   }

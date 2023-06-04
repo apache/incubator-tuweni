@@ -20,7 +20,7 @@ class CanonicalSynchronizer(
   peerRepository: EthereumPeerRepository,
   from: UInt256?,
   to: UInt256?,
-  private val fromRepository: BlockchainRepository
+  private val fromRepository: BlockchainRepository,
 ) : Synchronizer(executor, coroutineContext, repository, client, peerRepository, from, to) {
 
   private var listenerId: String? = null

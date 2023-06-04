@@ -34,7 +34,7 @@ import java.util.function.Function
 class RPCHandler(
   private val vertx: Vertx,
   private val messageSender: Consumer<Bytes>,
-  private val terminationFn: Runnable
+  private val terminationFn: Runnable,
 ) :
   Multiplexer, ClientHandler {
   private val awaitingAsyncResponse: MutableMap<Int, CompletableAsyncResult<RPCResponse>> = ConcurrentHashMap()
@@ -118,7 +118,7 @@ class RPCHandler(
       closed = true
       streams.forEach { (_: Int, streamHandler: ScuttlebuttStreamHandler) ->
         streamHandler.onStreamError(
-          ConnectionClosedException()
+          ConnectionClosedException(),
         )
       }
       streams.clear()
@@ -164,7 +164,7 @@ class RPCHandler(
             "Couldn't find stream handler for RPC response with request number " +
               requestNumber +
               " " +
-              response.asString()
+              response.asString(),
           )
       }
     } else {
@@ -184,7 +184,7 @@ class RPCHandler(
                 requestNumber +
                 " " +
                 response.asString()
-              )
+              ),
           )
       }
     }

@@ -27,7 +27,7 @@ abstract class Synchronizer(
   val client: EthRequestsManager,
   val peerRepository: EthereumPeerRepository,
   val from: UInt256?,
-  val to: UInt256?
+  val to: UInt256?,
 ) : CoroutineScope {
   abstract fun start()
   abstract fun stop()

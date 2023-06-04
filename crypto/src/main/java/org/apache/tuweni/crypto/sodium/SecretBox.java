@@ -19,32 +19,28 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Secret-key authenticated encryption.
  *
- * <p>
- * Encrypts a message with a key and a nonce to keep it confidential, and computes an authentication tag. The tag is
- * used to make sure that the message hasn't been tampered with before decrypting it.
+ * <p>Encrypts a message with a key and a nonce to keep it confidential, and computes an
+ * authentication tag. The tag is used to make sure that the message hasn't been tampered with
+ * before decrypting it.
  *
- * <p>
- * A single key is used both to encrypt/sign and verify/decrypt messages. For this reason, it is critical to keep the
- * key confidential.
+ * <p>A single key is used both to encrypt/sign and verify/decrypt messages. For this reason, it is
+ * critical to keep the key confidential.
  *
- * <p>
- * The nonce doesn't have to be confidential, but it should never ever be reused with the same key. The easiest way to
- * generate a nonce is to use randombytes_buf().
+ * <p>The nonce doesn't have to be confidential, but it should never ever be reused with the same
+ * key. The easiest way to generate a nonce is to use randombytes_buf().
  *
- * <p>
- * Messages encrypted are assumed to be independent. If multiple messages are sent using this API and random nonces,
- * there will be no way to detect if a message has been received twice, or if messages have been reordered.
+ * <p>Messages encrypted are assumed to be independent. If multiple messages are sent using this API
+ * and random nonces, there will be no way to detect if a message has been received twice, or if
+ * messages have been reordered.
  *
- * <p>
- * This class depends upon the JNR-FFI library being available on the classpath, along with its dependencies. See
- * https://github.com/jnr/jnr-ffi. JNR-FFI can be included using the gradle dependency 'com.github.jnr:jnr-ffi'.
+ * <p>This class depends upon the JNR-FFI library being available on the classpath, along with its
+ * dependencies. See https://github.com/jnr/jnr-ffi. JNR-FFI can be included using the gradle
+ * dependency 'com.github.jnr:jnr-ffi'.
  */
 public final class SecretBox {
   private SecretBox() {}
 
-  /**
-   * A SecretBox key.
-   */
+  /** A SecretBox key. */
   public static final class Key implements Destroyable {
     final Allocated value;
 
@@ -77,8 +73,7 @@ public final class SecretBox {
     /**
      * Create a {@link Key} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the key.
      * @return A key, based on the supplied bytes.
@@ -90,8 +85,7 @@ public final class SecretBox {
     /**
      * Create a {@link Key} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the key.
      * @return A key, based on the supplied bytes.
@@ -127,7 +121,7 @@ public final class SecretBox {
       Pointer ptr = Sodium.malloc(length);
       try {
         // When support for 10.0.11 is dropped, use this instead
-        //Sodium.crypto_secretbox_keygen(ptr);
+        // Sodium.crypto_secretbox_keygen(ptr);
         Sodium.randombytes_buf(ptr, length);
         return new Key(ptr, length);
       } catch (Throwable e) {
@@ -156,7 +150,7 @@ public final class SecretBox {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory.
+     * <p>WARNING: This will cause the key to be copied into heap memory.
      *
      * @return The bytes of this key.
      */
@@ -167,8 +161,8 @@ public final class SecretBox {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory. The returned array should be overwritten when no
-     * longer required.
+     * <p>WARNING: This will cause the key to be copied into heap memory. The returned array should
+     * be overwritten when no longer required.
      *
      * @return The bytes of this key.
      */
@@ -177,9 +171,7 @@ public final class SecretBox {
     }
   }
 
-  /**
-   * A SecretBox nonce.
-   */
+  /** A SecretBox nonce. */
   public static final class Nonce implements Destroyable {
     final Allocated value;
 
@@ -190,8 +182,7 @@ public final class SecretBox {
     /**
      * Create a {@link Nonce} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the nonce.
      * @return A nonce, based on these bytes.
@@ -203,8 +194,7 @@ public final class SecretBox {
     /**
      * Create a {@link Nonce} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the nonce.
      * @return A nonce, based on these bytes.
@@ -212,7 +202,10 @@ public final class SecretBox {
     public static Nonce fromBytes(byte[] bytes) {
       if (bytes.length != Sodium.crypto_secretbox_noncebytes()) {
         throw new IllegalArgumentException(
-            "nonce must be " + Sodium.crypto_secretbox_noncebytes() + " bytes, got " + bytes.length);
+            "nonce must be "
+                + Sodium.crypto_secretbox_noncebytes()
+                + " bytes, got "
+                + bytes.length);
       }
       return Sodium.dup(bytes, Nonce::new);
     }
@@ -264,9 +257,9 @@ public final class SecretBox {
     /**
      * Increment this nonce.
      *
-     * <p>
-     * Note that this is not synchronized. If multiple threads are creating encrypted messages and incrementing this
-     * nonce, then external synchronization is required to ensure no two encrypt operations use the same nonce.
+     * <p>Note that this is not synchronized. If multiple threads are creating encrypted messages
+     * and incrementing this nonce, then external synchronization is required to ensure no two
+     * encrypt operations use the same nonce.
      *
      * @return A new {@link Nonce}.
      */
@@ -293,7 +286,7 @@ public final class SecretBox {
 
     /**
      * Provides the bytes of this nonce.
-     * 
+     *
      * @return The bytes of this nonce.
      */
     public Bytes bytes() {
@@ -302,7 +295,7 @@ public final class SecretBox {
 
     /**
      * Provides the bytes of this nonce.
-     * 
+     *
      * @return The bytes of this nonce.
      */
     public byte[] bytesArray() {
@@ -333,8 +326,8 @@ public final class SecretBox {
   public static Allocated encrypt(Allocated message, Key key, Nonce nonce) {
     int macbytes = macLength();
     Allocated cipherText = Allocated.allocate(macbytes + message.length());
-    int rc = Sodium
-        .crypto_secretbox_easy(
+    int rc =
+        Sodium.crypto_secretbox_easy(
             cipherText.pointer(),
             message.pointer(),
             message.length(),
@@ -363,7 +356,8 @@ public final class SecretBox {
 
     byte[] cipherText = new byte[macbytes + message.length];
     int rc =
-        Sodium.crypto_secretbox_easy(cipherText, message, message.length, nonce.value.pointer(), key.value.pointer());
+        Sodium.crypto_secretbox_easy(
+            cipherText, message, message.length, nonce.value.pointer(), key.value.pointer());
     if (rc != 0) {
       throw new SodiumException("crypto_secretbox_easy: failed with result " + rc);
     }
@@ -399,14 +393,9 @@ public final class SecretBox {
 
     byte[] cipherText = new byte[message.length];
     byte[] mac = new byte[macbytes];
-    int rc = Sodium
-        .crypto_secretbox_detached(
-            cipherText,
-            mac,
-            message,
-            message.length,
-            nonce.value.pointer(),
-            key.value.pointer());
+    int rc =
+        Sodium.crypto_secretbox_detached(
+            cipherText, mac, message, message.length, nonce.value.pointer(), key.value.pointer());
     if (rc != 0) {
       throw new SodiumException("crypto_secretbox_detached: failed with result " + rc);
     }
@@ -447,8 +436,8 @@ public final class SecretBox {
     }
 
     Allocated clearText = Allocated.allocate(cipherText.length() - macLength);
-    int rc = Sodium
-        .crypto_secretbox_open_easy(
+    int rc =
+        Sodium.crypto_secretbox_open_easy(
             clearText.pointer(),
             cipherText.pointer(),
             cipherText.length(),
@@ -482,13 +471,9 @@ public final class SecretBox {
     }
 
     byte[] clearText = new byte[cipherText.length - macLength];
-    int rc = Sodium
-        .crypto_secretbox_open_easy(
-            clearText,
-            cipherText,
-            cipherText.length,
-            nonce.value.pointer(),
-            key.value.pointer());
+    int rc =
+        Sodium.crypto_secretbox_open_easy(
+            clearText, cipherText, cipherText.length, nonce.value.pointer(), key.value.pointer());
     if (rc == -1) {
       return null;
     }
@@ -533,8 +518,8 @@ public final class SecretBox {
     }
 
     byte[] clearText = new byte[cipherText.length];
-    int rc = Sodium
-        .crypto_secretbox_open_detached(
+    int rc =
+        Sodium.crypto_secretbox_open_detached(
             clearText,
             cipherText,
             mac,
@@ -551,8 +536,9 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with the currently
-   * recommended algorithm and limits on operations and memory that are suitable for most use-cases).
+   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with the
+   * currently recommended algorithm and limits on operations and memory that are suitable for most
+   * use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -568,8 +554,9 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with the currently
-   * recommended algorithm and limits on operations and memory that are suitable for most use-cases).
+   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with the
+   * currently recommended algorithm and limits on operations and memory that are suitable for most
+   * use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -585,8 +572,8 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with limits on operations and
-   * memory that are suitable for most use-cases).
+   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with
+   * limits on operations and memory that are suitable for most use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -594,12 +581,17 @@ public final class SecretBox {
    * @return The encrypted data.
    */
   public static Bytes encrypt(Bytes message, String password, PasswordHash.Algorithm algorithm) {
-    return encrypt(message, password, PasswordHash.moderateOpsLimit(), PasswordHash.moderateMemLimit(), algorithm);
+    return encrypt(
+        message,
+        password,
+        PasswordHash.moderateOpsLimit(),
+        PasswordHash.moderateMemLimit(),
+        algorithm);
   }
 
   /**
-   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with limits on operations and
-   * memory that are suitable for most use-cases).
+   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with
+   * limits on operations and memory that are suitable for most use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -607,12 +599,18 @@ public final class SecretBox {
    * @return The encrypted data.
    */
   public static byte[] encrypt(byte[] message, String password, PasswordHash.Algorithm algorithm) {
-    return encrypt(message, password, PasswordHash.moderateOpsLimit(), PasswordHash.moderateMemLimit(), algorithm);
+    return encrypt(
+        message,
+        password,
+        PasswordHash.moderateOpsLimit(),
+        PasswordHash.moderateMemLimit(),
+        algorithm);
   }
 
   /**
-   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with the currently
-   * recommended algorithm and limits on operations and memory that are suitable for interactive use-cases).
+   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with the
+   * currently recommended algorithm and limits on operations and memory that are suitable for
+   * interactive use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -628,8 +626,9 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with the currently
-   * recommended algorithm and limits on operations and memory that are suitable for interactive use-cases).
+   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with the
+   * currently recommended algorithm and limits on operations and memory that are suitable for
+   * interactive use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -645,15 +644,16 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with limits on operations and
-   * memory that are suitable for interactive use-cases).
+   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with
+   * limits on operations and memory that are suitable for interactive use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
    * @param algorithm The algorithm to use.
    * @return The encrypted data.
    */
-  public static Bytes encryptInteractive(Bytes message, String password, PasswordHash.Algorithm algorithm) {
+  public static Bytes encryptInteractive(
+      Bytes message, String password, PasswordHash.Algorithm algorithm) {
     return encrypt(
         message,
         password,
@@ -663,15 +663,16 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with limits on operations and
-   * memory that are suitable for interactive use-cases).
+   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with
+   * limits on operations and memory that are suitable for interactive use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
    * @param algorithm The algorithm to use.
    * @return The encrypted data.
    */
-  public static byte[] encryptInteractive(byte[] message, String password, PasswordHash.Algorithm algorithm) {
+  public static byte[] encryptInteractive(
+      byte[] message, String password, PasswordHash.Algorithm algorithm) {
     return encrypt(
         message,
         password,
@@ -681,8 +682,9 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with the currently
-   * recommended algorithm and limits on operations and memory that are suitable for sensitive use-cases).
+   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with the
+   * currently recommended algorithm and limits on operations and memory that are suitable for
+   * sensitive use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -698,8 +700,9 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with the currently
-   * recommended algorithm and limits on operations and memory that are suitable for sensitive use-cases).
+   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with the
+   * currently recommended algorithm and limits on operations and memory that are suitable for
+   * sensitive use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -715,29 +718,41 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with limits on operations and
-   * memory that are suitable for sensitive use-cases).
+   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with
+   * limits on operations and memory that are suitable for sensitive use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
    * @param algorithm The algorithm to use.
    * @return The encrypted data.
    */
-  public static Bytes encryptSensitive(Bytes message, String password, PasswordHash.Algorithm algorithm) {
-    return encrypt(message, password, PasswordHash.sensitiveOpsLimit(), PasswordHash.sensitiveMemLimit(), algorithm);
+  public static Bytes encryptSensitive(
+      Bytes message, String password, PasswordHash.Algorithm algorithm) {
+    return encrypt(
+        message,
+        password,
+        PasswordHash.sensitiveOpsLimit(),
+        PasswordHash.sensitiveMemLimit(),
+        algorithm);
   }
 
   /**
-   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with limits on operations and
-   * memory that are suitable for sensitive use-cases).
+   * Encrypt a message with a password, using {@link PasswordHash} for the key generation (with
+   * limits on operations and memory that are suitable for sensitive use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
    * @param algorithm The algorithm to use.
    * @return The encrypted data.
    */
-  public static byte[] encryptSensitive(byte[] message, String password, PasswordHash.Algorithm algorithm) {
-    return encrypt(message, password, PasswordHash.sensitiveOpsLimit(), PasswordHash.sensitiveMemLimit(), algorithm);
+  public static byte[] encryptSensitive(
+      byte[] message, String password, PasswordHash.Algorithm algorithm) {
+    return encrypt(
+        message,
+        password,
+        PasswordHash.sensitiveOpsLimit(),
+        PasswordHash.sensitiveMemLimit(),
+        algorithm);
   }
 
   /**
@@ -745,10 +760,10 @@ public final class SecretBox {
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
-   * @param opsLimit The operations limit, which must be in the range {@link PasswordHash#minOpsLimit()} to
-   *        {@link PasswordHash#maxOpsLimit()}.
-   * @param memLimit The memory limit, which must be in the range {@link PasswordHash#minMemLimit()} to
-   *        {@link PasswordHash#maxMemLimit()}.
+   * @param opsLimit The operations limit, which must be in the range {@link
+   *     PasswordHash#minOpsLimit()} to {@link PasswordHash#maxOpsLimit()}.
+   * @param memLimit The memory limit, which must be in the range {@link PasswordHash#minMemLimit()}
+   *     to {@link PasswordHash#maxMemLimit()}.
    * @param algorithm The algorithm to use.
    * @return The encrypted data.
    */
@@ -766,14 +781,14 @@ public final class SecretBox {
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
-   * @param opsLimit The operations limit, which must be in the range {@link PasswordHash#minOpsLimit()} to
-   *        {@link PasswordHash#maxOpsLimit()}.
-   * @param memLimit The memory limit, which must be in the range {@link PasswordHash#minMemLimit()} to
-   *        {@link PasswordHash#maxMemLimit()}.
+   * @param opsLimit The operations limit, which must be in the range {@link
+   *     PasswordHash#minOpsLimit()} to {@link PasswordHash#maxOpsLimit()}.
+   * @param memLimit The memory limit, which must be in the range {@link PasswordHash#minMemLimit()}
+   *     to {@link PasswordHash#maxMemLimit()}.
    * @param algorithm The algorithm to use.
    * @return The encrypted data.
-   * @throws UnsupportedOperationException If the specified algorithm is not supported by the currently loaded sodium
-   *         native library.
+   * @throws UnsupportedOperationException If the specified algorithm is not supported by the
+   *     currently loaded sodium native library.
    */
   public static byte[] encrypt(
       byte[] message,
@@ -797,8 +812,9 @@ public final class SecretBox {
 
     int rc;
     try {
-      rc = Sodium
-          .crypto_secretbox_easy(cipherText, message, message.length, nonce.value.pointer(), key.value.pointer());
+      rc =
+          Sodium.crypto_secretbox_easy(
+              cipherText, message, message.length, nonce.value.pointer(), key.value.pointer());
     } finally {
       key.destroy();
     }
@@ -809,9 +825,9 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, generating a detached message authentication code, using {@link PasswordHash}
-   * for the key generation (with the currently recommended algorithm and limits on operations and memory that are
-   * suitable for most use-cases).
+   * Encrypt a message with a password, generating a detached message authentication code, using
+   * {@link PasswordHash} for the key generation (with the currently recommended algorithm and
+   * limits on operations and memory that are suitable for most use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -827,9 +843,9 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, generating a detached message authentication code, using {@link PasswordHash}
-   * for the key generation (with the currently recommended algorithm and limits on operations and memory that are
-   * suitable for most use-cases).
+   * Encrypt a message with a password, generating a detached message authentication code, using
+   * {@link PasswordHash} for the key generation (with the currently recommended algorithm and
+   * limits on operations and memory that are suitable for most use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -845,8 +861,9 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, generating a detached message authentication code, using {@link PasswordHash}
-   * for the key generation (with limits on operations and memory that are suitable for most use-cases).
+   * Encrypt a message with a password, generating a detached message authentication code, using
+   * {@link PasswordHash} for the key generation (with limits on operations and memory that are
+   * suitable for most use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -854,9 +871,7 @@ public final class SecretBox {
    * @return The encrypted data and message authentication code.
    */
   public static DetachedEncryptionResult encryptDetached(
-      Bytes message,
-      String password,
-      PasswordHash.Algorithm algorithm) {
+      Bytes message, String password, PasswordHash.Algorithm algorithm) {
     return encryptDetached(
         message,
         password,
@@ -866,8 +881,9 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, generating a detached message authentication code, using {@link PasswordHash}
-   * for the key generation (with limits on operations and memory that are suitable for most use-cases).
+   * Encrypt a message with a password, generating a detached message authentication code, using
+   * {@link PasswordHash} for the key generation (with limits on operations and memory that are
+   * suitable for most use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -875,9 +891,7 @@ public final class SecretBox {
    * @return The encrypted data and message authentication code.
    */
   public static DetachedEncryptionResult encryptDetached(
-      byte[] message,
-      String password,
-      PasswordHash.Algorithm algorithm) {
+      byte[] message, String password, PasswordHash.Algorithm algorithm) {
     return encryptDetached(
         message,
         password,
@@ -887,15 +901,16 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, generating a detached message authentication code, using {@link PasswordHash}
-   * for the key generation (with the currently recommended algorithm and limits on operations and memory that are
-   * suitable for interactive use-cases).
+   * Encrypt a message with a password, generating a detached message authentication code, using
+   * {@link PasswordHash} for the key generation (with the currently recommended algorithm and
+   * limits on operations and memory that are suitable for interactive use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
    * @return The encrypted data and message authentication code.
    */
-  public static DetachedEncryptionResult encryptInteractiveDetached(Bytes message, String password) {
+  public static DetachedEncryptionResult encryptInteractiveDetached(
+      Bytes message, String password) {
     return encryptDetached(
         message,
         password,
@@ -905,15 +920,16 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, generating a detached message authentication code, using {@link PasswordHash}
-   * for the key generation (with the currently recommended algorithm and limits on operations and memory that are
-   * suitable for interactive use-cases).
+   * Encrypt a message with a password, generating a detached message authentication code, using
+   * {@link PasswordHash} for the key generation (with the currently recommended algorithm and
+   * limits on operations and memory that are suitable for interactive use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
    * @return The encrypted data and message authentication code.
    */
-  public static DetachedEncryptionResult encryptInteractiveDetached(byte[] message, String password) {
+  public static DetachedEncryptionResult encryptInteractiveDetached(
+      byte[] message, String password) {
     return encryptDetached(
         message,
         password,
@@ -923,8 +939,9 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, generating a detached message authentication code, using {@link PasswordHash}
-   * for the key generation (with limits on operations and memory that are suitable for interactive use-cases).
+   * Encrypt a message with a password, generating a detached message authentication code, using
+   * {@link PasswordHash} for the key generation (with limits on operations and memory that are
+   * suitable for interactive use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -932,9 +949,7 @@ public final class SecretBox {
    * @return The encrypted data and message authentication code.
    */
   public static DetachedEncryptionResult encryptInteractiveDetached(
-      Bytes message,
-      String password,
-      PasswordHash.Algorithm algorithm) {
+      Bytes message, String password, PasswordHash.Algorithm algorithm) {
     return encryptDetached(
         message,
         password,
@@ -944,8 +959,9 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, generating a detached message authentication code, using {@link PasswordHash}
-   * for the key generation (with limits on operations and memory that are suitable for interactive use-cases).
+   * Encrypt a message with a password, generating a detached message authentication code, using
+   * {@link PasswordHash} for the key generation (with limits on operations and memory that are
+   * suitable for interactive use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -953,9 +969,7 @@ public final class SecretBox {
    * @return The encrypted data and message authentication code.
    */
   public static DetachedEncryptionResult encryptInteractiveDetached(
-      byte[] message,
-      String password,
-      PasswordHash.Algorithm algorithm) {
+      byte[] message, String password, PasswordHash.Algorithm algorithm) {
     return encryptDetached(
         message,
         password,
@@ -965,9 +979,9 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, generating a detached message authentication code, using {@link PasswordHash}
-   * for the key generation (with the currently recommended algorithm and limits on operations and memory that are
-   * suitable for sensitive use-cases).
+   * Encrypt a message with a password, generating a detached message authentication code, using
+   * {@link PasswordHash} for the key generation (with the currently recommended algorithm and
+   * limits on operations and memory that are suitable for sensitive use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -983,9 +997,9 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, generating a detached message authentication code, using {@link PasswordHash}
-   * for the key generation (with the currently recommended algorithm and limits on operations and memory that are
-   * suitable for sensitive use-cases).
+   * Encrypt a message with a password, generating a detached message authentication code, using
+   * {@link PasswordHash} for the key generation (with the currently recommended algorithm and
+   * limits on operations and memory that are suitable for sensitive use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -1001,8 +1015,9 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, generating a detached message authentication code, using {@link PasswordHash}
-   * for the key generation (with limits on operations and memory that are suitable for sensitive use-cases).
+   * Encrypt a message with a password, generating a detached message authentication code, using
+   * {@link PasswordHash} for the key generation (with limits on operations and memory that are
+   * suitable for sensitive use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -1010,9 +1025,7 @@ public final class SecretBox {
    * @return The encrypted data and message authentication code.
    */
   public static DetachedEncryptionResult encryptSensitiveDetached(
-      Bytes message,
-      String password,
-      PasswordHash.Algorithm algorithm) {
+      Bytes message, String password, PasswordHash.Algorithm algorithm) {
     return encryptDetached(
         message,
         password,
@@ -1022,8 +1035,9 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, generating a detached message authentication code, using {@link PasswordHash}
-   * for the key generation (with limits on operations and memory that are suitable for sensitive use-cases).
+   * Encrypt a message with a password, generating a detached message authentication code, using
+   * {@link PasswordHash} for the key generation (with limits on operations and memory that are
+   * suitable for sensitive use-cases).
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
@@ -1031,9 +1045,7 @@ public final class SecretBox {
    * @return The encrypted data and message authentication code.
    */
   public static DetachedEncryptionResult encryptSensitiveDetached(
-      byte[] message,
-      String password,
-      PasswordHash.Algorithm algorithm) {
+      byte[] message, String password, PasswordHash.Algorithm algorithm) {
     return encryptDetached(
         message,
         password,
@@ -1043,15 +1055,15 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, generating a detached message authentication code, using {@link PasswordHash}
-   * for the key generation
+   * Encrypt a message with a password, generating a detached message authentication code, using
+   * {@link PasswordHash} for the key generation
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
-   * @param opsLimit The operations limit, which must be in the range {@link PasswordHash#minOpsLimit()} to
-   *        {@link PasswordHash#maxOpsLimit()}.
-   * @param memLimit The memory limit, which must be in the range {@link PasswordHash#minMemLimit()} to
-   *        {@link PasswordHash#maxMemLimit()}.
+   * @param opsLimit The operations limit, which must be in the range {@link
+   *     PasswordHash#minOpsLimit()} to {@link PasswordHash#maxOpsLimit()}.
+   * @param memLimit The memory limit, which must be in the range {@link PasswordHash#minMemLimit()}
+   *     to {@link PasswordHash#maxMemLimit()}.
    * @param algorithm The algorithm to use.
    * @return The encrypted data and message authentication code.
    */
@@ -1065,15 +1077,15 @@ public final class SecretBox {
   }
 
   /**
-   * Encrypt a message with a password, generating a detached message authentication code, using {@link PasswordHash}
-   * for the key generation.
+   * Encrypt a message with a password, generating a detached message authentication code, using
+   * {@link PasswordHash} for the key generation.
    *
    * @param message The message to encrypt.
    * @param password The password to use for encryption.
-   * @param opsLimit The operations limit, which must be in the range {@link PasswordHash#minOpsLimit()} to
-   *        {@link PasswordHash#maxOpsLimit()}.
-   * @param memLimit The memory limit, which must be in the range {@link PasswordHash#minMemLimit()} to
-   *        {@link PasswordHash#maxMemLimit()}.
+   * @param opsLimit The operations limit, which must be in the range {@link
+   *     PasswordHash#minOpsLimit()} to {@link PasswordHash#maxOpsLimit()}.
+   * @param memLimit The memory limit, which must be in the range {@link PasswordHash#minMemLimit()}
+   *     to {@link PasswordHash#maxMemLimit()}.
    * @param algorithm The algorithm to use.
    * @return The encrypted data and message authentication code.
    */
@@ -1099,14 +1111,9 @@ public final class SecretBox {
 
     int rc;
     try {
-      rc = Sodium
-          .crypto_secretbox_detached(
-              cipherText,
-              mac,
-              message,
-              message.length,
-              nonce.value.pointer(),
-              key.value.pointer());
+      rc =
+          Sodium.crypto_secretbox_detached(
+              cipherText, mac, message, message.length, nonce.value.pointer(), key.value.pointer());
     } finally {
       key.destroy();
     }
@@ -1117,8 +1124,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with the currently
-   * recommended algorithm and limits on operations and memory that are suitable for most use-cases).
+   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with the
+   * currently recommended algorithm and limits on operations and memory that are suitable for most
+   * use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param password The password that was used for encryption.
@@ -1135,8 +1143,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with the currently
-   * recommended algorithm and limits on operations and memory that are suitable for most use-cases).
+   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with the
+   * currently recommended algorithm and limits on operations and memory that are suitable for most
+   * use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param password The password that was used for encryption.
@@ -1153,8 +1162,8 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with limits on operations
-   * and memory that are suitable for most use-cases).
+   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with
+   * limits on operations and memory that are suitable for most use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param password The password that was used for encryption.
@@ -1163,12 +1172,17 @@ public final class SecretBox {
    */
   @Nullable
   public static Bytes decrypt(Bytes cipherText, String password, PasswordHash.Algorithm algorithm) {
-    return decrypt(cipherText, password, PasswordHash.moderateOpsLimit(), PasswordHash.moderateMemLimit(), algorithm);
+    return decrypt(
+        cipherText,
+        password,
+        PasswordHash.moderateOpsLimit(),
+        PasswordHash.moderateMemLimit(),
+        algorithm);
   }
 
   /**
-   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with limits on operations
-   * and memory that are suitable for most use-cases).
+   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with
+   * limits on operations and memory that are suitable for most use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param password The password that was used for encryption.
@@ -1176,13 +1190,20 @@ public final class SecretBox {
    * @return The decrypted data, or {@code null} if verification failed.
    */
   @Nullable
-  public static byte[] decrypt(byte[] cipherText, String password, PasswordHash.Algorithm algorithm) {
-    return decrypt(cipherText, password, PasswordHash.moderateOpsLimit(), PasswordHash.moderateMemLimit(), algorithm);
+  public static byte[] decrypt(
+      byte[] cipherText, String password, PasswordHash.Algorithm algorithm) {
+    return decrypt(
+        cipherText,
+        password,
+        PasswordHash.moderateOpsLimit(),
+        PasswordHash.moderateMemLimit(),
+        algorithm);
   }
 
   /**
-   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with the currently
-   * recommended algorithm and limits on operations and memory that are suitable for interactive use-cases).
+   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with the
+   * currently recommended algorithm and limits on operations and memory that are suitable for
+   * interactive use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param password The password that was used for encryption.
@@ -1199,8 +1220,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with the currently
-   * recommended algorithm and limits on operations and memory that are suitable for interactive use-cases).
+   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with the
+   * currently recommended algorithm and limits on operations and memory that are suitable for
+   * interactive use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param password The password that was used for encryption.
@@ -1217,8 +1239,8 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with limits on operations
-   * and memory that are suitable for interactive use-cases).
+   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with
+   * limits on operations and memory that are suitable for interactive use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param password The password that was used for encryption.
@@ -1226,7 +1248,8 @@ public final class SecretBox {
    * @return The decrypted data, or {@code null} if verification failed.
    */
   @Nullable
-  public static Bytes decryptInteractive(Bytes cipherText, String password, PasswordHash.Algorithm algorithm) {
+  public static Bytes decryptInteractive(
+      Bytes cipherText, String password, PasswordHash.Algorithm algorithm) {
     return decrypt(
         cipherText,
         password,
@@ -1236,8 +1259,8 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with limits on operations
-   * and memory that are suitable for interactive use-cases).
+   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with
+   * limits on operations and memory that are suitable for interactive use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param password The password that was used for encryption.
@@ -1245,7 +1268,8 @@ public final class SecretBox {
    * @return The decrypted data, or {@code null} if verification failed.
    */
   @Nullable
-  public static byte[] decryptInteractive(byte[] cipherText, String password, PasswordHash.Algorithm algorithm) {
+  public static byte[] decryptInteractive(
+      byte[] cipherText, String password, PasswordHash.Algorithm algorithm) {
     return decrypt(
         cipherText,
         password,
@@ -1255,8 +1279,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with the currently
-   * recommended algorithm and limits on operations and memory that are suitable for sensitive use-cases).
+   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with the
+   * currently recommended algorithm and limits on operations and memory that are suitable for
+   * sensitive use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param password The password that was used for encryption.
@@ -1273,8 +1298,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with the currently
-   * recommended algorithm and limits on operations and memory that are suitable for sensitive use-cases).
+   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with the
+   * currently recommended algorithm and limits on operations and memory that are suitable for
+   * sensitive use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param password The password that was used for encryption.
@@ -1291,8 +1317,8 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with limits on operations
-   * and memory that are suitable for sensitive use-cases).
+   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with
+   * limits on operations and memory that are suitable for sensitive use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param password The password that was used for encryption.
@@ -1300,13 +1326,19 @@ public final class SecretBox {
    * @return The decrypted data, or {@code null} if verification failed.
    */
   @Nullable
-  public static Bytes decryptSensitive(Bytes cipherText, String password, PasswordHash.Algorithm algorithm) {
-    return decrypt(cipherText, password, PasswordHash.sensitiveOpsLimit(), PasswordHash.sensitiveMemLimit(), algorithm);
+  public static Bytes decryptSensitive(
+      Bytes cipherText, String password, PasswordHash.Algorithm algorithm) {
+    return decrypt(
+        cipherText,
+        password,
+        PasswordHash.sensitiveOpsLimit(),
+        PasswordHash.sensitiveMemLimit(),
+        algorithm);
   }
 
   /**
-   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with limits on operations
-   * and memory that are suitable for sensitive use-cases).
+   * Decrypt a message using a password, using {@link PasswordHash} for the key generation (with
+   * limits on operations and memory that are suitable for sensitive use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param password The password that was used for encryption.
@@ -1314,8 +1346,14 @@ public final class SecretBox {
    * @return The decrypted data, or {@code null} if verification failed.
    */
   @Nullable
-  public static byte[] decryptSensitive(byte[] cipherText, String password, PasswordHash.Algorithm algorithm) {
-    return decrypt(cipherText, password, PasswordHash.sensitiveOpsLimit(), PasswordHash.sensitiveMemLimit(), algorithm);
+  public static byte[] decryptSensitive(
+      byte[] cipherText, String password, PasswordHash.Algorithm algorithm) {
+    return decrypt(
+        cipherText,
+        password,
+        PasswordHash.sensitiveOpsLimit(),
+        PasswordHash.sensitiveMemLimit(),
+        algorithm);
   }
 
   /**
@@ -1348,8 +1386,8 @@ public final class SecretBox {
    * @param memLimit The memLimit that was used for encryption.
    * @param algorithm The algorithm that was used for encryption.
    * @return The decrypted data, or {@code null} if verification failed.
-   * @throws UnsupportedOperationException If the specified algorithm is not supported by the currently loaded sodium
-   *         native library.
+   * @throws UnsupportedOperationException If the specified algorithm is not supported by the
+   *     currently loaded sodium native library.
    */
   @Nullable
   public static byte[] decrypt(
@@ -1378,8 +1416,8 @@ public final class SecretBox {
 
     int rc;
     try {
-      rc = Sodium
-          .crypto_secretbox_open_easy(
+      rc =
+          Sodium.crypto_secretbox_open_easy(
               clearText,
               Arrays.copyOfRange(cipherText, noncebytes, cipherText.length),
               cipherText.length - noncebytes,
@@ -1398,9 +1436,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password and a detached message authentication code, using {@link PasswordHash} for the
-   * key generation (with the currently recommended algorithm and limits on operations and memory that are suitable for
-   * most use-cases).
+   * Decrypt a message using a password and a detached message authentication code, using {@link
+   * PasswordHash} for the key generation (with the currently recommended algorithm and limits on
+   * operations and memory that are suitable for most use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param mac The message authentication code.
@@ -1419,9 +1457,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password and a detached message authentication code, using {@link PasswordHash} for the
-   * key generation (with the currently recommended algorithm and limits on operations and memory that are suitable for
-   * most use-cases).
+   * Decrypt a message using a password and a detached message authentication code, using {@link
+   * PasswordHash} for the key generation (with the currently recommended algorithm and limits on
+   * operations and memory that are suitable for most use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param mac The message authentication code.
@@ -1440,8 +1478,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password and a detached message authentication code, using {@link PasswordHash} for the
-   * key generation (with limits on operations and memory that are suitable for most use-cases).
+   * Decrypt a message using a password and a detached message authentication code, using {@link
+   * PasswordHash} for the key generation (with limits on operations and memory that are suitable
+   * for most use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param mac The message authentication code.
@@ -1450,7 +1489,8 @@ public final class SecretBox {
    * @return The decrypted data, or {@code null} if verification failed.
    */
   @Nullable
-  public static Bytes decryptDetached(Bytes cipherText, Bytes mac, String password, PasswordHash.Algorithm algorithm) {
+  public static Bytes decryptDetached(
+      Bytes cipherText, Bytes mac, String password, PasswordHash.Algorithm algorithm) {
     return decryptDetached(
         cipherText,
         mac,
@@ -1461,8 +1501,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password and a detached message authentication code, using {@link PasswordHash} for the
-   * key generation (with limits on operations and memory that are suitable for most use-cases).
+   * Decrypt a message using a password and a detached message authentication code, using {@link
+   * PasswordHash} for the key generation (with limits on operations and memory that are suitable
+   * for most use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param mac The message authentication code.
@@ -1472,10 +1513,7 @@ public final class SecretBox {
    */
   @Nullable
   public static byte[] decryptDetached(
-      byte[] cipherText,
-      byte[] mac,
-      String password,
-      PasswordHash.Algorithm algorithm) {
+      byte[] cipherText, byte[] mac, String password, PasswordHash.Algorithm algorithm) {
     return decryptDetached(
         cipherText,
         mac,
@@ -1486,9 +1524,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password and a detached message authentication code, using {@link PasswordHash} for the
-   * key generation (with the currently recommended algorithm and limits on operations and memory that are suitable for
-   * interactive use-cases).
+   * Decrypt a message using a password and a detached message authentication code, using {@link
+   * PasswordHash} for the key generation (with the currently recommended algorithm and limits on
+   * operations and memory that are suitable for interactive use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param mac The message authentication code.
@@ -1507,9 +1545,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password and a detached message authentication code, using {@link PasswordHash} for the
-   * key generation (with the currently recommended algorithm and limits on operations and memory that are suitable for
-   * interactive use-cases).
+   * Decrypt a message using a password and a detached message authentication code, using {@link
+   * PasswordHash} for the key generation (with the currently recommended algorithm and limits on
+   * operations and memory that are suitable for interactive use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param mac The message authentication code.
@@ -1528,8 +1566,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password and a detached message authentication code, using {@link PasswordHash} for the
-   * key generation (with limits on operations and memory that are suitable for interactive use-cases).
+   * Decrypt a message using a password and a detached message authentication code, using {@link
+   * PasswordHash} for the key generation (with limits on operations and memory that are suitable
+   * for interactive use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param mac The message authentication code.
@@ -1539,10 +1578,7 @@ public final class SecretBox {
    */
   @Nullable
   public static Bytes decryptInteractiveDetached(
-      Bytes cipherText,
-      Bytes mac,
-      String password,
-      PasswordHash.Algorithm algorithm) {
+      Bytes cipherText, Bytes mac, String password, PasswordHash.Algorithm algorithm) {
     return decryptDetached(
         cipherText,
         mac,
@@ -1553,8 +1589,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password and a detached message authentication code, using {@link PasswordHash} for the
-   * key generation (with limits on operations and memory that are suitable for interactive use-cases).
+   * Decrypt a message using a password and a detached message authentication code, using {@link
+   * PasswordHash} for the key generation (with limits on operations and memory that are suitable
+   * for interactive use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param mac The message authentication code.
@@ -1564,10 +1601,7 @@ public final class SecretBox {
    */
   @Nullable
   public static byte[] decryptInteractiveDetached(
-      byte[] cipherText,
-      byte[] mac,
-      String password,
-      PasswordHash.Algorithm algorithm) {
+      byte[] cipherText, byte[] mac, String password, PasswordHash.Algorithm algorithm) {
     return decryptDetached(
         cipherText,
         mac,
@@ -1578,9 +1612,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password and a detached message authentication code, using {@link PasswordHash} for the
-   * key generation (with the currently recommended algorithm and limits on operations and memory that are suitable for
-   * sensitive use-cases).
+   * Decrypt a message using a password and a detached message authentication code, using {@link
+   * PasswordHash} for the key generation (with the currently recommended algorithm and limits on
+   * operations and memory that are suitable for sensitive use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param mac The message authentication code.
@@ -1599,9 +1633,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password and a detached message authentication code, using {@link PasswordHash} for the
-   * key generation (with the currently recommended algorithm and limits on operations and memory that are suitable for
-   * sensitive use-cases).
+   * Decrypt a message using a password and a detached message authentication code, using {@link
+   * PasswordHash} for the key generation (with the currently recommended algorithm and limits on
+   * operations and memory that are suitable for sensitive use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param mac The message authentication code.
@@ -1620,8 +1654,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password and a detached message authentication code, using {@link PasswordHash} for the
-   * key generation (with limits on operations and memory that are suitable for sensitive use-cases).
+   * Decrypt a message using a password and a detached message authentication code, using {@link
+   * PasswordHash} for the key generation (with limits on operations and memory that are suitable
+   * for sensitive use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param mac The message authentication code.
@@ -1631,10 +1666,7 @@ public final class SecretBox {
    */
   @Nullable
   public static Bytes decryptSensitiveDetached(
-      Bytes cipherText,
-      Bytes mac,
-      String password,
-      PasswordHash.Algorithm algorithm) {
+      Bytes cipherText, Bytes mac, String password, PasswordHash.Algorithm algorithm) {
     return decryptDetached(
         cipherText,
         mac,
@@ -1645,8 +1677,9 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password and a detached message authentication code, using {@link PasswordHash} for the
-   * key generation (with limits on operations and memory that are suitable for sensitive use-cases).
+   * Decrypt a message using a password and a detached message authentication code, using {@link
+   * PasswordHash} for the key generation (with limits on operations and memory that are suitable
+   * for sensitive use-cases).
    *
    * @param cipherText The cipher text to decrypt.
    * @param mac The message authentication code.
@@ -1656,10 +1689,7 @@ public final class SecretBox {
    */
   @Nullable
   public static byte[] decryptSensitiveDetached(
-      byte[] cipherText,
-      byte[] mac,
-      String password,
-      PasswordHash.Algorithm algorithm) {
+      byte[] cipherText, byte[] mac, String password, PasswordHash.Algorithm algorithm) {
     return decryptDetached(
         cipherText,
         mac,
@@ -1670,8 +1700,8 @@ public final class SecretBox {
   }
 
   /**
-   * Decrypt a message using a password and a detached message authentication code, using {@link PasswordHash} for the
-   * key generation.
+   * Decrypt a message using a password and a detached message authentication code, using {@link
+   * PasswordHash} for the key generation.
    *
    * @param cipherText The cipher text to decrypt.
    * @param mac The message authentication code.
@@ -1690,13 +1720,19 @@ public final class SecretBox {
       long memLimit,
       PasswordHash.Algorithm algorithm) {
     byte[] bytes =
-        decryptDetached(cipherText.toArrayUnsafe(), mac.toArrayUnsafe(), password, opsLimit, memLimit, algorithm);
+        decryptDetached(
+            cipherText.toArrayUnsafe(),
+            mac.toArrayUnsafe(),
+            password,
+            opsLimit,
+            memLimit,
+            algorithm);
     return (bytes != null) ? Bytes.wrap(bytes) : null;
   }
 
   /**
-   * Decrypt a message using a password and a detached message authentication code, using {@link PasswordHash} for the
-   * key generation.
+   * Decrypt a message using a password and a detached message authentication code, using {@link
+   * PasswordHash} for the key generation.
    *
    * @param cipherText The cipher text to decrypt.
    * @param mac The message authentication code.
@@ -1725,7 +1761,8 @@ public final class SecretBox {
     int noncebytes = Nonce.length();
     int macLength = macLength();
     if ((noncebytes + macLength) != mac.length) {
-      throw new IllegalArgumentException("mac must be " + (noncebytes + macLength) + " bytes, got " + mac.length);
+      throw new IllegalArgumentException(
+          "mac must be " + (noncebytes + macLength) + " bytes, got " + mac.length);
     }
 
     byte[] clearText = new byte[cipherText.length];
@@ -1735,8 +1772,8 @@ public final class SecretBox {
 
     int rc;
     try {
-      rc = Sodium
-          .crypto_secretbox_open_detached(
+      rc =
+          Sodium.crypto_secretbox_open_detached(
               clearText,
               cipherText,
               Arrays.copyOfRange(mac, noncebytes, mac.length),
@@ -1777,10 +1814,12 @@ public final class SecretBox {
             + PasswordHash.Salt.length()
             + ")";
     PasswordHash.Salt salt =
-        PasswordHash.Salt.fromBytes(Arrays.copyOfRange(nonce.bytesArray(), 0, PasswordHash.Salt.length()));
+        PasswordHash.Salt.fromBytes(
+            Arrays.copyOfRange(nonce.bytesArray(), 0, PasswordHash.Salt.length()));
     byte[] passwordBytes = password.getBytes(UTF_8);
     try {
-      byte[] keyBytes = PasswordHash.hash(passwordBytes, Key.length(), salt, opsLimit, memLimit, algorithm);
+      byte[] keyBytes =
+          PasswordHash.hash(passwordBytes, Key.length(), salt, opsLimit, memLimit, algorithm);
       try {
         return Key.fromBytes(keyBytes);
       } finally {

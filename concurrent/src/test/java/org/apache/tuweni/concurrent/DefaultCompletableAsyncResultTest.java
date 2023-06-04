@@ -70,10 +70,12 @@ class DefaultCompletableAsyncResultTest {
   @Test
   void suppliesAsyncResultWhenCompleted() throws Exception {
     CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
-    AsyncResult<String> asyncResult2 = asyncResult.then(value -> {
-      assertThat(value).isEqualTo("Completed1");
-      return AsyncResult.completed("Completed2");
-    });
+    AsyncResult<String> asyncResult2 =
+        asyncResult.then(
+            value -> {
+              assertThat(value).isEqualTo("Completed1");
+              return AsyncResult.completed("Completed2");
+            });
     assertThat(asyncResult2.isDone()).isFalse();
     asyncResult.complete("Completed1");
     assertThat(asyncResult2.isDone()).isTrue();
@@ -83,10 +85,13 @@ class DefaultCompletableAsyncResultTest {
   @Test
   void suppliesAsyncResultWhenCompletedSchedule(@VertxInstance Vertx vertx) throws Exception {
     CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
-    AsyncResult<String> asyncResult2 = asyncResult.thenSchedule(vertx, value -> {
-      assertThat(value).isEqualTo("Completed1");
-      return AsyncResult.completed("Completed2");
-    });
+    AsyncResult<String> asyncResult2 =
+        asyncResult.thenSchedule(
+            vertx,
+            value -> {
+              assertThat(value).isEqualTo("Completed1");
+              return AsyncResult.completed("Completed2");
+            });
     assertThat(asyncResult2.isDone()).isFalse();
     asyncResult.complete("Completed1");
     assertThat(asyncResult2.get()).isEqualTo("Completed2");
@@ -95,10 +100,12 @@ class DefaultCompletableAsyncResultTest {
   @Test
   void suppliesAsyncCompletionWhenCompletedCompose() throws Exception {
     CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
-    AsyncCompletion completion = asyncResult.thenCompose(value -> {
-      assertThat(value).isEqualTo("Completed1");
-      return AsyncCompletion.completed();
-    });
+    AsyncCompletion completion =
+        asyncResult.thenCompose(
+            value -> {
+              assertThat(value).isEqualTo("Completed1");
+              return AsyncCompletion.completed();
+            });
     asyncResult.complete("Completed1");
     assertThat(completion.isDone()).isTrue();
   }
@@ -110,9 +117,12 @@ class DefaultCompletableAsyncResultTest {
 
     AtomicReference<String> ref = new AtomicReference<>();
 
-    AsyncCompletion completion = asyncResult.thenAcceptBoth(asyncResult2, (value, value2) -> {
-      ref.set(value + value2);
-    });
+    AsyncCompletion completion =
+        asyncResult.thenAcceptBoth(
+            asyncResult2,
+            (value, value2) -> {
+              ref.set(value + value2);
+            });
     asyncResult.complete("Completed1");
     asyncResult2.complete("Completed2");
     assertThat(completion.isDone()).isTrue();
@@ -123,9 +133,11 @@ class DefaultCompletableAsyncResultTest {
   void accept() throws Exception {
     CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
     AtomicReference<Boolean> ref = new AtomicReference<>();
-    AsyncCompletion completion = asyncResult.accept((value, e) -> {
-      ref.set(true);
-    });
+    AsyncCompletion completion =
+        asyncResult.accept(
+            (value, e) -> {
+              ref.set(true);
+            });
     asyncResult.complete("Completed1");
     assertThat(completion.isDone()).isTrue();
     assertThat(ref.get()).isTrue();
@@ -183,7 +195,8 @@ class DefaultCompletableAsyncResultTest {
   @Test
   void thenScheduleBlockingApply(@VertxInstance Vertx vertx) throws Exception {
     CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
-    AsyncResult<String> completion = asyncResult.thenScheduleBlockingApply(vertx, (value) -> value + "foo");
+    AsyncResult<String> completion =
+        asyncResult.thenScheduleBlockingApply(vertx, (value) -> value + "foo");
     asyncResult.complete("Completed1");
     assertThat(completion.get()).isEqualTo("Completed1foo");
   }
@@ -192,7 +205,8 @@ class DefaultCompletableAsyncResultTest {
   void thenScheduleBlockingApplyWorker(@VertxInstance Vertx vertx) throws Exception {
     CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
     WorkerExecutor executor = vertx.createSharedWorkerExecutor("foo");
-    AsyncResult<String> completion = asyncResult.thenScheduleBlockingApply(executor, (value) -> value + "foo");
+    AsyncResult<String> completion =
+        asyncResult.thenScheduleBlockingApply(executor, (value) -> value + "foo");
     asyncResult.complete("Completed1");
     assertThat(completion.get()).isEqualTo("Completed1foo");
   }
@@ -201,7 +215,8 @@ class DefaultCompletableAsyncResultTest {
   void completesExceptionallyWhenSuppliedResultCompletesExceptionally() throws Exception {
     Exception exception = new RuntimeException();
     CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
-    AsyncResult<String> asyncResult2 = asyncResult.then(value -> AsyncResult.exceptional(exception));
+    AsyncResult<String> asyncResult2 =
+        asyncResult.then(value -> AsyncResult.exceptional(exception));
     assertThat(asyncResult2.isDone()).isFalse();
     asyncResult.complete("Complete");
     assertThat(asyncResult2.isDone()).isTrue();
@@ -212,9 +227,11 @@ class DefaultCompletableAsyncResultTest {
   void completesExceptionallyWhenSupplierThrows() throws Exception {
     RuntimeException exception = new RuntimeException();
     CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
-    AsyncResult<String> asyncResult2 = asyncResult.then(value -> {
-      throw exception;
-    });
+    AsyncResult<String> asyncResult2 =
+        asyncResult.then(
+            value -> {
+              throw exception;
+            });
     assertThat(asyncResult2.isDone()).isFalse();
     asyncResult.complete("Complete");
     assertThat(asyncResult2.isDone()).isTrue();
@@ -225,10 +242,12 @@ class DefaultCompletableAsyncResultTest {
   void doesntInvokeSupplierIfCompletingExceptionally() throws Exception {
     RuntimeException exception = new RuntimeException();
     CompletableAsyncResult<String> asyncResult = AsyncResult.incomplete();
-    AsyncResult<String> asyncResult2 = asyncResult.then(value -> {
-      fail("should not be invoked");
-      throw new RuntimeException();
-    });
+    AsyncResult<String> asyncResult2 =
+        asyncResult.then(
+            value -> {
+              fail("should not be invoked");
+              throw new RuntimeException();
+            });
     assertThat(asyncResult2.isDone()).isFalse();
     asyncResult.completeExceptionally(exception);
     assertThat(asyncResult2.isDone()).isTrue();
@@ -305,7 +324,6 @@ class DefaultCompletableAsyncResultTest {
     assertThat(completedThrowable.get()).isInstanceOf(CancellationException.class);
   }
 
-
   @Test
   void testExecutingBlocking() throws InterruptedException {
     AsyncResult<String> result = AsyncResult.executeBlocking(() -> "foo");
@@ -320,7 +338,8 @@ class DefaultCompletableAsyncResultTest {
 
   @Test
   void testRunOnContext(@VertxInstance Vertx vertx) throws InterruptedException {
-    AsyncResult<String> result = AsyncResult.runOnContext(vertx, () -> AsyncResult.completed("foo"));
+    AsyncResult<String> result =
+        AsyncResult.runOnContext(vertx, () -> AsyncResult.completed("foo"));
     assertEquals("foo", result.get());
   }
 
@@ -341,11 +360,13 @@ class DefaultCompletableAsyncResultTest {
 
   @Test
   void testRunOnContextWithCompletion(@VertxInstance Vertx vertx) throws InterruptedException {
-    AsyncResult<String> result = AsyncResult.runOnContext(vertx, () -> AsyncResult.completed("foo"));
+    AsyncResult<String> result =
+        AsyncResult.runOnContext(vertx, () -> AsyncResult.completed("foo"));
     assertEquals("foo", result.get());
   }
 
-  private void assertCompletedWithException(AsyncResult<?> asyncResult, Exception exception) throws Exception {
+  private void assertCompletedWithException(AsyncResult<?> asyncResult, Exception exception)
+      throws Exception {
     try {
       asyncResult.get();
       fail("Expected exception not thrown");
@@ -354,7 +375,8 @@ class DefaultCompletableAsyncResultTest {
     }
   }
 
-  private void assertCompletedWithException(AsyncCompletion completion, Exception exception) throws Exception {
+  private void assertCompletedWithException(AsyncCompletion completion, Exception exception)
+      throws Exception {
     try {
       completion.join();
       fail("Expected exception not thrown");

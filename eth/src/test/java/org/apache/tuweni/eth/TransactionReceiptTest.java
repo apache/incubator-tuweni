@@ -21,8 +21,8 @@ class TransactionReceiptTest {
 
   @Test
   void testRLPRoundtrip() {
-    List<Log> logs = Collections
-        .singletonList(
+    List<Log> logs =
+        Collections.singletonList(
             new Log(
                 Address.fromBytes(Bytes.random(20)),
                 Bytes.of(1, 2, 3),
@@ -30,7 +30,8 @@ class TransactionReceiptTest {
 
     LogsBloomFilter filter = LogsBloomFilter.compute(logs);
 
-    TransactionReceipt transactionReceipt = new TransactionReceipt(Bytes32.random(), 2, filter, logs);
+    TransactionReceipt transactionReceipt =
+        new TransactionReceipt(Bytes32.random(), 2, filter, logs);
     Bytes rlp = RLP.encode(transactionReceipt::writeTo);
     TransactionReceipt read = RLP.decode(rlp, TransactionReceipt::readFrom);
     assertEquals(transactionReceipt, read);
@@ -38,8 +39,8 @@ class TransactionReceiptTest {
 
   @Test
   void testRLPRoundtripWithStatus() {
-    List<Log> logs = Arrays
-        .asList(
+    List<Log> logs =
+        Arrays.asList(
             new Log(
                 Address.fromBytes(Bytes.random(20)),
                 Bytes.of(1, 2, 3),

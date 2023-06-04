@@ -23,12 +23,12 @@ internal class LocalIdentityTest {
   @Test
   fun localIdentityInvalidPort() {
     Assertions.assertThrows(
-      IllegalArgumentException::class.java
+      IllegalArgumentException::class.java,
     ) {
       LocalIdentity(
         "0.0.0.0",
         450000,
-        Identity.random()
+        Identity.random(),
       )
     }
   }

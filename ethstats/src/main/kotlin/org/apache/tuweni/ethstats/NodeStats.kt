@@ -12,5 +12,5 @@ data class NodeStats(
   val hashrate: Int,
   val peers: Int,
   val gasPrice: Int,
-  val uptime: Int
+  val uptime: Int,
 )

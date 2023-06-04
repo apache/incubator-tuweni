@@ -20,8 +20,8 @@ class EthSubprotocol(
   private val repository: BlockchainRepository,
   private val pendingTransactionsPool: TransactionPool,
   private val selectionStrategy:
-    (WireConnectionRepository) -> ConnectionSelectionStrategy = ::RandomConnectionSelectionStrategy,
-  private val listener: (WireConnection, Status) -> Unit = { _, _ -> }
+  (WireConnectionRepository) -> ConnectionSelectionStrategy = ::RandomConnectionSelectionStrategy,
+  private val listener: (WireConnection, Status) -> Unit = { _, _ -> },
 ) : SubProtocol {
 
   companion object {
@@ -58,7 +58,7 @@ class EthSubprotocol(
       return EthClient66(
         service,
         pendingTransactionsPool,
-        selectionStrategy(service.repository())
+        selectionStrategy(service.repository()),
       )
     } else {
       return EthClient(service, pendingTransactionsPool, selectionStrategy(service.repository()))

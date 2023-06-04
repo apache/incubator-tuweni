@@ -31,7 +31,7 @@ class JSONRPCConfig(val filePath: Path? = null) {
         "basicAuth",
         false,
         "Whether the JSON-RPC server should authenticate incoming requests with HTTP Basic Authentication",
-        null
+        null,
       )
       .addString("basicAuthUsername", "", "HTTP Basic Auth username", null)
       .addString("basicAuthPassword", "", "HTTP Basic Auth password", null)
@@ -51,10 +51,10 @@ class JSONRPCConfig(val filePath: Path? = null) {
           "eth_getBlockByHash",
           "eth_getTransactionReceipt",
           "eth_getTransactionByHash",
-          "eth_getLogs"
+          "eth_getLogs",
         ),
         "Cached JSON-RPC methods",
-        null
+        null,
       )
       .addBoolean("cacheEnabled", true, "Enable caching", null)
       .addString("cacheStoragePath", "", "Location of cache storage", null)

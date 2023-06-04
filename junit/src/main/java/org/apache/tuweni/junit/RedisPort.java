@@ -7,11 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * A parameter annotation for injecting the running Redis server port into junit5 tests.
- */
+/** A parameter annotation for injecting the running Redis server port into junit5 tests. */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RedisPort {
-
-}
+public @interface RedisPort {}

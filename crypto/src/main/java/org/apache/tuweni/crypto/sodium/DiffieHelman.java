@@ -11,19 +11,18 @@ import jnr.ffi.Pointer;
 
 /**
  * Sodium provides an API to perform scalar multiplication of elliptic curve points.
- * <p>
- * This can be used as a building block to construct key exchange mechanisms, or more generally to compute a public key
- * from a secret key.
- * <p>
- * On current libsodium versions, you generally want to use the crypto_kx API for key exchange instead.
- * 
+ *
+ * <p>This can be used as a building block to construct key exchange mechanisms, or more generally
+ * to compute a public key from a secret key.
+ *
+ * <p>On current libsodium versions, you generally want to use the crypto_kx API for key exchange
+ * instead.
+ *
  * @see KeyExchange
  */
 public final class DiffieHelman {
 
-  /**
-   * A Diffie-Helman public key.
-   */
+  /** A Diffie-Helman public key. */
   public static final class PublicKey {
     final Allocated value;
 
@@ -54,8 +53,7 @@ public final class DiffieHelman {
     /**
      * Create a {@link PublicKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the public key.
      * @return A public key.
@@ -67,8 +65,7 @@ public final class DiffieHelman {
     /**
      * Create a {@link PublicKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the public key.
      * @return A public key.
@@ -113,7 +110,7 @@ public final class DiffieHelman {
 
     /**
      * Provides the bytes of this key
-     * 
+     *
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -122,7 +119,7 @@ public final class DiffieHelman {
 
     /**
      * Provides the bytes of this key
-     * 
+     *
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {
@@ -130,9 +127,7 @@ public final class DiffieHelman {
     }
   }
 
-  /**
-   * A Diffie-Helman secret key.
-   */
+  /** A Diffie-Helman secret key. */
   public static final class SecretKey implements Destroyable {
     final Allocated value;
 
@@ -173,8 +168,7 @@ public final class DiffieHelman {
     /**
      * Create a {@link SecretKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the secret key.
      * @return A secret key.
@@ -186,8 +180,7 @@ public final class DiffieHelman {
     /**
      * Create a {@link SecretKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the secret key.
      * @return A secret key.
@@ -195,7 +188,10 @@ public final class DiffieHelman {
     public static SecretKey fromBytes(byte[] bytes) {
       if (bytes.length != Sodium.crypto_scalarmult_scalarbytes()) {
         throw new IllegalArgumentException(
-            "key must be " + Sodium.crypto_scalarmult_scalarbytes() + " bytes, got " + bytes.length);
+            "key must be "
+                + Sodium.crypto_scalarmult_scalarbytes()
+                + " bytes, got "
+                + bytes.length);
       }
       return Sodium.dup(bytes, SecretKey::new);
     }
@@ -233,7 +229,7 @@ public final class DiffieHelman {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory.
+     * <p>WARNING: This will cause the key to be copied into heap memory.
      *
      * @return The bytes of this key.
      */
@@ -244,8 +240,8 @@ public final class DiffieHelman {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory. The returned array should be overwritten when no
-     * longer required.
+     * <p>WARNING: This will cause the key to be copied into heap memory. The returned array should
+     * be overwritten when no longer required.
      *
      * @return The bytes of this key.
      */
@@ -254,9 +250,7 @@ public final class DiffieHelman {
     }
   }
 
-  /**
-   * A Diffie-Helman key pair.
-   */
+  /** A Diffie-Helman key pair. */
   public static final class KeyPair {
 
     private final PublicKey publicKey;
@@ -283,14 +277,20 @@ public final class DiffieHelman {
       if (secretKey.isDestroyed()) {
         throw new IllegalStateException("SecretKey has been destroyed");
       }
-      return Sodium.scalarMultBase(secretKey.value.pointer(), SecretKey.length(), (ptr, len) -> {
-        int publicKeyLength = PublicKey.length();
-        if (len != publicKeyLength) {
-          throw new IllegalStateException(
-              "Public key length " + publicKeyLength + " is not same as generated key length " + len);
-        }
-        return new KeyPair(new PublicKey(ptr, publicKeyLength), secretKey);
-      });
+      return Sodium.scalarMultBase(
+          secretKey.value.pointer(),
+          SecretKey.length(),
+          (ptr, len) -> {
+            int publicKeyLength = PublicKey.length();
+            if (len != publicKeyLength) {
+              throw new IllegalStateException(
+                  "Public key length "
+                      + publicKeyLength
+                      + " is not same as generated key length "
+                      + len);
+            }
+            return new KeyPair(new PublicKey(ptr, publicKeyLength), secretKey);
+          });
     }
 
     /**
@@ -299,12 +299,13 @@ public final class DiffieHelman {
      * @return A randomly generated key pair.
      */
     public static KeyPair random() {
-      return Sodium.randomBytes(SecretKey.length(), (ptr, len) -> forSecretKey(new SecretKey(ptr, len)));
+      return Sodium.randomBytes(
+          SecretKey.length(), (ptr, len) -> forSecretKey(new SecretKey(ptr, len)));
     }
 
     /**
      * Provides the public key
-     * 
+     *
      * @return The public key of the key pair.
      */
     public PublicKey publicKey() {
@@ -313,7 +314,7 @@ public final class DiffieHelman {
 
     /**
      * Provides the secret key
-     * 
+     *
      * @return The secret key of the key pair.
      */
     public SecretKey secretKey() {
@@ -338,9 +339,7 @@ public final class DiffieHelman {
     }
   }
 
-  /**
-   * A Diffie-Helman shared secret.
-   */
+  /** A Diffie-Helman shared secret. */
   public static final class Secret implements Destroyable {
     final Allocated value;
 
@@ -369,27 +368,25 @@ public final class DiffieHelman {
       if (secretKey.isDestroyed()) {
         throw new IllegalStateException("SecretKey has been destroyed");
       }
-      return Sodium
-          .scalarMult(
-              secretKey.value.pointer(),
-              secretKey.value.length(),
-              publicKey.value.pointer(),
-              publicKey.value.length(),
-              (ptr, len) -> {
-                int secretLength = Secret.length();
-                if (len != secretLength) {
-                  throw new IllegalStateException(
-                      "Secret length " + secretLength + " is not same as generated key length " + len);
-                }
-                return new Secret(ptr, secretLength);
-              });
+      return Sodium.scalarMult(
+          secretKey.value.pointer(),
+          secretKey.value.length(),
+          publicKey.value.pointer(),
+          publicKey.value.length(),
+          (ptr, len) -> {
+            int secretLength = Secret.length();
+            if (len != secretLength) {
+              throw new IllegalStateException(
+                  "Secret length " + secretLength + " is not same as generated key length " + len);
+            }
+            return new Secret(ptr, secretLength);
+          });
     }
 
     /**
      * Create a {@link Secret} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the secret key.
      * @return A secret key.
@@ -401,8 +398,7 @@ public final class DiffieHelman {
     /**
      * Create a {@link Secret} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the secret key.
      * @return A secret key.
@@ -447,7 +443,7 @@ public final class DiffieHelman {
 
     /**
      * Provides the bytes of this key.
-     * 
+     *
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -456,7 +452,7 @@ public final class DiffieHelman {
 
     /**
      * Provides the bytes of this key.
-     * 
+     *
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {

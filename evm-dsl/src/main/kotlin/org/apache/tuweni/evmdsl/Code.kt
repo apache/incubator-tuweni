@@ -32,7 +32,7 @@ class Code(val instructions: List<Instruction>) {
             this.add(model.creator(codeBytes, index))
             index += model.additionalBytesToRead
           }
-        }
+        },
       )
     }
 
@@ -104,7 +104,7 @@ class Code(val instructions: List<Instruction>) {
 enum class Error {
   STACK_UNDERFLOW,
   STACK_OVERFLOW,
-  HIT_INVALID_OPCODE
+  HIT_INVALID_OPCODE,
 }
 
 data class CodeValidationError(val instruction: Instruction, val index: Int, val error: Error)

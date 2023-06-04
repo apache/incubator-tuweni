@@ -36,7 +36,7 @@ class RelayerApp(val vertx: Vertx, val relayer: Relayer) {
       Runtime.getRuntime().addShutdownHook(
         Thread {
           app.close()
-        }
+        },
       )
       runBlocking {
         relayer.start()

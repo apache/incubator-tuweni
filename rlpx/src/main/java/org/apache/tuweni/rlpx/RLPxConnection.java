@@ -25,20 +25,20 @@ import org.xerial.snappy.Snappy;
 
 /**
  * Connection between 2 peers over the RLPx protocol.
- * <p>
- * The RLPx protocol creates a exchange of unique secrets during an initial handshake. The peers proceed to communicate
- * using the shared secrets.
- * <p>
- * This connection allows encrypting and decrypting messages with a remote peer.
+ *
+ * <p>The RLPx protocol creates a exchange of unique secrets during an initial handshake. The peers
+ * proceed to communicate using the shared secrets.
+ *
+ * <p>This connection allows encrypting and decrypting messages with a remote peer.
  */
 public final class RLPxConnection {
 
-  private final static Logger logger = LoggerFactory.getLogger(RLPxConnection.class);
+  private static final Logger logger = LoggerFactory.getLogger(RLPxConnection.class);
 
   /**
    * Checks if two RLPx connections represent both ends of a connection.
-   * <p>
-   * Used for testing.
+   *
+   * <p>Used for testing.
    *
    * @param one one RLPx connection
    * @param other an other RLPx connection
@@ -108,7 +108,7 @@ public final class RLPxConnection {
 
   /**
    * Provides the local public key
-   * 
+   *
    * @return our public key associated with this connection
    */
   public SECP256K1.PublicKey publicKey() {
@@ -117,7 +117,7 @@ public final class RLPxConnection {
 
   /**
    * Provides the peer public key
-   * 
+   *
    * @return the public key of the peer associated with this connection
    */
   public SECP256K1.PublicKey peerPublicKey() {
@@ -153,7 +153,8 @@ public final class RLPxConnection {
       Bytes headerBytes = messageFrame.slice(0, 16);
 
       Bytes decryptedHeader = Bytes.wrap(new byte[16]);
-      decryptionCipher.processBytes(headerBytes.toArrayUnsafe(), 0, 16, decryptedHeader.toArrayUnsafe(), 0);
+      decryptionCipher.processBytes(
+          headerBytes.toArrayUnsafe(), 0, 16, decryptedHeader.toArrayUnsafe(), 0);
       frameSize = decryptedHeader.get(0) & 0xff;
       frameSize = (frameSize << 8) + (decryptedHeader.get(1) & 0xff);
       frameSize = (frameSize << 8) + (decryptedHeader.get(2) & 0xff);
@@ -162,11 +163,9 @@ public final class RLPxConnection {
 
       if (!macBytes.equals(expectedMac)) {
         throw new InvalidMACException(
-            String
-                .format(
-                    "Header MAC did not match expected MAC; expected: %s, received: %s",
-                    expectedMac.toHexString(),
-                    macBytes.toHexString()));
+            String.format(
+                "Header MAC did not match expected MAC; expected: %s, received: %s",
+                expectedMac.toHexString(), macBytes.toHexString()));
       }
     }
     int pad = frameSize % 16 == 0 ? 0 : 16 - frameSize % 16;
@@ -177,27 +176,24 @@ public final class RLPxConnection {
       lastFrameSize = null;
     }
 
-
-
     Bytes frameData = messageFrame.slice(32, frameSize + pad);
     Bytes frameMac = messageFrame.slice(32 + frameSize + pad, 16);
 
     Bytes newFrameMac = Bytes.wrap(new byte[16]);
     Bytes frameMacSeed = updateIngress(messageFrame.slice(32, frameSize + pad));
-    macEncryptionEngine.processBlock(frameMacSeed.toArrayUnsafe(), 0, newFrameMac.toArrayUnsafe(), 0);
+    macEncryptionEngine.processBlock(
+        frameMacSeed.toArrayUnsafe(), 0, newFrameMac.toArrayUnsafe(), 0);
     Bytes expectedFrameMac = updateIngress(newFrameMac.xor(frameMacSeed.slice(0, 16))).slice(0, 16);
     if (!expectedFrameMac.equals(frameMac)) {
       throw new InvalidMACException(
-          String
-              .format(
-                  "Frame MAC did not match expected MAC; expected: %s, received: %s",
-                  expectedFrameMac.toHexString(),
-                  frameMac.toHexString()));
+          String.format(
+              "Frame MAC did not match expected MAC; expected: %s, received: %s",
+              expectedFrameMac.toHexString(), frameMac.toHexString()));
     }
 
     Bytes decryptedFrameData = Bytes.wrap(new byte[frameData.size()]);
-    decryptionCipher
-        .processBytes(frameData.toArrayUnsafe(), 0, frameData.size(), decryptedFrameData.toArrayUnsafe(), 0);
+    decryptionCipher.processBytes(
+        frameData.toArrayUnsafe(), 0, frameData.size(), decryptedFrameData.toArrayUnsafe(), 0);
 
     int messageType = RLP.decodeInt(decryptedFrameData.slice(0, 1));
 
@@ -214,7 +210,8 @@ public final class RLPxConnection {
   }
 
   /**
-   * Frames a message for sending to an RLPx peer, encrypting it and calculating the appropriate MACs.
+   * Frames a message for sending to an RLPx peer, encrypting it and calculating the appropriate
+   * MACs.
    *
    * @param message The message to frame.
    * @return The framed message, as byte buffer.
@@ -239,47 +236,50 @@ public final class RLPxConnection {
     frameSizeBytes.set(0, (byte) ((frameSize >> 16) & 0xff));
     frameSizeBytes.set(1, (byte) ((frameSize >> 8) & 0xff));
     frameSizeBytes.set(2, (byte) (frameSize & 0xff));
-    Bytes protocolHeader = RLP.encodeList(writer -> {
-      writer.writeValue(Bytes.EMPTY);
-      writer.writeValue(Bytes.EMPTY);
-    });
+    Bytes protocolHeader =
+        RLP.encodeList(
+            writer -> {
+              writer.writeValue(Bytes.EMPTY);
+              writer.writeValue(Bytes.EMPTY);
+            });
     byte[] zeros = new byte[16 - frameSizeBytes.size() - protocolHeader.size()];
     Arrays.fill(zeros, (byte) 0x00);
     Bytes headerBytes = Bytes.concatenate(frameSizeBytes, protocolHeader, Bytes.wrap(zeros));
     Bytes encryptedHeaderBytes = Bytes.wrap(new byte[16]);
-    encryptionCipher.processBytes(headerBytes.toArrayUnsafe(), 0, 16, encryptedHeaderBytes.toArrayUnsafe(), 0);
+    encryptionCipher.processBytes(
+        headerBytes.toArrayUnsafe(), 0, 16, encryptedHeaderBytes.toArrayUnsafe(), 0);
     Bytes headerMac = calculateMac(encryptedHeaderBytes, false);
 
     Bytes idBytes = RLP.encodeInt(message.messageId());
     assert idBytes.size() == 1;
 
     Bytes encryptedPayload = Bytes.wrap(new byte[idBytes.size() + messageData.size() + pad]);
-    encryptionCipher
-        .processBytes(
-            Bytes.concatenate(idBytes, messageData, Bytes.wrap(new byte[pad])).toArrayUnsafe(),
-            0,
-            encryptedPayload.size(),
-            encryptedPayload.toArrayUnsafe(),
-            0);
+    encryptionCipher.processBytes(
+        Bytes.concatenate(idBytes, messageData, Bytes.wrap(new byte[pad])).toArrayUnsafe(),
+        0,
+        encryptedPayload.size(),
+        encryptedPayload.toArrayUnsafe(),
+        0);
 
     // Calculate the frame MAC.
     Bytes payloadMacSeed = updateEgress(encryptedPayload).slice(0, 16);
     Bytes payloadMac = Bytes.wrap(new byte[16]);
-    macEncryptionEngine.processBlock(payloadMacSeed.toArrayUnsafe(), 0, payloadMac.toArrayUnsafe(), 0);
+    macEncryptionEngine.processBlock(
+        payloadMacSeed.toArrayUnsafe(), 0, payloadMac.toArrayUnsafe(), 0);
     payloadMac = updateEgress(payloadMacSeed.xor(payloadMac)).slice(0, 16);
 
-    Bytes finalBytes = Bytes.concatenate(encryptedHeaderBytes, headerMac, encryptedPayload, payloadMac);
+    Bytes finalBytes =
+        Bytes.concatenate(encryptedHeaderBytes, headerMac, encryptedPayload, payloadMac);
     return finalBytes;
   }
 
   private Bytes calculateMac(Bytes input, boolean ingress) {
     Bytes mac = Bytes.wrap(new byte[16]);
-    macEncryptionEngine
-        .processBlock(
-            snapshot(ingress ? ingressMac : egressMac).slice(0, 16).toArrayUnsafe(),
-            0,
-            mac.toArrayUnsafe(),
-            0);
+    macEncryptionEngine.processBlock(
+        snapshot(ingress ? ingressMac : egressMac).slice(0, 16).toArrayUnsafe(),
+        0,
+        mac.toArrayUnsafe(),
+        0);
     mac = mac.xor(input);
     if (ingress) {
       mac = updateIngress(mac).slice(0, 16);
@@ -317,7 +317,11 @@ public final class RLPxConnection {
 
   @Override
   public int hashCode() {
-    return Objects
-        .hash(Objects.hashCode(aesSecret), Objects.hashCode(macSecret), Objects.hashCode(token), egressMac, ingressMac);
+    return Objects.hash(
+        Objects.hashCode(aesSecret),
+        Objects.hashCode(macSecret),
+        Objects.hashCode(token),
+        egressMac,
+        ingressMac);
   }
 }

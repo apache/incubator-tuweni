@@ -25,15 +25,16 @@ class PropertyValidatorTest {
     assertTrue(whenOutOfRange.get(0).getMessage().contains("is outside range"));
   }
 
-
   @Test
   void validatesAllElementsInList() {
-    PropertyValidator<List<Integer>> allInList = PropertyValidator.allInList(PropertyValidator.inRange(1, 5));
+    PropertyValidator<List<Integer>> allInList =
+        PropertyValidator.allInList(PropertyValidator.inRange(1, 5));
     assertTrue(allInList.validate("foo", null, Arrays.asList(1, 2, 3, 4)).isEmpty());
     List<ConfigurationError> oneError = allInList.validate("foo", null, Arrays.asList(1, 10, 3, 4));
     assertEquals(1, oneError.size());
     assertTrue(oneError.get(0).getMessage().contains("is outside range"));
-    List<ConfigurationError> twoErrors = allInList.validate("foo", null, Arrays.asList(1, 10, 30, 4));
+    List<ConfigurationError> twoErrors =
+        allInList.validate("foo", null, Arrays.asList(1, 10, 30, 4));
     assertEquals(2, twoErrors.size());
     assertTrue(twoErrors.get(0).getMessage().contains("is outside range"));
     assertTrue(twoErrors.get(1).getMessage().contains("is outside range"));
@@ -57,19 +58,24 @@ class PropertyValidatorTest {
     assertEquals(1, inSetValidator.validate("foo", null, "three").size());
     List<ConfigurationError> errors = inSetValidator.validate("foo", null, "foobar");
     assertEquals(1, errors.size());
-    assertEquals("Value of property 'foo' should be \"one\", \"two\", or \"three \"", errors.get(0).getMessage());
+    assertEquals(
+        "Value of property 'foo' should be \"one\", \"two\", or \"three \"",
+        errors.get(0).getMessage());
   }
 
   @Test
   void validatesInSetIgnoreCase() {
-    PropertyValidator<String> inSetValidator = PropertyValidator.anyOfIgnoreCase("one", "two", "three ");
+    PropertyValidator<String> inSetValidator =
+        PropertyValidator.anyOfIgnoreCase("one", "two", "three ");
     assertTrue(inSetValidator.validate("foo", null, "OnE").isEmpty());
     assertTrue(inSetValidator.validate("foo", null, "TWo").isEmpty());
     assertTrue(inSetValidator.validate("foo", null, "THree ").isEmpty());
     assertEquals(1, inSetValidator.validate("foo", null, "three").size());
     List<ConfigurationError> errors = inSetValidator.validate("foo", null, "foobar");
     assertEquals(1, errors.size());
-    assertEquals("Value of property 'foo' should be \"one\", \"two\", or \"three \"", errors.get(0).getMessage());
+    assertEquals(
+        "Value of property 'foo' should be \"one\", \"two\", or \"three \"",
+        errors.get(0).getMessage());
   }
 
   @Test

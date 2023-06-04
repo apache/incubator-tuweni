@@ -65,7 +65,7 @@ object DownloaderApp {
       }
       val vertx = Vertx.vertx(VertxOptions().setWorkerPoolSize(config.numberOfThreads()))
       val pool = Executors.newFixedThreadPool(
-        config.numberOfThreads()
+        config.numberOfThreads(),
       ) {
         val thread = Thread("downloader")
         thread.isDaemon = true

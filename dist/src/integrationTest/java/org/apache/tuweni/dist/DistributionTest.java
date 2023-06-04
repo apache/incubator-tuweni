@@ -18,21 +18,22 @@ import java.util.zip.ZipFile;
 
 import org.junit.jupiter.api.Test;
 
-/**
- * Tests no duplicate entries are present in the distribution zip file.
- */
+/** Tests no duplicate entries are present in the distribution zip file. */
 class DistributionTest {
 
   private static Path distributionsFolder() {
     File currentFile = null;
     try {
-      currentFile = new File(DistributionTest.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+      currentFile =
+          new File(
+              DistributionTest.class.getProtectionDomain().getCodeSource().getLocation().toURI());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
     // dist/build/classes/java/org/apache/tuweni/dist
     Path parentFolder = currentFile.toPath();
-    while (!"dist".equals(parentFolder.getFileName().toString()) && parentFolder.getParent() != null) {
+    while (!"dist".equals(parentFolder.getFileName().toString())
+        && parentFolder.getParent() != null) {
       parentFolder = parentFolder.getParent();
     }
     return parentFolder.resolve("build").resolve("distributions").toAbsolutePath();
@@ -61,7 +62,6 @@ class DistributionTest {
             }
           }
         }
-
       }
     }
     assertTrue(foundOneZipFile);

@@ -42,45 +42,52 @@ class MerklePatriciaTriePerformanceTest {
     ExecutorService threadPool = Executors.newFixedThreadPool(16);
 
     Map<Bytes32, Bytes> storage = new ConcurrentHashMap<>();
-    AsyncMerkleStorage merkleStorage = new AsyncMerkleStorage() {
-      @Override
-      public @NotNull AsyncResult<Bytes> getAsync(@NotNull Bytes32 hash) {
-        return AsyncResult.completed(storage.get(hash));
-      }
+    AsyncMerkleStorage merkleStorage =
+        new AsyncMerkleStorage() {
+          @Override
+          public @NotNull AsyncResult<Bytes> getAsync(@NotNull Bytes32 hash) {
+            return AsyncResult.completed(storage.get(hash));
+          }
 
-      @Override
-      public @NotNull AsyncCompletion putAsync(@NotNull Bytes32 hash, @NotNull Bytes content) {
-        CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
-        threadPool.submit(() -> {
-          storage.put(hash, content);
-          completion.complete();
-        });
-        return completion;
-      }
-    };
+          @Override
+          public @NotNull AsyncCompletion putAsync(@NotNull Bytes32 hash, @NotNull Bytes content) {
+            CompletableAsyncCompletion completion = AsyncCompletion.incomplete();
+            threadPool.submit(
+                () -> {
+                  storage.put(hash, content);
+                  completion.complete();
+                });
+            return completion;
+          }
+        };
 
     StoredMerklePatriciaTrie<String> trie = StoredMerklePatriciaTrie.storingStrings(merkleStorage);
     List<Bytes> allKeys = new ArrayList<>();
     long beforeInsertion = System.nanoTime();
-    AsyncCompletion.allOf(IntStream.range(0, 1000000).mapToObj(i -> {
-      Bytes key = createRandomBytes();
-      allKeys.add(key);
-      AsyncCompletion completion = trie.putAsync(key, UUID.randomUUID().toString());
-      if (i % 1000 == 0) {
-        return completion
-            .thenRun(
-                () -> System.out
-                    .println(
-                        String.format("%020d", (System.nanoTime() - beforeInsertion) / 1000)
-                            + " ms Record #"
-                            + i
-                            + " ingested"));
-      } else {
-        return completion;
-      }
-    })).join(2, TimeUnit.MINUTES);
+    AsyncCompletion.allOf(
+            IntStream.range(0, 1000000)
+                .mapToObj(
+                    i -> {
+                      Bytes key = createRandomBytes();
+                      allKeys.add(key);
+                      AsyncCompletion completion = trie.putAsync(key, UUID.randomUUID().toString());
+                      if (i % 1000 == 0) {
+                        return completion.thenRun(
+                            () ->
+                                System.out.println(
+                                    String.format(
+                                            "%020d", (System.nanoTime() - beforeInsertion) / 1000)
+                                        + " ms Record #"
+                                        + i
+                                        + " ingested"));
+                      } else {
+                        return completion;
+                      }
+                    }))
+        .join(2, TimeUnit.MINUTES);
     long afterInsertion = System.nanoTime();
-    System.out.println("Insertion of records done in " + (afterInsertion - beforeInsertion) + " ns");
+    System.out.println(
+        "Insertion of records done in " + (afterInsertion - beforeInsertion) + " ns");
 
     long recordsRead = System.nanoTime();
 

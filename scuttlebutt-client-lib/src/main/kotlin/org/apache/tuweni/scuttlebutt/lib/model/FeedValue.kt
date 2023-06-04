@@ -23,7 +23,7 @@ class FeedValue(
   val sequence: Long,
   val timestamp: Long,
   val hash: String,
-  private val content: JsonNode
+  private val content: JsonNode,
 ) {
 
   companion object {

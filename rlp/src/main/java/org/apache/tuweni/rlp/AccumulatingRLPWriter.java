@@ -60,7 +60,8 @@ final class AccumulatingRLPWriter implements RLPWriter {
       try {
         totalSize = Math.addExact(totalSize, value.length);
       } catch (ArithmeticException e) {
-        throw new IllegalArgumentException("Combined length of values is too long (> Integer.MAX_VALUE)");
+        throw new IllegalArgumentException(
+            "Combined length of values is too long (> Integer.MAX_VALUE)");
       }
     }
     appendBytes(encodeLength(totalSize, 0xc0));

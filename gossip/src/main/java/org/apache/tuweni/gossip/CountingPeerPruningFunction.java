@@ -9,13 +9,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-/**
- * Function counting the number of times a peer showed.
- */
+/** Function counting the number of times a peer showed. */
 final class CountingPeerPruningFunction implements PeerPruning {
 
   private final int numberOfOccurrences;
-  private final Map<Peer, Integer> countingOccurrences = Collections.synchronizedMap(new WeakHashMap<>());
+  private final Map<Peer, Integer> countingOccurrences =
+      Collections.synchronizedMap(new WeakHashMap<>());
 
   public CountingPeerPruningFunction(int numberOfOccurrences) {
     this.numberOfOccurrences = numberOfOccurrences;

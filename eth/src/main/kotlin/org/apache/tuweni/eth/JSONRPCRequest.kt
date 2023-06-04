@@ -15,7 +15,7 @@ data class JSONRPCRequest constructor(
   @JsonProperty("id") val id: StringOrLong,
   @JsonProperty("method") val method: String,
   @JsonProperty("params") val params: Array<Any>,
-  @JsonProperty("jsonrpc") val jsonrpc: String = "2.0"
+  @JsonProperty("jsonrpc") val jsonrpc: String = "2.0",
 ) {
 
   companion object {
@@ -36,7 +36,7 @@ data class JSONRPCRequest constructor(
   }
 
   override fun equals(other: Any?) = other is JSONRPCRequest && this.method == other.method && params.contentEquals(
-    other.params
+    other.params,
   )
   override fun hashCode() = 31 * method.hashCode() + params.contentHashCode()
 

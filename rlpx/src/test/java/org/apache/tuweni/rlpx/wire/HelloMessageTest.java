@@ -14,14 +14,18 @@ class HelloMessageTest {
 
   @Test
   void p2pVersion() {
-    HelloMessage msg = HelloMessage.create(Bytes.fromHexString("deadbeef"), 10000, 3, "blah", Collections.emptyList());
+    HelloMessage msg =
+        HelloMessage.create(
+            Bytes.fromHexString("deadbeef"), 10000, 3, "blah", Collections.emptyList());
     HelloMessage msgRead = HelloMessage.read(msg.toBytes());
     assertEquals(3, msgRead.p2pVersion());
   }
 
   @Test
   void nodeId() {
-    HelloMessage msg = HelloMessage.create(Bytes.fromHexString("deadbeef"), 10000, 3, "blah", Collections.emptyList());
+    HelloMessage msg =
+        HelloMessage.create(
+            Bytes.fromHexString("deadbeef"), 10000, 3, "blah", Collections.emptyList());
     HelloMessage msgRead = HelloMessage.read(msg.toBytes());
     assertEquals(Bytes.fromHexString("deadbeef"), msgRead.nodeId());
   }
@@ -29,7 +33,8 @@ class HelloMessageTest {
   @Test
   void clientId() {
     HelloMessage msg =
-        HelloMessage.create(Bytes.fromHexString("deadbeef"), 10000, 3, "foofoo", Collections.emptyList());
+        HelloMessage.create(
+            Bytes.fromHexString("deadbeef"), 10000, 3, "foofoo", Collections.emptyList());
     HelloMessage msgRead = HelloMessage.read(msg.toBytes());
     assertEquals("foofoo", msgRead.clientId());
   }

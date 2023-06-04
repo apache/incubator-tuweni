@@ -42,7 +42,9 @@ final class AccumulatingErrorListener extends BaseErrorListener implements Error
     }
 
     if (offendingSymbol instanceof Token && recognizer instanceof Parser) {
-      String message = getMessage((Token) offendingSymbol, getExpected(((Parser) recognizer).getExpectedTokens()));
+      String message =
+          getMessage(
+              (Token) offendingSymbol, getExpected(((Parser) recognizer).getExpectedTokens()));
       reportError(message, position);
       return;
     }
@@ -85,15 +87,14 @@ final class AccumulatingErrorListener extends BaseErrorListener implements Error
   }
 
   private static String getExpected(IntervalSet expectedTokens) {
-    List<String> sortedNames = expectedTokens
-        .getIntervals()
-        .stream()
-        .flatMap(i -> IntStream.rangeClosed(i.a, i.b).boxed())
-        .flatMap(TokenName::namesForToken)
-        .sorted()
-        .distinct()
-        .map(TokenName::displayName)
-        .collect(Collectors.toList());
+    List<String> sortedNames =
+        expectedTokens.getIntervals().stream()
+            .flatMap(i -> IntStream.rangeClosed(i.a, i.b).boxed())
+            .flatMap(TokenName::namesForToken)
+            .sorted()
+            .distinct()
+            .map(TokenName::displayName)
+            .collect(Collectors.toList());
 
     StringBuilder builder = new StringBuilder();
     int count = sortedNames.size();

@@ -47,8 +47,13 @@ class KeyValueStoreTest {
 
   @Test
   void testPutAndGetMapDB(@TempDirectory Path tmpDir) throws Exception {
-    try (KeyValueStore<Bytes, Bytes> store = MapDBKeyValueStore
-        .open(tmpDir.resolve("mapdb"), bytesIdentityFn, bytesIdentityFn, bytesIdentityFn, bytesIdentityFn)) {
+    try (KeyValueStore<Bytes, Bytes> store =
+        MapDBKeyValueStore.open(
+            tmpDir.resolve("mapdb"),
+            bytesIdentityFn,
+            bytesIdentityFn,
+            bytesIdentityFn,
+            bytesIdentityFn)) {
       AsyncCompletion completion = store.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
       completion.join();
       assertTrue(store.containsKeyAsync(Bytes.of(123)).get());
@@ -60,11 +65,22 @@ class KeyValueStoreTest {
 
   @Test
   void testPutAndGetProxied(@TempDirectory Path tmpDir) throws Exception {
-    KeyValueStore<Bytes, Bytes> store = MapDBKeyValueStore
-        .open(tmpDir.resolve("mapdbproxy"), bytesIdentityFn, bytesIdentityFn, bytesIdentityFn, bytesIdentityFn);
-    try (ProxyKeyValueStore<String, String, Bytes, Bytes> proxy = ProxyKeyValueStore
-        .open(store, Base64::encode, Base64::decode, Base64::encode, (key, value) -> Base64.decode(value))) {
-      AsyncCompletion completion = proxy.putAsync(Base64.encode(Bytes.of(123)), Base64.encode(Bytes.of(10, 12, 13)));
+    KeyValueStore<Bytes, Bytes> store =
+        MapDBKeyValueStore.open(
+            tmpDir.resolve("mapdbproxy"),
+            bytesIdentityFn,
+            bytesIdentityFn,
+            bytesIdentityFn,
+            bytesIdentityFn);
+    try (ProxyKeyValueStore<String, String, Bytes, Bytes> proxy =
+        ProxyKeyValueStore.open(
+            store,
+            Base64::encode,
+            Base64::decode,
+            Base64::encode,
+            (key, value) -> Base64.decode(value))) {
+      AsyncCompletion completion =
+          proxy.putAsync(Base64.encode(Bytes.of(123)), Base64.encode(Bytes.of(10, 12, 13)));
       completion.join();
       assertTrue(store.containsKeyAsync(Bytes.of(123)).get());
       String value = proxy.getAsync(Base64.encode(Bytes.of(123))).get();
@@ -72,12 +88,12 @@ class KeyValueStoreTest {
       assertEquals(Base64.encode(Bytes.of(10, 12, 13)), value);
       assertEquals(Bytes.of(10, 12, 13), store.getAsync(Bytes.of(123)).get());
     }
-
   }
 
   @Test
   void testPutAndGetMapDBDirect(@TempDirectory Path tmpDir) throws Exception {
-    try (KeyValueStore<Bytes, Bytes> store = MapDBKeyValueStore.open(tmpDir.resolve("mapdbdirect"))) {
+    try (KeyValueStore<Bytes, Bytes> store =
+        MapDBKeyValueStore.open(tmpDir.resolve("mapdbdirect"))) {
       AsyncCompletion completion = store.putAsync(Bytes.of(123), Bytes.of(10, 12, 13));
       completion.join();
       assertTrue(store.containsKeyAsync(Bytes.of(123)).get());
@@ -110,8 +126,8 @@ class KeyValueStoreTest {
   @DisabledOnOs(OS.WINDOWS)
   @Test
   void testLevelDBWithoutOptions(@TempDirectory Path tempDirectory) throws Exception {
-    try (LevelDBKeyValueStore<Bytes, Bytes> leveldb = LevelDBKeyValueStore
-        .open(
+    try (LevelDBKeyValueStore<Bytes, Bytes> leveldb =
+        LevelDBKeyValueStore.open(
             tempDirectory.resolve("foo").resolve("bar"),
             bytesIdentityFn,
             bytesIdentityFn,
@@ -127,8 +143,8 @@ class KeyValueStoreTest {
 
   @Test
   void testRocksDBWithoutOptions(@TempDirectory Path tempDirectory) throws Exception {
-    try (RocksDBKeyValueStore<Bytes, Bytes> rocksdb = RocksDBKeyValueStore
-        .open(
+    try (RocksDBKeyValueStore<Bytes, Bytes> rocksdb =
+        RocksDBKeyValueStore.open(
             tempDirectory.resolve("foo").resolve("bar"),
             bytesIdentityFn,
             bytesIdentityFn,

@@ -13,13 +13,10 @@ import jnr.ffi.Pointer;
  * Generic hashing utility (BLAKE2b).
  *
  * @see <a href="https://libsodium.gitbook.io/doc/hashing/generic_hashing">Generic hashing</a>
- *
  */
 public final class GenericHash {
 
-  /**
-   * Input of generic hash function.
-   */
+  /** Input of generic hash function. */
   public static final class Input implements Destroyable {
     private final Allocated value;
 
@@ -39,7 +36,7 @@ public final class GenericHash {
 
     /**
      * Provides the length of the input
-     * 
+     *
      * @return the length of the input
      */
     public int length() {
@@ -105,7 +102,7 @@ public final class GenericHash {
 
     /**
      * Provides the bytes of this key
-     * 
+     *
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -114,7 +111,7 @@ public final class GenericHash {
 
     /**
      * Provides the bytes of this key
-     * 
+     *
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {
@@ -122,9 +119,7 @@ public final class GenericHash {
     }
   }
 
-  /**
-   * Key of generic hash function.
-   */
+  /** Key of generic hash function. */
   public static final class Key implements Destroyable {
     private final Allocated value;
 
@@ -143,9 +138,8 @@ public final class GenericHash {
     }
 
     /**
-     *
      * Provides the length of the key
-     * 
+     *
      * @return the length of the key
      */
     public int length() {
@@ -211,7 +205,7 @@ public final class GenericHash {
 
     /**
      * Provides the bytes of this key
-     * 
+     *
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -220,7 +214,7 @@ public final class GenericHash {
 
     /**
      * Provides the bytes of this key
-     * 
+     *
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {
@@ -228,16 +222,13 @@ public final class GenericHash {
     }
   }
 
-  /**
-   * Generic hash function output.
-   */
+  /** Generic hash function output. */
   public static final class Hash implements Destroyable {
     Allocated value;
 
     Hash(Pointer ptr, int length) {
       this.value = new Allocated(ptr, length);
     }
-
 
     @Override
     public void destroy() {
@@ -269,7 +260,7 @@ public final class GenericHash {
     /**
      * Obtain the bytes of this hash.
      *
-     * WARNING: This will cause the hash to be copied into heap memory.
+     * <p>WARNING: This will cause the hash to be copied into heap memory.
      *
      * @return The bytes of this hash.
      */
@@ -280,8 +271,8 @@ public final class GenericHash {
     /**
      * Obtain the bytes of this hash.
      *
-     * WARNING: This will cause the hash to be copied into heap memory. The returned array should be overwritten when no
-     * longer required.
+     * <p>WARNING: This will cause the hash to be copied into heap memory. The returned array should
+     * be overwritten when no longer required.
      *
      * @return The bytes of this hash.
      */
@@ -301,7 +292,7 @@ public final class GenericHash {
 
   /**
    * Creates a generic hash of specified length of the input
-   * 
+   *
    * @param hashLength the length of the hash
    * @param input the input of the hash function
    * @return the hash of the input
@@ -322,14 +313,13 @@ public final class GenericHash {
    */
   public static Hash hash(int hashLength, Input input, Key key) {
     Pointer output = Sodium.malloc(hashLength);
-    Sodium
-        .crypto_generichash(
-            output,
-            hashLength,
-            input.value.pointer(),
-            input.length(),
-            key.value.pointer(),
-            key.length());
+    Sodium.crypto_generichash(
+        output,
+        hashLength,
+        input.value.pointer(),
+        input.length(),
+        key.value.pointer(),
+        key.length());
     return new Hash(output, hashLength);
   }
 }

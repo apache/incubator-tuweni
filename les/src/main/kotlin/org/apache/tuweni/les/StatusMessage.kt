@@ -30,7 +30,7 @@ internal data class StatusMessage(
   val flowControlBufferLimit: UInt256,
   val flowControlMaximumRequestCostTable: UInt256,
   val flowControlMinimumRateOfRecharge: UInt256,
-  val announceType: Int
+  val announceType: Int,
 ) {
 
   fun toBytes(): Bytes {
@@ -150,7 +150,7 @@ internal data class StatusMessage(
           parameters["flowControl/BL"] as UInt256,
           parameters["flowControl/MRC"] as UInt256,
           parameters["flowControl/MRR"] as UInt256,
-          parameters["announceType"] as Int
+          parameters["announceType"] as Int,
         )
       }
     }

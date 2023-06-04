@@ -56,7 +56,7 @@ object KeyFileLoader {
       val secretJSON = list.joinToString("")
       val values: HashMap<String, String> = objectMapper.readValue(
         secretJSON,
-        object : TypeReference<HashMap<String, String>>() {}
+        object : TypeReference<HashMap<String, String>>() {},
       )
       val pubKey = values["public"]!!.replace(".ed25519", "")
       val privateKey = values["private"]!!.replace(".ed25519", "")

@@ -106,7 +106,8 @@ class ByteBufferWrappingBytes extends AbstractBytes {
       return super.toArray();
     }
     int arrayOffset = byteBuffer.arrayOffset();
-    return Arrays.copyOfRange(byteBuffer.array(), arrayOffset + offset, arrayOffset + offset + length);
+    return Arrays.copyOfRange(
+        byteBuffer.array(), arrayOffset + offset, arrayOffset + offset + length);
   }
 
   @Override

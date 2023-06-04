@@ -51,7 +51,7 @@ class ConnectToAnotherNodeTest {
       MapKeyValueStore(),
       MapKeyValueStore(),
       BlockchainIndex(writer),
-      genesisBlock
+      genesisBlock,
     )
     val service = VertxRLPxService(
       vertx,
@@ -68,22 +68,22 @@ class ConnectToAnotherNodeTest {
             genesisBlock.header.hash,
             UInt256.valueOf(42L),
             genesisBlock.header.hash,
-            genesisFile.forks
+            genesisFile.forks,
           ),
-          pendingTransactionsPool = MemoryTransactionPool()
-        )
+          pendingTransactionsPool = MemoryTransactionPool(),
+        ),
       ),
       "Tuweni Experiment 0.1",
       10,
-      meter
+      meter,
     )
     service.start().await()
     service.connectTo(
       SECP256K1.PublicKey.fromHexString(
         "b1c9e33ebfd9446151688f0abaf171dac6df31ea5205a200f2cbaf5f8be" +
-          "d241c9f93732f25109e16badea1aa657a6078240657688cbbddb91a50aa8c7c34a9cc"
+          "d241c9f93732f25109e16badea1aa657a6078240657688cbbddb91a50aa8c7c34a9cc",
       ),
-      InetSocketAddress("192.168.88.46", 30303)
+      InetSocketAddress("192.168.88.46", 30303),
     ).await()
 
 //    val client = service.getClient(EthSubprotocol.ETH62) as EthRequestsManager
@@ -114,7 +114,7 @@ class ConnectToAnotherNodeTest {
       MapKeyValueStore(),
       MapKeyValueStore(),
       BlockchainIndex(writer),
-      genesisBlock
+      genesisBlock,
     )
     val service = VertxRLPxService(
       vertx,
@@ -131,14 +131,14 @@ class ConnectToAnotherNodeTest {
             genesisBlock.header.hash,
             UInt256.valueOf(42L),
             genesisBlock.header.hash,
-            emptyList()
+            emptyList(),
           ),
-          pendingTransactionsPool = MemoryTransactionPool()
-        )
+          pendingTransactionsPool = MemoryTransactionPool(),
+        ),
       ),
       "Tuweni Experiment 0.1",
       10,
-      meter
+      meter,
     )
 
     val repository2 = BlockchainRepository.init(
@@ -149,7 +149,7 @@ class ConnectToAnotherNodeTest {
       MapKeyValueStore(),
       MapKeyValueStore(),
       BlockchainIndex(writer),
-      genesisBlock
+      genesisBlock,
     )
     val service2kp = SECP256K1.KeyPair.random()
     val service2 = VertxRLPxService(
@@ -167,14 +167,14 @@ class ConnectToAnotherNodeTest {
             genesisBlock.header.hash,
             UInt256.valueOf(42L),
             genesisBlock.header.hash,
-            emptyList()
+            emptyList(),
           ),
-          pendingTransactionsPool = MemoryTransactionPool()
-        )
+          pendingTransactionsPool = MemoryTransactionPool(),
+        ),
       ),
       "Tuweni Experiment 0.1",
       10,
-      meter
+      meter,
     )
     val result = AsyncCompletion.allOf(service.start(), service2.start()).then {
       service.connectTo(service2kp.publicKey(), InetSocketAddress("127.0.0.1", service2.actualPort()))

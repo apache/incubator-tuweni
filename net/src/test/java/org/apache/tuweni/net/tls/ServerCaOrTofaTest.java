@@ -50,11 +50,12 @@ class ServerCaOrTofaTest {
   private HttpServer httpServer;
 
   @BeforeAll
-  static void setupClients(@TempDirectory Path tempDir, @VertxInstance Vertx vertx) throws Exception {
+  static void setupClients(@TempDirectory Path tempDir, @VertxInstance Vertx vertx)
+      throws Exception {
     SelfSignedCertificate caClientCert = SelfSignedCertificate.create();
     SecurityTestUtils.configureJDKTrustStore(tempDir, caClientCert);
-    caClient = vertx
-        .createHttpClient(
+    caClient =
+        vertx.createHttpClient(
             new HttpClientOptions()
                 .setTrustOptions(InsecureTrustOptions.INSTANCE)
                 .setSsl(true)
@@ -152,7 +153,11 @@ class ServerCaOrTofaTest {
     foobarClient
         .request(HttpMethod.GET, httpServer.actualPort(), "localhost", "/upcheck")
         .onFailure(respFuture::completeExceptionally)
-        .onSuccess((req) -> req.send().onFailure(respFuture::completeExceptionally).onSuccess(respFuture::complete));
+        .onSuccess(
+            (req) ->
+                req.send()
+                    .onFailure(respFuture::completeExceptionally)
+                    .onSuccess(respFuture::complete));
     Throwable e = assertThrows(CompletionException.class, respFuture::join);
     e = e.getCause().getCause();
     assertTrue(e.getMessage().contains("certificate_unknown"));

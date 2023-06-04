@@ -14,9 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * An Ethereum block body.
- */
+/** An Ethereum block body. */
 public final class BlockBody {
 
   /**
@@ -33,17 +31,19 @@ public final class BlockBody {
 
   public static BlockBody readFrom(RLPReader reader) {
     List<Transaction> txs = new ArrayList<>();
-    reader.readList((listReader, l) -> {
-      while (!listReader.isComplete()) {
-        txs.add(listReader.readList(Transaction::readFrom));
-      }
-    });
+    reader.readList(
+        (listReader, l) -> {
+          while (!listReader.isComplete()) {
+            txs.add(listReader.readList(Transaction::readFrom));
+          }
+        });
     List<BlockHeader> ommers = new ArrayList<>();
-    reader.readList((listReader, l) -> {
-      while (!listReader.isComplete()) {
-        ommers.add(listReader.readList(BlockHeader::readFrom));
-      }
-    });
+    reader.readList(
+        (listReader, l) -> {
+          while (!listReader.isComplete()) {
+            ommers.add(listReader.readList(BlockHeader::readFrom));
+          }
+        });
 
     return new BlockBody(txs, ommers);
   }
@@ -66,7 +66,7 @@ public final class BlockBody {
 
   /**
    * Provides the block transactions
-   * 
+   *
    * @return the transactions of the block.
    */
   public List<Transaction> getTransactions() {
@@ -75,7 +75,7 @@ public final class BlockBody {
 
   /**
    * Provides the block ommers
-   * 
+   *
    * @return the list of ommers for this block.
    */
   public List<BlockHeader> getOmmers() {
@@ -101,7 +101,7 @@ public final class BlockBody {
 
   /**
    * Provides the block body bytes
-   * 
+   *
    * @return The RLP serialized form of this block body.
    */
   public Bytes toBytes() {
@@ -114,15 +114,17 @@ public final class BlockBody {
   }
 
   public void writeTo(RLPWriter writer) {
-    writer.writeList(listWriter -> {
-      for (Transaction tx : transactions) {
-        listWriter.writeList(tx::writeTo);
-      }
-    });
-    writer.writeList(listWriter -> {
-      for (BlockHeader ommer : ommers) {
-        listWriter.writeList(ommer::writeTo);
-      }
-    });
+    writer.writeList(
+        listWriter -> {
+          for (Transaction tx : transactions) {
+            listWriter.writeList(tx::writeTo);
+          }
+        });
+    writer.writeList(
+        listWriter -> {
+          for (BlockHeader ommer : ommers) {
+            listWriter.writeList(ommer::writeTo);
+          }
+        });
   }
 }

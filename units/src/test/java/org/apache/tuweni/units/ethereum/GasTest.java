@@ -75,16 +75,20 @@ class GasTest {
 
   @Test
   void testNegativeLong() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      Gas.valueOf(-1L);
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          Gas.valueOf(-1L);
+        });
   }
 
   @Test
   void testNegativeBigInteger() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      Gas.valueOf(BigInteger.valueOf(-123L));
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          Gas.valueOf(BigInteger.valueOf(-123L));
+        });
   }
 
   @Test

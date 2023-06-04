@@ -27,7 +27,7 @@ data class Peer(
   val networkID: UInt256?,
   val bestHash: Bytes32?,
   val totalDifficulty: UInt256?,
-  val lastContacted: Instant?
+  val lastContacted: Instant?,
 )
 data class Peers(val peers: List<Peer>)
 
@@ -57,7 +57,7 @@ class StateService {
     val repository = client!!.peerRepositories[id]
       ?: throw ResponseStatusException(
         HttpStatus.NOT_FOUND,
-        "entity not found"
+        "entity not found",
       )
     val peers = Peers(
       repository.activeConnections().map {
@@ -67,10 +67,10 @@ class StateService {
           it.status()?.networkID,
           it.status()?.bestHash,
           it.status()?.totalDifficulty,
-          it.peer().lastContacted()
+          it.peer().lastContacted(),
         )
         peer
-      }.toList()
+      }.toList(),
     )
 
     return peers

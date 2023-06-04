@@ -39,14 +39,14 @@ object ScraperApp {
       repository = EphemeralPeerRepository(),
       listeners = listOf {
         println(it.uri())
-      }
+      },
     )
     Runtime.getRuntime().addShutdownHook(
       Thread {
         runBlocking {
           scraper.stop().await()
         }
-      }
+      },
     )
     runBlocking {
       scraper.start().await()
@@ -66,7 +66,7 @@ class Scraper(
   val bindAddress: SocketAddress,
   val repository: PeerRepository,
   val listeners: List<(Peer) -> Unit>? = null,
-  val waitSecondsBetweenScrapes: Long = 30
+  val waitSecondsBetweenScrapes: Long = 30,
 ) : CoroutineScope {
 
   private var service: DiscoveryService? = null
@@ -88,7 +88,7 @@ class Scraper(
       keyPair = SECP256K1.KeyPair.random(),
       bindAddress = bindAddress,
       bootstrapURIs = initialURIs,
-      peerRepository = repository
+      peerRepository = repository,
     )
     service = newService
     newService.awaitBootstrap()

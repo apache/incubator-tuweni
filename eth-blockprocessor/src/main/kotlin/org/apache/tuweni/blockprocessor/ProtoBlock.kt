@@ -28,7 +28,7 @@ data class SealableHeader(
   val logsBloom: Bytes,
   val number: UInt256,
   val gasLimit: Gas,
-  val gasUsed: Gas
+  val gasUsed: Gas,
 ) {
 
   /**
@@ -41,7 +41,7 @@ data class SealableHeader(
     timestamp: Instant,
     extraData: Bytes,
     mixHash: Hash,
-    nonce: UInt64
+    nonce: UInt64,
   ): BlockHeader {
     return BlockHeader(
       parentHash,
@@ -58,7 +58,7 @@ data class SealableHeader(
       timestamp,
       extraData,
       mixHash,
-      nonce
+      nonce,
     )
   }
 }
@@ -85,7 +85,7 @@ class ProtoBlock(
   val header: SealableHeader,
   val body: ProtoBlockBody,
   val transactionReceipts: List<TransactionReceipt>,
-  val stateChanges: TransientStateRepository
+  val stateChanges: TransientStateRepository,
 ) {
 
   fun toBlock(
@@ -95,12 +95,12 @@ class ProtoBlock(
     timestamp: Instant,
     extraData: Bytes,
     mixHash: Hash,
-    nonce: UInt64
+    nonce: UInt64,
   ): Block {
     val ommersHash = Hash.hash(RLP.encodeList { writer -> ommers.forEach { writer.writeValue(it.hash) } })
     return Block(
       header.toHeader(ommersHash, coinbase, difficulty, timestamp, extraData, mixHash, nonce),
-      body.toBlockBody(ommers)
+      body.toBlockBody(ommers),
     )
   }
 }

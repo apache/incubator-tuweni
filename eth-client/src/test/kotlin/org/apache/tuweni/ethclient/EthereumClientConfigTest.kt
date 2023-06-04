@@ -13,7 +13,7 @@ class EthereumClientConfigTest {
   @Test
   fun testFileConfig() {
     val config = EthereumClientConfig.fromFile(
-      Paths.get(EthereumClientConfigTest::class.java.getResource("/minimal.conf").toURI())
+      Paths.get(EthereumClientConfigTest::class.java.getResource("/minimal.conf").toURI()),
     )
     assertNotNull(config)
   }
@@ -78,7 +78,7 @@ class EthereumClientConfigTest {
     val config = EthereumClientConfig.fromString("[storage.forui]\npath=\"data\"")
     assertEquals(
       "[storage.forui]${System.lineSeparator()}path = \"data\"${System.lineSeparator()}",
-      config.toToml()
+      config.toToml(),
     )
   }
 
@@ -95,7 +95,7 @@ class EthereumClientConfigTest {
   @Test
   fun testDNSClientWithDNSServer() {
     val config = EthereumClientConfig.fromString(
-      "[dns.mine]\nenrLink=\"example.com\"\npollingPeriod=1000\ndnsServer=\"4.4.5.5\""
+      "[dns.mine]\nenrLink=\"example.com\"\npollingPeriod=1000\ndnsServer=\"4.4.5.5\"",
     )
     assertEquals(1, config.dnsClients().size)
     assertEquals("example.com", config.dnsClients()[0].enrLink())

@@ -22,21 +22,21 @@ class OpenTelemetryServerController(meter: Meter) : EthStatsServerController {
   override fun readLatency(remoteAddress: String, id: String, latency: Long) {
     latencyGauge.record(
       latency,
-      Attributes.of(AttributeKey.stringKey("address"), remoteAddress, AttributeKey.stringKey("id"), id)
+      Attributes.of(AttributeKey.stringKey("address"), remoteAddress, AttributeKey.stringKey("id"), id),
     )
   }
 
   override fun readBlock(remoteAddress: String, id: String, block: BlockStats) {
     latestBlockGauge.record(
       block.number.toLong(),
-      Attributes.of(AttributeKey.stringKey("address"), remoteAddress, AttributeKey.stringKey("id"), id)
+      Attributes.of(AttributeKey.stringKey("address"), remoteAddress, AttributeKey.stringKey("id"), id),
     )
   }
 
   override fun readPendingTx(remoteAddress: String, id: String, pendingTx: Long) {
     pendingTxCount.record(
       pendingTx,
-      Attributes.of(AttributeKey.stringKey("address"), remoteAddress, AttributeKey.stringKey("id"), id)
+      Attributes.of(AttributeKey.stringKey("address"), remoteAddress, AttributeKey.stringKey("id"), id),
     )
   }
 }

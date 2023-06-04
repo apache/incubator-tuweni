@@ -36,7 +36,8 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.BigIntegers;
 
 /**
- * Factory creating RLPxConnection, either from initiating a handshake or responding to a handshake request.
+ * Factory creating RLPxConnection, either from initiating a handshake or responding to a handshake
+ * request.
  */
 public final class RLPxConnectionFactory {
 
@@ -44,11 +45,11 @@ public final class RLPxConnectionFactory {
 
   /**
    * Creates a complete interaction to run a handshake with a remote peer.
-   * 
+   *
    * @param keyPair our key pair
    * @param remotePublicKey the peer public key
-   * @param initAndResponse a function giving us the peer response, and allowing us to respond to them to finalize the
-   *        handshake
+   * @param initAndResponse a function giving us the peer response, and allowing us to respond to
+   *     them to finalize the handshake
    * @return a future RLPxConnection created as the result of the handshake
    */
   public static AsyncResult<RLPxConnection> createHandshake(
@@ -61,19 +62,20 @@ public final class RLPxConnectionFactory {
     Bytes initHandshakeMessage = init(keyPair, remotePublicKey, ephemeralKeyPair, nonce);
     AsyncResult<Bytes> response = initAndResponse.apply(initHandshakeMessage);
 
-    return response.thenApply(responseBytes -> {
-      HandshakeMessage responseMessage = readResponse(responseBytes, keyPair.secretKey());
-      return createConnection(
-          true,
-          initHandshakeMessage,
-          responseBytes,
-          ephemeralKeyPair.secretKey(),
-          responseMessage.ephemeralPublicKey(),
-          nonce,
-          responseMessage.nonce(),
-          keyPair.publicKey(),
-          remotePublicKey);
-    });
+    return response.thenApply(
+        responseBytes -> {
+          HandshakeMessage responseMessage = readResponse(responseBytes, keyPair.secretKey());
+          return createConnection(
+              true,
+              initHandshakeMessage,
+              responseBytes,
+              ephemeralKeyPair.secretKey(),
+              responseMessage.ephemeralPublicKey(),
+              nonce,
+              responseMessage.nonce(),
+              keyPair.publicKey(),
+              remotePublicKey);
+        });
   }
 
   /**
@@ -81,21 +83,22 @@ public final class RLPxConnectionFactory {
    *
    * @param initiatorMessageBytes the initiation message raw bytes
    * @param keyPair our key pair
-   * @param responseHandler a function to respond back to the peer that we acknowledged the connection
+   * @param responseHandler a function to respond back to the peer that we acknowledged the
+   *     connection
    * @return a valid RLPxConnection
    */
   public static RLPxConnection respondToHandshake(
-      Bytes initiatorMessageBytes,
-      KeyPair keyPair,
-      Consumer<Bytes> responseHandler) {
-    InitiatorHandshakeMessage initiatorHandshakeMessage = read(initiatorMessageBytes, keyPair.secretKey());
+      Bytes initiatorMessageBytes, KeyPair keyPair, Consumer<Bytes> responseHandler) {
+    InitiatorHandshakeMessage initiatorHandshakeMessage =
+        read(initiatorMessageBytes, keyPair.secretKey());
     Bytes32 nonce = Bytes32.wrap(new byte[32]);
     random.nextBytes(nonce.toArrayUnsafe());
     KeyPair ephemeralKeyPair = KeyPair.random();
 
     PublicKey initiatorPublicKey = initiatorHandshakeMessage.publicKey();
 
-    ResponderHandshakeMessage responderMessage = ResponderHandshakeMessage.create(ephemeralKeyPair.publicKey(), nonce);
+    ResponderHandshakeMessage responderMessage =
+        ResponderHandshakeMessage.create(ephemeralKeyPair.publicKey(), nonce);
     Bytes responseBytes = encryptMessage(responderMessage.encode(), initiatorPublicKey);
     responseHandler.accept(responseBytes);
 
@@ -113,7 +116,7 @@ public final class RLPxConnectionFactory {
 
   /**
    * Creates a handshake initiation message using ephemeral keys and a random nonce.
-   * 
+   *
    * @param keyPair our key pair
    * @param remotePublicKey the peer public key
    * @param ephemeralKeyPair our ephemeral key pair for this connection
@@ -127,13 +130,14 @@ public final class RLPxConnectionFactory {
       Bytes32 initiatorNonce) {
     Bytes32 sharedSecret = calculateKeyAgreement(keyPair.secretKey(), remotePublicKey);
     InitiatorHandshakeMessage message =
-        InitiatorHandshakeMessage.create(keyPair.publicKey(), ephemeralKeyPair, sharedSecret, initiatorNonce);
+        InitiatorHandshakeMessage.create(
+            keyPair.publicKey(), ephemeralKeyPair, sharedSecret, initiatorNonce);
     return encryptMessage(message.encode(), remotePublicKey);
   }
 
   /**
    * Decrypts the handshake response using our private key.
-   * 
+   *
    * @param response the raw response bytes
    * @param privateKey our private key
    * @return a decrypted handshake response message
@@ -179,7 +183,9 @@ public final class RLPxConnectionFactory {
       PublicKey peerPublicKey) {
 
     Bytes agreedSecret = calculateKeyAgreement(ourEphemeralPrivateKey, peerEphemeralPublicKey);
-    Bytes sharedSecret = keccak256(concatenate(agreedSecret, keccak256(concatenate(responderNonce, initiatorNonce))));
+    Bytes sharedSecret =
+        keccak256(
+            concatenate(agreedSecret, keccak256(concatenate(responderNonce, initiatorNonce))));
 
     Bytes32 aesSecret = keccak256(concatenate(agreedSecret, sharedSecret));
     Bytes32 macSecret = keccak256(concatenate(agreedSecret, aesSecret));
@@ -189,9 +195,11 @@ public final class RLPxConnectionFactory {
     Bytes responderMac = concatenate(macSecret.xor(initiatorNonce), responderMessage);
 
     if (initiator) {
-      return new RLPxConnection(aesSecret, macSecret, token, initiatorMac, responderMac, ourPublicKey, peerPublicKey);
+      return new RLPxConnection(
+          aesSecret, macSecret, token, initiatorMac, responderMac, ourPublicKey, peerPublicKey);
     } else {
-      return new RLPxConnection(aesSecret, macSecret, token, responderMac, initiatorMac, ourPublicKey, peerPublicKey);
+      return new RLPxConnection(
+          aesSecret, macSecret, token, responderMac, initiatorMac, ourPublicKey, peerPublicKey);
     }
   }
 
@@ -216,41 +224,43 @@ public final class RLPxConnectionFactory {
     }
     // Create the output message by concatenating the ephemeral public key (prefixed with
     // 0x04 to designate uncompressed), IV, and encrypted bytes.
-    Bytes finalBytes = concatenate(
-        Bytes.of(sizePrefix.get(0), sizePrefix.get(1), (byte) 0x04),
-        ephemeralKeyPair.publicKey().bytes(),
-        iv,
-        Bytes.wrap(encrypted));
+    Bytes finalBytes =
+        concatenate(
+            Bytes.of(sizePrefix.get(0), sizePrefix.get(1), (byte) 0x04),
+            ephemeralKeyPair.publicKey().bytes(),
+            iv,
+            Bytes.wrap(encrypted));
     return finalBytes;
   }
 
   private static EthereumIESEncryptionEngine forEncryption(
-      PublicKey pubKey,
-      Bytes iv,
-      Bytes commonMac,
-      KeyPair ephemeralKeyPair) {
+      PublicKey pubKey, Bytes iv, Bytes commonMac, KeyPair ephemeralKeyPair) {
     CipherParameters pubParam = new ECPublicKeyParameters(pubKey.asEcPoint(), CURVE);
     CipherParameters privParam =
-        new ECPrivateKeyParameters(ephemeralKeyPair.secretKey().bytes().toUnsignedBigInteger(), CURVE);
+        new ECPrivateKeyParameters(
+            ephemeralKeyPair.secretKey().bytes().toUnsignedBigInteger(), CURVE);
 
     BasicAgreement agree = new ECDHBasicAgreement();
     agree.init(privParam);
     BigInteger z = agree.calculateAgreement(pubParam);
     byte[] zbytes = BigIntegers.asUnsignedByteArray(agree.getFieldSize(), z);
 
-    IESWithCipherParameters iesWithCipherParameters = new IESWithCipherParameters(new byte[0], new byte[0], 128, 128);
+    IESWithCipherParameters iesWithCipherParameters =
+        new IESWithCipherParameters(new byte[0], new byte[0], 128, 128);
 
     // Initialise the KDF.
     EthereumIESEncryptionEngine.ECIESHandshakeKDFFunction kdf =
         new EthereumIESEncryptionEngine.ECIESHandshakeKDFFunction(1, new SHA256Digest());
     kdf.init(new KDFParameters(zbytes, iesWithCipherParameters.getDerivationV()));
-    EthereumIESEncryptionEngine engine = new EthereumIESEncryptionEngine(
-        agree,
-        kdf,
-        new HMac(new SHA256Digest()),
-        commonMac.toArrayUnsafe(),
-        new BufferedBlockCipher(new SICBlockCipher(new AESEngine())));
-    ParametersWithIV cipherParameters = new ParametersWithIV(iesWithCipherParameters, iv.toArrayUnsafe());
+    EthereumIESEncryptionEngine engine =
+        new EthereumIESEncryptionEngine(
+            agree,
+            kdf,
+            new HMac(new SHA256Digest()),
+            commonMac.toArrayUnsafe(),
+            new BufferedBlockCipher(new SICBlockCipher(new AESEngine())));
+    ParametersWithIV cipherParameters =
+        new ParametersWithIV(iesWithCipherParameters, iv.toArrayUnsafe());
     engine.init(true, privParam, pubParam, cipherParameters);
 
     return engine;
@@ -275,7 +285,8 @@ public final class RLPxConnectionFactory {
     Bytes iv = msgBytes.slice(67, 16);
     Bytes encrypted = msgBytes.slice(83, size - 81);
 
-    EthereumIESEncryptionEngine decryptor = forDecryption(ourKey, ephemeralPublicKey, iv, commonMac);
+    EthereumIESEncryptionEngine decryptor =
+        forDecryption(ourKey, ephemeralPublicKey, iv, commonMac);
     byte[] result;
     try {
       result = decryptor.processBlock(encrypted.toArrayUnsafe(), 0, encrypted.size());
@@ -293,30 +304,32 @@ public final class RLPxConnectionFactory {
   }
 
   private static EthereumIESEncryptionEngine forDecryption(
-      SecretKey privateKey,
-      PublicKey ephemeralPublicKey,
-      Bytes iv,
-      Bytes commonMac) {
+      SecretKey privateKey, PublicKey ephemeralPublicKey, Bytes iv, Bytes commonMac) {
     CipherParameters pubParam = new ECPublicKeyParameters(ephemeralPublicKey.asEcPoint(), CURVE);
-    CipherParameters privParam = new ECPrivateKeyParameters(privateKey.bytes().toUnsignedBigInteger(), CURVE);
+    CipherParameters privParam =
+        new ECPrivateKeyParameters(privateKey.bytes().toUnsignedBigInteger(), CURVE);
 
     BasicAgreement agreement = new ECDHBasicAgreement();
     agreement.init(privParam);
     byte[] agreementValue =
-        BigIntegers.asUnsignedByteArray(agreement.getFieldSize(), agreement.calculateAgreement(pubParam));
+        BigIntegers.asUnsignedByteArray(
+            agreement.getFieldSize(), agreement.calculateAgreement(pubParam));
 
-    IESWithCipherParameters iesWithCipherParameters = new IESWithCipherParameters(new byte[0], new byte[0], 128, 128);
+    IESWithCipherParameters iesWithCipherParameters =
+        new IESWithCipherParameters(new byte[0], new byte[0], 128, 128);
 
     EthereumIESEncryptionEngine.ECIESHandshakeKDFFunction kdf =
         new EthereumIESEncryptionEngine.ECIESHandshakeKDFFunction(1, new SHA256Digest());
     kdf.init(new KDFParameters(agreementValue, iesWithCipherParameters.getDerivationV()));
-    EthereumIESEncryptionEngine engine = new EthereumIESEncryptionEngine(
-        agreement,
-        kdf,
-        new HMac(new SHA256Digest()),
-        commonMac.toArrayUnsafe(),
-        new BufferedBlockCipher(new SICBlockCipher(new AESEngine())));
-    ParametersWithIV cipherParameters = new ParametersWithIV(iesWithCipherParameters, iv.toArrayUnsafe());
+    EthereumIESEncryptionEngine engine =
+        new EthereumIESEncryptionEngine(
+            agreement,
+            kdf,
+            new HMac(new SHA256Digest()),
+            commonMac.toArrayUnsafe(),
+            new BufferedBlockCipher(new SICBlockCipher(new AESEngine())));
+    ParametersWithIV cipherParameters =
+        new ParametersWithIV(iesWithCipherParameters, iv.toArrayUnsafe());
     engine.init(false, privParam, pubParam, cipherParameters);
     return engine;
   }

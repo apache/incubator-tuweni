@@ -8,10 +8,10 @@ import java.util.Objects;
 
 /**
  * Message exchanged over a RLPx connection.
- * <p>
- * The message is identified by a negotiated code, offset according to the subprotocol mapping.
- * <p>
- * The message includes the raw content of the message as bytes.
+ *
+ * <p>The message is identified by a negotiated code, offset according to the subprotocol mapping.
+ *
+ * <p>The message includes the raw content of the message as bytes.
  */
 public final class RLPxMessage {
 
@@ -35,7 +35,7 @@ public final class RLPxMessage {
 
   /**
    * Message raw content
-   * 
+   *
    * @return the raw content of the message
    */
   public Bytes content() {
@@ -44,7 +44,7 @@ public final class RLPxMessage {
 
   /**
    * Message ID
-   * 
+   *
    * @return the message ID
    */
   public int messageId() {
@@ -53,10 +53,8 @@ public final class RLPxMessage {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     RLPxMessage that = (RLPxMessage) o;
     return messageId == that.messageId && Objects.equals(content, that.content);
   }

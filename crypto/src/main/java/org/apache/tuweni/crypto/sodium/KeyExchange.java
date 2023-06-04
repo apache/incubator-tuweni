@@ -13,14 +13,12 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Key exchange.
  *
- * <p>
- * Allows two parties to securely compute a set of shared keys using their peer's public key and their own secret key.
+ * <p>Allows two parties to securely compute a set of shared keys using their peer's public key and
+ * their own secret key.
  */
 public final class KeyExchange {
 
-  /**
-   * A KeyExchange public key.
-   */
+  /** A KeyExchange public key. */
   public static final class PublicKey {
     final Allocated value;
 
@@ -31,8 +29,7 @@ public final class KeyExchange {
     /**
      * Create a {@link PublicKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the public key.
      * @return A public key.
@@ -44,8 +41,7 @@ public final class KeyExchange {
     /**
      * Create a {@link PublicKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the public key.
      * @return A public key.
@@ -90,7 +86,7 @@ public final class KeyExchange {
 
     /**
      * Provides the bytes of this key.
-     * 
+     *
      * @return The bytes of this key.
      */
     public Bytes bytes() {
@@ -99,7 +95,7 @@ public final class KeyExchange {
 
     /**
      * Provides the bytes of this key.
-     * 
+     *
      * @return The bytes of this key.
      */
     public byte[] bytesArray() {
@@ -107,9 +103,7 @@ public final class KeyExchange {
     }
   }
 
-  /**
-   * A KeyExchange secret key.
-   */
+  /** A KeyExchange secret key. */
   public static final class SecretKey implements Destroyable {
     final Allocated value;
 
@@ -130,8 +124,7 @@ public final class KeyExchange {
     /**
      * Create a {@link SecretKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the secret key.
      * @return A secret key.
@@ -143,8 +136,7 @@ public final class KeyExchange {
     /**
      * Create a {@link SecretKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the secret key.
      * @return A secret key.
@@ -190,7 +182,7 @@ public final class KeyExchange {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory.
+     * <p>WARNING: This will cause the key to be copied into heap memory.
      *
      * @return The bytes of this key.
      */
@@ -201,8 +193,8 @@ public final class KeyExchange {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory. The returned array should be overwritten when no
-     * longer required.
+     * <p>WARNING: This will cause the key to be copied into heap memory. The returned array should
+     * be overwritten when no longer required.
      *
      * @return The bytes of this key.
      */
@@ -211,9 +203,7 @@ public final class KeyExchange {
     }
   }
 
-  /**
-   * A KeyExchange key pair seed.
-   */
+  /** A KeyExchange key pair seed. */
   public static final class Seed {
     final Allocated value;
 
@@ -224,8 +214,7 @@ public final class KeyExchange {
     /**
      * Create a {@link Seed} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the seed.
      * @return A seed.
@@ -237,8 +226,7 @@ public final class KeyExchange {
     /**
      * Create a {@link Seed} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the seed.
      * @return A seed.
@@ -292,7 +280,7 @@ public final class KeyExchange {
 
     /**
      * Provides the bytes of this seed.
-     * 
+     *
      * @return The bytes of this seed.
      */
     public Bytes bytes() {
@@ -301,7 +289,7 @@ public final class KeyExchange {
 
     /**
      * Provides the bytes of this seed.
-     * 
+     *
      * @return The bytes of this seed.
      */
     public byte[] bytesArray() {
@@ -309,9 +297,7 @@ public final class KeyExchange {
     }
   }
 
-  /**
-   * A KeyExchange key pair.
-   */
+  /** A KeyExchange key pair. */
   public static final class KeyPair {
 
     private final PublicKey publicKey;
@@ -338,14 +324,20 @@ public final class KeyExchange {
       if (secretKey.isDestroyed()) {
         throw new IllegalArgumentException("SecretKey has been destroyed");
       }
-      return Sodium.scalarMultBase(secretKey.value.pointer(), SecretKey.length(), (ptr, len) -> {
-        int publicKeyLength = PublicKey.length();
-        if (len != publicKeyLength) {
-          throw new IllegalStateException(
-              "Public key length " + publicKeyLength + " is not same as generated key length " + len);
-        }
-        return new KeyPair(new PublicKey(ptr, publicKeyLength), secretKey);
-      });
+      return Sodium.scalarMultBase(
+          secretKey.value.pointer(),
+          SecretKey.length(),
+          (ptr, len) -> {
+            int publicKeyLength = PublicKey.length();
+            if (len != publicKeyLength) {
+              throw new IllegalStateException(
+                  "Public key length "
+                      + publicKeyLength
+                      + " is not same as generated key length "
+                      + len);
+            }
+            return new KeyPair(new PublicKey(ptr, publicKeyLength), secretKey);
+          });
     }
 
     /**
@@ -415,7 +407,7 @@ public final class KeyExchange {
 
     /**
      * Provides the public key of the key pair.
-     * 
+     *
      * @return The public key of the key pair.
      */
     public PublicKey publicKey() {
@@ -424,7 +416,7 @@ public final class KeyExchange {
 
     /**
      * Provides the secret key of the key pair.
-     * 
+     *
      * @return The secret key of the key pair.
      */
     public SecretKey secretKey() {
@@ -449,12 +441,9 @@ public final class KeyExchange {
     }
   }
 
-  /**
-   * A KeyExchange session key.
-   */
+  /** A KeyExchange session key. */
   public static final class SessionKey implements Destroyable {
-    @Nullable
-    private Pointer ptr;
+    @Nullable private Pointer ptr;
     private final int length;
 
     private SessionKey(Pointer ptr, int length) {
@@ -479,8 +468,7 @@ public final class KeyExchange {
     /**
      * Create a {@link SessionKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the public key.
      * @return A public key.
@@ -492,8 +480,7 @@ public final class KeyExchange {
     /**
      * Create a {@link SessionKey} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the public key.
      * @return A public key.
@@ -545,7 +532,7 @@ public final class KeyExchange {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory.
+     * <p>WARNING: This will cause the key to be copied into heap memory.
      *
      * @return The bytes of this key.
      */
@@ -556,8 +543,8 @@ public final class KeyExchange {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory. The returned array should be overwritten when no
-     * longer required.
+     * <p>WARNING: This will cause the key to be copied into heap memory. The returned array should
+     * be overwritten when no longer required.
      *
      * @return The bytes of this key.
      */
@@ -569,9 +556,7 @@ public final class KeyExchange {
     }
   }
 
-  /**
-   * A KeyExchange session key pair.
-   */
+  /** A KeyExchange session key pair. */
   public static final class SessionKeyPair {
     private final SessionKey rxKey;
     private final SessionKey txKey;
@@ -589,7 +574,7 @@ public final class KeyExchange {
 
     /**
      * Provides the session key that will be used to receive data.
-     * 
+     *
      * @return The session key that will be used to receive data.
      */
     public SessionKey rx() {
@@ -598,7 +583,7 @@ public final class KeyExchange {
 
     /**
      * Provides the session key that will be used to send data.
-     * 
+     *
      * @return The session key that will be used to send data.
      */
     public SessionKey tx() {
@@ -643,8 +628,8 @@ public final class KeyExchange {
     try {
       rxPtr = Sodium.malloc(sessionkeybytes);
       txPtr = Sodium.malloc(sessionkeybytes);
-      int rc = Sodium
-          .crypto_kx_client_session_keys(
+      int rc =
+          Sodium.crypto_kx_client_session_keys(
               rxPtr,
               txPtr,
               clientKeys.publicKey.value.pointer(),
@@ -689,8 +674,8 @@ public final class KeyExchange {
     try {
       rxPtr = Sodium.malloc(sessionkeybytes);
       txPtr = Sodium.malloc(sessionkeybytes);
-      int rc = Sodium
-          .crypto_kx_server_session_keys(
+      int rc =
+          Sodium.crypto_kx_server_session_keys(
               rxPtr,
               txPtr,
               serverKeys.publicKey.value.pointer(),

@@ -27,7 +27,7 @@ class EthereumVirtualMachineTest {
   @Test
   fun testVersion() = runBlocking {
     val repository = BlockchainRepository.inMemory(
-      Genesis.dev()
+      Genesis.dev(),
     )
     val vm = EthereumVirtualMachine(repository, repository, Registry.istanbul, EvmVmImpl::create)
     vm.start()
@@ -107,7 +107,7 @@ class EthereumVirtualMachineTest {
           2,
           UInt256.valueOf(1),
           UInt256.valueOf(1),
-          CallKind.CREATE
+          CallKind.CREATE,
         )
       }
       assertEquals(EVMExecutionStatusCode.SUCCESS, result.statusCode)
@@ -139,7 +139,7 @@ class EthereumVirtualMachineTest {
           UInt256.valueOf(1),
           UInt256.valueOf(1),
           CallKind.CALL,
-          HardFork.FRONTIER
+          HardFork.FRONTIER,
         )
       } finally {
         vm.stop()
@@ -192,9 +192,9 @@ class EthereumVirtualMachineTest {
       Bytes.fromHexString(
         "0xf88183676173a000000000000000000000000000000000000000000000000000000000000" +
           "30d40866d656d6f7279a0000000000000000000000000353363663737323034654565663935326532350085737461636ba" +
-          "00000000000000000000000000000000000000000000000000000000000000020866f757470757480846c6f6773"
+          "00000000000000000000000000000000000000000000000000000000000000020866f757470757480846c6f6773",
       ),
-      result.state.toBytes()
+      result.state.toBytes(),
     )
   }
 }

@@ -50,6 +50,6 @@ fun parseEnodeUri(uri: URI): EnodeUriComponents {
 
   return EnodeUriComponents(
     nodeId,
-    Endpoint(uri.host, udpPort, tcpPort)
+    Endpoint(uri.host, udpPort, tcpPort),
   )
 }

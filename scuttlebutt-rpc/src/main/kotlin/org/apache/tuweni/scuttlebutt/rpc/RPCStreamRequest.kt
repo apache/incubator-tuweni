@@ -9,14 +9,11 @@ import org.apache.tuweni.scuttlebutt.rpc.RPCCodec.encodeRequest
 
 /**
  * A request which returns a 'source' type result (e.g. opens up a stream that is followed by the request ID.)
- */
-class RPCStreamRequest
-/**
- * The details for the function (the name of the function and its arguments.)
  *
  * @param function the function to be invoked
  * @param arguments the arguments for the function (can be any arbitrary class which can be marshalled into JSON.)
- */(private val function: RPCFunction, private val arguments: List<Any>) {
+ */
+class RPCStreamRequest(private val function: RPCFunction, private val arguments: List<Any>) {
   /**
    * Encodes message to bytes
    *

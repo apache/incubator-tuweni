@@ -67,7 +67,7 @@ class Stratum1Protocol(
   private val subscriptionIdCreator: () -> String = { createSubscriptionID() },
   private val submitCallback: suspend (PoWSolution) -> (Boolean),
   private val seedSupplier: () -> Bytes32,
-  private val coroutineContext: CoroutineContext
+  private val coroutineContext: CoroutineContext,
 ) : StratumProtocol {
   private var currentInput: PoWInput? = null
   private val activeConnections: MutableList<StratumConnection> = ArrayList()
@@ -104,11 +104,11 @@ class Stratum1Protocol(
             mutableListOf(
               "mining.notify",
               subscriptionIdCreator(),
-              STRATUM_1
+              STRATUM_1,
             ),
-            extranonce
-          )
-        )
+            extranonce,
+          ),
+        ),
       )
       conn.send(notify + "\n")
     } catch (e: JsonProcessingException) {
@@ -131,7 +131,7 @@ class Stratum1Protocol(
       Bytes.wrap(input.prePowHash).toHexString(),
       seedSupplier().toHexString(),
       input.target.toBytes().toHexString(),
-      true
+      true,
     )
     val req = JsonRpcRequest("2.0", "mining.notify", params, 32)
     try {
@@ -166,7 +166,7 @@ class Stratum1Protocol(
       message.bytes(2).getLong(0),
       message.bytes32(4),
       null,
-      message.bytes(3)
+      message.bytes(3),
     )
     if (currentInput?.prePowHash?.equals(solution.powHash) == true) {
       CoroutineScope(coroutineContext).launch {
@@ -210,7 +210,7 @@ class Stratum1Protocol(
 class Stratum1EthProxyProtocol(
   private val submitCallback: suspend (PoWSolution) -> Boolean,
   private val seedSupplier: () -> Bytes32,
-  private val coroutineContext: CoroutineContext
+  private val coroutineContext: CoroutineContext,
 ) : StratumProtocol {
 
   private val activeConnections: MutableList<StratumConnection> = ArrayList()
@@ -246,7 +246,7 @@ class Stratum1EthProxyProtocol(
     val result: List<String> = mutableListOf(
       input.prePowHash.toHexString(),
       seedSupplier().toHexString(),
-      input.target.toHexString()
+      input.target.toHexString(),
     )
     val resp = JsonRpcSuccessResponse(id = id, result = result)
     try {
@@ -291,7 +291,7 @@ class Stratum1EthProxyProtocol(
       req.bytes(0).getLong(0),
       req.bytes32(2),
       null,
-      req.bytes(1)
+      req.bytes(1),
     )
     if (currentInput?.prePowHash?.equals(solution.powHash) == true) {
       CoroutineScope(coroutineContext).launch {
@@ -319,13 +319,13 @@ class Stratum1EthProxyProtocol(
   fun handleHashrateSubmit(
     mapper: JsonMapper,
     conn: StratumConnection,
-    message: JsonRpcRequest
+    message: JsonRpcRequest,
   ) {
     val response = mapper.writeValueAsString(
       JsonRpcSuccessResponse(
         message.id,
-        result = true
-      )
+        result = true,
+      ),
     )
     conn.send(response + "\n")
   }

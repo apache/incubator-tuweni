@@ -9,9 +9,7 @@ import java.util.Objects;
 import io.vertx.core.net.NetSocket;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Vert.x gossip peer associated with a socket
- */
+/** Vert.x gossip peer associated with a socket */
 final class SocketPeer implements Peer {
 
   private final NetSocket socket;
@@ -31,10 +29,8 @@ final class SocketPeer implements Peer {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     SocketPeer that = (SocketPeer) o;
     return Objects.equals(socket.remoteAddress(), that.socket.remoteAddress());
   }
@@ -46,6 +42,9 @@ final class SocketPeer implements Peer {
 
   @Override
   public int compareTo(@NotNull Peer o) {
-    return socket.remoteAddress().toString().compareTo(((SocketPeer) o).socket.remoteAddress().toString());
+    return socket
+        .remoteAddress()
+        .toString()
+        .compareTo(((SocketPeer) o).socket.remoteAddress().toString());
   }
 }

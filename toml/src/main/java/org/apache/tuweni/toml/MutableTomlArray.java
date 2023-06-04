@@ -124,7 +124,11 @@ final class MutableTomlArray implements TomlArray {
     if (type != null) {
       if (valueType.get() != type) {
         throw new TomlInvalidTypeException(
-            "Cannot add a " + typeNameFor(value) + " to an array containing " + type.typeName() + "s");
+            "Cannot add a "
+                + typeNameFor(value)
+                + " to an array containing "
+                + type.typeName()
+                + "s");
       }
     } else {
       type = valueType.get();

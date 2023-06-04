@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.apache.tuweni.bytes;
 
-
-
 import static org.apache.tuweni.bytes.Checks.checkArgument;
 import static org.apache.tuweni.bytes.Checks.checkElementIndex;
 
@@ -36,7 +34,8 @@ final class ConcatenatedBytes extends AbstractBytes {
       try {
         totalSize = Math.addExact(totalSize, size);
       } catch (ArithmeticException e) {
-        throw new IllegalArgumentException("Combined length of values is too long (> Integer.MAX_VALUE)");
+        throw new IllegalArgumentException(
+            "Combined length of values is too long (> Integer.MAX_VALUE)");
       }
       if (value instanceof ConcatenatedBytes) {
         count += ((ConcatenatedBytes) value).values.length;
@@ -82,7 +81,8 @@ final class ConcatenatedBytes extends AbstractBytes {
       try {
         totalSize = Math.addExact(totalSize, size);
       } catch (ArithmeticException e) {
-        throw new IllegalArgumentException("Combined length of values is too long (> Integer.MAX_VALUE)");
+        throw new IllegalArgumentException(
+            "Combined length of values is too long (> Integer.MAX_VALUE)");
       }
       if (value instanceof ConcatenatedBytes) {
         count += ((ConcatenatedBytes) value).values.length;

@@ -22,7 +22,7 @@ class NodesMessageTest {
     val nodeRecords = listOf(
       EthereumNodeRecord.create(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress(), udp = 9090),
       EthereumNodeRecord.create(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress(), udp = 9091),
-      EthereumNodeRecord.create(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress(), udp = 9092)
+      EthereumNodeRecord.create(SECP256K1.KeyPair.random(), ip = InetAddress.getLoopbackAddress(), udp = 9092),
     )
     val message = NodesMessage(requestId, total, nodeRecords)
 

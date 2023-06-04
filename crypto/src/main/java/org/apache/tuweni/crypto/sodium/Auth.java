@@ -14,36 +14,32 @@ import jnr.ffi.Pointer;
 /**
  * Secret-key authentication.
  *
- * <p>
- * These operations computes an authentication tag for a message and a secret key, and provides a way to verify that a
- * given tag is valid for a given message and a key.
+ * <p>These operations computes an authentication tag for a message and a secret key, and provides a
+ * way to verify that a given tag is valid for a given message and a key.
  *
- * <p>
- * The function computing the tag is deterministic: the same (message, key) tuple will always produce the same output.
+ * <p>The function computing the tag is deterministic: the same (message, key) tuple will always
+ * produce the same output.
  *
- * <p>
- * However, even if the message is public, knowing the key is required in order to be able to compute a valid tag.
- * Therefore, the key should remain confidential. The tag, however, can be public.
+ * <p>However, even if the message is public, knowing the key is required in order to be able to
+ * compute a valid tag. Therefore, the key should remain confidential. The tag, however, can be
+ * public.
  *
- * <p>
- * A typical use case is:
+ * <p>A typical use case is:
  *
  * <ul>
- * <li>{@code A} prepares a message, add an authentication tag, sends it to {@code B}</li>
- * <li>{@code A} doesn't store the message</li>
- * <li>Later on, {@code B} sends the message and the authentication tag to {@code A}</li>
- * <li>{@code A} uses the authentication tag to verify that it created this message.</li>
+ *   <li>{@code A} prepares a message, add an authentication tag, sends it to {@code B}
+ *   <li>{@code A} doesn't store the message
+ *   <li>Later on, {@code B} sends the message and the authentication tag to {@code A}
+ *   <li>{@code A} uses the authentication tag to verify that it created this message.
  * </ul>
  *
- * <p>
- * This operation does not encrypt the message. It only computes and verifies an authentication tag.
+ * <p>This operation does not encrypt the message. It only computes and verifies an authentication
+ * tag.
  */
 public final class Auth {
   private Auth() {}
 
-  /**
-   * An Auth key.
-   */
+  /** An Auth key. */
   public static final class Key implements Destroyable {
     final Allocated value;
 
@@ -64,8 +60,7 @@ public final class Auth {
     /**
      * Create a {@link Key} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the key.
      * @return A key, based on the supplied bytes.
@@ -77,8 +72,7 @@ public final class Auth {
     /**
      * Create a {@link Key} from an array of bytes.
      *
-     * <p>
-     * The byte array must be of length {@link #length()}.
+     * <p>The byte array must be of length {@link #length()}.
      *
      * @param bytes The bytes for the key.
      * @return A key, based on the supplied bytes.
@@ -114,7 +108,7 @@ public final class Auth {
       Pointer ptr = Sodium.malloc(length);
       try {
         // When support for 10.0.11 is dropped, use this instead
-        //Sodium.crypto_auth_keygen(ptr);
+        // Sodium.crypto_auth_keygen(ptr);
         Sodium.randombytes_buf(ptr, length);
         return new Key(ptr, length);
       } catch (Throwable e) {
@@ -143,7 +137,7 @@ public final class Auth {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory.
+     * <p>WARNING: This will cause the key to be copied into heap memory.
      *
      * @return The bytes of this key.
      */
@@ -154,8 +148,8 @@ public final class Auth {
     /**
      * Obtain the bytes of this key.
      *
-     * WARNING: This will cause the key to be copied into heap memory. The returned array should be overwritten when no
-     * longer required.
+     * <p>WARNING: This will cause the key to be copied into heap memory. The returned array should
+     * be overwritten when no longer required.
      *
      * @return The bytes of this key.
      */

@@ -15,7 +15,6 @@ import java.util.Locale;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedTrustManager;
 
-
 final class ServerFingerprintTrustManager extends X509ExtendedTrustManager {
 
   private static final X509Certificate[] EMPTY_X509_CERTIFICATES = new X509Certificate[0];
@@ -37,21 +36,21 @@ final class ServerFingerprintTrustManager extends X509ExtendedTrustManager {
   private final boolean updateFingerprints;
 
   private ServerFingerprintTrustManager(
-      FingerprintRepository repository,
-      boolean acceptNewFingerprints,
-      boolean updateFingerprints) {
+      FingerprintRepository repository, boolean acceptNewFingerprints, boolean updateFingerprints) {
     this.repository = repository;
     this.acceptNewFingerprints = acceptNewFingerprints;
     this.updateFingerprints = updateFingerprints;
   }
 
   @Override
-  public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
+  public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket)
+      throws CertificateException {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
+  public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket)
+      throws CertificateException {
     InetSocketAddress socketAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
     checkTrusted(chain, socketAddress.getHostName(), socketAddress.getPort());
   }
@@ -69,16 +68,19 @@ final class ServerFingerprintTrustManager extends X509ExtendedTrustManager {
   }
 
   @Override
-  public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+  public void checkClientTrusted(X509Certificate[] chain, String authType)
+      throws CertificateException {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+  public void checkServerTrusted(X509Certificate[] chain, String authType)
+      throws CertificateException {
     throw new UnsupportedOperationException();
   }
 
-  private void checkTrusted(X509Certificate[] chain, String host, int port) throws CertificateException {
+  private void checkTrusted(X509Certificate[] chain, String host, int port)
+      throws CertificateException {
     X509Certificate cert = chain[0];
     String identifier = hostIdentifier(host, port);
     Bytes fingerprint = Bytes.wrap(certificateFingerprint(cert));
@@ -90,7 +92,8 @@ final class ServerFingerprintTrustManager extends X509ExtendedTrustManager {
       if (!updateFingerprints) {
         throw new CertificateException(
             format(
-                "Remote host identification has changed!!" + " Certificate for %s (%s) has fingerprint %s",
+                "Remote host identification has changed!!"
+                    + " Certificate for %s (%s) has fingerprint %s",
                 identifier,
                 cert.getSubjectDN(),
                 fingerprint.toHexString().substring(2).toLowerCase(Locale.ENGLISH)));

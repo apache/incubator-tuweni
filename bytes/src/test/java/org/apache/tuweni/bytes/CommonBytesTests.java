@@ -161,7 +161,8 @@ abstract class CommonBytesTests {
 
   @Test
   void testAsIntTooManyBytes() {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> w(new byte[] {1, 2, 3, 4, 5}).toInt());
+    Throwable exception =
+        assertThrows(IllegalArgumentException.class, () -> w(new byte[] {1, 2, 3, 4, 5}).toInt());
     assertEquals("Value of size 5 has more than 4 bytes", exception.getMessage());
   }
 
@@ -179,12 +180,14 @@ abstract class CommonBytesTests {
 
   @Test
   void testGetLongNegativeIndex() {
-    assertThrows(IndexOutOfBoundsException.class, () -> w(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}).getLong(-1));
+    assertThrows(
+        IndexOutOfBoundsException.class, () -> w(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}).getLong(-1));
   }
 
   @Test
   void testGetLongOutOfBound() {
-    assertThrows(IndexOutOfBoundsException.class, () -> w(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}).getLong(8));
+    assertThrows(
+        IndexOutOfBoundsException.class, () -> w(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}).getLong(8));
   }
 
   @Test
@@ -211,7 +214,9 @@ abstract class CommonBytesTests {
   @Test
   void testAsLongTooManyBytes() {
     Throwable exception =
-        assertThrows(IllegalArgumentException.class, () -> w(new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9}).toLong());
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> w(new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9}).toLong());
     assertEquals("Value of size 9 has more than 8 bytes", exception.getMessage());
   }
 
@@ -238,7 +243,8 @@ abstract class CommonBytesTests {
 
   @Test
   void testSliceTooLong() {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> h("0x012345").slice(1, 3));
+    Throwable exception =
+        assertThrows(IllegalArgumentException.class, () -> h("0x012345").slice(1, 3));
     assertEquals(
         "Provided length 3 is too big: the value has size 3 and has only 2 bytes from 1",
         exception.getMessage());
@@ -288,14 +294,16 @@ abstract class CommonBytesTests {
   @Test
   void testCopyToTooSmall() {
     Throwable exception =
-        assertThrows(IllegalArgumentException.class, () -> of(1, 2, 3).copyTo(MutableBytes.create(2)));
+        assertThrows(
+            IllegalArgumentException.class, () -> of(1, 2, 3).copyTo(MutableBytes.create(2)));
     assertEquals("Cannot copy 3 bytes to destination of non-equal size 2", exception.getMessage());
   }
 
   @Test
   void testCopyToTooBig() {
     Throwable exception =
-        assertThrows(IllegalArgumentException.class, () -> of(1, 2, 3).copyTo(MutableBytes.create(4)));
+        assertThrows(
+            IllegalArgumentException.class, () -> of(1, 2, 3).copyTo(MutableBytes.create(4)));
     assertEquals("Cannot copy 3 bytes to destination of non-equal size 4", exception.getMessage());
   }
 
@@ -327,18 +335,22 @@ abstract class CommonBytesTests {
   @Test
   void testCopyToWithOffsetTooSmall() {
     Throwable exception =
-        assertThrows(IllegalArgumentException.class, () -> of(1, 2, 3).copyTo(MutableBytes.create(4), 2));
-    assertEquals("Cannot copy 3 bytes, destination has only 2 bytes from index 2", exception.getMessage());
+        assertThrows(
+            IllegalArgumentException.class, () -> of(1, 2, 3).copyTo(MutableBytes.create(4), 2));
+    assertEquals(
+        "Cannot copy 3 bytes, destination has only 2 bytes from index 2", exception.getMessage());
   }
 
   @Test
   void testCopyToWithNegativeOffset() {
-    assertThrows(IndexOutOfBoundsException.class, () -> of(1, 2, 3).copyTo(MutableBytes.create(10), -1));
+    assertThrows(
+        IndexOutOfBoundsException.class, () -> of(1, 2, 3).copyTo(MutableBytes.create(10), -1));
   }
 
   @Test
   void testCopyToWithOutOfBoundIndex() {
-    assertThrows(IndexOutOfBoundsException.class, () -> of(1, 2, 3).copyTo(MutableBytes.create(10), 10));
+    assertThrows(
+        IndexOutOfBoundsException.class, () -> of(1, 2, 3).copyTo(MutableBytes.create(10), 10));
   }
 
   @Test
@@ -494,8 +506,7 @@ abstract class CommonBytesTests {
     wrapped.copy().update(md3);
     byte[] digest3 = md3.digest();
 
-    for (int i = 0; i < wrapped.size(); i++)
-      md4.update(wrapped.get(i));
+    for (int i = 0; i < wrapped.size(); i++) md4.update(wrapped.get(i));
     byte[] digest4 = md4.digest();
 
     assertArrayEquals(digest2, digest1);
@@ -526,13 +537,15 @@ abstract class CommonBytesTests {
     byte[] bytes = new byte[0];
     assertArrayEquals(extractor.apply(Bytes.EMPTY), bytes);
 
-    byte[][] toTest = new byte[][] {new byte[] {1}, new byte[] {1, 2, 3, 4, 5, 6}, new byte[] {-1, -1, 0, -1}};
+    byte[][] toTest =
+        new byte[][] {new byte[] {1}, new byte[] {1, 2, 3, 4, 5, 6}, new byte[] {-1, -1, 0, -1}};
     for (byte[] array : toTest) {
       assertArrayEquals(extractor.apply(w(array)), array);
     }
 
     // Test slightly more complex interactions
-    assertArrayEquals(extractor.apply(w(new byte[] {1, 2, 3, 4, 5}).slice(2, 2)), new byte[] {3, 4});
+    assertArrayEquals(
+        extractor.apply(w(new byte[] {1, 2, 3, 4, 5}).slice(2, 2)), new byte[] {3, 4});
     assertArrayEquals(extractor.apply(w(new byte[] {1, 2, 3, 4, 5}).slice(2, 0)), new byte[] {});
   }
 

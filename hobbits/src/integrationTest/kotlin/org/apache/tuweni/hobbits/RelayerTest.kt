@@ -30,7 +30,7 @@ class RelayerTest {
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.TCP,
         "localhost",
-        22000
+        22000,
       )
     }
     Thread.sleep(1000)
@@ -55,7 +55,7 @@ class RelayerTest {
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.HTTP,
         "localhost",
-        13000
+        13000,
       )
     }
     Thread.sleep(1000)
@@ -80,7 +80,7 @@ class RelayerTest {
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.UDP,
         "localhost",
-        12000
+        12000,
       )
     }
     Thread.sleep(1000)
@@ -105,7 +105,7 @@ class RelayerTest {
         Message(protocol = Protocol.PING, body = Bytes.fromHexString("deadbeef"), headers = Bytes.random(16)),
         Transport.WS,
         "localhost",
-        32000
+        32000,
       )
     }
     Thread.sleep(1000)

@@ -28,7 +28,7 @@ data class NodeInfo @JsonCreator constructor(
   @JsonProperty("canUpdateHistory")
   val canUpdateHistory: Boolean = true,
   @JsonProperty("client")
-  val client: String = "Apache Tuweni Ethstats"
+  val client: String = "Apache Tuweni Ethstats",
 ) {
 
   @JsonGetter("os_v")

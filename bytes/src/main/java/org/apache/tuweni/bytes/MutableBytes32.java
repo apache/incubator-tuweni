@@ -4,9 +4,7 @@ package org.apache.tuweni.bytes;
 
 import static org.apache.tuweni.bytes.Checks.checkNotNull;
 
-/**
- * A mutable {@link Bytes32}, that is a mutable {@link Bytes} value of exactly 32 bytes.
- */
+/** A mutable {@link Bytes32}, that is a mutable {@link Bytes} value of exactly 32 bytes. */
 public interface MutableBytes32 extends MutableBytes, Bytes32 {
 
   /**
@@ -33,15 +31,14 @@ public interface MutableBytes32 extends MutableBytes, Bytes32 {
   /**
    * Wrap a the provided array as a {@link MutableBytes32}.
    *
-   * <p>
-   * Note that value is not copied, only wrapped, and thus any future update to {@code value} within the wrapped parts
-   * will be reflected in the returned value.
+   * <p>Note that value is not copied, only wrapped, and thus any future update to {@code value}
+   * within the wrapped parts will be reflected in the returned value.
    *
    * @param value The bytes to wrap.
-   * @param offset The index (inclusive) in {@code value} of the first byte exposed by the returned value. In other
-   *        words, you will have {@code wrap(value, i).get(0) == value[i]}.
-   * @return A {@link MutableBytes32} that exposes the bytes of {@code value} from {@code offset} (inclusive) to
-   *         {@code offset + 32} (exclusive).
+   * @param offset The index (inclusive) in {@code value} of the first byte exposed by the returned
+   *     value. In other words, you will have {@code wrap(value, i).get(0) == value[i]}.
+   * @return A {@link MutableBytes32} that exposes the bytes of {@code value} from {@code offset}
+   *     (inclusive) to {@code offset + 32} (exclusive).
    * @throws IndexOutOfBoundsException if {@code offset < 0 || (value.length > 0 && offset >=
    *     value.length)}.
    * @throws IllegalArgumentException if {@code length < 0 || offset + 32 > value.length}.
@@ -54,9 +51,8 @@ public interface MutableBytes32 extends MutableBytes, Bytes32 {
   /**
    * Wrap a the provided value, which must be of size 32, as a {@link MutableBytes32}.
    *
-   * <p>
-   * Note that value is not copied, only wrapped, and thus any future update to {@code value} will be reflected in the
-   * returned value.
+   * <p>Note that value is not copied, only wrapped, and thus any future update to {@code value}
+   * will be reflected in the returned value.
    *
    * @param value The bytes to wrap.
    * @return A {@link MutableBytes32} that exposes the bytes of {@code value}.
@@ -73,15 +69,14 @@ public interface MutableBytes32 extends MutableBytes, Bytes32 {
   /**
    * Wrap a slice/sub-part of the provided value as a {@link MutableBytes32}.
    *
-   * <p>
-   * Note that the value is not copied, and thus any future update to {@code value} within the wrapped parts will be
-   * reflected in the returned value.
+   * <p>Note that the value is not copied, and thus any future update to {@code value} within the
+   * wrapped parts will be reflected in the returned value.
    *
    * @param value The bytes to wrap.
-   * @param offset The index (inclusive) in {@code value} of the first byte exposed by the returned value. In other
-   *        words, you will have {@code wrap(value, i).get(0) == value.get(i)}.
-   * @return A {@link Bytes32} that exposes the bytes of {@code value} from {@code offset} (inclusive) to
-   *         {@code offset + 32} (exclusive).
+   * @param offset The index (inclusive) in {@code value} of the first byte exposed by the returned
+   *     value. In other words, you will have {@code wrap(value, i).get(0) == value.get(i)}.
+   * @return A {@link Bytes32} that exposes the bytes of {@code value} from {@code offset}
+   *     (inclusive) to {@code offset + 32} (exclusive).
    * @throws IndexOutOfBoundsException if {@code offset < 0 || (value.size() > 0 && offset >=
    *     value.size())}.
    * @throws IllegalArgumentException if {@code length < 0 || offset + 32 > value.size()}.

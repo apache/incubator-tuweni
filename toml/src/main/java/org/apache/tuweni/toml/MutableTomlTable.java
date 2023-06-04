@@ -57,28 +57,35 @@ final class MutableTomlTable implements TomlTable {
 
   @Override
   public Set<List<String>> keyPathSet(boolean includeTables) {
-    return properties.entrySet().stream().flatMap(entry -> {
-      String key = entry.getKey();
-      List<String> basePath = Collections.singletonList(key);
+    return properties.entrySet().stream()
+        .flatMap(
+            entry -> {
+              String key = entry.getKey();
+              List<String> basePath = Collections.singletonList(key);
 
-      Element element = entry.getValue();
-      if (!(element.value instanceof TomlTable)) {
-        return Stream.of(basePath);
-      }
+              Element element = entry.getValue();
+              if (!(element.value instanceof TomlTable)) {
+                return Stream.of(basePath);
+              }
 
-      Stream<List<String>> subKeys = ((TomlTable) element.value).keyPathSet(includeTables).stream().map(subPath -> {
-        List<String> path = new ArrayList<>(subPath.size() + 1);
-        path.add(key);
-        path.addAll(subPath);
-        return path;
-      });
+              Stream<List<String>> subKeys =
+                  ((TomlTable) element.value)
+                      .keyPathSet(includeTables).stream()
+                          .map(
+                              subPath -> {
+                                List<String> path = new ArrayList<>(subPath.size() + 1);
+                                path.add(key);
+                                path.addAll(subPath);
+                                return path;
+                              });
 
-      if (includeTables) {
-        return Stream.concat(Stream.of(basePath), subKeys);
-      } else {
-        return subKeys;
-      }
-    }).collect(Collectors.toSet());
+              if (includeTables) {
+                return Stream.concat(Stream.of(basePath), subKeys);
+              } else {
+                return subKeys;
+              }
+            })
+        .collect(Collectors.toSet());
   }
 
   @Override
@@ -122,7 +129,8 @@ final class MutableTomlTable implements TomlTable {
 
   @Override
   public Map<String, Object> toMap() {
-    return properties.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().value));
+    return properties.entrySet().stream()
+        .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().value));
   }
 
   MutableTomlTable createTable(List<String> path, TomlPosition position) {
@@ -161,14 +169,20 @@ final class MutableTomlTable implements TomlTable {
     MutableTomlTable table = ensureTable(path.subList(0, depth - 1), position, true);
 
     String key = path.get(depth - 1);
-    Element element = table.properties.computeIfAbsent(key, k -> new Element(new MutableTomlArray(), position));
+    Element element =
+        table.properties.computeIfAbsent(key, k -> new Element(new MutableTomlArray(), position));
     if (!(element.value instanceof MutableTomlArray)) {
-      String message = Toml.joinKeyPath(path) + " is not an array (previously defined at " + element.position + ")";
+      String message =
+          Toml.joinKeyPath(path)
+              + " is not an array (previously defined at "
+              + element.position
+              + ")";
       throw new TomlParseError(message, position);
     }
     MutableTomlArray array = (MutableTomlArray) element.value;
     if (array.wasDefinedAsLiteral()) {
-      String message = Toml.joinKeyPath(path) + " previously defined as a literal array at " + element.position;
+      String message =
+          Toml.joinKeyPath(path) + " previously defined as a literal array at " + element.position;
       throw new TomlParseError(message, position);
     }
     MutableTomlTable newTable = new MutableTomlTable();
@@ -190,7 +204,8 @@ final class MutableTomlTable implements TomlTable {
     assert (typeFor(value).isPresent()) : "Unexpected value of type " + value.getClass();
 
     MutableTomlTable table = ensureTable(path.subList(0, depth - 1), position, false);
-    Element prevElem = table.properties.putIfAbsent(path.get(depth - 1), new Element(value, position));
+    Element prevElem =
+        table.properties.putIfAbsent(path.get(depth - 1), new Element(value, position));
     if (prevElem != null) {
       String pathString = Toml.joinKeyPath(path);
       String message = pathString + " previously defined at " + prevElem.position;
@@ -199,12 +214,14 @@ final class MutableTomlTable implements TomlTable {
     return this;
   }
 
-  private MutableTomlTable ensureTable(List<String> path, TomlPosition position, boolean followArrayTables) {
+  private MutableTomlTable ensureTable(
+      List<String> path, TomlPosition position, boolean followArrayTables) {
     MutableTomlTable table = this;
     int depth = path.size();
     for (int i = 0; i < depth; ++i) {
       Element element =
-          table.properties.computeIfAbsent(path.get(i), k -> new Element(new MutableTomlTable(true), position));
+          table.properties.computeIfAbsent(
+              path.get(i), k -> new Element(new MutableTomlTable(true), position));
       if (element.value instanceof MutableTomlTable) {
         table = (MutableTomlTable) element.value;
         continue;
@@ -217,7 +234,10 @@ final class MutableTomlTable implements TomlTable {
         }
       }
       String message =
-          Toml.joinKeyPath(path.subList(0, i + 1)) + " is not a table (previously defined at " + element.position + ")";
+          Toml.joinKeyPath(path.subList(0, i + 1))
+              + " is not a table (previously defined at "
+              + element.position
+              + ")";
       throw new TomlParseError(message, position);
     }
     return table;

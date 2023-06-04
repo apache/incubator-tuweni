@@ -95,7 +95,7 @@ internal class IdentityTest {
     val kp = Signature.KeyPair
       .fromSeed(
         Signature.Seed
-          .fromBytes(Bytes.fromHexString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"))
+          .fromBytes(Bytes.fromHexString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef")),
       )
     val message = Bytes.fromHexString("deadbeef")
     val id = fromKeyPair(kp)
@@ -145,12 +145,12 @@ internal class IdentityTest {
   @Test
   fun curveUnsupported() {
     Assertions.assertThrows(
-      UnsupportedOperationException::class.java
+      UnsupportedOperationException::class.java,
     ) {
       random().secp256k1PublicKey()
     }
     Assertions.assertThrows(
-      UnsupportedOperationException::class.java
+      UnsupportedOperationException::class.java,
     ) {
       randomSECP256K1().ed25519PublicKey()
     }
@@ -172,12 +172,12 @@ internal class IdentityTest {
     Assertions.assertEquals(
       fromPublicKey(id1.ed25519PublicKey()!!),
       fromPublicKey(
-        id2.ed25519PublicKey()!!
-      )
+        id2.ed25519PublicKey()!!,
+      ),
     )
     Assertions.assertEquals(
       fromPublicKey(id1.ed25519PublicKey()!!).hashCode(),
-      fromPublicKey(id2.ed25519PublicKey()!!).hashCode()
+      fromPublicKey(id2.ed25519PublicKey()!!).hashCode(),
     )
   }
 

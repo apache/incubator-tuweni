@@ -7,9 +7,7 @@ import org.apache.milagro.amcl.BLS381.ECP;
 import org.apache.milagro.amcl.BLS381.ROM;
 import org.apache.milagro.amcl.RAND;
 
-/**
- * KeyPair represents a public and private key.
- */
+/** KeyPair represents a public and private key. */
 public final class KeyPair {
 
   private static final BIG curveOrder = new BIG(ROM.CURVE_Order);
@@ -20,7 +18,7 @@ public final class KeyPair {
    *
    * @return a new random key pair
    */
-  static public KeyPair random() {
+  public static KeyPair random() {
     RAND rng = new RAND();
     Scalar secret = new Scalar(BIG.randomnum(curveOrder, rng));
 

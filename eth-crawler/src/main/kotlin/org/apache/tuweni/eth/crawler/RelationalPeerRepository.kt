@@ -27,7 +27,7 @@ open class RelationalPeerRepository(
   private val dataSource: DataSource,
   private val expiration: Long = 5 * 60 * 1000L,
   private val clientIdsInterval: Long = 24 * 60 * 60 * 1000 * 2L,
-  override val coroutineContext: CoroutineContext = Dispatchers.Default
+  override val coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : CoroutineScope, PeerRepository {
 
   companion object {
@@ -89,14 +89,14 @@ open class RelationalPeerRepository(
     dataSource.connection.use { conn ->
       val peer = get(
         wireConnection.peerPublicKey(),
-        Endpoint(wireConnection.peerHost(), wireConnection.peerPort())
+        Endpoint(wireConnection.peerHost(), wireConnection.peerPort()),
       ) as RepositoryPeer
       val stmt =
         conn.prepareStatement(
           """insert into nodeInfo(id, createdAt, host, port, publickey, p2pVersion, clientId, capabilities,
-            | genesisHash, bestHash, totalDifficulty, identity, disconnectReason) 
+            | genesisHash, bestHash, totalDifficulty, identity, disconnectReason)
             | values(?,?,?,?,?,?,?,?,?,?,?,?,?)
-          """.trimMargin()
+          """.trimMargin(),
         )
       stmt.use {
         val peerHello = wireConnection.peerHello
@@ -148,14 +148,14 @@ open class RelationalPeerRepository(
   internal fun getPeersWithInfo(
     infoCollected: Long,
     from: Int? = null,
-    limit: Int? = null
+    limit: Int? = null,
   ): List<PeerConnectionInfoDetails> {
     dataSource.connection.use { conn ->
       var query =
-        """select distinct nodeinfo.createdAt, nodeinfo.publickey, nodeinfo.p2pversion, nodeinfo.clientId, 
-          |nodeinfo.capabilities, nodeinfo.genesisHash, nodeinfo.besthash, nodeinfo.totalDifficulty from nodeinfo 
-          |inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen 
-          |on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt 
+        """select distinct nodeinfo.createdAt, nodeinfo.publickey, nodeinfo.p2pversion, nodeinfo.clientId,
+          |nodeinfo.capabilities, nodeinfo.genesisHash, nodeinfo.besthash, nodeinfo.totalDifficulty from nodeinfo
+          |inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen
+          |on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt
           |where createdAt < ? order by nodeInfo.createdAt desc
         """.trimMargin()
       if (from != null && limit != null) {
@@ -186,8 +186,8 @@ open class RelationalPeerRepository(
               capabilities,
               genesisHash,
               bestHash,
-              totalDifficulty
-            )
+              totalDifficulty,
+            ),
           )
         }
         return result
@@ -199,10 +199,10 @@ open class RelationalPeerRepository(
     dataSource.connection.use { conn ->
       val stmt =
         conn.prepareStatement(
-          """select endpoint.host, endpoint.port, identity.publickey from endpoint inner join identity on 
-            |(endpoint.identity = identity.id) where endpoint.identity NOT IN (select identity from nodeinfo) 
+          """select endpoint.host, endpoint.port, identity.publickey from endpoint inner join identity on
+            |(endpoint.identity = identity.id) where endpoint.identity NOT IN (select identity from nodeinfo)
             |order by endpoint.lastSeen desc limit $limit offset $from
-          """.trimMargin()
+          """.trimMargin(),
         )
       stmt.use {
         // map results.
@@ -222,9 +222,9 @@ open class RelationalPeerRepository(
   internal fun getClientIdsInternal(): List<ClientInfo> {
     dataSource.connection.use { conn ->
       val sql =
-        """select clients.clientId, count(clients.clientId) from (select nodeinfo.clientId, nodeInfo.createdAt 
-          |from nodeinfo inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) 
-          |maxSeen on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt) as clients 
+        """select clients.clientId, count(clients.clientId) from (select nodeinfo.clientId, nodeInfo.createdAt
+          |from nodeinfo inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity)
+          |maxSeen on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt) as clients
           |where clients.createdAt > ? group by clients.clientId
         """.trimMargin()
       val stmt =
@@ -249,10 +249,10 @@ open class RelationalPeerRepository(
   internal fun getPeerWithInfo(infoCollected: Long, publicKey: String): PeerConnectionInfoDetails? {
     dataSource.connection.use { conn ->
       val query =
-        """select distinct nodeinfo.createdAt, nodeinfo.publickey, nodeinfo.p2pversion, nodeinfo.clientId, 
-          |nodeinfo.capabilities, nodeinfo.genesisHash, nodeinfo.besthash, nodeinfo.totalDifficulty from nodeinfo 
-          |inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen 
-          |on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt 
+        """select distinct nodeinfo.createdAt, nodeinfo.publickey, nodeinfo.p2pversion, nodeinfo.clientId,
+          |nodeinfo.capabilities, nodeinfo.genesisHash, nodeinfo.besthash, nodeinfo.totalDifficulty from nodeinfo
+          |inner join (select identity, max(createdAt) as maxCreatedAt from nodeinfo group by identity) maxSeen
+          |on nodeinfo.identity = maxSeen.identity and nodeinfo.createdAt = maxSeen.maxCreatedAt
           |where createdAt < ? and nodeinfo.publickey = ? order by nodeInfo.createdAt desc
         """.trimMargin()
       val stmt =
@@ -279,7 +279,7 @@ open class RelationalPeerRepository(
             capabilities,
             genesisHash,
             bestHash,
-            totalDifficulty
+            totalDifficulty,
           )
         } else {
           return null
@@ -300,14 +300,14 @@ internal data class PeerConnectionInfoDetails(
   val capabilities: String,
   val genesisHash: String,
   val bestHash: String,
-  val totalDifficulty: String
+  val totalDifficulty: String,
 )
 
 internal class RepositoryPeer(
   override val nodeId: SECP256K1.PublicKey,
   val id: String,
   knownEndpoint: Endpoint,
-  private val dataSource: DataSource
+  private val dataSource: DataSource,
 ) : Peer {
 
   init {
@@ -401,7 +401,7 @@ internal class RepositoryPeer(
     dataSource.connection.use { conn ->
       val stmt =
         conn.prepareStatement(
-          "insert into endpoint(id, lastSeen, lastVerified, host, port, identity) values(?,?,?,?,?,?)"
+          "insert into endpoint(id, lastSeen, lastVerified, host, port, identity) values(?,?,?,?,?,?)",
         )
       stmt.use {
         it.setString(1, UUID.randomUUID().toString())

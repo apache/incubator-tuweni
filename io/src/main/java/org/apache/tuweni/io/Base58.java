@@ -7,9 +7,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.apache.tuweni.bytes.Bytes;
 
-/**
- * Utility methods for encoding and decoding base58 strings.
- */
+/** Utility methods for encoding and decoding base58 strings. */
 public final class Base58 {
   private Base58() {}
 

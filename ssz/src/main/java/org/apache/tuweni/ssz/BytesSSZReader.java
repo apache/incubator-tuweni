@@ -41,7 +41,8 @@ final class BytesSSZReader implements SSZReader {
     }
     index += 4;
     if (content.size() - index - size < 0) {
-      throw new InvalidSSZTypeException("SSZ encoded data has insufficient bytes for decoded byte array length");
+      throw new InvalidSSZTypeException(
+          "SSZ encoded data has insufficient bytes for decoded byte array length");
     }
     return consumeBytes(size);
   }
@@ -58,7 +59,9 @@ final class BytesSSZReader implements SSZReader {
       throw new IllegalArgumentException("bitLength must be a multiple of 8");
     }
     int byteLength = bitLength / 8;
-    ensureBytes(byteLength, () -> "SSZ encoded data has insufficient length to read a " + bitLength + "-bit integer");
+    ensureBytes(
+        byteLength,
+        () -> "SSZ encoded data has insufficient length to read a " + bitLength + "-bit integer");
     Bytes bytes = content.slice(index, byteLength);
     int zeroBytes = bytes.numberOfTrailingZeroBytes();
     if ((byteLength - zeroBytes) > 4) {
@@ -74,7 +77,9 @@ final class BytesSSZReader implements SSZReader {
       throw new IllegalArgumentException("bitLength must be a multiple of 8");
     }
     int byteLength = bitLength / 8;
-    ensureBytes(byteLength, () -> "SSZ encoded data has insufficient length to read a " + bitLength + "-bit integer");
+    ensureBytes(
+        byteLength,
+        () -> "SSZ encoded data has insufficient length to read a " + bitLength + "-bit integer");
     Bytes bytes = content.slice(index, byteLength);
     int zeroBytes = bytes.numberOfTrailingZeroBytes();
     if ((byteLength - zeroBytes) > 8) {
@@ -90,7 +95,9 @@ final class BytesSSZReader implements SSZReader {
       throw new IllegalArgumentException("bitLength must be a multiple of 8");
     }
     int byteLength = bitLength / 8;
-    ensureBytes(byteLength, () -> "SSZ encoded data has insufficient length to read a " + bitLength + "-bit integer");
+    ensureBytes(
+        byteLength,
+        () -> "SSZ encoded data has insufficient length to read a " + bitLength + "-bit integer");
     return consumeBytes(byteLength).toBigInteger(LITTLE_ENDIAN);
   }
 
@@ -100,19 +107,23 @@ final class BytesSSZReader implements SSZReader {
       throw new IllegalArgumentException("bitLength must be a multiple of 8");
     }
     int byteLength = bitLength / 8;
-    ensureBytes(byteLength, () -> "SSZ encoded data has insufficient length to read a " + bitLength + "-bit integer");
+    ensureBytes(
+        byteLength,
+        () -> "SSZ encoded data has insufficient length to read a " + bitLength + "-bit integer");
     return consumeBytes(byteLength).toUnsignedBigInteger(LITTLE_ENDIAN);
   }
 
   @Override
   public UInt256 readUInt256() {
-    ensureBytes(256 / 8, () -> "SSZ encoded data has insufficient length to read a 256-bit integer");
+    ensureBytes(
+        256 / 8, () -> "SSZ encoded data has insufficient length to read a 256-bit integer");
     return UInt256.fromBytes(consumeBytes(256 / 8).reverse());
   }
 
   @Override
   public UInt384 readUInt384() {
-    ensureBytes(384 / 8, () -> "SSZ encoded data has insufficient length to read a 384-bit integer");
+    ensureBytes(
+        384 / 8, () -> "SSZ encoded data has insufficient length to read a 384-bit integer");
     return UInt384.fromBytes(consumeBytes(384 / 8).reverse());
   }
 
@@ -124,7 +135,9 @@ final class BytesSSZReader implements SSZReader {
 
   @Override
   public Bytes readHash(int hashLength) {
-    ensureBytes(hashLength, () -> "SSZ encoded data has insufficient length to read a " + hashLength + "-byte hash");
+    ensureBytes(
+        hashLength,
+        () -> "SSZ encoded data has insufficient length to read a " + hashLength + "-byte hash");
     return consumeBytes(hashLength);
   }
 
@@ -150,7 +163,8 @@ final class BytesSSZReader implements SSZReader {
 
   @Override
   public List<String> readStringList(int limit) {
-    return readList(remaining -> readBytes(limit), bytes -> new String(bytes.toArrayUnsafe(), UTF_8));
+    return readList(
+        remaining -> readBytes(limit), bytes -> new String(bytes.toArrayUnsafe(), UTF_8));
   }
 
   @Override
@@ -252,7 +266,8 @@ final class BytesSSZReader implements SSZReader {
         listSize -= bytes.size();
         listSize -= 4;
         if (listSize < 0) {
-          throw new InvalidSSZTypeException("SSZ encoded list length does not align with lengths of its elements");
+          throw new InvalidSSZTypeException(
+              "SSZ encoded list length does not align with lengths of its elements");
         }
       }
     } catch (Exception e) {
@@ -276,7 +291,8 @@ final class BytesSSZReader implements SSZReader {
         listSize -= bytes.size();
         listSize -= 4;
         if (listSize < 0) {
-          throw new InvalidSSZTypeException("SSZ encoded list length does not align with lengths of its elements");
+          throw new InvalidSSZTypeException(
+              "SSZ encoded list length does not align with lengths of its elements");
         }
       }
     } catch (Exception e) {
@@ -286,7 +302,8 @@ final class BytesSSZReader implements SSZReader {
     return elements;
   }
 
-  private <T> List<T> readList(long listSize, LongFunction<byte[]> bytesSupplier, Function<byte[], T> converter) {
+  private <T> List<T> readList(
+      long listSize, LongFunction<byte[]> bytesSupplier, Function<byte[], T> converter) {
     int originalIndex = this.index;
     List<T> elements;
     try {
@@ -299,7 +316,8 @@ final class BytesSSZReader implements SSZReader {
         // we only subtract one each time an element is processed in this case.
         listSize -= 1;
         if (listSize < 0) {
-          throw new InvalidSSZTypeException("SSZ encoded list length does not align with lengths of its elements");
+          throw new InvalidSSZTypeException(
+              "SSZ encoded list length does not align with lengths of its elements");
         }
       }
     } catch (Exception e) {
@@ -309,7 +327,8 @@ final class BytesSSZReader implements SSZReader {
     return elements;
   }
 
-  private <T> List<T> readFixedList(int listSize, LongFunction<byte[]> bytesSupplier, Function<byte[], T> converter) {
+  private <T> List<T> readFixedList(
+      int listSize, LongFunction<byte[]> bytesSupplier, Function<byte[], T> converter) {
     int originalIndex = this.index;
     List<T> elements;
     try {
@@ -322,7 +341,8 @@ final class BytesSSZReader implements SSZReader {
         // we only subtract one each time an element is processed in this case.
         listSize -= 1;
         if (listSize < 0) {
-          throw new InvalidSSZTypeException("SSZ encoded list length does not align with lengths of its elements");
+          throw new InvalidSSZTypeException(
+              "SSZ encoded list length does not align with lengths of its elements");
         }
       }
     } catch (Exception e) {
@@ -339,7 +359,8 @@ final class BytesSSZReader implements SSZReader {
     try {
       int listSize = consumeBytes(4).toInt(LITTLE_ENDIAN);
       if ((listSize % elementSize) != 0) {
-        throw new InvalidSSZTypeException("SSZ encoded list length does not align with lengths of its elements");
+        throw new InvalidSSZTypeException(
+            "SSZ encoded list length does not align with lengths of its elements");
       }
       int nElements = listSize / elementSize;
       bytesList = new ArrayList<>(nElements);
@@ -379,7 +400,6 @@ final class BytesSSZReader implements SSZReader {
         .get(variableElements.size() - 1)
         .getElement()
         .populateFromReader(this.slice(content.size() - index));
-
   }
 
   private SSZReader slice(int length) {
@@ -407,21 +427,27 @@ final class BytesSSZReader implements SSZReader {
   @Override
   public <T extends SSZReadable> List<T> readFixedTypedList(int elementSize, Supplier<T> supplier) {
     int listSize = (content.size() - index) / elementSize;
-    return readFixedList(listSize, remaining -> readFixedByteArray(elementSize, listSize * elementSize), bytes -> {
-      T t = supplier.get();
-      t.populateFromReader(new BytesSSZReader(Bytes.wrap(bytes)));
-      return t;
-    });
+    return readFixedList(
+        listSize,
+        remaining -> readFixedByteArray(elementSize, listSize * elementSize),
+        bytes -> {
+          T t = supplier.get();
+          t.populateFromReader(new BytesSSZReader(Bytes.wrap(bytes)));
+          return t;
+        });
   }
 
   @Override
-  public <T extends SSZReadable> List<T> readTypedVector(int listSize, int elementSize, Supplier<T> supplier) {
-    return readFixedList(listSize, remaining -> readFixedByteArray(elementSize, listSize * elementSize), bytes -> {
-      T t = supplier.get();
-      t.populateFromReader(new BytesSSZReader(Bytes.wrap(bytes)));
-      return t;
-    });
-
+  public <T extends SSZReadable> List<T> readTypedVector(
+      int listSize, int elementSize, Supplier<T> supplier) {
+    return readFixedList(
+        listSize,
+        remaining -> readFixedByteArray(elementSize, listSize * elementSize),
+        bytes -> {
+          T t = supplier.get();
+          t.populateFromReader(new BytesSSZReader(Bytes.wrap(bytes)));
+          return t;
+        });
   }
 
   @Override

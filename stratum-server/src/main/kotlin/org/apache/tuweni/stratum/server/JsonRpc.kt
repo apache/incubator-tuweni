@@ -12,7 +12,7 @@ data class JsonRpcRequest(
   @JsonProperty("jsonrpc") val jsonrpc: String?,
   @JsonProperty("method") val method: String,
   @JsonProperty("params") val params: MutableList<Any> = mutableListOf(),
-  @JsonProperty("id") val id: Long
+  @JsonProperty("id") val id: Long,
 ) {
 
   fun bytes32(i: Int): Bytes32 = Bytes32.fromHexStringLenient(params[i] as String)
@@ -23,10 +23,10 @@ data class JsonRpcRequest(
 data class JsonRpcSuccessResponse(
   @JsonProperty("id") val id: Long,
   @JsonProperty("jsonrpc") val jsonrpc: String = "2.0",
-  @JsonProperty("result") val result: Any
+  @JsonProperty("result") val result: Any,
 )
 
 data class JsonRpcSuccessResponseWithoutID(
   @JsonProperty("jsonrpc") val jsonrpc: String = "2.0",
-  @JsonProperty("result") val result: Any
+  @JsonProperty("result") val result: Any,
 )

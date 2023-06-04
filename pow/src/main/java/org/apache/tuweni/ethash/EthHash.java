@@ -14,64 +14,46 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-/**
- * Implementation of EthHash utilities for Ethereum mining algorithms.
- */
+/** Implementation of EthHash utilities for Ethereum mining algorithms. */
 public class EthHash {
 
-  /**
-   * Bytes in word.
-   */
+  /** Bytes in word. */
   public static int WORD_BYTES = 4;
-  /**
-   * bytes in dataset at genesis
-   */
+
+  /** bytes in dataset at genesis */
   public static long DATASET_BYTES_INIT = (long) Math.pow(2, 30);
-  /**
-   * dataset growth per epoch
-   */
+
+  /** dataset growth per epoch */
   public static long DATASET_BYTES_GROWTH = (long) Math.pow(2, 23);
-  /**
-   * bytes in cache at genesis
-   */
+
+  /** bytes in cache at genesis */
   public static long CACHE_BYTES_INIT = (long) Math.pow(2, 24);
 
-  /**
-   * cache growth per epoch
-   */
+  /** cache growth per epoch */
   public static long CACHE_BYTES_GROWTH = (long) Math.pow(2, 17);
-  /**
-   * Size of the DAG relative to the cache
-   */
+
+  /** Size of the DAG relative to the cache */
   public static int CACHE_MULTIPLIER = 1024;
-  /**
-   * blocks per epoch
-   */
+
+  /** blocks per epoch */
   public static int EPOCH_LENGTH = 30000;
-  /**
-   * width of mix
-   */
+
+  /** width of mix */
   public static int MIX_BYTES = 128;
 
-  /**
-   * hash length in bytes
-   */
+  /** hash length in bytes */
   public static int HASH_BYTES = 64;
-  /**
-   * Number of words in a hash
-   */
+
+  /** Number of words in a hash */
   private static int HASH_WORDS = HASH_BYTES / WORD_BYTES;
-  /**
-   * number of parents of each dataset element
-   */
+
+  /** number of parents of each dataset element */
   public static int DATASET_PARENTS = 256;
-  /**
-   * number of rounds in cache production
-   */
+
+  /** number of rounds in cache production */
   public static int CACHE_ROUNDS = 3;
-  /**
-   * number of accesses in hashimoto loop
-   */
+
+  /** number of accesses in hashimoto loop */
   public static int ACCESSES = 64;
 
   public static int FNV_PRIME = 0x01000193;
@@ -83,13 +65,15 @@ public class EthHash {
    * @param cache EthHash Cache
    * @param header Truncated BlockHeader hash
    * @param nonce Nonce to use for hashing
-   * @return A byte array holding MixHash in its first 32 bytes and the EthHash result in the bytes 32 to 63
+   * @return A byte array holding MixHash in its first 32 bytes and the EthHash result in the bytes
+   *     32 to 63
    */
   public static Bytes hashimotoLight(long size, UInt32[] cache, Bytes header, Bytes nonce) {
     return hashimoto(size, header, nonce, (ind) -> calcDatasetItem(cache, ind));
   }
 
-  private static Bytes hashimoto(long size, Bytes header, Bytes nonce, Function<UInt32, Bytes> datasetLookup) {
+  private static Bytes hashimoto(
+      long size, Bytes header, Bytes nonce, Function<UInt32, Bytes> datasetLookup) {
     long n = Long.divideUnsigned(size, MIX_BYTES);
     Bytes seed = Hash.keccak512(Bytes.concatenate(header, nonce.reverse()));
     Bytes[] mixBufferElts = new Bytes[MIX_BYTES / HASH_BYTES];
@@ -117,10 +101,16 @@ public class EthHash {
         mix[k] = fnv(mix[k], cache.get(k));
       }
     }
-    Stream<Bytes> part1 = IntStream.range(0, mix.length / 4).parallel().mapToObj((int i) -> {
-      int index = i * 4;
-      return fnv(fnv(fnv(mix[index], mix[index + 1]), mix[index + 2]), mix[index + 3]).toBytes().reverse();
-    });
+    Stream<Bytes> part1 =
+        IntStream.range(0, mix.length / 4)
+            .parallel()
+            .mapToObj(
+                (int i) -> {
+                  int index = i * 4;
+                  return fnv(fnv(fnv(mix[index], mix[index + 1]), mix[index + 2]), mix[index + 3])
+                      .toBytes()
+                      .reverse();
+                });
     Bytes resultPart1 = Bytes.concatenate(part1.toArray(Bytes[]::new));
     Bytes resultPart2 = Hash.keccak256(Bytes.concatenate(seed, resultPart1));
 
@@ -190,12 +180,14 @@ public class EthHash {
       for (int j = 0; j < rows; ++j) {
         int offset = j * HASH_BYTES;
         for (int k = 0; k < HASH_BYTES; ++k) {
-          temp[k] = (byte) (completeCache.get((j - 1 + rows) % rows * HASH_BYTES + k)
-              ^ (completeCache
-                  .get(
-                      Integer.remainderUnsigned(completeCache.getInt(offset, ByteOrder.LITTLE_ENDIAN), rows)
-                          * HASH_BYTES
-                          + k)));
+          temp[k] =
+              (byte)
+                  (completeCache.get((j - 1 + rows) % rows * HASH_BYTES + k)
+                      ^ (completeCache.get(
+                          Integer.remainderUnsigned(
+                                      completeCache.getInt(offset, ByteOrder.LITTLE_ENDIAN), rows)
+                                  * HASH_BYTES
+                              + k)));
         }
         temp = Hash.keccak512(temp);
         System.arraycopy(temp, 0, completeCache.toArrayUnsafe(), offset, HASH_BYTES);
@@ -263,6 +255,8 @@ public class EthHash {
   }
 
   private static boolean isPrime(long number) {
-    return number > 2 && IntStream.rangeClosed(2, (int) Math.sqrt((double) number)).noneMatch(n -> (number % n == 0));
+    return number > 2
+        && IntStream.rangeClosed(2, (int) Math.sqrt((double) number))
+            .noneMatch(n -> (number % n == 0));
   }
 }

@@ -23,21 +23,19 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
-/**
- * An interface for accessing data stored in Tom's Obvious, Minimal Language (TOML).
- */
+/** An interface for accessing data stored in Tom's Obvious, Minimal Language (TOML). */
 public interface TomlTable {
 
   /**
    * Provides the size of the table
-   * 
+   *
    * @return The number of entries in this table.
    */
   int size();
 
   /**
    * Returns true if there are no entries in this table
-   * 
+   *
    * @return {@code true} if there are no entries in this table.
    */
   boolean isEmpty();
@@ -71,9 +69,9 @@ public interface TomlTable {
   /**
    * Get the keys of this table.
    *
-   * <p>
-   * The returned set contains only immediate keys to this table, and not dotted keys or key paths. For a complete view
-   * of keys available in the TOML document, use {@link #dottedKeySet()} or {@link #keyPathSet()}.
+   * <p>The returned set contains only immediate keys to this table, and not dotted keys or key
+   * paths. For a complete view of keys available in the TOML document, use {@link #dottedKeySet()}
+   * or {@link #keyPathSet()}.
    *
    * @return A set containing the keys of this table.
    */
@@ -82,8 +80,8 @@ public interface TomlTable {
   /**
    * Get all the dotted keys of this table.
    *
-   * <p>
-   * Paths to intermediary and empty tables are not returned. To include these, use {@link #dottedKeySet(boolean)}.
+   * <p>Paths to intermediary and empty tables are not returned. To include these, use {@link
+   * #dottedKeySet(boolean)}.
    *
    * @return A set containing all the dotted keys of this table.
    */
@@ -104,8 +102,8 @@ public interface TomlTable {
   /**
    * Get all the paths in this table.
    *
-   * <p>
-   * Paths to intermediary and empty tables are not returned. To include these, use {@link #keyPathSet(boolean)}.
+   * <p>Paths to intermediary and empty tables are not returned. To include these, use {@link
+   * #keyPathSet(boolean)}.
    *
    * @return A set containing all the key paths of this table.
    */
@@ -127,7 +125,8 @@ public interface TomlTable {
    * @param dottedKey A dotted key (e.g. {@code "server.address.port"}).
    * @return The value, or {@code null} if no value was set in the TOML document.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If any element of the path preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If any element of the path preceding the final key is not a
+   *     table.
    */
   @Nullable
   default Object get(String dottedKey) {
@@ -140,7 +139,8 @@ public interface TomlTable {
    *
    * @param path The key path.
    * @return The value, or {@code null} if no value was set in the TOML document.
-   * @throws TomlInvalidTypeException If any element of the path preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If any element of the path preceding the final key is not a
+   *     table.
    */
   @Nullable
   Object get(List<String> path);
@@ -151,7 +151,8 @@ public interface TomlTable {
    * @param dottedKey A dotted key (e.g. {@code "server.address.port"}).
    * @return The input position, or {@code null} if the key was not set in the TOML document.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If any element of the path preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If any element of the path preceding the final key is not a
+   *     table.
    */
   @Nullable
   default TomlPosition inputPositionOf(String dottedKey) {
@@ -164,7 +165,8 @@ public interface TomlTable {
    *
    * @param path The key path.
    * @return The input position, or {@code null} if the key was not set in the TOML document.
-   * @throws TomlInvalidTypeException If any element of the path preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If any element of the path preceding the final key is not a
+   *     table.
    */
   @Nullable
   TomlPosition inputPositionOf(List<String> path);
@@ -203,8 +205,8 @@ public interface TomlTable {
    * @param dottedKey A dotted key (e.g. {@code "server.address.hostname"}).
    * @return The value, or {@code null} if no value was set in the TOML document.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not a string, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a string, or any element of
+   *     the path preceding the final key is not a table.
    */
   @Nullable
   default String getString(String dottedKey) {
@@ -217,8 +219,8 @@ public interface TomlTable {
    *
    * @param path A dotted key (e.g. {@code "server.address.hostname"}).
    * @return The value, or {@code null} if no value was set in the TOML document.
-   * @throws TomlInvalidTypeException If the value is present but not a string, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a string, or any element of
+   *     the path preceding the final key is not a table.
    */
   @Nullable
   default String getString(List<String> path) {
@@ -227,7 +229,8 @@ public interface TomlTable {
       return null;
     }
     if (!(value instanceof String)) {
-      throw new TomlInvalidTypeException("Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
+      throw new TomlInvalidTypeException(
+          "Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
     }
     return (String) value;
   }
@@ -239,8 +242,8 @@ public interface TomlTable {
    * @param defaultValue A supplier for the default value.
    * @return The value, or the default.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not a string, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a string, or any element of
+   *     the path preceding the final key is not a table.
    */
   default String getString(String dottedKey, Supplier<String> defaultValue) {
     requireNonNull(dottedKey);
@@ -253,8 +256,8 @@ public interface TomlTable {
    * @param path The key path.
    * @param defaultValue A supplier for the default value.
    * @return The value, or the default.
-   * @throws TomlInvalidTypeException If the value is present but not a string, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a string, or any element of
+   *     the path preceding the final key is not a table.
    */
   default String getString(List<String> path, Supplier<String> defaultValue) {
     requireNonNull(defaultValue);
@@ -299,8 +302,8 @@ public interface TomlTable {
    * @param dottedKey A dotted key (e.g. {@code "server.address.port"}).
    * @return The value, or {@code null} if no value was set in the TOML document.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not a long, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a long, or any element of the
+   *     path preceding the final key is not a table.
    */
   @Nullable
   default Long getLong(String dottedKey) {
@@ -313,8 +316,8 @@ public interface TomlTable {
    *
    * @param path The key path.
    * @return The value, or {@code null} if no value was set in the TOML document.
-   * @throws TomlInvalidTypeException If the value is present but not a long, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a long, or any element of the
+   *     path preceding the final key is not a table.
    */
   @Nullable
   default Long getLong(List<String> path) {
@@ -323,7 +326,8 @@ public interface TomlTable {
       return null;
     }
     if (!(value instanceof Long)) {
-      throw new TomlInvalidTypeException("Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
+      throw new TomlInvalidTypeException(
+          "Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
     }
     return (Long) value;
   }
@@ -335,8 +339,8 @@ public interface TomlTable {
    * @param defaultValue A supplier for the default value.
    * @return The value, or the default.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not a long, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a long, or any element of the
+   *     path preceding the final key is not a table.
    */
   default long getLong(String dottedKey, LongSupplier defaultValue) {
     requireNonNull(dottedKey);
@@ -349,8 +353,8 @@ public interface TomlTable {
    * @param path The key path.
    * @param defaultValue A supplier for the default value.
    * @return The value, or the default.
-   * @throws TomlInvalidTypeException If the value is present but not a long, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a long, or any element of the
+   *     path preceding the final key is not a table.
    */
   default long getLong(List<String> path, LongSupplier defaultValue) {
     requireNonNull(defaultValue);
@@ -395,8 +399,8 @@ public interface TomlTable {
    * @param dottedKey A dotted key (e.g. {@code "server.address.port"}).
    * @return The value, or {@code null} if no value was set in the TOML document.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not a double, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a double, or any element of
+   *     the path preceding the final key is not a table.
    */
   @Nullable
   default Double getDouble(String dottedKey) {
@@ -409,8 +413,8 @@ public interface TomlTable {
    *
    * @param path A dotted key.
    * @return The value, or {@code null} if no value was set in the TOML document.
-   * @throws TomlInvalidTypeException If the value is present but not a double, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a double, or any element of
+   *     the path preceding the final key is not a table.
    */
   @Nullable
   default Double getDouble(List<String> path) {
@@ -419,7 +423,8 @@ public interface TomlTable {
       return null;
     }
     if (!(value instanceof Double)) {
-      throw new TomlInvalidTypeException("Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
+      throw new TomlInvalidTypeException(
+          "Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
     }
     return (Double) value;
   }
@@ -431,8 +436,8 @@ public interface TomlTable {
    * @param defaultValue A supplier for the default value.
    * @return The value, or the default.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not a double, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a double, or any element of
+   *     the path preceding the final key is not a table.
    */
   default double getDouble(String dottedKey, DoubleSupplier defaultValue) {
     requireNonNull(dottedKey);
@@ -445,8 +450,8 @@ public interface TomlTable {
    * @param path The key path.
    * @param defaultValue A supplier for the default value.
    * @return The value, or the default.
-   * @throws TomlInvalidTypeException If the value is present but not a double, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a double, or any element of
+   *     the path preceding the final key is not a table.
    */
   default double getDouble(List<String> path, DoubleSupplier defaultValue) {
     requireNonNull(defaultValue);
@@ -491,8 +496,8 @@ public interface TomlTable {
    * @param dottedKey A dotted key (e.g. {@code "server.address.port"}).
    * @return The value, or {@code null} if no value was set in the TOML document.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not a boolean, or any element of the path preceding
-   *         the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a boolean, or any element of
+   *     the path preceding the final key is not a table.
    */
   @Nullable
   default Boolean getBoolean(String dottedKey) {
@@ -505,8 +510,8 @@ public interface TomlTable {
    *
    * @param path The key path.
    * @return The value, or {@code null} if no value was set in the TOML document.
-   * @throws TomlInvalidTypeException If the value is present but not a boolean, or any element of the path preceding
-   *         the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a boolean, or any element of
+   *     the path preceding the final key is not a table.
    */
   @Nullable
   default Boolean getBoolean(List<String> path) {
@@ -515,7 +520,8 @@ public interface TomlTable {
       return null;
     }
     if (!(value instanceof Boolean)) {
-      throw new TomlInvalidTypeException("Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
+      throw new TomlInvalidTypeException(
+          "Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
     }
     return (Boolean) value;
   }
@@ -527,8 +533,8 @@ public interface TomlTable {
    * @param defaultValue A supplier for the default value.
    * @return The value, or the default.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not a boolean, or any element of the path preceding
-   *         the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a boolean, or any element of
+   *     the path preceding the final key is not a table.
    */
   default boolean getBoolean(String dottedKey, BooleanSupplier defaultValue) {
     requireNonNull(dottedKey);
@@ -541,8 +547,8 @@ public interface TomlTable {
    * @param path The key path.
    * @param defaultValue A supplier for the default value.
    * @return The value, or the default.
-   * @throws TomlInvalidTypeException If the value is present but not a boolean, or any element of the path preceding
-   *         the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a boolean, or any element of
+   *     the path preceding the final key is not a table.
    */
   default boolean getBoolean(List<String> path, BooleanSupplier defaultValue) {
     requireNonNull(defaultValue);
@@ -587,8 +593,8 @@ public interface TomlTable {
    * @param dottedKey A dotted key (e.g. {@code "server.address.port"}).
    * @return The value, or {@code null} if no value was set in the TOML document.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not an {@link OffsetDateTime}, or any element of the
-   *         path preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not an {@link OffsetDateTime}, or
+   *     any element of the path preceding the final key is not a table.
    */
   @Nullable
   default OffsetDateTime getOffsetDateTime(String dottedKey) {
@@ -601,8 +607,8 @@ public interface TomlTable {
    *
    * @param path The key path.
    * @return The value, or {@code null} if no value was set in the TOML document.
-   * @throws TomlInvalidTypeException If the value is present but not an {@link OffsetDateTime}, or any element of the
-   *         path preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not an {@link OffsetDateTime}, or
+   *     any element of the path preceding the final key is not a table.
    */
   @Nullable
   default OffsetDateTime getOffsetDateTime(List<String> path) {
@@ -611,7 +617,8 @@ public interface TomlTable {
       return null;
     }
     if (!(value instanceof OffsetDateTime)) {
-      throw new TomlInvalidTypeException("Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
+      throw new TomlInvalidTypeException(
+          "Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
     }
     return (OffsetDateTime) value;
   }
@@ -623,10 +630,11 @@ public interface TomlTable {
    * @param defaultValue A supplier for the default value.
    * @return The value, or the default.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not an {@link OffsetDateTime}, or any element of the
-   *         path preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not an {@link OffsetDateTime}, or
+   *     any element of the path preceding the final key is not a table.
    */
-  default OffsetDateTime getOffsetDateTime(String dottedKey, Supplier<OffsetDateTime> defaultValue) {
+  default OffsetDateTime getOffsetDateTime(
+      String dottedKey, Supplier<OffsetDateTime> defaultValue) {
     requireNonNull(dottedKey);
     return getOffsetDateTime(parseDottedKey(dottedKey), defaultValue);
   }
@@ -637,10 +645,11 @@ public interface TomlTable {
    * @param path The key path.
    * @param defaultValue A supplier for the default value.
    * @return The value, or the default.
-   * @throws TomlInvalidTypeException If the value is present but not an {@link OffsetDateTime}, or any element of the
-   *         path preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not an {@link OffsetDateTime}, or
+   *     any element of the path preceding the final key is not a table.
    */
-  default OffsetDateTime getOffsetDateTime(List<String> path, Supplier<OffsetDateTime> defaultValue) {
+  default OffsetDateTime getOffsetDateTime(
+      List<String> path, Supplier<OffsetDateTime> defaultValue) {
     requireNonNull(defaultValue);
     OffsetDateTime value = getOffsetDateTime(path);
     if (value != null) {
@@ -683,8 +692,8 @@ public interface TomlTable {
    * @param dottedKey A dotted key (e.g. {@code "server.address.port"}).
    * @return The value, or {@code null} if no value was set in the TOML document.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalDateTime}, or any element of the
-   *         path preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalDateTime}, or
+   *     any element of the path preceding the final key is not a table.
    */
   @Nullable
   default LocalDateTime getLocalDateTime(String dottedKey) {
@@ -697,8 +706,8 @@ public interface TomlTable {
    *
    * @param path The key path.
    * @return The value, or {@code null} if no value was set in the TOML document.
-   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalDateTime}, or any element of the
-   *         path preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalDateTime}, or
+   *     any element of the path preceding the final key is not a table.
    */
   @Nullable
   default LocalDateTime getLocalDateTime(List<String> path) {
@@ -707,7 +716,8 @@ public interface TomlTable {
       return null;
     }
     if (!(value instanceof LocalDateTime)) {
-      throw new TomlInvalidTypeException("Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
+      throw new TomlInvalidTypeException(
+          "Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
     }
     return (LocalDateTime) value;
   }
@@ -719,8 +729,8 @@ public interface TomlTable {
    * @param defaultValue A supplier for the default value.
    * @return The value, or the default.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalDateTime}, or any element of the
-   *         path preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalDateTime}, or
+   *     any element of the path preceding the final key is not a table.
    */
   default LocalDateTime getLocalDateTime(String dottedKey, Supplier<LocalDateTime> defaultValue) {
     requireNonNull(dottedKey);
@@ -733,8 +743,8 @@ public interface TomlTable {
    * @param path The key path.
    * @param defaultValue A supplier for the default value.
    * @return The value, or the default.
-   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalDateTime}, or any element of the
-   *         path preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalDateTime}, or
+   *     any element of the path preceding the final key is not a table.
    */
   default LocalDateTime getLocalDateTime(List<String> path, Supplier<LocalDateTime> defaultValue) {
     requireNonNull(defaultValue);
@@ -779,8 +789,8 @@ public interface TomlTable {
    * @param dottedKey A dotted key (e.g. {@code "server.address.port"}).
    * @return The value, or {@code null} if no value was set in the TOML document.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalDate}, or any element of the path
-   *         preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalDate}, or any
+   *     element of the path preceding the final key is not a table.
    */
   @Nullable
   default LocalDate getLocalDate(String dottedKey) {
@@ -793,8 +803,8 @@ public interface TomlTable {
    *
    * @param path The key path.
    * @return The value, or {@code null} if no value was set in the TOML document.
-   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalDate}, or any element of the path
-   *         preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalDate}, or any
+   *     element of the path preceding the final key is not a table.
    */
   @Nullable
   default LocalDate getLocalDate(List<String> path) {
@@ -803,7 +813,8 @@ public interface TomlTable {
       return null;
     }
     if (!(value instanceof LocalDate)) {
-      throw new TomlInvalidTypeException("Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
+      throw new TomlInvalidTypeException(
+          "Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
     }
     return (LocalDate) value;
   }
@@ -815,8 +826,8 @@ public interface TomlTable {
    * @param defaultValue A supplier for the default value.
    * @return The value, or the default.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalDate}, or any element of the path
-   *         preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalDate}, or any
+   *     element of the path preceding the final key is not a table.
    */
   default LocalDate getLocalDate(String dottedKey, Supplier<LocalDate> defaultValue) {
     requireNonNull(dottedKey);
@@ -829,8 +840,8 @@ public interface TomlTable {
    * @param path The key path.
    * @param defaultValue A supplier for the default value.
    * @return The value, or the default.
-   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalDate}, or any element of the path
-   *         preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalDate}, or any
+   *     element of the path preceding the final key is not a table.
    */
   default LocalDate getLocalDate(List<String> path, Supplier<LocalDate> defaultValue) {
     requireNonNull(defaultValue);
@@ -875,8 +886,8 @@ public interface TomlTable {
    * @param dottedKey A dotted key (e.g. {@code "server.address.port"}).
    * @return The value, or {@code null} if no value was set in the TOML document.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalTime}, or any element of the path
-   *         preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalTime}, or any
+   *     element of the path preceding the final key is not a table.
    */
   @Nullable
   default LocalTime getLocalTime(String dottedKey) {
@@ -889,8 +900,8 @@ public interface TomlTable {
    *
    * @param path The key path.
    * @return The value, or {@code null} if no value was set in the TOML document.
-   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalTime}, or any element of the path
-   *         preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalTime}, or any
+   *     element of the path preceding the final key is not a table.
    */
   @Nullable
   default LocalTime getLocalTime(List<String> path) {
@@ -899,7 +910,8 @@ public interface TomlTable {
       return null;
     }
     if (!(value instanceof LocalTime)) {
-      throw new TomlInvalidTypeException("Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
+      throw new TomlInvalidTypeException(
+          "Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
     }
     return (LocalTime) value;
   }
@@ -911,8 +923,8 @@ public interface TomlTable {
    * @param defaultValue A supplier for the default value.
    * @return The value, or the default.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalTime}, or any element of the path
-   *         preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalTime}, or any
+   *     element of the path preceding the final key is not a table.
    */
   default LocalTime getLocalTime(String dottedKey, Supplier<LocalTime> defaultValue) {
     requireNonNull(dottedKey);
@@ -925,8 +937,8 @@ public interface TomlTable {
    * @param path The key path.
    * @param defaultValue A supplier for the default value.
    * @return The value, or the default.
-   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalTime}, or any element of the path
-   *         preceding the final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a {@link LocalTime}, or any
+   *     element of the path preceding the final key is not a table.
    */
   default LocalTime getLocalTime(List<String> path, Supplier<LocalTime> defaultValue) {
     requireNonNull(defaultValue);
@@ -971,8 +983,8 @@ public interface TomlTable {
    * @param dottedKey A dotted key (e.g. {@code "server.addresses"}).
    * @return The value, or {@code null} if no value was set in the TOML document.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not an array, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not an array, or any element of
+   *     the path preceding the final key is not a table.
    */
   @Nullable
   default TomlArray getArray(String dottedKey) {
@@ -985,8 +997,8 @@ public interface TomlTable {
    *
    * @param path The key path.
    * @return The value, or {@code null} if no value was set in the TOML document.
-   * @throws TomlInvalidTypeException If the value is present but not an array, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not an array, or any element of
+   *     the path preceding the final key is not a table.
    */
   @Nullable
   default TomlArray getArray(List<String> path) {
@@ -995,7 +1007,8 @@ public interface TomlTable {
       return null;
     }
     if (!(value instanceof TomlArray)) {
-      throw new TomlInvalidTypeException("Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
+      throw new TomlInvalidTypeException(
+          "Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
     }
     return (TomlArray) value;
   }
@@ -1006,8 +1019,8 @@ public interface TomlTable {
    * @param dottedKey A dotted key (e.g. {@code "server.addresses"}).
    * @return The value, or an empty list if no list was set in the TOML document.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not an array, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not an array, or any element of
+   *     the path preceding the final key is not a table.
    */
   default TomlArray getArrayOrEmpty(String dottedKey) {
     requireNonNull(dottedKey);
@@ -1019,8 +1032,8 @@ public interface TomlTable {
    *
    * @param path The key path.
    * @return The value, or an empty list if no list was set in the TOML document.
-   * @throws TomlInvalidTypeException If the value is present but not an array, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not an array, or any element of
+   *     the path preceding the final key is not a table.
    */
   default TomlArray getArrayOrEmpty(List<String> path) {
     TomlArray value = getArray(path);
@@ -1064,8 +1077,8 @@ public interface TomlTable {
    * @param dottedKey A dotted key (e.g. {@code "server.address"}).
    * @return The value, or {@code null} if no value was set in the TOML document.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not a table, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a table, or any element of the
+   *     path preceding the final key is not a table.
    */
   @Nullable
   default TomlTable getTable(String dottedKey) {
@@ -1078,8 +1091,8 @@ public interface TomlTable {
    *
    * @param path The key path.
    * @return The value, or {@code null} if no value was set in the TOML document.
-   * @throws TomlInvalidTypeException If the value is present but not a table, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a table, or any element of the
+   *     path preceding the final key is not a table.
    */
   @Nullable
   default TomlTable getTable(List<String> path) {
@@ -1088,7 +1101,8 @@ public interface TomlTable {
       return null;
     }
     if (!(value instanceof TomlTable)) {
-      throw new TomlInvalidTypeException("Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
+      throw new TomlInvalidTypeException(
+          "Value of '" + joinKeyPath(path) + "' is a " + typeNameFor(value));
     }
     return (TomlTable) value;
   }
@@ -1099,8 +1113,8 @@ public interface TomlTable {
    * @param dottedKey A dotted key (e.g. {@code "server.address.port"}).
    * @return The value, or an empty table if no value was set in the TOML document.
    * @throws IllegalArgumentException If the key cannot be parsed.
-   * @throws TomlInvalidTypeException If the value is present but not a table, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a table, or any element of the
+   *     path preceding the final key is not a table.
    */
   default TomlTable getTableOrEmpty(String dottedKey) {
     requireNonNull(dottedKey);
@@ -1112,8 +1126,8 @@ public interface TomlTable {
    *
    * @param path The key path.
    * @return The value, or an empty table if no value was set in the TOML document.
-   * @throws TomlInvalidTypeException If the value is present but not a table, or any element of the path preceding the
-   *         final key is not a table.
+   * @throws TomlInvalidTypeException If the value is present but not a table, or any element of the
+   *     path preceding the final key is not a table.
    */
   default TomlTable getTableOrEmpty(List<String> path) {
     TomlTable value = getTable(path);
@@ -1126,9 +1140,8 @@ public interface TomlTable {
   /**
    * Get the elements of this array as a {@link Map}.
    *
-   * <p>
-   * Note that this does not do a deep conversion. If this array contains tables or arrays, they will be of type
-   * {@link TomlTable} or {@link TomlArray} respectively.
+   * <p>Note that this does not do a deep conversion. If this array contains tables or arrays, they
+   * will be of type {@link TomlTable} or {@link TomlArray} respectively.
    *
    * @return The elements of this array as a {@link Map}.
    */

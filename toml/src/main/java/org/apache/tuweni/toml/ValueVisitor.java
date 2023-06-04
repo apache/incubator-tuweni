@@ -94,7 +94,8 @@ final class ValueVisitor extends TomlParserBaseVisitor<Object> {
       }
       return value;
     } catch (NumberFormatException e) {
-      throw new TomlParseError("Invalid floating point number: " + e.getMessage(), new TomlPosition(ctx));
+      throw new TomlParseError(
+          "Invalid floating point number: " + e.getMessage(), new TomlPosition(ctx));
     }
   }
 

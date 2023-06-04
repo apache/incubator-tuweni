@@ -8,10 +8,11 @@ import static org.apache.tuweni.config.ConfigurationErrors.singleError;
 final class PropertyValidators {
   private PropertyValidators() {}
 
-  static final PropertyValidator<Object> IS_PRESENT = (key, position, value) -> {
-    if (value == null) {
-      return singleError(position, "Required property '" + key + "' is missing");
-    }
-    return noErrors();
-  };
+  static final PropertyValidator<Object> IS_PRESENT =
+      (key, position, value) -> {
+        if (value == null) {
+          return singleError(position, "Required property '" + key + "' is missing");
+        }
+        return noErrors();
+      };
 }

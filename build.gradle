@@ -93,7 +93,6 @@ apply from: "${rootDir}/gradle/check-licenses.gradle"
 spotless {
   groovyGradle {
     target '**/*.gradle'
-    greclipse().configFile(rootProject.file('gradle/greclipse-gradle-tuweni-style.properties'))
     endWithNewline()
   }
 }
@@ -114,13 +113,15 @@ subprojects {
       targetExclude '**/SECP256K1.java'
       removeUnusedImports()
       licenseHeaderFile rootProject.file('gradle/spotless.license.txt')
-      eclipse().configFile(rootProject.file('gradle/eclipse-java-tuweni-style.xml'))
+      googleJavaFormat('1.17.0')
       importOrder 'org.apache', 'java', ''
+      trimTrailingWhitespace()
       endWithNewline()
     }
     kotlin {
       licenseHeaderFile rootProject.file('gradle/spotless.license.txt')
-      ktlint("0.47.1").editorConfigOverride(['indent_size': '2', 'continuation_indent_size' : '2'])
+      ktlint("0.49.1").editorConfigOverride(['indent_size': '2', 'continuation_indent_size' : '2'])
+      trimTrailingWhitespace()
       endWithNewline()
     }
   }

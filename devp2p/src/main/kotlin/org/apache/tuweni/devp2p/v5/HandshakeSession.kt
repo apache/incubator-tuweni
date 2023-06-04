@@ -27,7 +27,7 @@ internal class HandshakeSession(
   private var publicKey: SECP256K1.PublicKey? = null,
   private val sendFn: (SocketAddress, Bytes) -> Unit,
   private val enr: () -> EthereumNodeRecord,
-  override val coroutineContext: CoroutineContext
+  override val coroutineContext: CoroutineContext,
 ) : CoroutineScope {
 
   var requestId: Bytes? = null
@@ -91,8 +91,8 @@ internal class HandshakeSession(
         writer.writeValue(
           Bytes.concatenate(
             UInt256.valueOf(signature.r()).toBytes(),
-            UInt256.valueOf(signature.s()).toBytes()
-          )
+            UInt256.valueOf(signature.s()).toBytes(),
+          ),
         )
         writer.writeRLP(enr().toRLP())
       }
@@ -106,7 +106,7 @@ internal class HandshakeSession(
         newSession.initiatorKey,
         authTag,
         Bytes.concatenate(Bytes.of(MessageType.FINDNODE.byte()), findNode.toRLP()),
-        newTag
+        newTag,
       )
       val response = Bytes.concatenate(
         newTag,
@@ -117,7 +117,7 @@ internal class HandshakeSession(
           it.writeValue(ephemeralKeyPair.publicKey().bytes())
           it.writeValue(authResponse)
         },
-        encryptedMessage
+        encryptedMessage,
       )
       logger.trace("Sending handshake FindNode {}", response)
       connected.complete(newSession)
@@ -173,12 +173,12 @@ internal class HandshakeSession(
     signatureBytes: Bytes,
     idNonce: Bytes,
     ephemeralPublicKey: SECP256K1.PublicKey,
-    publicKey: SECP256K1.PublicKey
+    publicKey: SECP256K1.PublicKey,
   ): Boolean {
     val signature = SECP256K1.Signature.create(
       1,
       signatureBytes.slice(0, 32).toUnsignedBigInteger(),
-      signatureBytes.slice(32).toUnsignedBigInteger()
+      signatureBytes.slice(32).toUnsignedBigInteger(),
     )
 
     val signValue = Bytes.concatenate(DISCOVERY_ID_NONCE, idNonce, ephemeralPublicKey.bytes())
@@ -187,7 +187,7 @@ internal class HandshakeSession(
       val signature0 = SECP256K1.Signature.create(
         0,
         signatureBytes.slice(0, 32).toUnsignedBigInteger(),
-        signatureBytes.slice(32).toUnsignedBigInteger()
+        signatureBytes.slice(32).toUnsignedBigInteger(),
       )
       return SECP256K1.verifyHashed(hashedSignValue, signature0, publicKey)
     } else {

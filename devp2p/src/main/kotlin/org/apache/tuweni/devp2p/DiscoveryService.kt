@@ -108,7 +108,7 @@ interface DiscoveryService {
       advertiseTcpPort: Int? = null,
       routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
       packetFilter: ((SECP256K1.PublicKey, SocketAddress) -> Boolean)? = null,
-      timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER
+      timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER,
     ): DiscoveryService {
       val bindAddress =
         if (host == null) {
@@ -116,7 +116,7 @@ interface DiscoveryService {
         } else {
           SocketAddress.inetSocketAddress(
             port,
-            host
+            host,
           )
         }
       return open(
@@ -132,7 +132,7 @@ interface DiscoveryService {
         advertiseTcpPort,
         routingTable,
         packetFilter,
-        timeSupplier
+        timeSupplier,
       )
     }
 
@@ -167,12 +167,12 @@ interface DiscoveryService {
       advertiseTcpPort: Int? = null,
       routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
       packetFilter: ((SECP256K1.PublicKey, SocketAddress) -> Boolean)? = null,
-      timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER
+      timeSupplier: () -> Long = CURRENT_TIME_SUPPLIER,
     ): DiscoveryService {
       return CoroutineDiscoveryService(
         vertx,
         keyPair, seq, enrData, bindAddress, bootstrapURIs, advertiseAddress, advertiseUdpPort, advertiseTcpPort,
-        peerRepository, routingTable, packetFilter, timeSupplier
+        peerRepository, routingTable, packetFilter, timeSupplier,
       )
     }
   }
@@ -285,7 +285,7 @@ internal class CoroutineDiscoveryService constructor(
   private val routingTable: PeerRoutingTable = DevP2PPeerRoutingTable(keyPair.publicKey()),
   private val packetFilter: ((SECP256K1.PublicKey, SocketAddress) -> Boolean)? = null,
   private val timeSupplier: () -> Long = DiscoveryService.CURRENT_TIME_SUPPLIER,
-  override val coroutineContext: CoroutineContext = vertx.dispatcher() + CoroutineExceptionHandler { _, _ -> }
+  override val coroutineContext: CoroutineContext = vertx.dispatcher() + CoroutineExceptionHandler { _, _ -> },
 ) : DiscoveryService, CoroutineScope {
 
   companion object {
@@ -339,7 +339,7 @@ internal class CoroutineDiscoveryService constructor(
     val endpoint = Endpoint(
       advertiseAddress ?: (server.localAddress()).host(),
       advertiseUdpPort ?: server.localAddress().port(),
-      advertiseTcpPort
+      advertiseTcpPort,
     )
     enr = EthereumNodeRecord.toRLP(
       keyPair,
@@ -348,7 +348,7 @@ internal class CoroutineDiscoveryService constructor(
       null,
       InetAddress.getByName(endpoint.address),
       endpoint.tcpPort,
-      endpoint.udpPort
+      endpoint.udpPort,
     )
     selfEndpoint = endpoint
     refreshLoop = launch {
@@ -361,7 +361,7 @@ internal class CoroutineDiscoveryService constructor(
       AsyncCompletion.allOf(
         bootstrapURIs.map { uri ->
           asyncCompletion { bootstrapFrom(uri) }
-        }
+        },
       ).thenRun {
         bootstrapped.complete()
       }.await()
@@ -382,7 +382,7 @@ internal class CoroutineDiscoveryService constructor(
         logger.warn(
           "{}: ignoring bootstrap peer {} - responding node used a different node-id",
           serviceDescriptor,
-          uri
+          uri,
         )
         return false
       }
@@ -463,7 +463,7 @@ internal class CoroutineDiscoveryService constructor(
               results.orderedInsert(peer) { a, _ ->
                 targetId.xorDistCmp(
                   a.nodeId.bytesArray(),
-                  node.nodeId.bytesArray()
+                  node.nodeId.bytesArray(),
                 )
               }
               results.removeAt(results.lastIndex)
@@ -532,7 +532,7 @@ internal class CoroutineDiscoveryService constructor(
     if (currentEndpoint.tcpPort != packet.from.tcpPort) {
       currentEndpoint = peer.updateEndpoint(
         Endpoint(currentEndpoint.address, currentEndpoint.udpPort, packet.from.tcpPort),
-        arrivalTime
+        arrivalTime,
       )
     }
 
@@ -576,7 +576,7 @@ internal class CoroutineDiscoveryService constructor(
         serviceDescriptor,
         endpoint.address,
         peer.nodeId,
-        sender.nodeId
+        sender.nodeId,
       )
     }
 
@@ -625,7 +625,7 @@ internal class CoroutineDiscoveryService constructor(
               "{}: adding {} to the routing table (node-id: {})",
               serviceDescriptor,
               result.endpoint.address,
-              result.peer.nodeId
+              result.peer.nodeId,
             )
             addToRoutingTable(result.peer)
           }
@@ -693,7 +693,7 @@ internal class CoroutineDiscoveryService constructor(
   private suspend fun ensurePeerIsValid(
     peer: Peer,
     address: SocketAddress,
-    arrivalTime: Long
+    arrivalTime: Long,
   ): VerificationResult? {
     val now = timeSupplier()
     peer.getEndpoint(now - ENDPOINT_PROOF_LONGEVITY_MS)?.let { endpoint ->
@@ -704,7 +704,7 @@ internal class CoroutineDiscoveryService constructor(
     val endpoint = peer.updateEndpoint(
       Endpoint(address, peer.endpoint.tcpPort),
       arrivalTime,
-      now - ENDPOINT_PROOF_LONGEVITY_MS
+      now - ENDPOINT_PROOF_LONGEVITY_MS,
     )
     return withTimeoutOrNull(PEER_VERIFICATION_TIMEOUT_MS) { endpointVerification(endpoint, peer).verify(now) }
   }
@@ -790,7 +790,7 @@ internal class CoroutineDiscoveryService constructor(
      *
      * This will typically be the same as peer.endpoint, but may not be due to concurrent updates.
      */
-    val endpoint: Endpoint
+    val endpoint: Endpoint,
   )
 
   private fun enrRequest(endpoint: Endpoint, peer: Peer) =
@@ -845,7 +845,7 @@ internal class CoroutineDiscoveryService constructor(
 
   private data class ENRResult(
     val peer: Peer,
-    val enr: EthereumNodeRecord
+    val enr: EthereumNodeRecord,
   )
 
   private suspend fun findNodes(peer: Peer, target: SECP256K1.PublicKey): AsyncResult<List<Node>> {
@@ -887,12 +887,12 @@ internal class CoroutineDiscoveryService constructor(
       } catch (e: TimeoutCancellationException) {
         logger.debug(
           "$serviceDescriptor: Timeout while sending FindNode requests for peer ${peer.nodeId}",
-          e
+          e,
         )
       } catch (e: Exception) {
         logger.error(
           "$serviceDescriptor: Error while sending FindNode requests for peer ${peer.nodeId}",
-          e
+          e,
         )
       }
     }

@@ -42,7 +42,7 @@ class JSONRPCClientTest {
     fun runServer(@VertxInstance vertx: Vertx): Unit = runBlocking {
       Assumptions.assumeTrue(
         !System.getProperty("os.name").lowercase().contains("win"),
-        "Server ports cannot bind on Windows"
+        "Server ports cannot bind on Windows",
       )
       server = JSONRPCServer(
         vertx,
@@ -50,7 +50,7 @@ class JSONRPCClientTest {
         methodHandler = {
           handler.get()(it)
         },
-        coroutineContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+        coroutineContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher(),
       )
       server!!.start()
     }
@@ -74,7 +74,7 @@ class JSONRPCClientTest {
         Address.fromHexString("0x0102030405060708090a0b0c0d0e0f0102030405"),
         Wei.valueOf(42),
         Bytes.EMPTY,
-        keyPair
+        keyPair,
 
       )
       val sent = CompletableDeferred<String>()
@@ -89,7 +89,7 @@ class JSONRPCClientTest {
         "0xf85d01020d940102030405060708090a0b0c0d0e0f01020304052a801ba01356bce3ee0043871c3bb" +
           "289597a903985d6f0235446283069031a613b286aeca02f7cf0fa0e4b160bc4d48fb256b4989f067de773b" +
           "0ac4c721d5222e4e38cc6ca",
-        sent.await()
+        sent.await(),
       )
     }
   }
