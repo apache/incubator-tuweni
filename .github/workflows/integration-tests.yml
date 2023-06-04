@@ -26,7 +26,7 @@ on:
 jobs:
   integration-tests:
     timeout-minutes: 30
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     services:
       ssb:
         image: tmio/ssb-server-docker:latest
