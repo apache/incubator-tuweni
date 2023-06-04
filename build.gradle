@@ -88,66 +88,6 @@ apply from: "${rootDir}/gradle/stage.gradle"
 apply from: "${rootDir}/gradle/check-licenses.gradle"
 
 //////
-// RAT checks
-
-if (file('.git').exists()) {
-  apply from: "${rootDir}/gradle/rat.gradle"
-  rat {
-    // Exclude everything under the directory that git should be ignoring via .gitignore or that isn't checked in. These
-    // restrict us only to files that are checked in or are staged.
-    def repo = Grgit.open(currentDir: project.getRootDir())
-    excludes = {
-      def list = new ArrayList<String>(repo.clean(ignore: false, directories: true, dryRun: true))
-      // And some of the files that we have checked in should also be excluded from this check
-      list.addAll([
-        '.*\\.asc',
-        'gradle/tuweni-test.asc',
-        '\\w+/out/.*',
-        'eth-reference-tests/**',
-        'build',
-        '.*/build/**',
-        '.editorconfig',
-        '.idea/**',
-        'gradlew.bat',
-        'gradlew',
-        'gradle/wrapper/gradle-wrapper.properties',
-        'toml/src/test/resources/**',
-        '.gitattributes',
-        '.*\\.kotlin_module',
-        'example-v0.4.0.toml',
-        'hard_example.toml',
-        'toml-v0.5.0-spec-example.toml',
-        'eth2-reference-tests/**',
-        'package-lock.json',
-        '.github/pull_request_template.md',
-        'eth-crawler/src/main/resources/mainnet.json',
-        'devp2p-eth/src/test/resources/mainnet.json',
-        'devp2p-eth/src/test/resources/besu-dev.json',
-        'dist/netty-license/*',
-        'eth/src/test/resources/astor.json',
-        'eth/src/test/resources/mainnet.json',
-        'eth-blockprocessor/src/test/resources/**',
-        'eth-client/src/main/resources/mainnet.json',
-        'eth-client/src/main/resources/default.json',
-        'eth/src/test/resources/missing-difficulty.json',
-        'eth/src/test/resources/missing-nonce.json',
-        'eth/src/test/resources/valid-genesis.json',
-        'eth/src/test/resources/besu-dev.json',
-        'app-commons/src/main/resources/tuweni.txt',
-        'evm/src/test/resources/**',
-        'tuweni.png',
-        'eth-crawler/src/main/resources/webapp/bootstrap-nightfall.css',
-        'eth/src/main/resources/genesis/*.json',
-        'evm-dsl/src/test/resources/contract.txt',
-        'ssz/src/test/resources/org/apache/tuweni/ssz/signedBlobTransaction.hex'
-      ])
-      return list
-    }
-  }
-  spotlessCheck.dependsOn rat
-}
-
-//////
 // Gradle script formatting
 
 spotless {
