@@ -230,7 +230,7 @@ public final class VertxRLPxService implements RLPxService {
               new NetClientOptions()
                   .setTcpKeepAlive(true)
                   .setConnectTimeout(connectTimeout)
-                  .setIdleTimeout(idleTimeout));
+                  .setIdleTimeout(idleTimeout).setRegisterWriteHandler(true));
       server =
           vertx
               .createNetServer(
@@ -238,7 +238,7 @@ public final class VertxRLPxService implements RLPxService {
                       .setPort(listenPort)
                       .setHost(networkInterface)
                       .setTcpKeepAlive(true)
-                      .setIdleTimeout(idleTimeout))
+                      .setIdleTimeout(idleTimeout).setRegisterWriteHandler(true))
               .connectHandler(this::receiveMessage);
       CompletableAsyncCompletion complete = AsyncCompletion.incomplete();
       server.listen(
